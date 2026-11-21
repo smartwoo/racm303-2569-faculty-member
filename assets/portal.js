@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = "faculty";
-  const PORTAL_BASE_URL = "https://smartwoo.github.io/racm303-2569-faculty";
+  const PORTAL_BASE_URL = "https://smartwoo.github.io/racm303-2569-faculty-member";
   const RAMED_COURSE_URL = "https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398";
   const RAMED_ASSIGN_INDEX_URL = "https://elearning.ra.mahidol.ac.th/ramed/mod/assign/index.php?id=398";
   const RAMED_LOGIN_URL = "https://elearning.ra.mahidol.ac.th/ramed/login/index.php";
@@ -20259,7 +20259,7 @@
   /* ---------- Digital Leave Form, Drawing Signature Pad, Advisor/Course Director Notification & PDF Export ---------- */
   const LEAVE_STORAGE_KEY = "racm303_leave_requests_v1";
   const COURSE_DIRECTOR_NAME = "อ.นพ.ณัฐวุฒิ เอี่ยงธนรัตน์";
-  const FACULTY_PORTAL_LEAVE_URL = "https://smartwoo.github.io/racm303-2569-faculty/#leave";
+  const FACULTY_PORTAL_LEAVE_URL = "https://smartwoo.github.io/racm303-2569-faculty-member/#leave";
 
   function loadLeaveRequests() {
     try {
@@ -20303,7 +20303,7 @@
         attachmentDataUrl: ""
       });
       const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
-      return `https://smartwoo.github.io/racm303-2569-faculty/?incoming_leave=${encodeURIComponent(b64)}#leave`;
+      return `https://smartwoo.github.io/racm303-2569-faculty-member/?incoming_leave=${encodeURIComponent(b64)}#leave`;
     } catch (_) {
       return FACULTY_PORTAL_LEAVE_URL;
     }
@@ -25244,19 +25244,28 @@
     document.documentElement.lang = state.lang;
     document.documentElement.setAttribute("data-lang", state.lang);
 
-    // Masthead
+    // Masthead & Role Identity Ribbon
     const deptLine = document.querySelector(".masthead .dept-line");
     const mastH1 = document.querySelector(".masthead h1");
     const mastSub = document.querySelector(".masthead .head-subtitle");
     if (ROLE === "faculty") {
-      setTranslatedText(deptLine, "FACULTY & COURSE COORDINATOR PORTAL · RACM 303 · AY 2026 (2569)");
-      setTranslatedText(mastH1, "RACM 303 Faculty & Course Coordinator Portal (AY 2026)");
+      document.title =
+        state.lang === "en"
+          ? "🔴 [FACULTY MEMBER] RACM 303 (AY 2026) · Faculty Member & Course Coordinator Portal"
+          : "🔴 [FACULTY MEMBER] RACM 303 (ปีการศึกษา 2569) · Faculty Member Portal สำหรับคณาจารย์และผู้ประสานงาน";
+      setTranslatedText(
+        $("roleIdentityBadge"),
+        "🔴 FACULTY MEMBER PORTAL · Instructors & Course Coordinators (Red Theme · Teacher Answer Keys)"
+      );
+      setTranslatedText($("roleRibbonStudentLink"), "🔵 Switch to Student Portal (Blue) ↗");
+      setTranslatedText(deptLine, "🔴 FACULTY MEMBER · RACM 303 · INSTRUCTOR & COORDINATOR PORTAL · AY 2026 (2569)");
+      setTranslatedText(mastH1, "Faculty Member Portal · RACM 303 (AY 2026)");
       setTranslatedText(
         mastSub,
         "Instructor Schedule · Lecture Slide Uploads · HS1–HS6 Teacher Answer Keys · Student Leave Approvals · Instructor Guide"
       );
       setTranslatedText($("facQuickSlideTopBtn"), "📊 Upload Slides");
-      setTranslatedText($("facOpenStudentSiteLink"), "Student Portal ↗");
+      setTranslatedText($("facOpenStudentSiteLink"), "🔵 Student Portal ↗");
       setTranslatedText($("facRamedTopLink"), "E-learning ↗");
       const facLeaveBtn = $("facQuickLeaveTopBtn");
       if (facLeaveBtn) {
@@ -25267,8 +25276,17 @@
         );
       }
     } else {
-      setTranslatedText(deptLine, "RACM 303 · COMMUNITY MEDICINE & HEALTH SYSTEMS SCIENCE · AY 2026 (2569)");
-      setTranslatedText(mastH1, "Community Medicine & Health Systems Science (3rd-Year Medical Students)");
+      document.title =
+        state.lang === "en"
+          ? "🔵 [STUDENT] RACM 303 (AY 2026) · 3rd-Year Medical Student Portal"
+          : "🔵 [STUDENT] RACM 303 (ปีการศึกษา 2569) · Student Portal สำหรับนักศึกษาแพทย์ชั้นปีที่ 3";
+      setTranslatedText(
+        $("roleIdentityBadge"),
+        "🔵 STUDENT PORTAL · 3rd-Year Medical Students (Blue Theme)"
+      );
+      setTranslatedText($("stuOpenFacultySiteLink"), "🔴 For Instructors: Open Faculty Member Portal ↗");
+      setTranslatedText(deptLine, "🔵 STUDENT · RACM 303 · COMMUNITY MEDICINE & HEALTH SYSTEMS SCIENCE · AY 2026 (2569)");
+      setTranslatedText(mastH1, "Student Portal · Community Medicine & Health Systems Science");
       setTranslatedText(
         mastSub,
         "Wed 25 Nov – Wed 30 Dec 2026 · Chakri Naruebodindra Medical Institute (CNMI) & 9 Fieldwork Hospital Sites"

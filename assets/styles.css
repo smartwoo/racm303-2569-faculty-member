@@ -21077,3 +21077,403 @@ html[data-theme="dark"] .sched-row-title-btn:hover {
   color: #60a5fa;
 }
 
+/* ==========================================================================
+   Role Visual Identity System:
+   - STUDENT PORTAL (racm303-2569-student)        -> Royal & Sapphire BLUE (สีน้ำเงิน)
+   - FACULTY MEMBER PORTAL (racm303-2569-faculty-member) -> Academic Crimson RED (สีแดง)
+   ========================================================================== */
+
+.portal-role-ribbon {
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--font-display);
+  font-size: 12.6px;
+}
+
+.portal-role-ribbon.is-student {
+  background: linear-gradient(90deg, #00102e 0%, #00256e 52%, #001847 100%);
+}
+
+.portal-role-ribbon.is-faculty {
+  background: linear-gradient(90deg, #34040a 0%, #6d0b19 52%, #3f070e 100%);
+}
+
+.role-ribbon-inner {
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 7px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+}
+
+.role-ribbon-left,
+.role-ribbon-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.role-identity-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3.5px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12.4px;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+}
+
+.role-identity-pill.is-student {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  border: 1.5px solid #93c5fd;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+}
+
+.role-identity-pill.is-faculty {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  border: 1.5px solid #fecaca;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.48);
+}
+
+.role-url-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-mono);
+  font-size: 11.8px;
+}
+
+.role-url-chip strong {
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.role-switch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-decoration: none !important;
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.role-switch-pill:hover {
+  transform: translateY(-1px);
+}
+
+.role-switch-pill.is-to-faculty {
+  background: rgba(220, 38, 38, 0.28);
+  border: 1px solid #fca5a5;
+  color: #ffe4e6 !important;
+}
+
+.role-switch-pill.is-to-faculty:hover {
+  background: #dc2626;
+  border-color: #fecaca;
+  color: #ffffff !important;
+}
+
+.role-switch-pill.is-to-student {
+  background: rgba(37, 99, 235, 0.34);
+  border: 1px solid #93c5fd;
+  color: #e0f2fe !important;
+}
+
+.role-switch-pill.is-to-student:hover {
+  background: #2563eb;
+  border-color: #bfdbfe;
+  color: #ffffff !important;
+}
+
+/* ---------- 1. STUDENT PORTAL SIGNATURE BLUE (สีน้ำเงินชัดเจน) ---------- */
+html[data-role="student"] .masthead,
+.masthead.student-masthead {
+  background:
+    radial-gradient(720px 280px at 92% 10%, rgba(56, 189, 248, 0.32) 0%, rgba(37, 99, 235, 0.12) 48%, transparent 74%),
+    radial-gradient(580px 250px at 8% 105%, rgba(59, 130, 246, 0.30) 0%, transparent 68%),
+    linear-gradient(132deg, #001845 0%, #002d72 44%, #0b46a6 78%, #1d4ed8 100%) !important;
+  border-bottom: 4px solid #38bdf8 !important;
+  box-shadow: 0 10px 28px rgba(0, 36, 99, 0.20) !important;
+}
+
+html[data-role="student"] .masthead .dept-line {
+  color: #e0f2fe !important;
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.55) 0%, rgba(14, 165, 233, 0.32) 100%) !important;
+  border: 1px solid rgba(125, 211, 252, 0.65) !important;
+}
+
+html[data-role="student"] .nav-group-btn.is-active {
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%) !important;
+  color: #00245c !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 6px 16px rgba(0, 20, 64, 0.32), inset 0 -3px 0 #2563eb !important;
+}
+
+html[data-role="student"] .nav-group-btn.is-active .ngb-pill,
+html[data-role="student"] .nav-tab[aria-selected="true"] .tab-count {
+  background: linear-gradient(135deg, #2563eb 0%, #0b46a6 100%) !important;
+  color: #ffffff !important;
+}
+
+html[data-role="student"] .nav-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%) !important;
+  color: #00245c !important;
+  box-shadow: 0 3px 10px rgba(0, 20, 64, 0.28), inset 0 -2.5px 0 #2563eb !important;
+}
+
+/* ---------- 2. FACULTY MEMBER PORTAL SIGNATURE RED (สีแดงชัดเจน) ---------- */
+html[data-role="faculty"]:not([data-theme="dark"]) {
+  --mahidol-navy-deep: #450a0a;
+  --mahidol-navy: #7f1d1d;
+  --mahidol-royal: #b91c1c;
+  --mahidol-blue-bright: #dc2626;
+  --brand: #b91c1c;
+  --brand-deep: #7f1d1d;
+  --brand-mid: #991b1b;
+  --bg: #fcf4f4;
+  --bg-alt: #f8e6e6;
+  --line: rgba(153, 27, 27, 0.16);
+  --line-soft: rgba(153, 27, 27, 0.09);
+  --shadow-xs: 0 1px 3px rgba(69, 10, 10, 0.06), 0 0 0 0.5px rgba(153, 27, 27, 0.05);
+  --shadow-sm: 0 6px 18px rgba(69, 10, 10, 0.08), 0 1px 3px rgba(69, 10, 10, 0.05);
+  --shadow-md: 0 16px 38px rgba(69, 10, 10, 0.14), 0 2px 6px rgba(69, 10, 10, 0.06);
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1150px 460px at 8% -4%, rgba(185, 28, 28, 0.09) 0%, transparent 66%),
+    radial-gradient(980px 420px at 92% 0%, rgba(244, 63, 94, 0.09) 0%, transparent 62%);
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead {
+  background:
+    radial-gradient(760px 300px at 90% 8%, rgba(251, 113, 133, 0.34) 0%, rgba(245, 158, 11, 0.12) 48%, transparent 74%),
+    radial-gradient(600px 260px at 10% 105%, rgba(239, 68, 68, 0.30) 0%, transparent 68%),
+    linear-gradient(132deg, #450a0a 0%, #7f1d1d 44%, #991b1b 78%, #c81e1e 100%) !important;
+  border-bottom: 4px solid #f87171 !important;
+  box-shadow: 0 10px 30px rgba(69, 10, 10, 0.24) !important;
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead .dept-line {
+  color: #7f1d1d !important;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe4e6 100%) !important;
+  border: 1.5px solid #fca5a5 !important;
+  box-shadow: 0 2px 8px rgba(69, 10, 10, 0.28) !important;
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead .head-subtitle {
+  color: rgba(255, 241, 242, 0.92) !important;
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead .ghost-link.is-student-preview-link {
+  background: rgba(37, 99, 235, 0.32) !important;
+  border-color: #93c5fd !important;
+  color: #eff6ff !important;
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead .ghost-link.is-student-preview-link:hover {
+  background: #2563eb !important;
+  border-color: #bfdbfe !important;
+  color: #ffffff !important;
+}
+
+html[data-role="faculty"] .masthead.faculty-masthead .personal-bar {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(254, 202, 202, 0.18) 100%) !important;
+  border-color: rgba(254, 202, 202, 0.3) !important;
+}
+
+html[data-role="faculty"] .nav-primary-bar,
+html[data-role="faculty"] .nav-primary-groups {
+  background: rgba(48, 5, 10, 0.45) !important;
+  border-color: rgba(254, 202, 202, 0.22) !important;
+}
+
+html[data-role="faculty"] .nav-scroll-shell.has-scroll-left::before {
+  background: linear-gradient(90deg, rgba(69, 10, 10, 0.9) 0%, rgba(69, 10, 10, 0) 100%) !important;
+}
+
+html[data-role="faculty"] .nav-scroll-shell.has-scroll-right::after {
+  background: linear-gradient(270deg, rgba(69, 10, 10, 0.92) 0%, rgba(69, 10, 10, 0) 100%) !important;
+}
+
+html[data-role="faculty"] .nav-group-btn:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(252, 165, 165, 0.6) !important;
+}
+
+html[data-role="faculty"] .nav-group-btn.is-active {
+  background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%) !important;
+  color: #7f1d1d !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 6px 16px rgba(56, 6, 10, 0.34), inset 0 -3px 0 #dc2626 !important;
+}
+
+html[data-role="faculty"] .nav-group-btn.is-active .ngb-ico {
+  background: rgba(185, 28, 28, 0.12) !important;
+}
+
+html[data-role="faculty"] .nav-group-btn.is-active .ngb-pill,
+html[data-role="faculty"] .nav-tab[aria-selected="true"] .tab-count {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+  color: #ffffff !important;
+}
+
+html[data-role="faculty"] .nav-group-btn.is-active .ngb-sub {
+  color: #881337 !important;
+}
+
+html[data-role="faculty"] .nav-subtabs-dock {
+  background: rgba(42, 4, 8, 0.5) !important;
+  border-color: rgba(254, 202, 202, 0.2) !important;
+}
+
+html[data-role="faculty"] .nav-subtabs-kicker {
+  color: #fecaca !important;
+}
+
+html[data-role="faculty"] .nav-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%) !important;
+  color: #7f1d1d !important;
+  box-shadow: 0 3px 10px rgba(56, 6, 10, 0.3), inset 0 -2.5px 0 #dc2626 !important;
+}
+
+html[data-role="faculty"] .btn.primary {
+  background: linear-gradient(135deg, #881337 0%, #b91c1c 52%, #dc2626 100%) !important;
+  border-color: #881337 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 9px rgba(153, 27, 27, 0.28) !important;
+}
+
+html[data-role="faculty"] .btn.primary:hover {
+  background: linear-gradient(135deg, #6b0f2b 0%, #991b1b 52%, #b91c1c 100%) !important;
+  border-color: #6b0f2b !important;
+}
+
+html[data-role="faculty"] .cal-ics-btn {
+  background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%) !important;
+  border-color: #7f1d1d !important;
+  color: #ffffff !important;
+}
+
+html[data-role="faculty"] .cal-ics-btn:hover {
+  background: linear-gradient(135deg, #651212 0%, #991b1b 100%) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .concierge-shell.is-compact-tabs {
+  border-color: rgba(185, 28, 28, 0.22) !important;
+  box-shadow: 0 3px 12px rgba(127, 29, 29, 0.07) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .concierge-tabbar {
+  background: linear-gradient(90deg, #fff5f5 0%, #ffffff 55%, #fffafa 100%) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .concierge-kicker {
+  color: #7f1d1d !important;
+  background: rgba(185, 28, 28, 0.1) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .concierge-tabs {
+  background: rgba(185, 28, 28, 0.065) !important;
+}
+
+html[data-role="faculty"] .concierge-tab-btn[aria-selected="true"] {
+  background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(153, 27, 27, 0.26) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .unified-sched-hub {
+  border-color: #fca5a5 !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .unified-sched-hub > .filter-panel.is-unified-sched-filters {
+  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%) !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .cal-target-summary.is-inline-hub-summary {
+  background: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+  color: #881337 !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .unified-sched-export-bar {
+  background: linear-gradient(90deg, #fef2f2 0%, #fff1f2 55%, #f0fdfa 100%) !important;
+  border-top-color: #fecdd3 !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .sched-sortable-table th.is-sorted-col,
+html[data-role="faculty"]:not([data-theme="dark"]) .sched-th-sort-btn.is-active {
+  background: rgba(220, 38, 38, 0.12) !important;
+  color: #991b1b !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .sched-sortable-table th.is-sorted-col .sched-sort-ind,
+html[data-role="faculty"]:not([data-theme="dark"]) .sched-th-sort-btn.is-active .sched-sort-ind {
+  color: #dc2626 !important;
+}
+
+html[data-role="faculty"] .fab-pill-btn.is-primary {
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .ms-card.is-next {
+  border-color: #dc2626 !important;
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.14) !important;
+}
+
+html[data-role="faculty"] .ms-step-num,
+html[data-role="faculty"] .cq-date-pill.is-active,
+html[data-role="faculty"] .concierge-preset-chip.is-active {
+  background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%) !important;
+  border-color: #991b1b !important;
+  color: #ffffff !important;
+}
+
+html[data-role="faculty"]:not([data-theme="dark"]) .cal-sidebar-toggle-btn[aria-expanded="true"],
+html[data-role="faculty"]:not([data-theme="dark"]) .zoom-pill-btn {
+  background: #fff1f2 !important;
+  border-color: #fca5a5 !important;
+  color: #991b1b !important;
+}
+
+/* Faculty Dark Mode: Deep Ruby-Burgundy Dark Palette */
+html[data-role="faculty"][data-theme="dark"] {
+  --bg: #13080a;
+  --bg-alt: #1d0c10;
+  --brand: #f87171;
+  --brand-deep: #fecaca;
+  --brand-mid: #fca5a5;
+}
+
+html[data-role="faculty"][data-theme="dark"] body {
+  background-color: #13080a !important;
+  background-image:
+    radial-gradient(1100px 460px at 10% -4%, rgba(220, 38, 38, 0.20) 0%, transparent 66%),
+    radial-gradient(920px 380px at 90% 0%, rgba(244, 63, 94, 0.12) 0%, transparent 62%) !important;
+}
+
+@media print {
+  .portal-role-ribbon {
+    display: none !important;
+  }
+}
+
+

@@ -1,16 +1,16 @@
-# RACM 303 (ปีการศึกษา 2569) — พอร์ทัลสำหรับคณาจารย์และผู้ประสานงานรายวิชา
+# 🔴 [FACULTY MEMBER] RACM 303 (ปีการศึกษา 2569) — Faculty Member Portal สำหรับคณาจารย์และผู้ประสานงานรายวิชา (โทนสีแดง)
 
 พอร์ทัลปฏิทินภาระงานสอนรายอาจารย์ ใบรายชื่อรูปถ่ายนักศึกษาพิมพ์ 1 หน้า A4 แผงตรวจสอบตารางสอนและซิงค์ Apps Script คู่มือรายวิชา และคู่มือผู้สอน (`Teacher Guides HS1–HS6`) ภาควิชาเวชศาสตร์ชุมชน คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล
 
 ## ลิงก์เข้าใช้งาน
 
-- **พอร์ทัลสำหรับอาจารย์และผู้ประสานงาน:** https://smartwoo.github.io/racm303-2569-faculty/
-  - **ชุดโจทย์ & Teacher Answer Key สำหรับ Discussion ระบบสุขภาพ (`HS1–HS6` · 10 กรณีศึกษา):** https://smartwoo.github.io/racm303-2569-faculty/#hs-discussion
-  - **ใบรายชื่อรูปถ่ายกลุ่ม Discussion (`HS1–HS6` · 6 กลุ่มย่อย):** https://smartwoo.github.io/racm303-2569-faculty/#discussion
-  - **9 พื้นที่ภาคสนาม & เจ้าหน้าที่ประสานงาน:** https://smartwoo.github.io/racm303-2569-faculty/#fieldwork
-  - **ระบบรับงาน · ตรวจ SRN & เชื่อมห้องวิชา RACM 303 (`id=398`):** https://smartwoo.github.io/racm303-2569-faculty/#submissions
+- **พอร์ทัลสำหรับอาจารย์และผู้ประสานงาน:** https://smartwoo.github.io/racm303-2569-faculty-member/
+  - **ชุดโจทย์ & Teacher Answer Key สำหรับ Discussion ระบบสุขภาพ (`HS1–HS6` · 10 กรณีศึกษา):** https://smartwoo.github.io/racm303-2569-faculty-member/#hs-discussion
+  - **ใบรายชื่อรูปถ่ายกลุ่ม Discussion (`HS1–HS6` · 6 กลุ่มย่อย):** https://smartwoo.github.io/racm303-2569-faculty-member/#discussion
+  - **9 พื้นที่ภาคสนาม & เจ้าหน้าที่ประสานงาน:** https://smartwoo.github.io/racm303-2569-faculty-member/#fieldwork
+  - **ระบบรับงาน · ตรวจ SRN & เชื่อมห้องวิชา RACM 303 (`id=398`):** https://smartwoo.github.io/racm303-2569-faculty-member/#submissions
 - **ห้องจัดการรายวิชาใน RAMA E-learning (`3/2569 RACM 303 Community Medicine I` · `id=398`):** https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
-- **พอร์ทัลฝั่งนักศึกษาแพทย์ชั้นปีที่ 3 (แยกคลังอิสระ ไม่มีเฉลย):** https://smartwoo.github.io/racm303-2569/
+- **พอร์ทัลฝั่งนักศึกษาแพทย์ชั้นปีที่ 3 (แยกคลังอิสระ ไม่มีเฉลย):** https://smartwoo.github.io/racm303-2569-student/
 
 ## ฟีเจอร์หลักสำหรับคณาจารย์และผู้ประสานงาน
 
