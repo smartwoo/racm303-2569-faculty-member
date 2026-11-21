@@ -49,7 +49,9 @@
 
   const state = {
     activeTab: "schedule",
-    schedSub: "month", // month | week | daily | spec
+    schedSub: "month", // month | week | daily | table | spec
+    schedSort: "date-asc",
+    showCalSubDrawer: false,
     calScope: "student", // student | group | teacher | all
     calWeek: 1,
     practiceSub: "rapid",
@@ -909,7 +911,7 @@
     discChip.style.cursor = "pointer";
     discChip.title = "คลิกเพื่อดูรายชื่อสมาชิกกลุ่ม Discussion ของฉัน";
     discChip.addEventListener("click", () => {
-      if ($("discGroupSelect")) $("discGroupSelect").value = String(s.disc);
+      setSyncedDiscussionGroup(String(s.disc), true);
       switchTab("discussion");
     });
 
@@ -918,7 +920,7 @@
     areaChip.style.cursor = "pointer";
     areaChip.title = "คลิกเพื่อดูข้อมูลและสมาชิกกลุ่มพื้นที่ภาคสนามของฉัน";
     areaChip.addEventListener("click", () => {
-      if ($("fieldAreaSelect")) $("fieldAreaSelect").value = s.area;
+      setSyncedFieldworkArea(s.area, true);
       switchTab("fieldwork");
     });
 
@@ -1307,6 +1309,81 @@
     });
   }
 
+  const SCHED_SORT_LABELS = {
+    "date-asc": "วัน-เวลาเรียน (เก่า → ใหม่)",
+    "date-desc": "วัน-เวลาเรียน (ใหม่ → เก่า)",
+    "category-asc": "หมวดกิจกรรม (HS · EP · กลุ่มย่อย · สอบ)",
+    "category-desc": "หมวดกิจกรรม (ย้อนกลับ)",
+    "code-asc": "รหัสคาบเรียน (A → Z)",
+    "code-desc": "รหัสคาบเรียน (Z → A)",
+    "title-asc": "หัวข้อคาบเรียน (ก → ฮ)",
+    "title-desc": "หัวข้อคาบเรียน (ฮ → ก)",
+    "lecturer-asc": "อาจารย์ผู้สอน (ก → ฮ)",
+    "lecturer-desc": "อาจารย์ผู้สอน (ฮ → ก)",
+    "room-asc": "ห้องเรียน / สถานที่ (ก → ฮ)",
+    "room-desc": "ห้องเรียน / สถานที่ (ฮ → ก)",
+    "media-first": "คาบที่มี Slide / Zoom ขึ้นก่อน"
+  };
+
+  function sortScheduleSessions(sessions, ctxOpt, sortKeyOpt) {
+    const list = Array.isArray(sessions) ? [...sessions] : [];
+    const sortKey = sortKeyOpt || state.schedSort || "date-asc";
+    if (sortKey === "date-asc" || list.length <= 1) return list;
+
+    const ctx = ctxOpt || getActivePersonalContext();
+    const CAT_ORDER = { HS: 1, EP: 2, SG: 3, PANEL: 4, EXAM: 5, HOLIDAY: 6, STAFF: 7 };
+    const dateTieBreak = (a, b) => {
+      const da = `${a.dateISO || ""} ${a.startTime || "00:00"}`;
+      const db = `${b.dateISO || ""} ${b.startTime || "00:00"}`;
+      return da.localeCompare(db);
+    };
+
+    const [field, dirRaw] = sortKey.split("-");
+    const mul = dirRaw === "desc" ? -1 : 1;
+
+    list.sort((a, b) => {
+      const effA = resolveEffectiveSessionDetails(a, ctx);
+      const effB = resolveEffectiveSessionDetails(b, ctx);
+      if (field === "date") {
+        return mul * dateTieBreak(a, b);
+      }
+      if (field === "category") {
+        const ca = CAT_ORDER[a.category] || 99;
+        const cb = CAT_ORDER[b.category] || 99;
+        return mul * (ca - cb) || dateTieBreak(a, b);
+      }
+      if (field === "code") {
+        return mul * compareTH(a.code || "", b.code || "") || dateTieBreak(a, b);
+      }
+      if (field === "title") {
+        return mul * compareTH(effA.title || a.title || "", effB.title || b.title || "") || dateTieBreak(a, b);
+      }
+      if (field === "lecturer") {
+        const la = !effA.lecturer || effA.lecturer === "—" ? "๙๙๙" : effA.lecturer;
+        const lb = !effB.lecturer || effB.lecturer === "—" ? "๙๙๙" : effB.lecturer;
+        return mul * compareTH(la, lb) || dateTieBreak(a, b);
+      }
+      if (field === "room") {
+        const ra = !effA.room || effA.room === "—" ? "๙๙๙" : effA.room;
+        const rb = !effB.room || effB.room === "—" ? "๙๙๙" : effB.room;
+        return mul * compareTH(ra, rb) || dateTieBreak(a, b);
+      }
+      if (field === "media") {
+        const ma =
+          (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(a.id) ? 4 : 0) +
+          (a.zoom ? 2 : 0) +
+          (a.docLink || a.conciseLink ? 1 : 0);
+        const mb =
+          (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(b.id) ? 4 : 0) +
+          (b.zoom ? 2 : 0) +
+          (b.docLink || b.conciseLink ? 1 : 0);
+        return (mb - ma) || dateTieBreak(a, b);
+      }
+      return dateTieBreak(a, b);
+    });
+    return list;
+  }
+
   /* ---------- Calendar Personalize, Download & Subscribe Studio ---------- */
   function computeSubscribeRelativePath(ctx) {
     if (ROLE === "faculty" && ctx.teacherVal) {
@@ -1329,7 +1406,7 @@
     const sessionsToExport = getSessionsForExport();
     const activeStu = ctx.effectiveStudent;
 
-    // Update scope tabs visual state
+    // Update scope tabs visual state (if legacy elements exist)
     document.querySelectorAll("[data-cal-scope]").forEach((btn) => {
       btn.setAttribute("aria-selected", btn.dataset.calScope === state.calScope ? "true" : "false");
     });
@@ -1346,12 +1423,10 @@
       $("studioClearTeacherBtn").hidden = !ctx.teacherVal;
     }
 
-    // Highlight active fieldwork group pill
     document.querySelectorAll(".cal-group-pill").forEach((pill) => {
       pill.classList.toggle("is-selected", pill.dataset.areaName === ctx.areaVal);
     });
 
-    // Update summary box & tooltips (keeping button face labels clean without embedded IDs)
     const sumBox = $("calTargetSummaryBox");
     const dlIcsBtn = $("studioDownloadIcsBtn");
     const dlXlsxBtn = $("studioDownloadXlsxBtn");
@@ -1360,6 +1435,11 @@
     const sideIcsBtn = $("sideDlIcsQuickBtn");
     const sideXlsxBtn = $("sideDlXlsxQuickBtn");
 
+    const sortSuffix =
+      state.schedSort && state.schedSort !== "date-asc"
+        ? ` · เรียงตาม <em>${escapeHtml(SCHED_SORT_LABELS[state.schedSort] || state.schedSort)}</em>`
+        : "";
+
     let shortTarget = "ตารางรวมทั้งรายวิชา";
     if (activeStu && ctx.siteObj) {
       const s = activeStu;
@@ -1367,47 +1447,49 @@
       shortTarget = `${s.id} · ${site.shortName}`;
       if (sumBox) {
         sumBox.innerHTML =
-          `<strong>ตารางเฉพาะตัวนักศึกษา:</strong> ${escapeHtml(s.fullName)} (<code>${escapeHtml(s.id)}</code>) · Discussion ${s.disc} · กลุ่ม <strong>${escapeHtml(site.hospital)} ${escapeHtml(site.province)}</strong><br>` +
-          `<strong>เวลาลงภาคสนามของกลุ่มนี้:</strong> ออกเดินทาง ${escapeHtml(site.departShortTH || "")} · ระยะฝึก <strong>${escapeHtml(site.datesTH)}</strong> · ${site.hasFri11Dec ? "มีเรียนกลุ่มย่อย 5–6 วันศุกร์ที่ 11 ธ.ค." : "ไม่มีเรียนวันศุกร์ที่ 11 ธ.ค. (อยู่ระหว่างภาคสนาม)"} · รวม <strong>${sessionsToExport.length} รายการ</strong> (พร้อมลิงก์ Zoom)`;
+          `📌 <strong>ตารางส่วนตัว:</strong> ${escapeHtml(s.fullName)} (<code>${escapeHtml(s.id)}</code>) · Discussion ${s.disc} · กลุ่ม <strong>${escapeHtml(site.shortName)}</strong> (${escapeHtml(site.datesTH)}) · <strong>${sessionsToExport.length} คาบ</strong>${sortSuffix}`;
       }
     } else if (ctx.teacherVal) {
       const tObj = (ROSTER.courseTeachers || []).find((t) => t.key === ctx.teacherVal);
       shortTarget = `อ.${ctx.teacherVal}`;
       if (sumBox) {
         sumBox.innerHTML =
-          `<strong>ปฏิทินภาระงานอาจารย์:</strong> ${escapeHtml(tObj ? tObj.label : ctx.teacherVal)}<br>` +
-          `คัดเฉพาะคาบบรรยาย กลุ่มอภิปราย HS และกลุ่มที่ปรึกษาภาคสนามของท่าน รวม <strong>${sessionsToExport.length} รายการ</strong> (พร้อมฝังลิงก์ Zoom ครบทุกคาบออนไลน์)`;
+          `📌 <strong>ภาระงานสอนเฉพาะอาจารย์:</strong> ${escapeHtml(tObj ? tObj.label : ctx.teacherVal)} · รวม <strong>${sessionsToExport.length} คาบ</strong> (พร้อมลิงก์ Zoom ในไฟล์ปฏิทิน)${sortSuffix}`;
       }
     } else if (ctx.siteObj) {
       const site = ctx.siteObj;
       shortTarget = `กลุ่ม${site.shortName}`;
       if (sumBox) {
         sumBox.innerHTML =
-          `<strong>ตารางเฉพาะกลุ่มภาคสนาม:</strong> <strong>${escapeHtml(site.hospital)} ${escapeHtml(site.province)}</strong> (${site.count} คน · ห้องกลุ่มย่อย <code>${escapeHtml(site.room.split(" ")[0])}</code> · อ.ที่ปรึกษา: ${escapeHtml(site.advisors)})<br>` +
-          `<strong>เวลาลงภาคสนามของกลุ่มนี้:</strong> ออกเดินทาง ${escapeHtml(site.departShortTH || "")} · ระยะฝึก <strong>${escapeHtml(site.datesTH)}</strong> · ${site.hasFri11Dec ? "รวมคาบกลุ่มย่อย 5–6 วันศุกร์ที่ 11 ธ.ค. แล้ว" : "ตัดคาบวันศุกร์ที่ 11 ธ.ค. ออกอัตโนมัติ (กลุ่มนี้เดินทางแล้ว)"} · รวม <strong>${sessionsToExport.length} รายการ</strong>`;
+          `📌 <strong>เฉพาะกลุ่มภาคสนาม:</strong> <strong>${escapeHtml(site.hospital)} (${escapeHtml(site.province)})</strong> · ห้อง <code>${escapeHtml(site.room.split(" ")[0])}</code> · เดินทาง ${escapeHtml(site.departShortTH || "")} · รวม <strong>${sessionsToExport.length} คาบ</strong>${sortSuffix}`;
       }
     } else if (ctx.discVal) {
       shortTarget = `Discussion ${ctx.discVal}`;
       if (sumBox) {
-        sumBox.innerHTML = `<strong>กรองเฉพาะกลุ่มอภิปราย Discussion ${escapeHtml(ctx.discVal)}:</strong> รวม <strong>${sessionsToExport.length} รายการ</strong> (เลือกกลุ่มพื้นที่ภาคสนามเพิ่มเติมด้านบนเพื่อผูกวันเดินทางภาคสนามได้)`;
+        sumBox.innerHTML =
+          `📌 <strong>เฉพาะกลุ่มอภิปราย Discussion ${escapeHtml(ctx.discVal)}:</strong> รวม <strong>${sessionsToExport.length} คาบ</strong>${sortSuffix}`;
       }
     } else {
       if (sumBox) {
         sumBox.innerHTML =
           ROLE === "faculty"
-            ? `<strong>กำลังเลือก: ตารางรวมทั้งรายวิชา (${sessionsToExport.length} รายการ)</strong> — เลือกชื่ออาจารย์หรือกลุ่มภาคสนามด้านบนเพื่อแยกดาวน์โหลดเฉพาะภาระงานของท่านหรือเฉพาะกลุ่มได้ทันที`
-            : `<strong>กำลังเลือก: ตารางรวมทั้งชั้นปี 169 คน (${sessionsToExport.length} รายการ)</strong> — พิมพ์รหัสนักศึกษาหรือคลิกเลือกกลุ่มภาคสนามด้านบน เพื่อให้ระบบปรับวันเดินทางไป-กลับภาคสนามและห้องเรียนเฉพาะของตัวเองอัตโนมัติ`;
+            ? `📌 <strong>กำลังแสดง &amp; พร้อมส่งออก: ตารางรวมทั้งรายวิชา (${sessionsToExport.length} คาบ)</strong>${sortSuffix} — เลือกชื่ออาจารย์หรือเรียงลำดับด้านบนก่อนกดบันทึกเข้าปฏิทิน/ส่งออกได้ทันที`
+            : `📌 <strong>กำลังแสดง &amp; พร้อมส่งออก: ตารางรวมทั้งชั้นปี (${sessionsToExport.length} คาบ)</strong>${sortSuffix} — พิมพ์รหัสนักศึกษาหรือเลือกกลุ่มภาคสนามด้านบนเพื่อผูกห้องและวันเดินทางอัตโนมัติ`;
       }
     }
 
-    setBtnLabel(dlIcsBtn, "Export as .ics");
+    const icsClearLabel = tr(
+      "บันทึกเข้า Google Calendar / iCal (.ics)",
+      "Save to Google Calendar / iCal (.ics)"
+    );
+    setBtnLabel(dlIcsBtn, icsClearLabel);
     setBtnLabel(dlXlsxBtn, "Export as .xlsx");
-    setBtnLabel(topIcsBtn, "Export as .ics");
+    setBtnLabel(topIcsBtn, icsClearLabel);
     setBtnLabel(topXlsxBtn, "Export as .xlsx");
-    setBtnLabel(sideIcsBtn, "Export as .ics");
+    setBtnLabel(sideIcsBtn, icsClearLabel);
     setBtnLabel(sideXlsxBtn, "Export as .xlsx");
-    const syncIcsTip = `ส่งออกปฏิทิน .ics (Google Calendar / Apple iCal / Outlook) ตามตัวกรองปัจจุบัน: ${shortTarget} (${sessionsToExport.length} รายการ)`;
-    const syncXlsxTip = `ส่งออกตาราง Excel .xlsx ตามตัวกรองปัจจุบัน: ${shortTarget} (${sessionsToExport.length} รายการ)`;
+    const syncIcsTip = `บันทึกไฟล์ปฏิทิน .ics เข้า Google Calendar / Apple Calendar (iCal) / Outlook ตามตัวกรองปัจจุบัน: ${shortTarget} (${sessionsToExport.length} รายการ)`;
+    const syncXlsxTip = `ส่งออกตาราง Excel (.xlsx) ตามตัวกรองและการเรียงลำดับปัจจุบัน: ${shortTarget} (${sessionsToExport.length} รายการ)`;
     if (topIcsBtn) topIcsBtn.title = syncIcsTip;
     if (topXlsxBtn) topXlsxBtn.title = syncXlsxTip;
     if (dlIcsBtn) dlIcsBtn.title = syncIcsTip;
@@ -1671,12 +1753,30 @@
 
     if ($("sideDlIcsQuickBtn")) $("sideDlIcsQuickBtn").addEventListener("click", downloadScheduleIcs);
     if ($("sideDlXlsxQuickBtn")) $("sideDlXlsxQuickBtn").addEventListener("click", () => downloadScheduleXlsx(false));
+    if ($("toggleCalSubDrawerBtn") && $("calSubInlineDrawer")) {
+      $("toggleCalSubDrawerBtn").addEventListener("click", () => {
+        state.showCalSubDrawer = !state.showCalSubDrawer;
+        $("calSubInlineDrawer").hidden = !state.showCalSubDrawer;
+        $("toggleCalSubDrawerBtn").setAttribute("aria-expanded", state.showCalSubDrawer ? "true" : "false");
+        $("toggleCalSubDrawerBtn").textContent = state.showCalSubDrawer ? "🔗 ซ่อนลิงก์ซิงค์ ▴" : "🔗 ซิงค์อัตโนมัติ ▾";
+      });
+    }
     if ($("sideOpenFullStudioBtn")) {
       $("sideOpenFullStudioBtn").addEventListener("click", () => {
-        const disc = $("calStudioDisclosure");
-        if (disc) {
-          disc.open = true;
-          disc.scrollIntoView({ behavior: "smooth", block: "start" });
+        const subDrawer = $("calSubInlineDrawer");
+        const subBtn = $("toggleCalSubDrawerBtn");
+        if (subDrawer) {
+          state.showCalSubDrawer = true;
+          subDrawer.hidden = false;
+          if (subBtn) {
+            subBtn.setAttribute("aria-expanded", "true");
+            subBtn.textContent = "🔗 ซ่อนลิงก์ซิงค์ ▴";
+          }
+        }
+        const hub = $("schedUnifiedHub") || $("calStudioDisclosure");
+        if (hub) {
+          if (hub.tagName === "DETAILS") hub.open = true;
+          hub.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       });
     }
@@ -1755,6 +1855,18 @@
       });
     }
 
+    if ($("schedSortSelect")) {
+      $("schedSortSelect").addEventListener("change", () => {
+        state.schedSort = $("schedSortSelect").value || "date-asc";
+        if (state.schedSort !== "date-asc" && (state.schedSub === "month" || state.schedSub === "week" || state.schedSub === "spec")) {
+          state.schedSub = "table";
+          syncSegButtons();
+        }
+        refreshCalendarStudioUI();
+        renderScheduleCurrent();
+      });
+    }
+
     if ($("schedSearchInput")) {
       const onSchedSearch = () => {
         refreshCalendarStudioUI();
@@ -1769,6 +1881,8 @@
           if ($(id)) $(id).value = "";
         });
         if ($("studioTeacherSelect")) $("studioTeacherSelect").value = "";
+        if ($("schedSortSelect")) $("schedSortSelect").value = "date-asc";
+        state.schedSort = "date-asc";
         state.calWeek = 1;
         state.calScope = ROLE === "faculty" ? "teacher" : "all";
         clearAllPersonalization();
@@ -1824,21 +1938,25 @@
 
     const hasActiveScheduleFilter = () => {
       const ids = ["schedWeekFilter", "schedCatFilter", "schedTeacherFilter", "schedDiscFilter", "schedAreaFilter", "schedSearchInput"];
-      return Boolean(state.myStudent || ids.some((id) => $(id) && String($(id).value || "").trim() !== ""));
+      return Boolean(
+        state.myStudent ||
+          (state.schedSort && state.schedSort !== "date-asc") ||
+          ids.some((id) => $(id) && String($(id).value || "").trim() !== "")
+      );
     };
 
     if ($("exportIcsBtn")) $("exportIcsBtn").addEventListener("click", downloadScheduleIcs);
     const topXlsxBtn = $("dlScheduleExcelBtn") || $("facDlXlsxBtn");
     if (topXlsxBtn) {
       topXlsxBtn.addEventListener("click", (ev) => {
-        if (!hasActiveScheduleFilter()) return; // allow native download of pre-built 3-sheet XLSX
+        if (!hasActiveScheduleFilter()) return;
         ev.preventDefault();
         downloadScheduleXlsx(true);
       });
     }
     if ($("exportSchedulePdfBtn")) {
       $("exportSchedulePdfBtn").addEventListener("click", (ev) => {
-        if (!hasActiveScheduleFilter()) return; // allow native download of pre-built PDF
+        if (!hasActiveScheduleFilter()) return;
         ev.preventDefault();
         const ctx = getActivePersonalContext();
         const tag = ctx.teacherVal || (ctx.effectiveStudent && ctx.effectiveStudent.id) || ctx.areaVal || ctx.discVal || "เฉพาะเงื่อนไขที่กรอง";
@@ -1847,20 +1965,20 @@
     }
     if ($("exportScheduleDocxBtn")) {
       $("exportScheduleDocxBtn").addEventListener("click", (ev) => {
-        if (!hasActiveScheduleFilter()) return; // allow native download of pre-built DOCX
+        if (!hasActiveScheduleFilter()) return;
         ev.preventDefault();
         const ctx = getActivePersonalContext();
-        const sessions = getFilteredSessions(false);
+        const sessions = sortScheduleSessions(getFilteredSessions(false), ctx);
         const rowsHtml = sessions
           .map((s) => {
             const eff = resolveEffectiveSessionDetails(s, ctx);
-            return `<tr><td>สัปดาห์ ${s.week} · ${escapeHtml(s.dateTH)} (${escapeHtml(eff.startTime || s.startTime)}–${escapeHtml(eff.endTime || s.endTime)})</td><td>${escapeHtml(eff.title || s.title)}</td><td>${escapeHtml(eff.lecturers || s.lecturers || "-")}</td><td>${escapeHtml(eff.room || s.room || "-")}</td></tr>`;
+            return `<tr><td>สัปดาห์ ${s.week} · ${escapeHtml(s.dateTH)} (${escapeHtml(eff.startTime || s.startTime)}–${escapeHtml(eff.endTime || s.endTime)})</td><td>${escapeHtml(eff.title || s.title)}</td><td>${escapeHtml(eff.lecturer || s.lecturers || "-")}</td><td>${escapeHtml(eff.room || s.room || "-")}</td></tr>`;
           })
           .join("");
-        const tag = ctx.teacherVal || (ctx.effectiveStudent && `${ctx.effectiveStudent.id}_${ctx.effectiveStudent.fullName}`) || ctx.areaVal || (ctx.discVal ? `Discussion_${ctx.discVal}` : "Filtered");
+        const tag = ctx.teacherVal || (ctx.effectiveStudent && `${ctx.effectiveStudent.id}_${ctx.effectiveStudent.fullName}`) || ctx.areaVal || (ctx.discVal ? `Discussion_${ctx.discVal}` : "Sorted");
         downloadHtmlAsGenuineDocx(
           "ตารางกิจกรรมการเรียนการสอน รายวิชา RACM 303 ปีการศึกษา 2569",
-          `เงื่อนไขที่กรอง: ${tag} · รวม ${sessions.length} คาบกิจกรรม`,
+          `เงื่อนไขที่กรอง/เรียงลำดับ: ${tag} · รวม ${sessions.length} คาบกิจกรรม`,
           `<table><thead><tr><th>วัน-เวลา</th><th>หัวข้อและกิจกรรม</th><th>ผู้สอน</th><th>ห้องเรียน / ช่องทาง</th></tr></thead><tbody>${rowsHtml}</tbody></table>`,
           `ตารางสอน_RACM303_2569_${sanitizeFilenamePart(tag)}.docx`
         );
@@ -1900,6 +2018,8 @@
       if (state.schedSub === "week") {
         const wb = WEEK_BOUNDS.find((w) => w.week === state.calWeek) || WEEK_BOUNDS[0];
         titleEl.textContent = wb.label;
+      } else if (state.schedSub === "table") {
+        titleEl.textContent = "ตารางรวมกิจกรรมการเรียนการสอน (คลิกหัวคอลัมน์เพื่อ Sort ลำดับได้ทันที)";
       } else if (state.schedSub === "spec") {
         titleEl.textContent = "ตารางหมุนเวียนกลุ่มอภิปราย HS1–HS6 และสัดส่วนข้อสอบ";
       } else if (weekVal) {
@@ -1919,7 +2039,10 @@
         ctx.teacherVal ? `อาจารย์: ${ctx.teacherVal}` : "",
         ctx.discVal ? `Discussion ${ctx.discVal}` : "",
         ctx.areaVal ? `กลุ่มพื้นที่ ${ctx.areaVal}` : "",
-        "คลิกที่คาบเรียนเพื่อดูรายละเอียด ลิงก์ Zoom หรือเพิ่มเข้าปฏิทิน"
+        state.schedSort && state.schedSort !== "date-asc"
+          ? `เรียงตาม: ${SCHED_SORT_LABELS[state.schedSort] || state.schedSort}`
+          : "",
+        "คลิกที่คาบเรียนเพื่อดูรายละเอียด ลิงก์ Zoom หรือบันทึกเข้าปฏิทิน"
       ].filter(Boolean);
       statusEl.textContent = parts.join(" · ");
     }
@@ -1929,11 +2052,13 @@
     if ($("schedMonthWrap")) $("schedMonthWrap").hidden = state.schedSub !== "month";
     if ($("schedWeekWrap")) $("schedWeekWrap").hidden = state.schedSub !== "week";
     if ($("schedDailyWrap")) $("schedDailyWrap").hidden = state.schedSub !== "daily";
+    if ($("schedTableWrap")) $("schedTableWrap").hidden = state.schedSub !== "table";
     if ($("schedSpecWrap")) $("schedSpecWrap").hidden = state.schedSub !== "spec";
 
     if (state.schedSub === "month") renderScheduleMonth();
     else if (state.schedSub === "week") renderScheduleWeek();
     else if (state.schedSub === "daily") renderScheduleDaily();
+    else if (state.schedSub === "table") renderScheduleSortableTable();
     else if (state.schedSub === "spec") renderScheduleSpec();
   }
 
@@ -2178,7 +2303,8 @@
 
   /* ---------- View 3: Detailed Agenda / Daily Cards (Full-Card Color Coding for Rapid Skim/Scan) ---------- */
   function renderScheduleDaily() {
-    const sessions = getFilteredSessions(false);
+    const ctx = getActivePersonalContext();
+    const sessions = sortScheduleSessions(getFilteredSessions(false), ctx);
     updateScheduleStatusBar(sessions.length);
 
     const listEl = $("scheduleSessionsContainer");
@@ -2190,24 +2316,44 @@
       return;
     }
 
-    const ctx = getActivePersonalContext();
+    const isCustomSorted = Boolean(state.schedSort && state.schedSort !== "date-asc");
+    if (isCustomSorted) {
+      const sortBanner = make("div", null, "sched-active-sort-banner");
+      sortBanner.appendChild(
+        make("span", `⇅ กำลังเรียงลำดับรายคาบตาม: ${SCHED_SORT_LABELS[state.schedSort] || state.schedSort}`)
+      );
+      const resetSortBtn = make("button", "กลับไปเรียงตามวัน-เวลาปกติ", "btn sm");
+      resetSortBtn.type = "button";
+      resetSortBtn.addEventListener("click", () => {
+        state.schedSort = "date-asc";
+        if ($("schedSortSelect")) $("schedSortSelect").value = "date-asc";
+        refreshCalendarStudioUI();
+        renderScheduleCurrent();
+      });
+      sortBanner.appendChild(resetSortBtn);
+      listEl.appendChild(sortBanner);
+    }
+
     let lastWeek = null;
     let lastDate = "";
 
     sessions.forEach((s) => {
       const eff = resolveEffectiveSessionDetails(s, ctx);
       const isHoliday = s.category === "HOLIDAY";
-      if (s.week !== lastWeek) {
-        lastWeek = s.week;
-        lastDate = "";
-        const wg = (SCHED.masterGrid || []).find((w) => w.week === s.week);
-        listEl.appendChild(make("div", `สัปดาห์ที่ ${s.week}${wg ? " · " + wg.range : ""}`, "week-divider"));
-      }
       const dateHeadingText = s.code === "FIELD" && ctx.siteObj ? `ช่วงฝึกภาคสนาม (${ctx.siteObj.datesTH})` : s.dateTH;
-      if (dateHeadingText !== lastDate) {
-        lastDate = dateHeadingText;
-        const dayH = make("h3", dateHeadingText, `day-heading${isHoliday ? " is-holiday-heading" : ""}`);
-        listEl.appendChild(dayH);
+
+      if (!isCustomSorted) {
+        if (s.week !== lastWeek) {
+          lastWeek = s.week;
+          lastDate = "";
+          const wg = (SCHED.masterGrid || []).find((w) => w.week === s.week);
+          listEl.appendChild(make("div", `สัปดาห์ที่ ${s.week}${wg ? " · " + wg.range : ""}`, "week-divider"));
+        }
+        if (dateHeadingText !== lastDate) {
+          lastDate = dateHeadingText;
+          const dayH = make("h3", dateHeadingText, `day-heading${isHoliday ? " is-holiday-heading" : ""}`);
+          listEl.appendChild(dayH);
+        }
       }
 
       const card = make("article", null, `session-card cat-${s.category}`);
@@ -2219,6 +2365,9 @@
           ? ctx.siteObj.badgeDates || s.timeLabel
           : s.timeLabel;
       const timeCol = make("div", timeLabelTxt, "session-time");
+      if (isCustomSorted) {
+        timeCol.appendChild(make("small", `W${s.week} · ${dateHeadingText}`, "sched-sorted-date-sub"));
+      }
       const subCodeTxt = isHoliday
         ? "งดการเรียนการสอน"
         : [s.code, s.checkIn && s.checkIn !== "—" ? s.checkIn : ""].filter(Boolean).join(" · ");
@@ -2366,8 +2515,8 @@
 
       const icsSingle = make("button", null, "btn sm cal-ics-btn");
       icsSingle.type = "button";
-      icsSingle.title = "ส่งออกไฟล์ปฏิทิน .ics เฉพาะคาบนี้ ใช้ได้ทั้ง Google Calendar, Apple Calendar (iCal) และ Outlook";
-      icsSingle.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Export as .ics`;
+      icsSingle.title = "บันทึกไฟล์ปฏิทิน .ics เฉพาะคาบนี้ลงใน Google Calendar, Apple Calendar (iCal) หรือ Outlook";
+      icsSingle.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกเข้า Google Cal / iCal (.ics)", "Save to Google Cal / iCal (.ics)"))}`;
       icsSingle.addEventListener("click", () => downloadSingleSessionIcs(s));
       actions.appendChild(icsSingle);
 
@@ -2413,6 +2562,194 @@
       }
 
       listEl.appendChild(card);
+    });
+  }
+
+  /* ---------- View 3B: Interactive Master Sortable Schedule Table ---------- */
+  function renderScheduleSortableTable() {
+    const wrap = $("schedTableContent");
+    if (!wrap) return;
+    const ctx = getActivePersonalContext();
+    const sessions = sortScheduleSessions(getFilteredSessions(false), ctx);
+    updateScheduleStatusBar(sessions.length);
+    wrap.replaceChildren();
+
+    if (!sessions.length) {
+      wrap.appendChild(make("div", "ไม่พบคาบเรียนที่ตรงกับตัวกรอง ลองกด “ล้างตัวกรอง” เพื่อดูตารางทั้งหมด", "empty-state"));
+      return;
+    }
+
+    const curSort = state.schedSort || "date-asc";
+    const [curField, curDir] = curSort.split("-");
+
+    const columns = [
+      { key: "date", label: "สัปดาห์ / วัน-เวลา", width: "16%" },
+      { key: "category", label: "หมวด", width: "11%" },
+      { key: "code", label: "รหัสคาบ", width: "8%" },
+      { key: "title", label: "หัวข้อและกิจกรรม", width: "24%" },
+      { key: "lecturer", label: "อาจารย์ผู้สอน", width: "14%" },
+      { key: "room", label: "ห้องเรียน / Zoom", width: "12%" },
+      { key: "media", label: "บันทึกปฏิทิน (.ics)", width: "15%" }
+    ];
+
+    const card = make("div", null, "data-card sched-sortable-table-card");
+    const tblWrap = make("div", null, "clean-table-wrap");
+    const tbl = make("table", null, "clean-table sched-sortable-table");
+
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    columns.forEach((col) => {
+      const th = document.createElement("th");
+      th.style.width = col.width;
+      const isAct = curField === col.key;
+      th.className = `is-clickable-sort-th${isAct ? " is-sorted-col" : ""}`;
+      const arrow = !isAct ? "⇅" : curDir === "desc" ? "▼" : "▲";
+      const sortBtn = make(
+        "button",
+        null,
+        `sched-th-sort-btn${isAct ? " is-active" : ""}`
+      );
+      sortBtn.type = "button";
+      sortBtn.dataset.colKey = col.key;
+      sortBtn.title = `คลิกเพื่อเรียงลำดับตาม "${col.label}"`;
+      sortBtn.innerHTML = `<span>${escapeHtml(col.label)}</span><span class="sched-sort-ind">${arrow}</span>`;
+      sortBtn.addEventListener("click", () => {
+        let nextSort = `${col.key}-asc`;
+        if (col.key === "media") {
+          nextSort = curSort === "media-first" ? "date-asc" : "media-first";
+        } else if (curField === col.key) {
+          nextSort = curDir === "asc" ? `${col.key}-desc` : `${col.key}-asc`;
+        }
+        state.schedSort = nextSort;
+        const sel = $("schedSortSelect");
+        if (sel) {
+          const hasExactOpt = Array.from(sel.options).some((o) => o.value === nextSort);
+          if (!hasExactOpt && SCHED_SORT_LABELS[nextSort]) {
+            sel.add(new Option(SCHED_SORT_LABELS[nextSort], nextSort));
+          }
+          sel.value = nextSort;
+        }
+        refreshCalendarStudioUI();
+        renderScheduleSortableTable();
+      });
+      th.appendChild(sortBtn);
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+
+    const tbody = document.createElement("tbody");
+    sessions.forEach((s) => {
+      const eff = resolveEffectiveSessionDetails(s, ctx);
+      const isHol = s.category === "HOLIDAY";
+      const trEl = document.createElement("tr");
+      trEl.className = `sched-tbl-row cat-row-${s.category}`;
+
+      // 1. Date & Time
+      const tdDate = document.createElement("td");
+      const dateStr = s.code === "FIELD" && ctx.siteObj ? ctx.siteObj.datesTH : s.dateTH;
+      const timeStr = isHol ? "วันหยุดราชการ" : eff.isAllDay ? "ตลอดวัน" : s.timeLabel;
+      tdDate.innerHTML = `<strong>W${escapeHtml(String(s.week))} · ${escapeHtml(dateStr)}</strong><br><small class="muted">${escapeHtml(timeStr)}</small>`;
+
+      // 2. Category
+      const tdCat = document.createElement("td");
+      tdCat.appendChild(make("span", CAT_NAMES[s.category] || s.category, `badge cat-${s.category}`));
+
+      // 3. Code
+      const tdCode = document.createElement("td");
+      tdCode.innerHTML = `<strong>${escapeHtml(s.code || "-")}</strong>`;
+
+      // 4. Title (clickable -> Event Modal)
+      const tdTitle = document.createElement("td");
+      const titleBtn = make("button", eff.title || s.title, "sched-row-title-btn");
+      titleBtn.type = "button";
+      titleBtn.addEventListener("click", () => openEventModal(s));
+      tdTitle.appendChild(titleBtn);
+      const targetHsMod = s.hsModule || (/^HS[1-6]$/.test(s.docLink || "") ? s.docLink : "");
+      if (targetHsMod && !isHol) {
+        const hsJump = make("button", `💬 Discussion ${targetHsMod}`, "spec-hs-jump-link");
+        hsJump.type = "button";
+        hsJump.style.marginLeft = "6px";
+        hsJump.addEventListener("click", () => openHsDiscussion(targetHsMod));
+        tdTitle.appendChild(hsJump);
+      }
+
+      // 5. Lecturer
+      const tdLec = document.createElement("td");
+      tdLec.textContent = isHol ? "—" : eff.lecturer || s.lecturers || "—";
+
+      // 6. Room / Zoom
+      const tdRoom = document.createElement("td");
+      if (eff.room && eff.room !== "—") {
+        tdRoom.appendChild(make("div", eff.room, "sched-tbl-room"));
+      }
+      if (s.zoom && s.zoom.url) {
+        const zLink = make("a", `🎥 Zoom (${s.zoom.id}) ↗`, "spec-hs-jump-link");
+        zLink.href = s.zoom.url;
+        zLink.target = "_blank";
+        zLink.rel = "noopener";
+        tdRoom.appendChild(zLink);
+      }
+
+      // 7. Materials & Save to Calendar (.ics)
+      const tdActs = document.createElement("td");
+      const actStack = make("div", null, "sched-tbl-act-stack");
+      if (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(s.id)) {
+        const slBtn = make("button", "📊 Slide", "btn sm teal");
+        slBtn.type = "button";
+        slBtn.addEventListener("click", () => openEventModal(s));
+        actStack.appendChild(slBtn);
+      }
+      const rowIcsBtn = make("button", "📅 Google Cal / iCal", "btn sm cal-ics-btn");
+      rowIcsBtn.type = "button";
+      rowIcsBtn.title = "บันทึกเฉพาะคาบนี้เข้า Google Calendar / Apple Calendar (iCal) (.ics)";
+      rowIcsBtn.addEventListener("click", () => downloadSingleSessionIcs(s));
+      actStack.appendChild(rowIcsBtn);
+      tdActs.appendChild(actStack);
+
+      trEl.append(tdDate, tdCat, tdCode, tdTitle, tdLec, tdRoom, tdActs);
+      tbody.appendChild(trEl);
+    });
+
+    tbl.append(thead, tbody);
+    tblWrap.appendChild(tbl);
+    card.appendChild(tblWrap);
+    wrap.appendChild(card);
+  }
+
+  function makeStaticTableSortable(tableEl) {
+    if (!tableEl || tableEl.dataset.sortableWired) return;
+    tableEl.dataset.sortableWired = "1";
+    const thead = tableEl.querySelector("thead");
+    const tbody = tableEl.querySelector("tbody");
+    if (!thead || !tbody) return;
+    const ths = Array.from(thead.querySelectorAll("th"));
+    let activeIdx = -1;
+    let asc = true;
+
+    ths.forEach((th, colIdx) => {
+      th.classList.add("is-clickable-sort-th");
+      const ind = make("span", " ⇅", "sched-sort-ind");
+      th.appendChild(ind);
+      th.title = "คลิกเพื่อเรียงลำดับคอลัมน์นี้";
+      th.addEventListener("click", (ev) => {
+        if (ev.target && ev.target.closest && ev.target.closest("button, a")) return;
+        if (activeIdx === colIdx) asc = !asc;
+        else {
+          activeIdx = colIdx;
+          asc = true;
+        }
+        ths.forEach((other, j) => {
+          const sp = other.querySelector(".sched-sort-ind");
+          if (sp) sp.textContent = j === activeIdx ? (asc ? " ▲" : " ▼") : " ⇅";
+        });
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        rows.sort((ra, rb) => {
+          const ca = (ra.children[colIdx] && ra.children[colIdx].textContent) || "";
+          const cb = (rb.children[colIdx] && rb.children[colIdx].textContent) || "";
+          return (asc ? 1 : -1) * compareTH(ca.trim(), cb.trim());
+        });
+        rows.forEach((r) => tbody.appendChild(r));
+      });
     });
   }
 
@@ -2506,6 +2843,7 @@
     wrap.querySelectorAll("[data-spec-tb]").forEach((btn) => {
       btn.addEventListener("click", () => openTextbookDoc(btn.dataset.specTb));
     });
+    wrap.querySelectorAll("table.clean-table").forEach((tbl) => makeStaticTableSortable(tbl));
   }
 
   /* ---------- Interactive Calendar Event Detail Popover Modal ---------- */
@@ -2651,8 +2989,8 @@
     const leftExport = make("div", null, "header-actions");
     const icsBtn = make("button", null, "btn sm cal-ics-btn");
     icsBtn.type = "button";
-    icsBtn.title = "ส่งออกไฟล์ปฏิทิน .ics เฉพาะคาบนี้ ใช้ได้ทั้ง Google Calendar, Apple Calendar (iCal) และ Outlook";
-    icsBtn.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Export as .ics (คาบนี้)`;
+    icsBtn.title = "บันทึกไฟล์ปฏิทิน .ics เฉพาะคาบนี้ลงใน Google Calendar, Apple Calendar (iCal) หรือ Outlook";
+    icsBtn.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกคาบนี้ลง Google Calendar / iCal (.ics)", "Save Session to Google Calendar / iCal (.ics)"))}`;
     icsBtn.addEventListener("click", () => downloadSingleSessionIcs(session));
 
     leftExport.append(icsBtn);
@@ -3082,6 +3420,7 @@
         ctx.teacherVal ||
         ctx.areaVal ||
         ctx.discVal ||
+        (state.schedSort && state.schedSort !== "date-asc") ||
         filterIds.some((id) => $(id) && String($(id).value || "").trim() !== "")
     );
     if (!useToolbarFilters && !hasAnyFilter && window.location.protocol !== "file:") {
@@ -3094,7 +3433,8 @@
       return;
     }
 
-    const sessions = useToolbarFilters ? getFilteredSessions(false) : getSessionsForExport();
+    const rawSessions = useToolbarFilters ? getFilteredSessions(false) : getSessionsForExport();
+    const sessions = sortScheduleSessions(rawSessions, ctx);
     const calTitle = getActiveCalendarDisplayName();
     const subtitle = `ตารางกิจกรรมการเรียนการสอน รายวิชา RACM 303 ปีการศึกษา 2569 · ${calTitle} · รวม ${sessions.length} คาบกิจกรรม`;
     const prefix = ROLE === "faculty" ? "ตารางสอน_RACM303_2569" : "ตารางเรียน_RACM303_2569";
@@ -3460,7 +3800,7 @@
       switchTab("schedule");
     });
 
-    const icsLink = make("a", "📅 ปฏิทิน .ics เฉพาะคนนี้", "btn teal sm");
+    const icsLink = make("a", "📅 บันทึกตารางคนนี้ลง Google Cal / iCal (.ics)", "btn teal sm");
     icsLink.href = `calendars/d${s.disc}_g${siteId}.ics`;
     icsLink.setAttribute("download", `RACM303_2569_${s.id}_d${s.disc}_g${siteId}.ics`);
 
@@ -3786,26 +4126,32 @@
           return;
         }
         if (state.activeTab === "discussion" && (state.discViewMode === "deck" || state.discViewMode === "formation")) {
-          const total = (SCHED.hsGroups || []).length || 6;
+          const groups = SCHED.hsGroups || [];
+          const total = groups.length || 6;
           if (ev.key === "ArrowRight") {
             ev.preventDefault();
-            state.discDeckIdx = (state.discDeckIdx + 1) % total;
-            renderDiscussionView();
+            const nextIdx = (state.discDeckIdx + 1) % total;
+            const nextG = groups[nextIdx];
+            setSyncedDiscussionGroup(nextG ? String(nextG.id) : String(nextIdx + 1));
           } else if (ev.key === "ArrowLeft") {
             ev.preventDefault();
-            state.discDeckIdx = (state.discDeckIdx - 1 + total) % total;
-            renderDiscussionView();
+            const nextIdx = (state.discDeckIdx - 1 + total) % total;
+            const nextG = groups[nextIdx];
+            setSyncedDiscussionGroup(nextG ? String(nextG.id) : String(nextIdx + 1));
           }
         } else if (state.activeTab === "fieldwork" && (state.fieldViewMode === "deck" || state.fieldViewMode === "formation")) {
-          const total = (SCHED.fieldworkSites || []).length || 9;
+          const sites = SCHED.fieldworkSites || [];
+          const total = sites.length || 9;
           if (ev.key === "ArrowRight") {
             ev.preventDefault();
-            state.fieldDeckIdx = (state.fieldDeckIdx + 1) % total;
-            renderFieldworkView();
+            const nextIdx = (state.fieldDeckIdx + 1) % total;
+            const nextS = sites[nextIdx];
+            if (nextS) setSyncedFieldworkArea(nextS.shortName);
           } else if (ev.key === "ArrowLeft") {
             ev.preventDefault();
-            state.fieldDeckIdx = (state.fieldDeckIdx - 1 + total) % total;
-            renderFieldworkView();
+            const nextIdx = (state.fieldDeckIdx - 1 + total) % total;
+            const nextS = sites[nextIdx];
+            if (nextS) setSyncedFieldworkArea(nextS.shortName);
           }
         }
       });
@@ -3813,6 +4159,49 @@
 
     applyRosterZoomVars();
     return { dock, formationStage, sorterStage, deckStage, tableStage, cardsEl };
+  }
+
+  function keepActiveStripPillsVisible(panelId) {
+    const panel = $(panelId);
+    if (!panel) return;
+    requestAnimationFrame(() => {
+      panel.querySelectorAll(".fm-team-tab.is-active, .roster-jump-pill.is-active, .deck-film-chip.is-active").forEach((pill) => {
+        const strip = pill.parentElement;
+        if (!strip || strip.scrollWidth <= strip.clientWidth + 4) return;
+        const targetLeft = pill.offsetLeft - strip.clientWidth / 2 + pill.offsetWidth / 2;
+        strip.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+      });
+    });
+  }
+
+  function setSyncedDiscussionGroup(nextGroupId, skipRender) {
+    const val = nextGroupId ? String(nextGroupId) : "";
+    if ($("discGroupSelect")) $("discGroupSelect").value = val;
+    state.discHoverGroup = val;
+    state.discContext = null;
+    if (val) {
+      const idx = (SCHED.hsGroups || []).findIndex((g) => String(g.id) === val);
+      state.discDeckIdx = idx >= 0 ? idx : Math.max(0, Number(val) - 1);
+    }
+    if (!skipRender) {
+      renderDiscussionView();
+      keepActiveStripPillsVisible("panel-discussion");
+    }
+  }
+
+  function setSyncedFieldworkArea(nextArea, skipRender) {
+    const val = nextArea ? String(nextArea) : "";
+    if ($("fieldAreaSelect")) $("fieldAreaSelect").value = val;
+    state.mapHoverSite = val;
+    state.fieldContext = null;
+    if (val) {
+      const idx = (SCHED.fieldworkSites || []).findIndex((x) => x.shortName === val);
+      if (idx >= 0) state.fieldDeckIdx = idx;
+    }
+    if (!skipRender) {
+      renderFieldworkView();
+      keepActiveStripPillsVisible("panel-fieldwork");
+    }
   }
 
   function printSingleGroupHelper(scope, groupValue) {
@@ -4119,9 +4508,8 @@
         zoomGroupBtn.type = "button";
         zoomGroupBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          state.discDeckIdx = idx;
           state.discViewMode = "deck";
-          renderDiscussionView();
+          setSyncedDiscussionGroup(String(g.id));
         });
         const printOneBtn = make("button", "🖨 พิมพ์ A4", "btn sm");
         printOneBtn.type = "button";
@@ -4133,9 +4521,8 @@
         card.appendChild(foot);
 
         card.addEventListener("click", () => {
-          state.discDeckIdx = idx;
           state.discViewMode = "deck";
-          renderDiscussionView();
+          setSyncedDiscussionGroup(String(g.id));
         });
         grid.appendChild(card);
       });
@@ -4185,9 +4572,8 @@
         zoomSiteBtn.type = "button";
         zoomSiteBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          state.fieldDeckIdx = idx;
           state.fieldViewMode = "deck";
-          renderFieldworkView();
+          setSyncedFieldworkArea(site.shortName);
         });
         const printOneBtn = make("button", "🖨 พิมพ์ A4", "btn sm");
         printOneBtn.type = "button";
@@ -4199,9 +4585,8 @@
         card.appendChild(foot);
 
         card.addEventListener("click", () => {
-          state.fieldDeckIdx = idx;
           state.fieldViewMode = "deck";
-          renderFieldworkView();
+          setSyncedFieldworkArea(site.shortName);
         });
         grid.appendChild(card);
       });
@@ -4226,13 +4611,10 @@
     const prevBtn = make("button", "‹ กลุ่มก่อนหน้า", "btn sm");
     prevBtn.type = "button";
     prevBtn.addEventListener("click", () => {
-      if (isDisc) {
-        state.discDeckIdx = (idx - 1 + groups.length) % groups.length;
-        renderDiscussionView();
-      } else {
-        state.fieldDeckIdx = (idx - 1 + groups.length) % groups.length;
-        renderFieldworkView();
-      }
+      const nextIdx = (idx - 1 + groups.length) % groups.length;
+      const gNext = groups[nextIdx];
+      if (isDisc) setSyncedDiscussionGroup(String(gNext.id));
+      else setSyncedFieldworkArea(gNext.shortName);
     });
 
     const mid = make("div", null, "deck-mid-controls");
@@ -4247,13 +4629,9 @@
     });
     sel.addEventListener("change", () => {
       const next = Number(sel.value) || 0;
-      if (isDisc) {
-        state.discDeckIdx = next;
-        renderDiscussionView();
-      } else {
-        state.fieldDeckIdx = next;
-        renderFieldworkView();
-      }
+      const gNext = groups[next] || groups[0];
+      if (isDisc) setSyncedDiscussionGroup(String(gNext.id));
+      else setSyncedFieldworkArea(gNext.shortName);
     });
 
     const toSorterBtn = make("button", "⊞ Group Sorter", "btn sm");
@@ -4280,13 +4658,10 @@
     const nextBtn = make("button", "กลุ่มถัดไป ›", "btn sm");
     nextBtn.type = "button";
     nextBtn.addEventListener("click", () => {
-      if (isDisc) {
-        state.discDeckIdx = (idx + 1) % groups.length;
-        renderDiscussionView();
-      } else {
-        state.fieldDeckIdx = (idx + 1) % groups.length;
-        renderFieldworkView();
-      }
+      const nextIdx = (idx + 1) % groups.length;
+      const gNext = groups[nextIdx];
+      if (isDisc) setSyncedDiscussionGroup(String(gNext.id));
+      else setSyncedFieldworkArea(gNext.shortName);
     });
 
     navBar.append(prevBtn, mid, nextBtn);
@@ -4389,7 +4764,7 @@
             <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">${escapeHtml(site.travelNote || "")}</p>
           </div>
           <div class="header-actions">
-            <a class="btn sm teal" href="calendars/group_${site.id}_${site.slug}.ics" download="RACM303_2569_group_${site.id}_${site.slug}.ics">📅 ปฏิทิน .ics กลุ่มนี้</a>
+            <a class="btn sm teal" href="calendars/group_${site.id}_${site.slug}.ics" download="RACM303_2569_group_${site.id}_${site.slug}.ics">📅 บันทึกตารางกลุ่มนี้ลง Google Cal / iCal (.ics)</a>
           </div>
         </div>
       `;
@@ -4413,13 +4788,8 @@
       );
       chip.type = "button";
       chip.addEventListener("click", () => {
-        if (isDisc) {
-          state.discDeckIdx = i;
-          renderDiscussionView();
-        } else {
-          state.fieldDeckIdx = i;
-          renderFieldworkView();
-        }
+        if (isDisc) setSyncedDiscussionGroup(String(g.id));
+        else setSyncedFieldworkArea(g.shortName);
       });
       filmstrip.appendChild(chip);
     });
@@ -4537,7 +4907,7 @@
       discBtn.title = `กรองเฉพาะกลุ่ม Discussion ที่ ${s.disc}`;
       discBtn.addEventListener("click", (ev) => {
         ev.stopPropagation();
-        if ($("discGroupSelect")) $("discGroupSelect").value = String(s.disc);
+        setSyncedDiscussionGroup(String(s.disc));
         switchTab("discussion");
       });
       tdDisc.appendChild(discBtn);
@@ -4549,7 +4919,7 @@
       areaBtn.title = `เปิดดูสมาชิกกลุ่มพื้นที่ ${s.area}`;
       areaBtn.addEventListener("click", (ev) => {
         ev.stopPropagation();
-        if ($("fieldAreaSelect")) $("fieldAreaSelect").value = s.area;
+        setSyncedFieldworkArea(s.area);
         switchTab("fieldwork");
       });
       tdArea.appendChild(areaBtn);
@@ -4964,13 +5334,9 @@
       active: i === idx,
       onClick: () => {
         if (isDisc) {
-          state.discDeckIdx = i;
-          if ($("discGroupSelect")) $("discGroupSelect").value = String(g.id);
-          renderDiscussionView();
+          setSyncedDiscussionGroup(String(g.id));
         } else {
-          state.fieldDeckIdx = i;
-          if ($("fieldAreaSelect")) $("fieldAreaSelect").value = g.shortName;
-          renderFieldworkView();
+          setSyncedFieldworkArea(g.shortName);
         }
       }
     }));
@@ -5034,7 +5400,7 @@
       const icsBtn = make("a", null, "btn sm teal");
       icsBtn.href = `calendars/group_${site.id}_${site.slug}.ics`;
       icsBtn.setAttribute("download", `RACM303_2569_group_${site.id}_${site.slug}.ics`);
-      icsBtn.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Export .ics`;
+      icsBtn.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกเข้า Google Cal / iCal (.ics)", "Save to Google Cal / iCal (.ics)"))}`;
       footActs.append(pdfBtn, printBtn, icsBtn);
 
       stageEl.appendChild(
@@ -5098,18 +5464,16 @@
       const allPill = make(
         "button",
         isDisc ? `ทุกกลุ่ม (${allMatched.length})` : `ทุกพื้นที่ (${allMatched.length})`,
-        `roster-jump-pill${!activeGroupVal && viewMode !== "deck" ? " is-active" : ""}`
+        `roster-jump-pill${!activeGroupVal && viewMode !== "deck" && viewMode !== "formation" ? " is-active" : ""}`
       );
       allPill.type = "button";
       allPill.addEventListener("click", () => {
         if (isDisc) {
-          if ($("discGroupSelect")) $("discGroupSelect").value = "";
-          if (state.discViewMode === "deck") state.discViewMode = "cards";
-          renderDiscussionView();
+          if (state.discViewMode === "deck" || state.discViewMode === "formation") state.discViewMode = "cards";
+          setSyncedDiscussionGroup("");
         } else {
-          if ($("fieldAreaSelect")) $("fieldAreaSelect").value = "";
-          if (state.fieldViewMode === "deck") state.fieldViewMode = "cards";
-          renderFieldworkView();
+          if (state.fieldViewMode === "deck" || state.fieldViewMode === "formation") state.fieldViewMode = "cards";
+          setSyncedFieldworkArea("");
         }
       });
       jumpStrip.appendChild(allPill);
@@ -5117,7 +5481,10 @@
       if (isDisc) {
         (SCHED.hsGroups || []).forEach((g, idx) => {
           const cnt = allMatched.filter((s) => s.disc === g.id).length;
-          const isAct = viewMode === "deck" ? state.discDeckIdx === idx : activeGroupVal === String(g.id);
+          const isAct =
+            viewMode === "deck" || viewMode === "formation"
+              ? state.discDeckIdx === idx
+              : activeGroupVal === String(g.id);
           const p = make(
             "button",
             `G${g.id} · ${g.defaultRoom.split(" ")[0]} (${cnt})`,
@@ -5127,21 +5494,21 @@
           p.dataset.hoverDiscOnly = String(g.id);
           p.addEventListener("click", () => {
             if (state.discViewMode === "deck" || state.discViewMode === "formation") {
-              state.discDeckIdx = idx;
-              renderDiscussionView();
+              setSyncedDiscussionGroup(String(g.id));
               return;
             }
-            const sel = $("discGroupSelect");
-            if (sel) sel.value = sel.value === String(g.id) ? "" : String(g.id);
-            state.discContext = null;
-            renderDiscussionView();
+            const curVal = ($("discGroupSelect") && $("discGroupSelect").value) || "";
+            setSyncedDiscussionGroup(curVal === String(g.id) ? "" : String(g.id));
           });
           jumpStrip.appendChild(p);
         });
       } else {
         (SCHED.fieldworkSites || []).forEach((site, idx) => {
           const cnt = allMatched.filter((s) => s.area === site.shortName).length;
-          const isAct = viewMode === "deck" ? state.fieldDeckIdx === idx : activeGroupVal === site.shortName;
+          const isAct =
+            viewMode === "deck" || viewMode === "formation"
+              ? state.fieldDeckIdx === idx
+              : activeGroupVal === site.shortName;
           const p = make(
             "button",
             null,
@@ -5152,14 +5519,11 @@
           p.innerHTML = `<i class="area-dot"></i><span>${site.id}. ${escapeHtml(site.shortName)}</span><strong>(${cnt})</strong>`;
           p.addEventListener("click", () => {
             if (state.fieldViewMode === "deck" || state.fieldViewMode === "formation") {
-              state.fieldDeckIdx = idx;
-              renderFieldworkView();
+              setSyncedFieldworkArea(site.shortName);
               return;
             }
-            const sel = $("fieldAreaSelect");
-            if (sel) sel.value = sel.value === site.shortName ? "" : site.shortName;
-            state.fieldContext = null;
-            renderFieldworkView();
+            const curVal = ($("fieldAreaSelect") && $("fieldAreaSelect").value) || "";
+            setSyncedFieldworkArea(curVal === site.shortName ? "" : site.shortName);
           });
           jumpStrip.appendChild(p);
         });
@@ -5392,11 +5756,7 @@
         discSel.add(new Option(`กลุ่มอภิปราย Discussion ที่ ${g.id} · ห้อง ${g.defaultRoom.split(" ")[0]} (${g.count} คน)`, String(g.id)));
       });
       discSel.addEventListener("change", () => {
-        state.discContext = null;
-        if (discSel.value && state.discViewMode === "deck") {
-          state.discDeckIdx = Math.max(0, Number(discSel.value) - 1);
-        }
-        renderDiscussionView();
+        setSyncedDiscussionGroup(discSel.value);
       });
     }
 
@@ -5616,26 +5976,20 @@
           pillEl.addEventListener("click", (ev) => {
             ev.stopPropagation();
             const areaTarget = pillEl.dataset.hoverArea || "";
-            if ($("discGroupSelect")) $("discGroupSelect").value = String(g.id);
             if ($("discAreaSubFilter")) {
               $("discAreaSubFilter").value = $("discAreaSubFilter").value === areaTarget ? "" : areaTarget;
             }
-            state.discContext = null;
-            renderDiscussionView();
+            setSyncedDiscussionGroup(String(g.id));
           });
         });
 
         const selectGroup = () => {
-          if (state.discViewMode === "deck") {
-            state.discDeckIdx = idx;
-            renderDiscussionView();
+          if (state.discViewMode === "deck" || state.discViewMode === "formation") {
+            setSyncedDiscussionGroup(String(g.id));
             return;
           }
-          const sel = $("discGroupSelect");
-          if (!sel) return;
-          sel.value = sel.value === String(g.id) ? "" : String(g.id);
-          state.discContext = null;
-          renderDiscussionView();
+          const curVal = ($("discGroupSelect") && $("discGroupSelect").value) || "";
+          setSyncedDiscussionGroup(curVal === String(g.id) ? "" : String(g.id));
         };
         card.addEventListener("click", selectGroup);
         card.addEventListener("keydown", (ev) => {
@@ -5773,18 +6127,13 @@
         label: `G${g.id} · ${g.defaultRoom.split(" ")[0]}`,
         color: DISC_GROUP_COLORS[g.id] || "#007aff",
         active: g.id === curG.id,
-        onHover: () => {
-          if (state.discHoverGroup !== String(g.id)) {
-            state.discHoverGroup = String(g.id);
-            renderDiscInspectorContent();
-          }
-        },
         onClick: () => {
-          const sel = $("discGroupSelect");
-          if (sel) sel.value = sel.value === String(g.id) ? "" : String(g.id);
-          state.discHoverGroup = String(g.id);
-          state.discContext = null;
-          renderDiscussionView();
+          const curVal = ($("discGroupSelect") && $("discGroupSelect").value) || "";
+          if (state.discViewMode === "deck" || state.discViewMode === "formation") {
+            setSyncedDiscussionGroup(String(g.id));
+          } else {
+            setSyncedDiscussionGroup(curVal === String(g.id) ? "" : String(g.id));
+          }
         }
       }));
 
@@ -5798,10 +6147,7 @@
       );
       lockBtn.type = "button";
       lockBtn.addEventListener("click", () => {
-        const sel = $("discGroupSelect");
-        if (sel) sel.value = isLocked ? "" : gIdStr;
-        state.discContext = null;
-        renderDiscussionView();
+        setSyncedDiscussionGroup(isLocked ? "" : gIdStr);
         const dockEl = document.querySelector('.roster-sticky-dock[data-scope="discussion"]') || $("discCardsContainer");
         if (dockEl && !isLocked) dockEl.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -5960,11 +6306,12 @@
         renderDiscInspectorContent();
       };
       const toggleLockRoom = () => {
-        const sel = $("discGroupSelect");
-        if (sel) sel.value = sel.value === gIdStr ? "" : gIdStr;
-        state.discHoverGroup = gIdStr;
-        state.discContext = null;
-        renderDiscussionView();
+        const curVal = ($("discGroupSelect") && $("discGroupSelect").value) || "";
+        if (state.discViewMode === "deck" || state.discViewMode === "formation") {
+          setSyncedDiscussionGroup(gIdStr);
+        } else {
+          setSyncedDiscussionGroup(curVal === gIdStr ? "" : gIdStr);
+        }
       };
 
       rmG.addEventListener("mouseenter", focusRoom);
@@ -5978,6 +6325,13 @@
       });
 
       roomsGroup.appendChild(rmG);
+    });
+
+    svg.addEventListener("mouseleave", () => {
+      if (activeDiscVal && state.discHoverGroup !== activeDiscVal) {
+        state.discHoverGroup = activeDiscVal;
+        renderDiscInspectorContent();
+      }
     });
 
     // Special 3D Floor-2 Callout Badge for Group 6 (HS4 -> 2C2-03)
@@ -6344,12 +6698,7 @@
         areaSel.add(new Option(s.shortName, s.shortName));
       });
       areaSel.addEventListener("change", () => {
-        state.fieldContext = null;
-        if (areaSel.value && state.fieldViewMode === "deck") {
-          const foundIdx = (SCHED.fieldworkSites || []).findIndex((x) => x.shortName === areaSel.value);
-          if (foundIdx >= 0) state.fieldDeckIdx = foundIdx;
-        }
-        renderFieldworkView();
+        setSyncedFieldworkArea(areaSel.value);
       });
     }
 
@@ -6359,11 +6708,8 @@
 
     if ($("fieldClearFiltersBtn")) {
       $("fieldClearFiltersBtn").addEventListener("click", () => {
-        state.fieldContext = null;
-        state.mapHoverSite = "";
         if ($("fieldSearchInput")) $("fieldSearchInput").value = "";
-        if (areaSel) areaSel.value = "";
-        renderFieldworkView();
+        setSyncedFieldworkArea("");
       });
     }
 
@@ -6499,17 +6845,14 @@
         const filterBtn = make("button", `ดูรายชื่อกลุ่ม ${site.shortName}`, "btn sm primary");
         filterBtn.type = "button";
         filterBtn.addEventListener("click", () => {
-          if (state.fieldViewMode === "deck") {
-            state.fieldDeckIdx = idx;
-            renderFieldworkView();
+          if (state.fieldViewMode === "deck" || state.fieldViewMode === "formation") {
+            setSyncedFieldworkArea(site.shortName);
             return;
           }
-          const sel = $("fieldAreaSelect");
-          if (sel) sel.value = sel.value === site.shortName ? "" : site.shortName;
-          state.fieldContext = null;
-          renderFieldworkView();
+          const curVal = ($("fieldAreaSelect") && $("fieldAreaSelect").value) || "";
+          setSyncedFieldworkArea(curVal === site.shortName ? "" : site.shortName);
         });
-        const icsLink = make("a", "Export .ics กลุ่มนี้", "btn sm teal");
+        const icsLink = make("a", tr("📅 บันทึกเข้า Google Cal / iCal (.ics)", "📅 Save to Google Cal / iCal (.ics)"), "btn sm teal");
         icsLink.href = `calendars/group_${site.id}_${site.slug}.ics`;
         icsLink.setAttribute("download", `RACM303_2569_group_${site.id}_${site.slug}.ics`);
         actRow.append(filterBtn, icsLink);
@@ -6755,18 +7098,13 @@
         label: `${st.id}.${st.shortName}`,
         color: SITE_PIN_COLORS[st.id] || "#007aff",
         active: st.shortName === curSite.shortName,
-        onHover: () => {
-          if (state.mapHoverSite !== st.shortName) {
-            state.mapHoverSite = st.shortName;
-            renderMapInspectorContent();
-          }
-        },
         onClick: () => {
-          const sel = $("fieldAreaSelect");
-          if (sel) sel.value = sel.value === st.shortName ? "" : st.shortName;
-          state.mapHoverSite = st.shortName;
-          state.fieldContext = null;
-          renderFieldworkView();
+          const curVal = ($("fieldAreaSelect") && $("fieldAreaSelect").value) || "";
+          if (state.fieldViewMode === "deck" || state.fieldViewMode === "formation") {
+            setSyncedFieldworkArea(st.shortName);
+          } else {
+            setSyncedFieldworkArea(curVal === st.shortName ? "" : st.shortName);
+          }
         }
       }));
 
@@ -6780,10 +7118,7 @@
       );
       lockBtn.type = "button";
       lockBtn.addEventListener("click", () => {
-        const sel = $("fieldAreaSelect");
-        if (sel) sel.value = isLocked ? "" : curSite.shortName;
-        state.fieldContext = null;
-        renderFieldworkView();
+        setSyncedFieldworkArea(isLocked ? "" : curSite.shortName);
         const dockEl = document.querySelector('.roster-sticky-dock[data-scope="fieldwork"]') || $("fieldCardsContainer");
         if (dockEl && !isLocked) dockEl.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -6801,7 +7136,7 @@
       const icsLink = make("a", null, "btn sm teal");
       icsLink.href = `calendars/group_${curSite.id}_${curSite.slug}.ics`;
       icsLink.setAttribute("download", `RACM303_2569_group_${curSite.id}_${curSite.slug}.ics`);
-      icsLink.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Export .ics`;
+      icsLink.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกเข้า Google Cal / iCal (.ics)", "Save to Google Cal / iCal (.ics)"))}`;
 
       actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
 
@@ -6830,6 +7165,7 @@
           footerActions: actRow
         })
       );
+      keepActiveStripPillsVisible(inspector, ".fm-team-tab.is-active");
     };
 
     // Custom 3D parabolic control offsets per site so all 9 flight arcs soar cleanly without tangling
@@ -6923,11 +7259,12 @@
         renderMapInspectorContent();
       };
       const toggleLockSite = () => {
-        const sel = $("fieldAreaSelect");
-        if (sel) sel.value = sel.value === site.shortName ? "" : site.shortName;
-        state.mapHoverSite = site.shortName;
-        state.fieldContext = null;
-        renderFieldworkView();
+        const curVal = ($("fieldAreaSelect") && $("fieldAreaSelect").value) || "";
+        if (state.fieldViewMode === "deck" || state.fieldViewMode === "formation") {
+          setSyncedFieldworkArea(site.shortName);
+        } else {
+          setSyncedFieldworkArea(curVal === site.shortName ? "" : site.shortName);
+        }
       };
 
       pinG.addEventListener("mouseenter", focusSite);
@@ -6941,6 +7278,13 @@
       });
 
       pinsGroup.appendChild(pinG);
+    });
+
+    svg.addEventListener("mouseleave", () => {
+      if (activeAreaVal && state.mapHoverSite !== activeAreaVal) {
+        state.mapHoverSite = activeAreaVal;
+        renderMapInspectorContent();
+      }
     });
 
     svg.append(routesGroup, hubG, pinsGroup, provBadgeOverlayGroup);
@@ -7556,7 +7900,7 @@
 
       const matchedSession = (SCHED.sessions || []).find((s) => s.id === d.sessionId);
       if (matchedSession) {
-        const icsBtn = make("button", "+ เตือนในปฏิทิน (.ics)", "btn sm");
+        const icsBtn = make("button", tr("+ บันทึกแจ้งเตือนลง Google Cal / iCal (.ics)", "+ Save Reminder to Google Cal / iCal (.ics)"), "btn sm");
         icsBtn.type = "button";
         icsBtn.addEventListener("click", () => downloadSingleSessionIcs(matchedSession));
         actions.appendChild(icsBtn);
@@ -25074,17 +25418,20 @@
     setTranslatedText($("schedSubMonthBtn"), "Month");
     setTranslatedText($("schedSubWeekBtn"), "Week");
     setTranslatedText($("schedSubDailyBtn"), "Agenda");
+    setTranslatedText($("schedSubTableBtn"), "≡ Sortable Table");
+    setTranslatedText($("fSchedSubTable"), "≡ Sortable Table");
     setTranslatedText($("schedSubSpecBtn"), "HS Rotation");
     setTranslatedText($("calStartWeekBtn"), "Week 1");
     setTranslatedText($("toggleCalSidebarBtn"), "◫ Milestones");
-    setTranslatedText($("calSideTabSync"), "Sync .ics");
-    setTranslatedText($("fCalSideTabSync"), "Sync .ics");
+    setTranslatedText($("calSideTabSync"), "Google Cal / iCal");
+    setTranslatedText($("fCalSideTabSync"), "Google Cal / iCal");
     setTranslatedText($("resetSchedFiltersBtn"), "Reset Filters");
     setTranslatedText($("discClearFiltersBtn"), "Reset Filters");
     setTranslatedText($("fieldClearFiltersBtn"), "Reset Filters");
     setTranslatedText($("hsdViewSlideBtn"), "▣ Slide Each Case");
     setTranslatedText($("hsdViewScrollBtn"), "☰ Full Scroll");
     setTranslatedText($("closeLightboxBtn"), "Close (Esc)");
+    if (typeof refreshCalendarStudioUI === "function") refreshCalendarStudioUI();
 
     const legendEn = [
       `<i class="cal-dot cat-HS"></i>Health Systems (HS)`,
@@ -25141,7 +25488,8 @@
         if (LIVE && $("hsdLiveClassroomBar") && $("hsdTimerWidget")) {
           renderHsLiveClassroomBar();
         }
-        if (state.activeTab === "fieldwork") renderFieldworkView();
+        if (state.activeTab === "schedule") renderScheduleCurrent();
+        else if (state.activeTab === "fieldwork") renderFieldworkView();
         else if (state.activeTab === "discussion") renderDiscussionView();
         else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
         if (typeof renderRoleConcierge === "function") renderRoleConcierge();
@@ -25261,11 +25609,11 @@
       const t = params.get("type");
       const g = params.get("group") || "";
       if (t === "discussion") {
-        if ($("discGroupSelect")) $("discGroupSelect").value = g;
+        setSyncedDiscussionGroup(g);
         switchTab("discussion", false);
         return;
       }
-      if ($("fieldAreaSelect")) $("fieldAreaSelect").value = g;
+      setSyncedFieldworkArea(g);
       switchTab("fieldwork", false);
       return;
     }
