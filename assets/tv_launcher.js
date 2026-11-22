@@ -468,9 +468,9 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("อภิปรายสด HS1–HS6", "Live Case Discussion"),
-              sub: t("เปิดสไลด์โจทย์ 16:9 และพิมพ์คำตอบร่วมกับกลุ่ม", "16:9 case slides & live 6-room worksheet"),
-              badge: t("10 กรณีศึกษา", "10 Cases"),
+              title: t("อภิปรายสด HS1–HS6", "Slide Case Discussion"),
+              sub: t("ดูสไลด์ล่วงหน้าได้โดยไม่ต้องใช้รหัส และเช็คชื่อ Interactive ในคาบเรียน", "Preview 16:9 case slides ID-free & join live room in class"),
+              badge: t("อ่านล่วงหน้า / Live", "Preview & Live"),
               action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
             },
             {
@@ -623,8 +623,11 @@
           </div>
           <div class="tv-shelf-track is-sites" id="tvSitesTrack">
             ${sites
-              .map(
-                (s) => `
+              .map((s) => {
+                const cleanStaff = String(s.staffRef || "")
+                  .replace(/\s*\[[^\]]*\]/g, "")
+                  .trim();
+                return `
               <button type="button" class="tv-site-card" id="tvSiteCard-${s.id}" data-site-short="${esc(s.shortName)}" data-tv-focus data-tv-row="4">
                 <span class="tv-site-top">
                   <span class="tv-site-num">0${s.id}</span>
@@ -634,10 +637,17 @@
                   <span class="tv-site-name">${esc(s.hospital)}</span>
                   <span class="tv-site-prov">${esc(s.province)}</span>
                 </span>
+                <span class="tv-site-mentor">
+                  <strong>${esc(t("อ.ประจำกลุ่ม:", "Advisor:"))}</strong> ${esc(s.advisors || "-")}${
+                  cleanStaff
+                    ? `<br><strong>${esc(t("ผู้ประสานงาน:", "Coordinator:"))}</strong> ${esc(cleanStaff)}`
+                    : ""
+                }
+                </span>
                 <span class="tv-site-dates">${esc(s.badgeDates || s.datesTH)}</span>
               </button>
-            `
-              )
+            `;
+              })
               .join("")}
           </div>
         </div>
@@ -765,11 +775,33 @@
         <div class="tv-ep-action-list">
           <button type="button" class="tv-ep-action-btn is-primary" id="tvEpActSlides" data-tv-modal-focus>
             <span>
-              <span class="tv-ep-action-title-row">▶ <span>${esc(ROLE === "faculty" ? t(`เปิดสไลด์สอน & เฉลย ${mod.code}`, `Open ${mod.code} Slides & Teacher Key`) : t(`เข้าสไลด์อภิปรายสด ${mod.code}`, `Open ${mod.code} Live Discussion`))}</span></span>
-              <span class="tv-ep-action-sub">${esc(t(`มุมมองสไลด์ 16:9 คาบ ${mod.discTime}`, `16:9 Slide Deck · ${mod.discTime}`))}</span>
+              <span class="tv-ep-action-title-row">▶ <span>${esc(
+                ROLE === "faculty"
+                  ? t(`เปิดสไลด์สอน & เฉลย ${mod.code}`, `Open ${mod.code} Slides & Teacher Key`)
+                  : t(`เปิดดูสไลด์ Case Discussion ${mod.code} (ไม่ต้องใช้รหัส)`, `Preview ${mod.code} Case Slides (No ID Required)`)
+              )}</span></span>
+              <span class="tv-ep-action-sub">${esc(
+                ROLE === "faculty"
+                  ? t(`มุมมองสไลด์ 16:9 คาบ ${mod.discTime}`, `16:9 Slide Deck · ${mod.discTime}`)
+                  : t(`อ่านโจทย์ล่วงหน้าได้ทันที มุมมองสไลด์ 16:9 · คาบ ${mod.discTime}`, `Read ahead anytime in 16:9 Slide Deck · ${mod.discTime}`)
+              )}</span>
             </span>
             <span>→</span>
           </button>
+
+          ${
+            ROLE === "student"
+              ? `
+          <button type="button" class="tv-ep-action-btn is-live-green" id="tvEpActLiveJoin" data-tv-modal-focus>
+            <span>
+              <span class="tv-ep-action-title-row">🟢 <span>${esc(t(`เข้าห้องเรียนสด ${mod.code} (Interactive ในคาบเรียน)`, `Join ${mod.code} Live Interactive Class`))}</span></span>
+              <span class="tv-ep-action-sub">${esc(t("กรอกรหัสนักศึกษาเช็คชื่อเข้ากลุ่มย่อย 1–6 ซิงค์สไลด์ & ส่งคำตอบขึ้นจอ", "Enter Student ID to join Group 1–6 & submit live answers"))}</span>
+            </span>
+            <span>→</span>
+          </button>
+          `
+              : ""
+          }
 
           <button type="button" class="tv-ep-action-btn" id="tvEpActConcise" data-tv-modal-focus>
             <span>
@@ -814,6 +846,18 @@
       backdrop.remove();
       if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
     });
+
+    const liveJoinBtn = $("tvEpActLiveJoin");
+    if (liveJoinBtn) {
+      liveJoinBtn.addEventListener("click", () => {
+        backdrop.remove();
+        if (api && api.openHsLiveJoinGate) {
+          api.openHsLiveJoinGate(mod.code);
+        } else if (api && api.openHsDiscussion) {
+          api.openHsDiscussion(mod.code);
+        }
+      });
+    }
 
     $("tvEpActConcise").addEventListener("click", () => {
       backdrop.remove();
@@ -1199,19 +1243,75 @@
     // Special clean mode switcher when inside Live Case Discussion (#panel-hs-discussion)
     if (activeTab === "hs-discussion") {
       const curMode = st.hsdViewMode || "slide";
+      const isGateOpen = Boolean(
+        ROLE === "student" && st.hsdShowJoinGate && (!st.hsdSessionJoined || !st.myStudent)
+      );
+      const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
+
+      if (isGateOpen) {
+        bar.innerHTML = `
+          <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
+            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+          </button>
+          <div class="tv-hsd-bar-right">
+            <button type="button" class="tv-pill-action-btn is-primary" id="tvHsdSkipGateBtn">
+              📖 <span>${esc(t("ดูสไลด์ล่วงหน้าโดยไม่ใช้รหัส →", "Preview Slides Without ID →"))}</span>
+            </button>
+          </div>
+        `;
+        $("tvSubBackHomeBtn").addEventListener("click", () => {
+          navigateTvTab("home");
+          restoreHomeFocus();
+        });
+        $("tvHsdSkipGateBtn").addEventListener("click", () => {
+          if (api && api.openHsDiscussion) {
+            api.openHsDiscussion(st.hsdModule || "HS1");
+          }
+          syncSubpageBar();
+        });
+        return;
+      }
+
       bar.innerHTML = `
         <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
           <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
         </button>
-        <div class="tv-sibling-pills" role="group" aria-label="รูปแบบการแสดงผลอภิปราย">
-          <button type="button" class="tv-sibling-pill ${curMode === "slide" ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t("สไลด์ 16:9", "16:9 Slides"))}</button>
-          <button type="button" class="tv-sibling-pill ${curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("เลื่อนอ่านยาว", "Full Scroll"))}</button>
+        <div class="tv-hsd-bar-right">
+          ${
+            ROLE === "student"
+              ? isLiveJoined
+                ? `<span class="tv-live-active-pill">
+                     <span>🟢 ${esc(t(`ห้องสด กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `Live G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
+                     <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกโหมดสด", "Exit Live"))}</button>
+                   </span>`
+                : `<span class="tv-preview-mode-tag">📖 ${esc(t("โหมดอ่านล่วงหน้า (ไม่ต้องใช้รหัส)", "Preview Mode (No ID)"))}</span>
+                   <button type="button" class="tv-live-join-pill" id="tvHsdEnterLiveBtn">🟢 ${esc(t("เข้าห้องเรียนสด (Interactive)", "Join Live Class"))}</button>`
+              : ""
+          }
+          <div class="tv-sibling-pills" role="group" aria-label="รูปแบบการแสดงผลอภิปราย">
+            <button type="button" class="tv-sibling-pill ${curMode === "slide" ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t("สไลด์ 16:9", "16:9 Slides"))}</button>
+            <button type="button" class="tv-sibling-pill ${curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("เลื่อนอ่านยาว", "Full Scroll"))}</button>
+          </div>
         </div>
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
         navigateTvTab("home");
         restoreHomeFocus();
       });
+      const enterLiveBtn = $("tvHsdEnterLiveBtn");
+      if (enterLiveBtn) {
+        enterLiveBtn.addEventListener("click", () => {
+          if (api && api.openHsLiveJoinGate) api.openHsLiveJoinGate(st.hsdModule);
+          syncSubpageBar();
+        });
+      }
+      const exitLiveBtn = $("tvHsdExitLiveBtn");
+      if (exitLiveBtn) {
+        exitLiveBtn.addEventListener("click", () => {
+          if (api && api.exitHsLiveMode) api.exitHsLiveMode();
+          syncSubpageBar();
+        });
+      }
       $("tvHsdModeSlideBtn").addEventListener("click", () => {
         if ($("hsdViewSlideBtn")) $("hsdViewSlideBtn").click();
         syncSubpageBar();
@@ -1449,6 +1549,11 @@
     initTvRemoteNavigation();
 
     window.addEventListener("racm:tabchange", () => {
+      syncSubpageBar();
+      syncProfilePill();
+    });
+
+    window.addEventListener("racm:hsdstatechange", () => {
       syncSubpageBar();
       syncProfilePill();
     });

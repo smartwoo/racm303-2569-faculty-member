@@ -794,12 +794,12 @@ html[data-theme="dark"] .tv-app-badge {
 
 /* Fieldwork Hospital Destination Tiles (9 Sites) */
 .tv-site-card {
-  flex: 0 0 236px;
+  flex: 0 0 282px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   padding: 18px 20px;
   border-radius: 22px;
   border: 1px solid var(--tv-card-border);
@@ -868,8 +868,23 @@ html[data-theme="dark"] .tv-site-num {
   color: var(--tv-ink-muted);
 }
 
+.tv-site-mentor {
+  display: block;
+  font-size: 12px;
+  line-height: 1.42;
+  color: var(--tv-ink-muted);
+  padding-top: 8px;
+  border-top: 1px solid var(--tv-card-border);
+}
+
+.tv-site-mentor strong {
+  color: var(--tv-ink);
+  font-weight: 600;
+}
+
 .tv-site-dates {
   display: inline-block;
+  align-self: flex-start;
   padding: 4px 9px;
   border-radius: 8px;
   background: rgba(128, 138, 158, 0.10);
@@ -1123,11 +1138,103 @@ html[data-theme="dark"] .tv-pill-action-btn[aria-expanded="true"] {
   display: none !important;
 }
 
-/* When 16:9 Slide Mode is active, remove duplicate top bars (controls live cleanly in #tvSubpageBar & Slide Stage) */
+/* When 16:9 Slide Mode or Live Join Gate is active, remove duplicate top bars (controls live cleanly in #tvSubpageBar & Slide Stage) */
 #panel-hs-discussion.is-ppt-slide-mode > .section-header,
 #panel-hs-discussion.is-ppt-slide-mode > .hsd-live-bar,
-#panel-hs-discussion.is-ppt-slide-mode > .hsd-view-toolbar {
+#panel-hs-discussion.is-ppt-slide-mode > .hsd-view-toolbar,
+#panel-hs-discussion.is-join-gate-open > .section-header,
+#panel-hs-discussion.is-join-gate-open > .hsd-live-bar,
+#panel-hs-discussion.is-join-gate-open > #hsdModuleGrid,
+#panel-hs-discussion.is-join-gate-open > .hsd-view-toolbar {
   display: none !important;
+}
+
+/* Subpage Bar Live Interactive vs ID-Free Preview Controls */
+.tv-hsd-bar-right {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tv-preview-mode-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--tv-surface-subtle);
+  border: 1px solid var(--tv-card-border);
+  color: var(--tv-ink-muted);
+  font-family: var(--font-display);
+  font-size: 12.6px;
+  font-weight: 600;
+}
+
+.tv-live-join-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid #059669;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 13.2px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.22);
+  transition: transform 0.18s var(--tv-ease), box-shadow 0.18s ease;
+}
+
+.tv-live-join-pill:hover,
+.tv-live-join-pill:focus-visible {
+  outline: none;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 18px rgba(4, 120, 87, 0.30);
+}
+
+.tv-live-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px 5px 13px;
+  border-radius: 999px;
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.34);
+  color: #065f46;
+  font-family: var(--font-display);
+  font-size: 12.8px;
+  font-weight: 700;
+}
+
+html[data-theme="dark"] .tv-live-active-pill {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.36);
+}
+
+.tv-live-exit-btn {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(5, 150, 105, 0.28);
+  background: var(--tv-surface);
+  color: var(--tv-ink);
+  font-family: var(--font-display);
+  font-size: 11.8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tv-live-exit-btn:hover {
+  background: var(--tv-accent-soft);
+}
+
+.tv-ep-action-btn.is-live-green {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-color: #047857;
+  color: #ffffff;
 }
 
 .tv-hero-btn svg,
@@ -1150,13 +1257,22 @@ html[data-theme="dark"] .tv-pill-action-btn[aria-expanded="true"] {
   flex-shrink: 0;
 }
 
-/* 4. Fieldwork & Discussion Roster Simplification: Hide Duplicate Filter/Toolbar Rows */
+/* 4. Fieldwork & Discussion Roster Simplification + Full Mentor & Coordinator Plaque */
 #panel-discussion > .filter-panel,
 #panel-discussion > .disc-area-legend-bar,
 #panel-discussion > .toolbar-row,
 #panel-fieldwork > .filter-panel,
 #panel-fieldwork > .toolbar-row {
   display: none !important;
+}
+
+.fm-mentor-plaque {
+  max-width: 520px !important;
+  padding: 6px 12px !important;
+}
+
+.fm-mentor-val {
+  line-height: 1.38 !important;
 }
 
 /* 5. Compact Export / Tools Overflow Menu on Section Headers */

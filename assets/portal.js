@@ -193,6 +193,21 @@
     return found ? found.id : 1;
   }
 
+  function cleanCoordinatorName(raw) {
+    return String(raw || "").replace(/\s*\[รอยืนยัน.*?\]\s*/g, "").trim();
+  }
+
+  function formatAdvisorWithCoordinator(siteOrArea, fallbackAdv) {
+    const site =
+      siteOrArea && typeof siteOrArea === "object"
+        ? siteOrArea
+        : (SCHED.fieldworkSites || []).find((x) => x.shortName === String(siteOrArea || ""));
+    const adv = String(fallbackAdv || (site && site.advisors) || "-").trim();
+    const staff = site ? cleanCoordinatorName(site.staffRef) : "";
+    if (!staff) return adv;
+    return `${adv} · ${tr("ผู้ประสานงาน", "Coordinator")}: ${staff}`;
+  }
+
   /* ---------- Date & Time Helpers ---------- */
   function parseISODate(iso) {
     const [y, m, d] = String(iso).split("-").map(Number);
@@ -928,7 +943,7 @@
     summary.append(
       discChip,
       areaChip,
-      make("span", `อ.ที่ปรึกษา: ${s.advisor}`, "personal-chip")
+      make("span", `อ.ที่ปรึกษา: ${formatAdvisorWithCoordinator(site, s.advisor)}`, "personal-chip")
     );
     if (clearBtn) clearBtn.hidden = false;
     if (typeof renderRoleConcierge === "function") renderRoleConcierge();
@@ -964,12 +979,7 @@
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
     }
     requestAnimationFrame(() => {
-      const targetEl = $("hsdCasesContainer") || $("panel-hs-discussion");
-      if (targetEl && typeof targetEl.scrollIntoView === "function") {
-        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
@@ -1144,8 +1154,7 @@
       renderHsDiscussionView();
       if (!state.isPptSlideSharePopup) {
         requestAnimationFrame(() => {
-          const pEl = $("panel-hs-discussion");
-          if (pEl) pEl.scrollIntoView({ behavior: "instant", block: "start" });
+          window.scrollTo({ top: 0, behavior: "instant" });
         });
       }
     }
@@ -1197,12 +1206,13 @@
           } else if (session.code === "RETURN") {
             roomLabel = `${site.hospital} ${site.province} → กรุงเทพฯ / CNMI`;
           }
+          const staffStr = site.staffRef ? ` · ผู้ประสานงาน: ${cleanCoordinatorName(site.staffRef)}` : "";
           return {
             type: "area",
             groupId: site.shortName,
             label: `กลุ่มพื้นที่ ${site.shortName} (${site.count} คน)`,
             shortGroup: site.shortName,
-            lecturer: site.advisors + extra,
+            lecturer: site.advisors + extra + staffStr,
             room: roomLabel,
             highlightRoom: false,
             facultyFlag: ""
@@ -3765,10 +3775,6 @@
 
     // Box 2: Fieldwork Site
     const fieldBox = make("div", null, "stu-quick-box");
-    const staffHtml =
-      ROLE === "faculty" && site.staffRef
-        ? `<p><strong>ผู้ประสานงานพื้นที่:</strong> ${escapeHtml(site.staffRef)}</p>`
-        : "";
     fieldBox.innerHTML = `
       <div class="stu-quick-box-head">
         <span class="area-sub-pill area-site-${siteId}"><i class="area-dot"></i>${siteId}. ${escapeHtml(s.area)}</span>
@@ -3776,11 +3782,10 @@
       </div>
       <div class="stu-quick-meta-lines">
         <p><strong>โรงพยาบาล:</strong> ${escapeHtml(site.hospital || s.area)} (${escapeHtml(site.province || "")})</p>
-        <p><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(s.advisor || site.advisors || "-")}</p>
+        <p><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site, s.advisor))}</p>
         <p><strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room || "-")}</p>
         <p><strong>ช่วงฝึกภาคสนาม:</strong> ${escapeHtml(site.datesTH || "-")}</p>
         ${site.travelNote ? `<p class="muted-line">${escapeHtml(site.travelNote)}</p>` : ""}
-        ${staffHtml}
       </div>
     `;
     const jumpFieldBtn = make("button", `ไปที่รายชื่อกลุ่มพื้นที่ ${s.area} →`, "btn sm");
@@ -4566,11 +4571,8 @@
         card.appendChild(head);
 
         const metaP = make("p", null, "gsorter-teachers");
-        metaP.textContent = `อ.ที่ปรึกษา: ${site.advisors} · ห้อง ${site.room} · ${site.datesTH}`;
+        metaP.textContent = `อ.ที่ปรึกษา: ${formatAdvisorWithCoordinator(site)} · ห้อง ${site.room} · ${site.datesTH}`;
         card.appendChild(metaP);
-        if (ROLE === "faculty" && site.staffRef) {
-          card.appendChild(make("p", `ผู้ประสานงาน: ${site.staffRef}`, "gsorter-staff-line"));
-        }
 
         const mosaic = make("div", null, "gsorter-avatar-mosaic is-site-grouped");
         const toShow = hasFilter ? matched : allMembers;
@@ -4764,18 +4766,13 @@
       const site = curGroupObj;
       const groupAll = ROSTER.students.filter((s) => s.area === site.shortName).sort((a, b) => compareTH(a.id, b.id));
       const members = groupAll.filter(matchStudent);
-      const staffLine =
-        ROLE === "faculty" && site.staffRef
-          ? ` · <strong>ผู้ประสานงาน:</strong> ${escapeHtml(site.staffRef)}`
-          : "";
-
       const banner = make("div", null, "gdeck-info-banner");
       banner.innerHTML = `
         <div class="gdeck-banner-top">
           <div>
             <span class="deck-slide-eyebrow">พื้นที่ที่ ${idx + 1} จาก ${groups.length} · กดปุ่มลูกศร ← / → เพื่อเลื่อนพื้นที่</span>
             <h3><span class="area-sub-pill area-site-${site.id}" style="font-size:15px;padding:4px 12px"><i class="area-dot"></i>${site.id}. ${escapeHtml(site.shortName)}</span> ${escapeHtml(site.hospital)} (${escapeHtml(site.province)}) · ${members.length}/${groupAll.length} คน</h3>
-            <p style="margin:6px 0 0;font-size:13.8px;color:var(--ink-body)"><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(site.advisors)} · <strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room)} · <strong>ช่วงฝึก:</strong> ${escapeHtml(site.datesTH)}${staffLine}</p>
+            <p style="margin:6px 0 0;font-size:13.8px;color:var(--ink-body)"><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site))} · <strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room)} · <strong>ช่วงฝึก:</strong> ${escapeHtml(site.datesTH)}</p>
             <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">${escapeHtml(site.travelNote || "")}</p>
           </div>
           <div class="header-actions">
@@ -4850,7 +4847,7 @@
       { key: "program", label: "หลักสูตร" },
       { key: "disc", label: "Discussion" },
       { key: "area", label: "กลุ่มพื้นที่ภาคสนาม" },
-      { key: "advisor", label: "อาจารย์ที่ปรึกษา" },
+      { key: "advisor", label: "อาจารย์ที่ปรึกษา & ผู้ประสานงาน" },
       { key: null, label: "ทางลัด" }
     ];
 
@@ -4939,7 +4936,7 @@
       });
       tdArea.appendChild(areaBtn);
 
-      const tdAdv = make("td", s.advisor || "-", "td-advisor");
+      const tdAdv = make("td", formatAdvisorWithCoordinator(s.area, s.advisor), "td-advisor");
 
       const tdAct = document.createElement("td");
       const openBtn = make("button", "ดูข้อมูล ↗", "btn sm");
@@ -5429,8 +5426,8 @@
           eyebrowText: `พื้นที่ที่ ${site.id} · ${geo.region || site.province}`,
           titleText: `${site.hospital} (${site.province})`,
           subText: `ห้องกลุ่มย่อย ${site.room} · ช่วงฝึก ${site.datesTH} · จัดแถวตามกลุ่ม Discussion (G1–G6)`,
-          mentorLabel: "อาจารย์ที่ปรึกษาประจำพื้นที่",
-          mentorValue: site.advisors,
+          mentorLabel: "อาจารย์ที่ปรึกษา & ผู้ประสานงาน",
+          mentorValue: formatAdvisorWithCoordinator(site),
           members: shownM,
           viewStyle: state.fieldFormationSubStyle || "formation",
           onToggleStyle: (nextStyle) => {
@@ -6836,22 +6833,16 @@
         const friBadge = site.hasFri11Dec
           ? `<span class="badge cat-HS">ศ. 11 ธ.ค. มีเรียนกลุ่มย่อย 5–6</span>`
           : `<span class="badge">เดินทาง พฤ. 10 ธ.ค. (ไม่มีเรียน 11 ธ.ค.)</span>`;
-        const staffLine =
-          ROLE === "faculty" && site.staffRef
-            ? `<p class="site-meta"><strong>เจ้าหน้าที่ประสานงาน:</strong> ${escapeHtml(site.staffRef)}</p>`
-            : "";
-
         c.innerHTML = `
           <div class="site-card-head">
             <h3><span class="area-sub-pill area-site-${site.id}" data-hover-area="${escapeHtml(site.shortName)}"><i class="area-dot"></i>${site.id}. ${escapeHtml(site.shortName)}</span></h3>
             <span class="badge cat-SG">${site.count} คน</span>
           </div>
           <p class="site-meta"><strong>${escapeHtml(site.hospital)}</strong> (${escapeHtml(site.province)})</p>
-          <p class="site-meta"><strong>อ.ที่ปรึกษา:</strong> ${escapeHtml(site.advisors)}</p>
+          <p class="site-meta"><strong>อ.ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site))}</p>
           <p class="site-meta"><strong>ห้องประชุมกลุ่มย่อย:</strong> ${escapeHtml(site.room)}</p>
           <p class="site-meta"><strong>ช่วงฝึกภาคสนาม:</strong> ${escapeHtml(site.datesTH)}</p>
           <p class="site-meta">${escapeHtml(site.travelNote)}</p>
-          ${staffLine}
           <div style="margin-top:6px">${friBadge}</div>
         `;
 
@@ -7155,7 +7146,6 @@
 
       actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
 
-      const staffPart = ROLE === "faculty" && curSite.staffRef ? ` · ผู้ประสานงาน: ${curSite.staffRef}` : "";
       const friNote = curSite.hasFri11Dec ? "ศ. 11 ธ.ค. มีกลุ่มย่อย 5–6" : "เดินทาง พฤ. 10 / พ. 9 ธ.ค.";
 
       inspector.appendChild(
@@ -7168,9 +7158,9 @@
           teamColor: SITE_PIN_COLORS[curSite.id] || "#007aff",
           eyebrowText: `พื้นที่ที่ ${curSite.id} · ${geo.region || curSite.province}${isMine ? " · ★ พื้นที่ของฉัน" : ""}`,
           titleText: `${curSite.hospital} (${curSite.province})`,
-          subText: `ห้อง ${curSite.room.split(" ")[0]} · ${curSite.datesTH} · ${friNote}${staffPart}`,
-          mentorLabel: tr("อาจารย์ที่ปรึกษา", "Site Advisors"),
-          mentorValue: curSite.advisors,
+          subText: `ห้อง ${curSite.room.split(" ")[0]} · ${curSite.datesTH} · ${friNote}`,
+          mentorLabel: tr("อาจารย์ที่ปรึกษา & ผู้ประสานงาน", "Site Advisors & Coordinator"),
+          mentorValue: formatAdvisorWithCoordinator(curSite),
           members,
           viewStyle: state.mapInspectorStyle || "formation",
           onToggleStyle: (nextStyle) => {
@@ -7403,7 +7393,7 @@
         );
       } else if (activeSiteObj) {
         printHeading.appendChild(
-          make("div", `อาจารย์ที่ปรึกษา: ${activeSiteObj.advisors} · ห้องกลุ่มย่อย: ${activeSiteObj.room} · ช่วงฝึก: ${activeSiteObj.datesTH}`)
+          make("div", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(activeSiteObj)} · ห้องกลุ่มย่อย: ${activeSiteObj.room} · ช่วงฝึก: ${activeSiteObj.datesTH}`)
         );
       }
     }
@@ -7424,7 +7414,7 @@
           const h = make("div", null, "area-group-header");
           h.append(
             make("h3", `${siteObj ? siteObj.id + ". " : ""}กลุ่มพื้นที่ ${s.area}${siteObj ? " (" + siteObj.hospital + " " + siteObj.province + " · " + siteObj.count + " คน)" : ""}`),
-            make("p", `อาจารย์ที่ปรึกษา: ${s.advisor}${siteObj ? " · ห้อง " + siteObj.room + " · " + siteObj.datesTH : ""}`)
+            make("p", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(siteObj, s.advisor)}${siteObj ? " · ห้อง " + siteObj.room + " · " + siteObj.datesTH : ""}`)
           );
           cardsEl.appendChild(h);
         }
