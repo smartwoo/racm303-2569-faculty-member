@@ -1112,6 +1112,10 @@
     document.querySelectorAll(".tab-panel").forEach((panel) => {
       panel.hidden = panel.id !== `panel-${tabId}`;
     });
+    const conciergeEl = $("roleConciergeShell");
+    if (conciergeEl) {
+      conciergeEl.hidden = tabId !== "schedule";
+    }
 
     document.body.classList.remove("print-leave-form-mode");
     document.body.classList.toggle("print-students-mode", tabId === "discussion" || tabId === "fieldwork");
@@ -1123,7 +1127,10 @@
       history.replaceState(null, "", `#${tabId}${suffix}`);
     }
 
-    if (tabId === "schedule") renderScheduleCurrent();
+    if (tabId === "schedule") {
+      renderScheduleCurrent();
+      if (typeof renderRoleConcierge === "function") renderRoleConcierge();
+    }
     if (tabId === "discussion") renderDiscussionView();
     if (tabId === "hs-discussion") {
       markSlideBoxesAutoOptimize("both");
@@ -17546,15 +17553,20 @@
 
     requestAnimationFrame(() => {
       refreshAllNavScrollShells();
-      if (activeChip && typeof activeChip.scrollIntoView === "function") {
-        activeChip.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      if (activeChip && presetsRow.clientWidth > 0) {
+        const targetLeft = Math.max(
+          0,
+          activeChip.offsetLeft - (presetsRow.clientWidth - activeChip.offsetWidth) / 2
+        );
+        presetsRow.scrollTo({ left: targetLeft, behavior: "smooth" });
       }
     });
   }
 
   function initRoleConcierge() {
-    const mainEl = document.querySelector(".portal-main");
-    if (!mainEl || $("roleConciergeShell")) return;
+    const schedPanel = $("panel-schedule");
+    const mountTarget = schedPanel || document.querySelector(".portal-main");
+    if (!mountTarget || $("roleConciergeShell")) return;
 
     const allDates = getCourseDistinctDates();
     const todayISO = getBangkokTodayISO();
@@ -17801,7 +17813,7 @@
 
     bodyWrap.append(dayToolbar, cardsStage);
     shell.append(tabBar, bodyWrap);
-    mainEl.insertBefore(shell, mainEl.firstChild);
+    mountTarget.insertBefore(shell, mountTarget.firstChild);
 
     renderRoleConcierge();
   }
@@ -18260,6 +18272,9 @@
     const dayToolbar = $("conciergeDayToolbar");
     if (!shell || !bodyWrap || !stage) return;
 
+    const isScheduleTab = (state.activeTab || "schedule") === "schedule";
+    shell.hidden = !isScheduleTab;
+
     const activeTab = state.conciergeTab || "today";
     shell.classList.toggle("is-open", Boolean(state.conciergeOpen));
     bodyWrap.hidden = !state.conciergeOpen;
@@ -18715,7 +18730,8 @@
           if (ROLE === "faculty") {
             selectActiveTeacher(t.key, true);
             state.conciergeOpen = true;
-            renderRoleConcierge();
+            if (state.activeTab !== "schedule") switchTab("schedule");
+            else renderRoleConcierge();
           } else {
             if ($("schedTeacherFilter")) $("schedTeacherFilter").value = t.key;
             refreshCalendarStudioUI();
@@ -19015,7 +19031,11 @@
       myDayFabBtn.addEventListener("click", () => {
         state.conciergeOpen = true;
         localStorage.setItem("racm303_concierge_tab_open", "1");
-        renderRoleConcierge();
+        if (state.activeTab !== "schedule") {
+          switchTab("schedule");
+        } else {
+          renderRoleConcierge();
+        }
         const shell = $("roleConciergeShell");
         if (shell && shell.scrollIntoView) shell.scrollIntoView({ behavior: "smooth", block: "start" });
       });
