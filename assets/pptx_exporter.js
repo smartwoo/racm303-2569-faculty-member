@@ -398,6 +398,174 @@
     let shapeId = 2;
     const shapes = [];
 
+    if (slideSpec.kind === "concept-summary" && slideSpec.conceptSummary) {
+      const cs = slideSpec.conceptSummary;
+      const csShapes = [];
+      let csId = 2;
+      const padX = 460000;
+      const workW = W - padX * 2;
+      const kickerText = cs.kicker || (cs.takeawayNumber ? `Key Takeaway #${cs.takeawayNumber}` : "Key Takeaway #1");
+
+      // Apple Keynote off-white canvas
+      csShapes.push(
+        buildShapeXml(csId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, "F5F5F7", null, "")
+      );
+
+      // Minimalist white top header + hairline divider
+      const csHeadParas =
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`${slideSpec.moduleCode || "HS"}`, { pt: 11, bold: true, color: "0066CC" }) +
+        buildRunXml(`   ${slideSpec.caseTitle || cs.title || ""}`, { pt: 13.5, bold: true, color: "1D1D1F" }) +
+        buildRunXml(`   ·   ${kickerText}`, { pt: 11, bold: false, color: "86868B" }) +
+        `</a:p>`;
+      csShapes.push(
+        buildShapeXml(
+          csId++,
+          "KeynoteHeader",
+          { x: 0, y: 0, w: W, h: 480000, anchor: "ctr" },
+          "FFFFFF",
+          null,
+          csHeadParas,
+          0,
+          { l: padX, r: padX, t: 30000, b: 30000 }
+        )
+      );
+      csShapes.push(
+        buildShapeXml(csId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, "E5E5EA", null, "")
+      );
+
+      // 1. Editorial Hero Statement (Open Canvas · Two-Tone Typography)
+      const heroY = 640000;
+      const heroH = 1480000;
+      const heroParas =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="160"/></a:spcAft></a:pPr>` +
+        buildRunXml(kickerText, { pt: 13, bold: true, color: "0066CC" }) +
+        (cs.sourceNote
+          ? buildRunXml(`     ${cs.sourceNote}`, { pt: 11, bold: false, color: "86868B" })
+          : "") +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 21, bold: true, color: "1D1D1F" }) +
+        (cs.coreDefinitionLead || cs.coreDefinitionQualifier
+          ? buildRunXml(`${cs.coreDefinitionLead || ""} `, { pt: 20, bold: true, color: "1D1D1F" }) +
+            buildRunXml(cs.coreDefinitionQualifier || "", { pt: 20, bold: false, color: "6E6E73" })
+          : buildRunXml(cs.coreDefinition || "", { pt: 20, bold: false, color: "1D1D1F" })) +
+        `</a:p>`;
+      csShapes.push(
+        buildShapeXml(
+          csId++,
+          "KeyTakeawayHero",
+          { x: padX, y: heroY, w: workW, h: heroH },
+          "F5F5F7",
+          null,
+          heroParas,
+          0,
+          { l: 0, r: 0, t: 20000, b: 20000 }
+        )
+      );
+
+      // 2. Clean 2x2 Apple Bento Dimension Cards
+      const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
+      const gridY = heroY + heroH + 140000;
+      const bridgeH = cs.caseBridge ? 420000 : 0;
+      const gridH = H - 340000 - 110000 - bridgeH - (bridgeH ? 120000 : 0) - gridY;
+      const gapX = 200000;
+      const gapY = 180000;
+      const cardW = Math.floor((workW - gapX) / 2);
+      const cardH = Math.floor((gridH - gapY) / 2);
+
+      dims.slice(0, 4).forEach((d, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const cx = padX + col * (cardW + gapX);
+        const cy = gridY + row * (cardH + gapY);
+        const idxLabel = d.num ? String(d.num).padStart(2, "0") : String(idx + 1).padStart(2, "0");
+
+        const cardParas =
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
+          buildRunXml(idxLabel, { pt: 12, bold: true, color: "0066CC" }) +
+          (d.enTitle ? buildRunXml(`   ·   ${d.enTitle}`, { pt: 11.5, bold: false, color: "86868B" }) : "") +
+          `</a:p>` +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="160"/></a:spcAft></a:pPr>` +
+          buildRunXml(d.thTitle || "", { pt: 19, bold: true, color: "1D1D1F" }) +
+          `</a:p>` +
+          `<a:p><a:pPr algn="l"/>` +
+          buildRunXml(d.definition || "", { pt: 14.5, bold: false, color: "424245" }) +
+          `</a:p>`;
+        csShapes.push(
+          buildShapeXml(
+            csId++,
+            `BentoDimCard_${idx + 1}`,
+            { x: cx, y: cy, w: cardW, h: cardH, anchor: "ctr" },
+            "FFFFFF",
+            "E5E5EA",
+            cardParas,
+            6000,
+            { l: 220000, r: 220000, t: 140000, b: 140000 }
+          )
+        );
+      });
+
+      // 3. Minimalist Hairline Footer Case Link
+      if (cs.caseBridge) {
+        const bY = gridY + gridH + 120000;
+        const bLabel = cs.caseBridgeLabel || `เชื่อมโยงโจทย์ ${slideSpec.moduleCode || "HS"}`;
+        csShapes.push(
+          buildShapeXml(csId++, "BridgeHairline", { x: padX, y: bY, w: workW, h: 12000 }, "D2D2D7", null, "")
+        );
+        const bParas =
+          `<a:p><a:pPr algn="l"/>` +
+          buildRunXml(`${bLabel}   |   `, { pt: 11.5, bold: true, color: "1D1D1F" }) +
+          buildRunXml(cs.caseBridge, { pt: 11.5, bold: false, color: "6E6E73" }) +
+          `</a:p>`;
+        csShapes.push(
+          buildShapeXml(
+            csId++,
+            "KeyTakeawayBridge",
+            { x: padX, y: bY + 30000, w: workW, h: bridgeH - 30000, anchor: "ctr" },
+            "F5F5F7",
+            null,
+            bParas,
+            0,
+            { l: 0, r: 0, t: 20000, b: 20000 }
+          )
+        );
+      }
+
+      // Slide Master Footer Bar
+      const footParasCs =
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(
+          `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     ${kickerText}  ·  Slide ${slideIdx + 1} / ${totalSlides}`,
+          { pt: 8.8, color: "86868B" }
+        ) +
+        `</a:p>`;
+      csShapes.push(
+        buildShapeXml(
+          csId++,
+          "MasterFooter",
+          { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
+          "F5F5F7",
+          "E5E5EA",
+          footParasCs,
+          0,
+          { l: padX, r: padX, t: 25000, b: 25000 }
+        )
+      );
+
+      return (
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+        `<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
+        `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ` +
+        `xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">` +
+        `<p:cSld><p:spTree>` +
+        `<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
+        `<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>` +
+        csShapes.join("") +
+        `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`
+      );
+    }
+
     // Soft slide canvas background card
     shapes.push(
       buildShapeXml(shapeId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, "F8FAFC", null, "")
@@ -432,156 +600,6 @@
     shapes.push(
       buildShapeXml(shapeId++, "GoldAccent", { x: 0, y: 520000, w: W, h: 36000 }, "FFB81C", null, "")
     );
-
-    if (slideSpec.kind === "concept-summary" && slideSpec.conceptSummary) {
-      const cs = slideSpec.conceptSummary;
-      const padX = 220000;
-      const workW = W - padX * 2;
-
-      // 1. Hero Definition Banner
-      const heroY = 630000;
-      const heroH = 1660000;
-      const heroParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
-        buildRunXml(`💡 ${cs.kicker || "สาระสำคัญ (Conceptualized)"}`, { pt: 12, bold: true, color: "FDE68A" }) +
-        (cs.sourceNote
-          ? buildRunXml(`   |   ${cs.sourceNote}`, { pt: 11, bold: false, color: "DBEAFE" })
-          : "") +
-        `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
-        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 18.5, bold: true, color: "FFB81C" }) +
-        buildRunXml(cs.coreDefinition || "", { pt: 16, bold: false, color: "FFFFFF" }) +
-        `</a:p>` +
-        (cs.contrastNotOnly || cs.contrastHolistic
-          ? `<a:p><a:pPr algn="l"/>` +
-            (cs.contrastNotOnly
-              ? buildRunXml(`✕ ไม่ใช่แค่: ${cs.contrastNotOnly}     `, { pt: 12, bold: true, color: "FECACA" })
-              : "") +
-            (cs.contrastHolistic
-              ? buildRunXml(`✓ แต่คือองค์รวม: ${cs.contrastHolistic}`, { pt: 12, bold: true, color: "A7F3D0" })
-              : "") +
-            `</a:p>`
-          : "");
-      shapes.push(
-        buildShapeXml(
-          shapeId++,
-          "ConceptHeroBanner",
-          { x: padX, y: heroY, w: workW, h: heroH },
-          "0F2D6B",
-          "1E40AF",
-          heroParas,
-          3500,
-          { l: 170000, r: 170000, t: 105000, b: 95000 }
-        )
-      );
-
-      // 2. 2x2 Holistic Dimension Cards
-      const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
-      const gridY = heroY + heroH + 130000;
-      const bridgeH = cs.caseBridge ? 460000 : 0;
-      const gridH = H - 340000 - 100000 - bridgeH - (bridgeH ? 105000 : 0) - gridY;
-      const gapX = 160000;
-      const gapY = 140000;
-      const cardW = Math.floor((workW - gapX) / 2);
-      const cardH = Math.floor((gridH - gapY) / 2);
-      const toneStyles = {
-        physical: { fill: "EFF6FF", border: "2563EB", title: "1D4ED8", badge: "DBEAFE" },
-        mental: { fill: "F5F3FF", border: "7C3AED", title: "6D28D9", badge: "EDE9FE" },
-        spiritual: { fill: "FFFBEB", border: "D97706", title: "B45309", badge: "FEF3C7" },
-        social: { fill: "ECFDF5", border: "059669", title: "047857", badge: "D1FAE5" }
-      };
-      const fallbackTones = ["physical", "mental", "spiritual", "social"];
-
-      dims.slice(0, 4).forEach((d, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const cx = padX + col * (cardW + gapX);
-        const cy = gridY + row * (cardH + gapY);
-        const ts = toneStyles[d.tone] || toneStyles[fallbackTones[idx % 4]];
-
-        const cardParas =
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="180"/></a:spcAft></a:pPr>` +
-          buildRunXml(`มิติที่ ${d.num || idx + 1} · ${d.thTitle || ""}`, { pt: 17.5, bold: true, color: ts.title }) +
-          (d.enTitle ? buildRunXml(`  (${d.enTitle})`, { pt: 13.5, bold: false, color: "475569" }) : "") +
-          `</a:p>` +
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="200"/></a:spcAft></a:pPr>` +
-          buildRunXml(`${d.quoteTitle || d.thTitle || ""} `, { pt: 15, bold: true, color: "0F172A" }) +
-          buildRunXml(d.definition || "", { pt: 15, bold: false, color: "1E293B" }) +
-          `</a:p>` +
-          (Array.isArray(d.keywords) && d.keywords.length
-            ? `<a:p><a:pPr algn="l"/>` +
-              buildRunXml(`★ ${d.keywords.join("   ·   ")}`, { pt: 12.2, bold: true, color: ts.title }) +
-              `</a:p>`
-            : "");
-        shapes.push(
-          buildShapeXml(
-            shapeId++,
-            `ConceptDimCard_${idx + 1}`,
-            { x: cx, y: cy, w: cardW, h: cardH },
-            ts.fill,
-            ts.border,
-            cardParas,
-            3500,
-            { l: 160000, r: 160000, t: 120000, b: 100000 }
-          )
-        );
-      });
-
-      // 3. Conceptualized Bridge Bar
-      if (cs.caseBridge) {
-        const bY = gridY + gridH + 105000;
-        const bParas =
-          `<a:p><a:pPr algn="l"/>` +
-          buildRunXml("🎯 Conceptualized Link: ", { pt: 12.2, bold: true, color: "002663" }) +
-          buildRunXml(cs.caseBridge, { pt: 12, bold: false, color: "1E293B" }) +
-          `</a:p>`;
-        shapes.push(
-          buildShapeXml(
-            shapeId++,
-            "ConceptBridgeBar",
-            { x: padX, y: bY, w: workW, h: bridgeH, anchor: "ctr" },
-            "F1F5F9",
-            "CBD5E1",
-            bParas,
-            2500,
-            { l: 140000, r: 140000, t: 40000, b: 40000 }
-          )
-        );
-      }
-
-      // Slide Master Footer Bar
-      const footParasCs =
-        `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(
-          `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     Slide ${slideIdx + 1} / ${totalSlides}`,
-          { pt: 8.8, color: "64748B" }
-        ) +
-        `</a:p>`;
-      shapes.push(
-        buildShapeXml(
-          shapeId++,
-          "MasterFooter",
-          { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
-          "F1F5F9",
-          "E2E8F0",
-          footParasCs,
-          0,
-          { l: 160000, r: 160000, t: 25000, b: 25000 }
-        )
-      );
-
-      return (
-        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-        `<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
-        `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ` +
-        `xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">` +
-        `<p:cSld><p:spTree>` +
-        `<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
-        `<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>` +
-        shapes.join("") +
-        `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`
-      );
-    }
 
     // Content Workspace (y = 630000 .. 6460000 -> height 5830000)
     const padX = 180000;

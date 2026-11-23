@@ -16011,8 +16011,8 @@
               kind: "concept-summary",
               pedStage: 5,
               pedKey: "concept-summary",
-              pedBadge: cs.badge || "ขั้น ④ สาระสำคัญ (Conceptualized)",
-              pedShort: cs.shortLabel || "④ สาระสำคัญ",
+              pedBadge: cs.badge || "ขั้น ④ Key Takeaway #1",
+              pedShort: cs.shortLabel || "④ Key Takeaway #1",
               mod,
               caseObj: c,
               qObj,
@@ -16051,8 +16051,8 @@
               kind: "concept-summary",
               pedStage: 5,
               pedKey: "concept-summary",
-              pedBadge: cs.studentBadge || "สาระสำคัญ (Conceptualized)",
-              pedShort: cs.studentShortLabel || "💡 สาระสำคัญ",
+              pedBadge: cs.studentBadge || "Key Takeaway #1",
+              pedShort: cs.studentShortLabel || "Key Takeaway #1",
               mod,
               caseObj: c,
               qObj,
@@ -17246,8 +17246,8 @@
       if (s.kind === "opening-kahoot") {
         optLabel = `🎯 Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย Kahoot (${s.mod.code})`;
       } else if (s.kind === "concept-summary") {
-        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "สาระสำคัญ";
-        optLabel = `💡 [${s.pedShort || "สาระสำคัญ"}] ข้อ ${s.shortNum}: ${csTitle}`;
+        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "Key Takeaway";
+        optLabel = `[${s.pedShort || "Key Takeaway #1"}] ข้อ ${s.shortNum}: ${csTitle}`;
       } else {
         const doneMark = isHsQuestionAnswered(s.qObj) ? "✓ " : "";
         const stagePrefix = s.pedShort ? `[${s.pedShort}] ` : "";
@@ -17835,18 +17835,18 @@
             { id: "split-key-all", label: "③ Unhide All" },
             ...(hasConceptSummary
               ? [
-                  { id: "concept-summary", label: "④ สาระสำคัญ 💡" },
-                  { id: "split-concept", label: "⑤ เส้นเชื่อม 📚" }
+                  { id: "concept-summary", label: "④ Key Takeaway" },
+                  { id: "split-concept", label: "⑤ เส้นเชื่อม" }
                 ]
-              : [{ id: "split-concept", label: "④ เส้นเชื่อม 📚" }]),
-            { id: "scenario", label: "📖 โจทย์เต็ม" },
-            { id: "key-only", label: "★ เฉลยเต็ม" }
+              : [{ id: "split-concept", label: "④ เส้นเชื่อม" }]),
+            { id: "scenario", label: "โจทย์เต็ม" },
+            { id: "key-only", label: "เฉลยเต็ม" }
           ]
         : [
-            { id: "scenario", label: "📖 โจทย์เต็ม 16:9" },
-            { id: "split-sheet", label: "◫ โจทย์ + ใบงาน" },
-            { id: "sheet", label: "▦ ใบงานเต็ม 16:9" },
-            ...(hasConceptSummary ? [{ id: "concept-summary", label: "💡 สาระสำคัญ" }] : [])
+            { id: "scenario", label: "โจทย์เต็ม 16:9" },
+            { id: "split-sheet", label: "โจทย์ + ใบงาน" },
+            { id: "sheet", label: "ใบงานเต็ม 16:9" },
+            ...(hasConceptSummary ? [{ id: "concept-summary", label: "Key Takeaway" }] : [])
           ];
     layoutOpts.forEach((opt) => {
       const lb = make("button", opt.label, `hsd-layout-btn${layout === opt.id ? " is-active" : ""}`);
@@ -18703,96 +18703,80 @@
     const cs = (cur && (cur.conceptSummary || (cur.qObj && cur.qObj.conceptSummarySlide))) || {};
     const stage = make("div", null, "ppt-concept-summary-stage is-16x9-canvas");
 
-    // 1. Hero Conceptual Definition Banner (WHO + National Health Act B.E. 2550)
+    // 1. Clean Editorial Keynote Hero (WHO + National Health Act B.E. 2550)
     const hero = make("section", null, "ppt-cs-hero");
     const heroTop = make("div", null, "ppt-cs-hero-top");
-    heroTop.append(
-      make("span", cs.kicker || `สาระสำคัญหลังเฉลยโจทย์ ${cur.mod.code} ${cur.shortNum}`, "ppt-cs-kicker"),
-      make("span", cs.sourceNote || "", "ppt-cs-source-pill")
-    );
-
-    const heroMain = make("div", null, "ppt-cs-hero-main");
-    const heroLead = make("p", null, "ppt-cs-core-def");
-    heroLead.innerHTML =
-      `<strong class="ppt-cs-core-term">${escapeHtml(cs.coreTerm || "“สุขภาพ” (health)")}</strong> ` +
-      `<span>${escapeHtml(cs.coreDefinition || "")}</span>`;
-    heroMain.appendChild(heroLead);
-
-    if (cs.contrastNotOnly || cs.contrastHolistic) {
-      const contrastRow = make("div", null, "ppt-cs-contrast-row");
-      if (cs.contrastNotOnly) {
-        const neg = make("div", null, "ppt-cs-contrast-chip is-not");
-        neg.innerHTML = `<span class="ppt-cs-chip-ico" aria-hidden="true">✕</span><span><strong>ไม่ใช่แค่:</strong> ${escapeHtml(cs.contrastNotOnly)}</span>`;
-        contrastRow.appendChild(neg);
-      }
-      if (cs.contrastHolistic) {
-        const pos = make("div", null, "ppt-cs-contrast-chip is-holistic");
-        pos.innerHTML = `<span class="ppt-cs-chip-ico" aria-hidden="true">✓</span><span><strong>แต่คือองค์รวม:</strong> ${escapeHtml(cs.contrastHolistic)}</span>`;
-        contrastRow.appendChild(pos);
-      }
-      heroMain.appendChild(contrastRow);
+    const kickerText = cs.kicker || (cs.takeawayNumber ? `Key Takeaway #${cs.takeawayNumber}` : "Key Takeaway #1");
+    heroTop.appendChild(make("span", kickerText, "ppt-cs-kicker"));
+    if (cs.sourceNote) {
+      heroTop.appendChild(make("span", cs.sourceNote, "ppt-cs-source-note"));
     }
 
-    hero.append(heroTop, heroMain);
+    const heroLead = make("p", null, "ppt-cs-core-def");
+    const coreTermHtml = `<strong class="ppt-cs-core-term">${escapeHtml(cs.coreTerm || "“สุขภาพ” (health)")}</strong>`;
+    if (cs.coreDefinitionLead || cs.coreDefinitionQualifier) {
+      heroLead.innerHTML =
+        `${coreTermHtml} ` +
+        `<span class="ppt-cs-core-main">${escapeHtml(cs.coreDefinitionLead || "")}</span>` +
+        (cs.coreDefinitionQualifier
+          ? ` <span class="ppt-cs-core-sub">${escapeHtml(cs.coreDefinitionQualifier)}</span>`
+          : "");
+    } else {
+      heroLead.innerHTML = `${coreTermHtml} <span class="ppt-cs-core-main">${escapeHtml(cs.coreDefinition || "")}</span>`;
+    }
+
+    hero.append(heroTop, heroLead);
     stage.appendChild(hero);
 
-    // 2. Four-Dimension Conceptualized Grid (2x2 Holistic Framework)
+    // 2. Clean 2x2 Apple Bento Dimension Grid
     const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
     const grid = make("div", null, `ppt-cs-dim-grid count-${Math.min(4, dims.length || 4)}`);
     dims.forEach((d, dIdx) => {
       const card = make("article", null, `ppt-cs-dim-card is-tone-${d.tone || (dIdx + 1)}`);
-      const cHead = make("div", null, "ppt-cs-dim-head");
-      const badgeWrap = make("div", null, "ppt-cs-dim-head-left");
-      badgeWrap.append(
-        make("span", d.icon || String(d.num || dIdx + 1), "ppt-cs-dim-icon"),
-        (() => {
-          const titleBox = make("div", null, "ppt-cs-dim-titles");
-          titleBox.append(
-            make("h5", d.thTitle || "", "ppt-cs-dim-th"),
-            make("span", d.enTitle ? `(${d.enTitle})` : "", "ppt-cs-dim-en")
-          );
-          return titleBox;
-        })()
-      );
-      cHead.append(badgeWrap, make("span", `มิติที่ ${d.num || dIdx + 1}`, "ppt-cs-dim-num"));
-
-      const defP = make("p", null, "ppt-cs-dim-def");
-      defP.innerHTML =
-        `<strong>${escapeHtml(d.quoteTitle || d.thTitle || "")}</strong> ` +
-        `${escapeHtml(d.definition || "")}`;
-
-      card.append(cHead, defP);
-
-      if (Array.isArray(d.keywords) && d.keywords.length) {
-        const kwRow = make("div", null, "ppt-cs-kw-row");
-        d.keywords.forEach((kw) => {
-          kwRow.appendChild(make("span", kw, "ppt-cs-kw-pill"));
-        });
-        card.appendChild(kwRow);
+      const cMeta = make("div", null, "ppt-cs-dim-meta");
+      const idxLabel = d.num ? String(d.num).padStart(2, "0") : String(dIdx + 1).padStart(2, "0");
+      cMeta.appendChild(make("span", idxLabel, "ppt-cs-dim-num"));
+      if (d.enTitle) {
+        cMeta.appendChild(make("span", d.enTitle, "ppt-cs-dim-en"));
       }
+
+      const titleEl = make("h5", d.thTitle || "", "ppt-cs-dim-th");
+      const defEl = make("p", d.definition || "", "ppt-cs-dim-def");
+
+      card.append(cMeta, titleEl, defEl);
       grid.appendChild(card);
     });
     stage.appendChild(grid);
 
-    // 3. Case-to-Concept Bridge Footer Strip
+    // 3. Minimalist Hairline Footer Bar (Case Link + Clean Actions)
     if (cs.caseBridge || cs.docId) {
-      const bridge = make("div", null, "ppt-cs-bridge");
+      const bridge = make("footer", null, "ppt-cs-bridge");
       const bText = make("div", null, "ppt-cs-bridge-text");
-      bText.innerHTML = `<span class="ppt-cs-bridge-badge">🎯 Conceptualized Link</span><span>${escapeHtml(cs.caseBridge || "")}</span>`;
+      const bLabel = cs.caseBridgeLabel || `เชื่อมโยงโจทย์ ${cur.mod.code} ${cur.shortNum}`;
+      bText.innerHTML =
+        `<span class="ppt-cs-bridge-label">${escapeHtml(bLabel)}</span>` +
+        `<span class="ppt-cs-bridge-sep" aria-hidden="true"></span>` +
+        `<span class="ppt-cs-bridge-copy">${escapeHtml(cs.caseBridge || "")}</span>`;
       bridge.appendChild(bText);
 
       if (!exp && !state.isPptSlideSharePopup) {
         const bActions = make("div", null, "ppt-cs-bridge-actions hsd-no-print");
         if (cs.docId) {
-          const readBtn = make("button", `📚 ${cs.docLabel || `เปิดคำสอน ${cur.mod.code}`}`, "ppt-cs-action-btn");
+          const readBtn = make("button", null, "ppt-cs-action-btn is-link");
           readBtn.type = "button";
+          readBtn.innerHTML =
+            `<span>${escapeHtml(cs.docLabel || `อ่านเพิ่มเติม ${cur.mod.code}`)}</span>` +
+            `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
           readBtn.addEventListener("click", () => openTextbookDoc(cs.docId));
           bActions.appendChild(readBtn);
         }
         const curIdx = slides.indexOf(cur);
         if (curIdx >= 0 && curIdx < slides.length - 1) {
-          const nextQBtn = make("button", "▶ ไปสไลด์ถัดไป →", "ppt-cs-action-btn is-primary");
+          const nextQBtn = make("button", null, "ppt-cs-action-btn is-primary");
           nextQBtn.type = "button";
+          nextQBtn.innerHTML =
+            `<span>สไลด์ถัดไป</span>` +
+            `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.75 4.25L12.5 8L8.75 11.75" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
           nextQBtn.addEventListener("click", () => stepHsQuestionSlide(1));
           bActions.appendChild(nextQBtn);
         }
@@ -18873,7 +18857,7 @@
       const mLeft = make("div", null, "ppt-sm-left");
       mLeft.append(
         make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
-        make("h4", `${cs.title || "สาระสำคัญ"}${cs.enTitle ? ` (${cs.enTitle})` : ""}`, "ppt-sm-title")
+        make("h4", `${cs.title || "Key Takeaway"}${cs.enTitle ? ` (${cs.enTitle})` : ""}`, "ppt-sm-title")
       );
 
       const mRight = make("div", null, "ppt-sm-right");
@@ -18883,7 +18867,7 @@
           { st: 1, lbl: "① Sheet", tip: "ขั้นที่ 1: โจทย์ + Answer Sheet" },
           { st: 2, lbl: "② Key (Hide/Unhide)", tip: "ขั้นที่ 2: โจทย์ + Answer Key (Hide/Unhide รายข้อ)" },
           { st: 3, lbl: "③ Unhide All", tip: "ขั้นที่ 3: เปิดเฉลยครบทุกข้อ + ไฮไลต์หลักฐาน" },
-          { st: 5, lbl: "④ สาระสำคัญ", tip: "ขั้นที่ 4: สรุปสาระสำคัญเชิงมโนทัศน์หลังเฉลยโจทย์ (Conceptualized Key Takeaway)" },
+          { st: 5, lbl: "④ Key Takeaway", tip: "ขั้นที่ 4: สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway #1)" },
           { st: 4, lbl: "⑤ เส้นเชื่อม & คำสอน", tip: "ขั้นที่ 5: เส้นเชื่อมโจทย์ → เฉลย & เอกสารคำสอน" }
         ].forEach((sp) => {
           const isActSt = sp.st === 5;
@@ -18941,7 +18925,7 @@
       const slidePosIdx = exp && typeof exp.slideNumber === "number" ? exp.slideNumber : state.hsdSlideIdx + 1;
       mFoot.append(
         make("span", "RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี"),
-        make("span", `คาบ ${cur.mod.code} · ${clearQLabel} · ${cur.pedBadge || "สาระสำคัญ"}  |  Slide ${slidePosIdx} / ${slides.length}`)
+        make("span", `คาบ ${cur.mod.code} · ${clearQLabel} · ${cur.pedBadge || "Key Takeaway #1"}  |  Slide ${slidePosIdx} / ${slides.length}`)
       );
       const progLine = make("div", null, "ppt-slide-progress-line");
       progLine.style.width = `${(slidePosIdx / Math.max(1, slides.length)) * 100}%`;
@@ -19004,8 +18988,8 @@
       if (hasCs) {
         stageDefs.push({
           st: 5,
-          lbl: "④ สาระสำคัญ",
-          tip: "ขั้นที่ 4: สรุปสาระสำคัญเชิงมโนทัศน์หลังเฉลยโจทย์ (Conceptualized Key Takeaway)"
+          lbl: "④ Key Takeaway",
+          tip: "ขั้นที่ 4: สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway #1)"
         });
       }
       stageDefs.push({
@@ -19416,14 +19400,15 @@
           `</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
       } else if (s.kind === "concept-summary") {
-        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "สาระสำคัญ";
+        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "Key Takeaway";
+        const ktLabel = (s.conceptSummary && s.conceptSummary.kicker) || "Key Takeaway #1";
         card.innerHTML =
           `<div class="ppt-thumb-top">` +
-          `<span class="ppt-thumb-mod">💡 ${escapeHtml(s.mod.code)} · ข้อ ${escapeHtml(s.shortNum)} · ${escapeHtml(s.pedShort || "สาระสำคัญ")}</span>` +
-          `<span class="ppt-thumb-flag is-concept-summary">สาระสำคัญ</span>` +
+          `<span class="ppt-thumb-mod">${escapeHtml(s.mod.code)} · ข้อ ${escapeHtml(s.shortNum)} · ${escapeHtml(ktLabel)}</span>` +
+          `<span class="ppt-thumb-flag is-concept-summary">${escapeHtml(ktLabel)}</span>` +
           `</div>` +
           `<div>` +
-          `<div style="font-size:11px;color:var(--muted);margin-bottom:3px">${escapeHtml(s.pedBadge || "สาระสำคัญ (Conceptualized)")}</div>` +
+          `<div style="font-size:11px;color:var(--muted);margin-bottom:3px">${escapeHtml(s.pedBadge || ktLabel)}</div>` +
           `<div style="font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.35">${escapeHtml(csTitle)}</div>` +
           `</div>` +
           `<div class="ppt-thumb-wire is-cs-wire"><span></span><span></span></div>`;
@@ -19504,7 +19489,7 @@
         cur.kind === "opening-kahoot"
           ? `📊 [Slide Share 16:9] คาบ ${cur.mod.code}.pptx — สไลด์เปิดคาบ & Kahoot — RACM 303`
           : cur.kind === "concept-summary"
-          ? `💡 [Slide Share 16:9] คาบ ${cur.mod.code}.pptx — สาระสำคัญ ข้อ ${cur.shortNum}: ${(cur.conceptSummary && cur.conceptSummary.title) || "สาระสำคัญ"} — RACM 303`
+          ? `[Slide Share 16:9] คาบ ${cur.mod.code}.pptx — ${(cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"} — RACM 303`
           : `📊 [Slide Share 16:9] คาบ ${cur.mod.code}.pptx — กรณีที่ ${cur.caseObj.caseNumber} (${cur.shortNum}) — RACM 303`;
     }
 
@@ -20809,10 +20794,10 @@
             )
           );
         } else if (s.kind === "concept-summary") {
-          const csTitle = (s.conceptSummary && s.conceptSummary.title) || "สาระสำคัญ";
+          const csTitle = (s.conceptSummary && s.conceptSummary.title) || "Key Takeaway";
           picker.add(
             new Option(
-              `💡 [${s.pedShort || "สาระสำคัญ"}] ข้อ ${s.shortNum}: ${csTitle}`,
+              `[${s.pedShort || "Key Takeaway #1"}] ข้อ ${s.shortNum}: ${csTitle}`,
               String(idx),
               false,
               idx === state.hsdSlideIdx
@@ -20867,18 +20852,18 @@
               { id: "split-key-all", label: "③ All" },
               ...(hasConceptSummary
                 ? [
-                    { id: "concept-summary", label: "④ สาระสำคัญ" },
+                    { id: "concept-summary", label: "④ Key Takeaway" },
                     { id: "split-concept", label: "⑤ เชื่อม" }
                   ]
                 : [{ id: "split-concept", label: "④ เชื่อม" }]),
-              { id: "scenario", label: "📖 โจทย์" },
-              { id: "key-only", label: "★ เฉลย" }
+              { id: "scenario", label: "โจทย์" },
+              { id: "key-only", label: "เฉลย" }
             ]
           : [
-              { id: "scenario", label: "📖 โจทย์เต็ม" },
-              { id: "split-sheet", label: "◫ โจทย์ + ใบงาน" },
-              { id: "sheet", label: "▦ ใบงานเต็ม" },
-              ...(hasConceptSummary ? [{ id: "concept-summary", label: "💡 สาระสำคัญ" }] : [])
+              { id: "scenario", label: "โจทย์เต็ม" },
+              { id: "split-sheet", label: "โจทย์ + ใบงาน" },
+              { id: "sheet", label: "ใบงานเต็ม" },
+              ...(hasConceptSummary ? [{ id: "concept-summary", label: "Key Takeaway" }] : [])
             ];
       layoutOpts.forEach((opt) => {
         const lb = make("button", opt.label, `hsd-layout-btn${cur.kind !== "opening-kahoot" && layout === opt.id ? " is-active" : ""}`);
@@ -21071,11 +21056,11 @@
             pedStage: 5,
             forceLayout: "concept-summary",
             pedBadge: isTeacherDeck
-              ? (cs.badge || "ขั้น ④ สาระสำคัญ (Conceptualized)")
-              : (cs.studentBadge || "สาระสำคัญ (Conceptualized)"),
+              ? (cs.badge || "ขั้น ④ Key Takeaway #1")
+              : (cs.studentBadge || "Key Takeaway #1"),
             pedShort: isTeacherDeck
-              ? (cs.shortLabel || "④ สาระสำคัญ")
-              : (cs.studentShortLabel || "สาระสำคัญ"),
+              ? (cs.shortLabel || "④ Key Takeaway #1")
+              : (cs.studentShortLabel || "Key Takeaway #1"),
             mod,
             caseObj: c,
             qObj,
@@ -21793,12 +21778,14 @@
           `<div class="ppt-thumb-title">สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
       } else if (s.kind === "concept-summary") {
-        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "สาระสำคัญ";
-        item.title = `Slide ${idx + 1}: ${s.mod.code} · ข้อ ${s.shortNum} (${s.pedShort || "สาระสำคัญ"}) — ${csTitle}`;
+        const csTitle = (s.conceptSummary && s.conceptSummary.title) || "Key Takeaway";
+        const ktNum = (s.conceptSummary && s.conceptSummary.takeawayNumber) || 1;
+        const ktLabel = (s.conceptSummary && s.conceptSummary.kicker) || `Key Takeaway #${ktNum}`;
+        item.title = `Slide ${idx + 1}: ${s.mod.code} · ข้อ ${s.shortNum} (${ktLabel}) — ${csTitle}`;
         tCard.innerHTML =
           `<div class="ppt-thumb-top">` +
-          `<span class="ppt-thumb-mod">${escapeHtml(s.shortNum)} · ${escapeHtml((s.pedShort || "สาระสำคัญ").replace(/^💡\s*/, ""))}</span>` +
-          `<span class="ppt-thumb-flag is-concept-summary">💡</span>` +
+          `<span class="ppt-thumb-mod">${escapeHtml(s.shortNum)} · ${escapeHtml(ktLabel)}</span>` +
+          `<span class="ppt-thumb-flag is-concept-summary">#${escapeHtml(String(ktNum))}</span>` +
           `</div>` +
           `<div class="ppt-thumb-title">${escapeHtml(csTitle)}</div>` +
           `<div class="ppt-thumb-wire is-cs-wire"><span></span><span></span></div>`;
@@ -21952,7 +21939,7 @@
         cur.kind === "opening-kahoot"
           ? `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (Kahoot)`
           : cur.kind === "concept-summary"
-          ? `คาบ ${cur.mod.code} · สาระสำคัญหลังเฉลย ข้อ ${cur.shortNum}: ${(cur.conceptSummary && cur.conceptSummary.title) || "สาระสำคัญ"}`
+          ? `คาบ ${cur.mod.code} · ${(cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"}`
           : `คาบ ${cur.mod.code} · กรณีที่ ${cur.caseObj.caseNumber} (ข้อ ${cur.shortNum})`
       ),
       make("span", "|", "ppt-status-sep"),
