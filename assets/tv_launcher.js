@@ -1650,10 +1650,13 @@
 
     // Epidemiology section filter bar (#panel-epidemiology)
     if (groupKey === "epidemiology") {
-      const curEpSec = st.epSection || "all";
+      const curEpSec = st.epSection === "morbidity-mortality" ? "ep6" : (st.epSection || "all");
       const epPills = [
         { id: "all", label: t("ภาพรวมทั้งหมด", "All Sections") },
-        { id: "morbidity-mortality", label: t("🎬 EP6: Measures of Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
+        { id: "ep6", label: t("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
+        { id: "ep7", label: t("🎬 EP7: Health Survey", "🎬 EP7: Health Survey") },
+        { id: "ep8", label: t("🎬 EP8: Experimental Study", "🎬 EP8: Experimental Study") },
+        { id: "ep9", label: t("🎬 EP9: EBM", "🎬 EP9: EBM") },
         { id: "sessions", label: t("คาบเรียน EP1–EP9 & Ex 1–6", "EP1–EP9 & Ex 1–6") },
         { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
@@ -2395,15 +2398,64 @@
           {
             id: "ep:ep6-morbidity",
             folderPath: ["epidemiology"],
-            name: "EP6_Measures_of_Morbidity_and_Mortality_Video_&_43_Conceptualized_Slides.app",
-            title: "EP6: Measures of Morbidity & Mortality — Video Playback + 43 Captured Slides + Verbatim & Conceptualized Logical Flow",
-            sub: "เล่นวิดีโอบรรยายควบคู่กับสไลด์ 43 หน้า คำพูดผู้สอนคำต่อคำ (Verbatim) และประเด็นสังเคราะห์เชิงแนวคิด (Conceptualized) ตาม Timeline",
+            name: "EP6_Measures_of_Morbidity_and_Mortality_Video_&_43_Slides.app",
+            title: "EP6: Measures of Morbidity & Mortality — Native Video (63:30) + 43 Slides + Verbatim & Conceptualized",
+            sub: "ศ. นพ.วิชัย เอกพลากร · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 43 หน้า",
             meta: "EP6 · สอบ 15% · 43 Slides",
             badge: "🎬 เปิดบทเรียน EP6",
             icoCls: "is-slide",
             icoTxt: "🎬",
+            pdfHref: "downloads/EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf",
             onOpen: openFileAction(() => {
-              if (api && api.openEpidemiology) api.openEpidemiology("morbidity-mortality");
+              if (api && api.openEpidemiology) api.openEpidemiology("ep6");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:ep7-survey",
+            folderPath: ["epidemiology"],
+            name: "EP7_Health_Survey_Video_&_30_Slides.app",
+            title: "EP7: Health Survey — Native Video (42:20) + 30 Slides + Verbatim & Conceptualized",
+            sub: "ศ. นพ.วิชัย เอกพลากร · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 30 หน้า",
+            meta: "EP7 · สอบ 7.5% · 30 Slides",
+            badge: "🎬 เปิดบทเรียน EP7",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            pdfHref: "downloads/EP7_Health_Survey_Slides.pdf",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("ep7");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:ep8-experimental",
+            folderPath: ["epidemiology"],
+            name: "EP8_Experimental_Study_Video_&_29_Slides.app",
+            title: "EP8: Experimental Study — Native Video (53:09) + 29 Slides + Verbatim & Conceptualized",
+            sub: "ผศ. พญ.ฉัฐญาณ์ วงศ์รัฐนันท์ · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 29 หน้า",
+            meta: "EP8 · สอบ 15% · 29 Slides",
+            badge: "🎬 เปิดบทเรียน EP8",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            pdfHref: "downloads/EP8_Experimental_Study_Slides.pdf",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("ep8");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:ep9-ebm",
+            folderPath: ["epidemiology"],
+            name: "EP9_Evidence_Based_Medicine_Video_&_26_Slides.app",
+            title: "EP9: Evidence-Based Medicine (EBM) — Native Video (44:41) + 26 Slides + Verbatim & Conceptualized",
+            sub: "ผศ. พญ.ฉัฐญาณ์ วงศ์รัฐนันท์ · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 26 หน้า",
+            meta: "EP9 · สอบ 7.5% · 26 Slides",
+            badge: "🎬 เปิดบทเรียน EP9",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            pdfHref: "downloads/EP9_Evidence_Based_Medicine_Slides.pdf",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("ep9");
               else navigateTvTab("epidemiology");
             })
           },

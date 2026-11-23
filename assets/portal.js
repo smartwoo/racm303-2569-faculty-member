@@ -3175,8 +3175,8 @@
       .map(
         (x) =>
           `<tr><td><strong>${escapeHtml(x.code)}</strong></td><td>${escapeHtml(x.title)}${
-            x.code === "EP6"
-              ? ` <button type="button" class="spec-hs-jump-link" data-spec-ep6="1">🎬 เปิด Video + Conceptualized Slides →</button>`
+            ["EP6", "EP7", "EP8", "EP9"].includes(x.code)
+              ? ` <button type="button" class="spec-hs-jump-link" data-spec-epmod="${escapeHtml(x.code.toLowerCase())}">🎬 เปิด Video + Conceptualized Slides →</button>`
               : ""
           }</td><td>${escapeHtml(x.date)}</td><td><strong>${escapeHtml(x.weight)}</strong></td></tr>`
       )
@@ -3228,8 +3228,8 @@
     wrap.querySelectorAll("[data-spec-tb]").forEach((btn) => {
       btn.addEventListener("click", () => openTextbookDoc(btn.dataset.specTb));
     });
-    wrap.querySelectorAll("[data-spec-ep6]").forEach((btn) => {
-      btn.addEventListener("click", () => openEpidemiology("morbidity-mortality"));
+    wrap.querySelectorAll("[data-spec-epmod]").forEach((btn) => {
+      btn.addEventListener("click", () => openEpidemiology(btn.dataset.specEpmod || "ep6"));
     });
     wrap.querySelectorAll("table.clean-table").forEach((tbl) => makeStaticTableSortable(tbl));
   }
@@ -29863,18 +29863,28 @@
       container.appendChild(bDoc);
     }
 
-    if (session.id === "w2-d4-ep678" || session.id === "w2-d4-ep9-ex56") {
-      const bEp6 = make(
-        "button",
-        "🎬 EP6: Morbidity & Mortality (Video + 43 Conceptualized Slides)",
-        "btn sm teal"
-      );
-      bEp6.type = "button";
-      bEp6.addEventListener("click", () => {
-        if (closeModalFirst) closeEventModal();
-        openEpidemiology("morbidity-mortality");
+    if (session.id === "w2-d4-ep678") {
+      [
+        { sec: "ep6", label: "🎬 EP6: Morbidity & Mortality (Video + 43 สไลด์)" },
+        { sec: "ep7", label: "🎬 EP7: Health Survey (Video + 30 สไลด์)" },
+        { sec: "ep8", label: "🎬 EP8: Experimental Study (Video + 29 สไลด์)" }
+      ].forEach((epItem) => {
+        const bEp = make("button", epItem.label, "btn sm teal");
+        bEp.type = "button";
+        bEp.addEventListener("click", () => {
+          if (closeModalFirst) closeEventModal();
+          openEpidemiology(epItem.sec);
+        });
+        container.appendChild(bEp);
       });
-      container.appendChild(bEp6);
+    } else if (session.id === "w2-d4-ep9-ex56") {
+      const bEp9 = make("button", "🎬 EP9: Evidence-Based Medicine (Video + 26 สไลด์)", "btn sm teal");
+      bEp9.type = "button";
+      bEp9.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openEpidemiology("ep9");
+      });
+      container.appendChild(bEp9);
     }
 
     const slideRec = getSessionSlideRecord(session.id);
@@ -29899,10 +29909,21 @@
         container.appendChild(aPdf);
       }
     } else if (session.id === "w2-d4-ep678") {
-      const bPdf = make("a", "📥 ดาวน์โหลด Slide EP6 (.PDF)", "btn sm slide-ready-btn");
-      bPdf.href = "downloads/EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf";
-      bPdf.download = "EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf";
-      container.appendChild(bPdf);
+      [
+        { label: "📥 Slide EP6 (.PDF)", file: "EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf" },
+        { label: "📥 Slide EP7 (.PDF)", file: "EP7_Health_Survey_Slides.pdf" },
+        { label: "📥 Slide EP8 (.PDF)", file: "EP8_Experimental_Study_Slides.pdf" }
+      ].forEach((pf) => {
+        const bPdf = make("a", pf.label, "btn sm slide-ready-btn");
+        bPdf.href = `downloads/${pf.file}`;
+        bPdf.download = pf.file;
+        container.appendChild(bPdf);
+      });
+    } else if (session.id === "w2-d4-ep9-ex56") {
+      const bPdf9 = make("a", "📥 ดาวน์โหลด Slide EP9 (.PDF)", "btn sm slide-ready-btn");
+      bPdf9.href = "downloads/EP9_Evidence_Based_Medicine_Slides.pdf";
+      bPdf9.download = "EP9_Evidence_Based_Medicine_Slides.pdf";
+      container.appendChild(bPdf9);
     } else {
       const bNoSlide = make("button", "📊 Slide ประกอบการสอน (ยังไม่อัปโหลด)", "btn sm cal-mat-btn is-disabled-slide");
       bNoSlide.type = "button";
@@ -30482,9 +30503,33 @@
         cat: "บทเรียน & คาบสอนหลัก",
         icon: "🎬",
         title: "EP6: Measures of Morbidity & Mortality (Video + 43 Conceptualized Slides)",
-        sub: "เล่นวิดีโอบรรยายควบคู่กับสไลด์ 43 หน้า คำพูดผู้สอนคำต่อคำ (Verbatim) และประเด็นสังเคราะห์เชิงแนวคิดตาม Timeline",
+        sub: "วิดีโอบรรยายตัดตรงคาบควบคู่กับสไลด์ 43 หน้า คำพูดคำต่อคำ (Verbatim) และ Conceptualized Insights",
         hay: "ep6 morbidity mortality burden of disease prevalence incidence daly standardization smr ระบาดวิทยา ภาระโรค ความชุก อุบัติการณ์",
-        run: () => openEpidemiology("morbidity-mortality")
+        run: () => openEpidemiology("ep6")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP7: Health Survey (Video + 30 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายตัดตรงคาบ การสำรวจสุขภาพชุมชน สูตร Sample Size และ Probability Sampling 5 วิธี",
+        hay: "ep7 health survey sample size probability sampling simple systematic stratified cluster multistage validity reliability dummy table การสำรวจสุขภาพ",
+        run: () => openEpidemiology("ep7")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP8: Experimental Study (Video + 29 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายตัดตรงคาบ การวิจัยเชิงทดลอง RCT, Randomization, Blinding และสูตร RR / RRR / ARR / NNT",
+        hay: "ep8 experimental study rct randomization allocation concealment blinding intention to treat per protocol rr rrr arr nnt การวิจัยเชิงทดลอง",
+        run: () => openEpidemiology("ep8")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP9: Evidence-Based Medicine — EBM (Video + 26 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายตัดตรงคาบ การตั้งคำถาม PICO พีระมิด 5S ตาราง Levels of Evidence และ Survivorship Bias",
+        hay: "ep9 ebm evidence based medicine pico 5s pyramid levels of evidence cochrane pubmed survivorship bias เวชปฏิบัติอิงหลักฐาน",
+        run: () => openEpidemiology("ep9")
       },
       {
         cat: "บทเรียน & คาบสอนหลัก",
@@ -36727,9 +36772,15 @@
   }
 
   /* ---------- Clinical & Community Epidemiology Hub (#panel-epidemiology) ---------- */
+  function normalizeEpSection(sec) {
+    const s = String(sec || "").trim().toLowerCase();
+    if (s === "morbidity-mortality") return "ep6";
+    const valid = ["all", "ep6", "ep7", "ep8", "ep9", "sessions", "zoom-spss", "exam-field"];
+    return valid.includes(s) ? s : "all";
+  }
+
   function setEpidemiologySection(sec) {
-    const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
-    state.epSection = valid.includes(sec) ? sec : "all";
+    state.epSection = normalizeEpSection(sec);
     if (state.activeTab === "epidemiology") {
       renderEpidemiologyView();
     }
@@ -36738,8 +36789,7 @@
 
   function openEpidemiology(sec) {
     if (sec) {
-      const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
-      state.epSection = valid.includes(sec) ? sec : "all";
+      state.epSection = normalizeEpSection(sec);
     }
     switchTab("epidemiology");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -36769,10 +36819,10 @@
     const kpiGrid = make("div", null, "ep-kpi-grid");
     const kpis = [
       {
-        badge: "🎬 EP6 Interactive",
-        title: tr("Measures of Morbidity & Mortality", "Measures of Morbidity & Mortality"),
-        meta: tr("Video Playback + 43 สไลด์ · Verbatim → Conceptualized ตาม Timeline", "Synced Video + 43 Slides · Verbatim → Conceptualized"),
-        sec: "morbidity-mortality"
+        badge: "🎬 EP6 – EP9 Interactive",
+        title: tr("4 คาบบรรยาย Video + สไลด์ซิงก์", "4 Interactive Video Lectures (EP6–EP9)"),
+        meta: tr("หั่นคลิปตรงแต่ละคาบ (ไม่ผ่าน YouTube) · รวม 128 สไลด์ · Verbatim → Conceptualized", "4 Sliced Native Videos · 128 Slides · Verbatim → Conceptualized"),
+        sec: "ep6"
       },
       {
         badge: "EP1 – EP9 & Ex 1–6",
@@ -36811,7 +36861,10 @@
     filterBar.setAttribute("role", "tablist");
     const filterItems = [
       { id: "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
-      { id: "morbidity-mortality", label: tr("🎬 EP6: Measures of Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
+      { id: "ep6", label: tr("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
+      { id: "ep7", label: tr("🎬 EP7: Health Survey", "🎬 EP7: Health Survey") },
+      { id: "ep8", label: tr("🎬 EP8: Experimental Study", "🎬 EP8: Experimental Study") },
+      { id: "ep9", label: tr("🎬 EP9: Evidence-Based Medicine", "🎬 EP9: EBM") },
       { id: "sessions", label: tr("คาบสอน EP1–EP9 & Exercise 1–6", "EP1–EP9 & Exercise 1–6 Sessions") },
       { id: "zoom-spss", label: tr("ห้องเรียน Zoom (3 วัน) & SPSS", "3-Day Zoom Classrooms & SPSS") },
       { id: "exam-field", label: tr("สัดส่วนข้อสอบ & นำเสนอภาคสนาม (4A)", "Exam Blueprint & Fieldwork Form 4A") }
@@ -36827,7 +36880,8 @@
     wrap.appendChild(filterBar);
 
     let ep6StudioHost = null;
-    if (curSec === "all" || curSec === "morbidity-mortality") {
+    const isEpLectureSec = ["ep6", "ep7", "ep8", "ep9"].includes(curSec);
+    if (curSec === "all" || isEpLectureSec) {
       ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
       wrap.appendChild(ep6StudioHost);
     }
@@ -37013,8 +37067,8 @@
                     <tr>
                       <td><span class="ep-code-pill">${escapeHtml(r.code)}</span></td>
                       <td><strong>${escapeHtml(r.title)}</strong>${
-                        r.code === "EP6"
-                          ? ` <button type="button" class="spec-hs-jump-link" data-ep-open-morb="1">🎬 เปิด Video + Conceptualized →</button>`
+                        ["EP6", "EP7", "EP8", "EP9"].includes(r.code)
+                          ? ` <button type="button" class="spec-hs-jump-link" data-ep-open-mod="${escapeHtml(r.code.toLowerCase())}">🎬 เปิด Video + Conceptualized →</button>`
                           : ""
                       }</td>
                       <td class="ep-td-muted">${escapeHtml(r.date || "")}</td>
@@ -37032,8 +37086,8 @@
           </table>
         </div>
       `;
-      specCard.querySelectorAll("[data-ep-open-morb]").forEach((b) => {
-        b.addEventListener("click", () => setEpidemiologySection("morbidity-mortality"));
+      specCard.querySelectorAll("[data-ep-open-mod]").forEach((b) => {
+        b.addEventListener("click", () => setEpidemiologySection(b.dataset.epOpenMod || "ep6"));
       });
       specGrid.appendChild(specCard);
 
@@ -37074,7 +37128,7 @@
 
     mount.appendChild(wrap);
     if (ep6StudioHost && window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.render === "function") {
-      window.RACM303_EP6_STUDIO.render(ep6StudioHost);
+      window.RACM303_EP6_STUDIO.render(ep6StudioHost, isEpLectureSec ? { moduleCode: curSec.toUpperCase() } : undefined);
     }
   }
 
@@ -37183,8 +37237,7 @@
     if (params.get("page") === "epidemiology" || params.get("page") === "ep") {
       const secParam = params.get("sec") || "";
       if (secParam) {
-        const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
-        state.epSection = valid.includes(secParam) ? secParam : "all";
+        state.epSection = normalizeEpSection(secParam);
       }
       switchTab("epidemiology", false);
       return;
