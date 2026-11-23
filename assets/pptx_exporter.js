@@ -439,26 +439,26 @@
       const workW = W - padX * 2;
 
       // 1. Hero Definition Banner
-      const heroY = 640000;
-      const heroH = 1520000;
+      const heroY = 630000;
+      const heroH = 1660000;
       const heroParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="120"/></a:spcAft></a:pPr>` +
-        buildRunXml(`💡 ${cs.kicker || "สาระสำคัญ (Conceptualized)"}`, { pt: 10.5, bold: true, color: "FDE68A" }) +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
+        buildRunXml(`💡 ${cs.kicker || "สาระสำคัญ (Conceptualized)"}`, { pt: 12, bold: true, color: "FDE68A" }) +
         (cs.sourceNote
-          ? buildRunXml(`   |   ${cs.sourceNote}`, { pt: 9.5, bold: false, color: "DBEAFE" })
+          ? buildRunXml(`   |   ${cs.sourceNote}`, { pt: 11, bold: false, color: "DBEAFE" })
           : "") +
         `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
-        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 14, bold: true, color: "FFB81C" }) +
-        buildRunXml(cs.coreDefinition || "", { pt: 12.2, bold: false, color: "FFFFFF" }) +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
+        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 18.5, bold: true, color: "FFB81C" }) +
+        buildRunXml(cs.coreDefinition || "", { pt: 16, bold: false, color: "FFFFFF" }) +
         `</a:p>` +
         (cs.contrastNotOnly || cs.contrastHolistic
           ? `<a:p><a:pPr algn="l"/>` +
             (cs.contrastNotOnly
-              ? buildRunXml(`✕ ไม่ใช่แค่: ${cs.contrastNotOnly}     `, { pt: 9.8, bold: true, color: "FECACA" })
+              ? buildRunXml(`✕ ไม่ใช่แค่: ${cs.contrastNotOnly}     `, { pt: 12, bold: true, color: "FECACA" })
               : "") +
             (cs.contrastHolistic
-              ? buildRunXml(`✓ แต่คือ: ${cs.contrastHolistic}`, { pt: 9.8, bold: true, color: "A7F3D0" })
+              ? buildRunXml(`✓ แต่คือองค์รวม: ${cs.contrastHolistic}`, { pt: 12, bold: true, color: "A7F3D0" })
               : "") +
             `</a:p>`
           : "");
@@ -471,15 +471,15 @@
           "1E40AF",
           heroParas,
           3500,
-          { l: 170000, r: 170000, t: 110000, b: 95000 }
+          { l: 170000, r: 170000, t: 105000, b: 95000 }
         )
       );
 
       // 2. 2x2 Holistic Dimension Cards
       const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
-      const gridY = heroY + heroH + 135000;
-      const bridgeH = cs.caseBridge ? 430000 : 0;
-      const gridH = H - 340000 - 110000 - bridgeH - (bridgeH ? 105000 : 0) - gridY;
+      const gridY = heroY + heroH + 130000;
+      const bridgeH = cs.caseBridge ? 460000 : 0;
+      const gridH = H - 340000 - 100000 - bridgeH - (bridgeH ? 105000 : 0) - gridY;
       const gapX = 160000;
       const gapY = 140000;
       const cardW = Math.floor((workW - gapX) / 2);
@@ -500,17 +500,17 @@
         const ts = toneStyles[d.tone] || toneStyles[fallbackTones[idx % 4]];
 
         const cardParas =
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
-          buildRunXml(`มิติที่ ${d.num || idx + 1} · ${d.thTitle || ""}`, { pt: 13.5, bold: true, color: ts.title }) +
-          (d.enTitle ? buildRunXml(`  (${d.enTitle})`, { pt: 10.5, bold: false, color: "475569" }) : "") +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="180"/></a:spcAft></a:pPr>` +
+          buildRunXml(`มิติที่ ${d.num || idx + 1} · ${d.thTitle || ""}`, { pt: 17.5, bold: true, color: ts.title }) +
+          (d.enTitle ? buildRunXml(`  (${d.enTitle})`, { pt: 13.5, bold: false, color: "475569" }) : "") +
           `</a:p>` +
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
-          buildRunXml(`${d.quoteTitle || d.thTitle || ""} `, { pt: 11.2, bold: true, color: "0F172A" }) +
-          buildRunXml(d.definition || "", { pt: 11.2, bold: false, color: "1E293B" }) +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="200"/></a:spcAft></a:pPr>` +
+          buildRunXml(`${d.quoteTitle || d.thTitle || ""} `, { pt: 15, bold: true, color: "0F172A" }) +
+          buildRunXml(d.definition || "", { pt: 15, bold: false, color: "1E293B" }) +
           `</a:p>` +
           (Array.isArray(d.keywords) && d.keywords.length
             ? `<a:p><a:pPr algn="l"/>` +
-              buildRunXml(`★ ${d.keywords.join("   ·   ")}`, { pt: 9.6, bold: true, color: ts.title }) +
+              buildRunXml(`★ ${d.keywords.join("   ·   ")}`, { pt: 12.2, bold: true, color: ts.title }) +
               `</a:p>`
             : "");
         shapes.push(
@@ -522,7 +522,7 @@
             ts.border,
             cardParas,
             3500,
-            { l: 150000, r: 150000, t: 110000, b: 95000 }
+            { l: 160000, r: 160000, t: 120000, b: 100000 }
           )
         );
       });
@@ -532,8 +532,8 @@
         const bY = gridY + gridH + 105000;
         const bParas =
           `<a:p><a:pPr algn="l"/>` +
-          buildRunXml("🎯 Conceptualized Link: ", { pt: 10.2, bold: true, color: "002663" }) +
-          buildRunXml(cs.caseBridge, { pt: 10, bold: false, color: "1E293B" }) +
+          buildRunXml("🎯 Conceptualized Link: ", { pt: 12.2, bold: true, color: "002663" }) +
+          buildRunXml(cs.caseBridge, { pt: 12, bold: false, color: "1E293B" }) +
           `</a:p>`;
         shapes.push(
           buildShapeXml(
