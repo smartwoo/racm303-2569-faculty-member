@@ -883,6 +883,8 @@
         : `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
       : t(`สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Check-in + 16:9 in-class case slides");
 
+    const epSlideInf = api && api.getHsSlideInfo ? api.getHsSlideInfo(mod.code) : { uploaded: false, extBadge: "" };
+
     backdrop.innerHTML = `
       <div class="tv-modal-sheet is-compact">
         <div class="tv-modal-head">
@@ -934,7 +936,11 @@
 
         <div class="tv-ep-secondary-row">
           <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 4 ขั้นตอน (${mod.code})`, `Open 4-Step Hub (${mod.code})`))}</button>
-          <button type="button" class="tv-hosp-chip" id="tvEpActLecSlides" data-tv-modal-focus>🖥️ ${esc(t(`Slide อาจารย์ (${mod.code} · รอ Upload)`, `Instructor Slides (Pending)`))}</button>
+          <button type="button" class="tv-hosp-chip ${epSlideInf.uploaded ? "is-slide-ready-chip" : "is-slide-pending-chip"}" id="tvEpActLecSlides" data-tv-modal-focus>🖥️ ${esc(
+            epSlideInf.uploaded
+              ? t(`Slide อาจารย์ (${mod.code} · ✓ ${epSlideInf.extBadge})`, `Instructor Slides (✓ ${epSlideInf.extBadge})`)
+              : t(`Slide อาจารย์ (${mod.code} · รอ Upload)`, `Instructor Slides (Pending)`)
+          )}</button>
         </div>
       </div>
     `;
@@ -1853,17 +1859,22 @@
       });
 
       // Step 05: Instructor Lecture Slides
+      const mSlideInf = api && api.getHsSlideInfo ? api.getHsSlideInfo(m.code) : { uploaded: false, extBadge: "", icoCls: "is-pptx is-muted-pptx", icoTxt: "P", record: null };
       files.push({
         id: `hslec:${m.id}`,
         folderPath: ["health-systems", m.id],
-        name: `05_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
+        name:
+          (mSlideInf.uploaded && mSlideInf.record && mSlideInf.record.fileName) ||
+          `05_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
         title: `สไลด์ประกอบการบรรยายโดยอาจารย์ประจำคาบ ${m.code}`,
-        sub: `ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
+        sub: mSlideInf.uploaded
+          ? `อัปโหลดแล้ว (${mSlideInf.extBadge}) — คลิกเพื่อเปิดดูหรือดาวน์โหลดไฟล์สไลด์`
+          : `ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
         meta: m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : "",
-        badge: "⏳ รออาจารย์ Upload",
-        isPending: true,
-        icoCls: "is-pptx is-muted-pptx",
-        icoTxt: "P",
+        badge: mSlideInf.uploaded ? `✓ อัปโหลดแล้ว (${mSlideInf.extBadge})` : "⏳ รออาจารย์ Upload",
+        isPending: !mSlideInf.uploaded,
+        icoCls: mSlideInf.icoCls || "is-pptx is-muted-pptx",
+        icoTxt: mSlideInf.icoTxt || "P",
         onOpen: openFileAction(() => {
           if (api && api.openHsLectureSlides) api.openHsLectureSlides(m.code);
         })
@@ -2626,15 +2637,24 @@
       backBar.querySelector("#cdUpBtn").addEventListener("click", () => openCourseDriveAtPath([]));
 
       const hsF = folders["health-systems"];
-      const hsFolderObjs = hsF.subfolders.map((sf) => ({
-        code: sf.code,
-        title: sf.title,
-        meta: sf.meta,
-        pill: sf.examWeight ? `สอบ ${sf.examWeight}` : "",
-        tags: ["📄 คำสอน", "🟠 Discussion .pptx", "⏳ Slide อ.", "🧠 โจทย์"],
-        countLabel: `${sf.files.length} ไฟล์ในโฟลเดอร์`,
-        path: ["health-systems", sf.id]
-      }));
+      const api = getApi();
+      const hsFolderObjs = hsF.subfolders.map((sf) => {
+        const sInf = api && api.getHsSlideInfo ? api.getHsSlideInfo(sf.code) : { uploaded: false };
+        return {
+          code: sf.code,
+          title: sf.title,
+          meta: sf.meta,
+          pill: sf.examWeight ? `สอบ ${sf.examWeight}` : "",
+          tags: [
+            "📄 คำสอน",
+            "🟠 Discussion .pptx",
+            sInf.uploaded ? `✓ Slide อ. (${sInf.extBadge})` : "⏳ Slide อ.",
+            "🧠 โจทย์"
+          ],
+          countLabel: `${sf.files.length} ไฟล์ในโฟลเดอร์`,
+          path: ["health-systems", sf.id]
+        };
+      });
       renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพเรียงตาม HS1–HS6 (6 โฟลเดอร์)");
       renderFilesSection(hsF.files, "ไฟล์รวมทั้งหมวดระบบสุขภาพ (HS1–HS6)");
     } else if (rootKey === "health-systems" && subKey) {
