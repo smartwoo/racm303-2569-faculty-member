@@ -9300,6 +9300,14 @@
       ? extractSlidesFromProse(proseContainer)
       : [];
 
+    const activeDocIdHint = (proseContainer.dataset && proseContainer.dataset.docId) || state.activeDocId || "";
+    if (window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.enhanceProse === "function") {
+      window.RACM_HE_VIDEO_BRIDGE.enhanceProse(proseContainer, activeDocIdHint);
+    }
+    if (window.RACM_SECTION_TAKEAWAYS && typeof window.RACM_SECTION_TAKEAWAYS.enhanceProse === "function") {
+      window.RACM_SECTION_TAKEAWAYS.enhanceProse(proseContainer, activeDocIdHint);
+    }
+
     let jumpToHeadingHandler = (h) => {
       if (h && h.id) jumpToIdHandler(h.id);
       else if (h) h.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -9625,8 +9633,15 @@
         slideCard.appendChild(crumb);
       }
       const canvas = make("div", null, "editorial-prose deck-slide-canvas");
+      canvas.dataset.docId = activeDocIdHint;
       canvas.innerHTML = s.html;
       wireInteractiveProseChildren(canvas, docGallery, (id) => jumpToIdHandler(id));
+      if (window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.enhanceProse === "function") {
+        window.RACM_HE_VIDEO_BRIDGE.enhanceProse(canvas, activeDocIdHint);
+      }
+      if (window.RACM_SECTION_TAKEAWAYS && typeof window.RACM_SECTION_TAKEAWAYS.enhanceProse === "function") {
+        window.RACM_SECTION_TAKEAWAYS.enhanceProse(canvas, activeDocIdHint);
+      }
       slideCard.appendChild(canvas);
 
       // Swipe Left / Right support on touch devices (iPad / iPhone)
@@ -11129,6 +11144,7 @@
     switchTab("textbooks");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  window.racmOpenTextbookDoc = openTextbookDoc;
 
   function getTeachingDocEntriesForModules(modList, formatFilter, searchQuery) {
     const docs = HS.docs || [];
@@ -16282,6 +16298,7 @@
       }
     }
 
+    prose.dataset.docId = readerDoc.id;
     prose.innerHTML = readerDoc.html;
     attachProseEnhancements(prose, toc);
 
@@ -35215,6 +35232,7 @@
           $("exportFacultyDocDocxBtn").href = `exports/docx/${curDoc.id}.docx`;
           $("exportFacultyDocDocxBtn").download = `RACM303_${curDoc.id}.docx`;
         }
+        prose.dataset.docId = curDoc.id;
         prose.innerHTML = curDoc.html;
         attachProseEnhancements(prose, toc);
       }

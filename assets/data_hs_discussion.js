@@ -2829,7 +2829,7 @@ window.RACM_HS_DISCUSSION_DATA = {
             "studentShortLabel": "Key Takeaway #4",
             "kicker": "Key Takeaway #4",
             "title": "หลักประกันสุขภาพและประกันสังคมสำหรับแรงงานนอกระบบ",
-            "enTitle": "Universal Coverage & Social Security Section 40 in Thailand",
+            "enTitle": "Universal Health Coverage & Social Security Section 40 in Thailand",
             "sourceNote": "พ.ร.บ.หลักประกันสุขภาพแห่งชาติ พ.ศ. 2545 · พ.ร.บ.ประกันสังคม (มาตรา 40)",
             "coreTerm": "“การคุ้มครองสุขภาพควบคู่ความมั่นคงทางรายได้” (health & social protection)",
             "coreDefinitionLead": "ในประเทศไทย แรงงานนอกระบบมีสิทธิหลักประกันสุขภาพแห่งชาติคุ้มครองค่ารักษาพยาบาลเป็นฐานถ้วนหน้าอยู่แล้ว",
