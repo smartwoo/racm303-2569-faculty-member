@@ -9746,6 +9746,19 @@
   }
 
   function renderManualReader() {
+    const manualBannerWrap = $("manualUnifiedBannerWrap");
+    if (manualBannerWrap) {
+      manualBannerWrap.replaceChildren(
+        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "manual", {
+          showModuleBar: true,
+          onSelectModule: (m) => {
+            state.activeHsModule = m || "HS1";
+            renderManualReader();
+          }
+        })
+      );
+    }
+
     const picker = $("manualChapterList");
     const prose = $("manualProseContainer");
     if (!picker || !prose) return;
@@ -9854,7 +9867,7 @@
       `hsd-module-banner is-unified-hs-banner hsd-no-print${options.compact ? " is-compact-slide-banner" : ""}`
     );
 
-    if (options.showModuleBar) {
+    if (options.showModuleBar !== false) {
       const strip = make("div", null, "hs-unified-mod-strip");
       strip.setAttribute("role", "group");
       strip.setAttribute("aria-label", "เลือกบทเรียน HS1–HS6");
@@ -9879,6 +9892,8 @@
           state.activeHsModule = m.id;
           if (typeof options.onSelectModule === "function") {
             options.onSelectModule(m.id);
+          } else {
+            openHsDiscussion(m.id);
           }
         });
         strip.appendChild(pBtn);
@@ -9982,6 +9997,27 @@
         state.activeHsModule = mod.code;
         if ($("practiceModuleFilter")) $("practiceModuleFilter").value = mod.code;
         switchTab("practice");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+    );
+
+    if (ROLE === "faculty") {
+      tabsRow.appendChild(
+        makeTabBtn(`คู่มือผู้สอน (${mod.code})`, "faculty-docs", true, () => {
+          state.activeHsModule = mod.code;
+          if (typeof openFacultyGuideForHsModule === "function") {
+            openFacultyGuideForHsModule(mod.code);
+          } else {
+            switchTab("faculty-docs");
+          }
+        })
+      );
+    }
+
+    tabsRow.appendChild(
+      makeTabBtn("คู่มือรายวิชา", "manual", true, () => {
+        state.activeHsModule = mod.code;
+        switchTab("manual");
         window.scrollTo({ top: 0, behavior: "smooth" });
       })
     );
@@ -16988,6 +17024,26 @@
   }
 
   function renderHsGoogleDriveFolderMode(container) {
+    const activeDriveMod =
+      state.activeHsModule && /^HS[1-6]$/i.test(state.activeHsModule)
+        ? state.activeHsModule.toUpperCase()
+        : state.hsdSlideDeckMod && /^HS[1-6]$/i.test(state.hsdSlideDeckMod)
+        ? state.hsdSlideDeckMod.toUpperCase()
+        : "HS1";
+    container.appendChild(
+      buildUnifiedHsModuleBanner(activeDriveMod, "discussion", {
+        showModuleBar: true,
+        onSelectModule: (m) => {
+          const clean = m && /^HS[1-6]$/i.test(m) ? m.toUpperCase() : "HS1";
+          state.activeHsModule = clean;
+          state.hsdSlideDeckMod = clean;
+          try {
+            localStorage.setItem("racm303_hsd_deck_mod", clean);
+          } catch (_) {}
+          renderHsDiscussionView();
+        }
+      })
+    );
     container.appendChild(buildGoogleDriveExplorerDOM({ isModal: false }));
   }
 
@@ -18659,7 +18715,19 @@
     activeModules.forEach((mod) => {
       const modSec = make("section", null, "hsd-module-section");
       modSec.id = `hsd-sec-${mod.id}`;
-      modSec.appendChild(buildUnifiedHsModuleBanner(mod.id, "discussion"));
+      modSec.appendChild(
+        buildUnifiedHsModuleBanner(mod.id, "discussion", {
+          showModuleBar: true,
+          allowAllModules: true,
+          isAllActive: false,
+          onSelectModule: (m) => {
+            state.hsdModule = m || "ALL";
+            if (m) state.activeHsModule = m;
+            if ($("hsdModuleSelect")) $("hsdModuleSelect").value = state.hsdModule;
+            renderHsDiscussionView();
+          }
+        })
+      );
 
       if (ROLE === "faculty" && state.hsdFacultyMode === "teacher" && typeof appendFacultyFacilitationPlan === "function") {
         appendFacultyFacilitationPlan(modSec, mod.id);
@@ -18853,6 +18921,19 @@
       if (panelEl) {
         panelEl.classList.remove("is-ppt-slide-mode", "is-drive-folder-mode");
       }
+      container.appendChild(
+        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "discussion", {
+          showModuleBar: true,
+          allowAllModules: true,
+          isAllActive: state.hsdModule === "ALL",
+          onSelectModule: (m) => {
+            state.hsdModule = m || "ALL";
+            if (m) state.activeHsModule = m;
+            if ($("hsdModuleSelect")) $("hsdModuleSelect").value = state.hsdModule;
+            renderHsDiscussionView();
+          }
+        })
+      );
       container.appendChild(make("div", "ไม่พบกรณีศึกษาที่ตรงกับตัวกรองหรือคำค้นหา", "empty-state"));
       if (ROLE === "faculty" && typeof syncFacultyScrollGlobalLinkBar === "function") {
         syncFacultyScrollGlobalLinkBar(matchedCases);
@@ -27080,6 +27161,187 @@
           applyThemeMode(state.theme === "dark" ? "light" : "dark");
         }
       });
+    }
+  }
+
+  /* ---------- Faculty Teacher Guides & Original Links (#panel-faculty-docs) ---------- */
+  function resolveFacultyGuideDocIdForModule(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
+    const matched = docs.find(
+      (d) =>
+        String(d.id || "").toUpperCase().startsWith(clean) ||
+        String(d.title || "").toUpperCase().startsWith(clean)
+    );
+    return matched ? matched.id : (docs[0] && docs[0].id) || "hs-disc-teacher-key";
+  }
+
+  function openFacultyGuideForHsModule(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    state.activeHsModule = clean;
+    state.facultySub = "guides";
+    state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
+    document.querySelectorAll("[data-fac-sub]").forEach((b) =>
+      b.setAttribute("aria-pressed", b.dataset.facSub === "guides" ? "true" : "false")
+    );
+    switchTab("faculty-docs");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function initFacultyDocsControls() {
+    const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
+    if (!state.activeFacultyDocId && docs[0]) {
+      state.activeFacultyDocId = docs[0].id;
+    }
+    document.querySelectorAll("[data-fac-sub]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.facultySub = btn.dataset.facSub || "guides";
+        document.querySelectorAll("[data-fac-sub]").forEach((b) =>
+          b.setAttribute("aria-pressed", b.dataset.facSub === state.facultySub ? "true" : "false")
+        );
+        renderFacultyDocsView();
+      });
+    });
+    if ($("printFacultyDocBtn")) {
+      $("printFacultyDocBtn").addEventListener("click", () => printWithCleanTitle(""));
+    }
+  }
+
+  function renderFacultyDocsView() {
+    const guidesWrap = $("facultyGuidesReaderWrap");
+    const linksWrap = $("facultyLinksDirectoryWrap");
+    if (!guidesWrap || !linksWrap) return;
+
+    const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
+    const curDoc = docs.find((d) => d.id === state.activeFacultyDocId) || docs[0];
+    if (curDoc) {
+      const mMatch = String(curDoc.id || curDoc.title || "").match(/^(HS[1-6])/i);
+      if (mMatch) state.activeHsModule = mMatch[1].toUpperCase();
+    }
+
+    const facBannerWrap = $("facultyDocsUnifiedBannerWrap");
+    if (facBannerWrap) {
+      facBannerWrap.replaceChildren(
+        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "faculty-docs", {
+          showModuleBar: true,
+          onSelectModule: (m) => {
+            const clean = m && /^HS[1-6]$/i.test(m) ? m.toUpperCase() : "HS1";
+            state.activeHsModule = clean;
+            state.facultySub = "guides";
+            state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
+            document.querySelectorAll("[data-fac-sub]").forEach((b) =>
+              b.setAttribute("aria-pressed", b.dataset.facSub === "guides" ? "true" : "false")
+            );
+            renderFacultyDocsView();
+          }
+        })
+      );
+    }
+
+    guidesWrap.hidden = state.facultySub !== "guides";
+    linksWrap.hidden = state.facultySub !== "links";
+
+    if (state.facultySub === "guides") {
+      const picker = $("facultyDocList");
+      const toc = $("facultyDocToc");
+      const prose = $("facultyProseContainer");
+
+      if (picker && !picker.dataset.rendered) {
+        picker.dataset.rendered = "1";
+        docs.forEach((d) => {
+          const li = document.createElement("li");
+          const b = make("button", d.title, "doc-picker-btn");
+          b.type = "button";
+          b.dataset.fdocId = d.id;
+          b.addEventListener("click", () => {
+            state.activeFacultyDocId = d.id;
+            renderFacultyDocsView();
+          });
+          li.appendChild(b);
+          picker.appendChild(li);
+        });
+      }
+      if (picker) {
+        picker.querySelectorAll(".doc-picker-btn").forEach((b) =>
+          b.setAttribute("aria-current", b.dataset.fdocId === state.activeFacultyDocId ? "true" : "false")
+        );
+      }
+      if (curDoc && prose) {
+        if ($("exportFacultyDocPdfBtn")) {
+          $("exportFacultyDocPdfBtn").href = `exports/pdf/${curDoc.id}.pdf`;
+          $("exportFacultyDocPdfBtn").download = `RACM303_${curDoc.id}.pdf`;
+        }
+        if ($("exportFacultyDocDocxBtn")) {
+          $("exportFacultyDocDocxBtn").href = `exports/docx/${curDoc.id}.docx`;
+          $("exportFacultyDocDocxBtn").download = `RACM303_${curDoc.id}.docx`;
+        }
+        prose.innerHTML = curDoc.html;
+        attachProseEnhancements(prose, toc);
+      }
+    } else {
+      const allLinks = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.links) || [];
+      const cats = ["ทั้งหมด", ...new Set(allLinks.map((l) => l.category || "ลิงก์เอกสาร"))];
+      let activeCat = "ทั้งหมด";
+
+      const dock = make("div", null, "roster-sticky-dock admin-sticky-dock");
+      const top = make("div", null, "roster-dock-top");
+      const searchBox = make("div", null, "roster-dock-search");
+      searchBox.innerHTML = `<span class="dock-search-icon">🔎</span><input id="facLinksSearchInput" type="search" placeholder="ค้นหาคู่มือผู้สอน, ไฟล์ต้นฉบับ, ข้อสอบ…">`;
+      top.appendChild(searchBox);
+
+      const catStrip = make("div", null, "roster-jump-strip");
+      const cardsContainer = make("div");
+
+      const refreshLinksUI = () => {
+        const q = ((dock.querySelector("#facLinksSearchInput") && dock.querySelector("#facLinksSearchInput").value) || "")
+          .trim()
+          .toLocaleLowerCase("th");
+        catStrip.replaceChildren();
+        cats.forEach((c) => {
+          const pill = make("button", c, `roster-jump-pill${activeCat === c ? " is-active" : ""}`);
+          pill.type = "button";
+          pill.addEventListener("click", () => {
+            activeCat = c;
+            refreshLinksUI();
+          });
+          catStrip.appendChild(pill);
+        });
+
+        const groups = new Map();
+        allLinks
+          .filter((l) => {
+            if (activeCat !== "ทั้งหมด" && (l.category || "ลิงก์เอกสาร") !== activeCat) return false;
+            if (q && !`${l.title} ${l.note || ""} ${l.category || ""}`.toLocaleLowerCase("th").includes(q)) return false;
+            return true;
+          })
+          .forEach((l) => {
+            const cat = l.category || "ลิงก์เอกสาร";
+            if (!groups.has(cat)) groups.set(cat, []);
+            groups.get(cat).push(l);
+          });
+
+        let html = "";
+        groups.forEach((items, cat) => {
+          html += `<div class="data-card"><h3>${escapeHtml(cat)} (${items.length})</h3><div class="links-grid">`;
+          items.forEach((it) => {
+            html += `
+              <div class="link-card">
+                <div>
+                  <h4>${escapeHtml(it.title)}</h4>
+                  <p>${escapeHtml(it.note || "")}</p>
+                </div>
+                <div><a class="btn sm primary" href="${escapeHtml(it.url)}" target="_blank" rel="noopener">เปิดเอกสาร ↗</a></div>
+              </div>`;
+          });
+          html += `</div></div>`;
+        });
+        cardsContainer.innerHTML = html || `<div class="empty-state">ไม่พบรายการที่ตรงกับคำค้นหา</div>`;
+      };
+
+      dock.append(top, catStrip);
+      dock.querySelector("#facLinksSearchInput").addEventListener("input", refreshLinksUI);
+      linksWrap.replaceChildren(dock, cardsContainer);
+      refreshLinksUI();
     }
   }
 

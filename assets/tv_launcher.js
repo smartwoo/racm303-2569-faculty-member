@@ -1216,23 +1216,16 @@
 
     bar.hidden = false;
 
-    const hsSiblings = [
-      { id: "hs-discussion", label: t("Discussion ระบบสุขภาพ", "HS Discussion") },
-      { id: "textbooks", label: t("บทเรียน HS1–HS6", "HS1–HS6 Textbooks") },
-      { id: "practice", label: t("คำศัพท์ & โจทย์ (60 ข้อ)", "Flashcards & Quiz") }
-    ];
-    if (ROLE === "faculty") {
-      hsSiblings.push({ id: "faculty-docs", label: t("คู่มือผู้สอน & ข้อสอบ", "Teacher Guides") });
-    }
-    hsSiblings.push({ id: "manual", label: t("คู่มือรายวิชา", "Course Manual") });
-
-    // Clean unified bar inside Discussion ระบบสุขภาพ (#panel-hs-discussion)
-    if (activeTab === "hs-discussion") {
+    // Clean unified bar across all ระบบสุขภาพ screens (buildUnifiedHsModuleBanner handles module & format tabs directly below)
+    if (groupKey === "health-systems") {
+      const inHsd = activeTab === "hs-discussion";
       const curMode = st.hsdViewMode || "slide";
       const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
-      const isDriveOpen = Boolean(curMode === "slide" && st.hsdDriveFolderOpen);
+      const isDriveOpen = Boolean(inHsd && curMode === "slide" && st.hsdDriveFolderOpen);
       const activeModLabel =
-        st.hsdModule && /^HS[1-6]$/i.test(st.hsdModule)
+        st.activeHsModule && /^HS[1-6]$/i.test(st.activeHsModule)
+          ? st.activeHsModule.toUpperCase()
+          : st.hsdModule && /^HS[1-6]$/i.test(st.hsdModule)
           ? st.hsdModule.toUpperCase()
           : st.hsdSlideDeckMod || "HS1";
 
@@ -1241,15 +1234,6 @@
           <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn" data-tv-focus>
             <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
           </button>
-          <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบบสุขภาพ">
-            ${hsSiblings
-              .map(
-                (s) => `
-              <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}">${esc(s.label)}</button>
-            `
-              )
-              .join("")}
-          </div>
         </div>
         <div class="tv-hsd-bar-right">
           ${
@@ -1260,19 +1244,16 @@
                  </span>`
               : ""
           }
-          <div class="tv-sibling-pills" role="group" aria-label="รูปแบบการแสดงผล Discussion ระบบสุขภาพ">
-            <button type="button" class="tv-sibling-pill ${isDriveOpen ? "is-active" : ""}" id="tvHsdModeDriveBtn">${esc(t("📁 Google Drive", "📁 Google Drive"))}</button>
-            <button type="button" class="tv-sibling-pill ${curMode === "slide" && !isDriveOpen ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t(`สไลด์ 16:9 (${activeModLabel})`, `16:9 (${activeModLabel})`))}</button>
-            <button type="button" class="tv-sibling-pill ${curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("เลื่อนอ่านยาว", "Full Scroll"))}</button>
+          <div class="tv-sibling-pills" role="group" aria-label="มุมมองสไลด์และโจทย์ Discussion ระบบสุขภาพ">
+            <button type="button" class="tv-sibling-pill ${isDriveOpen ? "is-active" : ""}" id="tvHsdModeDriveBtn">${esc(t("📁 Google Drive (.pptx)", "📁 Google Drive (.pptx)"))}</button>
+            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "slide" && !isDriveOpen ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t(`สไลด์ 16:9 (${activeModLabel})`, `16:9 (${activeModLabel})`))}</button>
+            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("ใบงานเลื่อนอ่านยาว", "Full Scroll"))}</button>
           </div>
         </div>
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
         navigateTvTab("home");
         restoreHomeFocus();
-      });
-      bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
-        btn.addEventListener("click", () => navigateTvTab(btn.dataset.tvSib));
       });
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
@@ -1282,19 +1263,23 @@
         });
       }
       $("tvHsdModeDriveBtn").addEventListener("click", () => {
-        if (api && api.openHsDriveFolder) api.openHsDriveFolder();
+        if (api && api.openHsDriveFolder) {
+          if (!inHsd) navigateTvTab("hs-discussion");
+          api.openHsDriveFolder();
+        }
         syncSubpageBar();
       });
       $("tvHsdModeSlideBtn").addEventListener("click", () => {
-        if (api && api.selectHsSessionDeck) {
-          api.selectHsSessionDeck(activeModLabel);
-        } else if ($("hsdViewSlideBtn")) {
-          $("hsdViewSlideBtn").click();
+        if (api && api.openHsDiscussion) {
+          st.hsdViewMode = "slide";
+          api.openHsDiscussion(activeModLabel);
         }
         syncSubpageBar();
       });
       $("tvHsdModeScrollBtn").addEventListener("click", () => {
-        if (st) st.hsdDriveFolderOpen = false;
+        st.hsdDriveFolderOpen = false;
+        st.hsdViewMode = "scroll";
+        if (!inHsd) navigateTvTab("hs-discussion");
         if ($("hsdViewScrollBtn")) $("hsdViewScrollBtn").click();
         syncSubpageBar();
       });
@@ -1340,9 +1325,7 @@
     }
 
     let siblings = [];
-    if (groupKey === "health-systems") {
-      siblings = hsSiblings;
-    } else if (groupKey === "groups") {
+    if (groupKey === "groups") {
       siblings = [
         { id: "fieldwork", label: t("9 พื้นที่ภาคสนาม", "9 Fieldwork Sites") },
         { id: "discussion", label: t("6 กลุ่ม Discussion", "6 Discussion Groups") }

@@ -21565,7 +21565,8 @@ html[data-role="faculty"][data-theme="dark"] body {
 }
 
 /* ---------- Unified Persistent HS1-HS6 Module & Format Switcher Banner ---------- */
-#jumpTextbookToHsDiscBtn {
+#jumpTextbookToHsDiscBtn,
+#hsdModuleGrid {
   display: none !important;
 }
 
