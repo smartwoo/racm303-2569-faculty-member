@@ -3951,7 +3951,7 @@
         `${s.id} ${s.fullName}${s.nickname ? " (" + s.nickname + ")" : ""}`,
         `Discussion กลุ่มที่ ${s.disc} (ห้อง ${rot.room || "-"})`,
         `พื้นที่ภาคสนาม: ${siteId}. ${s.area} (${site.hospital || ""} ${site.province || ""})`,
-        `อาจารย์ที่ปรึกษา: ${s.advisor || site.advisors || "-"}`
+        `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(site, s.advisor)}`
       ].join(" | ");
       copyTextWithFeedback(summaryText, copyBtn);
     });
@@ -3977,7 +3977,8 @@
       "กลุ่มพื้นที่ภาคสนาม",
       "โรงพยาบาลภาคสนาม",
       "จังหวัด",
-      "อาจารย์ที่ปรึกษา"
+      "อาจารย์ที่ปรึกษา",
+      "เจ้าหน้าที่ประสานงาน"
     ].join(",");
 
     const rows = [header];
@@ -3997,7 +3998,8 @@
           csvCell(s.area),
           csvCell(site.hospital || ""),
           csvCell(site.province || ""),
-          csvCell(s.advisor || site.advisors || "")
+          csvCell(s.advisor || site.advisors || ""),
+          csvCell(cleanCoordinatorName(site.staffRef))
         ].join(",")
       );
     });
@@ -4008,9 +4010,10 @@
   function copyRosterTsv(list, btn) {
     if (!list || !list.length) return;
     const lines = [
-      ["ลำดับ", "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "หลักสูตร", "Discussion", "พื้นที่ภาคสนาม", "อาจารย์ที่ปรึกษา"].join("\t")
+      ["ลำดับ", "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "หลักสูตร", "Discussion", "พื้นที่ภาคสนาม", "อาจารย์ที่ปรึกษา", "เจ้าหน้าที่ประสานงาน"].join("\t")
     ];
     list.forEach((s, idx) => {
+      const site = (SCHED.fieldworkSites || []).find((x) => x.shortName === s.area) || {};
       lines.push(
         [
           idx + 1,
@@ -4020,7 +4023,8 @@
           s.program || "MD",
           `กลุ่ม ${s.disc}`,
           s.area,
-          s.advisor || "-"
+          s.advisor || "-",
+          cleanCoordinatorName(site.staffRef) || "-"
         ].join("\t")
       );
     });
@@ -6895,7 +6899,7 @@
           ? `รายชื่อนักศึกษาพื้นที่ภาคสนามกลุ่มที่ ${siteObj.id}: ${siteObj.hospital} (${siteObj.province})`
           : "รายชื่อนักศึกษาพื้นที่ภาคสนาม (ตามเงื่อนไขที่กรอง)";
         const sub = siteObj
-          ? `อาจารย์ที่ปรึกษา: ${siteObj.advisors} · ห้อง ${siteObj.room} · ${siteObj.datesTH}`
+          ? `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(siteObj)} · ห้อง ${siteObj.room} · ${siteObj.datesTH}`
           : `จำนวน ${(state.visibleFieldStudents || []).length} คน`;
         downloadHtmlAsGenuineDocx(
           title,
@@ -27329,12 +27333,12 @@
     });
 
     (SCHED.fieldworkSites || []).forEach((st) => {
-      const staffSearch = ROLE === "faculty" && st.staffRef ? st.staffRef : "";
+      const staffSearch = st.staffRef ? cleanCoordinatorName(st.staffRef) : "";
       pushIfMatch({
         cat: "groups",
         icon: "🏥",
         title: `พื้นที่ ${st.id}. ${st.shortName} — ${st.hospital} (${st.province})`,
-        sub: `${st.count} คน · ห้อง ${st.room} · อ.ที่ปรึกษา: ${st.advisors} · ${st.datesTH}`,
+        sub: `${st.count} คน · ห้อง ${st.room} · อ.ที่ปรึกษา: ${formatAdvisorWithCoordinator(st)} · ${st.datesTH}`,
         badge: `พื้นที่ ${st.id}`,
         defaultShow: !q && st.id <= 4,
         searchHay: `พื้นที่ ${st.id} ${st.shortName} ${st.hospital} ${st.province} ${st.advisors} ${st.room} ${staffSearch}`.toLocaleLowerCase("th"),
@@ -28974,13 +28978,13 @@
 
     // 3. Fieldwork Sites (9) & Discussion Groups (6)
     (SCHED.fieldworkSites || []).forEach((site) => {
-      const hay = `${site.shortName} ${site.hospital} ${site.province} ${site.advisors} ${site.room}`.toLocaleLowerCase("th");
+      const hay = `${site.shortName} ${site.hospital} ${site.province} ${site.advisors} ${cleanCoordinatorName(site.staffRef)} ${site.room}`.toLocaleLowerCase("th");
       if (hay.includes(q)) {
         results.push({
           cat: "กลุ่มพื้นที่ภาคสนาม & Discussion",
           icon: "🏥",
           title: `กลุ่มพื้นที่ ${site.shortName} (${site.hospital} ${site.province})`,
-          sub: `สมาชิก ${site.count} คน · ห้องกลุ่มย่อย ${site.room.split(" ")[0]} · อ.ที่ปรึกษา: ${site.advisors}`,
+          sub: `สมาชิก ${site.count} คน · ห้องกลุ่มย่อย ${site.room.split(" ")[0]} · อ.ที่ปรึกษา: ${formatAdvisorWithCoordinator(site)}`,
           run: () => {
             if ($("fieldAreaSelect")) $("fieldAreaSelect").value = site.shortName;
             state.mapHoverSite = site.shortName;
