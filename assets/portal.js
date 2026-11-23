@@ -563,20 +563,21 @@
     : null;
 
   function mountStudentPhoto(box) {
+    const localPhoto = box.dataset.localPhoto || "";
     const sid = box.dataset.studentId || "";
     const pid = box.dataset.photoId || "";
     const initials = box.dataset.initials || "นศ";
     const sLabel = box.dataset.studentName || initials;
-    if (!sid && !pid) {
-      box.innerHTML = `<span class="avatar-monogram">${escapeHtml(initials)}</span>`;
+    if (!localPhoto && !sid && !pid) {
+      box.innerHTML = `<span class="avatar-monogram" title="${escapeHtml(sLabel)}">${escapeHtml(initials)}</span>`;
       return;
     }
     const img = document.createElement("img");
-    img.alt = box.dataset.studentName || "รูปนักศึกษา";
+    img.alt = box.dataset.studentName || "รูปถ่าย";
     img.loading = "lazy";
     img.decoding = "async";
-    if (sid) {
-      img.src = `assets/photos/${encodeURIComponent(sid)}.jpg`;
+    if (localPhoto || sid) {
+      img.src = localPhoto || `assets/photos/${encodeURIComponent(sid)}.jpg`;
       img.onerror = () => {
         if (pid && !img.dataset.triedDrive) {
           img.dataset.triedDrive = "1";
@@ -594,6 +595,178 @@
       };
     }
     box.replaceChildren(img);
+  }
+
+  function getStaffCoordinatorInfo(siteOrArea) {
+    const site =
+      siteOrArea && typeof siteOrArea === "object"
+        ? siteOrArea
+        : (SCHED.fieldworkSites || []).find((x) => x.shortName === String(siteOrArea || ""));
+    if (!site) return null;
+    const raw = cleanCoordinatorName(site.staffRef || "");
+    const m = raw.match(/^(.+?)\s*\((.+?)\)$/);
+    const firstName = site.staffFirstName || (m ? m[1].trim() : raw);
+    const nickname = site.staffNickname || (m ? m[2].trim() : raw);
+    const hasLocal = Boolean(site.staffHasLocalPhoto);
+    const photoId = site.staffPhotoId || "";
+    const localSrc = hasLocal ? `assets/photos/staff_${encodeURIComponent(site.id)}.jpg` : "";
+    const initials = site.staffInitials || (firstName.replace(/^คุณ/, "").slice(0, 2) || "จนท");
+    return {
+      site,
+      siteId: site.id,
+      firstName,
+      nickname,
+      displayFull: raw || `${firstName} (${nickname})`,
+      hasPhoto: Boolean(hasLocal || photoId),
+      localSrc,
+      photoId,
+      initials
+    };
+  }
+
+  function zoomStaffPhoto(siteOrArea) {
+    const info = getStaffCoordinatorInfo(siteOrArea);
+    if (!info || !info.hasPhoto) return;
+    const caption = `${info.nickname} (${info.firstName}) · เจ้าหน้าที่ประสานงานประจำพื้นที่ ${info.siteId}. ${info.site.shortName} (${info.site.hospital} ${info.site.province})`;
+    const src = info.localSrc || `https://drive.google.com/thumbnail?id=${encodeURIComponent(info.photoId)}&sz=w1000`;
+    openLightbox(src, caption);
+    if (info.photoId) {
+      const hdUrl = `https://drive.google.com/thumbnail?id=${encodeURIComponent(info.photoId)}&sz=w1200`;
+      const pre = new Image();
+      pre.referrerPolicy = "no-referrer";
+      pre.onload = () => {
+        const lb = $("imageLightbox");
+        const lbImg = $("lightboxImg");
+        if (lb && !lb.hidden && lbImg && pre.naturalWidth >= 180) {
+          lbImg.referrerPolicy = "no-referrer";
+          lbImg.src = hdUrl;
+        }
+      };
+      pre.src = hdUrl;
+    }
+  }
+
+  function renderStaffCoordinatorCardElement(siteOrArea) {
+    const info = getStaffCoordinatorInfo(siteOrArea);
+    if (!info) return document.createDocumentFragment();
+    const { site, siteId } = info;
+    const card = make("article", null, `student-card is-interactive is-staff-card card-site-${siteId} chip-site-${siteId}`);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${info.nickname} (${info.firstName}) เจ้าหน้าที่ประสานงานพื้นที่ ${site.shortName}`);
+
+    const portraitWrap = make("div", null, "student-portrait-wrap");
+    const portrait = make("div", null, `student-portrait${state.showPhotos ? "" : " compact-avatar"}`);
+    if (info.localSrc) portrait.dataset.localPhoto = info.localSrc;
+    if (info.photoId) portrait.dataset.photoId = info.photoId;
+    portrait.dataset.initials = info.initials;
+    portrait.dataset.studentName = info.displayFull;
+    portrait.innerHTML = `<span class="avatar-monogram">${escapeHtml(info.initials)}</span>`;
+    if (state.showPhotos && info.hasPhoto) {
+      if (photoObserver) photoObserver.observe(portrait);
+      else mountStudentPhoto(portrait);
+    }
+    portraitWrap.appendChild(portrait);
+
+    if (state.showPhotos && info.hasPhoto) {
+      const zoomCornerBtn = make("button", null, "portrait-zoom-corner-btn");
+      zoomCornerBtn.type = "button";
+      zoomCornerBtn.title = tr("ขยายรูปถ่ายพี่เจ้าหน้าที่ (Zoom In)", "Zoom in coordinator photo");
+      zoomCornerBtn.setAttribute("aria-label", tr(`ขยายรูปถ่าย ${info.nickname}`, `Zoom photo of ${info.nickname}`));
+      zoomCornerBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
+      zoomCornerBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        zoomStaffPhoto(site);
+      });
+      portraitWrap.appendChild(zoomCornerBtn);
+    }
+
+    card.appendChild(portraitWrap);
+    card.appendChild(make("h3", info.nickname, "stu-card-lead"));
+    card.appendChild(make("p", `(${info.firstName})`, "stu-card-paren"));
+    card.appendChild(make("p", tr("ผู้ประสานงานประจำพื้นที่", "Site Coordinator"), "sid-mono staff-role-mono"));
+
+    const pillWrap = make("div", null, "s-area area-sub-pill-wrap");
+    pillWrap.innerHTML = `<span class="area-sub-pill area-site-${siteId}"><i class="area-dot"></i>${siteId}. ${escapeHtml(site.shortName)}</span>`;
+    card.appendChild(pillWrap);
+    card.appendChild(make("p", `${site.hospital}`, "disc-line"));
+
+    const hint = make(
+      "span",
+      info.hasPhoto ? tr("ขยายรูปถ่าย ↗", "Zoom Photo ↗") : tr("ผู้ประสานงานกลุ่ม", "Coordinator"),
+      "student-quick-hint"
+    );
+    card.appendChild(hint);
+
+    card.addEventListener("click", () => {
+      if (info.hasPhoto) zoomStaffPhoto(site);
+      else setSyncedFieldworkArea(site.shortName);
+    });
+    card.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        if (info.hasPhoto) zoomStaffPhoto(site);
+      }
+    });
+    return card;
+  }
+
+  function renderStaffHeaderBadge(siteOrArea, compactPrint = false) {
+    const info = getStaffCoordinatorInfo(siteOrArea);
+    if (!info) return null;
+    const wrap = make("div", null, `staff-coord-badge${info.hasPhoto ? " is-zoomable" : ""}${compactPrint ? " is-print-badge" : ""}`);
+    const av = make("div", null, "staff-coord-avatar student-portrait");
+    if (info.localSrc) av.dataset.localPhoto = info.localSrc;
+    if (info.photoId) av.dataset.photoId = info.photoId;
+    av.dataset.initials = info.initials;
+    av.dataset.studentName = info.displayFull;
+    av.innerHTML = `<span class="avatar-monogram">${escapeHtml(info.initials)}</span>`;
+    if (info.hasPhoto) mountStudentPhoto(av);
+
+    const meta = make("div", null, "staff-coord-meta");
+    meta.innerHTML =
+      `<span class="staff-coord-kicker">${escapeHtml(tr("ผู้ประสานงานพื้นที่", "Coordinator"))}</span>` +
+      `<strong class="staff-coord-lead">${escapeHtml(info.nickname)}</strong>` +
+      `<span class="staff-coord-sub">${escapeHtml(info.firstName)}</span>`;
+    wrap.append(av, meta);
+    if (info.hasPhoto) {
+      wrap.title = tr("คลิกเพื่อขยายรูปถ่ายผู้ประสานงาน", "Click to zoom coordinator photo");
+      wrap.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        zoomStaffPhoto(info.site);
+      });
+    }
+    return wrap;
+  }
+
+  function renderStaffMiniChip(siteOrArea) {
+    const info = getStaffCoordinatorInfo(siteOrArea);
+    if (!info) return null;
+    const chip = make("button", null, `gsorter-stu-chip is-staff-mini-chip chip-site-${info.siteId}`);
+    chip.type = "button";
+    chip.title = `${info.displayFull} · ผู้ประสานงานประจำพื้นที่ ${info.site.shortName}`;
+    const av = make("span", null, "gsorter-chip-avatar");
+    if (info.localSrc) {
+      const img = document.createElement("img");
+      img.src = info.localSrc;
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.onerror = () => {
+        av.textContent = info.initials;
+      };
+      av.appendChild(img);
+    } else {
+      av.textContent = info.initials;
+    }
+    const txt = make("span", null, "gsorter-chip-txt");
+    txt.innerHTML = `<strong class="chip-lead">${escapeHtml(info.nickname)}</strong><small class="chip-paren">(${escapeHtml(info.firstName)} · ผู้ประสานงาน)</small>`;
+    chip.append(av, txt);
+    chip.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      if (info.hasPhoto) zoomStaffPhoto(info.site);
+    });
+    return chip;
   }
 
   /* ---------- Student Nickname Store, Live Sheet Sync & Display Formatter ---------- */
@@ -1342,10 +1515,8 @@
         .filter((site) => !allowed || allowed.includes(site.id))
         .map((site) => {
           let extra = "";
-          if (session.code === "SG3" && ["เพชรบูรณ์ 2", "อุบลรัตน์", "อุ้มผาง"].includes(site.shortName)) {
-            extra = " (อ.ที่ปรึกษา Online)";
-          } else if (session.code === "SG4" && site.shortName === "เพชรบูรณ์ 2") {
-            extra = " (อ.ที่ปรึกษา Online)";
+          if (ROLE === "faculty" && session.code === "SG3" && site.shortName === "อุ้มผาง") {
+            extra = " (หมายเหตุ: อ.ที่ปรึกษาติดนิเทศปี 5)";
           }
           let roomLabel = site.room;
           if (session.code === "FIELD") {
@@ -4003,6 +4174,11 @@
     `;
     const fieldBtnWrap = make("div", null, "header-actions");
     fieldBtnWrap.style.marginTop = "8px";
+    const staffBadgeInModal = renderStaffHeaderBadge(site);
+    if (staffBadgeInModal) {
+      staffBadgeInModal.style.marginTop = "8px";
+      fieldBox.appendChild(staffBadgeInModal);
+    }
     const jumpFieldBtn = make("button", `ไปที่รายชื่อกลุ่มพื้นที่ ${s.area} →`, "btn sm");
     jumpFieldBtn.type = "button";
     jumpFieldBtn.addEventListener("click", () => {
@@ -4798,8 +4974,14 @@
         card.appendChild(head);
 
         const metaP = make("p", null, "gsorter-teachers");
-        metaP.textContent = `อ.ที่ปรึกษา: ${formatAdvisorWithCoordinator(site)} · ห้อง ${site.room} · ${site.datesTH}`;
+        metaP.textContent = `อ.ที่ปรึกษา: ${site.advisors || "-"} · ห้อง ${site.room} · ${site.datesTH}`;
         card.appendChild(metaP);
+        const staffMini = renderStaffMiniChip(site);
+        if (staffMini) {
+          const staffRow = make("div", null, "gsorter-staff-row");
+          staffRow.appendChild(staffMini);
+          card.appendChild(staffRow);
+        }
 
         const mosaic = make("div", null, "gsorter-avatar-mosaic is-site-grouped");
         const toShow = hasFilter ? matched : allMembers;
@@ -5007,12 +5189,18 @@
           </div>
         </div>
       `;
+      const deckActs = banner.querySelector(".header-actions");
+      const deckStaffBadge = renderStaffHeaderBadge(site);
+      if (deckActs && deckStaffBadge) {
+        deckActs.prepend(deckStaffBadge);
+      }
       slideCard.appendChild(banner);
 
       const grid = make("div", null, "student-cards");
       if (!members.length) {
         grid.appendChild(make("div", "ไม่มีสมาชิกในพื้นที่นี้ที่ตรงกับคำค้นหา", "empty-state"));
       } else {
+        if (!q) grid.appendChild(renderStaffCoordinatorCardElement(site));
         members.forEach((s) => grid.appendChild(renderStudentCardElement(s, "fieldwork")));
       }
       slideCard.appendChild(grid);
@@ -5405,6 +5593,7 @@
       subText,
       mentorLabel,
       mentorValue,
+      staffSite = null,
       coachesRot = null,
       members = [],
       viewStyle = "formation", // "formation" | "chips"
@@ -5457,9 +5646,33 @@
     const hRight = make("div", null, "fm-head-right");
     if (mentorValue) {
       const plaque = make("div", null, "fm-mentor-plaque");
-      plaque.innerHTML =
-        `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
-        `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
+      const stInfo = staffSite ? getStaffCoordinatorInfo(staffSite) : null;
+      if (stInfo) {
+        plaque.classList.add("has-staff-avatar");
+        const stAv = make("div", null, `fm-staff-avatar student-portrait${stInfo.hasPhoto ? " is-zoomable" : ""}`);
+        if (stInfo.localSrc) stAv.dataset.localPhoto = stInfo.localSrc;
+        if (stInfo.photoId) stAv.dataset.photoId = stInfo.photoId;
+        stAv.dataset.initials = stInfo.initials;
+        stAv.dataset.studentName = stInfo.displayFull;
+        stAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(stInfo.initials)}</span>`;
+        if (stInfo.hasPhoto) {
+          mountStudentPhoto(stAv);
+          stAv.title = tr(`คลิกขยายรูปถ่าย ${stInfo.displayFull}`, `Zoom photo of ${stInfo.displayFull}`);
+          stAv.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            zoomStaffPhoto(staffSite);
+          });
+        }
+        const txtCol = make("div", null, "fm-mentor-text-col");
+        txtCol.innerHTML =
+          `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
+          `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
+        plaque.append(stAv, txtCol);
+      } else {
+        plaque.innerHTML =
+          `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
+          `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
+      }
       hRight.appendChild(plaque);
     }
 
@@ -5499,6 +5712,15 @@
       if (mode === "discussion") {
         renderSiteGroupedMiniChips(sortedMembers, mosaic);
       } else {
+        if (staffSite) {
+          const stChip = renderStaffMiniChip(staffSite);
+          if (stChip) {
+            const stWrap = make("div", null, "gsorter-staff-row");
+            stWrap.style.marginBottom = "8px";
+            stWrap.appendChild(stChip);
+            chipBody.appendChild(stWrap);
+          }
+        }
         renderFieldworkGradGroupedMiniChips(sortedMembers, mosaic, teamColor);
       }
       chipBody.appendChild(mosaic);
@@ -5673,6 +5895,7 @@
           subText: `ห้องกลุ่มย่อย ${site.room} · ช่วงฝึก ${site.datesTH} · จัดแถวตามกลุ่ม Discussion (G1–G6)`,
           mentorLabel: "อาจารย์ที่ปรึกษา & ผู้ประสานงาน",
           mentorValue: formatAdvisorWithCoordinator(site),
+          staffSite: site,
           members: shownM,
           viewStyle: state.fieldFormationSubStyle || "formation",
           onToggleStyle: (nextStyle) => {
@@ -5926,6 +6149,35 @@
       const head = make("div", null, "ghp-head");
       head.innerHTML = headHtml;
       pop.appendChild(head);
+      if (areaName && !discId) {
+        const stInfo = getStaffCoordinatorInfo(areaName);
+        if (stInfo) {
+          const stRow = make("div", null, "ghp-staff-banner");
+          const stAv = make("span", null, "ghp-avatar");
+          if (stInfo.localSrc) {
+            const img = document.createElement("img");
+            img.src = stInfo.localSrc;
+            img.alt = "";
+            img.loading = "lazy";
+            img.onerror = () => { stAv.textContent = stInfo.initials; };
+            stAv.appendChild(img);
+          } else {
+            stAv.textContent = stInfo.initials;
+          }
+          const stTxt = make("span", null, "ghp-txt");
+          stTxt.innerHTML = `<strong>${escapeHtml(stInfo.nickname)} (${escapeHtml(stInfo.firstName)})</strong><small>ผู้ประสานงานประจำพื้นที่</small>`;
+          stRow.append(stAv, stTxt);
+          if (stInfo.hasPhoto) {
+            stRow.style.cursor = "pointer";
+            stRow.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              pop.hidden = true;
+              zoomStaffPhoto(stInfo.site);
+            });
+          }
+          pop.appendChild(stRow);
+        }
+      }
 
       const buildPersonRow = (s) => {
         const sSiteId = getSiteIdByAreaName(s.area);
@@ -6000,10 +6252,10 @@
   const HS_SLOTS_META = [
     { mod: "HS1", label: "HS1 · พฤ. 26 พ.ย. (08.30–12.00)", docId: "HS1" },
     { mod: "HS2", label: "HS2 · จ. 30 พ.ย. (08.30–12.00)", docId: "HS2" },
-    { mod: "HS3", label: "HS3 · จ. 30 พ.ย. (13.30–17.00)", docId: "HS3" },
+    { mod: "HS3", label: "HS3 · จ. 30 พ.ย. (13.30–16.40)", docId: "HS3" },
     { mod: "HS4", label: "HS4 · อ. 1 ธ.ค. (08.30–12.00)", docId: "HS4" },
-    { mod: "HS5", label: "HS5 · อ. 1 ธ.ค. (13.30–17.00)", docId: "HS5" },
-    { mod: "HS6", label: "HS6 · ศ. 4 ธ.ค. (08.30–12.00)", docId: "HS6" }
+    { mod: "HS5", label: "HS5 · อ. 1 ธ.ค. (13.30–16.40)", docId: "HS5" },
+    { mod: "HS6", label: "HS6 · ศ. 4 ธ.ค. (08.30–12.00 · 2C2×3ห้อง)", docId: "HS6" }
   ];
 
   function initDiscussionControls() {
@@ -6594,9 +6846,9 @@
 
     // Special 3D Floor-2 Callout Badge for Group 6 (HS4 -> 2C2-03)
     const fl2Box = document.createElementNS(svgNS, "rect");
-    fl2Box.setAttribute("x", "236");
+    fl2Box.setAttribute("x", "212");
     fl2Box.setAttribute("y", "528");
-    fl2Box.setAttribute("width", "182");
+    fl2Box.setAttribute("width", "230");
     fl2Box.setAttribute("height", "38");
     fl2Box.setAttribute("rx", "10");
     fl2Box.setAttribute("fill", "#fff7ed");
@@ -6608,7 +6860,7 @@
     fl2Txt.setAttribute("y", "551");
     fl2Txt.setAttribute("text-anchor", "middle");
     fl2Txt.setAttribute("class", "disc-fl2-note");
-    fl2Txt.textContent = tr("ชั้น 2: ห้อง 2C2-03 (กลุ่ม 6 เฉพาะ HS4)", "Fl. 2: 2C2-03 (G6 on HS4 AM)");
+    fl2Txt.textContent = tr("ชั้น 2: 2C2-03 (G6·HS4) · 2C2×3ห้อง (ทุกกลุ่ม·HS6)", "Fl.2: 2C2-03 (G6·HS4) · 2C2×3 (All·HS6)");
     appendSvg3DAnimatedArc(svgNS, routesGroup, 327, 478, 372, 496, 332, 506, 327, 528, "#ea580c", "discRoom", "6", 2.8);
     svg.append(routesGroup, hubG, roomsGroup, fl2Box, fl2Txt);
 
@@ -6694,8 +6946,8 @@
       make(
         "p",
         rot.group === 6
-          ? "หมายเหตุสำคัญ: เช้าวันอังคารที่ 1 ธ.ค. 2569 (HS4) กลุ่มที่ 6 ย้ายไปเรียนที่ห้อง 2C2-03 ชั่วคราว และช่วงบ่าย (HS5) กลับมาใช้ห้อง 1C1-07 ตามปกติ"
-          : `สมาชิกกลุ่มอภิปรายที่ ${rot.group} ใช้ห้อง ${rot.room} ชั้น 1 อาคารพรีคลินิก ตลอดทั้งคาบ HS1–HS6`
+          ? "หมายเหตุสำคัญ: เช้าวันอังคารที่ 1 ธ.ค. (HS4) กลุ่มที่ 6 ใช้ห้อง 2C2-03 และเช้าวันศุกร์ที่ 4 ธ.ค. (HS6) ทุกกลุ่มใช้ห้อง 2C2 × 3 ห้อง ชั้น 2 อาคารพรีคลินิก"
+          : `สมาชิกกลุ่มอภิปรายที่ ${rot.group} ใช้ห้องหลัก ${rot.room} ชั้น 1 อาคารพรีคลินิก (ยกเว้นเช้าวันศุกร์ที่ 4 ธ.ค. คาบ HS6 ทุกกลุ่มใช้ห้อง 2C2 × 3 ห้อง ชั้น 2 อาคารพรีคลินิก)`
       )
     );
     const showAllBtn = make("button", "ดูสมาชิกครบทั้ง 6 กลุ่ม (169 คน)", "btn sm");
@@ -7421,6 +7673,7 @@
           subText: `ห้อง ${curSite.room.split(" ")[0]} · ${curSite.datesTH} · ${friNote}`,
           mentorLabel: tr("อาจารย์ที่ปรึกษา & ผู้ประสานงาน", "Site Advisors & Coordinator"),
           mentorValue: formatAdvisorWithCoordinator(curSite),
+          staffSite: curSite,
           members,
           viewStyle: state.mapInspectorStyle || "formation",
           onToggleStyle: (nextStyle) => {
@@ -7656,6 +7909,8 @@
         printHeading.appendChild(
           make("div", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(activeSiteObj)} · ห้องกลุ่มย่อย: ${activeSiteObj.room} · ช่วงฝึก: ${activeSiteObj.datesTH}`)
         );
+        const pBadge = renderStaffHeaderBadge(activeSiteObj, true);
+        if (pBadge) printHeading.appendChild(pBadge);
       }
     }
 
@@ -7667,17 +7922,29 @@
     if (!list.length) {
       cardsEl.appendChild(make("div", "ไม่พบรายชื่อนักศึกษาในกลุ่มพื้นที่ภาคสนามตามเงื่อนไขที่เลือก", "empty-state"));
     } else {
+      if (areaVal && activeSiteObj && !q) {
+        cardsEl.appendChild(renderStaffCoordinatorCardElement(activeSiteObj));
+      }
       let lastArea = null;
       list.forEach((s) => {
         if (!areaVal && s.area !== lastArea) {
           lastArea = s.area;
           const siteObj = (SCHED.fieldworkSites || []).find((x) => x.shortName === s.area);
-          const h = make("div", null, "area-group-header");
-          h.append(
+          const h = make("div", null, "area-group-header has-staff-badge");
+          const hTextCol = make("div", null, "area-group-title-col");
+          hTextCol.append(
             make("h3", `${siteObj ? siteObj.id + ". " : ""}กลุ่มพื้นที่ ${s.area}${siteObj ? " (" + siteObj.hospital + " " + siteObj.province + " · " + siteObj.count + " คน)" : ""}`),
             make("p", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(siteObj, s.advisor)}${siteObj ? " · ห้อง " + siteObj.room + " · " + siteObj.datesTH : ""}`)
           );
+          h.appendChild(hTextCol);
+          if (siteObj) {
+            const hBadge = renderStaffHeaderBadge(siteObj);
+            if (hBadge) h.appendChild(hBadge);
+          }
           cardsEl.appendChild(h);
+          if (siteObj && !q) {
+            cardsEl.appendChild(renderStaffCoordinatorCardElement(siteObj));
+          }
         }
         cardsEl.appendChild(renderStudentCardElement(s, "fieldwork"));
       });
@@ -7729,7 +7996,7 @@
     const containerSelector = targetMode === "discussion" ? "#discCardsContainer" : "#fieldCardsContainer";
     if (state.showPhotos) {
       document.querySelectorAll(`${containerSelector} .student-portrait`).forEach((box) => {
-        if (!box.querySelector("img") && (box.dataset.studentId || box.dataset.photoId)) mountStudentPhoto(box);
+        if (!box.querySelector("img") && (box.dataset.localPhoto || box.dataset.studentId || box.dataset.photoId)) mountStudentPhoto(box);
       });
     }
     fitPrintRoster(targetMode);
@@ -10711,57 +10978,60 @@
       code: "GLOBAL",
       driveFileName: "02_GLOBAL_Planetary_HPSR.md",
       kind: "panel",
-      kindLabel: "Panel Discussion · วิทยากรรับเชิญ",
-      kindLabelEn: "Expert Panel · Global & HPSR",
+      kindLabel: "Panel Discussion · บทบาทและเส้นทางวิชาชีพแพทย์ (HSS & SBP)",
+      kindLabelEn: "Expert Panel · Physician Roles & HSS Career Paths",
       phase: 1,
       phaseLabel: "ระยะที่ 1 · เปิดเลนส์เชิงระบบ (ก่อนเข้าสู่ HS1–HS6)",
       phaseLabelEn: "Phase 1 · Systems Lens (Before HS1–HS6)",
       weekLabel: "สัปดาห์ที่ 1",
       dateTH: "วันพุธที่ 25 พฤศจิกายน 2569",
       shortDate: "พ. 25 พ.ย. 69",
-      timeLabel: "13.00 – 16.00 น.",
+      timeLabel: "13.30 – 16.30 น.",
       hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Bedside to Systems-Based Practice: Global/Planetary Health & HPSR",
-      titleThSub: "เชื่อมผู้ป่วยข้างเตียงสู่สุขภาพโลก สุขภาพดาวเคราะห์ และการวิจัยนโยบายและระบบสุขภาพ",
-      speakers: "วิทยากร: นพ.ทักษพล ธรรมรังสี, นพ.วิรุฬ ลิ้มสวาท | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
-      examBadge: "นอกข้อสอบ HS1–HS6 · วัตถุประสงค์รายวิชา",
+      title: "Bedside to Systems-Based Practice: Global/Planetary Health & HPSR — From Bedside to Health Public Policy",
+      titleThSub: "บทบาทแพทย์และเส้นทางอาชีพเชิงวิทยาศาสตร์ระบบสุขภาพ (HSS): จากข้างเตียงสู่นโยบายสาธารณะ สุขภาพโลก และ HPSR",
+      speakers:
+        "วิทยากร: นพ.ทักษพล ธรรมรังสี (ผอ.มูลนิธิ CMB), นพ.วิรุฬ ลิ้มสวาท (หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ), ศ.เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ (รอง ผอ.ศจย.) | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      examBadge: "เชื่อมตรงวัตถุประสงค์ที่ 5 · Physician Roles & SBP",
       whyImportant:
-        "ขยายขอบฟ้าจากข้างเตียงผู้ป่วย (Bedside) สู่พลวัตสุขภาพโลก สุขภาพดาวเคราะห์ และเป้าหมาย SDGs พร้อมฉายภาพบทบาทของ HPSR ในการเปลี่ยนปัญหาหน้างานให้เกิดการปฏิรูประดับนโยบาย",
+        "เปิดมุมมองบทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems) และเส้นทางอาชีพแพทย์ (Career Paths) เชิง Health Systems Science & Systems-Based Practice ผ่านต้นแบบแพทย์ผู้ขับเคลื่อนงานตั้งแต่ข้างเตียงผู้ป่วย สู่การวิจัยระบบสุขภาพ (HPSR) นโยบายสาธารณะเพื่อสุขภาพ และเวทีสุขภาพโลก",
       objectives: [
-        "เชื่อมโยงปัญหาผู้ป่วยข้างเตียงสู่บริบทระบบสุขภาพ สุขภาพโลก และสุขภาพดาวเคราะห์ (Global & Planetary Health) รวมถึงเป้าหมายการพัฒนาที่ยั่งยืน (SDGs)",
-        "อธิบายบทบาทของการวิจัยนโยบายและระบบสุขภาพ (Health Policy and Systems Research: HPSR) ในการขับเคลื่อนการเปลี่ยนแปลงเชิงระบบ"
+        "อธิบายภาพรวมบทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems) และเส้นทางวิชาชีพแพทย์ (Physician Career Paths) เชิงวิทยาศาสตร์ระบบสุขภาพ (Health Systems Science: HSS) ที่ต่อยอดจากการดูแลผู้ป่วยข้างเตียงสู่เวชปฏิบัติอิงระบบ (Systems-Based Practice: SBP)",
+        "วิเคราะห์การบูรณาการบทบาทแพทย์ในฐานะผู้นำการเปลี่ยนแปลง (Change Agent) นักวิจัยนโยบายและระบบสุขภาพ (HPSR) และผู้ขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพ (From Bedside to Health Public Policy) เชื่อมโยงผู้ป่วย ครอบครัว ชุมชน สู่สุขภาพโลกและสุขภาพดาวเคราะห์ (Global & Planetary Health)",
+        "สะท้อนคิดแนวทางการพัฒนาสมรรถนะ HSS & SBP และเส้นทางอาชีพแพทย์ในการทำงานร่วมกับทีมสหวิชาชีพ องค์กรสุขภาพ และสังคม"
       ],
       frameworks: [
-        "Bedside to Systems-Based Practice",
-        "Global & Planetary Health",
-        "Sustainable Development Goals (SDGs)",
-        "Health Policy & Systems Research (HPSR)"
+        "Physician Roles in Health Systems (Objective 5)",
+        "Health Systems Science (HSS) & Career Paths",
+        "Systems-Based Practice (SBP): Bedside to Policy",
+        "Health Policy & Systems Research (HPSR)",
+        "Global & Planetary Health"
       ],
-      relatedHs: ["HS1", "HS2", "HS5"],
+      relatedHs: ["HS1", "HS2", "HS4", "HS5"],
       assessmentLinks: [
-        "ตอบวัตถุประสงค์รายวิชาด้านสุขภาพไร้พรมแดน สุขภาพโลก และสุขภาพดาวเคราะห์",
-        "ขยายมุมมอง SDH / CDH / สิ่งแวดล้อม (HS1) และ UHC / SDGs (HS5)",
-        "เสริมมิติบทบาทแพทย์ Change Agent สำหรับ SRN 1 และเกณฑ์ฟอร์ม 3A ข้อ 3"
+        "เชื่อมตรงกับวัตถุประสงค์รายวิชาข้อที่ 5: บทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems · Applying HSS)",
+        "ขยายมุมมอง SDH/CDoH (HS1), โครงสร้างระบบสุขภาพ (HS2), นโยบายสาธารณะเพื่อสุขภาพ (HS4) และปฐมภูมิ/UHC (HS5)",
+        "จุดประกายอัตลักษณ์วิชาชีพและบทบาทแพทย์ Change Agent สำหรับบันทึกสะท้อนคิด SRN 1–2 และเกณฑ์ฟอร์ม 3A"
       ],
       guidingQuestions: [
-        "เมื่อดูแลผู้ป่วย 1 คนข้างเตียง ปัจจัยระดับโลกและสิ่งแวดล้อม (เช่น ภาวะโลกร้อน ฝุ่น PM2.5 ระบบอาหาร การค้าข้ามพรมแดน) ส่งผลต่อผู้ป่วยคนนั้นอย่างไร?",
-        "แพทย์คลินิกจะตั้งคำถามวิจัยเชิงระบบ (HPSR) เพื่อเปลี่ยนปัญหาที่พบซ้ำ ๆ ในโรงพยาบาลให้กลายเป็นข้อเสนอเชิงนโยบายได้อย่างไร?"
+        "จากประสบการณ์ของวิทยากรทั้ง 3 ท่าน จุดเปลี่ยนใดที่ทำให้แพทย์ขยายบทบาทจากการรักษาผู้ป่วยรายบุคคลข้างเตียง (Bedside) สู่การตั้งคำถามและขับเคลื่อนการเปลี่ยนแปลงระดับระบบและนโยบายสาธารณะ (Systems-Based Practice)?",
+        "สมรรถนะด้าน Health Systems Science (HSS) และการวิจัยระบบสุขภาพ (HPSR) เปิดเส้นทางอาชีพ (Career Paths) และเพิ่มคุณค่าให้แพทย์ในศตวรรษที่ 21 ได้อย่างไร ไม่ว่าจะปฏิบัติงานในคลินิก โรงพยาบาลชุมชน หรือองค์กรระดับประเทศและนานาชาติ?"
       ],
       facultyNote:
-        "เวทีเสวนาบ่ายวันแรกที่ช่วยให้นักศึกษาเห็นภาพจริงของแพทย์นักพัฒนาระบบและนักวิจัย HPSR ก่อนเข้าสู่เนื้อหาภาคทฤษฎี HS1–HS6",
+        "เวทีเสวนาบ่ายวันแรกที่เชื่อมตรงกับวัตถุประสงค์รายวิชาข้อที่ 5 (Physician Roles in Health Systems) ช่วยให้นักศึกษาเห็นต้นแบบเส้นทางอาชีพแพทย์ด้าน HSS, Systems-Based Practice, HPSR และการขับเคลื่อนนโยบายสาธารณะก่อนเข้าสู่ HS1–HS6",
       searchKeywords:
-        "bedside systems-based practice global planetary health hpsr sdgs ทักษพล ธรรมรังสี วิรุฬ ลิ้มสวาท สุขภาพโลก สุขภาพดาวเคราะห์ วิจัยระบบสุขภาพ"
+        "bedside systems-based practice sbp hss health systems science physician roles career path บทบาทแพทย์ เส้นทางอาชีพ from bedside to health public policy global planetary health hpsr ทักษพล ธรรมรังสี วิรุฬ ลิ้มสวาท สุวรรณา เรืองกาญจนเศรษฐ์"
     },
     {
       id: "w3-d3-dhs-panel",
       order: 3,
       tone: "sf-3",
       code: "PANEL-DHS",
-      driveFileName: "03_DHS_6BB_Plus_One.md",
+      driveFileName: "03_Workshop_Learning_How_to_Learn.md",
       kind: "panel",
-      kindLabel: "Panel Discussion · เตรียมลงภาคสนาม",
-      kindLabelEn: "Expert Panel · Pre-Fieldwork DHS",
+      kindLabel: "Interactive Workshop · เตรียมลงภาคสนาม",
+      kindLabelEn: "Workshop · Learning How to Learn",
       phase: 2,
       phaseLabel: "ระยะที่ 2 · เชื่อมทฤษฎีสู่ชุมชนจริง (ก่อนออกภาคสนาม)",
       phaseLabelEn: "Phase 2 · Connecting Theory to Community (Pre-Fieldwork)",
@@ -10770,37 +11040,37 @@
       shortDate: "พ. 9 ธ.ค. 69",
       timeLabel: "09.00 – 12.00 น.",
       hours: "3 ชม.",
-      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Panel Discussion: District Health Systems – Six Building Blocks Plus One & Learning How to Learn in Community",
-      titleThSub: "ระบบสุขภาพอำเภอ (DHS) และท่าทีการเรียนรู้ร่วมกับชุมชนก่อนลงพื้นที่ภาคสนาม",
+      room: "ห้อง 2C2-02 และ 2C2-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก",
+      title: "Workshop: Learning How to Learn",
+      titleThSub: "เวิร์กชอปฝึกทักษะและท่าทีการเรียนรู้จากการปฏิบัติจริงร่วมกับชุมชนและระบบสุขภาพอำเภอก่อนลงภาคสนาม",
       speakers: "วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ",
       examBadge: "นอกข้อสอบ HS1–HS6 · เข็มทิศภาคสนาม",
       whyImportant:
-        "จัดขึ้นในเช้าวันสุดท้ายก่อนกลุ่มแรก (อุ้มผาง) ออกเดินทางภาคสนาม เพื่อเชื่อมกรอบ Six Building Blocks เข้ากับ 'Plus One' (ชุมชนและภาคีเครือข่าย) พร้อมวางท่าทีการเรียนรู้ร่วมกับชาวบ้านอย่างอ่อนน้อมและเคารพศักดิ์ศรี",
+        "จัดขึ้นในเช้าวันสุดท้ายก่อนกลุ่มแรก (อุ้มผาง) ออกเดินทางภาคสนาม เพื่อบ่มเพาะทักษะการเรียนรู้จากการปฏิบัติจริง (Learning How to Learn) การฟังอย่างลึกซึ้ง และท่าทีการเรียนรู้ร่วมกับชาวบ้านและทีมสุขภาพอำเภออย่างอ่อนน้อมและเคารพศักดิ์ศรี",
       objectives: [
-        "วิเคราะห์การบูรณาการระบบสุขภาพอำเภอ (District Health Systems: DHS) ที่เชื่อมโยงหน่วยบริการเข้ากับชุมชนและภาคีเครือข่าย (Six Building Blocks Plus One)",
-        "เตรียมทักษะและท่าทีการเรียนรู้ร่วมกับชุมชนและพื้นที่จริง (Learning How to Learn in Community) ก่อนออกฝึกภาคสนามทั้ง 9 โรงพยาบาลชุมชน"
+        "ฝึกทักษะและกระบวนการเรียนรู้จากการปฏิบัติจริง (Learning How to Learn & Experiential Learning) เพื่อสกัดบทเรียนจากสถานการณ์จริงในชุมชนและโรงพยาบาลชุมชน",
+        "เตรียมท่าทีการเรียนรู้ร่วมกับชุมชนและภาคีเครือข่ายในระบบสุขภาพอำเภอ (District Health Systems) อย่างเคารพและเข้าใจบริบทก่อนออกฝึกภาคสนามทั้ง 9 พื้นที่"
       ],
       frameworks: [
-        "District Health Systems (DHS)",
-        "Six Building Blocks Plus One (+Community)",
-        "Community Potential & Social Capital",
-        "Learning How to Learn in Community"
+        "Learning How to Learn (Experiential & Reflective Learning)",
+        "Deep Listening & Dialogue in Community",
+        "District Health Systems (DHS) & Six Building Blocks Plus One",
+        "Community Potential & Social Capital"
       ],
       relatedHs: ["HS2", "HS3", "HS5"],
       assessmentLinks: [
         "เข็มทิศตรงสู่วัตถุประสงค์ภาคสนามทั้ง 5 ข้อ ณ โรงพยาบาลชุมชน 9 แห่ง",
-        "เชื่อมโยงพฤติกรรมและเจตคติการลงพื้นที่ตามฟอร์ม 1A (การสื่อสาร ความอ่อนน้อม เคารพชุมชน)",
+        "เชื่อมโยงพฤติกรรมและเจตคติการลงพื้นที่ตามฟอร์ม 1A (ความอ่อนน้อม การใฝ่รู้ การทำงานเป็นทีม)",
         "วันเดียวกันกับกำหนดส่ง SRN 1 (ภายใน 17.00 น.) และคืนแรกของการเดินทางกลุ่มอุ้มผาง"
       ],
       guidingQuestions: [
-        "องค์ประกอบ 'Plus One' ในระบบสุขภาพอำเภอ (DHS) เติมเต็มช่องว่างใดของกรอบ Six Building Blocks ที่เรียนใน HS2?",
-        "ท่าที 'ไปเรียนรู้ร่วมกับชุมชน' แตกต่างจากท่าที 'ไปเก็บข้อมูลจากชุมชน' อย่างไรตลอด 8–10 วันในพื้นที่ภาคสนาม?"
+        "ท่าทีของการ 'ไปเรียนรู้ร่วมกับชุมชน (Learning with Community)' แตกต่างจากการ 'ไปเก็บข้อมูลจากชุมชน' อย่างไร และส่งผลต่อความลึกซึ้งของสิ่งที่เราจะค้นพบอย่างไร?",
+        "เราจะใช้กระบวนการทบทวนหลังปฏิบัติงาน (After Action Review / Reflection) ร่วมกันในทีมอย่างไรตลอด 8–10 วันในพื้นที่ภาคสนาม?"
       ],
       facultyNote:
-        "จัดช่วงเช้าก่อนกิจกรรมกลุ่มย่อยครั้งที่ 4 (สรุปเครื่องมือก่อนลงพื้นที่) — อาจารย์ที่ปรึกษาทั้ง 9 กลุ่มสามารถต่อยอดประเด็น DHS และท่าทีการเรียนรู้ร่วมกับชุมชนในช่วงบ่ายได้ทันที",
+        "จัดช่วงเช้า ณ ห้อง 2C2-02..03 (2 ห้อง) ก่อนกิจกรรมกลุ่มย่อยครั้งที่ 4 ช่วงบ่าย (13.30–16.30 น.)",
       searchKeywords:
-        "district health systems dhs six building blocks plus one learning how to learn community สุรเกียรติ อาชานานุภาพ ระบบสุขภาพอำเภอ ภาคสนาม ชุมชน"
+        "workshop learning how to learn experiential learning district health systems dhs community สุรเกียรติ อาชานานุภาพ ภาคสนาม ชุมชน"
     },
     {
       id: "w5-d2-cld-ws",
@@ -10812,15 +11082,15 @@
       kindLabel: "Systems Thinking Workshop · สังเคราะห์ภาคสนาม",
       kindLabelEn: "Systems Workshop · CLD & Archetypes",
       phase: 3,
-      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
-      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & สร้างเสริมสุขภาพเชิงบูรณาการ (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Action (Post-Fieldwork)",
       weekLabel: "สัปดาห์ที่ 5",
       dateTH: "วันอังคารที่ 22 ธันวาคม 2569",
       shortDate: "อ. 22 ธ.ค. 69",
-      timeLabel: "13.00 – 16.30 น.",
-      hours: "3.5 ชม.",
-      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก (มีห้องกลุ่มย่อย 9 ห้องสำรองช่วงบ่าย)",
-      title: "Workshop: Systems Thinking in Action – Causal Loop Diagram (CLD) & System Archetypes",
+      timeLabel: "13.30 – 16.30 น.",
+      hours: "3 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Workshop: Systems Thinking in Action – Causal Loop Diagram (CLD) & System Archetypes (Synthesis & Wrap-up)",
       titleThSub: "เวิร์กชอปสังเคราะห์ข้อมูลภาคสนามด้วยแผนผังวงจรเหตุปัจจัย แม่แบบเชิงระบบ และจุดคานงัด",
       speakers: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
       examBadge: "หลังสอบ HS1–HS6 · หัวใจนำเสนอฟอร์ม 3A",
@@ -10847,7 +11117,7 @@
         "จุดคานงัด (Leverage Point) ใดที่สามารถปรับโครงสร้างหรือกติกาของระบบได้จริง โดยไม่เป็นเพียงการแก้ปลายเหตุชั่วคราว (Fixes that Fail)?"
       ],
       facultyNote:
-        "มีห้องกลุ่มย่อย 9 ห้องจองสำรองไว้ช่วงบ่ายเพื่อให้แต่ละกลุ่มทดลองวาด CLD จากข้อมูลพื้นที่จริงก่อนเข้าสู่การถอดบทเรียนกลุ่มย่อยครั้งที่ 7 ในวันถัดไป",
+        "ช่วยให้นักศึกษาแต่ละกลุ่มทดลองวาด CLD จากข้อมูลพื้นที่จริงก่อนเข้าสู่การถอดบทเรียนกลุ่มย่อยครั้งที่ 7 ในวันถัดไป",
       searchKeywords:
         "workshop systems thinking in action causal loop diagram cld system archetypes leverage points synthesis wrap-up ณัฐวุฒิ ฟอร์ม 3A สังเคราะห์ภาคสนาม วงจรเหตุปัจจัย จุดคานงัด"
     },
@@ -10861,29 +11131,30 @@
       kindLabel: "Panel Discussion · กรณีศึกษาโลกจริง",
       kindLabelEn: "Expert Panel · Real-World Case",
       phase: 3,
-      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
-      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & สร้างเสริมสุขภาพเชิงบูรณาการ (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Action (Post-Fieldwork)",
       weekLabel: "สัปดาห์ที่ 5",
       dateTH: "วันพุธที่ 23 ธันวาคม 2569",
       shortDate: "พ. 23 ธ.ค. 69",
       timeLabel: "09.00 – 12.00 น.",
       hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Panel Discussion: Interconnected Six Building Blocks & Health Promotion in Action — บทเรียน “สุขภาวะข้างถนน”",
-      titleThSub: "เมื่อระบบสุขภาพไม่ได้แยกส่วน: ออกแบบระบบใหม่เพื่อสังคมที่เป็นธรรมผ่านชุมชนคนไร้บ้าน",
-      speakers: "วิทยากร: นพ.อานนท์ กุลธรรมานุสรณ์, อ.อนรรฆ พิทักษ์ธานิน, รศ. ภญ. ดร.ยุพดี ศิริสินสุข",
+      title: "Panel Discussion: Connecting the Six Building Blocks for Health Equity “เชื่อม 6 องค์ประกอบสู่ระบบสุขภาพที่เป็นธรรม: บทเรียนเชิงรุกจาก ‘สุขภาวะข้างถนน’”",
+      titleThSub: "เมื่อระบบสุขภาพไม่ได้แยกส่วน: เชื่อม 6 องค์ประกอบเพื่อความเป็นธรรมทางสุขภาพผ่านบทเรียนเชิงรุกกลุ่มคนไร้บ้าน",
+      speakers:
+        "วิทยากร: นพ.ภูริทัต แสงทองพานิชกุล (ผอ.รพ.ราชพิพัฒน์), นพ.อานนท์ กุลธรรมานุสรณ์, อ.อนรรฆ พิทักษ์ธานิน, รศ. ภญ. ดร.ยุพดี ศิริสินสุข | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
       examBadge: "นอกข้อสอบ HS1–HS6 · บูรณาการครบ 6 บท",
       whyImportant:
-        "แสดงให้เห็นชีวิตจริงเมื่อองค์ประกอบทั้ง 6 ของระบบสุขภาพเชื่อมโยงกัน (Interconnected 6BB) ผ่านบทเรียนการเสริมสร้างพลังชุมชนคนไร้บ้านโดย 'สุขภาวะข้างถนน' ซึ่งสะท้อนมิติความเป็นธรรม ปฐมภูมิเชิงรุก และสิทธิสุขภาพอย่างเป็นรูปธรรม",
+        "แสดงให้เห็นชีวิตจริงเมื่อองค์ประกอบทั้ง 6 ของระบบสุขภาพเชื่อมโยงกัน (Connecting the Six Building Blocks) ผ่านบทเรียนการทำงานเชิงรุกร่วมกับชุมชนคนไร้บ้านและเครือข่ายโรงพยาบาล/ภาคประชาสังคม สะท้อนมิติความเป็นธรรม ปฐมภูมิเชิงรุก และสิทธิสุขภาพอย่างเป็นรูปธรรม",
       objectives: [
-        "วิเคราะห์ความเชื่อมโยงระหว่าง 6 องค์ประกอบของระบบสุขภาพ (Six Building Blocks), ปัจจัยกำหนดสุขภาพทางสังคม (SDH) และการสร้างเสริมสุขภาพในโลกความจริง",
+        "วิเคราะห์ความเชื่อมโยงระหว่าง 6 องค์ประกอบของระบบสุขภาพ (Six Building Blocks), ปัจจัยกำหนดสุขภาพทางสังคม (SDH) และความเป็นธรรมทางสุขภาพในโลกความจริง",
         "ถอดบทเรียนการทำงานข้ามภาคส่วนและการจัดบริการสุขภาพปฐมภูมิเชิงรุกเพื่อลดความเหลื่อมล้ำในกลุ่มเปราะบาง (ชุมชนคนไร้บ้าน)"
       ],
       frameworks: [
-        "Interconnected Six Building Blocks",
+        "Connecting the Six Building Blocks",
         "Health Equity & Vulnerable Populations",
-        "Health Promotion & Community Co-creation",
-        "Intersectoral Collaboration & Proactive PHC"
+        "Proactive Primary Health Care & Urban Outreach",
+        "Intersectoral Collaboration & Community Co-creation"
       ],
       relatedHs: ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"],
       assessmentLinks: [
@@ -10893,61 +11164,63 @@
       ],
       guidingQuestions: [
         "สำหรับชุมชนคนไร้บ้าน อุปสรรคด้านสิทธิ บัตรประชาชน ที่อยู่อาศัย และอคติทางสังคม ทำให้ 6 องค์ประกอบของระบบสุขภาพขาดการเชื่อมต่อกันตรงจุดใด?",
-        "การทำงานร่วมกับชุมชนคนไร้บ้านโดย 'สุขภาวะข้างถนน' ช่วยให้เราเห็นแนวทางออกแบบระบบบริการปฐมภูมิเชิงรุกเพื่อลดความเหลื่อมล้ำได้อย่างไร?"
+        "บทเรียนเชิงรุกจาก 'สุขภาวะข้างถนน' และโรงพยาบาลเครือข่ายช่วยให้เราเห็นแนวทางออกแบบระบบบริการปฐมภูมิเพื่อลดความเหลื่อมล้ำได้อย่างไร?"
       ],
       facultyNote:
-        "กรณีศึกษาจริงที่รวมทั้งแพทย์ นักวิชาการด้านสังคม/คนไร้บ้าน และผู้ขับเคลื่อนระบบหลักประกันสุขภาพ เหมาะใช้กระตุ้นการเชื่อมโยงประเด็นกลุ่มเปราะบางในพื้นที่ภาคสนามทั้ง 9 แห่ง",
+        "รวมมุมมองครบทั้งผู้อำนวยการโรงพยาบาล นักวิจัยระบบสุขภาพ นักวิชาการด้านคนไร้บ้าน และผู้ขับเคลื่อนระบบหลักประกันสุขภาพ/คุ้มครองผู้บริโภค",
       searchKeywords:
-        "interconnected six building blocks health promotion in action สุขภาวะข้างถนน คนไร้บ้าน homeless equity อานนท์ กุลธรรมานุสรณ์ อนรรฆ พิทักษ์ธานิน ยุพดี ศิริสินสุข กลุ่มเปราะบาง"
+        "connecting six building blocks health equity สุขภาวะข้างถนน คนไร้บ้าน homeless ภูริทัต แสงทองพานิชกุล อานนท์ กุลธรรมานุสรณ์ อนรรฆ พิทักษ์ธานิน ยุพดี ศิริสินสุข กลุ่มเปราะบาง"
     },
     {
       id: "w5-d4-policy",
       order: 6,
       tone: "sf-6",
-      code: "POLICY",
-      driveFileName: "06_POLICY_Political_Economy.md",
+      code: "PANEL-HP",
+      driveFileName: "06_Integrated_Health_Promotion_in_Action.md",
       kind: "panel",
-      kindLabel: "Panel Discussion & Policy Exercise",
-      kindLabelEn: "Panel & Policy Exercise",
+      kindLabel: "Expert Panel · สร้างเสริมสุขภาพเชิงบูรณาการ",
+      kindLabelEn: "Expert Panel · Integrated Health Promotion",
       phase: 3,
-      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
-      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & สร้างเสริมสุขภาพเชิงบูรณาการ (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Action (Post-Fieldwork)",
       weekLabel: "สัปดาห์ที่ 5",
       dateTH: "วันพฤหัสบดีที่ 24 ธันวาคม 2569",
       shortDate: "พฤ. 24 ธ.ค. 69",
-      timeLabel: "13.00 – 16.30 น.",
-      hours: "3.5 ชม.",
+      timeLabel: "13.30 – 16.30 น.",
+      hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Panel Discussion & Policy Exercise: การขับเคลื่อนข้อเสนอเชิงนโยบายภายใต้บริบทเศรษฐศาสตร์การเมือง",
-      titleThSub: "Young-Gen Systems-based Practitioner · การวิเคราะห์ผู้มีส่วนได้ส่วนเสีย & Earmarked Tax",
-      speakers: "คณาจารย์และวิทยากรผู้ทรงคุณวุฒิด้านนโยบายสุขภาพ",
-      examBadge: "นอกข้อสอบ HS1–HS6 · ทักษะนโยบายจริง",
+      title: "Integrated Health Promotion in Action: Learning from Expert Experience",
+      titleThSub: "สร้างเสริมสุขภาพเชิงบูรณาการในภาคปฏิบัติ: เรียนรู้ผ่านประสบการณ์จริงของผู้เชี่ยวชาญ",
+      speakers:
+        "วิทยากร: นพ.พงศ์เทพ วงศ์วัชรไพบูลย์ (ผู้จัดการ สสส.), นพ.กติกา อรรฆศิลป์ (หัวหน้าฝ่ายการผสานข้อมูลและประเมินโครงการส่งเสริมสุขภาพ), นพ.ฐิติกร โตโพธิ์ไทย (กองกิจกรรมทางกายเพื่อสุขภาพ) | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      examBadge: "นอกข้อสอบ HS1–HS6 · ต่อยอดวัตถุประสงค์ที่ 4 & 5",
       whyImportant:
-        "เติมเต็มมิติสุดท้ายที่ตำราทฤษฎีเพียงอย่างเดียวสอนไม่ได้ — คือ 'เศรษฐศาสตร์การเมืองของนโยบายสุขภาพ' (Political Economy) การวิเคราะห์ผู้มีส่วนได้ส่วนเสีย และบทบาทของแพทย์รุ่นใหม่ในการผลักดันข้อเสนอเชิงนโยบายให้เกิดขึ้นจริง",
+        "ถ่ายทอดประสบการณ์จริงจากแพทย์ผู้บริหารและผู้เชี่ยวชาญด้านการสร้างเสริมสุขภาพระดับประเทศ (สสส. และกรมอนามัย) ช่วยให้นักศึกษาเห็นวิธีผสานข้อมูล การประเมินผล และการขับเคลื่อนสิ่งแวดล้อม/นโยบายสาธารณะเพื่อเปลี่ยนพฤติกรรมสุขภาพของประชากรในโลกจริง",
       objectives: [
-        "วิเคราะห์กระบวนการขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพภายใต้บริบทเศรษฐศาสตร์การเมือง (Political Economy of Health) และพลวัตอำนาจของผู้มีส่วนได้ส่วนเสีย",
-        "ฝึกการวิเคราะห์ผู้มีส่วนได้ส่วนเสีย (Stakeholder Analysis) และบทบาทของแพทย์รุ่นใหม่ในการเปลี่ยนแปลงเชิงระบบ (Young-Gen Systems-based Practitioner)"
+        "วิเคราะห์กลยุทธ์การสร้างเสริมสุขภาพเชิงบูรณาการในภาคปฏิบัติ (Integrated Health Promotion in Action) ตั้งแต่ระดับชุมชน องค์กร ไปจนถึงนโยบายสาธารณะระดับประเทศ",
+        "อธิบายบทบาทของการผสานข้อมูล การประเมินผลโครงการส่งเสริมสุขภาพ และการออกแบบสิ่งแวดล้อมที่เอื้อต่อกิจกรรมทางกายและพฤติกรรมสุขภาพที่ยั่งยืน",
+        "เชื่อมโยงประสบการณ์จริงของแพทย์นักสร้างเสริมสุขภาพเข้ากับการออกแบบข้อเสนอแนะเชิงระบบสำหรับพื้นที่ภาคสนาม"
       ],
       frameworks: [
-        "Political Economy of Health",
-        "Stakeholder Analysis (Power vs Interest)",
-        "Health in All Policies (HiAP)",
-        "Fiscal Policy & Earmarked Tax Advocacy"
+        "Ottawa Charter 5 Action Areas in Practice",
+        "Integrated Health Promotion & Healthy Public Policy",
+        "Data Integration & Program Evaluation for Health Promotion",
+        "Physical Activity & Supportive Environments"
       ],
-      relatedHs: ["HS1", "HS3", "HS4", "HS6"],
+      relatedHs: ["HS1", "HS3", "HS4", "HS5"],
       assessmentLinks: [
-        "เชื่อมโยง CDH (HS1) · Governance & Accountability (HS3) · Build Healthy Public Policy (HS4) · Financing (HS6)",
-        "ยกระดับข้อเสนอเชิงนโยบายในนำเสนอภาคสนามระบบสุขภาพ ฟอร์ม 3A (29 ธ.ค.)",
-        "หล่อหลอมอัตลักษณ์แพทย์ในฐานะ Change Agent สำหรับบันทึกสะท้อนคิด SRN 2"
+        "เชื่อมตรงกับวัตถุประสงค์รายวิชาข้อที่ 4 (การสร้างเสริมสุขภาพ) และข้อที่ 5 (บทบาทแพทย์ในระบบสุขภาพ)",
+        "ยกระดับข้อเสนอแนะเชิงระบบและการสร้างเสริมสุขภาพในเวทีนำเสนอภาคสนาม ฟอร์ม 3A (29 ธ.ค.)",
+        "เสริมมุมมองเส้นทางอาชีพแพทย์ด้านการสร้างเสริมสุขภาพและนโยบายสาธารณะสำหรับ SRN 2"
       ],
       guidingQuestions: [
-        "เหตุใดข้อเสนอเชิงนโยบายสุขภาพที่มีหลักฐานทางวิชาการชัดเจนจึงมักไม่ถูกนำไปปฏิบัติทันที และแรงต้านทางเศรษฐศาสตร์การเมืองใดอยู่เบื้องหลัง?",
-        "ในฐานะแพทย์รุ่นใหม่ (Young-Gen Practitioner) เราจะออกแบบกลยุทธ์สื่อสารและสร้างแนวร่วมกับ Stakeholders อย่างไรให้ข้อเสนอเกิดผลจริง?"
+        "เหตุใดการรณรงค์ให้ความรู้เพียงอย่างเดียวจึงไม่เพียงพอในการเปลี่ยนพฤติกรรมระดับประชากร และผู้เชี่ยวชาญใช้กลไกข้อมูล สิ่งแวดล้อม และนโยบายสาธารณะเข้ามาเสริมพลังอย่างไร?",
+        "กลุ่มสามารถนำบทเรียนการผสานข้อมูลและการออกแบบโครงการสร้างเสริมสุขภาพเชิงบูรณาการไปปรับใช้กับข้อเสนอแนะของพื้นที่ภาคสนามตนเองได้อย่างไร?"
       ],
       facultyNote:
-        "ตามเอกสารตารางสอนปี 2569 มี 2 แนวทางที่อยู่ระหว่างยืนยันรูปแบบขั้นสุดท้าย: (1) Young-Gen Systems-based Practitioner ภายใต้บริบทเศรษฐศาสตร์การเมือง หรือ (2) Earmarked Tax Case Exercise (ทีม รศ. พญ.เริงฤดี และวิทยากร ศจย.)",
+        "เวทีเสวนาแลกเปลี่ยนประสบการณ์ตรงจากผู้จัดการ สสส. และแพทย์ผู้เชี่ยวชาญด้านประเมินผลโครงการและกิจกรรมทางกายเพื่อสุขภาพ",
       searchKeywords:
-        "policy exercise political economy stakeholder analysis young-gen systems-based practitioner earmarked tax เศรษฐศาสตร์การเมือง นโยบายสาธารณะ ผู้มีส่วนได้ส่วนเสีย ภาษีบาป ศจย เริงฤดี"
+        "integrated health promotion in action สร้างเสริมสุขภาพเชิงบูรณาการ สสส กิจกรรมทางกาย ประเมินโครงการ พงศ์เทพ วงศ์วัชรไพบูลย์ กติกา อรรฆศิลป์ ฐิติกร โตโพธิ์ไทย"
     }
   ];
 
@@ -11076,8 +11349,8 @@
           options.allDesc ||
             (isBeyondActive
               ? tr(
-                  "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
-                  "6 high-impact taught sessions beyond the HS1–HS6 written exam (18.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
+                  "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
+                  "6 high-impact taught sessions beyond the HS1–HS6 written exam (17.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
                 )
               : `เลือกบทเรียน ST1 & HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (รอแขวน VDO)`)
         )
@@ -14404,8 +14677,8 @@
       )}</h3>` +
       `<p class="sf-why-sub">${escapeHtml(
         ROLE === "faculty"
-          ? "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ประเมินเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 18.5 ชม. นี้คือโครงสร้างที่เชื่อมทฤษฎีสู่ภาคสนาม การให้คำปรึกษากลุ่มย่อย ฟอร์ม 3A และ SRN 1–2"
-          : "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ออกเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 18.5 ชม. นี้ (เช็คชื่อ Onsite ห้อง 2C2-03) คือเลนส์คิดเชิงระบบและประสบการณ์ตรงจากโลกจริงที่ส่งผลต่อภาคสนาม ฟอร์ม 3A และ SRN 1–2"
+          ? "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ประเมินเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 17.5 ชม. นี้คือโครงสร้างที่เชื่อมทฤษฎีสู่ภาคสนาม การให้คำปรึกษากลุ่มย่อย ฟอร์ม 3A และ SRN 1–2"
+          : "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ออกเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 17.5 ชม. นี้ (เช็คชื่อ Onsite ห้อง 2C2-03) คือเลนส์คิดเชิงระบบและประสบการณ์ตรงจากโลกจริงที่ส่งผลต่อภาคสนาม ฟอร์ม 3A และ SRN 1–2"
       )}</p>` +
       `</div>` +
       `<div class="sf-why-pillars">` +
@@ -14418,7 +14691,7 @@
     // 2. Category Filter Bar
     const filterBar = make("div", null, "sf-filter-bar");
     const filterDefs = [
-      { id: "all", label: tr("ทั้งหมด (6 คาบ · 18.5 ชม.)", "All (6 Sessions · 18.5 hrs)") },
+      { id: "all", label: tr("ทั้งหมด (6 คาบ · 17.5 ชม.)", "All (6 Sessions · 17.5 hrs)") },
       { id: "systems", label: tr("🧠 Systems Thinking & Workshop (2 คาบ)", "🧠 Systems Thinking & Workshop (2)") },
       { id: "panel", label: tr("🎙️ Panel Discussion & Policy (4 คาบ)", "🎙️ Panel Discussion & Policy (4)") }
     ];
@@ -14757,7 +15030,7 @@
     storageBox.innerHTML =
       `<div class="gdrive-storage-head">🧭 <span>สถานะคาบ Beyond HS1–HS6</span></div>` +
       `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:${Math.max(12, Math.round((uploadedCount / 6) * 100))}%"></div></div>` +
-      `<div class="gdrive-storage-caption"><strong>6 คาบสอนสำคัญ (18.5 ชม.)</strong> · Slide อัปโหลดแล้ว <strong>${uploadedCount} / 6</strong> คาบ — เช็คชื่อ Onsite ห้อง 2C2-03</div>`;
+      `<div class="gdrive-storage-caption"><strong>6 คาบสอนสำคัญ (17.5 ชม.)</strong> · Slide อัปโหลดแล้ว <strong>${uploadedCount} / 6</strong> คาบ — เช็คชื่อ Onsite ห้อง 2C2-03</div>`;
     sidebar.appendChild(storageBox);
 
     function renderCanvas() {
@@ -14804,7 +15077,7 @@
       // Pedagogical context callout inside Drive mode
       const infoStrip = make("div", null, "sf-drive-callout");
       infoStrip.innerHTML =
-        `<strong>🧭 คาบสอนสำคัญที่ไม่ได้ออกข้อสอบทฤษฎี HS1–HS6 (6 คาบ · 18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03)</strong>` +
+        `<strong>🧭 คาบสอนสำคัญที่ไม่ได้ออกข้อสอบทฤษฎี HS1–HS6 (6 คาบ · 17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03)</strong>` +
         `<span>ปูกรอบคิด Systems Thinking (CAS / Iceberg / CLD) และเสวนาผู้เชี่ยวชาญจากโลกจริง เชื่อมตรงสู่ภาคสนาม 9 พื้นที่ การนำเสนอระบบสุขภาพ (ฟอร์ม 3A) และบันทึกสะท้อนคิด SRN 1–2</span>`;
       canvas.appendChild(infoStrip);
 
@@ -15023,8 +15296,8 @@
           allDesc: sel
             ? `${sel.dateTH} (${sel.timeLabel}) · ${sel.speakers} — ${sel.examBadge}`
             : tr(
-                "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
-                "6 high-impact taught sessions beyond the HS1–HS6 written exam (18.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
+                "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
+                "6 high-impact taught sessions beyond the HS1–HS6 written exam (17.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
               ),
           onSelectModule: (m) => openTextbookDriveFolder(m || "FOLDERS")
         })
@@ -15186,7 +15459,7 @@
       const bCopy = make("div", null, "sf-companion-copy");
       bCopy.append(
         make("div", "🧭 FOUNDATIONAL & BEYOND THE WRITTEN EXAM · ปูรากฐานคิดเชิงระบบ (ST1) & 6 คาบสอนสำคัญ", "sf-why-kicker"),
-        make("h4", "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบ · 18.5 ชม.)"),
+        make("h4", "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบ · 17.5 ชม.)"),
         make("p", "อ่านเอกสารคำสอนคาบปูรากฐาน ST1 (ฉบับเต็ม & ฉบับย่อ · ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์) และดูกรอบคาบ Global/Planetary Health, DHS 6BB+1, Workshop CLD, สุขภาวะข้างถนน และ Policy Exercise")
       );
       const bActs = make("div", null, "header-actions");
@@ -36519,13 +36792,15 @@
 
       const zoomGrid = make("div", null, "ep-zoom-grid");
       const zoomRooms = (SCHED.courseMeta && SCHED.courseMeta.zoomRooms) || [];
+      const spssSession = epSessions.find((s) => s.id === "w3-d2-spss");
       zoomRooms.forEach((zr, idx) => {
-        const zCard = make("div", null, "ep-zoom-card");
-        const dayTag = idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : "Day 3 · พฤ. 3 ธ.ค. 69";
+        const isSpssZoom = String(zr.id || "").replace(/\s+/g, "") === "95270544175";
+        const zCard = make("div", null, `ep-zoom-card${isSpssZoom ? " is-spss" : ""}`);
+        const dayTag = zr.dayTag || (idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : idx === 2 ? "Day 3 · พฤ. 3 ธ.ค. 69" : "SPSS · อ. 8 ธ.ค. 69");
         const zoomTime = zr.timeLabel || (idx === 0 ? "08.30 – 11.00 น." : "09.00 – 16.30 น.");
         zCard.innerHTML = `
           <div class="ep-zoom-top">
-            <span class="ep-zoom-tag">ZOOM · ${escapeHtml(dayTag)}</span>
+            <span class="ep-zoom-tag${isSpssZoom ? " is-spss-tag" : ""}">ZOOM · ${escapeHtml(dayTag)}</span>
             <span class="ep-zoom-time">${escapeHtml(zoomTime)}</span>
           </div>
           <div class="ep-zoom-label">${escapeHtml(zr.label || "")}</div>
@@ -36550,34 +36825,20 @@
             });
           });
         }
+        if (isSpssZoom && spssSession) {
+          const actWrap = zCard.querySelector(".ep-zoom-actions");
+          if (actWrap && typeof appendSessionMaterialButtons === "function") {
+            appendSessionMaterialButtons(actWrap, spssSession, false);
+          }
+          if (actWrap) {
+            const detailBtn = make("button", tr("รายละเอียดคาบ", "Session Details"), "btn sm");
+            detailBtn.type = "button";
+            detailBtn.addEventListener("click", () => openEventModal(spssSession));
+            actWrap.appendChild(detailBtn);
+          }
+        }
         zoomGrid.appendChild(zCard);
       });
-
-      const spssSession = epSessions.find((s) => s.id === "w3-d2-spss");
-      if (spssSession) {
-        const spssCard = make("div", null, "ep-zoom-card is-spss");
-        spssCard.innerHTML = `
-          <div class="ep-zoom-top">
-            <span class="ep-zoom-tag is-spss-tag">SPSS LAB · อ. 8 ธ.ค. 69</span>
-            <span class="ep-zoom-time">${escapeHtml(spssSession.timeLabel || "13.00 – 14.30 น.")}</span>
-          </div>
-          <div class="ep-zoom-label">${escapeHtml(spssSession.title)}</div>
-          <div class="ep-zoom-creds">
-            <span><strong>${escapeHtml(tr("ผู้สอน:", "Instructor:"))}</strong> ${escapeHtml(spssSession.lecturers || "-")}</span>
-            <span><strong>${escapeHtml(tr("สถานที่:", "Room:"))}</strong> ${escapeHtml(spssSession.room || "-")}</span>
-          </div>
-        `;
-        const spssActs = make("div", null, "ep-zoom-actions");
-        if (typeof appendSessionMaterialButtons === "function") {
-          appendSessionMaterialButtons(spssActs, spssSession, false);
-        }
-        const detailBtn = make("button", tr("รายละเอียดคาบ", "Session Details"), "btn sm");
-        detailBtn.type = "button";
-        detailBtn.addEventListener("click", () => openEventModal(spssSession));
-        spssActs.appendChild(detailBtn);
-        spssCard.appendChild(spssActs);
-        zoomGrid.appendChild(spssCard);
-      }
 
       zoomSection.appendChild(zoomGrid);
       wrap.appendChild(zoomSection);

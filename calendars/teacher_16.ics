@@ -3,7 +3,7 @@ VERSION:2.0
 PRODID:-//Ramathibodi Community Medicine//RACM 303 2569//TH
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:RACM 303 (2569) · รศ. นพ.สุรเกียรติ อาชานานุภาพ (วิทยากรพิเศษ)
+X-WR-CALNAME:RACM 303 (2569) · อาจารย์ รศ. นพ.สุรเกียรติ อาชานานุภาพ (วิทยากรพิเศษ)
 X-WR-TIMEZONE:Asia/Bangkok
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
@@ -18,16 +18,16 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:w3-d3-dhs-panel@racm303-2569.mahidol.ac.th
-DTSTAMP:20261119T160000Z
+DTSTAMP:20261123T073000Z
 DTSTART;TZID=Asia/Bangkok:20261209T090000
 DTEND;TZID=Asia/Bangkok:20261209T120000
-SUMMARY:[RACM 303] Panel Discussion: District Health Systems – Six Building Blocks Plus One & Learning How to Learn in Community
-LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: วิเคราะห์การบูรณาการระบบสุขภาพอำเภอ (DHS) ที่เชื่อมโยงหน่วยบริการเข้ากับชุมชนและภาคีเครือข่าย พร้อมเตรียมทักษะและท่าทีการเรียนรู้ร่วมกับชุมชนก่อนออกภาคสนาม\nอาจารย์ผู้สอน: วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (169 คน) (เช็คชื่อ)
+SUMMARY:[RACM 303] Workshop: Learning How to Learn
+LOCATION:ห้อง 2C2-02 และ 2C2-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก
+DESCRIPTION:วัตถุประสงค์: เตรียมกรอบคิด ทักษะ และท่าทีการเรียนรู้จากการปฏิบัติจริงร่วมกับชุมชนและระบบสุขภาพอำเภอ (Learning How to Learn in Community) ก่อนออกฝึกภาคสนามทั้ง 9 พื้นที่\nอาจารย์ผู้สอน: วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ\nสถานที่/ห้องเรียน: ห้อง 2C2-02 และ 2C2-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (169 คน) (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Panel Discussion: District Health Systems – Six Building Blocks Plus One & Learning How to Learn in Community
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Workshop: Learning How to Learn
 END:VALARM
 END:VEVENT
 END:VCALENDAR

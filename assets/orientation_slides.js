@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261123or18";
+  const ASSET_VER = "20261123sbp3";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -445,7 +445,7 @@
       keyMessageHtml:
         "สร้างพื้นฐานความรู้สู่ <strong>โน้ตสรุป A4 สำหรับสอบข้อเขียน</strong> ควบคู่กับการฝึก <strong>การคิดเชิงระบบ</strong> เพื่อเชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอทีม (<code>ฟอร์ม 3A</code>)",
       notes:
-        "อธิบายเส้นทางเรียนรู้ 5 ขั้นตอนของ ST1 และ HS1–HS6 ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ (18.5 ชม.) ซึ่งช่วยบ่มเพาะสมรรถนะการคิดเชิงระบบเพื่อใช้เชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอผลงานทีมฟอร์ม 3A และงานสะท้อนคิด",
+        "อธิบายเส้นทางเรียนรู้ 5 ขั้นตอนของ ST1 และ HS1–HS6 ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ (17.5 ชม.) ซึ่งช่วยบ่มเพาะสมรรถนะการคิดเชิงระบบเพื่อใช้เชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอผลงานทีมฟอร์ม 3A และงานสะท้อนคิด",
       render: () => `
         <div class="or-top-fig-stack is-s07-stack">
           ${figPlate("orient_s07_guided_flow.png", "5-Step Guided Learning Flow and Systems Thinking & Policy Panels", "")}
@@ -967,7 +967,7 @@
                 <p class="or-card-text"><strong>เรียนคาบแรก <code>ST1</code>: ระบบซับซ้อนและการคิดเชิงระบบในระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">② วันนี้ · 13.00 – 16.00 น. (ห้อง 2C2-03)</span>
+                <span class="or-card-kicker">② วันนี้ · 13.30 – 16.30 น. (ห้อง 2C2-03)</span>
                 <p class="or-card-text"><strong>ร่วมเสวนาจากข้างเตียงสู่ระบบสุขภาพ สุขภาพโลก และการวิจัยระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
@@ -975,7 +975,7 @@
                 <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 08.30 น. และกลุ่มย่อย 09.40 น.</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.00 – 16.30 น.</span>
+                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.30 – 16.30 น.</span>
                 <p class="or-card-text"><strong>พบอาจารย์ที่ปรึกษาประจำกลุ่มโรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง ในชั่วโมงกลุ่มย่อยครั้งที่ 1</strong></p>
               </div>
             </div>

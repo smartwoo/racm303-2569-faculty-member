@@ -1,0 +1,33 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Ramathibodi Community Medicine//RACM 303 2569//TH
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:RACM 303 (2569) · อาจารย์ นพ.ภูริทัต แสงทองพานิชกุล (วิทยากรพิเศษ)
+X-WR-TIMEZONE:Asia/Bangkok
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VTIMEZONE
+TZID:Asia/Bangkok
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0700
+TZOFFSETTO:+0700
+TZNAME:+07
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:w5-d3-panel-homeless@racm303-2569.mahidol.ac.th
+DTSTAMP:20261123T073000Z
+DTSTART;TZID=Asia/Bangkok:20261223T090000
+DTEND;TZID=Asia/Bangkok:20261223T120000
+SUMMARY:[RACM 303] Panel Discussion: Connecting the Six Building Blocks for Health Equity “เชื่อม 6 องค์ประกอบสู่ระบบสุขภาพที่เป็นธรรม: บทเรียนเชิงรุกจาก ‘สุขภาวะข้างถนน’”
+LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
+DESCRIPTION:วัตถุประสงค์: วิเคราะห์ความเชื่อมโยงระหว่าง 6 องค์ประกอบของระบบสุขภาพ ปัจจัยกำหนดสุขภาพทางสังคม และการสร้างเสริมสุขภาพในโลกความจริงผ่านบทเรียนการเสริมสร้างความเข้มแข็งให้ชุมชนคนไร้บ้าน\nอาจารย์ผู้สอน: วิทยากร: นพ.ภูริทัต แสงทองพานิชกุล (ผู้อำนวยการโรงพยาบาลราชพิพัฒน์)\, นพ.อานนท์ กุลธรรมานุสรณ์ (สำนักวิชาการสาธารณสุข)\, อ.อนรรฆ พิทักษ์ธานิน (ผู้อำนวยการศูนย์แม่โขงศึกษา)\, รศ. ภญ. ดร.ยุพดี ศิริสินสุข (รองเลขาธิการสำนักงานสภาผู้บริโภค) | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (169 คน) (เช็คชื่อ)
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Panel Discussion: Connecting the Six Building Blocks for Health Equity “เชื่อม 6 องค์ประกอบสู่ระบบสุขภาพที่เป็นธรรม: บทเรียนเชิงรุกจาก ‘สุขภาวะข้างถนน’”
+END:VALARM
+END:VEVENT
+END:VCALENDAR
