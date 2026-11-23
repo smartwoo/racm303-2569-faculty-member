@@ -481,8 +481,8 @@
               tone: "tone-teal",
               icon: ICONS.chart,
               title: t("ระบาดวิทยา (EP1–EP9)", "Epidemiology (EP1–EP9)"),
-              sub: t("อัปโหลด Slide คาบ EP1–EP9 & Ex 1–6 ห้องเรียน Zoom · SPSS และฟอร์ม 4A", "Slide upload, EP1–EP9 & Ex 1–6, Zoom rooms, SPSS & Form 4A"),
-              badge: "EP1 – EP9",
+              sub: t("🎬 Video + Conceptualized Slides คาบ EP6 (Morbidity & Mortality) · อัปโหลด Slide · Zoom · SPSS & ฟอร์ม 4A", "🎬 EP6 Synced Video & Conceptualized Slides · Slide upload, Zoom, SPSS & Form 4A"),
+              badge: "🎬 EP6 Player · EP1–EP9",
               action: () => navigateFromTile("app-epi", () => navigateTvTab("epidemiology"))
             },
             {
@@ -545,8 +545,8 @@
               tone: "tone-slate",
               icon: ICONS.chart,
               title: t("ระบาดวิทยา (EP1–EP9)", "Epidemiology (EP1–EP9)"),
-              sub: t("คาบเรียน EP1–EP9 & Exercise 1–6 ห้องเรียน Zoom · SPSS สัดส่วนสอบ & ฟอร์ม 4A", "EP1–EP9 lectures, Exercises 1–6, Zoom rooms, SPSS & Form 4A"),
-              badge: t("EP1 – EP9", "EP1 – EP9"),
+              sub: t("🎬 Video + Conceptualized Slides คาบ EP6 (Morbidity & Mortality) · คาบเรียน EP1–EP9 · Zoom · SPSS & ฟอร์ม 4A", "🎬 EP6 Synced Video & Conceptualized Slides · EP1–EP9 lectures, Zoom, SPSS & Form 4A"),
+              badge: t("🎬 EP6 Player · EP1–EP9", "🎬 EP6 Player · EP1–EP9"),
               action: () => navigateFromTile("app-epi", () => navigateTvTab("epidemiology"))
             },
             {
@@ -1392,6 +1392,7 @@
       const curEpSec = st.epSection || "all";
       const epPills = [
         { id: "all", label: t("ภาพรวมทั้งหมด", "All Sections") },
+        { id: "morbidity-mortality", label: t("🎬 EP6: Measures of Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
         { id: "sessions", label: t("คาบเรียน EP1–EP9 & Ex 1–6", "EP1–EP9 & Ex 1–6") },
         { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
@@ -2061,6 +2062,21 @@
         meta: "9 คาบบรรยาย · 6 แบบฝึกหัด",
         tags: ["📊 EP1–EP9", "💻 Ex 1–6 & SPSS", "📋 สัดส่วนสอบ & 4A"],
         files: [
+          {
+            id: "ep:ep6-morbidity",
+            folderPath: ["epidemiology"],
+            name: "EP6_Measures_of_Morbidity_and_Mortality_Video_&_43_Conceptualized_Slides.app",
+            title: "EP6: Measures of Morbidity & Mortality — Video Playback + 43 Captured Slides + Verbatim & Conceptualized Logical Flow",
+            sub: "เล่นวิดีโอบรรยายควบคู่กับสไลด์ 43 หน้า คำพูดผู้สอนคำต่อคำ (Verbatim) และประเด็นสังเคราะห์เชิงแนวคิด (Conceptualized) ตาม Timeline",
+            meta: "EP6 · สอบ 15% · 43 Slides",
+            badge: "🎬 เปิดบทเรียน EP6",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("morbidity-mortality");
+              else navigateTvTab("epidemiology");
+            })
+          },
           {
             id: "ep:all",
             folderPath: ["epidemiology"],

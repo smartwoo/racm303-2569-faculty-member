@@ -646,7 +646,7 @@ window.RACM_SCHEDULE_DATA = {
       },
       {
         "code": "EP6",
-        "title": "Measure of Burden of Disease",
+        "title": "Measures of Morbidity & Mortality (Measure of Burden of Disease)",
         "date": "พฤ. 3 ธ.ค. 69",
         "weight": "15%"
       },
@@ -1080,7 +1080,7 @@ window.RACM_SCHEDULE_DATA = {
       "timeLabel": "09.00 – 12.00 น.",
       "category": "EP",
       "code": "EP6–EP8",
-      "title": "EP6: Measure of Burden of Disease · EP7: Health Survey · EP8: Experimental Study",
+      "title": "EP6: Measures of Morbidity & Mortality (Measure of Burden of Disease) · EP7: Health Survey · EP8: Experimental Study",
       "objectives": "คำนวณและแปลผลตัวชี้วัดภาระโรค (Incidence, Prevalence, Mortality, DALYs) ออกแบบการสำรวจสุขภาพชุมชนและการสุ่มตัวอย่าง (Health Survey) และประเมินความตรงของการศึกษาเชิงทดลอง (RCT)",
       "lecturers": "อ. นพ.ปวินท์ ศรีวิเชียร, ศ. นพ.วิชัย เอกพลากร, ผศ. พญ.ฉัฐญาณ์ วงศ์รัฐนันท์",
       "format": "Onsite + Online (Hybrid)",

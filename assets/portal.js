@@ -1220,6 +1220,9 @@
       }
     }
     if (tabId === "fieldwork") renderFieldworkView();
+    if (tabId !== "epidemiology" && window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.destroy === "function") {
+      window.RACM303_EP6_STUDIO.destroy();
+    }
     if (tabId === "epidemiology") renderEpidemiologyView();
     if (tabId === "submissions") renderSubmissionsView();
     if (tabId === "leave" && typeof renderLeavePortalView === "function") renderLeavePortalView();
@@ -2913,7 +2916,12 @@
 
     const epSpecRows = ((SCHED.tableSpec && SCHED.tableSpec.ep) || [])
       .map(
-        (x) => `<tr><td><strong>${escapeHtml(x.code)}</strong></td><td>${escapeHtml(x.title)}</td><td>${escapeHtml(x.date)}</td><td><strong>${escapeHtml(x.weight)}</strong></td></tr>`
+        (x) =>
+          `<tr><td><strong>${escapeHtml(x.code)}</strong></td><td>${escapeHtml(x.title)}${
+            x.code === "EP6"
+              ? ` <button type="button" class="spec-hs-jump-link" data-spec-ep6="1">🎬 เปิด Video + Conceptualized Slides →</button>`
+              : ""
+          }</td><td>${escapeHtml(x.date)}</td><td><strong>${escapeHtml(x.weight)}</strong></td></tr>`
       )
       .join("");
 
@@ -2962,6 +2970,9 @@
     });
     wrap.querySelectorAll("[data-spec-tb]").forEach((btn) => {
       btn.addEventListener("click", () => openTextbookDoc(btn.dataset.specTb));
+    });
+    wrap.querySelectorAll("[data-spec-ep6]").forEach((btn) => {
+      btn.addEventListener("click", () => openEpidemiology("morbidity-mortality"));
     });
     wrap.querySelectorAll("table.clean-table").forEach((tbl) => makeStaticTableSortable(tbl));
   }
@@ -27216,12 +27227,31 @@
       container.appendChild(bDoc);
     }
 
+    if (session.id === "w2-d4-ep678" || session.id === "w2-d4-ep9-ex56") {
+      const bEp6 = make(
+        "button",
+        "🎬 EP6: Morbidity & Mortality (Video + 43 Conceptualized Slides)",
+        "btn sm teal"
+      );
+      bEp6.type = "button";
+      bEp6.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openEpidemiology("morbidity-mortality");
+      });
+      container.appendChild(bEp6);
+    }
+
     const slideRec = getSessionSlideRecord(session.id);
     if (slideRec) {
       const bSlide = make("button", `📊 เปิด Slide · ${slideRec.fileName || "ดาวน์โหลด"}`, "btn sm slide-ready-btn");
       bSlide.type = "button";
       bSlide.addEventListener("click", () => openSessionSlide(session.id));
       container.appendChild(bSlide);
+    } else if (session.id === "w2-d4-ep678") {
+      const bPdf = make("a", "📥 ดาวน์โหลด Slide EP6 (.PDF)", "btn sm slide-ready-btn");
+      bPdf.href = "downloads/EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf";
+      bPdf.download = "EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf";
+      container.appendChild(bPdf);
     } else {
       const bNoSlide = make("button", "📊 Slide ประกอบการสอน (ยังไม่อัปโหลด)", "btn sm cal-mat-btn is-disabled-slide");
       bNoSlide.type = "button";
@@ -27797,6 +27827,14 @@
 
     // 1. Quick Portal Actions (Leave Form, Slide Upload, SRN, Map, Epidemiology)
     const quickTools = [
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP6: Measures of Morbidity & Mortality (Video + 43 Conceptualized Slides)",
+        sub: "เล่นวิดีโอบรรยายควบคู่กับสไลด์ 43 หน้า คำพูดผู้สอนคำต่อคำ (Verbatim) และประเด็นสังเคราะห์เชิงแนวคิดตาม Timeline",
+        hay: "ep6 morbidity mortality burden of disease prevalence incidence daly standardization smr ระบาดวิทยา ภาระโรค ความชุก อุบัติการณ์",
+        run: () => openEpidemiology("morbidity-mortality")
+      },
       {
         cat: "บทเรียน & คาบสอนหลัก",
         icon: "📊",
@@ -33674,7 +33712,7 @@
 
   /* ---------- Clinical & Community Epidemiology Hub (#panel-epidemiology) ---------- */
   function setEpidemiologySection(sec) {
-    const valid = ["all", "sessions", "zoom-spss", "exam-field"];
+    const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
     state.epSection = valid.includes(sec) ? sec : "all";
     if (state.activeTab === "epidemiology") {
       renderEpidemiologyView();
@@ -33684,7 +33722,7 @@
 
   function openEpidemiology(sec) {
     if (sec) {
-      const valid = ["all", "sessions", "zoom-spss", "exam-field"];
+      const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
       state.epSection = valid.includes(sec) ? sec : "all";
     }
     switchTab("epidemiology");
@@ -33703,6 +33741,9 @@
   function renderEpidemiologyView() {
     const mount = $("epidemiologyMount");
     if (!mount) return;
+    if (window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.destroy === "function") {
+      window.RACM303_EP6_STUDIO.destroy();
+    }
     mount.replaceChildren();
 
     const curSec = state.epSection || "all";
@@ -33712,16 +33753,16 @@
     const kpiGrid = make("div", null, "ep-kpi-grid");
     const kpis = [
       {
-        badge: "EP1 – EP9",
-        title: tr("9 หัวข้อบรรยายหลัก", "9 Core Lectures"),
-        meta: tr("ศ. 27 พ.ย. · พ. 2 ธ.ค. · พฤ. 3 ธ.ค. 2569", "27 Nov · 2 Dec · 3 Dec 2026"),
-        sec: "sessions"
+        badge: "🎬 EP6 Interactive",
+        title: tr("Measures of Morbidity & Mortality", "Measures of Morbidity & Mortality"),
+        meta: tr("Video Playback + 43 สไลด์ · Verbatim → Conceptualized ตาม Timeline", "Synced Video + 43 Slides · Verbatim → Conceptualized"),
+        sec: "morbidity-mortality"
       },
       {
-        badge: "Exercise 1 – 6",
-        title: tr("ฝึกวิเคราะห์โจทย์ & Q&A", "6 Case Exercises & Q&A"),
-        meta: tr("เรียนและอภิปรายผ่านห้องเรียน Zoom ทั้ง 3 วัน", "Interactive Zoom workshops across 3 days"),
-        sec: "zoom-spss"
+        badge: "EP1 – EP9 & Ex 1–6",
+        title: tr("9 หัวข้อบรรยาย & 6 แบบฝึกหัด", "9 Core Lectures & 6 Exercises"),
+        meta: tr("ศ. 27 พ.ย. · พ. 2 ธ.ค. · พฤ. 3 ธ.ค. 2569 (มี Zoom)", "27 Nov · 2 Dec · 3 Dec 2026"),
+        sec: "sessions"
       },
       {
         badge: tr("อ. 8 ธ.ค. 2569", "Tue 8 Dec 2026"),
@@ -33754,6 +33795,7 @@
     filterBar.setAttribute("role", "tablist");
     const filterItems = [
       { id: "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
+      { id: "morbidity-mortality", label: tr("🎬 EP6: Measures of Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
       { id: "sessions", label: tr("คาบสอน EP1–EP9 & Exercise 1–6", "EP1–EP9 & Exercise 1–6 Sessions") },
       { id: "zoom-spss", label: tr("ห้องเรียน Zoom (3 วัน) & SPSS", "3-Day Zoom Classrooms & SPSS") },
       { id: "exam-field", label: tr("สัดส่วนข้อสอบ & นำเสนอภาคสนาม (4A)", "Exam Blueprint & Fieldwork Form 4A") }
@@ -33767,6 +33809,12 @@
       filterBar.appendChild(btn);
     });
     wrap.appendChild(filterBar);
+
+    let ep6StudioHost = null;
+    if (curSec === "all" || curSec === "morbidity-mortality") {
+      ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
+      wrap.appendChild(ep6StudioHost);
+    }
 
     const allSessions = SCHED.sessions || [];
     const epSessions = allSessions.filter(
@@ -33953,7 +34001,11 @@
                   return `
                     <tr>
                       <td><span class="ep-code-pill">${escapeHtml(r.code)}</span></td>
-                      <td><strong>${escapeHtml(r.title)}</strong></td>
+                      <td><strong>${escapeHtml(r.title)}</strong>${
+                        r.code === "EP6"
+                          ? ` <button type="button" class="spec-hs-jump-link" data-ep-open-morb="1">🎬 เปิด Video + Conceptualized →</button>`
+                          : ""
+                      }</td>
                       <td class="ep-td-muted">${escapeHtml(r.date || "")}</td>
                       <td style="text-align:right">
                         <div class="ep-weight-cell">
@@ -33969,6 +34021,9 @@
           </table>
         </div>
       `;
+      specCard.querySelectorAll("[data-ep-open-morb]").forEach((b) => {
+        b.addEventListener("click", () => setEpidemiologySection("morbidity-mortality"));
+      });
       specGrid.appendChild(specCard);
 
       const ch17 = (MANUAL.chapters || []).find((c) => c.id === "man-ch-17");
@@ -34007,6 +34062,9 @@
     }
 
     mount.appendChild(wrap);
+    if (ep6StudioHost && window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.render === "function") {
+      window.RACM303_EP6_STUDIO.render(ep6StudioHost);
+    }
   }
 
   function init() {
@@ -34107,6 +34165,11 @@
     }
 
     if (params.get("page") === "epidemiology" || params.get("page") === "ep") {
+      const secParam = params.get("sec") || "";
+      if (secParam) {
+        const valid = ["all", "morbidity-mortality", "sessions", "zoom-spss", "exam-field"];
+        state.epSection = valid.includes(secParam) ? secParam : "all";
+      }
       switchTab("epidemiology", false);
       return;
     }
