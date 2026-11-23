@@ -4561,29 +4561,67 @@ a:hover {
   box-shadow: 0 2px 6px rgba(0, 45, 114, 0.22);
 }
 
-/* Fullscreen Theater Mode for Slide Deck */
+/* Fullscreen Theater Mode for Slide Deck (Apple / Samsung / Google Keynote Projector Scale) */
 .reader-paper.is-deck-theater {
   position: fixed;
   inset: 0;
   z-index: 920;
   margin: 0;
   border-radius: 0;
-  padding: 18px 28px 28px;
+  padding: 18px 32px 32px;
   overflow-y: auto;
   background: #f3f5f9;
 }
 
 .reader-paper.is-deck-theater .deck-slide-card {
-  max-width: 1180px;
+  max-width: 1460px;
   margin: 0 auto;
   width: 100%;
-  min-height: calc(100vh - 210px);
+  min-height: calc(100vh - 200px);
+  padding: 36px 48px 42px;
+}
+
+.reader-paper.is-deck-theater .deck-slide-eyebrow {
+  font-size: 14.5px;
+  padding: 5px 14px;
+  margin-bottom: 16px;
+}
+
+.reader-paper.is-deck-theater .deck-slide-canvas {
+  font-size: clamp(20px, 1.42vw, 25px);
+  line-height: 1.66;
+}
+
+.reader-paper.is-deck-theater .deck-slide-canvas h2,
+.reader-paper.is-deck-theater .deck-slide-canvas .section-h2 {
+  font-size: clamp(28px, 2.15vw, 38px);
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+}
+
+.reader-paper.is-deck-theater .deck-slide-canvas h3,
+.reader-paper.is-deck-theater .deck-slide-canvas .numbered-h3 {
+  font-size: clamp(23px, 1.72vw, 30px);
+  line-height: 1.34;
+}
+
+.reader-paper.is-deck-theater .deck-slide-canvas .editorial-figure,
+.reader-paper.is-deck-theater .deck-slide-canvas .figure-box {
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+.reader-paper.is-deck-theater .deck-slide-canvas figcaption,
+.reader-paper.is-deck-theater .deck-slide-canvas .editorial-caption {
+  font-size: clamp(16.5px, 1.12vw, 20px);
+  line-height: 1.55;
+  color: #1e293b;
 }
 
 .reader-paper.is-deck-theater .deck-nav-bar,
 .reader-paper.is-deck-theater .deck-progress-track,
 .reader-paper.is-deck-theater .deck-filmstrip {
-  max-width: 1180px;
+  max-width: 1460px;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
