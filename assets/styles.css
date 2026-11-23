@@ -25378,6 +25378,66 @@ html[data-theme="dark"] .ppt-thumb-wire.is-cs-wire span {
   background: rgba(255, 255, 255, 0.14);
 }
 
+.ppt-cs-action-btn.is-release-locked {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #92400e;
+}
+
+.ppt-cs-action-btn.is-release-locked:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #d97706;
+}
+
+.ppt-cs-action-btn.is-release-open {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #065f46;
+}
+
+.ppt-cs-action-btn.is-release-open:hover {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #059669;
+}
+
+html[data-theme="dark"] .ppt-cs-action-btn.is-release-locked {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fde68a;
+}
+
+html[data-theme="dark"] .ppt-cs-action-btn.is-release-open {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #a7f3d0;
+}
+
+.ppt-rb-cmd.is-cs-release-open,
+.ppt-fs-tool-btn.is-cs-release-open {
+  border-color: #10b981 !important;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+}
+
+.hsd-cs-unlock-cta {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  color: #78350f !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.22);
+}
+
+.hsd-cs-unlock-cta:hover {
+  filter: brightness(0.97);
+  border-color: #d97706 !important;
+}
+
+html[data-theme="dark"] .hsd-cs-unlock-cta {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.35) 100%) !important;
+  border-color: rgba(251, 191, 36, 0.6) !important;
+  color: #fef3c7 !important;
+}
+
 
 
 /* ---------- Health Systems Apple TV UI Mode (Default) ---------- */

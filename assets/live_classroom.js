@@ -138,10 +138,14 @@
       module: "",
       caseId: "",
       questionId: "",
+      slideKind: "",
       splitOrient: "",
       forceSync: false,
       sentWallMs: 0
     },
+
+    // Teacher-released Conceptualized Key Takeaway slides (room-scoped, hidden initially for students)
+    unlockedConceptSummaries: {},
 
     // Responses: Map<questionId, Map<participantId, ResponseRecord>>
     responsesByQuestion: new Map(),
@@ -151,11 +155,14 @@
     presence: new Map()
   };
 
+  const RETAINED_STALE_MS = 90 * 60 * 1000;
+
   const listeners = {
     timer: new Set(),
     responses: new Set(),
     presence: new Set(),
     pointer: new Set(),
+    concept_unlock: new Set(),
     connection: new Set()
   };
 
@@ -384,16 +391,54 @@
 
     if (msg.type === "slide") {
       if ((Number(msg.sentWallMs) || 0) < (state.teacherPointer.sentWallMs || 0)) return;
+      const staleRetained = Boolean(
+        isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RETAINED_STALE_MS
+      );
+      const qid = String(msg.questionId || "").slice(0, 24);
+      const slideKind =
+        msg.slideKind === "concept-summary" && !staleRetained ? "concept-summary" : "question";
+      const sentMs = Number(msg.sentWallMs) || Date.now();
       state.teacherPointer = {
         seq: Number(msg.seq) || 0,
         module: String(msg.module || "").slice(0, 12),
         caseId: String(msg.caseId || "").slice(0, 24),
-        questionId: String(msg.questionId || "").slice(0, 24),
+        questionId: qid,
+        slideKind,
         splitOrient: msg.splitOrient === "horizontal" || msg.splitOrient === "vertical" ? msg.splitOrient : "",
         forceSync: Boolean(msg.forceSync) && !isRetained,
-        sentWallMs: Number(msg.sentWallMs) || Date.now()
+        sentWallMs: sentMs
       };
+      if (slideKind === "concept-summary" && qid) {
+        const prevRec = state.unlockedConceptSummaries[qid];
+        if (!prevRec || (prevRec.updatedWallMs || 0) <= sentMs) {
+          state.unlockedConceptSummaries[qid] = {
+            unlocked: true,
+            seq: Number(msg.seq) || 0,
+            updatedWallMs: sentMs
+          };
+          emit("concept_unlock", { questionId: qid, unlocked: true, isRetained: Boolean(isRetained) });
+        }
+      }
       emit("pointer", Object.assign({}, state.teacherPointer));
+      return;
+    }
+
+    if (msg.type === "concept_unlock") {
+      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RETAINED_STALE_MS) {
+        return;
+      }
+      const qid = String(msg.questionId || "").slice(0, 32);
+      if (!qid) return;
+      const updatedMs = Number(msg.updatedWallMs || msg.sentWallMs) || Date.now();
+      const prevRec = state.unlockedConceptSummaries[qid];
+      if (prevRec && (prevRec.updatedWallMs || 0) > updatedMs) return;
+      const isUnlocked = Boolean(msg.unlocked);
+      state.unlockedConceptSummaries[qid] = {
+        unlocked: isUnlocked,
+        seq: Number(msg.seq) || 0,
+        updatedWallMs: updatedMs
+      };
+      emit("concept_unlock", { questionId: qid, unlocked: isUnlocked, isRetained: Boolean(isRetained) });
       return;
     }
 
@@ -498,20 +543,35 @@
       if (state.role === "faculty" && state.teacherPointer.questionId) {
         publishPacket(
           "slide",
-          Object.assign(
-            {
-              type: "slide",
-              seq: state.teacherPointer.seq,
-              module: state.teacherPointer.module,
-              caseId: state.teacherPointer.caseId,
-              questionId: state.teacherPointer.questionId,
-              splitOrient: state.teacherPointer.splitOrient || "",
-              forceSync: false
-            },
-            {}
-          ),
+          {
+            type: "slide",
+            seq: state.teacherPointer.seq,
+            module: state.teacherPointer.module,
+            caseId: state.teacherPointer.caseId,
+            questionId: state.teacherPointer.questionId,
+            slideKind: state.teacherPointer.slideKind || "question",
+            splitOrient: state.teacherPointer.splitOrient || "",
+            forceSync: false
+          },
           true
         );
+      }
+      if (state.role === "faculty") {
+        Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
+          const rec = state.unlockedConceptSummaries[qid];
+          if (!rec) return;
+          publishPacket(
+            `concept_unlock/${qid}`,
+            {
+              type: "concept_unlock",
+              questionId: qid,
+              unlocked: Boolean(rec.unlocked),
+              seq: rec.seq || 0,
+              updatedWallMs: rec.updatedWallMs || Date.now()
+            },
+            true
+          );
+        });
       }
       return;
     }
@@ -705,6 +765,23 @@
                   msg: Object.assign({ type: "slide", msgId: randomId("sync"), roomId: state.roomId }, state.teacherPointer)
                 });
               }
+              Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
+                const rec = state.unlockedConceptSummaries[qid];
+                if (!rec) return;
+                conn.send({
+                  subpath: `concept_unlock/${qid}`,
+                  msg: {
+                    type: "concept_unlock",
+                    msgId: randomId("sync"),
+                    roomId: state.roomId,
+                    questionId: qid,
+                    unlocked: Boolean(rec.unlocked),
+                    seq: rec.seq || 0,
+                    updatedWallMs: rec.updatedWallMs || Date.now(),
+                    sentWallMs: Date.now()
+                  }
+                });
+              });
               state.presence.forEach((pRec) => {
                 conn.send({
                   subpath: `presence/${pRec.participantId}`,
@@ -960,11 +1037,13 @@
     state.responsesByQuestion.clear();
     state.clearedAtByQuestion.clear();
     state.presence.clear();
+    state.unlockedConceptSummaries = {};
     state.teacherPointer = {
       seq: 0,
       module: "",
       caseId: "",
       questionId: "",
+      slideKind: "",
       splitOrient: "",
       forceSync: false,
       sentWallMs: 0
@@ -989,6 +1068,7 @@
     requestRoomSnapshot();
     emit("timer", getTimerSnapshot());
     emit("responses", { questionId: "*" });
+    emit("concept_unlock", { questionId: "*", unlocked: false, roomChanged: true });
   }
 
   /* ---------- Teacher Timer & Slide Pointer Controls ---------- */
@@ -1132,6 +1212,8 @@
       opts && (opts.splitOrient === "horizontal" || opts.splitOrient === "vertical")
         ? opts.splitOrient
         : state.teacherPointer.splitOrient || "";
+    const slideKind =
+      opts && opts.slideKind === "concept-summary" ? "concept-summary" : "question";
     const forceSync = Boolean(opts && opts.forceSync);
     const now = Date.now();
     if (
@@ -1139,6 +1221,7 @@
       state.teacherPointer.module === (moduleId || "") &&
       state.teacherPointer.caseId === (caseId || "") &&
       state.teacherPointer.questionId === questionId &&
+      state.teacherPointer.slideKind === slideKind &&
       state.teacherPointer.splitOrient === orient &&
       now - (state.teacherPointer.sentWallMs || 0) < 900
     ) {
@@ -1148,6 +1231,7 @@
     state.teacherPointer.module = moduleId || "";
     state.teacherPointer.caseId = caseId || "";
     state.teacherPointer.questionId = questionId || "";
+    state.teacherPointer.slideKind = slideKind;
     state.teacherPointer.splitOrient = orient;
     state.teacherPointer.forceSync = forceSync;
     state.teacherPointer.sentWallMs = now;
@@ -1159,11 +1243,55 @@
         module: state.teacherPointer.module,
         caseId: state.teacherPointer.caseId,
         questionId: state.teacherPointer.questionId,
+        slideKind,
         splitOrient: orient,
         forceSync
       },
       !forceSync
     );
+  }
+
+  let conceptUnlockSeq = 0;
+  function setConceptSummaryUnlocked(questionId, unlocked) {
+    if (state.role !== "faculty" || !questionId) return false;
+    const qid = String(questionId).slice(0, 32);
+    const nextUnlocked = Boolean(unlocked);
+    const now = Date.now();
+    conceptUnlockSeq += 1;
+    state.unlockedConceptSummaries[qid] = {
+      unlocked: nextUnlocked,
+      seq: conceptUnlockSeq,
+      updatedWallMs: now
+    };
+    publishPacket(
+      `concept_unlock/${qid}`,
+      {
+        type: "concept_unlock",
+        questionId: qid,
+        unlocked: nextUnlocked,
+        seq: conceptUnlockSeq,
+        updatedWallMs: now
+      },
+      true
+    );
+    emit("concept_unlock", { questionId: qid, unlocked: nextUnlocked, local: true });
+    return nextUnlocked;
+  }
+
+  function isConceptSummaryUnlocked(questionId) {
+    if (!questionId) return false;
+    const rec = state.unlockedConceptSummaries[String(questionId)];
+    return Boolean(rec && rec.unlocked);
+  }
+
+  function getUnlockedConceptSummaries() {
+    const out = {};
+    Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
+      if (state.unlockedConceptSummaries[qid] && state.unlockedConceptSummaries[qid].unlocked) {
+        out[qid] = true;
+      }
+    });
+    return out;
   }
 
   /* ---------- Student Per-Cell Live Typing & Per-Block Submission ---------- */
@@ -1188,6 +1316,19 @@
     const prevSent = submittedTextByCell[inputId];
     if (prevSent === undefined) return "ready";
     return prevSent === trimmed ? "submitted" : "dirty";
+  }
+
+  function hasSubmittedQuestionCells(qObj) {
+    if (!qObj || !qObj.worksheet || !Array.isArray(qObj.worksheet.rows)) return false;
+    const inputRows = qObj.worksheet.rows.filter((r) =>
+      (r.cells || []).some((cell) => Boolean(cell && cell.inputId))
+    );
+    if (!inputRows.length) return false;
+    return inputRows.every((r) =>
+      (r.cells || []).some(
+        (cell) => cell && cell.inputId && String(submittedTextByCell[cell.inputId] || "").trim().length > 0
+      )
+    );
   }
 
   function clearSubmittedCells(inputIds) {
@@ -1450,11 +1591,15 @@
     clearTimeUpAlert,
     broadcastTeacherQuestionPointer,
     getTeacherPointer: () => Object.assign({}, state.teacherPointer),
+    setConceptSummaryUnlocked,
+    isConceptSummaryUnlocked,
+    getUnlockedConceptSummaries,
     queueLiveTyping,
     flushLiveTyping,
     submitSingleCell,
     submitQuestionFinal,
     getCellSubmissionState,
+    hasSubmittedQuestionCells,
     clearSubmittedCells,
     clearQuestionResponses,
     getQuestionResponses,
