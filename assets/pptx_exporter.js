@@ -261,7 +261,47 @@
     );
   }
 
-  function buildTableGraphicFrameXml(id, name, box, tableSpec) {
+  function getSlideThemePalette(isDark) {
+    if (isDark) {
+      return {
+        canvasBg: "0B0C10",
+        headerBg: "12141B",
+        cardBg: "16181E",
+        cardAltBg: "1B1E26",
+        tblHeadBg: "1E212B",
+        tblHeadBorder: "2C303D",
+        border: "282B36",
+        hairline: "2C303D",
+        accent: "2997FF",
+        ink: "F5F5F7",
+        body: "D1D1D6",
+        sub: "98989F",
+        muted: "8E8E93",
+        pageBg: "0B0C10",
+        notesLine: "2C303D"
+      };
+    }
+    return {
+      canvasBg: "F5F5F7",
+      headerBg: "FFFFFF",
+      cardBg: "FFFFFF",
+      cardAltBg: "FAFAFC",
+      tblHeadBg: "F5F5F7",
+      tblHeadBorder: "D2D2D7",
+      border: "E5E5EA",
+      hairline: "D2D2D7",
+      accent: "0066CC",
+      ink: "1D1D1F",
+      body: "424245",
+      sub: "6E6E73",
+      muted: "86868B",
+      pageBg: "FFFFFF",
+      notesLine: "CBD5E1"
+    };
+  }
+
+  function buildTableGraphicFrameXml(id, name, box, tableSpec, isDark) {
+    const pal = getSlideThemePalette(Boolean(isDark));
     const headers = (tableSpec && tableSpec.headers) || [];
     const rows = (tableSpec && tableSpec.rows) || [];
     const colCount = Math.max(1, headers.length || (rows[0] ? rows[0].cells.length : 1));
@@ -273,16 +313,15 @@
 
     const gridColsXml = colWidths.map((cw) => `<a:gridCol w="${cw}"/>`).join("");
     const cellBorders = (borderColor) => {
-      const bc = (borderColor || "CBD5E1").replace(/^#/, "").toUpperCase();
-      const ln = `<a:ln w="9525" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:srgbClr val="${bc}"/></a:solidFill></a:ln>`;
+      const bc = (borderColor || pal.border).replace(/^#/, "").toUpperCase();
       return `<a:lnL w="9525"><a:solidFill><a:srgbClr val="${bc}"/></a:solidFill></a:lnL>` +
         `<a:lnR w="9525"><a:solidFill><a:srgbClr val="${bc}"/></a:solidFill></a:lnR>` +
         `<a:lnT w="9525"><a:solidFill><a:srgbClr val="${bc}"/></a:solidFill></a:lnT>` +
         `<a:lnB w="9525"><a:solidFill><a:srgbClr val="${bc}"/></a:solidFill></a:lnB>`;
     };
 
-    const ptBody = tableSpec.fontPt || (rows.length >= 5 ? 8.8 : rows.length >= 4 ? 9.4 : 10.2);
-    const headRowH = 340000;
+    const ptBody = tableSpec.fontPt || (rows.length >= 5 ? 9.2 : rows.length >= 4 ? 9.8 : 10.6);
+    const headRowH = 360000;
     const bodyRowH = Math.max(
       360000,
       Math.floor((box.h - headRowH) / Math.max(1, rows.length))
@@ -294,12 +333,12 @@
         .map(
           (hTxt) =>
             `<a:tc>` +
-            `<a:txBody><a:bodyPr lIns="68580" rIns="68580" tIns="45720" bIns="45720"/><a:lstStyle/>` +
-            `<a:p><a:pPr algn="l"/>${buildRunXml(hTxt, { pt: ptBody, bold: true, color: "FFFFFF" })}</a:p>` +
+            `<a:txBody><a:bodyPr lIns="82000" rIns="82000" tIns="52000" bIns="52000"/><a:lstStyle/>` +
+            `<a:p><a:pPr algn="l"/>${buildRunXml(hTxt, { pt: ptBody, bold: true, color: pal.ink })}</a:p>` +
             `</a:txBody>` +
-            `<a:tcPr marL="68580" marR="68580" marT="45720" marB="45720" anchor="ctr">` +
-            cellBorders("1E3A8A") +
-            `<a:solidFill><a:srgbClr val="002D72"/></a:solidFill>` +
+            `<a:tcPr marL="82000" marR="82000" marT="52000" marB="52000" anchor="ctr">` +
+            cellBorders(pal.tblHeadBorder) +
+            `<a:solidFill><a:srgbClr val="${pal.tblHeadBg}"/></a:solidFill>` +
             `</a:tcPr>` +
             `</a:tc>`
         )
@@ -308,8 +347,10 @@
     }
 
     rows.forEach((rowObj, rIdx) => {
-      const bgHex = rowObj.bgHex || (rIdx % 2 === 1 ? "F8FAFC" : "FFFFFF");
-      const borderHex = rowObj.borderHex || "CBD5E1";
+      const bgHex = isDark
+        ? (rIdx % 2 === 1 ? pal.cardAltBg : pal.cardBg)
+        : (rowObj.bgHex || (rIdx % 2 === 1 ? pal.cardAltBg : pal.cardBg));
+      const borderHex = isDark ? pal.border : (rowObj.borderHex || pal.border);
       const cells = rowObj.cells || [];
       const tdsXml = [];
       for (let c = 0; c < colCount; c += 1) {
@@ -317,11 +358,11 @@
         const rawLines = String(cell.text || "").split(/\n+/);
         let paras = rawLines
           .map((ln, lIdx) =>
-            `<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="114000"/></a:lnSpc>${lIdx > 0 ? '<a:spcBef><a:spcPts val="100"/></a:spcBef>' : ""}</a:pPr>` +
+            `<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="118000"/></a:lnSpc>${lIdx > 0 ? '<a:spcBef><a:spcPts val="100"/></a:spcBef>' : ""}</a:pPr>` +
             buildRunXml(ln || " ", {
               pt: ptBody,
               bold: Boolean(cell.bold || (c === 0 && lIdx === 0)),
-              color: cell.color || "0F172A"
+              color: isDark ? pal.ink : (cell.color || pal.ink)
             }) +
             `</a:p>`
           )
@@ -330,8 +371,8 @@
         if (cell.evidenceQuotes && cell.evidenceQuotes.length) {
           const cIdx = ((rowObj.colorIdx || rIdx + 1) - 1) % 6;
           paras +=
-            `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="140"/></a:spcBef></a:pPr>` +
-            buildRunXml(`💬 Supporting Evidence: `, {
+            `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="120"/></a:spcBef></a:pPr>` +
+            buildRunXml(`หลักฐานจากโจทย์: `, {
               pt: Math.max(8, ptBody - 1),
               bold: true,
               color: THEME_HL_FG[cIdx],
@@ -340,7 +381,7 @@
             buildRunXml(cell.evidenceQuotes.map((q) => `“${q}”`).join(" · "), {
               pt: Math.max(8, ptBody - 1),
               italic: true,
-              color: "1E293B",
+              color: "1D1D1F",
               highlightHex: THEME_HL_BG[cIdx]
             }) +
             `</a:p>`;
@@ -348,19 +389,19 @@
 
         if (cell.docCitation) {
           paras +=
-            `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="110"/></a:spcBef></a:pPr>` +
-            buildRunXml(`📚 อ้างอิงคำสอน: ${cell.docCitation}`, {
+            `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="100"/></a:spcBef></a:pPr>` +
+            buildRunXml(`อ้างอิงคำสอน: ${cell.docCitation}`, {
               pt: Math.max(7.8, ptBody - 1.2),
               bold: true,
-              color: "0F766E"
+              color: pal.accent
             }) +
             `</a:p>`;
         }
 
         tdsXml.push(
           `<a:tc>` +
-            `<a:txBody><a:bodyPr lIns="68580" rIns="68580" tIns="45720" bIns="45720"/><a:lstStyle/>${paras}</a:txBody>` +
-            `<a:tcPr marL="68580" marR="68580" marT="45720" marB="45720" anchor="t">` +
+            `<a:txBody><a:bodyPr lIns="82000" rIns="82000" tIns="52000" bIns="52000"/><a:lstStyle/>${paras}</a:txBody>` +
+            `<a:tcPr marL="82000" marR="82000" marT="52000" marB="52000" anchor="t">` +
             cellBorders(borderHex) +
             `<a:solidFill><a:srgbClr val="${bgHex.replace(/^#/, "").toUpperCase()}"/></a:solidFill>` +
             `</a:tcPr>` +
@@ -392,9 +433,13 @@
   }
 
   // 3. Build Single 16:9 Slide XML (12192000 x 6858000 EMU = 13.333" x 7.5")
-  function buildSlideXml(slideSpec, slideIdx, totalSlides) {
+  function buildSlideXml(slideSpec, slideIdx, totalSlides, deckSpec) {
     const W = 12192000;
     const H = 6858000;
+    const isDark =
+      (slideSpec && slideSpec.slideTheme === "dark") ||
+      Boolean(deckSpec && deckSpec.slideTheme === "dark");
+    const pal = getSlideThemePalette(isDark);
     let shapeId = 2;
     const shapes = [];
 
@@ -406,24 +451,24 @@
       const workW = W - padX * 2;
       const kickerText = cs.kicker || (cs.takeawayNumber ? `Key Takeaway #${cs.takeawayNumber}` : "Key Takeaway #1");
 
-      // Apple Keynote off-white canvas
+      // Apple Keynote canvas (Light Off-White or Dark Obsidian)
       csShapes.push(
-        buildShapeXml(csId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, "F5F5F7", null, "")
+        buildShapeXml(csId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, pal.canvasBg, null, "")
       );
 
-      // Minimalist white top header + hairline divider
+      // Minimalist top header + hairline divider
       const csHeadParas =
         `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(`${slideSpec.moduleCode || "HS"}`, { pt: 11, bold: true, color: "0066CC" }) +
-        buildRunXml(`   ${slideSpec.caseTitle || cs.title || ""}`, { pt: 13.5, bold: true, color: "1D1D1F" }) +
-        buildRunXml(`   ·   ${kickerText}`, { pt: 11, bold: false, color: "86868B" }) +
+        buildRunXml(`${slideSpec.moduleCode || "HS"}`, { pt: 11, bold: true, color: pal.accent }) +
+        buildRunXml(`   ${slideSpec.caseTitle || cs.title || ""}`, { pt: 13.5, bold: true, color: pal.ink }) +
+        buildRunXml(`   ·   ${kickerText}`, { pt: 11, bold: false, color: pal.muted }) +
         `</a:p>`;
       csShapes.push(
         buildShapeXml(
           csId++,
           "KeynoteHeader",
           { x: 0, y: 0, w: W, h: 480000, anchor: "ctr" },
-          "FFFFFF",
+          pal.headerBg,
           null,
           csHeadParas,
           0,
@@ -431,103 +476,148 @@
         )
       );
       csShapes.push(
-        buildShapeXml(csId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, "E5E5EA", null, "")
+        buildShapeXml(csId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, pal.border, null, "")
       );
 
       // 1. Editorial Hero Statement (Open Canvas · Two-Tone Typography)
-      const heroY = 640000;
-      const heroH = 1480000;
+      const heroY = 610000;
+      const heroH = 1380000;
       const heroParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="160"/></a:spcAft></a:pPr>` +
-        buildRunXml(kickerText, { pt: 13, bold: true, color: "0066CC" }) +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
+        buildRunXml(kickerText, { pt: 12.5, bold: true, color: pal.accent }) +
         (cs.sourceNote
-          ? buildRunXml(`     ${cs.sourceNote}`, { pt: 11, bold: false, color: "86868B" })
+          ? buildRunXml(`     ${cs.sourceNote}`, { pt: 10.8, bold: false, color: pal.muted })
           : "") +
         `</a:p>` +
         `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 21, bold: true, color: "1D1D1F" }) +
+        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 20, bold: true, color: pal.ink }) +
         (cs.coreDefinitionLead || cs.coreDefinitionQualifier
-          ? buildRunXml(`${cs.coreDefinitionLead || ""} `, { pt: 20, bold: true, color: "1D1D1F" }) +
-            buildRunXml(cs.coreDefinitionQualifier || "", { pt: 20, bold: false, color: "6E6E73" })
-          : buildRunXml(cs.coreDefinition || "", { pt: 20, bold: false, color: "1D1D1F" })) +
+          ? buildRunXml(`${cs.coreDefinitionLead || ""} `, { pt: 19, bold: true, color: pal.ink }) +
+            buildRunXml(cs.coreDefinitionQualifier || "", { pt: 19, bold: false, color: pal.sub })
+          : buildRunXml(cs.coreDefinition || "", { pt: 19, bold: false, color: pal.ink })) +
         `</a:p>`;
       csShapes.push(
         buildShapeXml(
           csId++,
           "KeyTakeawayHero",
           { x: padX, y: heroY, w: workW, h: heroH },
-          "F5F5F7",
+          pal.canvasBg,
           null,
           heroParas,
           0,
-          { l: 0, r: 0, t: 20000, b: 20000 }
+          { l: 0, r: 0, t: 15000, b: 15000 }
         )
       );
 
-      // 2. Clean 2x2 Apple Bento Dimension Cards
-      const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
-      const gridY = heroY + heroH + 140000;
-      const bridgeH = cs.caseBridge ? 420000 : 0;
-      const gridH = H - 340000 - 110000 - bridgeH - (bridgeH ? 120000 : 0) - gridY;
-      const gapX = 200000;
-      const gapY = 180000;
-      const cardW = Math.floor((workW - gapX) / 2);
-      const cardH = Math.floor((gridH - gapY) / 2);
+      // 2. Adaptive Apple Bento Dimension Cards (2..6 cards)
+      const dims = Array.isArray(cs.dimensions) ? cs.dimensions.slice(0, 6) : [];
+      const dimCount = dims.length || 4;
+      const gridY = heroY + heroH + 130000;
+      const bridgeH = cs.caseBridge ? 410000 : 0;
+      const gridH = H - 340000 - 100000 - bridgeH - (bridgeH ? 110000 : 0) - gridY;
+      const gapX = dimCount >= 5 || dimCount === 3 ? 170000 : 200000;
+      const gapY = 165000;
+      const isCompactGrid = dimCount >= 5;
+      const thPt = isCompactGrid ? 16 : dimCount === 3 ? 17.5 : 18.5;
+      const defPt = isCompactGrid ? 12.5 : dimCount === 3 ? 13.5 : 14;
+      const padLR = isCompactGrid ? 175000 : 215000;
+      const padTB = isCompactGrid ? 115000 : 145000;
 
-      dims.slice(0, 4).forEach((d, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const cx = padX + col * (cardW + gapX);
-        const cy = gridY + row * (cardH + gapY);
+      dims.forEach((d, idx) => {
+        let cx = padX;
+        let cy = gridY;
+        let cardW = workW;
+        let cardH = gridH;
+
+        if (dimCount <= 2) {
+          cardW = Math.floor((workW - gapX) / 2);
+          cardH = gridH;
+          cx = padX + idx * (cardW + gapX);
+        } else if (dimCount === 3) {
+          cardW = Math.floor((workW - gapX * 2) / 3);
+          cardH = gridH;
+          cx = padX + idx * (cardW + gapX);
+        } else if (dimCount === 4) {
+          cardW = Math.floor((workW - gapX) / 2);
+          cardH = Math.floor((gridH - gapY) / 2);
+          cx = padX + (idx % 2) * (cardW + gapX);
+          cy = gridY + Math.floor(idx / 2) * (cardH + gapY);
+        } else if (dimCount === 5) {
+          cardH = Math.floor((gridH - gapY) / 2);
+          if (idx < 3) {
+            cardW = Math.floor((workW - gapX * 2) / 3);
+            cx = padX + idx * (cardW + gapX);
+            cy = gridY;
+          } else {
+            cardW = Math.floor((workW - gapX) / 2);
+            cx = padX + (idx - 3) * (cardW + gapX);
+            cy = gridY + cardH + gapY;
+          }
+        } else {
+          cardW = Math.floor((workW - gapX * 2) / 3);
+          cardH = Math.floor((gridH - gapY) / 2);
+          cx = padX + (idx % 3) * (cardW + gapX);
+          cy = gridY + Math.floor(idx / 3) * (cardH + gapY);
+        }
+
         const idxLabel = d.num ? String(d.num).padStart(2, "0") : String(idx + 1).padStart(2, "0");
+        const anchorText =
+          dimCount <= 4
+            ? (typeof d.anchor === "string" ? d.anchor : Array.isArray(d.anchor) ? d.anchor[0] || "" : "")
+            : "";
 
         const cardParas =
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
-          buildRunXml(idxLabel, { pt: 12, bold: true, color: "0066CC" }) +
-          (d.enTitle ? buildRunXml(`   ·   ${d.enTitle}`, { pt: 11.5, bold: false, color: "86868B" }) : "") +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="${isCompactGrid ? 95 : 130}"/></a:spcAft></a:pPr>` +
+          buildRunXml(idxLabel, { pt: isCompactGrid ? 11 : 12, bold: true, color: pal.accent }) +
+          (d.enTitle ? buildRunXml(`   ·   ${d.enTitle}`, { pt: isCompactGrid ? 10.5 : 11.2, bold: false, color: pal.muted }) : "") +
           `</a:p>` +
-          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="160"/></a:spcAft></a:pPr>` +
-          buildRunXml(d.thTitle || "", { pt: 19, bold: true, color: "1D1D1F" }) +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="${isCompactGrid ? 105 : 145}"/></a:spcAft></a:pPr>` +
+          buildRunXml(d.thTitle || "", { pt: thPt, bold: true, color: pal.ink }) +
           `</a:p>` +
           `<a:p><a:pPr algn="l"/>` +
-          buildRunXml(d.definition || "", { pt: 14.5, bold: false, color: "424245" }) +
-          `</a:p>`;
+          buildRunXml(d.definition || "", { pt: defPt, bold: false, color: pal.body }) +
+          `</a:p>` +
+          (anchorText
+            ? `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="140"/></a:spcBef></a:pPr>` +
+              buildRunXml(anchorText, { pt: 11.2, bold: false, color: pal.muted }) +
+              `</a:p>`
+            : "");
         csShapes.push(
           buildShapeXml(
             csId++,
             `BentoDimCard_${idx + 1}`,
             { x: cx, y: cy, w: cardW, h: cardH, anchor: "ctr" },
-            "FFFFFF",
-            "E5E5EA",
+            pal.cardBg,
+            pal.border,
             cardParas,
-            6000,
-            { l: 220000, r: 220000, t: 140000, b: 140000 }
+            5200,
+            { l: padLR, r: padLR, t: padTB, b: padTB }
           )
         );
       });
 
       // 3. Minimalist Hairline Footer Case Link
       if (cs.caseBridge) {
-        const bY = gridY + gridH + 120000;
+        const bY = gridY + gridH + 110000;
         const bLabel = cs.caseBridgeLabel || `เชื่อมโยงโจทย์ ${slideSpec.moduleCode || "HS"}`;
         csShapes.push(
-          buildShapeXml(csId++, "BridgeHairline", { x: padX, y: bY, w: workW, h: 12000 }, "D2D2D7", null, "")
+          buildShapeXml(csId++, "BridgeHairline", { x: padX, y: bY, w: workW, h: 12000 }, pal.hairline, null, "")
         );
         const bParas =
           `<a:p><a:pPr algn="l"/>` +
-          buildRunXml(`${bLabel}   |   `, { pt: 11.5, bold: true, color: "1D1D1F" }) +
-          buildRunXml(cs.caseBridge, { pt: 11.5, bold: false, color: "6E6E73" }) +
+          buildRunXml(`${bLabel}   |   `, { pt: 11.2, bold: true, color: pal.ink }) +
+          buildRunXml(cs.caseBridge, { pt: 11.2, bold: false, color: pal.sub }) +
           `</a:p>`;
         csShapes.push(
           buildShapeXml(
             csId++,
             "KeyTakeawayBridge",
-            { x: padX, y: bY + 30000, w: workW, h: bridgeH - 30000, anchor: "ctr" },
-            "F5F5F7",
+            { x: padX, y: bY + 25000, w: workW, h: bridgeH - 25000, anchor: "ctr" },
+            pal.canvasBg,
             null,
             bParas,
             0,
-            { l: 0, r: 0, t: 20000, b: 20000 }
+            { l: 0, r: 0, t: 15000, b: 15000 }
           )
         );
       }
@@ -537,7 +627,7 @@
         `<a:p><a:pPr algn="l"/>` +
         buildRunXml(
           `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     ${kickerText}  ·  Slide ${slideIdx + 1} / ${totalSlides}`,
-          { pt: 8.8, color: "86868B" }
+          { pt: 8.8, color: pal.muted }
         ) +
         `</a:p>`;
       csShapes.push(
@@ -545,8 +635,8 @@
           csId++,
           "MasterFooter",
           { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
-          "F5F5F7",
-          "E5E5EA",
+          pal.canvasBg,
+          pal.border,
           footParasCs,
           0,
           { l: padX, r: padX, t: 25000, b: 25000 }
@@ -566,157 +656,143 @@
       );
     }
 
-    // Soft slide canvas background card
+    // Apple Keynote canvas (Light or Dark) for Question / Worksheet / Answer Key / Concept-Synthesis slides
+    const padX = 280000;
+    const workY = 615000;
+    const workH = 5790000;
+    const workW = W - padX * 2;
+    const cleanStageBadge = String(slideSpec.stageBadge || "")
+      .replace(/^[🎯🔑💡🔗📝📊✨\s]+/u, "")
+      .trim();
+
     shapes.push(
-      buildShapeXml(shapeId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, "F8FAFC", null, "")
+      buildShapeXml(shapeId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, pal.canvasBg, null, "")
     );
 
-    // Ramathibodi Navy Slide Master Header Bar + Gold Strip
+    // Minimalist top header + hairline divider
     const headParas =
       `<a:p><a:pPr algn="l"/>` +
-      buildRunXml(` [${slideSpec.moduleCode || "HS"}] `, {
-        pt: 11.5,
-        bold: true,
-        color: "001D4A",
-        highlightHex: "FFB81C"
-      }) +
-      buildRunXml(`  ${slideSpec.caseTitle || ""}`, { pt: 13.5, bold: true, color: "FFFFFF" }) +
-      (slideSpec.stageBadge
-        ? buildRunXml(`   |   ${slideSpec.stageBadge}`, { pt: 11, bold: true, color: "FDE68A" })
+      buildRunXml(`${slideSpec.moduleCode || "HS"}`, { pt: 11, bold: true, color: pal.accent }) +
+      buildRunXml(`   ${slideSpec.caseTitle || ""}`, { pt: 13.5, bold: true, color: pal.ink }) +
+      (cleanStageBadge
+        ? buildRunXml(`   ·   ${cleanStageBadge}`, { pt: 11, bold: false, color: pal.muted })
         : "") +
       `</a:p>`;
     shapes.push(
       buildShapeXml(
         shapeId++,
-        "MasterHeader",
-        { x: 0, y: 0, w: W, h: 520000, anchor: "ctr" },
-        "002663",
+        "KeynoteHeader",
+        { x: 0, y: 0, w: W, h: 480000, anchor: "ctr" },
+        pal.headerBg,
         null,
         headParas,
         0,
-        { l: 160000, r: 160000, t: 36000, b: 36000 }
+        { l: padX, r: padX, t: 30000, b: 30000 }
       )
     );
     shapes.push(
-      buildShapeXml(shapeId++, "GoldAccent", { x: 0, y: 520000, w: W, h: 36000 }, "FFB81C", null, "")
+      buildShapeXml(shapeId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, pal.border, null, "")
     );
 
-    // Content Workspace (y = 630000 .. 6460000 -> height 5830000)
-    const padX = 180000;
-    const workY = 635000;
-    const workH = 5800000;
-    const workW = W - padX * 2;
     const isHoriz = slideSpec.splitOrient === "horizontal";
 
     let scenBox;
     let rightBox;
     if (isHoriz) {
       const topH = Math.round(workH * 0.41);
-      const gapY = 110000;
+      const gapY = 140000;
       scenBox = { x: padX, y: workY, w: workW, h: topH };
       rightBox = { x: padX, y: workY + topH + gapY, w: workW, h: workH - topH - gapY };
     } else {
-      const leftW = Math.round(workW * 0.43);
-      const gapX = 150000;
+      const leftW = Math.round(workW * 0.42);
+      const gapX = 185000;
       scenBox = { x: padX, y: workY, w: leftW, h: workH };
       rightBox = { x: padX + leftW + gapX, y: workY, w: workW - leftW - gapX, h: workH };
     }
 
-    // Left / Top Scenario Card with Thematic Analysis Verbatim Highlights
+    // Left / Top Bento Scenario Card
     const scenLines = Array.isArray(slideSpec.scenarioParagraphs) ? slideSpec.scenarioParagraphs : [];
-    const scenPt = scenLines.join(" ").length > 950 ? 9.2 : scenLines.join(" ").length > 650 ? 10 : 10.8;
+    const scenPt = scenLines.join(" ").length > 950 ? 9.6 : scenLines.join(" ").length > 650 ? 10.4 : 11.2;
     const scenHeadPara =
       `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="180"/></a:spcAft></a:pPr>` +
-      buildRunXml(`📖 สถานการณ์กรณีศึกษา (${slideSpec.caseShort || ""})`, {
-        pt: 11,
+      buildRunXml(`สถานการณ์กรณีศึกษา (${slideSpec.caseShort || ""})`, {
+        pt: 11.5,
         bold: true,
-        color: "0B46A6"
+        color: pal.accent
       }) +
       (slideSpec.clues && slideSpec.clues.length
-        ? buildRunXml(`  ·  ไฮไลต์ Supporting Evidence (${slideSpec.clues.length} จุด)`, {
-            pt: 9.5,
-            bold: true,
-            color: "0F766E"
+        ? buildRunXml(`   ·   หลักฐานในโจทย์ ${slideSpec.clues.length} จุด`, {
+            pt: 9.8,
+            bold: false,
+            color: pal.muted
           })
         : "") +
       `</a:p>`;
     const scenBodyParas = scenLines
-      .map((ln) => buildHighlightedParagraphXml(ln, slideSpec.clues, scenPt, "1E293B", "l"))
+      .map((ln) => buildHighlightedParagraphXml(ln, slideSpec.clues, scenPt, pal.ink, "l"))
       .join("");
     shapes.push(
       buildShapeXml(
         shapeId++,
         "ScenarioCard",
         scenBox,
-        "FFFFFF",
-        "CBD5E1",
+        pal.cardBg,
+        pal.border,
         scenHeadPara + scenBodyParas,
-        2500,
-        { l: 115000, r: 115000, t: 95000, b: 85000 }
+        4500,
+        { l: 150000, r: 150000, t: 120000, b: 110000 }
       )
     );
 
-    // Right / Bottom Question Prompt Header (with Question Framework Highlights) + Editable Answer / Key Table
+    // Right / Bottom Bento Question Header + Editable Answer / Key Table
     const qHeadH = 920000;
     const qClues = Array.isArray(slideSpec.questionClues) ? slideSpec.questionClues : [];
     const qTitleLine = `${slideSpec.questionHeading || ""} — ${slideSpec.questionTitle || ""}`;
     const qHeadParas =
-      buildHighlightedParagraphXml(qTitleLine, qClues, 11.2, "002D72", "l") +
-      buildHighlightedParagraphXml(slideSpec.questionPrompt || "", qClues, 9.5, "334155", "l");
+      buildHighlightedParagraphXml(qTitleLine, qClues, 11.6, pal.ink, "l") +
+      buildHighlightedParagraphXml(slideSpec.questionPrompt || "", qClues, 9.8, pal.body, "l");
     const qBox = { x: rightBox.x, y: rightBox.y, w: rightBox.w, h: qHeadH };
     shapes.push(
       buildShapeXml(
         shapeId++,
         "QuestionBanner",
         qBox,
-        "EFF6FF",
-        "BFDBFE",
+        pal.cardBg,
+        pal.border,
         qHeadParas,
-        2500,
-        { l: 105000, r: 105000, t: 58000, b: 58000 }
+        4500,
+        { l: 135000, r: 135000, t: 75000, b: 75000 }
       )
     );
 
     if (slideSpec.table) {
       const tblBox = {
         x: rightBox.x,
-        y: rightBox.y + qHeadH + 85000,
+        y: rightBox.y + qHeadH + 100000,
         w: rightBox.w,
-        h: rightBox.h - qHeadH - 85000
+        h: rightBox.h - qHeadH - 100000
       };
-      shapes.push(buildTableGraphicFrameXml(shapeId++, "AnswerKeyTable", tblBox, slideSpec.table));
+      shapes.push(buildTableGraphicFrameXml(shapeId++, "AnswerKeyTable", tblBox, slideSpec.table, isDark));
 
-      // Draw Real 3-Way Triangulated Curved Connectors on Stage 4 ("split-concept") Slides!
+      // Draw 1 clean gutter S-curve per row across the blank channel on Concept-Synthesis slides
       if (slideSpec.drawConnectors && slideSpec.table.rows && slideSpec.table.rows.length) {
         const rowCnt = slideSpec.table.rows.length;
-        const headRowH = 340000;
+        const headRowH = 360000;
         const eachRowH = Math.floor((tblBox.h - headRowH) / Math.max(1, rowCnt));
         for (let r = 0; r < rowCnt; r += 1) {
           const hex = THEME_HL_FG[r % 6];
           if (!isHoriz) {
-            const x1 = scenBox.x + scenBox.w - 15000;
-            const y1 = scenBox.y + 380000 + Math.round(((r + 0.5) / rowCnt) * (scenBox.h - 520000));
-            const x2 = tblBox.x + 10000;
+            const x1 = scenBox.x + scenBox.w - 6000;
+            const y1 = scenBox.y + 420000 + Math.round(((r + 0.5) / rowCnt) * (scenBox.h - 560000));
+            const x2 = tblBox.x + 6000;
             const y2 = tblBox.y + headRowH + Math.round((r + 0.5) * eachRowH);
-            const qx = qBox.x + 12000;
-            const qy = qBox.y + 180000 + Math.round(((r + 0.5) / rowCnt) * (qBox.h - 300000));
-            // 1) Scenario -> Answer Table
             shapes.push(buildConnectorXml(shapeId++, `ScenToAns_${r + 1}`, x1, y1, x2, y2, hex));
-            // 2) Scenario -> Question Prompt
-            shapes.push(buildConnectorXml(shapeId++, `ScenToQuestion_${r + 1}`, x1, y1, qx, qy, hex, "dash"));
-            // 3) Question Prompt -> Answer Table
-            shapes.push(
-              buildConnectorXml(shapeId++, `QuestionToAns_${r + 1}`, qBox.x + 25000 + r * 35000, qBox.y + qBox.h, x2 + 25000, y2, hex, "sysDot")
-            );
           } else {
             const x1 = scenBox.x + Math.round(((r + 0.5) / rowCnt) * scenBox.w);
-            const y1 = scenBox.y + scenBox.h - 10000;
+            const y1 = scenBox.y + scenBox.h - 6000;
             const x2 = tblBox.x + Math.round(((r + 0.5) / rowCnt) * Math.min(tblBox.w, 3600000));
             const y2 = tblBox.y + headRowH;
-            const qx = qBox.x + Math.round(((r + 0.5) / rowCnt) * Math.min(qBox.w, 4200000));
             shapes.push(buildConnectorXml(shapeId++, `ScenToAns_${r + 1}`, x1, y1, x2, y2, hex));
-            shapes.push(buildConnectorXml(shapeId++, `ScenToQuestion_${r + 1}`, x1, y1, qx, qBox.y + 10000, hex, "dash"));
-            shapes.push(buildConnectorXml(shapeId++, `QuestionToAns_${r + 1}`, qx, qBox.y + qBox.h - 8000, x2, y2, hex, "sysDot"));
           }
         }
       }
@@ -727,7 +803,7 @@
       `<a:p><a:pPr algn="l"/>` +
       buildRunXml(
         `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     Slide ${slideIdx + 1} / ${totalSlides}`,
-        { pt: 8.8, color: "64748B" }
+        { pt: 8.8, color: pal.muted }
       ) +
       `</a:p>`;
     shapes.push(
@@ -735,11 +811,11 @@
         shapeId++,
         "MasterFooter",
         { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
-        "F1F5F9",
-        "E2E8F0",
+        pal.canvasBg,
+        pal.border,
         footParas,
         0,
-        { l: 160000, r: 160000, t: 25000, b: 25000 }
+        { l: padX, r: padX, t: 25000, b: 25000 }
       )
     );
 
@@ -758,9 +834,11 @@
     );
   }
 
-  // 3b. Build Multi-Slide 16:9 Handout Page XML inside PowerPoint (Supports Vertical/Horizontal + 1x1..4x4 & 3+Notes!)
+  // 3b. Build Multi-Slide 16:9 Handout Page XML inside PowerPoint (Supports Vertical/Horizontal + 1x1..4x4 & 3+Notes + Light/Dark Theme!)
   function buildHandoutGridSlideXml(chunkSlides, pageIdx, totalPages, deckSpec) {
     const isPortrait = deckSpec.pageOrient === "portrait";
+    const isDark = Boolean(deckSpec && deckSpec.slideTheme === "dark");
+    const pal = getSlideThemePalette(isDark);
     const W = isPortrait ? 7560000 : 10692000;
     const H = isPortrait ? 10692000 : 7560000;
     let shapeId = 2;
@@ -770,10 +848,10 @@
 
     const pageHeadParas =
       `<a:p><a:pPr algn="l"/>` +
-      buildRunXml(deckSpec.title || "RACM 303 Slide Handout", { pt: 10.5, bold: true, color: "002663" }) +
+      buildRunXml(deckSpec.title || "RACM 303 Slide Handout", { pt: 10.5, bold: true, color: "1D1D1F" }) +
       buildRunXml(`   |   Handout ${deckSpec.gridLabel || ""}   |   หน้า ${pageIdx + 1} / ${totalPages}`, {
         pt: 9,
-        color: "64748B"
+        color: "86868B"
       }) +
       `</a:p>`;
     shapes.push(
@@ -781,8 +859,8 @@
         shapeId++,
         "HandoutHeader",
         { x: 240000, y: 160000, w: W - 480000, h: 320000 },
-        "F8FAFC",
-        "E2E8F0",
+        "F5F5F7",
+        "E5E5EA",
         pageHeadParas,
         0,
         { l: 90000, r: 90000, t: 30000, b: 30000 }
@@ -821,19 +899,24 @@
       const cx = slotX + Math.floor((cellSlotW - cardW) / 2);
       const cy = slotY + Math.floor((cellSlotH - cardH) / 2);
 
-      // 16:9 Slide Frame
+      // 16:9 Apple Keynote Slide Frame (Light or Dark)
       shapes.push(
-        buildShapeXml(shapeId++, `SlideFrame_${idx + 1}`, { x: cx, y: cy, w: cardW, h: cardH }, "FFFFFF", "94A3B8", "")
+        buildShapeXml(shapeId++, `SlideFrame_${idx + 1}`, { x: cx, y: cy, w: cardW, h: cardH }, pal.canvasBg, pal.hairline, "")
       );
 
-      // Mini Navy Banner
+      // Minimalist Keynote Mini-Header
       const banH = Math.max(150000, Math.round(cardH * 0.12));
       const banP =
         `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(`${sSpec.moduleCode || "HS"} · ${sSpec.questionHeading || ""}${sSpec.stageShort ? ` [${sSpec.stageShort}]` : ""}`, {
+        buildRunXml(`${sSpec.moduleCode || "HS"}`, {
           pt: Math.max(5, scalePt),
           bold: true,
-          color: "FFFFFF"
+          color: pal.accent
+        }) +
+        buildRunXml(`  ${sSpec.questionHeading || ""}${sSpec.stageShort ? ` · ${sSpec.stageShort}` : ""}`, {
+          pt: Math.max(5, scalePt),
+          bold: true,
+          color: pal.ink
         }) +
         `</a:p>`;
       shapes.push(
@@ -841,8 +924,8 @@
           shapeId++,
           `MiniHead_${idx + 1}`,
           { x: cx, y: cy, w: cardW, h: banH, anchor: "ctr" },
-          "002663",
-          null,
+          pal.headerBg,
+          pal.border,
           banP,
           0,
           { l: 55000, r: 55000, t: 12000, b: 12000 }
@@ -857,16 +940,16 @@
         const lines = [
           `${cs.coreTerm || "“สุขภาพ” (health)"} ${cs.coreDefinition || ""}`
         ];
-        (cs.dimensions || []).slice(0, 4).forEach((d) => {
-          lines.push(`• ${d.thTitle} (${d.enTitle || ""}): ${d.definition || ""}`);
+        (cs.dimensions || []).slice(0, 6).forEach((d) => {
+          lines.push(`• ${d.thTitle}${d.enTitle ? ` (${d.enTitle})` : ""}: ${d.definition || ""}`);
         });
         const csP = lines
           .map((ln, lIdx) =>
             `<a:p><a:pPr algn="l"/>` +
-            buildRunXml(ln.slice(0, cols >= 4 ? 75 : 170), {
-              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.0)),
+            buildRunXml(ln.slice(0, cols >= 4 ? 75 : 165), {
+              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
               bold: lIdx === 0,
-              color: lIdx === 0 ? "002D72" : "1E293B"
+              color: lIdx === 0 ? pal.ink : pal.body
             }) +
             `</a:p>`
           )
@@ -876,8 +959,8 @@
             shapeId++,
             `MiniConceptSummary_${idx + 1}`,
             { x: cx + 25000, y: bodyY, w: cardW - 50000, h: bodyH },
-            "F8FAFC",
-            "CBD5E1",
+            pal.cardBg,
+            pal.border,
             csP,
             0,
             { l: 45000, r: 45000, t: 35000, b: 35000 }
@@ -890,7 +973,7 @@
           scenSnippet + ((sSpec.scenarioParagraphs || []).join(" ").length > scenSnippet.length ? "…" : ""),
           sSpec.clues,
           Math.max(4.5, scalePt - 1),
-          "334155",
+          pal.body,
           "l"
         );
         shapes.push(
@@ -898,8 +981,8 @@
             shapeId++,
             `MiniScen_${idx + 1}`,
             { x: cx + 25000, y: bodyY, w: leftW - 35000, h: bodyH },
-            "F8FAFC",
-            "E2E8F0",
+            pal.cardBg,
+            pal.border,
             leftP,
             0,
             { l: 45000, r: 45000, t: 35000, b: 35000 }
@@ -920,7 +1003,7 @@
             buildRunXml(ln, {
               pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
               bold: lIdx === 0,
-              color: lIdx === 0 ? "002D72" : "0F172A"
+              color: lIdx === 0 ? pal.ink : pal.body
             }) +
             `</a:p>`
           )
@@ -930,8 +1013,8 @@
             shapeId++,
             `MiniRight_${idx + 1}`,
             { x: cx + leftW + 10000, y: bodyY, w: cardW - leftW - 35000, h: bodyH },
-            "FFFFFF",
-            "CBD5E1",
+            pal.cardBg,
+            pal.border,
             rightP,
             0,
             { l: 45000, r: 45000, t: 35000, b: 35000 }
@@ -1008,7 +1091,7 @@
       }
       slideXmlList = chunks.map((ch, pIdx) => buildHandoutGridSlideXml(ch, pIdx, chunks.length, deckSpec));
     } else {
-      slideXmlList = rawSlides.map((sSpec, idx) => buildSlideXml(sSpec, idx, rawSlides.length));
+      slideXmlList = rawSlides.map((sSpec, idx) => buildSlideXml(sSpec, idx, rawSlides.length, deckSpec));
     }
 
     const files = [];
