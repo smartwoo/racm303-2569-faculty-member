@@ -1668,6 +1668,10 @@ html[data-theme="dark"] .tv-live-active-pill {
   flex-shrink: 0;
 }
 
+.tv-view-mode-switch[hidden] {
+  display: none !important;
+}
+
 .tv-view-seg-btn {
   display: inline-flex;
   align-items: center;

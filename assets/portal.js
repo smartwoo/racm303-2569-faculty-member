@@ -12437,7 +12437,7 @@
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", "เอกสารคำสอนระบบสุขภาพ (Apple TV Mode)");
+    stage.setAttribute("aria-label", "เอกสารคำสอนระบบสุขภาพ (โหมดเรียน)");
 
     if (scope === "folders") {
       const shelf = make("div", null, "tv-shelf");
@@ -12648,7 +12648,7 @@
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", "Slide อาจารย์ประจำคาบ (Apple TV Mode)");
+    stage.setAttribute("aria-label", "Slide อาจารย์ประจำคาบ (โหมดเรียน)");
 
     if (scope === "folders") {
       const shelf = make("div", null, "tv-shelf");
@@ -12785,7 +12785,7 @@
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", `โจทย์อภิปรายระบบสุขภาพ ${curMod.code} (Apple TV Mode)`);
+    stage.setAttribute("aria-label", `โจทย์อภิปรายระบบสุขภาพ ${curMod.code} (โหมดเรียน)`);
 
     // 1. Featured Episode Hero
     const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
@@ -13004,7 +13004,7 @@
           allowAllModules: true,
           isAllActive: isFoldersRoot,
           keepFormatTabActiveWhenAll: true,
-          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📺 รวมทุกตอน (HS1–HS6)",
+          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
           allHeading:
             subMode === "lecture-slides"
               ? isDriveUi
@@ -13067,7 +13067,7 @@
       const backGroup = make("div", null, "tb-drive-file-pills");
       const backAllBtn = make(
         "button",
-        isDriveUi ? "📂 โฟลเดอร์ HS1–HS6" : "📺 รวมทุกตอน HS1–HS6",
+        isDriveUi ? "📂 โฟลเดอร์ HS1–HS6" : "📚 รวมทุกบท HS1–HS6",
         "btn sm"
       );
       backAllBtn.type = "button";
@@ -13107,7 +13107,7 @@
     const backRootLi = document.createElement("li");
     const backRootSideBtn = make(
       "button",
-      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ HS1–HS6" : "📺 รวมทุกตอน HS1–HS6",
+      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ HS1–HS6" : "📚 รวมทุกบท HS1–HS6",
       "doc-picker-btn"
     );
     backRootSideBtn.type = "button";
@@ -20460,14 +20460,14 @@
 
     const gdriveFolderBtn = make(
       "button",
-      state.hsUiMode === "drive" ? "📁 โฟลเดอร์ไดรฟ์" : "📺 ← เลือกคาบอื่น",
+      state.hsUiMode === "drive" ? "📁 โฟลเดอร์ไดรฟ์" : "📚 ← เลือกบทอื่น",
       "ppt-gdrive-folder-btn"
     );
     gdriveFolderBtn.type = "button";
     gdriveFolderBtn.title =
       state.hsUiMode === "drive"
         ? "ปิดสไลด์ปัจจุบันกลับไปหน้าโฟลเดอร์ Google Drive รวมทุกไฟล์ (HS1–HS6)"
-        : "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกคาบโหมด Apple TV";
+        : "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกบทเรียน (โหมดเรียน)";
     gdriveFolderBtn.addEventListener("click", () => openHsGoogleDriveFolder());
     menuRight.appendChild(gdriveFolderBtn);
 

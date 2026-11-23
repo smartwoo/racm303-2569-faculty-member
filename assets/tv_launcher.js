@@ -100,7 +100,7 @@
     admin: "submissions"
   };
 
-  let portalViewMode = localStorage.getItem("racm303_portal_view_mode") === "drive" ? "drive" : "tv";
+  let portalViewMode = "tv";
   let driveBrowserActive = false;
   let drivePath = []; // [] | ["schedule"] | ["health-systems"] | ["health-systems","HS1"] | ["epidemiology"] | ["fieldwork"] | ["manuals"] | ["admin"]
   let driveLayout = localStorage.getItem("racm303_course_drive_layout") === "list" ? "list" : "grid";
@@ -161,14 +161,14 @@
         </div>
 
         <div class="tv-utility-cluster">
-          <div class="tv-view-mode-switch" role="group" aria-label="สลับมุมมอง: Apple TV Mode (ค่าเริ่มต้น) หรือ File Explorer (Google Drive)">
-            <button type="button" class="tv-view-seg-btn ${portalViewMode === "tv" ? "is-active" : ""}" id="tvViewModeTvBtn" data-portal-view="tv" data-tv-focus data-tv-row="0" title="โหมด Apple TV (ค่าเริ่มต้น)">
-              <span class="tv-view-seg-ico">📺</span>
-              <span class="tv-view-seg-lbl">Apple TV</span>
+          <div class="tv-view-mode-switch" id="tvHsViewModeSwitch" role="group" aria-label="สลับมุมมองระบบสุขภาพ: โหมดเรียน หรือ Google Drive" hidden>
+            <button type="button" class="tv-view-seg-btn is-active" id="tvViewModeTvBtn" data-portal-view="tv" data-tv-focus data-tv-row="0" title="โหมดเรียนแบบกระชับ (ค่าเริ่มต้น)">
+              <span class="tv-view-seg-ico">📚</span>
+              <span class="tv-view-seg-lbl" id="tvViewModeStudyLbl">โหมดเรียน</span>
             </button>
-            <button type="button" class="tv-view-seg-btn ${portalViewMode === "drive" ? "is-active" : ""}" id="tvViewModeDriveBtn" data-portal-view="drive" data-tv-focus data-tv-row="0" title="โหมด File Explorer เหมือน Google Drive (ดูโฟลเดอร์ทั้งรายวิชา)">
+            <button type="button" class="tv-view-seg-btn" id="tvViewModeDriveBtn" data-portal-view="drive" data-tv-focus data-tv-row="0" title="โหมด File Explorer เหมือน Google Drive">
               <span class="tv-view-seg-ico">📁</span>
-              <span class="tv-view-seg-lbl">Drive</span>
+              <span class="tv-view-seg-lbl" id="tvViewModeDriveLbl">Drive</span>
             </button>
           </div>
           <button type="button" class="tv-icon-pill" id="tvSearchBtn" data-tv-focus data-tv-row="0" title="ค้นหาด่วน (⌘K หรือ /)" aria-label="ค้นหา">${ICONS.search}</button>
@@ -209,29 +209,12 @@
     $("tvViewModeDriveBtn").addEventListener("click", () => setPortalViewMode("drive"));
 
     $("tvBrandHomeBtn").addEventListener("click", () => {
-      if (portalViewMode === "drive") {
-        openCourseDriveAtPath([]);
-      } else {
-        navigateTvTab("home");
-      }
+      navigateTvTab("home");
     });
 
     dock.querySelectorAll("[data-tv-nav]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const navKey = btn.dataset.tvNav;
-        if (portalViewMode === "drive") {
-          const mapToPath = {
-            home: [],
-            schedule: ["schedule"],
-            groups: ["fieldwork"],
-            "health-systems": ["health-systems"],
-            epidemiology: ["epidemiology"],
-            manual: ["manuals"],
-            admin: ["admin"]
-          };
-          openCourseDriveAtPath(mapToPath[navKey] || []);
-          return;
-        }
         if (navKey === "home" || navKey === "schedule" || navKey === "epidemiology" || navKey === "manual") {
           navigateTvTab(navKey);
         } else if (navKey === "health-systems") {
@@ -308,7 +291,7 @@
     if (!btn) return;
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     btn.innerHTML = isDark ? ICONS.sun : ICONS.moon;
-    btn.title = isDark ? t("สลับเป็นโหมดสว่าง", "Switch to Light Mode") : t("สลับเป็นโหมดมืดสไตล์ Apple TV", "Switch to Dark Mode");
+    btn.title = isDark ? t("สลับเป็นโหมดสว่าง", "Switch to Light Mode") : t("สลับเป็นโหมดมืด", "Switch to Dark Mode");
   }
 
   function syncTopBarLabels() {
@@ -334,6 +317,7 @@
         btn.textContent = labels[k];
       }
     });
+    syncViewModeSwitchUI();
     syncProfilePill();
   }
 
@@ -623,7 +607,6 @@
                       : t("เลือกชื่อ / กลุ่มของฉัน", "Select My Name or Group")
                   )}</span></button>`
             }
-            <button type="button" class="tv-hero-btn is-glass" id="tvHeroDriveViewBtn" data-tv-focus data-tv-row="1">📁 <span>${esc(t("มุมมอง Google Drive (File Explorer)", "Google Drive File Explorer"))}</span></button>
           </div>
         </div>
 
@@ -778,11 +761,6 @@
     const heroProfBtn = $("tvHeroProfileBtn");
     if (heroProfBtn) {
       heroProfBtn.addEventListener("click", () => openProfileModal());
-    }
-
-    const heroDriveBtn = $("tvHeroDriveViewBtn");
-    if (heroDriveBtn) {
-      heroDriveBtn.addEventListener("click", () => setPortalViewMode("drive", []));
     }
 
     appTiles.forEach((tile) => {
@@ -1297,42 +1275,29 @@
 
     bar.hidden = false;
 
-    // Simplified UI Mode Switcher across all ระบบสุขภาพ screens: Apple TV Mode (Default) vs File Explorer (Google Drive) Mode
     if (groupKey === "health-systems") {
       const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
-      const uiMode = st.hsUiMode === "drive" ? "drive" : "apple-tv";
-      const tvSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2.5"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`;
-      const driveSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-      const backLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
 
       bar.innerHTML = `
         <div class="tv-subpage-left-group">
           <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn" data-tv-focus>
-            <span>← ${esc(backLabel)}</span>
+            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
           </button>
         </div>
-        <div class="tv-hsd-bar-right">
-          ${
-            isLiveJoined
-              ? `<span class="tv-live-active-pill">
+        ${
+          isLiveJoined
+            ? `<div class="tv-hsd-bar-right">
+                 <span class="tv-live-active-pill">
                    <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
                    <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
-                 </span>`
-              : ""
-          }
-          <div class="tv-sibling-pills" role="group" aria-label="สลับโหมดหน้าตา UI (Apple TV / File Explorer)">
-            <button type="button" class="tv-sibling-pill ${uiMode === "apple-tv" ? "is-active" : ""}" id="tvHsUiAppleTvBtn" title="${esc(t("โหมด Apple TV (ค่าเริ่มต้น)", "Apple TV UI Mode (Default)"))}">${tvSvg} <span>Apple TV</span></button>
-            <button type="button" class="tv-sibling-pill ${uiMode === "drive" ? "is-active" : ""}" id="tvHsUiDriveBtn" title="${esc(t("โหมด File Explorer เหมือน Google Drive", "Google Drive File Explorer Mode"))}">${driveSvg} <span>${esc(t("File Explorer (Drive)", "File Explorer (Drive)"))}</span></button>
-          </div>
-        </div>
+                 </span>
+               </div>`
+            : ""
+        }
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
-        if (portalViewMode === "drive") {
-          openCourseDriveAtPath(drivePath.length ? drivePath : ["health-systems"]);
-        } else {
-          navigateTvTab("home");
-          restoreHomeFocus();
-        }
+        navigateTvTab("home");
+        restoreHomeFocus();
       });
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
@@ -1341,16 +1306,6 @@
           syncSubpageBar();
         });
       }
-      $("tvHsUiAppleTvBtn").addEventListener("click", () => {
-        if (api && api.setHsUiMode) api.setHsUiMode("apple-tv");
-        syncViewModeSwitchUI();
-        syncSubpageBar();
-      });
-      $("tvHsUiDriveBtn").addEventListener("click", () => {
-        if (api && api.setHsUiMode) api.setHsUiMode("drive");
-        syncViewModeSwitchUI();
-        syncSubpageBar();
-      });
       return;
     }
 
@@ -1363,10 +1318,9 @@
         { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
       ];
-      const epBackLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
       bar.innerHTML = `
         <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-          <span>← ${esc(epBackLabel)}</span>
+          <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
         </button>
         <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
           ${epPills
@@ -1379,12 +1333,8 @@
         </div>
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
-        if (portalViewMode === "drive") {
-          openCourseDriveAtPath(drivePath.length ? drivePath : ["epidemiology"]);
-        } else {
-          navigateTvTab("home");
-          restoreHomeFocus();
-        }
+        navigateTvTab("home");
+        restoreHomeFocus();
       });
       bar.querySelectorAll("[data-tv-ep-sec]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -1417,10 +1367,9 @@
             ];
     }
 
-    const stdBackLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
     bar.innerHTML = `
       <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-        <span>← ${esc(stdBackLabel)}</span>
+        <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
       </button>
       ${
         siblings.length
@@ -1438,18 +1387,8 @@
     `;
 
     $("tvSubBackHomeBtn").addEventListener("click", () => {
-      if (portalViewMode === "drive") {
-        const fallbackDriveMap = {
-          schedule: ["schedule"],
-          groups: ["fieldwork"],
-          manual: ["manuals"],
-          admin: ["admin"]
-        };
-        openCourseDriveAtPath(drivePath.length ? drivePath : fallbackDriveMap[groupKey] || []);
-      } else {
-        navigateTvTab("home");
-        restoreHomeFocus();
-      }
+      navigateTvTab("home");
+      restoreHomeFocus();
     });
 
     bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
@@ -1663,18 +1602,29 @@
     const api = getApi();
     const st = api && api.getState ? api.getState() : {};
     const inHs = !driveBrowserActive && NAV_GROUP_MAP[st.activeTab || "home"] === "health-systems";
-    const isEffectiveDrive = portalViewMode === "drive" || (inHs && st.hsUiMode === "drive");
+    const sw = $("tvHsViewModeSwitch");
+    if (sw) {
+      sw.hidden = !inHs;
+      sw.setAttribute("aria-label", t("สลับมุมมองระบบสุขภาพ: โหมดเรียน หรือ Google Drive", "Switch Health Systems view: Study or Drive"));
+    }
+    const studyLbl = $("tvViewModeStudyLbl");
+    if (studyLbl) studyLbl.textContent = t("โหมดเรียน", "Study");
+    const driveLbl = $("tvViewModeDriveLbl");
+    if (driveLbl) driveLbl.textContent = "Drive";
+    const isEffectiveDrive = inHs && st.hsUiMode === "drive";
     const tvBtn = $("tvViewModeTvBtn");
     const drBtn = $("tvViewModeDriveBtn");
     if (tvBtn) {
       tvBtn.classList.toggle("is-active", !isEffectiveDrive);
       tvBtn.setAttribute("aria-pressed", !isEffectiveDrive ? "true" : "false");
+      tvBtn.title = t("โหมดเรียนแบบกระชับ (ค่าเริ่มต้น)", "Simplified Study View (Default)");
     }
     if (drBtn) {
       drBtn.classList.toggle("is-active", isEffectiveDrive);
       drBtn.setAttribute("aria-pressed", isEffectiveDrive ? "true" : "false");
+      drBtn.title = t("โหมด File Explorer เหมือน Google Drive", "Google Drive File Explorer View");
     }
-    document.body.dataset.portalViewMode = portalViewMode;
+    document.body.dataset.portalViewMode = isEffectiveDrive ? "drive" : "study";
   }
 
   function hideCourseDriveBrowser() {
@@ -1723,17 +1673,21 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function setPortalViewMode(mode, explicitPath) {
+  function setPortalViewMode(mode) {
     const api = getApi();
     const st = api && api.getState ? api.getState() : {};
     const curTab = st.activeTab || "home";
-    const inHs = !driveBrowserActive && NAV_GROUP_MAP[curTab] === "health-systems";
+    const inHs = NAV_GROUP_MAP[curTab] === "health-systems";
 
-    if (inHs && !Array.isArray(explicitPath)) {
-      portalViewMode = "tv";
-      try {
-        localStorage.setItem("racm303_portal_view_mode", "tv");
-      } catch (_) {}
+    portalViewMode = "tv";
+    try {
+      localStorage.setItem("racm303_portal_view_mode", "tv");
+    } catch (_) {}
+    if (driveBrowserActive) {
+      hideCourseDriveBrowser();
+    }
+
+    if (inHs) {
       if (api && api.setHsUiMode) {
         api.setHsUiMode(mode === "drive" ? "drive" : "apple-tv");
       }
@@ -1742,45 +1696,8 @@
       return;
     }
 
-    portalViewMode = mode === "drive" ? "drive" : "tv";
-    try {
-      localStorage.setItem("racm303_portal_view_mode", portalViewMode);
-    } catch (_) {}
     syncViewModeSwitchUI();
-
-    if (portalViewMode === "drive") {
-      if (Array.isArray(explicitPath)) {
-        openCourseDriveAtPath(explicitPath);
-      } else {
-        const tabToDrivePath = {
-          home: [],
-          schedule: ["schedule"],
-          textbooks: ["health-systems"],
-          "hs-discussion": ["health-systems"],
-          practice: ["health-systems"],
-          epidemiology: ["epidemiology"],
-          fieldwork: ["fieldwork"],
-          discussion: ["fieldwork"],
-          manual: ["manuals"],
-          "faculty-docs": ["manuals"],
-          submissions: ["admin"],
-          leave: ["admin"],
-          audit: ["admin"]
-        };
-        openCourseDriveAtPath(tabToDrivePath[curTab] || []);
-      }
-    } else {
-      hideCourseDriveBrowser();
-      if (api && api.setHsUiMode) {
-        api.setHsUiMode("apple-tv", { returnToHub: false });
-      }
-      if (api && api.switchTab) {
-        api.switchTab(curTab, false);
-      }
-      syncViewModeSwitchUI();
-      syncSubpageBar();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    syncSubpageBar();
   }
 
   function getFullCourseDriveCatalog() {
@@ -2235,9 +2152,9 @@
     modeBanner.innerHTML = `
       <div class="portal-drive-mode-copy">
         <strong>📁 ${esc(t("มุมมอง Google Drive (File Explorer) — รายวิชา RACM 303 ปีการศึกษา 2569", "Google Drive File Explorer View — RACM 303 (2569)"))}</strong>
-        <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับมุมมอง Apple TV / Google TV ได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Apple TV / Google TV Simplified view anytime."))}</span>
+        <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับโหมดเรียนได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Study View anytime."))}</span>
       </div>
-      <button type="button" class="portal-drive-switch-tv-btn" id="portalDriveBackToTvBtn">📺 <span>${esc(t("สลับเป็นมุมมอง Apple TV / Google TV", "Switch to TV Simplified View"))}</span></button>
+      <button type="button" class="portal-drive-switch-tv-btn" id="portalDriveBackToTvBtn">📚 <span>${esc(t("สลับเป็นโหมดเรียน", "Switch to Study View"))}</span></button>
     `;
     panel.appendChild(modeBanner);
     $("portalDriveBackToTvBtn").addEventListener("click", () => setPortalViewMode("tv"));
@@ -2325,7 +2242,7 @@
     storageBox.innerHTML =
       `<div class="gdrive-storage-head">☁️ <span>Google Drive · RACM 303</span></div>` +
       `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:100%"></div></div>` +
-      `<div class="gdrive-storage-caption">จัดเก็บไฟล์ครบทั้ง <strong>6 หมวดรายวิชา</strong> (รวมโฟลเดอร์ <strong>HS1–HS6</strong>) สลับกลับโหมด <strong>📺 TV View</strong> ได้ทุกเมื่อ</div>`;
+      `<div class="gdrive-storage-caption">จัดเก็บไฟล์ครบทั้ง <strong>6 หมวดรายวิชา</strong> (รวมโฟลเดอร์ <strong>HS1–HS6</strong>) สลับกลับ <strong>📚 โหมดเรียน</strong> ได้ทุกเมื่อ</div>`;
     sidebar.appendChild(storageBox);
 
     // Right Canvas
@@ -2706,14 +2623,6 @@
     syncProfilePill();
     initTvRemoteNavigation();
 
-    if (portalViewMode === "drive") {
-      const api = getApi();
-      const curTab = (api && api.getState && api.getState().activeTab) || "home";
-      if (curTab === "home") {
-        openCourseDriveAtPath([]);
-      }
-    }
-
     window.addEventListener("racm:tabchange", () => {
       syncViewModeSwitchUI();
       syncSubpageBar();
@@ -2721,6 +2630,7 @@
     });
 
     window.addEventListener("racm:hsdstatechange", () => {
+      syncViewModeSwitchUI();
       syncSubpageBar();
       syncProfilePill();
     });
