@@ -161,16 +161,6 @@
         </div>
 
         <div class="tv-utility-cluster">
-          <div class="tv-view-mode-switch" id="tvHsViewModeSwitch" role="group" aria-label="สลับมุมมองระบบสุขภาพ: โหมดเรียน หรือ Google Drive" hidden>
-            <button type="button" class="tv-view-seg-btn is-active" id="tvViewModeTvBtn" data-portal-view="tv" data-tv-focus data-tv-row="0" title="โหมดเรียนแบบกระชับ (ค่าเริ่มต้น)">
-              <span class="tv-view-seg-ico">📚</span>
-              <span class="tv-view-seg-lbl" id="tvViewModeStudyLbl">โหมดเรียน</span>
-            </button>
-            <button type="button" class="tv-view-seg-btn" id="tvViewModeDriveBtn" data-portal-view="drive" data-tv-focus data-tv-row="0" title="โหมด File Explorer เหมือน Google Drive">
-              <span class="tv-view-seg-ico">📁</span>
-              <span class="tv-view-seg-lbl" id="tvViewModeDriveLbl">Drive</span>
-            </button>
-          </div>
           <button type="button" class="tv-icon-pill" id="tvSearchBtn" data-tv-focus data-tv-row="0" title="ค้นหาด่วน (⌘K หรือ /)" aria-label="ค้นหา">${ICONS.search}</button>
           <button type="button" class="tv-profile-pill" id="tvProfileBtn" data-tv-focus data-tv-row="0" title="ตั้งค่าชื่อหรือกลุ่มของฉัน">
             <span class="tv-profile-avatar" id="tvProfileAvatar">${ICONS.user}</span>
@@ -204,9 +194,6 @@
     `;
 
     header.appendChild(dock);
-
-    $("tvViewModeTvBtn").addEventListener("click", () => setPortalViewMode("tv"));
-    $("tvViewModeDriveBtn").addEventListener("click", () => setPortalViewMode("drive"));
 
     $("tvBrandHomeBtn").addEventListener("click", () => {
       navigateTvTab("home");
@@ -1599,32 +1586,7 @@
   }
 
   function syncViewModeSwitchUI() {
-    const api = getApi();
-    const st = api && api.getState ? api.getState() : {};
-    const inHs = !driveBrowserActive && NAV_GROUP_MAP[st.activeTab || "home"] === "health-systems";
-    const sw = $("tvHsViewModeSwitch");
-    if (sw) {
-      sw.hidden = !inHs;
-      sw.setAttribute("aria-label", t("สลับมุมมองระบบสุขภาพ: โหมดเรียน หรือ Google Drive", "Switch Health Systems view: Study or Drive"));
-    }
-    const studyLbl = $("tvViewModeStudyLbl");
-    if (studyLbl) studyLbl.textContent = t("โหมดเรียน", "Study");
-    const driveLbl = $("tvViewModeDriveLbl");
-    if (driveLbl) driveLbl.textContent = "Drive";
-    const isEffectiveDrive = inHs && st.hsUiMode === "drive";
-    const tvBtn = $("tvViewModeTvBtn");
-    const drBtn = $("tvViewModeDriveBtn");
-    if (tvBtn) {
-      tvBtn.classList.toggle("is-active", !isEffectiveDrive);
-      tvBtn.setAttribute("aria-pressed", !isEffectiveDrive ? "true" : "false");
-      tvBtn.title = t("โหมดเรียนแบบกระชับ (ค่าเริ่มต้น)", "Simplified Study View (Default)");
-    }
-    if (drBtn) {
-      drBtn.classList.toggle("is-active", isEffectiveDrive);
-      drBtn.setAttribute("aria-pressed", isEffectiveDrive ? "true" : "false");
-      drBtn.title = t("โหมด File Explorer เหมือน Google Drive", "Google Drive File Explorer View");
-    }
-    document.body.dataset.portalViewMode = isEffectiveDrive ? "drive" : "study";
+    document.body.dataset.portalViewMode = "study";
   }
 
   function hideCourseDriveBrowser() {
@@ -1673,7 +1635,7 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function setPortalViewMode(mode) {
+  function setPortalViewMode() {
     const api = getApi();
     const st = api && api.getState ? api.getState() : {};
     const curTab = st.activeTab || "home";
@@ -1681,19 +1643,15 @@
 
     portalViewMode = "tv";
     try {
-      localStorage.setItem("racm303_portal_view_mode", "tv");
+      localStorage.removeItem("racm303_portal_view_mode");
+      localStorage.removeItem("racm303_hs_ui_mode_v1");
     } catch (_) {}
     if (driveBrowserActive) {
       hideCourseDriveBrowser();
     }
 
-    if (inHs) {
-      if (api && api.setHsUiMode) {
-        api.setHsUiMode(mode === "drive" ? "drive" : "apple-tv");
-      }
-      syncViewModeSwitchUI();
-      syncSubpageBar();
-      return;
+    if (inHs && api && api.setHsUiMode) {
+      api.setHsUiMode("apple-tv");
     }
 
     syncViewModeSwitchUI();

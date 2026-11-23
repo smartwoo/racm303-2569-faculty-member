@@ -138,7 +138,7 @@
     activeDocId: "HS1-CONCISE",
     activeHsModule: "HS1",
     preferredHsFormat: "concise",
-    hsUiMode: localStorage.getItem("racm303_hs_ui_mode_v1") || "apple-tv",
+    hsUiMode: "apple-tv",
     textbookSubMode: "docs-drive",
     tbDriveScope: "folders",
     tbDriveFormatChip: "all",
@@ -12401,12 +12401,12 @@
     return m ? Number(m[1]) : 1;
   }
 
-  function setHsUiMode(nextMode, opts) {
-    const mode = nextMode === "drive" ? "drive" : "apple-tv";
+  function setHsUiMode(_nextMode, opts) {
+    const mode = "apple-tv";
     state.hsUiMode = mode;
     document.body.dataset.hsUiMode = mode;
     try {
-      localStorage.setItem("racm303_hs_ui_mode_v1", mode);
+      localStorage.removeItem("racm303_hs_ui_mode_v1");
     } catch (_) {}
     const o = opts || {};
     if (o.returnToHub !== false) {
