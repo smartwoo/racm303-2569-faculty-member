@@ -95,10 +95,32 @@
   };
 
   const rememberedSubTab = {
-    "health-systems": "hs-discussion",
+    "health-systems": "textbooks",
     groups: "fieldwork",
     admin: "submissions"
   };
+
+  let portalViewMode = localStorage.getItem("racm303_portal_view_mode") === "drive" ? "drive" : "tv";
+  let driveBrowserActive = false;
+  let drivePath = []; // [] | ["schedule"] | ["health-systems"] | ["health-systems","HS1"] | ["epidemiology"] | ["fieldwork"] | ["manuals"] | ["admin"]
+  let driveLayout = localStorage.getItem("racm303_course_drive_layout") === "list" ? "list" : "grid";
+  let driveSearchQuery = "";
+
+  const COURSE_DRIVE_TRIANGLE_SVG =
+    `<svg class="gdrive-logo-svg" viewBox="0 0 87.3 78" aria-hidden="true">` +
+    `<path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>` +
+    `<path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>` +
+    `<path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>` +
+    `<path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>` +
+    `<path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>` +
+    `<path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>` +
+    `</svg>`;
+
+  const COURSE_DRIVE_FOLDER_SVG =
+    `<svg class="gdrive-folder-svg" viewBox="0 0 24 24" aria-hidden="true">` +
+    `<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h3.9c.7 0 1.36.3 1.82.82l1.16 1.36c.3.35.74.55 1.2.55H18.5A2.5 2.5 0 0 1 21 9.23v8.27A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11z" fill="#f59e0b"/>` +
+    `<path d="M3 9.2h18v8.3A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5V9.2z" fill="#fbbf24"/>` +
+    `</svg>`;
 
   /* ---------- 1. Mount Floating Top TV Capsule Bar ---------- */
   function mountTvTopCapsule() {
@@ -138,6 +160,16 @@
         </div>
 
         <div class="tv-utility-cluster">
+          <div class="tv-view-mode-switch" role="group" aria-label="สลับมุมมอง: Apple TV / Google TV หรือ Google Drive File Explorer">
+            <button type="button" class="tv-view-seg-btn ${portalViewMode === "tv" ? "is-active" : ""}" id="tvViewModeTvBtn" data-portal-view="tv" data-tv-focus data-tv-row="0" title="มุมมอง Apple TV / Google TV (Simplified)">
+              <span class="tv-view-seg-ico">📺</span>
+              <span class="tv-view-seg-lbl">TV</span>
+            </button>
+            <button type="button" class="tv-view-seg-btn ${portalViewMode === "drive" ? "is-active" : ""}" id="tvViewModeDriveBtn" data-portal-view="drive" data-tv-focus data-tv-row="0" title="มุมมอง File Explorer แบบ Google Drive (ดูโฟลเดอร์ทั้งรายวิชา)">
+              <span class="tv-view-seg-ico">📁</span>
+              <span class="tv-view-seg-lbl">Drive</span>
+            </button>
+          </div>
           <button type="button" class="tv-icon-pill" id="tvSearchBtn" data-tv-focus data-tv-row="0" title="ค้นหาด่วน (⌘K หรือ /)" aria-label="ค้นหา">${ICONS.search}</button>
           <button type="button" class="tv-profile-pill" id="tvProfileBtn" data-tv-focus data-tv-row="0" title="ตั้งค่าชื่อหรือกลุ่มของฉัน">
             <span class="tv-profile-avatar" id="tvProfileAvatar">${ICONS.user}</span>
@@ -172,15 +204,42 @@
 
     header.appendChild(dock);
 
-    $("tvBrandHomeBtn").addEventListener("click", () => navigateTvTab("home"));
+    $("tvViewModeTvBtn").addEventListener("click", () => setPortalViewMode("tv"));
+    $("tvViewModeDriveBtn").addEventListener("click", () => setPortalViewMode("drive"));
+
+    $("tvBrandHomeBtn").addEventListener("click", () => {
+      if (portalViewMode === "drive") {
+        openCourseDriveAtPath([]);
+      } else {
+        navigateTvTab("home");
+      }
+    });
 
     dock.querySelectorAll("[data-tv-nav]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const navKey = btn.dataset.tvNav;
+        if (portalViewMode === "drive") {
+          const mapToPath = {
+            home: [],
+            schedule: ["schedule"],
+            groups: ["fieldwork"],
+            "health-systems": ["health-systems"],
+            epidemiology: ["epidemiology"],
+            admin: ["admin"]
+          };
+          openCourseDriveAtPath(mapToPath[navKey] || []);
+          return;
+        }
         if (navKey === "home" || navKey === "schedule" || navKey === "epidemiology") {
           navigateTvTab(navKey);
         } else if (navKey === "health-systems") {
-          navigateTvTab(rememberedSubTab["health-systems"] || "hs-discussion");
+          const api = getApi();
+          const st = api && api.getState ? api.getState() : null;
+          if (st && st.activeTab === "textbooks" && (st.textbookSubMode !== "docs-drive" || st.tbDriveScope !== "folders") && api.openTextbookDriveFolder) {
+            api.openTextbookDriveFolder("FOLDERS");
+          } else {
+            navigateTvTab(rememberedSubTab["health-systems"] || "textbooks");
+          }
         } else if (navKey === "groups") {
           navigateTvTab(rememberedSubTab.groups || "fieldwork");
         } else if (navKey === "admin") {
@@ -309,6 +368,7 @@
   }
 
   function navigateTvTab(tabId) {
+    hideCourseDriveBrowser();
     const api = getApi();
     if (!api) return;
     api.switchTab(tabId, true);
@@ -423,17 +483,21 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · Discussion", "Health Systems · Discussion"),
-              sub: t("เลือกไฟล์สไลด์ .pptx จาก Google Drive พร้อมสไลด์เปิดคาบ Kahoot & เฉลย", "Google Drive .pptx decks with opening Kahoot & Teacher Key"),
+              title: t("ระบบสุขภาพ · Google Drive", "Health Systems · Google Drive"),
+              sub: t("File Explorer รวมโฟลเดอร์ HS1–HS6: เอกสารคำสอน สไลด์ Discussion .pptx เฉลย และ Slide อาจารย์", "Unified File Explorer for HS1–HS6 folders: docs, Discussion .pptx, Teacher Key & lecture slides"),
               badge: "HS1 – HS6",
-              action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
+              action: () => navigateFromTile("app-hsd", () => {
+                const a = getApi();
+                if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
+                else navigateTvTab("textbooks");
+              })
             },
             {
               id: "app-guides",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("บทเรียนระบบสุขภาพ & คู่มือ", "HS Textbooks & Guides"),
-              sub: t("บทเรียน HS1–6 แนวทางนำอภิปราย โจทย์ 60 ข้อ และคู่มือวิชา", "HS1–6 textbooks, facilitator guides & 60 practice items"),
+              title: t("คู่มือผู้สอน & โจทย์อภิปราย", "Facilitator Guides & Key"),
+              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ 60 ข้อ และคู่มือรายวิชา", "Facilitator guides, Teacher Key, 60 practice items & course manual"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
             },
@@ -479,19 +543,23 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · Discussion", "Health Systems · Discussion"),
-              sub: t("เลือกเปิดไฟล์สไลด์ .pptx จาก Google Drive รายคาบ พร้อมสไลด์เปิดคาบเช็คชื่อ Kahoot", "Open HS1–HS6 .pptx decks from Google Drive with opening Kahoot slide"),
+              title: t("ระบบสุขภาพ · Google Drive", "Health Systems · Google Drive"),
+              sub: t("เปิด File Explorer โฟลเดอร์ HS1–HS6 รวมเอกสารคำสอน สไลด์ Discussion .pptx และ Slide อาจารย์", "Unified File Explorer for HS1–HS6 folders: docs, Discussion .pptx, lecture slides & worksheets"),
               badge: t("HS1 – HS6", "HS1 – HS6"),
-              action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
+              action: () => navigateFromTile("app-hsd", () => {
+                const a = getApi();
+                if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
+                else navigateTvTab("textbooks");
+              })
             },
             {
               id: "app-books",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("บทเรียนระบบสุขภาพ & โจทย์", "HS Textbooks & Quiz"),
-              sub: t("อ่านฉบับย่อพร้อมแผนภาพ ฉบับเต็ม HS1–HS6 คำศัพท์ 111 คำ และโจทย์ 60 ข้อ", "Abridged visual texts, full HS1–HS6 chapters & 60 practice questions"),
+              title: t("คำศัพท์ 111 คำ & โจทย์ 60 ข้อ", "111 Flashcards & 60 Quiz"),
+              sub: t("ตารางทบทวนเร็ว High-Yield บัตรคำศัพท์ และโจทย์ฝึกคิด Active Recall ครบ HS1–HS6", "High-Yield rapid review, flashcards & 60 active recall questions"),
               badge: t("HS1 – HS6", "HS1 – HS6"),
-              action: () => navigateFromTile("app-books", () => navigateTvTab("textbooks"))
+              action: () => navigateFromTile("app-books", () => navigateTvTab("practice"))
             },
             {
               id: "app-epi",
@@ -552,6 +620,7 @@
                       : t("เลือกชื่อ / กลุ่มของฉัน", "Select My Name or Group")
                   )}</span></button>`
             }
+            <button type="button" class="tv-hero-btn is-glass" id="tvHeroDriveViewBtn" data-tv-focus data-tv-row="1">📁 <span>${esc(t("มุมมอง Google Drive (File Explorer)", "Google Drive File Explorer"))}</span></button>
           </div>
         </div>
 
@@ -706,6 +775,11 @@
     const heroProfBtn = $("tvHeroProfileBtn");
     if (heroProfBtn) {
       heroProfBtn.addEventListener("click", () => openProfileModal());
+    }
+
+    const heroDriveBtn = $("tvHeroDriveViewBtn");
+    if (heroDriveBtn) {
+      heroDriveBtn.addEventListener("click", () => setPortalViewMode("drive", []));
     }
 
     appTiles.forEach((tile) => {
@@ -1238,19 +1312,20 @@
       let rightControlsHtml = "";
       if (inHsd) {
         rightControlsHtml = `
-          <div class="tv-sibling-pills" role="group" aria-label="มุมมองสไลด์และโจทย์ Discussion ระบบสุขภาพ">
-            <button type="button" class="tv-sibling-pill ${isDriveOpen ? "is-active" : ""}" id="tvHsdModeDriveBtn">${esc(t("📁 Google Drive (.pptx)", "📁 Google Drive (.pptx)"))}</button>
-            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "slide" && !isDriveOpen ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t(`สไลด์ 16:9 (${activeModLabel})`, `16:9 (${activeModLabel})`))}</button>
-            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("ใบงานเลื่อนอ่านยาว", "Full Scroll"))}</button>
+          <div class="tv-sibling-pills" role="group" aria-label="มุมมองสไลด์และ Google Drive ระบบสุขภาพ">
+            <button type="button" class="tv-sibling-pill" id="tvTbDriveRootBtn">${esc(t("📁 Google Drive", "📁 Google Drive"))}</button>
+            <button type="button" class="tv-sibling-pill" id="tvTbDriveFolderBtn">${esc(t(`📂 โฟลเดอร์ ${activeModLabel}`, `📂 ${activeModLabel} Folder`))}</button>
+            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "slide" && !isDriveOpen ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t(`▶ สไลด์ 16:9 (${activeModLabel})`, `▶ 16:9 (${activeModLabel})`))}</button>
+            <button type="button" class="tv-sibling-pill ${inHsd && curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("📜 ใบงานเลื่อนอ่านยาว", "📜 Full Scroll"))}</button>
           </div>
         `;
       } else if (inTb && tbMode === "lecture-slides") {
         const curLsScope = st.lsDriveScope || "folders";
         rightControlsHtml = `
           <div class="tv-sibling-pills" role="group" aria-label="มุมมองโฟลเดอร์ Slide อาจารย์">
-            <button type="button" class="tv-sibling-pill ${curLsScope === "folders" ? "is-active" : ""}" id="tvLsScopeFoldersBtn">${esc(t("📂 โฟลเดอร์ HS1–HS6", "📂 HS1–HS6 Folders"))}</button>
-            <button type="button" class="tv-sibling-pill ${curLsScope === "module" ? "is-active" : ""}" id="tvLsScopeModBtn">${esc(t(`🖥️ คาบ ${activeModLabel}`, `🖥️ ${activeModLabel} Folder`))}</button>
-            <button type="button" class="tv-sibling-pill ${curLsScope === "all" ? "is-active" : ""}" id="tvLsScopeAllBtn">${esc(t("📋 รวมครบทั้ง 6 คาบ", "📋 All 6 Sessions"))}</button>
+            <button type="button" class="tv-sibling-pill" id="tvTbDriveRootBtn">${esc(t("📁 Google Drive", "📁 Google Drive"))}</button>
+            <button type="button" class="tv-sibling-pill ${curLsScope === "folders" ? "is-active" : ""}" id="tvLsScopeFoldersBtn">${esc(t("🖥️ โฟลเดอร์ Slide (HS1–HS6)", "🖥️ Slide Folders"))}</button>
+            <button type="button" class="tv-sibling-pill ${curLsScope === "module" ? "is-active" : ""}" id="tvLsScopeModBtn">${esc(t(`คาบ ${activeModLabel}`, `${activeModLabel}`))}</button>
           </div>
         `;
       } else if (inTb) {
@@ -1260,19 +1335,27 @@
         const isConciseOpen = tbMode === "doc-reader" && /-CONCISE$/i.test(String(st.activeDocId || ""));
         const isFullOpen = tbMode === "doc-reader" && !/-CONCISE$|-WB$/i.test(String(st.activeDocId || ""));
         rightControlsHtml = `
-          <div class="tv-sibling-pills" role="group" aria-label="มุมมองโฟลเดอร์เอกสารคำสอน Google Drive">
-            <button type="button" class="tv-sibling-pill ${isFoldersView ? "is-active" : ""}" id="tvTbDriveRootBtn">${esc(t("📂 โฟลเดอร์ HS1–HS6", "📂 HS1–HS6 Folders"))}</button>
-            <button type="button" class="tv-sibling-pill ${isModuleDrive ? "is-active" : ""}" id="tvTbDriveFolderBtn">${esc(t(`📁 โฟลเดอร์ ${activeModLabel}`, `📁 ${activeModLabel} Folder`))}</button>
+          <div class="tv-sibling-pills" role="group" aria-label="มุมมอง Google Drive ระบบสุขภาพ">
+            <button type="button" class="tv-sibling-pill ${isFoldersView ? "is-active" : ""}" id="tvTbDriveRootBtn">${esc(t("📁 Google Drive (HS1–HS6)", "📁 Google Drive (HS1–HS6)"))}</button>
+            <button type="button" class="tv-sibling-pill ${isModuleDrive ? "is-active" : ""}" id="tvTbDriveFolderBtn">${esc(t(`📂 โฟลเดอร์ ${activeModLabel}`, `📂 ${activeModLabel} Folder`))}</button>
             <button type="button" class="tv-sibling-pill ${isConciseOpen ? "is-active" : ""}" id="tvTbOpenConciseBtn">${esc(t(`⚡ ฉบับย่อ (${activeModLabel})`, `⚡ Concise (${activeModLabel})`))}</button>
             <button type="button" class="tv-sibling-pill ${isFullOpen ? "is-active" : ""}" id="tvTbOpenFullBtn">${esc(t(`📚 ฉบับเต็ม (${activeModLabel})`, `📚 Full (${activeModLabel})`))}</button>
           </div>
         `;
+      } else {
+        rightControlsHtml = `
+          <div class="tv-sibling-pills" role="group" aria-label="ทางลัด Google Drive ระบบสุขภาพ">
+            <button type="button" class="tv-sibling-pill" id="tvTbDriveRootBtn">${esc(t("📁 Google Drive (HS1–HS6)", "📁 Google Drive (HS1–HS6)"))}</button>
+            <button type="button" class="tv-sibling-pill" id="tvTbDriveFolderBtn">${esc(t(`📂 โฟลเดอร์ ${activeModLabel}`, `📂 ${activeModLabel} Folder`))}</button>
+          </div>
+        `;
       }
 
+      const backLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
       bar.innerHTML = `
         <div class="tv-subpage-left-group">
           <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn" data-tv-focus>
-            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+            <span>← ${esc(backLabel)}</span>
           </button>
         </div>
         <div class="tv-hsd-bar-right">
@@ -1288,8 +1371,12 @@
         </div>
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
-        navigateTvTab("home");
-        restoreHomeFocus();
+        if (portalViewMode === "drive") {
+          openCourseDriveAtPath(drivePath.length ? drivePath : ["health-systems"]);
+        } else {
+          navigateTvTab("home");
+          restoreHomeFocus();
+        }
       });
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
@@ -1381,9 +1468,10 @@
         { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
       ];
+      const epBackLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
       bar.innerHTML = `
         <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-          <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+          <span>← ${esc(epBackLabel)}</span>
         </button>
         <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
           ${epPills
@@ -1396,8 +1484,12 @@
         </div>
       `;
       $("tvSubBackHomeBtn").addEventListener("click", () => {
-        navigateTvTab("home");
-        restoreHomeFocus();
+        if (portalViewMode === "drive") {
+          openCourseDriveAtPath(drivePath.length ? drivePath : ["epidemiology"]);
+        } else {
+          navigateTvTab("home");
+          restoreHomeFocus();
+        }
       });
       bar.querySelectorAll("[data-tv-ep-sec]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -1430,9 +1522,10 @@
             ];
     }
 
+    const stdBackLabel = portalViewMode === "drive" ? t("กลับ Google Drive", "Back to Drive") : t("หน้าหลัก", "Home");
     bar.innerHTML = `
       <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-        <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+        <span>← ${esc(stdBackLabel)}</span>
       </button>
       ${
         siblings.length
@@ -1450,8 +1543,12 @@
     `;
 
     $("tvSubBackHomeBtn").addEventListener("click", () => {
-      navigateTvTab("home");
-      restoreHomeFocus();
+      if (portalViewMode === "drive") {
+        openCourseDriveAtPath(drivePath);
+      } else {
+        navigateTvTab("home");
+        restoreHomeFocus();
+      }
     });
 
     bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
@@ -1645,18 +1742,1056 @@
     });
   }
 
+  /* ---------- 7. Full-Course Google Drive File Explorer View Mode (Dual View: TV vs Drive) ---------- */
+  function ensureDrivePanelExists() {
+    let panel = $("portalDriveExplorerPanel");
+    if (!panel) {
+      const main = document.querySelector("main.portal-main");
+      if (!main) return null;
+      panel = document.createElement("section");
+      panel.className = "portal-drive-view-panel hsd-no-print";
+      panel.id = "portalDriveExplorerPanel";
+      panel.setAttribute("aria-label", "Google Drive File Explorer รายวิชา RACM 303");
+      panel.hidden = true;
+      main.prepend(panel);
+    }
+    return panel;
+  }
+
+  function syncViewModeSwitchUI() {
+    const tvBtn = $("tvViewModeTvBtn");
+    const drBtn = $("tvViewModeDriveBtn");
+    if (tvBtn) {
+      tvBtn.classList.toggle("is-active", portalViewMode === "tv");
+      tvBtn.setAttribute("aria-pressed", portalViewMode === "tv" ? "true" : "false");
+    }
+    if (drBtn) {
+      drBtn.classList.toggle("is-active", portalViewMode === "drive");
+      drBtn.setAttribute("aria-pressed", portalViewMode === "drive" ? "true" : "false");
+    }
+    document.body.dataset.portalViewMode = portalViewMode;
+  }
+
+  function hideCourseDriveBrowser() {
+    driveBrowserActive = false;
+    const panel = $("portalDriveExplorerPanel");
+    if (panel) panel.hidden = true;
+    const api = getApi();
+    const activeTab = (api && api.getState && api.getState().activeTab) || "home";
+    document.querySelectorAll("main.portal-main > .tab-panel").forEach((tp) => {
+      tp.hidden = tp.id !== `panel-${activeTab}`;
+    });
+  }
+
+  function syncTopNavForDrivePath(pathArr) {
+    const first = pathArr && pathArr[0] ? pathArr[0] : "home";
+    const navMap = {
+      home: "home",
+      schedule: "schedule",
+      "health-systems": "health-systems",
+      epidemiology: "epidemiology",
+      fieldwork: "groups",
+      manuals: "health-systems",
+      admin: "admin"
+    };
+    const activeNav = navMap[first] || "home";
+    document.querySelectorAll("#tvPillNavList [data-tv-nav]").forEach((btn) => {
+      if (btn.dataset.tvNav === activeNav) btn.setAttribute("aria-current", "page");
+      else btn.removeAttribute("aria-current");
+    });
+  }
+
+  function openCourseDriveAtPath(pathArr) {
+    drivePath = Array.isArray(pathArr) ? [...pathArr] : [];
+    driveBrowserActive = true;
+    const panel = ensureDrivePanelExists();
+    if (!panel) return;
+    document.querySelectorAll("main.portal-main > .tab-panel").forEach((tp) => {
+      tp.hidden = true;
+    });
+    const subBar = $("tvSubpageBar");
+    if (subBar) subBar.hidden = true;
+    panel.hidden = false;
+    syncViewModeSwitchUI();
+    syncTopNavForDrivePath(drivePath);
+    renderFullCourseDriveExplorer();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function setPortalViewMode(mode, explicitPath) {
+    portalViewMode = mode === "drive" ? "drive" : "tv";
+    try {
+      localStorage.setItem("racm303_portal_view_mode", portalViewMode);
+    } catch (_) {}
+    syncViewModeSwitchUI();
+
+    const api = getApi();
+    const st = api && api.getState ? api.getState() : {};
+    const curTab = st.activeTab || "home";
+
+    if (portalViewMode === "drive") {
+      if (Array.isArray(explicitPath)) {
+        openCourseDriveAtPath(explicitPath);
+      } else {
+        const tabToDrivePath = {
+          home: [],
+          schedule: ["schedule"],
+          textbooks: ["health-systems"],
+          "hs-discussion": ["health-systems"],
+          practice: ["health-systems"],
+          epidemiology: ["epidemiology"],
+          fieldwork: ["fieldwork"],
+          discussion: ["fieldwork"],
+          manual: ["manuals"],
+          "faculty-docs": ["manuals"],
+          submissions: ["admin"],
+          leave: ["admin"],
+          audit: ["admin"]
+        };
+        openCourseDriveAtPath(tabToDrivePath[curTab] || []);
+      }
+    } else {
+      hideCourseDriveBrowser();
+      if (api && api.switchTab) {
+        api.switchTab(curTab, false);
+      }
+      syncSubpageBar();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function getFullCourseDriveCatalog() {
+    const api = getApi();
+    const HS_DATA = window.RACM_HS_DATA || { docs: [], glossary: [], selfCheck: [] };
+    const modules = (HSD.modules && HSD.modules.length)
+      ? HSD.modules
+      : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => ({ id: c, code: c, title: c }));
+    const sites = SCHED.fieldworkSites || [];
+
+    const openFileAction = (fn) => () => {
+      hideCourseDriveBrowser();
+      fn();
+      syncSubpageBar();
+    };
+
+    const buildHsModuleFiles = (m) => {
+      const files = [];
+      const docs = HS_DATA.docs || [];
+      const addDoc = (docId, suffix, kicker, icoCls, icoTxt, chip) => {
+        if (!docId) return;
+        const docObj = docs.find((d) => d.id === docId);
+        if (!docObj) return;
+        files.push({
+          id: `hsdoc:${docId}`,
+          folderPath: ["health-systems", m.id],
+          name: `RACM303_${m.code}_${suffix}.gdoc`,
+          title: `${m.code}: ${docObj.title || m.title}`,
+          sub: kicker,
+          meta: `${m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : ""} · น้ำหนักสอบ ${m.examWeight || ""}`,
+          badge: chip,
+          icoCls,
+          icoTxt,
+          pdfHref: `exports/pdf/${encodeURIComponent(docId)}.pdf`,
+          docxHref: `exports/docx/${encodeURIComponent(docId)}.docx`,
+          onOpen: openFileAction(() => {
+            if (api && api.openTextbookDoc) api.openTextbookDoc(docId);
+          })
+        });
+      };
+
+      addDoc(m.conciseDocId, "เอกสารคำสอน_ฉบับย่อ_(Abridged)", "⚡ เอกสารคำสอนฉบับย่อ + แผนภาพเตรียมสอบ", "is-gdoc", "≡", "ฉบับย่อ · อ่านไว");
+      addDoc(m.docId, "เอกสารคำสอน_ฉบับเต็ม_(Full_Textbook)", "📚 เอกสารคำสอนฉบับสมบูรณ์พร้อมอ้างอิง", "is-gdoc", "≡", "ฉบับเต็ม");
+      addDoc(m.wbDocId, "สมุดใบงาน_Worksheet", "📋 ใบงานฝึกคิดเตรียมความพร้อมก่อนเข้าคาบ", "is-gdoc", "📋", "Worksheet");
+
+      const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
+      const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+      files.push({
+        id: `hsppt:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: `RACM303_คาบ_${m.code}_Case_Discussion.pptx`,
+        title: `สไลด์อภิปรายกลุ่มย่อย 16:9 · ${m.code}: ${m.title}`,
+        sub: ROLE === "faculty" ? `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key` : `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`,
+        meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
+        badge: ROLE === "faculty" ? `★ สไลด์ + เฉลย` : `▶ สไลด์ 16:9`,
+        icoCls: "is-pptx",
+        icoTxt: "P",
+        onOpen: openFileAction(() => {
+          if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
+        })
+      });
+
+      files.push({
+        id: `hslec:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: `RACM303_คาบ_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
+        title: `สไลด์ประกอบการบรรยายโดยอาจารย์ประจำคาบ ${m.code}`,
+        sub: `ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
+        meta: m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : "",
+        badge: "⏳ รออาจารย์ Upload",
+        isPending: true,
+        icoCls: "is-pptx is-muted-pptx",
+        icoTxt: "P",
+        onOpen: openFileAction(() => {
+          if (api && api.openHsLectureSlides) api.openHsLectureSlides(m.code);
+        })
+      });
+
+      const gCnt = (HS_DATA.glossary || []).filter((g) => g.module === m.code).length;
+      const qCnt = (HS_DATA.selfCheck || []).filter((q) => q.module === m.code).length;
+      files.push({
+        id: `hsquiz:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: `RACM303_${m.code}_คำศัพท์และโจทย์ทบทวน_(Active_Recall).app`,
+        title: `ตารางทบทวนเร็ว · คำศัพท์ ${gCnt} คำ · โจทย์ ${qCnt} ข้อ (${m.code})`,
+        sub: "ฝึกพลิกบัตรคำศัพท์และตอบคำถาม Active Recall เฉพาะบทนี้",
+        meta: `${gCnt} คำศัพท์ · ${qCnt} ข้อ`,
+        badge: "🧠 ฝึกทำโจทย์",
+        icoCls: "is-quiz",
+        icoTxt: "🧠",
+        onOpen: openFileAction(() => {
+          if (api && api.openPractice) api.openPractice(m.code, "qa");
+        })
+      });
+
+      if (ROLE === "faculty") {
+        files.push({
+          id: `hsfac:${m.id}`,
+          folderPath: ["health-systems", m.id],
+          name: `RACM303_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
+          title: `คู่มือผู้สอนและแนวทางนำอภิปรายประจำคาบ ${m.code}`,
+          sub: "เฉพาะคณาจารย์ — แผนนำอภิปราย ประเด็นเฉลย 4 ขั้น และเกณฑ์ประเมิน",
+          meta: "Faculty Member Only",
+          badge: "📕 คู่มือผู้สอน",
+          icoCls: "is-faculty",
+          icoTxt: "📕",
+          onOpen: openFileAction(() => {
+            if (api && api.switchTab) api.switchTab("faculty-docs");
+          })
+        });
+      }
+
+      return files;
+    };
+
+    const folders = {
+      schedule: {
+        id: "schedule",
+        code: "01_ตารางเรียนและปฏิทิน",
+        title: ROLE === "faculty" ? "ปฏิทินภาระงานสอน · ซิงค์ iCal / Google Calendar · Zoom · อัปโหลด Slide" : "ตารางเรียน 6 สัปดาห์ · ซิงค์ปฏิทินมือถือ (.ics) · ลิงก์ห้อง Zoom",
+        meta: "6 สัปดาห์ (23 พ.ย. 2569 – 3 ม.ค. 2570)",
+        tags: ["📅 ปฏิทิน 6 สัปดาห์", "📲 ซิงค์ .ics", "🎥 Zoom 3 ห้อง"],
+        files: [
+          {
+            id: "sched:cal",
+            folderPath: ["schedule"],
+            name: ROLE === "faculty" ? "RACM303_ปฏิทินภาระงานสอน_6_สัปดาห์.app" : "RACM303_ตารางเรียนรวม_6_สัปดาห์.app",
+            title: "ปฏิทินรายเดือน / รายสัปดาห์ / ตารางเรียนครบทั้ง 6 สัปดาห์",
+            sub: "กรองตามอาจารย์ กลุ่มพื้นที่ หรือสัปดาห์ พร้อมส่งออก Excel / PDF / Word",
+            meta: "23 พ.ย. 69 – 3 ม.ค. 70",
+            badge: "เปิดปฏิทิน →",
+            icoCls: "is-manual",
+            icoTxt: "📅",
+            onOpen: openFileAction(() => navigateTvTab("schedule"))
+          },
+          {
+            id: "sched:ics",
+            folderPath: ["schedule"],
+            name: "RACM303_2569_Sync_Google_Calendar_&_Apple_iCal.ics",
+            title: "ดาวน์โหลดไฟล์ปฏิทิน (.ics) สำหรับบันทึกเข้ามือถือทันที",
+            sub: "รองรับ Google Calendar, Apple Calendar (iPhone/iPad/Mac) และ Outlook",
+            meta: "ไฟล์มาตรฐาน .ics",
+            badge: "⬇ ดาวน์โหลด .ics",
+            icoCls: "is-quiz",
+            icoTxt: "📲",
+            onOpen: () => {
+              if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
+            }
+          },
+          {
+            id: "sched:zoom",
+            folderPath: ["schedule"],
+            name: "RACM303_รวมลิงก์ห้องเรียนออนไลน์_Zoom_(3_ห้อง).link",
+            title: "ศูนย์รวมลิงก์ Zoom ห้องเรียนออนไลน์ประจำรายวิชา",
+            sub: "เปิดแผงรวมลิงก์ Zoom สำหรับคาบบรรยายและระบาดวิทยา",
+            meta: "3 ห้องเรียนออนไลน์",
+            badge: "🎥 เปิดลิงก์ Zoom",
+            icoCls: "is-gdoc",
+            icoTxt: "🎥",
+            onOpen: openFileAction(() => {
+              navigateTvTab("schedule");
+              setTimeout(() => {
+                const zBtn = $("toggleZoomDrawerBtn");
+                if (zBtn && zBtn.getAttribute("aria-expanded") !== "true") zBtn.click();
+              }, 80);
+            })
+          },
+          ...(ROLE === "faculty"
+            ? [
+                {
+                  id: "sched:upload",
+                  folderPath: ["schedule"],
+                  name: "Faculty_Slide_Upload_Studio_(อัปโหลดสไลด์สอน).app",
+                  title: "ระบบอัปโหลด Slide ประกอบการสอนสำหรับอาจารย์ประจำคาบ",
+                  sub: "อัปโหลดไฟล์ .pptx / .pdf ประจำคาบ HS1–HS6 และ EP1–EP9",
+                  meta: "เฉพาะคณาจารย์",
+                  badge: "📊 เปิดหน้าอัปโหลด",
+                  icoCls: "is-faculty",
+                  icoTxt: "📊",
+                  onOpen: openFileAction(() => {
+                    navigateTvTab("schedule");
+                    setTimeout(() => {
+                      const sBtn = $("toggleSlideStudioBtn");
+                      if (sBtn && sBtn.getAttribute("aria-expanded") !== "true") sBtn.click();
+                    }, 80);
+                  })
+                }
+              ]
+            : [])
+        ]
+      },
+      "health-systems": {
+        id: "health-systems",
+        code: "02_ระบบสุขภาพ (HS1–HS6)",
+        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 รวมเอกสารคำสอน สไลด์ Discussion .pptx Slide อาจารย์ และโจทย์",
+        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + เอกสารรวม",
+        tags: ["📁 HS1–HS6", "📄 คำสอนย่อ/เต็ม", "🟠 Discussion .pptx", "⏳ Slide อาจารย์"],
+        subfolders: modules.map((m) => ({
+          id: m.id,
+          code: m.code,
+          title: m.title,
+          examWeight: m.examWeight || "",
+          meta: `${m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : ""} · สอบ ${m.examWeight || ""}`,
+          files: buildHsModuleFiles(m)
+        })),
+        files: [
+          {
+            id: "hs:all-scroll",
+            folderPath: ["health-systems"],
+            name: "RACM303_ใบงาน_Discussion_รวมทุกบท_HS1-HS6_(เลื่อนอ่านยาว).web",
+            title: "ใบงานกรณีศึกษา HS1–HS6 รวมทุกบทในหน้าเดียว (Scroll View)",
+            sub: "ครบ 10 กรณีศึกษา · 20 ข้อย่อย สำหรับอ่านทบทวนหรือพิมพ์เตรียมสอบ Open Note",
+            meta: "HS1–HS6 รวมทุกบท",
+            badge: "📜 เปิดอ่านรวม",
+            icoCls: "is-gdoc",
+            icoTxt: "≡",
+            onOpen: openFileAction(() => {
+              const st = api && api.getState ? api.getState() : null;
+              if (st) {
+                st.hsdViewMode = "scroll";
+                st.hsdModule = "ALL";
+                st.hsdDriveFolderOpen = false;
+              }
+              navigateTvTab("hs-discussion");
+            })
+          },
+          {
+            id: "hs:practice-all",
+            folderPath: ["health-systems"],
+            name: "RACM303_คลังคำศัพท์_111คำ_และโจทย์ฝึกหัด_60ข้อ_HS1-HS6.app",
+            title: "ตารางทบทวนเร็ว High-Yield · บัตรคำศัพท์ 111 คำ · โจทย์ 60 ข้อ",
+            sub: "ทบทวนครบทุกบทเรียนระบบสุขภาพพร้อมโหมดพลิกบัตรคำศัพท์",
+            meta: "111 คำศัพท์ · 60 ข้อ",
+            badge: "🧠 เปิดคลังทบทวน",
+            icoCls: "is-quiz",
+            icoTxt: "🧠",
+            onOpen: openFileAction(() => {
+              if (api && api.openPractice) api.openPractice("", "rapid");
+            })
+          }
+        ]
+      },
+      epidemiology: {
+        id: "epidemiology",
+        code: "03_ระบาดวิทยา (EP1–EP9)",
+        title: "คาบเรียน EP1–EP9 & Exercise 1–6 · ห้องเรียน Zoom · SPSS · สัดส่วนข้อสอบ & ฟอร์ม 4A",
+        meta: "9 คาบบรรยาย · 6 แบบฝึกหัด",
+        tags: ["📊 EP1–EP9", "💻 Ex 1–6 & SPSS", "📋 สัดส่วนสอบ & 4A"],
+        files: [
+          {
+            id: "ep:all",
+            folderPath: ["epidemiology"],
+            name: "RACM303_ระบาดวิทยา_ภาพรวมและคาบเรียน_EP1-EP9_&_Ex1-6.app",
+            title: "ตารางเรียนและรายละเอียดคาบ EP1–EP9 และแบบฝึกหัด Exercise 1–6",
+            sub: "เช็กหัวข้อเรียน อาจารย์ผู้สอน วันเวลา และลิงก์เอกสารประกอบทุกคาบ",
+            meta: "EP1–EP9 · Ex 1–6",
+            badge: "📊 เปิดหมวด EP",
+            icoCls: "is-manual",
+            icoTxt: "📊",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("sessions");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:zoom-spss",
+            folderPath: ["epidemiology"],
+            name: "RACM303_ห้องเรียนออนไลน์_Zoom_&_คู่มือโปรแกรม_SPSS.link",
+            title: "ลิงก์ห้องเรียน Zoom ระบาดวิทยาและชุดข้อมูลฝึกปฏิบัติ SPSS",
+            sub: "ทางลัดเข้าห้องเรียนออนไลน์และไฟล์เตรียมฝึกวิเคราะห์ข้อมูล",
+            meta: "Zoom · SPSS",
+            badge: "🎥 เปิด Zoom & SPSS",
+            icoCls: "is-gdoc",
+            icoTxt: "💻",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("zoom-spss");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:exam-4a",
+            folderPath: ["epidemiology"],
+            name: "RACM303_สัดส่วนข้อสอบ_EP_&_แบบฟอร์มนำเสนอภาคสนาม_4A.app",
+            title: "ผังสัดส่วนการออกข้อสอบระบาดวิทยาและแบบฟอร์ม 4A",
+            sub: "รายละเอียดโครงสร้างข้อสอบ EP และแนวทางจัดทำรายงาน/นำเสนอฟอร์ม 4A",
+            meta: "สอบ EP · ฟอร์ม 4A",
+            badge: "📋 เปิดดูเกณฑ์",
+            icoCls: "is-quiz",
+            icoTxt: "📋",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("exam-field");
+              else navigateTvTab("epidemiology");
+            })
+          }
+        ]
+      },
+      fieldwork: {
+        id: "fieldwork",
+        code: "04_กลุ่มเรียนและพื้นที่ภาคสนาม (9 แห่ง)",
+        title: "9 โรงพยาบาลชุมชนภาคสนาม · อาจารย์ที่ปรึกษา · แผนที่ · ผังกลุ่ม Discussion 6 กลุ่ม (169 คน)",
+        meta: "9 พื้นที่ภาคสนาม · 6 กลุ่มอภิปราย",
+        tags: ["🏥 9 โรงพยาบาลภาคสนาม", "👥 6 กลุ่ม (169 คน)", "🗺️ แผนที่ 3D"],
+        files: [
+          {
+            id: "fw:map",
+            folderPath: ["fieldwork"],
+            name: "RACM303_แผนที่และข้อมูล_9_พื้นที่ภาคสนาม_(โรงพยาบาลชุมชน).app",
+            title: "แผนที่ 3D และข้อมูลโรงพยาบาลภาคสนามครบทั้ง 9 แห่ง",
+            sub: "วันเดินทาง ที่พัก อาจารย์ที่ปรึกษา ผู้ประสานงาน และรายชื่อนักศึกษาประจำพื้นที่",
+            meta: "9 พื้นที่ภาคสนาม",
+            badge: "🗺️ เปิดแผนที่ภาคสนาม",
+            icoCls: "is-quiz",
+            icoTxt: "🏥",
+            onOpen: openFileAction(() => navigateTvTab("fieldwork"))
+          },
+          {
+            id: "fw:disc",
+            folderPath: ["fieldwork"],
+            name: "RACM303_ผังกลุ่ม_Discussion_6_กลุ่ม_&_รายชื่อนักศึกษา_169_คน.app",
+            title: "ผังกลุ่มอภิปราย 6 กลุ่ม · ห้องเรียน · อาจารย์ประจำกลุ่มแต่ละคาบ",
+            sub: "ตรวจสอบรายชื่อสมาชิกและตารางหมุนเวียนห้องเรียนกลุ่ม 1–6",
+            meta: "6 กลุ่ม · 169 คน",
+            badge: "👥 เปิดผังกลุ่ม",
+            icoCls: "is-gdoc",
+            icoTxt: "👥",
+            onOpen: openFileAction(() => navigateTvTab("discussion"))
+          },
+          ...sites.map((s) => ({
+            id: `fw:site:${s.id}`,
+            folderPath: ["fieldwork"],
+            name: `พื้นที่_${s.id}_${s.shortName}_(${s.province}).site`,
+            title: `โรงพยาบาลภาคสนามพื้นที่ ${s.id}: ${s.shortName} (${s.province})`,
+            sub: `อาจารย์ที่ปรึกษา: ${s.advisor || "-"} · นักศึกษา ${s.count || ""} คน`,
+            meta: s.travelDate || s.province,
+            badge: "🏥 เปิดข้อมูลพื้นที่",
+            icoCls: "is-manual",
+            icoTxt: String(s.id),
+            onOpen: openFileAction(() => {
+              if (api && api.openFieldworkSite) api.openFieldworkSite(s.shortName);
+              else navigateTvTab("fieldwork");
+            })
+          }))
+        ]
+      },
+      manuals: {
+        id: "manuals",
+        code: "05_คู่มือรายวิชาและเอกสารอ้างอิง",
+        title: ROLE === "faculty" ? "คู่มือรายวิชา 2569 (17 บท) · คู่มือผู้สอน & เฉลย Teacher Answer Key" : "คู่มือการจัดการเรียนการสอน RACM 303 ปีการศึกษา 2569 (17 บท)",
+        meta: ROLE === "faculty" ? "คู่มือวิชา 17 บท + คู่มือผู้สอน" : "คู่มือรายวิชา 17 บท",
+        tags: ["📘 คู่มือ 17 บท", "⬇ PDF / Word", ...(ROLE === "faculty" ? ["📕 คู่มือผู้สอน"] : [])],
+        files: [
+          {
+            id: "man:course",
+            folderPath: ["manuals"],
+            name: "คู่มือการจัดการเรียนการสอน_RACM303_2569_(17_บท).gdoc",
+            title: "คู่มือรายวิชา RACM 303 ปีการศึกษา 2569 ฉบับสมบูรณ์ (17 บท)",
+            sub: "อ่านบนเว็บพร้อมสารบัญ ค้นหาคำสำคัญ และดาวน์โหลด PDF / Word",
+            meta: "17 บทครบถ้วน",
+            badge: "📘 เปิดอ่านคู่มือ",
+            icoCls: "is-manual",
+            icoTxt: "📘",
+            onOpen: openFileAction(() => navigateTvTab("manual"))
+          },
+          ...(ROLE === "faculty"
+            ? [
+                {
+                  id: "man:faculty",
+                  folderPath: ["manuals"],
+                  name: "RACM303_คู่มือผู้สอน_แนวทางนำอภิปราย_และเฉลยรวม_HS1-HS6.gdoc",
+                  title: "คู่มือผู้สอนและต้นฉบับ Teacher Answer Key (เฉพาะคณาจารย์)",
+                  sub: "แผนนำอภิปรายกลุ่มย่อย เฉลยครบ 10 กรณีศึกษา และเอกสารอ้างอิงสำหรับคณาจารย์",
+                  meta: "Faculty Member Portal",
+                  badge: "📕 เปิดคู่มือผู้สอน",
+                  icoCls: "is-faculty",
+                  icoTxt: "📕",
+                  onOpen: openFileAction(() => navigateTvTab("faculty-docs"))
+                }
+              ]
+            : [])
+        ]
+      },
+      admin: {
+        id: "admin",
+        code: ROLE === "faculty" ? "06_รับงาน_อนุมัติใบลา_และตรวจตาราง" : "06_ส่งงาน_ยื่นใบลา_และ E-learning",
+        title: ROLE === "faculty" ? "ระบบรับงาน SRN · อนุมัติใบลานักศึกษา · ตรวจซิงค์ตารางสอน 6 จุด" : "ส่งงาน SRN 1–2 · เช็กหน้า PDF · ยื่นใบลากิจ/ลาป่วยออนไลน์",
+        meta: "RAMED E-learning · ระบบใบลาออนไลน์",
+        tags: ["📤 ส่งงาน SRN", "📝 ใบลาออนไลน์", ...(ROLE === "faculty" ? ["✅ ตรวจตาราง 6 จุด"] : ["🔗 E-learning"])],
+        files: [
+          {
+            id: "adm:sub",
+            folderPath: ["admin"],
+            name: ROLE === "faculty" ? "RACM303_ระบบรับงาน_SRN_และ_E-learning.app" : "RACM303_ระบบส่งงาน_SRN_1-2_&_ตรวจหน้า_PDF.app",
+            title: ROLE === "faculty" ? "ระบบรับงานและตรวจเช็กการส่งงาน SRN 1–2 (RAMED)" : "เช็กลิสต์ส่งงาน SRN 1–2 ตรวจจำนวนหน้า PDF และลิงก์ RAMED",
+            sub: "ตรวจสอบกำหนดส่งชิ้นงานทั้งหมดในรายวิชา RACM 303",
+            meta: "4 ชิ้นงานหลัก",
+            badge: "📤 เปิดระบบส่งงาน",
+            icoCls: "is-gdoc",
+            icoTxt: "📤",
+            onOpen: openFileAction(() => navigateTvTab("submissions"))
+          },
+          {
+            id: "adm:leave",
+            folderPath: ["admin"],
+            name: ROLE === "faculty" ? "RACM303_ระบบอนุมัติใบลานักศึกษาออนไลน์.app" : "RACM303_ระบบยื่นใบลากิจ_ลาป่วยออนไลน์.app",
+            title: ROLE === "faculty" ? "ตรวจสอบและลงนามอนุมัติใบลานักศึกษาออนไลน์" : "กรอกและลงนามใบลากิจ / ลาป่วยออนไลน์ พร้อมส่ง PDF",
+            sub: "บันทึกและติดตามสถานะใบลาออนไลน์ได้ทันที",
+            meta: "e-Sign Leave Form",
+            badge: "📝 เปิดระบบใบลา",
+            icoCls: "is-pptx",
+            icoTxt: "📝",
+            onOpen: openFileAction(() => navigateTvTab("leave"))
+          },
+          ...(ROLE === "faculty"
+            ? [
+                {
+                  id: "adm:audit",
+                  folderPath: ["admin"],
+                  name: "RACM303_ตรวจตารางและซิงค์ข้อมูล_(6_จุด).app",
+                  title: "เครื่องมือตรวจสอบความถูกต้องของตารางสอนและการซิงค์ข้อมูล",
+                  sub: "เช็กความสอดคล้อง 6 จุดระหว่างปฏิทิน กลุ่มอภิปราย และภาคสนาม",
+                  meta: "Audit 6 จุด",
+                  badge: "✅ เปิดหน้าตรวจ",
+                  icoCls: "is-quiz",
+                  icoTxt: "✅",
+                  onOpen: openFileAction(() => navigateTvTab("audit"))
+                }
+              ]
+            : [])
+        ]
+      }
+    };
+
+    return { folders, order: ["schedule", "health-systems", "epidemiology", "fieldwork", "manuals", "admin"] };
+  }
+
+  function renderFullCourseDriveExplorer() {
+    const panel = $("portalDriveExplorerPanel");
+    if (!panel || !driveBrowserActive) return;
+
+    const catalog = getFullCourseDriveCatalog();
+    const { folders, order } = catalog;
+    const isGrid = driveLayout !== "list";
+    const q = (driveSearchQuery || "").trim().toLocaleLowerCase("th");
+    const rootKey = drivePath[0] || "";
+    const subKey = drivePath[1] || "";
+
+    panel.replaceChildren();
+
+    // Top Dual-View Mode Banner
+    const modeBanner = document.createElement("div");
+    modeBanner.className = "portal-drive-mode-banner";
+    modeBanner.innerHTML = `
+      <div class="portal-drive-mode-copy">
+        <strong>📁 ${esc(t("มุมมอง Google Drive (File Explorer) — รายวิชา RACM 303 ปีการศึกษา 2569", "Google Drive File Explorer View — RACM 303 (2569)"))}</strong>
+        <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับมุมมอง Apple TV / Google TV ได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Apple TV / Google TV Simplified view anytime."))}</span>
+      </div>
+      <button type="button" class="portal-drive-switch-tv-btn" id="portalDriveBackToTvBtn">📺 <span>${esc(t("สลับเป็นมุมมอง Apple TV / Google TV", "Switch to TV Simplified View"))}</span></button>
+    `;
+    panel.appendChild(modeBanner);
+    $("portalDriveBackToTvBtn").addEventListener("click", () => setPortalViewMode("tv"));
+
+    // Main Google Drive Shell
+    const shell = document.createElement("div");
+    shell.className = "gdrive-explorer-shell";
+
+    // Topbar
+    const topBar = document.createElement("div");
+    topBar.className = "gdrive-topbar";
+    topBar.innerHTML = `
+      <div class="gdrive-brand">
+        ${COURSE_DRIVE_TRIANGLE_SVG}
+        <span class="gdrive-brand-title">${esc(t("Google Drive · RACM 303 (2569)", "Google Drive · RACM 303 (2569)"))}</span>
+      </div>
+      <div class="gdrive-search-pill">
+        <svg class="gdrive-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" class="gdrive-search-input" id="courseDriveSearchInput" placeholder="${esc(t("ค้นหาไฟล์และโฟลเดอร์ทั้งรายวิชา RACM 303 — HS1–HS6, EP1–EP9, .pptx, ฉบับย่อ, ภาคสนาม, ใบลา…", "Search all RACM 303 folders & files…"))}" value="${esc(driveSearchQuery)}">
+        <button type="button" class="gdrive-search-clear" id="courseDriveSearchClear" ${driveSearchQuery ? "" : "hidden"}>✕</button>
+      </div>
+      <div class="gdrive-top-actions">
+        <button type="button" class="gdrive-top-action-btn" id="courseDriveGoHsBtn">📁 โฟลเดอร์ HS1–HS6</button>
+      </div>
+    `;
+    shell.appendChild(topBar);
+
+    const body = document.createElement("div");
+    body.className = "gdrive-body";
+
+    // Left Sidebar Tree (Real File Explorer!)
+    const sidebar = document.createElement("aside");
+    sidebar.className = "gdrive-sidebar";
+    sidebar.setAttribute("aria-label", "โครงสร้างโฟลเดอร์ Google Drive ทั้งรายวิชา");
+
+    const fab = document.createElement("button");
+    fab.type = "button";
+    fab.className = "gdrive-fab-btn";
+    fab.innerHTML =
+      `<span class="gdrive-fab-plus"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v8" stroke="#ea4335" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12h8" stroke="#4285f4" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12v8" stroke="#34a853" stroke-width="2.8" stroke-linecap="round"/><path d="M4 12h8" stroke="#fbbc05" stroke-width="2.8" stroke-linecap="round"/></svg></span>` +
+      `<span>${drivePath.length ? "↑ หน้าหลักไดรฟ์ (RACM 303)" : "📁 เปิดโฟลเดอร์ HS1–HS6"}</span>`;
+    fab.addEventListener("click", () => {
+      if (drivePath.length) openCourseDriveAtPath([]);
+      else openCourseDriveAtPath(["health-systems"]);
+    });
+    sidebar.appendChild(fab);
+
+    const navList = document.createElement("div");
+    navList.className = "gdrive-nav-list";
+
+    const addSideItem = (label, count, isAct, onClick, isTree, iconStr) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `gdrive-nav-item${isTree ? " is-tree-folder" : ""}${isAct ? " is-active" : ""}`;
+      b.innerHTML = `<span class="gdrive-nav-left"><span>${iconStr}</span><span class="gdrive-tree-sub">${esc(label)}</span></span>${count !== "" ? `<span class="gdrive-nav-count">${esc(count)}</span>` : ""}`;
+      b.addEventListener("click", onClick);
+      navList.appendChild(b);
+    };
+
+    addSideItem("ไดรฟ์รายวิชา RACM 303", order.length, !rootKey, () => openCourseDriveAtPath([]), false, "🏠");
+
+    const treeLbl = document.createElement("div");
+    treeLbl.className = "gdrive-sidebar-section-label";
+    treeLbl.textContent = "โฟลเดอร์หลัก (6 หมวด)";
+    navList.appendChild(treeLbl);
+
+    order.forEach((fKey) => {
+      const f = folders[fKey];
+      const isActFolder = rootKey === fKey && !subKey;
+      const cnt = f.subfolders ? f.subfolders.length + f.files.length : f.files.length;
+      addSideItem(f.code, cnt, isActFolder, () => openCourseDriveAtPath([fKey]), false, isActFolder ? "📂" : "📁");
+
+      if (fKey === "health-systems" && f.subfolders) {
+        f.subfolders.forEach((sf) => {
+          const isSubAct = rootKey === "health-systems" && subKey === sf.id;
+          addSideItem(`${sf.code} · ${sf.title}`, sf.files.length, isSubAct, () => openCourseDriveAtPath(["health-systems", sf.id]), true, isSubAct ? "📂" : "📁");
+        });
+      }
+    });
+
+    sidebar.appendChild(navList);
+
+    const storageBox = document.createElement("div");
+    storageBox.className = "gdrive-storage-box";
+    storageBox.innerHTML =
+      `<div class="gdrive-storage-head">☁️ <span>Google Drive · RACM 303</span></div>` +
+      `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:100%"></div></div>` +
+      `<div class="gdrive-storage-caption">จัดเก็บไฟล์ครบทั้ง <strong>6 หมวดรายวิชา</strong> (รวมโฟลเดอร์ <strong>HS1–HS6</strong>) สลับกลับโหมด <strong>📺 TV View</strong> ได้ทุกเมื่อ</div>`;
+    sidebar.appendChild(storageBox);
+
+    // Right Canvas
+    const canvas = document.createElement("div");
+    canvas.className = "gdrive-canvas";
+
+    // Breadcrumb & View Switcher Bar
+    const crumbBar = document.createElement("div");
+    crumbBar.className = "gdrive-breadcrumb-bar";
+    const crumbs = document.createElement("div");
+    crumbs.className = "gdrive-breadcrumbs";
+
+    const mkCrumbBtn = (label, path) => {
+      const cb = document.createElement("button");
+      cb.type = "button";
+      cb.className = "gdrive-crumb";
+      cb.textContent = label;
+      cb.addEventListener("click", () => openCourseDriveAtPath(path));
+      return cb;
+    };
+    const mkSep = () => {
+      const sp = document.createElement("span");
+      sp.className = "gdrive-crumb-sep";
+      sp.textContent = "›";
+      return sp;
+    };
+    const mkCur = (label) => {
+      const sp = document.createElement("span");
+      sp.className = "gdrive-crumb-current";
+      sp.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg><span>${esc(label)}</span>`;
+      return sp;
+    };
+
+    crumbs.appendChild(mkCrumbBtn("ไดรฟ์ที่แชร์", []));
+    crumbs.appendChild(mkSep());
+    if (!rootKey) {
+      crumbs.appendChild(mkCur("RACM 303 (ปีการศึกษา 2569)"));
+    } else {
+      crumbs.appendChild(mkCrumbBtn("RACM 303 (2569)", []));
+      crumbs.appendChild(mkSep());
+      const curRoot = folders[rootKey];
+      if (!subKey) {
+        crumbs.appendChild(mkCur(curRoot ? curRoot.code : rootKey));
+      } else {
+        crumbs.appendChild(mkCrumbBtn(curRoot ? curRoot.code : rootKey, [rootKey]));
+        crumbs.appendChild(mkSep());
+        const sf = curRoot && curRoot.subfolders ? curRoot.subfolders.find((x) => x.id === subKey) : null;
+        crumbs.appendChild(mkCur(sf ? `${sf.code}: ${sf.title}` : subKey));
+      }
+    }
+
+    const tbRight = document.createElement("div");
+    tbRight.className = "gdrive-toolbar-right";
+    const viewToggle = document.createElement("div");
+    viewToggle.className = "gdrive-view-toggle";
+    const listBtn = document.createElement("button");
+    listBtn.type = "button";
+    listBtn.className = `gdrive-vmode-btn${!isGrid ? " is-active" : ""}`;
+    listBtn.textContent = `${!isGrid ? "✓ " : ""}☰ รายการ`;
+    listBtn.addEventListener("click", () => {
+      driveLayout = "list";
+      try { localStorage.setItem("racm303_course_drive_layout", "list"); } catch (_) {}
+      renderFullCourseDriveExplorer();
+    });
+    const gridBtn = document.createElement("button");
+    gridBtn.type = "button";
+    gridBtn.className = `gdrive-vmode-btn${isGrid ? " is-active" : ""}`;
+    gridBtn.textContent = `${isGrid ? "✓ " : ""}⊞ ตารางการ์ด`;
+    gridBtn.addEventListener("click", () => {
+      driveLayout = "grid";
+      try { localStorage.setItem("racm303_course_drive_layout", "grid"); } catch (_) {}
+      renderFullCourseDriveExplorer();
+    });
+    viewToggle.append(listBtn, gridBtn);
+    tbRight.appendChild(viewToggle);
+    crumbBar.append(crumbs, tbRight);
+    canvas.appendChild(crumbBar);
+
+    const renderFilesSection = (fileList, headingText) => {
+      if (!fileList.length) return;
+      const sh = document.createElement("div");
+      sh.className = "gdrive-section-head";
+      sh.innerHTML = `<span class="gdrive-section-label">${esc(headingText)}</span>`;
+      canvas.appendChild(sh);
+
+      if (isGrid) {
+        const grid = document.createElement("div");
+        grid.className = "gdrive-files-grid";
+        fileList.forEach((f) => {
+          const card = document.createElement("div");
+          card.className = `gdrive-file-card${f.isPending ? " is-pending-upload" : ""}`;
+          card.tabIndex = 0;
+          card.setAttribute("role", "button");
+          card.setAttribute("aria-label", `เปิด ${f.name}`);
+
+          const dlHtml =
+            f.pdfHref && f.docxHref
+              ? `<div class="gdrive-card-quick-acts"><a class="gdrive-icon-act-btn is-mini-badge" href="${esc(f.pdfHref)}" download>PDF</a><a class="gdrive-icon-act-btn is-mini-badge" href="${esc(f.docxHref)}" download>W</a></div>`
+              : "";
+
+          card.innerHTML =
+            `<div class="gdrive-card-head">` +
+            `<span class="gdrive-filetype-ico ${esc(f.icoCls || "is-gdoc")}">${esc(f.icoTxt || "≡")}</span>` +
+            `<span class="gdrive-card-filename">${esc(f.name)}</span>` +
+            dlHtml +
+            `</div>` +
+            `<div class="gd-mini-pane" style="min-height:86px;justify-content:center;gap:4px">` +
+            `<div class="gd-doc-title" style="font-size:12.6px">${esc(f.title)}</div>` +
+            `<div class="gd-doc-sub">${esc(f.sub)}</div>` +
+            `</div>` +
+            `<div class="gdrive-card-foot">` +
+            `<span class="gdrive-card-date">${esc(f.meta || "")}</span>` +
+            `<span class="gdrive-status-chip ${f.isPending ? "is-pending" : "is-open-now"}">${esc(f.badge || "เปิดไฟล์ →")}</span>` +
+            `</div>`;
+
+          card.querySelectorAll("a[download]").forEach((a) => a.addEventListener("click", (ev) => ev.stopPropagation()));
+          card.addEventListener("click", f.onOpen);
+          card.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              f.onOpen();
+            }
+          });
+          grid.appendChild(card);
+        });
+        canvas.appendChild(grid);
+      } else {
+        const listWrap = document.createElement("div");
+        listWrap.className = "gdrive-list-wrap";
+        const tbl = document.createElement("table");
+        tbl.className = "gdrive-list-table";
+        tbl.innerHTML = `<thead><tr><th>ชื่อไฟล์ (Name)</th><th>รายละเอียด / สถานะ</th><th>ข้อมูลเพิ่มเติม</th><th>การดำเนินการ</th></tr></thead>`;
+        const tb = document.createElement("tbody");
+        fileList.forEach((f) => {
+          const trEl = document.createElement("tr");
+          trEl.className = "gdrive-list-row";
+          trEl.tabIndex = 0;
+          trEl.innerHTML =
+            `<td><div class="gdrive-list-name-cell"><span class="gdrive-filetype-ico ${esc(f.icoCls || "is-gdoc")}">${esc(f.icoTxt || "≡")}</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">${esc(f.name)}</span><span class="gdrive-list-fsub">${esc(f.title)}</span></div></div></td>` +
+            `<td><span class="gdrive-status-chip ${f.isPending ? "is-pending" : "is-open-now"}">${esc(f.badge || "เปิดไฟล์")}</span></td>` +
+            `<td>${esc(f.meta || "")}</td>` +
+            `<td><div class="gdrive-list-actions"><button type="button" class="gdrive-row-open-btn">เปิดไฟล์ →</button>${
+              f.pdfHref ? `<a class="gdrive-row-sec-btn" href="${esc(f.pdfHref)}" download style="text-decoration:none">⬇ PDF</a>` : ""
+            }${
+              f.docxHref ? `<a class="gdrive-row-sec-btn" href="${esc(f.docxHref)}" download style="text-decoration:none">⬇ .docx</a>` : ""
+            }</div></td>`;
+          trEl.querySelectorAll("a[download]").forEach((a) => a.addEventListener("click", (ev) => ev.stopPropagation()));
+          trEl.querySelector(".gdrive-row-open-btn").addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            f.onOpen();
+          });
+          trEl.addEventListener("click", f.onOpen);
+          tb.appendChild(trEl);
+        });
+        tbl.appendChild(tb);
+        listWrap.appendChild(tbl);
+        canvas.appendChild(listWrap);
+      }
+    };
+
+    const renderFolderCards = (folderObjs, headingText) => {
+      if (!folderObjs.length) return;
+      const sh = document.createElement("div");
+      sh.className = "gdrive-section-head";
+      sh.innerHTML = `<span class="gdrive-section-label">${esc(headingText)}</span>`;
+      canvas.appendChild(sh);
+
+      if (isGrid) {
+        const grid = document.createElement("div");
+        grid.className = "gdrive-folders-grid";
+        folderObjs.forEach((fo) => {
+          const fc = document.createElement("div");
+          fc.className = "gdrive-folder-card";
+          fc.tabIndex = 0;
+          fc.setAttribute("role", "button");
+          fc.dataset.courseDriveFolder = fo.path.join("/");
+          fc.innerHTML =
+            `<div class="gdrive-folder-head">` +
+            `<div class="gdrive-folder-head-left">${COURSE_DRIVE_FOLDER_SVG}<span class="gdrive-folder-code">${esc(fo.code)}</span></div>` +
+            (fo.pill ? `<span class="gdrive-folder-weight">${esc(fo.pill)}</span>` : "") +
+            `</div>` +
+            `<div class="gdrive-folder-title">${esc(fo.title)}</div>` +
+            `<div class="gdrive-folder-meta">${esc(fo.meta)}</div>` +
+            (fo.tags && fo.tags.length
+              ? `<div class="gdrive-folder-tags">${fo.tags.map((tg) => `<span class="gdrive-folder-tag">${esc(tg)}</span>`).join("")}</div>`
+              : "") +
+            `<div class="gdrive-folder-foot"><span>${esc(fo.countLabel)}</span><span class="gdrive-folder-open-cta">📂 เปิดโฟลเดอร์ →</span></div>`;
+          fc.addEventListener("click", () => openCourseDriveAtPath(fo.path));
+          fc.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              openCourseDriveAtPath(fo.path);
+            }
+          });
+          grid.appendChild(fc);
+        });
+        canvas.appendChild(grid);
+      } else {
+        const listWrap = document.createElement("div");
+        listWrap.className = "gdrive-list-wrap";
+        const tbl = document.createElement("table");
+        tbl.className = "gdrive-list-table";
+        tbl.innerHTML = `<thead><tr><th>ชื่อโฟลเดอร์ (Folder Name)</th><th>เนื้อหาภายใน</th><th>ข้อมูล</th><th>การดำเนินการ</th></tr></thead>`;
+        const tb = document.createElement("tbody");
+        folderObjs.forEach((fo) => {
+          const trEl = document.createElement("tr");
+          trEl.className = "gdrive-list-row";
+          trEl.tabIndex = 0;
+          trEl.innerHTML =
+            `<td><div class="gdrive-list-name-cell"><span style="display:inline-flex;align-items:center;flex-shrink:0">${COURSE_DRIVE_FOLDER_SVG}</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">${esc(fo.code)}</span><span class="gdrive-list-fsub">${esc(fo.title)}</span></div></div></td>` +
+            `<td>${esc(fo.countLabel)}</td>` +
+            `<td>${esc(fo.meta)}</td>` +
+            `<td><button type="button" class="gdrive-row-open-btn">📂 เปิดโฟลเดอร์ →</button></td>`;
+          trEl.querySelector(".gdrive-row-open-btn").addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openCourseDriveAtPath(fo.path);
+          });
+          trEl.addEventListener("click", () => openCourseDriveAtPath(fo.path));
+          tb.appendChild(trEl);
+        });
+        tbl.appendChild(tb);
+        listWrap.appendChild(tbl);
+        canvas.appendChild(listWrap);
+      }
+    };
+
+    // Global Drive Search across entire course
+    if (q) {
+      const matchedFiles = [];
+      order.forEach((fKey) => {
+        const f = folders[fKey];
+        (f.files || []).forEach((item) => {
+          if (`${item.name} ${item.title} ${item.sub} ${item.meta}`.toLocaleLowerCase("th").includes(q)) {
+            matchedFiles.push(item);
+          }
+        });
+        (f.subfolders || []).forEach((sf) => {
+          (sf.files || []).forEach((item) => {
+            if (`${sf.code} ${sf.title} ${item.name} ${item.title} ${item.sub} ${item.meta}`.toLocaleLowerCase("th").includes(q)) {
+              matchedFiles.push(item);
+            }
+          });
+        });
+      });
+
+      if (!matchedFiles.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "ไม่พบโฟลเดอร์หรือไฟล์ที่ตรงกับคำค้นหาในไดรฟ์รายวิชา RACM 303";
+        canvas.appendChild(empty);
+      } else {
+        renderFilesSection(matchedFiles, `ผลการค้นหาใน Google Drive ทั้งรายวิชา (${matchedFiles.length} ไฟล์)`);
+      }
+    } else if (!rootKey) {
+      // ROOT VIEW: All 6 top-level RACM 303 Course Folders
+      const rootFolderObjs = order.map((fKey) => {
+        const f = folders[fKey];
+        const totalCnt = f.subfolders
+          ? `${f.subfolders.length} โฟลเดอร์ (HS1–HS6) · ${f.subfolders.reduce((a, s) => a + s.files.length, 0) + f.files.length} ไฟล์`
+          : `${f.files.length} ไฟล์ในโฟลเดอร์`;
+        return {
+          code: f.code,
+          title: f.title,
+          meta: f.meta,
+          tags: f.tags,
+          pill: fKey === "health-systems" ? "HS1–HS6" : fKey === "epidemiology" ? "EP1–EP9" : "",
+          countLabel: totalCnt,
+          path: [fKey]
+        };
+      });
+      renderFolderCards(rootFolderObjs, "โฟลเดอร์ทั้งหมดในไดรฟ์รายวิชา RACM 303 ปีการศึกษา 2569 (6 โฟลเดอร์หลัก)");
+    } else if (rootKey === "health-systems" && !subKey) {
+      // HEALTH SYSTEMS ROOT: HS1–HS6 Subfolders First!
+      const backBar = document.createElement("div");
+      backBar.className = "gdrive-section-head";
+      backBar.innerHTML = `<div class="gdrive-section-head-left"><button type="button" class="gdrive-back-folders-btn" id="cdUpBtn">← กลับหน้าหลักไดรฟ์ RACM 303</button></div>`;
+      canvas.appendChild(backBar);
+      backBar.querySelector("#cdUpBtn").addEventListener("click", () => openCourseDriveAtPath([]));
+
+      const hsF = folders["health-systems"];
+      const hsFolderObjs = hsF.subfolders.map((sf) => ({
+        code: sf.code,
+        title: sf.title,
+        meta: sf.meta,
+        pill: sf.examWeight ? `สอบ ${sf.examWeight}` : "",
+        tags: ["📄 คำสอน", "🟠 Discussion .pptx", "⏳ Slide อ.", "🧠 โจทย์"],
+        countLabel: `${sf.files.length} ไฟล์ในโฟลเดอร์`,
+        path: ["health-systems", sf.id]
+      }));
+      renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพเรียงตาม HS1–HS6 (6 โฟลเดอร์)");
+      renderFilesSection(hsF.files, "ไฟล์รวมทั้งหมวดระบบสุขภาพ (HS1–HS6)");
+    } else if (rootKey === "health-systems" && subKey) {
+      // INSIDE SPECIFIC HS FOLDER (HS1..HS6)
+      const hsF = folders["health-systems"];
+      const sf = hsF.subfolders.find((x) => x.id === subKey);
+      const backBar = document.createElement("div");
+      backBar.className = "gdrive-section-head";
+      backBar.innerHTML = `<div class="gdrive-section-head-left"><button type="button" class="gdrive-back-folders-btn" id="cdUpBtn">← กลับหน้ารวมโฟลเดอร์ HS1–HS6</button></div>`;
+      canvas.appendChild(backBar);
+      backBar.querySelector("#cdUpBtn").addEventListener("click", () => openCourseDriveAtPath(["health-systems"]));
+
+      if (sf) {
+        renderFilesSection(sf.files, `ไฟล์ทั้งหมดในโฟลเดอร์ ${sf.code}: ${sf.title} (${sf.files.length} ไฟล์)`);
+      }
+
+      // Sibling HS1–HS6 quick switcher at bottom
+      const strip = document.createElement("div");
+      strip.className = "gdrive-companion-strip";
+      strip.innerHTML = `<span class="gdrive-folder-hint">สลับไปยังโฟลเดอร์บทอื่น:</span><div class="gdrive-companion-pills"></div>`;
+      const pills = strip.querySelector(".gdrive-companion-pills");
+      hsF.subfolders.forEach((other) => {
+        const pb = document.createElement("button");
+        pb.type = "button";
+        pb.className = `gdrive-doc-pill${other.id === subKey ? " is-active-folder-pill" : ""}`;
+        pb.innerHTML = `<span>📁</span> <span>${esc(other.code)}</span>`;
+        pb.addEventListener("click", () => openCourseDriveAtPath(["health-systems", other.id]));
+        pills.appendChild(pb);
+      });
+      canvas.appendChild(strip);
+    } else {
+      // OTHER TOP-LEVEL COURSE FOLDERS (schedule, epidemiology, fieldwork, manuals, admin)
+      const curF = folders[rootKey];
+      const backBar = document.createElement("div");
+      backBar.className = "gdrive-section-head";
+      backBar.innerHTML = `<div class="gdrive-section-head-left"><button type="button" class="gdrive-back-folders-btn" id="cdUpBtn">← กลับหน้าหลักไดรฟ์ RACM 303</button></div>`;
+      canvas.appendChild(backBar);
+      backBar.querySelector("#cdUpBtn").addEventListener("click", () => openCourseDriveAtPath([]));
+
+      if (curF) {
+        renderFilesSection(curF.files, `ไฟล์ในโฟลเดอร์ ${curF.code} (${curF.files.length} รายการ)`);
+      }
+    }
+
+    body.append(sidebar, canvas);
+    shell.appendChild(body);
+    panel.appendChild(shell);
+
+    // Wire Search & Quick Button
+    const sIn = $("courseDriveSearchInput");
+    const sClr = $("courseDriveSearchClear");
+    if (sIn) {
+      sIn.addEventListener("input", () => {
+        driveSearchQuery = sIn.value;
+        const caret = sIn.selectionStart;
+        renderFullCourseDriveExplorer();
+        const nextIn = $("courseDriveSearchInput");
+        if (nextIn) {
+          nextIn.focus();
+          try { nextIn.setSelectionRange(caret, caret); } catch (_) {}
+        }
+      });
+    }
+    if (sClr) {
+      sClr.addEventListener("click", () => {
+        driveSearchQuery = "";
+        renderFullCourseDriveExplorer();
+        const nextIn = $("courseDriveSearchInput");
+        if (nextIn) nextIn.focus();
+      });
+    }
+    const goHs = $("courseDriveGoHsBtn");
+    if (goHs) {
+      goHs.addEventListener("click", () => openCourseDriveAtPath(["health-systems"]));
+    }
+  }
+
   /* ---------- Boot Sequence ---------- */
   function bootTvInterface() {
     if (document.body.classList.contains("is-ppt-slideshare-window")) return;
     ensureHomePanelExists();
+    ensureDrivePanelExists();
     mountTvTopCapsule();
     mountSubpageEnhancements();
     renderHomeLauncher();
+    syncViewModeSwitchUI();
     syncSubpageBar();
     syncProfilePill();
     initTvRemoteNavigation();
 
+    if (portalViewMode === "drive") {
+      const api = getApi();
+      const curTab = (api && api.getState && api.getState().activeTab) || "home";
+      if (curTab === "home") {
+        openCourseDriveAtPath([]);
+      }
+    }
+
     window.addEventListener("racm:tabchange", () => {
+      syncViewModeSwitchUI();
       syncSubpageBar();
       syncProfilePill();
     });

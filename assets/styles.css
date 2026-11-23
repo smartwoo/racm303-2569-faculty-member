@@ -24536,4 +24536,108 @@ html[data-theme="dark"] .gdrive-back-folders-btn:hover {
   }
 }
 
+/* Unified Real File Explorer Sidebar Tree & Multi-Type File Icons */
+.gdrive-sidebar-section-label {
+  margin: 12px 0 4px 10px;
+  font-family: var(--font-display);
+  font-size: 10.6px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gd-muted);
+}
+
+.gdrive-tree-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gdrive-nav-item.is-tree-folder {
+  height: 33px;
+  padding: 0 10px 0 14px;
+  font-size: 12.2px;
+}
+
+.gdrive-nav-item.is-tree-folder .gdrive-tree-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gdrive-filetype-ico.is-quiz {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+}
+
+.gdrive-filetype-ico.is-faculty {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+}
+
+.gdrive-filetype-ico.is-manual {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+}
+
+.gdrive-folder-tag.is-pptx {
+  color: #c2410c;
+  border-color: rgba(234, 88, 12, 0.28);
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.gdrive-folder-tag.is-quiz {
+  color: #0f766e;
+  border-color: rgba(13, 148, 136, 0.26);
+  background: rgba(13, 148, 136, 0.07);
+}
+
+.gdrive-folder-tag.is-faculty {
+  color: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.26);
+  background: rgba(185, 28, 28, 0.07);
+}
+
+html[data-theme="dark"] .gdrive-folder-tag.is-pptx {
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(234, 88, 12, 0.16);
+}
+
+html[data-theme="dark"] .gdrive-folder-tag.is-quiz {
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.30);
+  background: rgba(20, 184, 166, 0.14);
+}
+
+html[data-theme="dark"] .gdrive-folder-tag.is-faculty {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(185, 28, 28, 0.18);
+}
+
+.gdrive-folder-card.is-course-root-folder {
+  border-style: dashed;
+  border-color: rgba(11, 87, 208, 0.34);
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.55) 0%, var(--gd-card-bg) 100%);
+}
+
+html[data-theme="dark"] .gdrive-folder-card.is-course-root-folder {
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.22) 0%, var(--gd-card-bg) 100%);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+.gd-doc-head.is-quiz {
+  background: linear-gradient(90deg, #0f766e 0%, #14b8a6 100%);
+  border-bottom: 2px solid #99f6e4;
+}
+
+.gd-doc-head.is-faculty {
+  background: linear-gradient(90deg, #7f1d1d 0%, #b91c1c 100%);
+  border-bottom: 2px solid #fca5a5;
+}
+
+.gd-doc-head.is-manual {
+  background: linear-gradient(90deg, #0369a1 0%, #0284c7 100%);
+  border-bottom: 2px solid #bae6fd;
+}
+
+
 
