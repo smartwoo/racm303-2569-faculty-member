@@ -1,10 +1,10 @@
 /* ==========================================================================
-   RACM 303 — EP6: Measures of Morbidity & Mortality Interactive Lecture Studio (v2)
+   RACM 303 — EP6: Measures of Morbidity & Mortality Interactive Lecture Studio (v3)
    - Protected Google Drive Video Stream (View-Only · No Student Download · Zero YouTube)
-   - Full YouTube-Style Player Functions: Live Thai CC, Speed (0.5x–2x), -15s / +15s Skip,
-     Chaptered Scrubber, Fullscreen, and Auto Picture-in-Picture (PiP) on Scroll
-   - 43 Captured Slides + Verbatim Quotations -> Conceptualized 5-Stage Logical Flow
-   - Zero Unwanted Auto-Scroll on Scrubber + Clickable Logical Flow Slide Bridges
+   - Pure Clean Video (Zero Conceptualized text inside video or PiP player)
+   - Dedicated Non-Overlapping Cinema CC Bar (Never covers Drive video controller!)
+   - Customizable 4-Mode Workspace Layout + Hide/Unhide Toggles for All 7 Sections
+   - Auto Picture-in-Picture (PiP) on Scroll, Zero Unwanted Auto-Scroll, Clickable Slide Bridges
    ========================================================================== */
 (function () {
   "use strict";
@@ -13,6 +13,7 @@
   if (!DATA) return;
 
   const STORAGE_DRIVE_KEY = "racm303_ep6_drive_file_id";
+  const STORAGE_UI_PREFS_KEY = "racm303_ep6_ui_prefs_v3";
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const MIN_SEC = DATA.meta.startSec || 4;
   const MAX_SEC = DATA.meta.endSec || 3806;
@@ -87,7 +88,6 @@
     }
   }
 
-  // Binary search over DATA.captions = [[startSec, endSec, text], ...]
   function findCaptionAtTime(sec) {
     const cues = DATA.captions;
     if (!Array.isArray(cues) || !cues.length) return "";
@@ -133,12 +133,23 @@
     return (DATA.stages || []).find((st) => st.id === id) || DATA.stages[0];
   }
 
+  const DEFAULT_PANELS = {
+    stages: true,
+    video: true,
+    slide: true,
+    scrubber: true,
+    concept: true,
+    verbatim: true,
+    atlas: true
+  };
+
   const studioState = {
     currentSec: MIN_SEC,
     activeSlideId: 1,
     activeStageId: 1,
     imgQuality: "hd", // 'hd' | 'yt'
-    theaterMode: "split", // 'split' | 'video' | 'slides'
+    layoutMode: "cinema", // 'cinema' | 'balanced' | 'tri' | 'stack'
+    panels: { ...DEFAULT_PANELS },
     atlasView: "flow", // 'flow' | 'matrix'
     stageFilter: 0,
     searchQuery: "",
@@ -146,12 +157,56 @@
     playbackSpeed: 1,
     ccEnabled: true,
     ccLarge: false,
-    syncDriveOnSeek: true,
     isPipActive: false,
     isPipMinimized: false,
     manualPipPinned: false,
     pipDismissedWhileScrolled: false
   };
+
+  // Load persisted layout & panel visibility preferences
+  (function loadPersistedPrefs() {
+    try {
+      const raw = localStorage.getItem(STORAGE_UI_PREFS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (["cinema", "balanced", "tri", "stack"].includes(parsed.layoutMode)) {
+          studioState.layoutMode = parsed.layoutMode;
+        }
+        if (["hd", "yt"].includes(parsed.imgQuality)) {
+          studioState.imgQuality = parsed.imgQuality;
+        }
+        if (typeof parsed.ccEnabled === "boolean") {
+          studioState.ccEnabled = parsed.ccEnabled;
+        }
+        if (typeof parsed.ccLarge === "boolean") {
+          studioState.ccLarge = parsed.ccLarge;
+        }
+        if (parsed.panels && typeof parsed.panels === "object") {
+          Object.keys(DEFAULT_PANELS).forEach((k) => {
+            if (typeof parsed.panels[k] === "boolean") {
+              studioState.panels[k] = parsed.panels[k];
+            }
+          });
+        }
+      }
+    } catch (_) {}
+  })();
+
+  function savePersistedPrefs() {
+    try {
+      localStorage.setItem(
+        STORAGE_UI_PREFS_KEY,
+        JSON.stringify({
+          layoutMode: studioState.layoutMode,
+          imgQuality: studioState.imgQuality,
+          ccEnabled: studioState.ccEnabled,
+          ccLarge: studioState.ccLarge,
+          panels: studioState.panels
+        })
+      );
+    } catch (_) {}
+  }
 
   function getSlideImg(slide) {
     return studioState.imgQuality === "yt" ? slide.ytImg : slide.hdImg;
@@ -182,6 +237,23 @@
     activeInstance = null;
   }
 
+  const PANEL_DEFS = [
+    { key: "stages", label: "🗺️ แถบ 5 องก์" },
+    { key: "video", label: "🎥 วิดีโอ" },
+    { key: "slide", label: "🖼️ สไลด์ซิงก์" },
+    { key: "scrubber", label: "⏱️ แถบเลื่อนเวลา" },
+    { key: "concept", label: "💡 Conceptualized" },
+    { key: "verbatim", label: "🎙️ คำพูด & Flow" },
+    { key: "atlas", label: "🧭 ผัง 43 สไลด์" }
+  ];
+
+  const LAYOUT_DEFS = [
+    { id: "cinema", label: "🖥️ จอกว้าง (วิดีโอ+สไลด์บน · เนื้อหาล่าง)" },
+    { id: "balanced", label: "⚖️ 2 คอลัมน์สมดุล (ซ้ายสื่อ · ขวาเนื้อหา)" },
+    { id: "tri", label: "🎬 3 ช่องขนาน (วิดีโอ · สไลด์ · เนื้อหา)" },
+    { id: "stack", label: "📄 เรียงเดี่ยวแนวตั้ง" }
+  ];
+
   function renderEp6MorbidityStudio(container, opts) {
     if (!container) return;
     destroyActiveTimers();
@@ -207,7 +279,7 @@
     };
     activeInstance = instance;
 
-    // 1. Header Banner (Zero YouTube links — Protected Course Stream + Slide PDF)
+    // 1. Header Banner
     const header = document.createElement("div");
     header.className = "ep6-studio-header";
     header.innerHTML = `
@@ -219,7 +291,7 @@
           <span class="ep6-badge-meta">⏱ 00:04 – 62:00</span>
         </div>
         <h3 class="ep6-head-title">Measures of Morbidity &amp; Mortality · การวัดการป่วย การตาย ภาระโรค (DALY) และการปรับมาตรฐานอัตรา</h3>
-        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายจาก Google Drive ผ่านตัวเล่นบนเว็บไซต์โดยตรง (พร้อมคำบรรยายไทย CC, ปรับความเร็ว 0.5x–2x, ถอยหลัง/เดินหน้าครั้งละ 15 วินาที และโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านสไลด์ด้านล่าง)</p>
+        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เลือกจัด Layout และซ่อน/แสดงแต่ละส่วนได้อิสระ พร้อมคำบรรยายไทย CC แยกใต้จอวิดีโอไม่บังปุ่มควบคุม และโหมดหน้าต่างลอย PiP เมื่อเลื่อนอ่านด้านล่าง</p>
       </div>
       <div class="ep6-head-actions">
         <a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf">📥 ดาวน์โหลดสไลด์ประกอบ (.PDF)</a>
@@ -246,7 +318,7 @@
           <a class="btn sm" href="https://drive.google.com/drive/folders/${esc(DATA.meta.driveProtectedFolderId)}" target="_blank" rel="noopener">📂 เปิดโฟลเดอร์ Drive ที่ป้องกันสิทธิ์ ↗</a>
         </div>
         <p class="ep6-fdb-note">
-          วิธีอัปเดตไฟล์เสียงบรรยายเต็มทับไฟล์เดิมโดยไม่ต้องแก้โค้ด: เปิดโฟลเดอร์ด้านบน → คลิกขวาที่ <code>EP6_Measures_of_Morbidity_and_Mortality.mp4</code> → <strong>จัดการเวอร์ชัน (Manage versions) → อัปโหลดเวอร์ชันใหม่</strong> และในเมนู <strong>แชร์ (Share) → ⚙️</strong> ให้เอาเครื่องหมายถูกออกจาก <em>“ผู้มีสิทธิ์อ่านและผู้แสดงความคิดเห็นจะเห็นตัวเลือกในการดาวน์โหลด พิมพ์ และคัดลอก”</em> หรือวางลิงก์ไฟล์วิดีโอ Drive อื่นเพื่อทดสอบทันทีด้านล่าง:
+          วิธีอัปเดตไฟล์เสียงบรรยายเต็มทับไฟล์เดิมโดยไม่ต้องแก้โค้ด: เปิดโฟลเดอร์ด้านบน → คลิกขวาที่ <code>EP6_Measures_of_Morbidity_and_Mortality.mp4</code> → <strong>จัดการเวอร์ชัน (Manage versions) → อัปโหลดเวอร์ชันใหม่</strong> และในเมนู <strong>แชร์ (Share) → ⚙️</strong> ให้เอาเครื่องหมายถูกออกจาก <em>“ผู้มีสิทธิ์อ่านและผู้แสดงความคิดเห็นจะเห็นตัวเลือกในการดาวน์โหลด พิมพ์ และคัดลอก”</em> หรือวางลิงก์ไฟล์วิดีโอ Drive อื่นด้านล่าง:
         </p>
         <div class="ep6-fdb-form">
           <input type="text" id="ep6FacultyDriveInput" class="ep6-search-input" value="${esc(currentDriveId)}" placeholder="วางลิงก์ Google Drive (https://drive.google.com/file/d/.../view) หรือ File ID">
@@ -257,13 +329,58 @@
       root.appendChild(facBar);
     }
 
-    // 2. 5-Stage Logical Flow Stepper Ribbon
+    // 2. Workspace Layout Switcher & Hide/Unhide Section Control Bar
+    const workspaceBar = document.createElement("div");
+    workspaceBar.className = "ep6-workspace-bar";
+    workspaceBar.id = "ep6WorkspaceBar";
+    workspaceBar.innerHTML = `
+      <div class="ep6-ws-row">
+        <div class="ep6-ws-group">
+          <span class="ep6-ws-label">📐 จัดรูปแบบ Layout:</span>
+          <div class="ep6-mode-group" role="group" aria-label="เลือกรูปแบบการจัดวางหน้าจอ">
+            ${LAYOUT_DEFS.map(
+              (ld) =>
+                `<button type="button" class="ep6-tool-btn ${studioState.layoutMode === ld.id ? "is-active" : ""}" data-layout-mode="${ld.id}">${esc(ld.label)}</button>`
+            ).join("")}
+          </div>
+        </div>
+        <div class="ep6-ws-group">
+          <span class="ep6-ws-label">ความชัดสไลด์:</span>
+          <div class="ep6-mode-group" role="group" aria-label="ความละเอียดภาพสไลด์">
+            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "hd" ? "is-active" : ""}" data-imgq="hd">✨ คมชัด HD</button>
+            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "yt" ? "is-active" : ""}" data-imgq="yt">📸 ภาพจริงขณะบรรยาย</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ep6-ws-row ep6-ws-toggles-row">
+        <div class="ep6-ws-group ep6-ws-vis-wrap">
+          <span class="ep6-ws-label">👁️ ซ่อน / แสดงส่วนต่างๆ:</span>
+          <div class="ep6-vis-pills" id="ep6VisPills">
+            ${PANEL_DEFS.map(
+              (p) =>
+                `<button type="button" class="ep6-vis-pill ${studioState.panels[p.key] ? "is-shown" : "is-hidden"}" data-toggle-panel="${p.key}" aria-pressed="${studioState.panels[p.key]}">
+                  <span class="ep6-vis-eye">${studioState.panels[p.key] ? "✓" : "+"}</span> ${esc(p.label)}
+                </button>`
+            ).join("")}
+          </div>
+        </div>
+        <button type="button" class="ep6-reset-ws-btn" id="ep6ResetWorkspaceBtn" title="แสดงครบทุกส่วนและคืนค่า Layout มาตรฐาน">↺ แสดงครบทุกส่วน</button>
+      </div>
+    `;
+    root.appendChild(workspaceBar);
+
+    // 3. 5-Stage Logical Flow Stepper Ribbon
     const stepperWrap = document.createElement("div");
     stepperWrap.className = "ep6-stage-ribbon";
+    stepperWrap.id = "ep6PanelStages";
     stepperWrap.setAttribute("role", "navigation");
     stepperWrap.setAttribute("aria-label", "ลำดับตรรกะการเรียนรู้ 5 องก์ (5-Stage Logical Flow)");
     stepperWrap.innerHTML = `
-      <div class="ep6-ribbon-label">Logical Flow 5 องก์ต่อเนื่อง (คลิกเพื่อข้ามไปยังช่วงเวลาของแต่ละองก์):</div>
+      <div class="ep6-sec-head-inline">
+        <span class="ep6-ribbon-label">🗺️ Logical Flow 5 องก์ต่อเนื่อง (คลิกเพื่อข้ามไปยังช่วงเวลาของแต่ละองก์):</span>
+        <button type="button" class="ep6-inline-hide-btn" data-hide-panel="stages" title="ซ่อนแถบ 5 องก์">ซ่อน ✕</button>
+      </div>
       <div class="ep6-stage-grid" id="ep6StageStepperGrid">
         ${DATA.stages
           .map(
@@ -283,33 +400,21 @@
     `;
     root.appendChild(stepperWrap);
 
-    // 3. Synchronized Theater (Left: Protected Drive Player + YouTube-Style Controls + Captured Slide | Right: Live Conceptualized Insight + Verbatim)
+    // 4. Synchronized Theater (adapts dynamically to layoutMode + hidden panels!)
     const theater = document.createElement("div");
-    theater.className = `ep6-theater mode-${studioState.theaterMode}`;
+    theater.className = `ep6-theater layout-${studioState.layoutMode}`;
     theater.id = "ep6TheaterGrid";
     theater.innerHTML = `
-      <div class="ep6-media-col">
-        <div class="ep6-toolbar">
-          <div class="ep6-mode-group" role="group" aria-label="รูปแบบการแสดงผลวิดีโอและสไลด์">
-            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "split" ? "is-active" : ""}" data-tmode="split">🎬 วิดีโอ + สไลด์คู่ขนาน</button>
-            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "video" ? "is-active" : ""}" data-tmode="video">📺 เน้นวิดีโอใหญ่</button>
-            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "slides" ? "is-active" : ""}" data-tmode="slides">🖼️ เน้นสไลด์</button>
-          </div>
-          <div class="ep6-mode-group" role="group" aria-label="ความละเอียดภาพสไลด์">
-            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "hd" ? "is-active" : ""}" data-imgq="hd" title="สไลด์คมชัดสูงสำหรับอ่านสูตรและตาราง">✨ สไลด์คมชัด HD</button>
-            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "yt" ? "is-active" : ""}" data-imgq="yt" title="ภาพ Capture ต้นฉบับขณะบรรยาย">📸 ภาพจริงขณะบรรยาย</button>
-          </div>
-        </div>
-
+      <div class="ep6-media-col" id="ep6MediaCol">
         <div class="ep6-player-stage" id="ep6PlayerStage">
-          <!-- Video Slot stays in place; #ep6VideoDock switches between static & fixed PiP without DOM reparenting (zero iframe reload!) -->
+          <!-- VIDEO PANEL (Pure Clean Video + Non-Overlapping Dedicated CC Strip Below Video!) -->
           <div class="ep6-video-slot" id="ep6VideoSlot">
             <div class="ep6-pip-placeholder" id="ep6PipPlaceholder" hidden>
               <div class="ep6-pip-ph-inner">
                 <span class="ep6-pip-ph-icon">⧉</span>
                 <div>
                   <strong>วิดีโอกำลังแสดงแบบหน้าต่างลอย (Picture-in-Picture) มุมขวาล่าง</strong>
-                  <p>คุณสามารถเลื่อนอ่านแผนผังตรรกะทั้ง 43 สไลด์ด้านล่างควบคู่กับการดูวิดีโอได้ทันที</p>
+                  <p>เลื่อนอ่านแผนผังตรรกะทั้ง 43 สไลด์ด้านล่างควบคู่กับการดูวิดีโอได้ทันที</p>
                 </div>
                 <button type="button" class="btn sm" id="ep6ReturnFromPipBtn">ดึงกลับช่องหลัก</button>
               </div>
@@ -319,16 +424,18 @@
               <div class="ep6-vdock-head">
                 <div class="ep6-vdock-title-wrap">
                   <span class="ep6-live-dot" id="ep6DockDot"></span>
-                  <span class="ep6-slide-pill" id="ep6DockHeaderLabel">🎥 Google Drive Stream · Slide 1/43</span>
+                  <span class="ep6-slide-pill" id="ep6DockHeaderLabel">🎥 วิดีโอบรรยาย (Drive Protected) · Slide 1/43</span>
                 </div>
                 <div class="ep6-vdock-actions">
                   <button type="button" class="ep6-dock-icon-btn" id="ep6PinPipBtn" title="เปิด/ปิด โหมดหน้าต่างลอย (Picture-in-Picture)">⧉ PiP</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-hide-panel="video" title="ซ่อนส่วนวิดีโอ">ซ่อน</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipMinBtn" title="ย่อ/ขยาย หน้าต่าง PiP">—</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipTopBtn" title="เลื่อนกลับขึ้นด้านบนสุด">⬆ บนสุด</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipCloseBtn" title="ปิดหน้าต่างลอย PiP ชั่วคราว">✕</button>
                 </div>
               </div>
 
+              <!-- Pure 16:9 Drive Video Frame: ZERO CC or Conceptualized overlay covering Drive's video controller! -->
               <div class="ep6-drive-aspect" id="ep6DriveAspect">
                 <iframe
                   id="ep6DriveIframeEl"
@@ -338,31 +445,34 @@
                   allowfullscreen
                 ></iframe>
 
-                <!-- Shield over Google Drive top-right pop-out icon so students cannot pop out to Drive or download -->
+                <!-- Shield over Google Drive top-right pop-out icon ONLY (never touches bottom controller!) -->
                 <div class="ep6-drive-popout-shield" title="สงวนสิทธิ์การรับชมเฉพาะบนเว็บไซต์รายวิชา RACM 303 (ห้ามดาวน์โหลด)">
                   <span>🔒 RACM 303</span>
                 </div>
 
-                <!-- YouTube-Style -15s / +15s Skip Visual Feedback Ripple -->
+                <!-- Temporary 0.7s ±15s Skip Feedback Pill at upper-center (never touches bottom controller!) -->
                 <div class="ep6-skip-flash" id="ep6SkipFlash" hidden></div>
-
-                <!-- YouTube-Style Live Thai Closed Captions (CC) Overlay -->
-                <div class="ep6-cc-overlay ${studioState.ccLarge ? "is-large" : ""}" id="ep6CcOverlay" ${studioState.ccEnabled ? "" : "hidden"}>
-                  <span class="ep6-cc-text" id="ep6CcText">กด ▶ เล่น เพื่อซิงก์คำบรรยายภาษาไทย (CC) และสไลด์ตามเวลาจริง</span>
-                </div>
               </div>
 
-              <!-- Compact YouTube-Style Transport Bar attached directly to Video Dock (works both docked & in Floating PiP!) -->
+              <!-- Dedicated Cinema Closed Captions (CC) Bar BELOW video frame -> 0% overlap with Drive video controller! -->
+              <div class="ep6-cc-dock-strip ${studioState.ccLarge ? "is-large" : ""}" id="ep6CcOverlay" ${studioState.ccEnabled ? "" : "hidden"}>
+                <span class="ep6-cc-badge">CC</span>
+                <span class="ep6-cc-text" id="ep6CcText">คำบรรยายภาษาไทยตามเวลาการบรรยายของ ศ. นพ.วิชัย เอกพลากร</span>
+              </div>
+
+              <!-- Compact YouTube-Style Transport Bar (ZERO Conceptualized text inside video player!) -->
               <div class="ep6-ytstyle-bar" id="ep6YtStyleBar">
                 <div class="ep6-ytb-left">
-                  <button type="button" class="ep6-ytb-btn is-play" id="ep6PlayPauseBtn" title="เล่น/หยุดซิงก์วิดีโอและคำบรรยาย (Space / K)">▶ เล่น</button>
+                  <button type="button" class="ep6-ytb-btn is-play" id="ep6PlayPauseBtn" title="เล่น/หยุดซิงก์เวลาและคำบรรยาย (K)">▶ เล่น</button>
                   <button type="button" class="ep6-ytb-btn" id="ep6Rew15Btn" title="ถอยหลัง 15 วินาที (J หรือ ←)">↺ -15s</button>
                   <button type="button" class="ep6-ytb-btn" id="ep6Fwd15Btn" title="เดินหน้า 15 วินาที (L หรือ →)">+15s ↻</button>
+                  <button type="button" class="ep6-ytb-btn ep6-pip-only" id="ep6PipPrevSlideBtn" title="สไลด์ก่อนหน้า">⏮</button>
+                  <button type="button" class="ep6-ytb-btn ep6-pip-only" id="ep6PipNextSlideBtn" title="สไลด์ถัดไป">⏭</button>
                   <span class="ep6-ytb-time"><strong id="ep6DockTimeTxt">00:04</strong> / 62:00</span>
                 </div>
                 <div class="ep6-ytb-right">
-                  <button type="button" class="ep6-ytb-btn is-cc ${studioState.ccEnabled ? "is-on" : ""}" id="ep6CcToggleBtn" aria-pressed="${studioState.ccEnabled}" title="เปิด/ปิด คำบรรยายภาษาไทย (CC · กด C)">CC</button>
-                  <button type="button" class="ep6-ytb-btn" id="ep6CcSizeBtn" title="สลับขนาดตัวอักษรคำบรรยาย CC (ปกติ / ใหญ่)">A+</button>
+                  <button type="button" class="ep6-ytb-btn is-cc ${studioState.ccEnabled ? "is-on" : ""}" id="ep6CcToggleBtn" aria-pressed="${studioState.ccEnabled}" title="เปิด/ปิด คำบรรยายภาษาไทยใต้จอวิดีโอ (C)">CC</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6CcSizeBtn" title="ขยาย/ย่อ ขนาดตัวอักษรคำบรรยาย CC">A+</button>
                   <div class="ep6-speed-wrap">
                     <select id="ep6SpeedSelect" class="ep6-speed-select" aria-label="ปรับความเร็วการเล่น (Playback Speed)" title="ปรับความเร็วการซิงก์เวลาและคำบรรยาย (0.5x – 2x)">
                       ${SPEEDS.map(
@@ -370,28 +480,20 @@
                       ).join("")}
                     </select>
                   </div>
-                  <button type="button" class="ep6-ytb-btn" id="ep6FullscreenBtn" title="ขยายเต็มจอพร้อมคำบรรยาย CC (F)">⛶</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6FullscreenBtn" title="ขยายเต็มจอพร้อมคำบรรยาย CC">⛶</button>
                 </div>
-              </div>
-
-              <!-- Live Conceptualized Mini-Caption shown when floating in PiP -->
-              <div class="ep6-pip-caption" id="ep6PipCaption">
-                <div class="ep6-pip-cap-top">
-                  <span class="ep6-pip-cap-slide" id="ep6PipSlideTxt">Slide 1/43</span>
-                  <div class="ep6-pip-cap-nav">
-                    <button type="button" class="ep6-pip-mini-nav" id="ep6PipPrevSlideBtn" title="สไลด์ก่อนหน้า">⏮ สไลด์ก่อน</button>
-                    <button type="button" class="ep6-pip-mini-nav" id="ep6PipNextSlideBtn" title="สไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
-                  </div>
-                </div>
-                <div class="ep6-pip-cap-title" id="ep6PipConceptTxt"></div>
               </div>
             </div>
           </div>
 
+          <!-- CAPTURED SLIDE PANEL -->
           <div class="ep6-sync-slide-box" id="ep6SyncSlideBox">
             <div class="ep6-slide-frame-head">
               <span id="ep6SyncSlideBadge" class="ep6-slide-pill">Slide 1 / 43</span>
-              <button type="button" class="ep6-zoom-btn" id="ep6ZoomCurrentSlideBtn">🔍 ขยายสไลด์เต็มจอ</button>
+              <div class="ep6-slide-head-btns">
+                <button type="button" class="ep6-zoom-btn" id="ep6ZoomCurrentSlideBtn">🔍 ขยายเต็มจอ</button>
+                <button type="button" class="ep6-inline-hide-btn" data-hide-panel="slide" title="ซ่อนกรอบสไลด์">ซ่อน ✕</button>
+              </div>
             </div>
             <div class="ep6-slide-img-wrap" id="ep6SyncSlideImgWrap" title="คลิกเพื่อขยายภาพสไลด์เต็มจอ">
               <img id="ep6SyncSlideImg" src="${esc(getSlideImg(DATA.slides[0]))}" alt="Captured lecture slide">
@@ -399,7 +501,7 @@
           </div>
         </div>
 
-        <!-- Custom Interactive Chaptered Timeline Scrubber (ZERO unwanted auto-scroll down!) -->
+        <!-- TIMELINE SCRUBBER PANEL (ZERO unwanted auto-scroll down!) -->
         <div class="ep6-scrubber-card" id="ep6ScrubberCard">
           <div class="ep6-scrubber-controls">
             <div class="ep6-transport-btns">
@@ -410,9 +512,12 @@
               <button type="button" class="ep6-ctrl-btn" id="ep6NextSlideBtn" title="ข้ามไปสไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
               <button type="button" class="ep6-ctrl-btn" id="ep6ForceSyncDriveBtn" title="ซิงก์ตัวเล่นวิดีโอ Google Drive ให้กระโดดมายังเวลาปัจจุบันบนแถบ Timeline">🎯 ซิงก์วิดีโอมาเวลานี้</button>
             </div>
-            <div class="ep6-time-readout">
-              <strong id="ep6CurTimeTxt">00:04</strong>
-              <span>/ 62:00</span>
+            <div class="ep6-scrubber-right-meta">
+              <div class="ep6-time-readout">
+                <strong id="ep6CurTimeTxt">00:04</strong>
+                <span>/ 62:00</span>
+              </div>
+              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="scrubber" title="ซ่อนแถบเลื่อนเวลา">ซ่อน ✕</button>
             </div>
           </div>
 
@@ -450,17 +555,19 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: LIVE CONCEPTUALIZED INSIGHT & VERBATIM QUOTATION -->
-      <div class="ep6-concept-col" aria-live="polite">
+      <!-- CONCEPTUALIZED INSIGHT & VERBATIM QUOTATION COLUMN -->
+      <div class="ep6-concept-col" id="ep6ConceptCol" aria-live="polite">
         <div class="ep6-live-status-bar">
           <div class="ep6-live-indicator">
             <span class="ep6-live-dot" id="ep6LiveDot"></span>
             <span id="ep6LiveStageBadge" class="ep6-live-stage-pill">Stage 1/5</span>
             <span id="ep6LiveTimeRange" class="ep6-live-range-txt">00:04 – 04:40</span>
           </div>
-          <button type="button" class="ep6-jump-atlas-btn" id="ep6JumpToActiveCardBtn" title="คลิกเมื่อต้องการเลื่อนลงไปดูสไลด์นี้ในตาราง 43 สไลด์ด้านล่าง">
-            ⬇ ดูสไลด์นี้ในผัง 43 สไลด์
-          </button>
+          <div class="ep6-live-bar-acts">
+            <button type="button" class="ep6-jump-atlas-btn" id="ep6JumpToActiveCardBtn" title="คลิกเมื่อต้องการเลื่อนลงไปดูสไลด์นี้ในตาราง 43 สไลด์ด้านล่าง">
+              ⬇ ดูในผัง 43 สไลด์
+            </button>
+          </div>
         </div>
 
         <div class="ep6-live-card" id="ep6LiveConceptCard"></div>
@@ -477,10 +584,10 @@
     pipRestorePill.innerHTML = `🎥 เปิดวิดีโอหน้าต่างลอย (PiP)`;
     root.appendChild(pipRestorePill);
 
-    // 4. Complete 43-Slide Logical Flow Atlas & Rapid Review Matrix
+    // 5. Complete 43-Slide Logical Flow Atlas & Rapid Review Matrix
     const atlas = document.createElement("div");
     atlas.className = "ep6-atlas-wrap";
-    atlas.id = "ep6AtlasWrap";
+    atlas.id = "ep6PanelAtlas";
     atlas.innerHTML = `
       <div class="ep6-atlas-bar">
         <div class="ep6-atlas-tabs" role="tablist">
@@ -495,6 +602,7 @@
               .join("")}
           </select>
           <input type="search" id="ep6SlideSearchInput" class="ep6-search-input" placeholder="ค้นหาสไลด์ สูตร หรือคำพูด เช่น Prevalence, Person-year, DALY, SMR..." value="${esc(studioState.searchQuery)}">
+          <button type="button" class="ep6-inline-hide-btn" data-hide-panel="atlas" title="ซ่อนผัง 43 สไลด์ด้านล่าง">ซ่อนผัง ✕</button>
         </div>
       </div>
       <div id="ep6AtlasBody"></div>
@@ -503,10 +611,73 @@
 
     container.appendChild(root);
 
-    // Block casual contextmenu on the Drive aspect wrapper
     root.querySelector("#ep6DriveAspect")?.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
+
+    // Apply Layout Mode & Section Visibility dynamically
+    function applyWorkspaceLayout() {
+      const p = studioState.panels;
+
+      const stagesEl = root.querySelector("#ep6PanelStages");
+      const videoSlot = root.querySelector("#ep6VideoSlot");
+      const slideBox = root.querySelector("#ep6SyncSlideBox");
+      const playerStage = root.querySelector("#ep6PlayerStage");
+      const scrubberCard = root.querySelector("#ep6ScrubberCard");
+      const mediaCol = root.querySelector("#ep6MediaCol");
+      const conceptCol = root.querySelector("#ep6ConceptCol");
+      const atlasEl = root.querySelector("#ep6PanelAtlas");
+
+      if (stagesEl) stagesEl.hidden = !p.stages;
+      if (videoSlot) videoSlot.hidden = !p.video;
+      if (slideBox) slideBox.hidden = !p.slide;
+      if (playerStage) playerStage.hidden = !p.video && !p.slide;
+      if (scrubberCard) scrubberCard.hidden = !p.scrubber;
+      if (atlasEl) atlasEl.hidden = !p.atlas;
+
+      const anyMediaShown = p.video || p.slide || p.scrubber;
+      const anyConceptShown = p.concept || p.verbatim;
+      if (mediaCol) mediaCol.hidden = !anyMediaShown;
+      if (conceptCol) conceptCol.hidden = !anyConceptShown;
+
+      // Update Live Card sub-panels if already rendered
+      const thesisBox = root.querySelector("#ep6LiveThesisPanel");
+      const quotesBox = root.querySelector("#ep6LiveVerbatimPanel");
+      const bridgeBox = root.querySelector("#ep6LiveBridgePanel");
+      if (thesisBox) thesisBox.hidden = !p.concept;
+      if (quotesBox) quotesBox.hidden = !p.verbatim;
+      if (bridgeBox) bridgeBox.hidden = !p.verbatim;
+
+      // Compute layout classes on #ep6TheaterGrid and #ep6PlayerStage
+      const cls = [`ep6-theater`, `layout-${studioState.layoutMode}`];
+      if (!anyMediaShown || !anyConceptShown) cls.push("is-single-col");
+      if (p.video && !p.slide) cls.push("only-video");
+      if (!p.video && p.slide) cls.push("only-slide");
+      theater.className = cls.join(" ");
+
+      // Sync layout buttons
+      root.querySelectorAll("[data-layout-mode]").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.getAttribute("data-layout-mode") === studioState.layoutMode);
+      });
+
+      // Sync visibility pills
+      root.querySelectorAll("[data-toggle-panel]").forEach((btn) => {
+        const key = btn.getAttribute("data-toggle-panel");
+        const on = Boolean(p[key]);
+        btn.classList.toggle("is-shown", on);
+        btn.classList.toggle("is-hidden", !on);
+        btn.setAttribute("aria-pressed", String(on));
+        const eye = btn.querySelector(".ep6-vis-eye");
+        if (eye) eye.textContent = on ? "✓" : "+";
+      });
+
+      if (!p.video && studioState.isPipActive) {
+        applyPipMode(false);
+      } else {
+        evaluateScrollPiP();
+      }
+      savePersistedPrefs();
+    }
 
     function showSkipFlash(deltaSec) {
       const el = root.querySelector("#ep6SkipFlash");
@@ -599,6 +770,7 @@
       if (speedSel && String(speedSel.value) !== String(studioState.playbackSpeed)) {
         speedSel.value = String(studioState.playbackSpeed);
       }
+      savePersistedPrefs();
     }
 
     // Core UI update — NEVER triggers window scroll or card.scrollIntoView!
@@ -627,36 +799,26 @@
       if (dockTxt) dockTxt.textContent = fmt;
       if (trackEl) trackEl.setAttribute("aria-valuenow", String(Math.floor(clamped)));
 
-      // 2. Update Live Thai Closed Captions (CC)
+      // 2. Update Dedicated Below-Video Closed Captions (CC) — ONLY spoken verbatim words, never Conceptualized!
       const ccTxtEl = root.querySelector("#ep6CcText");
-      if (ccTxtEl) {
+      const ccStrip = root.querySelector("#ep6CcOverlay");
+      if (ccTxtEl && ccStrip) {
         const cue = findCaptionAtTime(clamped);
         if (cue) {
           ccTxtEl.textContent = cue;
-          ccTxtEl.parentElement?.classList.remove("is-idle");
-        } else if (!studioState.isPlaying && clamped <= MIN_SEC + 1) {
-          ccTxtEl.textContent = "คำบรรยายไทย (CC) พร้อมแสดงผลตามเวลาการบรรยายของ ศ. นพ.วิชัย เอกพลากร";
-          ccTxtEl.parentElement?.classList.add("is-idle");
+          ccStrip.classList.remove("is-idle");
         } else {
-          ccTxtEl.textContent = `Slide ${slide.id}/43 · ${slide.title}`;
-          ccTxtEl.parentElement?.classList.add("is-idle");
+          ccTxtEl.textContent = "…";
+          ccStrip.classList.add("is-idle");
         }
       }
 
-      // 3. Update Dock & Floating PiP Labels
+      // 3. Update Dock Header Label (Pure Slide number & time — ZERO Conceptualized text inside video player!)
       const dockLabel = root.querySelector("#ep6DockHeaderLabel");
       if (dockLabel) {
         dockLabel.textContent = studioState.isPipActive
           ? `🎥 PiP · Slide ${slide.id}/43 (${fmt})`
           : `🎥 วิดีโอบรรยาย (Drive Protected) · Slide ${slide.id}/43`;
-      }
-      const pipSlideTxt = root.querySelector("#ep6PipSlideTxt");
-      if (pipSlideTxt) {
-        pipSlideTxt.textContent = `${stage.code} · Slide ${slide.id}/43 (${fmt})`;
-      }
-      const pipConceptTxt = root.querySelector("#ep6PipConceptTxt");
-      if (pipConceptTxt) {
-        pipConceptTxt.textContent = `${slide.title} — ${slide.conceptThesis}`;
       }
 
       // 4. Highlight active Stage in Stepper & Legend
@@ -679,7 +841,7 @@
         syncBadge.textContent = `Slide ${slide.id} / 43 · หน้าสไลด์ ${slide.deckSlideNo} (${studioState.imgQuality === "hd" ? "คมชัด HD" : "ภาพขณะบรรยาย"})`;
       }
 
-      // 6. Update Right-Column Live Conceptualized Card (with Clickable Logical Flow Slide Jump Buttons!)
+      // 6. Update Conceptualized Card (respects Hide/Unhide for Concept vs Verbatim!)
       const stagePill = root.querySelector("#ep6LiveStageBadge");
       const rangeTxt = root.querySelector("#ep6LiveTimeRange");
       if (stagePill) {
@@ -739,14 +901,17 @@
 
         liveCard.innerHTML = `
           <div class="ep6-lc-head">
-            <div class="ep6-lc-kicker">ประเด็น Conceptualized ขณะกำลังบรรยาย (Slide ${slide.id}/43 · หน้า ${slide.deckSlideNo})</div>
+            <div class="ep6-lc-kicker">Slide ${slide.id}/43 · หน้าสไลด์ ${slide.deckSlideNo} (${esc(slide.timeLabel)})</div>
             <h4 class="ep6-lc-title">${esc(slide.title)}</h4>
             <div class="ep6-lc-entitle">${esc(slide.enTitle || "")}</div>
             ${slide.revisitNotes ? `<div class="ep6-lc-revisit">🔄 ${esc(slide.revisitNotes)}</div>` : ""}
           </div>
 
-          <div class="ep6-lc-thesis-box">
-            <div class="ep6-lc-sec-tag">💡 แก่นแนวคิดที่สังเคราะห์ได้ (Conceptualized Takeaway)</div>
+          <div class="ep6-lc-thesis-box" id="ep6LiveThesisPanel" ${studioState.panels.concept ? "" : "hidden"}>
+            <div class="ep6-sec-head-inline">
+              <div class="ep6-lc-sec-tag">💡 แก่นแนวคิดที่สังเคราะห์ได้ (Conceptualized Takeaway)</div>
+              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="concept" title="ซ่อนส่วน Conceptualized">ซ่อน ✕</button>
+            </div>
             <p class="ep6-lc-thesis">${esc(slide.conceptThesis)}</p>
             ${slide.formula ? `<div class="ep6-lc-formula"><code>${esc(slide.formula)}</code></div>` : ""}
             <ul class="ep6-lc-bullets">
@@ -754,8 +919,11 @@
             </ul>
           </div>
 
-          <div class="ep6-lc-quotes-box">
-            <div class="ep6-lc-sec-tag">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ (Verbatim Quotation · คลิกเวลาเพื่อซิงก์เสียงช่วงนั้น)</div>
+          <div class="ep6-lc-quotes-box" id="ep6LiveVerbatimPanel" ${studioState.panels.verbatim ? "" : "hidden"}>
+            <div class="ep6-sec-head-inline">
+              <div class="ep6-lc-sec-tag">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ (Verbatim Quotation · คลิกเวลาเพื่อซิงก์เสียงช่วงนั้น)</div>
+              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="verbatim" title="ซ่อนส่วนคำพูดต้นฉบับและ Logical Flow">ซ่อน ✕</button>
+            </div>
             <div class="ep6-lc-quotes-list">
               ${quotes
                 .map(
@@ -770,7 +938,7 @@
             </div>
           </div>
 
-          <div class="ep6-lc-flow-bridge">
+          <div class="ep6-lc-flow-bridge" id="ep6LiveBridgePanel" ${studioState.panels.verbatim ? "" : "hidden"}>
             <div class="ep6-lc-sec-tag">🧭 การเชื่อมโยงตาม Logical Flow (คลิกปุ่มเพื่อข้ามไปยังสไลด์ก่อนหน้า / ถัดไป)</div>
             <div class="ep6-bridge-grid">
               ${prevBridgeHtml}
@@ -796,6 +964,17 @@
                 syncDrive: true,
                 autoPlay: studioState.isPlaying
               });
+            }
+          });
+        });
+
+        liveCard.querySelectorAll("[data-hide-panel]").forEach((btn) => {
+          btn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const key = btn.getAttribute("data-hide-panel");
+            if (key && key in studioState.panels) {
+              studioState.panels[key] = false;
+              applyWorkspaceLayout();
             }
           });
         });
@@ -849,7 +1028,7 @@
       const restorePill = root.querySelector("#ep6PipRestorePill");
       if (!slot || !dock) return;
 
-      if (enablePip && studioState.theaterMode !== "slides") {
+      if (enablePip && studioState.panels.video) {
         if (!studioState.isPipActive) {
           const h = slot.offsetHeight;
           if (h > 120) {
@@ -878,11 +1057,7 @@
     }
 
     function evaluateScrollPiP() {
-      if (!root.isConnected || root.offsetParent === null) {
-        if (studioState.isPipActive) applyPipMode(false);
-        return;
-      }
-      if (studioState.theaterMode === "slides") {
+      if (!root.isConnected || root.offsetParent === null || !studioState.panels.video) {
         if (studioState.isPipActive) applyPipMode(false);
         return;
       }
@@ -1068,7 +1243,6 @@
 
       body.innerHTML = htmlParts.join("");
 
-      // Clicking ▶ timestamp in the 43-slide Atlas plays right inside the Floating PiP player WITHOUT jumping away from your reading spot!
       body.querySelectorAll("[data-atlas-seek]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const sec = Number(btn.getAttribute("data-atlas-seek")) || MIN_SEC;
@@ -1139,16 +1313,38 @@
       });
     }
 
-    // Wire Theater Mode & Image Quality buttons
-    root.querySelectorAll("[data-tmode]").forEach((btn) => {
+    // Wire Layout Mode & Hide/Unhide Section Controls
+    root.querySelectorAll("[data-layout-mode]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        studioState.theaterMode = btn.getAttribute("data-tmode") || "split";
-        theater.className = `ep6-theater mode-${studioState.theaterMode}`;
-        root.querySelectorAll("[data-tmode]").forEach((b) =>
-          b.classList.toggle("is-active", b.getAttribute("data-tmode") === studioState.theaterMode)
-        );
-        evaluateScrollPiP();
+        studioState.layoutMode = btn.getAttribute("data-layout-mode") || "cinema";
+        applyWorkspaceLayout();
       });
+    });
+
+    root.querySelectorAll("[data-toggle-panel]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-toggle-panel");
+        if (key && key in studioState.panels) {
+          studioState.panels[key] = !studioState.panels[key];
+          applyWorkspaceLayout();
+        }
+      });
+    });
+
+    root.querySelectorAll("[data-hide-panel]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-hide-panel");
+        if (key && key in studioState.panels) {
+          studioState.panels[key] = false;
+          applyWorkspaceLayout();
+        }
+      });
+    });
+
+    root.querySelector("#ep6ResetWorkspaceBtn")?.addEventListener("click", () => {
+      studioState.layoutMode = "cinema";
+      studioState.panels = { ...DEFAULT_PANELS };
+      applyWorkspaceLayout();
     });
 
     root.querySelectorAll("[data-imgq]").forEach((btn) => {
@@ -1159,10 +1355,11 @@
         );
         updateLiveUI(studioState.currentSec, { forceCard: true });
         renderAtlasBody();
+        savePersistedPrefs();
       });
     });
 
-    // Wire Stage Jump buttons (strictly NO page scroll!)
+    // Wire Stage Jump buttons
     root.querySelectorAll("[data-stage-jump]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const st = getStageById(Number(btn.getAttribute("data-stage-jump")));
@@ -1297,6 +1494,10 @@
 
     // Explicit click-only button to view active slide in the 43-slide Atlas below
     root.querySelector("#ep6JumpToActiveCardBtn")?.addEventListener("click", () => {
+      if (!studioState.panels.atlas) {
+        studioState.panels.atlas = true;
+        applyWorkspaceLayout();
+      }
       if (studioState.atlasView !== "flow") {
         studioState.atlasView = "flow";
         root.querySelectorAll("[data-aview]").forEach((b) =>
@@ -1368,7 +1569,7 @@
       });
     }
 
-    // YouTube-style keyboard shortcuts when focus is inside the EP6 Studio (outside text inputs)
+    // Keyboard shortcuts when focus is inside the EP6 Studio
     root.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") return;
@@ -1427,6 +1628,7 @@
     // Initial render
     renderAtlasBody();
     updateLiveUI(studioState.currentSec, { forceCard: true });
+    applyWorkspaceLayout();
     syncTransportButtons();
     requestAnimationFrame(evaluateScrollPiP);
   }
