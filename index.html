@@ -760,8 +760,8 @@
 
       <div class="section-header">
         <div>
-          <h2>STEP 03 · Self-Quiz (แบบทดสอบประเมินตนเอง 60 ข้อ) · บัตรคำศัพท์ 111 คำ &amp; Rapid Review</h2>
-          <p>ชุดโจทย์ประเมินตนเองและคำศัพท์จากท้ายบทเอกสารคำสอน HS1–HS6 สำหรับใช้ตั้งคำถามกระตุ้นคิดก่อนเข้าอภิปรายกลุ่มย่อย</p>
+          <h2>STEP 03 · Self-Quiz (แบบทดสอบประเมินตนเอง 66 ข้อ) · บัตรคำศัพท์ 125 คำ &amp; Rapid Review</h2>
+          <p>ชุดโจทย์ประเมินตนเองและคำศัพท์จากท้ายบทเอกสารคำสอน ST1 และ HS1–HS6 สำหรับใช้ตั้งคำถามกระตุ้นคิดก่อนเข้าคาบและอภิปรายกลุ่มย่อย</p>
         </div>
         <div class="header-actions">
           <a class="btn pdf-red" id="exportPracticePdfBtn" href="exports/pdf/RACM303_2569_Practice_Review.pdf" download="คลังทบทวนเร็ว_คำศัพท์_โจทย์_RACM303_2569.pdf" title="ส่งออกคลังทบทวนเร็ว คำศัพท์ และโจทย์เป็นไฟล์ PDF"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9.5 15.5 2.5 2.5 2.5-2.5"/></svg>Export as PDF</a>
@@ -771,16 +771,17 @@
       </div>
 
       <div class="subnav" role="group" aria-label="เครื่องมือทบทวนความรู้">
-        <button class="subnav-btn" id="fPracQa" data-practice-sub="qa" aria-pressed="true" type="button">🧠 แบบทดสอบ Self-Quiz (60 ข้อ)</button>
-        <button class="subnav-btn" id="fPracFc" data-practice-sub="flashcards" aria-pressed="false" type="button">🗂 บัตรคำศัพท์สำคัญ (111 คำ)</button>
+        <button class="subnav-btn" id="fPracQa" data-practice-sub="qa" aria-pressed="true" type="button">🧠 แบบทดสอบ Self-Quiz (66 ข้อ)</button>
+        <button class="subnav-btn" id="fPracFc" data-practice-sub="flashcards" aria-pressed="false" type="button">🗂 บัตรคำศัพท์สำคัญ (125 คำ)</button>
         <button class="subnav-btn" id="fPracRapid" data-practice-sub="rapid" aria-pressed="false" type="button">📋 ตารางทบทวนเร็ว (Rapid Review)</button>
       </div>
 
       <div class="filter-panel">
         <div class="filter-field">
-          <label for="practiceModuleFilter">กรองตามบทเรียน (HS1–HS6)</label>
+          <label for="practiceModuleFilter">กรองตามบทเรียน (ST1 &amp; HS1–HS6)</label>
           <select id="practiceModuleFilter">
-            <option value="">ครบทุกบทเรียน (HS1–HS6)</option>
+            <option value="">ครบทุกบทเรียน (ST1 &amp; HS1–HS6)</option>
+            <option value="ST1">ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ (Systems and Systems Thinking)</option>
             <option value="HS1">HS1: สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)</option>
             <option value="HS2">HS2: หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)</option>
             <option value="HS3">HS3: คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)</option>
@@ -852,19 +853,19 @@
   <script src="assets/vendor/mqtt.min.js?v=20261122tv7"></script>
   <script src="assets/vendor/peerjs.min.js?v=20261122tv7"></script>
   <script src="assets/live_classroom.js?v=20261123kt2"></script>
-  <script src="assets/data_schedule.js?v=20261123ep6"></script>
+  <script src="assets/data_schedule.js?v=20261123st1"></script>
   <script src="assets/data_roster.js?v=20261122tv7"></script>
   <script src="assets/data_manual.js?v=20261123hs2"></script>
-  <script src="assets/data_hs_docs.js?v=20261123hs2"></script>
+  <script src="assets/data_hs_docs.js?v=20261123st1"></script>
   <script src="assets/data_hs_discussion.js?v=20261123hs2"></script>
   <script src="assets/data_hs_discussion_key.js?v=20261122tv7"></script>
-  <script src="assets/data_faculty.js?v=20261123hs2"></script>
+  <script src="assets/data_faculty.js?v=20261123st1"></script>
   <script src="assets/data_ep6_morbidity.js?v=20261123ep6"></script>
   <script src="assets/ep6_studio.js?v=20261123ep6"></script>
-  <script src="assets/interactive_qa.js?v=20261123ai1"></script>
+  <script src="assets/interactive_qa.js?v=20261123st1"></script>
   <script src="assets/pptx_exporter.js?v=20261123kt1"></script>
   <script src="assets/orientation_slides.js?v=20261123or3"></script>
-  <script src="assets/portal.js?v=20261123or3"></script>
+  <script src="assets/portal.js?v=20261123st1"></script>
   <script src="assets/tv_launcher.js?v=20261123or3"></script>
 </body>
 </html>

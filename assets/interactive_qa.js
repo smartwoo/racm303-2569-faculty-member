@@ -224,7 +224,7 @@
 
   function getCompanionTextbookDoc(docId) {
     const docs = getDocs();
-    const baseMatch = String(docId || "").match(/^(HS[1-6])/i);
+    const baseMatch = String(docId || "").match(/^(HS[1-6]|ST1)/i);
     if (!baseMatch) return null;
     const baseId = baseMatch[1].toUpperCase();
     return docs.find((d) => d.id === baseId) || null;
@@ -265,7 +265,7 @@
     }
     const docs = getDocs();
     const docId = (rubric && rubric.docId) || "";
-    const moduleMatch = String(docId).match(/^(HS[1-6])/i);
+    const moduleMatch = String(docId).match(/^(HS[1-6]|ST1)/i);
     const moduleCode = moduleMatch ? moduleMatch[1].toUpperCase() : "";
     const curDoc = docs.find((d) => d.id === docId) || getCompanionTextbookDoc(docId);
     const companionDoc = getCompanionTextbookDoc(docId);

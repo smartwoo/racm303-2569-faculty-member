@@ -9851,14 +9851,31 @@
   /* ---------- Tab 4: HS1–HS6 Guided Learning Textbooks, Concise Summaries & Workbooks ---------- */
   function parseHsDocInfo(docId) {
     const raw = String(docId || "HS1-CONCISE").trim();
-    const m = raw.match(/^(HS[1-6])/i);
+    const m = raw.match(/^(HS[1-6]|ST1)/i);
     const modCode = m ? m[1].toUpperCase() : "HS1";
     const format = /-CONCISE$/i.test(raw) ? "concise" : /-WB$/i.test(raw) ? "wb" : "full";
     return { modCode, format };
   }
 
   function getHsModuleMeta(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    if (clean === "ST1") {
+      return {
+        id: "ST1",
+        code: "ST1",
+        title: "แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ (Systems and Systems Thinking)",
+        scheduleDate: "วันพุธที่ 25 พฤศจิกายน 2569",
+        lectureTime: "09.30 – 12.00 น.",
+        discTime: "",
+        examWeight: "ปูรากฐานก่อน HS1–HS6",
+        summaryFocus:
+          "แนวคิดเรื่องระบบ ขอบเขต สิ่งแวดล้อม บริบท ระบบซับซ้อนที่ปรับตัวได้ (CAS) วงจรอุบาทว์ของห้องฉุกเฉิน และแบบจำลองภูเขาน้ำแข็ง (Iceberg Model)",
+        docId: "ST1",
+        conciseDocId: "ST1-CONCISE",
+        wbDocId: "",
+        isFoundationalBeyond: true
+      };
+    }
     const found = (HSD_DATA.modules || []).find((m) => m.id === clean);
     if (found) return found;
     const docs = HS.docs || [];
@@ -9887,7 +9904,10 @@
   const docHeadingPreviewCache = {};
 
   function getHsLecturerName(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    if (clean === "ST1") {
+      return "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ (เอกสารคำสอน: ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์)";
+    }
     const docs = HS.docs || [];
     const d = docs.find((it) => it.id === clean || it.id === `${clean}-CONCISE`);
     if (d && d.sessionInfo) {
@@ -9970,7 +9990,7 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     state.activeHsModule = clean;
     if (state.textbookSubMode === "doc-reader") {
       state.activeDocId = resolveDocIdForModuleAndFormat(clean, state.preferredHsFormat || "concise");
@@ -9988,7 +10008,7 @@
     state.textbookSubMode = "docs-drive";
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       state.tbDriveScope = "folders";
-    } else if (/^HS[1-6]$/i.test(String(modCode))) {
+    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
       state.activeHsModule = String(modCode).toUpperCase();
       state.tbDriveScope = "module";
     } else {
@@ -10002,7 +10022,7 @@
     state.textbookSubMode = "lecture-slides";
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       state.lsDriveScope = "folders";
-    } else if (/^HS[1-6]$/i.test(String(modCode))) {
+    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
       state.activeHsModule = String(modCode).toUpperCase();
       state.lsDriveScope = "module";
     } else {
@@ -10013,7 +10033,7 @@
   }
 
   function openSelfQuizForModule(modCode, subTab) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
     if (clean) state.activeHsModule = clean;
     const nextSub = subTab || "qa";
     state.practiceSub = nextSub;
@@ -10046,6 +10066,20 @@
   }
 
   const HS_LOGICAL_FLOW_PROFILES = {
+    ST1: {
+      thread:
+        "เส้นทางการเรียนรู้ปูรากฐาน 5 ขั้นตอน: แนวคิดเรื่องระบบ บริบท CAS วงจรอุบาทว์ และภูเขาน้ำแข็ง → สกัดแผนภาพและตารางเปรียบเทียบฉบับย่อ → ทดสอบความเข้าใจด้วย Self-Quiz → สไลด์ประกอบการบรรยาย → เชื่อมสู่กรอบคาบเรียนและภาคสนาม",
+      fullDesc:
+        "ปูรากฐานแนวคิดเรื่องระบบ (Input–Process–Output, Boundary, Contexts), เปรียบเทียบ Simple/Complicated/Complex Adaptive Systems (CAS), ความซับซ้อนในคลินิกและโรคเรื้อรัง, วงจรอุบาทว์ความแออัดห้องฉุกเฉิน (CLD) และแบบจำลองภูเขาน้ำแข็ง 4 ระดับ ฉบับสมบูรณ์",
+      fullBridge: "เข้าใจธรรมชาติของระบบซับซ้อนและการคิดเชิงระบบครบทุกมิติ เพื่อสรุปแก่นสำคัญในขั้นที่ 2",
+      abridgedDesc:
+        "สกัดแก่นจากฉบับเต็มเป็นแผนภาพครบทั้ง 6 ภาพ ตารางเปรียบเทียบระบบ 3 ประเภท โรคเฉียบพลัน vs โรคเรื้อรัง และตารางประยุกต์แบบจำลองภูเขาน้ำแข็ง 4 ระดับ สำหรับทบทวนก่อนเข้าคาบและก่อนออกภาคสนาม",
+      abridgedBridge: "จับโครงสร้าง CAS, CLD และ Iceberg Model ให้แม่นยำ แล้วเช็กความเข้าใจด้วยตนเองในขั้นที่ 3",
+      quizFocus: "บริบทของระบบ คุณสมบัติ CAS วงจรอุบาทว์ห้องฉุกเฉิน แบบจำลองภูเขาน้ำแข็ง และความต่างของ Systems vs Systematic Thinking",
+      quizBridge: "เช็กความเข้าใจก่อนดู Slide อาจารย์ในขั้นที่ 4 และเชื่อมสู่กรอบคาบเรียนและภาคสนามในขั้นที่ 5",
+      caseFocus: "เชื่อมโยงกรอบคิดเชิงระบบจากคาบ ST1 สู่บทเรียน HS1–HS6 บันทึกสะท้อนคิด SRN 1–2 เวิร์กชอป CLD (22 ธ.ค.) และการนำเสนอระบบสุขภาพภาคสนาม (ฟอร์ม 3A)",
+      caseBridge: "ดูภาพรวมความเชื่อมโยงของคาบ ST1 กับเส้นทางการเรียนรู้ทั้ง 6 สัปดาห์"
+    },
     HS1: {
       thread:
         "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพ, ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Primordial–Quaternary) → สกัดแผนภาพเปรียบเทียบ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์กรณีศึกษาคนทำงานโรงงานอุตสาหกรรมในห้องเรียน",
@@ -10133,7 +10167,7 @@
   };
 
   function countModuleSelfQuizProgress(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
     const items = (HS.selfCheck || []).filter((it) => !clean || it.module === clean);
     let answered = 0;
     try {
@@ -10285,34 +10319,55 @@
           : "⏳ รออาจารย์ Upload Slide",
         onPrimary: () => openHsLectureSlides(code)
       },
-      {
-        num: "05",
-        circle: "⑤",
-        key: "case-discussion",
-        stepTag: "STEP 05 · ประยุกต์ในชั้นเรียน",
-        stepperTitle: "อภิปรายในห้อง",
-        stepperSub: "Case Discussion",
-        shortLabel: "Case Discussion in Class",
-        title: `Case Discussion in Class`,
-        timing:
-          ROLE === "faculty"
-            ? `★ ในคาบ ${mod.discTime || ""} · เฉลย 4 ขั้น`
-            : discProg.filled > 0
-            ? `✓ ตอบแล้ว ${discProg.filled}/${discProg.total} · ${mod.discTime || ""}`
-            : `ในคาบ · ${mod.discTime || ""}`,
-        tone: "tone-crimson",
-        icon: "💬",
-        modCases,
-        subQCnt,
-        discProg,
-        desc:
-          ROLE === "faculty"
-            ? `สไลด์อภิปรายกลุ่มย่อย 16:9 พร้อมเฉลย Teacher Key ครบ 4 ขั้น (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อย`
-            : `นำกรอบคิดที่ฝึกไว้มาวิเคราะห์จริงในห้องกลุ่มย่อย (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อยและสไลด์ 16:9`,
-        bridge: profile.caseBridge,
-        primaryLabel: ROLE === "faculty" ? "▶ เปิดสไลด์ + เฉลย (16:9)" : "▶ เปิดสไลด์ในชั้นเรียน (16:9)",
-        onPrimary: () => openHsDiscussion(code)
-      }
+      code === "ST1"
+        ? {
+            num: "05",
+            circle: "⑤",
+            key: "systems-forum",
+            stepTag: "STEP 05 · เชื่อมสู่คาบเรียน & ภาคสนาม",
+            stepperTitle: "กรอบคาบเรียน",
+            stepperSub: "Systems Forum",
+            shortLabel: "กรอบคาบเรียน ST1",
+            title: "กรอบคาบเรียน ST1 & เชื่อมโยงภาคสนาม",
+            timing: "พ. 25 พ.ย. 69 · 09.30–12.00 น.",
+            tone: "tone-crimson",
+            icon: "🧭",
+            modCases: [],
+            subQCnt: 0,
+            discProg: { filled: 0, total: 0 },
+            desc: profile.caseFocus,
+            bridge: profile.caseBridge,
+            primaryLabel: "▶ เปิดกรอบคาบเรียน & คำถามชวนคิด (ST1)",
+            onPrimary: () => openSystemsForum("w1-d1-st")
+          }
+        : {
+            num: "05",
+            circle: "⑤",
+            key: "case-discussion",
+            stepTag: "STEP 05 · ประยุกต์ในชั้นเรียน",
+            stepperTitle: "อภิปรายในห้อง",
+            stepperSub: "Case Discussion",
+            shortLabel: "Case Discussion in Class",
+            title: `Case Discussion in Class`,
+            timing:
+              ROLE === "faculty"
+                ? `★ ในคาบ ${mod.discTime || ""} · เฉลย 4 ขั้น`
+                : discProg.filled > 0
+                ? `✓ ตอบแล้ว ${discProg.filled}/${discProg.total} · ${mod.discTime || ""}`
+                : `ในคาบ · ${mod.discTime || ""}`,
+            tone: "tone-crimson",
+            icon: "💬",
+            modCases,
+            subQCnt,
+            discProg,
+            desc:
+              ROLE === "faculty"
+                ? `สไลด์อภิปรายกลุ่มย่อย 16:9 พร้อมเฉลย Teacher Key ครบ 4 ขั้น (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อย`
+                : `นำกรอบคิดที่ฝึกไว้มาวิเคราะห์จริงในห้องกลุ่มย่อย (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อยและสไลด์ 16:9`,
+            bridge: profile.caseBridge,
+            primaryLabel: ROLE === "faculty" ? "▶ เปิดสไลด์ + เฉลย (16:9)" : "▶ เปิดสไลด์ในชั้นเรียน (16:9)",
+            onPrimary: () => openHsDiscussion(code)
+          }
     ];
 
     return {
@@ -10342,10 +10397,12 @@
       order: 1,
       tone: "sf-1",
       code: "ST1",
-      driveFileName: "01_ST1_Systems_Thinking.md",
+      docId: "ST1",
+      conciseDocId: "ST1-CONCISE",
+      driveFileName: "01_ST1_Systems_and_Systems_Thinking.gdoc",
       kind: "systems",
-      kindLabel: "Systems Thinking · ปูรากฐาน",
-      kindLabelEn: "Systems Thinking · Foundation",
+      kindLabel: "Systems Thinking · ปูรากฐาน (มีเอกสารคำสอน Full & Abridged)",
+      kindLabelEn: "Systems Thinking · Foundation (Full & Abridged Textbook)",
       phase: 1,
       phaseLabel: "ระยะที่ 1 · เปิดเลนส์เชิงระบบ (ก่อนเข้าสู่ HS1–HS6)",
       phaseLabelEn: "Phase 1 · Systems Lens (Before HS1–HS6)",
@@ -10356,36 +10413,42 @@
       hours: "2.5 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
       title: "Systems & Systems Thinking",
-      titleThSub: "ระบบที่ซับซ้อนและปรับตัวได้ (CAS) & แบบจำลองภูเขาน้ำแข็ง (Iceberg Model)",
-      speakers: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ (ประธานรายวิชา RACM 303)",
-      kickoffNote: "ต่อเนื่องจากปฐมนิเทศรายวิชา (Orientation 09.00–09.30 น. · คณาจารย์ 12 ท่าน)",
+      titleThSub:
+        "แนวคิดเบื้องต้นเกี่ยวกับระบบ บริบท ระบบซับซ้อนที่ปรับตัวได้ (CAS) วงจรอุบาทว์ของห้องฉุกเฉิน และแบบจำลองภูเขาน้ำแข็ง (Iceberg Model)",
+      speakers:
+        "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ (ประธานรายวิชา) · เอกสารคำสอนโดย ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      kickoffNote: "ต่อเนื่องจากปฐมนิเทศรายวิชา (Orientation 09.00–09.30 น. · คณาจารย์ 12 ท่าน) — พร้อมเอกสารคำสอนฉบับเต็ม & ฉบับย่อ และ Self-Quiz 6 ข้อ",
       examBadge: "นอกข้อสอบ HS1–HS6 · รากฐานทุกบท",
       whyImportant:
-        "เป็นกรอบคิดตั้งต้น (Foundational Mental Model) ก่อนเรียน HS1–HS6 ช่วยให้มองเห็นโครงสร้าง ความเชื่อมโยง และแรงย้อนกลับที่ซ่อนอยู่ใต้ปัญหาสุขภาพ ไม่แยกส่วนแก้เฉพาะอาการปลายเหตุ",
+        "เป็นกรอบคิดตั้งต้น (Foundational Mental Model) ก่อนเรียน HS1–HS6 ช่วยให้เข้าใจตั้งแต่ความหมายและบริบทของระบบ ความต่างของระบบสามัญ/ยุ่งยาก/ซับซ้อน (CAS) ความซับซ้อนในคลินิกและโรคเรื้อรัง วงจรอุบาทว์ของห้องฉุกเฉิน ไปจนถึงแบบจำลองภูเขาน้ำแข็ง 4 ระดับ และการแยก Systems Thinking ออกจาก Systematic Thinking",
       objectives: [
-        "อธิบายแนวคิดระบบที่ซับซ้อนและปรับตัวได้ (Complex Adaptive Systems: CAS) และคุณสมบัติการเกิดพฤติกรรมใหม่ของระบบ (Emergence)",
-        "วิเคราะห์ปัญหาสุขภาพแบบองค์รวมผ่านแบบจำลองภูเขาน้ำแข็ง (Iceberg Model: Events → Patterns → Structures → Mental Models) และความเชื่อมโยงของเหตุปัจจัยในระบบสุขภาพ"
+        "อธิบายความหมาย องค์ประกอบ ขอบเขต (Boundary) สิ่งแวดล้อม (Environment) กลไก Input–Process–Output และอิทธิพลของบริบท (Contexts) ต่อการทำงานของระบบ",
+        "เปรียบเทียบระบบสามัญ (Simple) ระบบยุ่งยาก (Complicated) และระบบซับซ้อนที่ปรับตัวได้ (Complex Adaptive Systems: CAS) พร้อมคุณสมบัติสำคัญ 5 ประการ",
+        "วิเคราะห์ความซับซ้อนของการตรวจรักษาทางคลินิก การดูแลโรคเฉียบพลันเทียบกับโรคเรื้อรัง และกลไกวงจรอุบาทว์ (Vicious Cycle) กับผลลัพธ์ที่ไม่ได้ตั้งใจ (Unintended Consequences) ของห้องฉุกเฉิน",
+        "แยกแยะการคิดเชิงระบบ (Systems Thinking) ออกจากมุมมองตาบอดคลำช้างและการคิดอย่างเป็นระบบ (Systematic Thinking) และใช้แบบจำลองภูเขาน้ำแข็ง (Iceberg Model) 4 ระดับค้นหาจุดคานงัดที่ยั่งยืน"
       ],
       frameworks: [
-        "Complex Adaptive Systems (CAS)",
+        "Systems, Boundary & Contexts",
+        "Simple vs Complicated vs CAS",
+        "Stacey Matrix & Chronic Complex Care",
+        "ER Crowding CLD & Vicious Cycles",
         "Iceberg Model (4 ระดับ)",
-        "Feedback Loops & Unintended Consequences",
-        "Systems-Based Practice"
+        "Systems vs Systematic Thinking"
       ],
-      relatedHs: ["HS1", "HS2", "HS3"],
+      relatedHs: ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"],
       assessmentLinks: [
-        "ปูพื้นฐานแนวคิด CAS และ Six Building Blocks ใน HS2",
-        "เป็นฐานสำคัญสำหรับ Workshop CLD & Archetypes (22 ธ.ค.)",
-        "ใช้เป็นกรอบวิเคราะห์ใน Self-Reflection Note ครั้งที่ 1 (SRN 1) และภาคสนาม"
+        "มีเอกสารคำสอนฉบับเต็ม (Full) · ฉบับย่อ (Abridged) · Self-Quiz 6 ข้อ & คำศัพท์ 14 คำ พร้อมอ่านและดาวน์โหลด",
+        "ปูพื้นฐานแนวคิด CAS และ Six Building Blocks ใน HS2 รวมถึงเวิร์กชอป CLD & Archetypes (22 ธ.ค.)",
+        "ใช้เป็นกรอบวิเคราะห์ใน Self-Reflection Note ครั้งที่ 1–2 (SRN 1–2) และการนำเสนอระบบสุขภาพภาคสนาม (ฟอร์ม 3A)"
       ],
       guidingQuestions: [
-        "ปัญหาสุขภาพที่เราเห็น 'เหนือผิวน้ำ' (เช่น ผู้ป่วยคุมเบาหวานไม่ได้หรือห้องฉุกเฉินแออัด) มีโครงสร้างระบบและกรอบความคิด (Mental Models) ใดซ่อนอยู่ใต้ภูเขาน้ำแข็ง?",
-        "เหตุใดการแก้ปัญหาแบบเส้นตรง (Linear Fix) ในโรงพยาบาลหรือชุมชนจึงมักสร้างผลข้างเคียงที่ไม่ตั้งใจ (Unintended Consequences)?"
+        "เหตุใดการเพิ่มแพทย์และทรัพยากรเฉพาะในห้องฉุกเฉินเพียงจุดเดียวจึงกลับกระตุ้นวงจรอุบาทว์ (Vicious Cycle) ให้ห้องฉุกเฉินยิ่งแออัดหนักขึ้นในระยะยาว?",
+        "ปัญหาผู้ป่วยโรคเรื้อรังคุมโรคไม่ได้ที่เห็น 'เหนือผิวน้ำ' มีโครงสร้างบริการและกรอบความคิด (Mental Models) ใดซ่อนอยู่ใต้ภูเขาน้ำแข็ง และการคิดเชิงระบบต่างจากการคิดอย่างเป็นระบบอย่างไร?"
       ],
       facultyNote:
-        "เชื่อมโยงต่อเนื่องจาก Orientation (09.00–09.30 น.) เพื่อปรับกรอบคิดนักศึกษาจากระดับชีวการแพทย์รายบุคคลสู่ภาพรวมระบบสุขภาพก่อนเริ่ม HS1 ในวันรุ่งขึ้น",
+        "เอกสารคำสอนคาบ ST1 พัฒนาและปรับปรุงบนฐานเอกสารต้นฉบับของ ผศ. นพ.บวรศม ลีระพันธ์ ครบทุกกรณีศึกษาและแผนภาพ พร้อมบูรณาการแบบจำลองภูเขาน้ำแข็ง 4 ระดับเพื่อเชื่อมตรงสู่ HS1–HS6 และภาคสนาม",
       searchKeywords:
-        "systems thinking cas complex adaptive iceberg model mental models feedback loops orientation ณัฐวุฒิ ปฐมนิเทศ คิดเชิงระบบ ภูเขาน้ำแข็ง"
+        "st1 systems thinking cas complex adaptive iceberg model mental models feedback loops vicious cycle cld emergency room บวรศม ลีระพันธ์ ณัฐวุฒิ ปฐมนิเทศ คิดเชิงระบบ ภูเขาน้ำแข็ง ตาบอดคลำช้าง"
     },
     {
       id: "w1-d1-global",
@@ -10635,6 +10698,7 @@
   ];
 
   const HS_SHORT_LABELS = {
+    ST1: "ST1: ระบบ & การคิดเชิงระบบ",
     HS1: "HS1: สุขภาพ & ปัจจัยกำหนด",
     HS2: "HS2: โครงสร้างระบบสุขภาพ (6W)",
     HS3: "HS3: บริการสุขภาพ (EQESaRR)",
@@ -10691,6 +10755,20 @@
         });
         strip.appendChild(allPill);
       }
+
+      const stPill = make("button", tr("ST1 · รากฐาน", "ST1 · Intro"), "hs-unified-mod-pill");
+      stPill.type = "button";
+      stPill.title = "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ (ปูรากฐานก่อน HS1–HS6)";
+      stPill.setAttribute("aria-pressed", !isBeyondActive && !isAllActive && mod.code === "ST1" ? "true" : "false");
+      stPill.addEventListener("click", () => {
+        state.activeHsModule = "ST1";
+        if (typeof options.onSelectModule === "function" && effectiveFormat !== "discussion") {
+          options.onSelectModule("ST1");
+        } else {
+          openTextbookDoc("ST1");
+        }
+      });
+      strip.appendChild(stPill);
 
       (HSD_DATA.modules || []).forEach((m) => {
         const pBtn = make("button", m.code, "hs-unified-mod-pill");
@@ -10889,22 +10967,34 @@
       )
     );
 
-    // Step 5: Case Discussion in Class
-    tabsRow.appendChild(
-      makeTabBtn(
-        `${ROLE === "faculty" ? "⑤ Case Discussion & เฉลย" : "⑤ Case Discussion"} (${mod.code})`,
-        "discussion",
-        true,
-        () => {
-          state.activeHsModule = mod.code;
-          state.hsdModule = mod.code;
-          state.hsdSlideDeckMod = mod.code;
-          openHsGoogleDriveFolder();
-          switchTab("hs-discussion");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      )
-    );
+    // Step 5: Case Discussion in Class (or Systems Forum Frame for ST1)
+    if (mod.code === "ST1" && !showAllTag) {
+      tabsRow.appendChild(
+        makeTabBtn(
+          `⑤ กรอบคาบเรียน (ST1)`,
+          "discussion",
+          true,
+          () => openSystemsForum("w1-d1-st")
+        )
+      );
+    } else {
+      const discTarget = mod.code === "ST1" ? "HS1" : mod.code;
+      tabsRow.appendChild(
+        makeTabBtn(
+          `${ROLE === "faculty" ? "⑤ Case Discussion & เฉลย" : "⑤ Case Discussion"} (${discTarget})`,
+          "discussion",
+          true,
+          () => {
+            state.activeHsModule = discTarget;
+            state.hsdModule = discTarget;
+            state.hsdSlideDeckMod = discTarget;
+            openHsGoogleDriveFolder();
+            switchTab("hs-discussion");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        )
+      );
+    }
 
     // Beyond the Exam: Systems Thinking, Expert Panels & Policy Exercise (6 Core Sessions)
     tabsRow.appendChild(
@@ -12819,11 +12909,13 @@
         ev.stopPropagation();
         openTextbookDriveFolder(m.code);
       });
-      const discBtn = make("button", `💬 โจทย์อภิปราย ${m.code}`, "gdrive-row-sec-btn");
+      const isStSlideM = m.code === "ST1";
+      const discBtn = make("button", isStSlideM ? `🧭 กรอบคาบเรียน ${m.code}` : `💬 โจทย์อภิปราย ${m.code}`, "gdrive-row-sec-btn");
       discBtn.type = "button";
       discBtn.addEventListener("click", (ev) => {
         ev.stopPropagation();
-        openHsDiscussion(m.code);
+        if (isStSlideM) openSystemsForum("w1-d1-st");
+        else openHsDiscussion(m.code);
       });
       actWrap.append(docsBtn, discBtn);
       cFoot.appendChild(actWrap);
@@ -13262,13 +13354,19 @@
     const jumpHsdBtn = $("jumpTextbookToHsDiscBtn");
     if (jumpHsdBtn) {
       jumpHsdBtn.addEventListener("click", () => {
-        const m = String(state.activeHsModule || state.activeDocId || "HS1").match(/^HS[1-6]/i);
+        const curCode = String(state.activeHsModule || state.activeDocId || "HS1");
+        if (/^ST1/i.test(curCode)) {
+          openSystemsForum("w1-d1-st");
+          return;
+        }
+        const m = curCode.match(/^HS[1-6]/i);
         openHsDiscussion(m ? m[0].toUpperCase() : "ALL");
       });
     }
   }
 
   function getEpNumIndex(modCode) {
+    if (/^ST1$/i.test(String(modCode || ""))) return 1;
     const m = String(modCode || "HS1").match(/([1-6])/);
     return m ? Number(m[1]) : 1;
   }
@@ -13317,6 +13415,9 @@
     const idx = HS_BEYOND_SESSIONS.findIndex((x) => x.id === sess.id);
     const prevSess = idx > 0 ? HS_BEYOND_SESSIONS[idx - 1] : null;
     const nextSess = idx >= 0 && idx < HS_BEYOND_SESSIONS.length - 1 ? HS_BEYOND_SESSIONS[idx + 1] : null;
+    const docs = HS.docs || [];
+    const sessFullDoc = sess.docId ? docs.find((d) => d.id === sess.docId) || null : null;
+    const sessConciseDoc = sess.conciseDocId ? docs.find((d) => d.id === sess.conciseDocId) || null : null;
 
     const wrap = make("div", null, "sf-spotlight-shell");
 
@@ -13350,17 +13451,36 @@
     );
 
     const heroActions = make("div", null, "tv-hero-actions");
+    if (sessFullDoc) {
+      const bReadFull = make("button", `① อ่านเอกสารคำสอนฉบับเต็ม (${sess.code})`, "tv-hero-btn is-primary");
+      bReadFull.type = "button";
+      bReadFull.addEventListener("click", () => openTextbookDoc(sessFullDoc.id));
+      heroActions.appendChild(bReadFull);
+    }
+    if (sessConciseDoc) {
+      const bReadCon = make("button", `② อ่านฉบับย่อ (${sess.code})`, "tv-hero-btn is-glass");
+      bReadCon.type = "button";
+      bReadCon.addEventListener("click", () => openTextbookDoc(sessConciseDoc.id));
+      heroActions.appendChild(bReadCon);
+    }
+    if (sess.docId) {
+      const qaCnt = (HS.selfCheck || []).filter((q) => q.module === sess.code).length;
+      const bQuiz = make("button", `③ ทำ Self-Quiz (${qaCnt} ข้อ)`, "tv-hero-btn is-glass");
+      bQuiz.type = "button";
+      bQuiz.addEventListener("click", () => openSelfQuizForModule(sess.code, "qa"));
+      heroActions.appendChild(bQuiz);
+    }
     if (slideRec) {
-      const openSlBtn = make("button", `📊 เปิด Slide ประจำคาบ (${slideRec.fileName || sess.code})`, "tv-hero-btn is-primary");
+      const openSlBtn = make("button", `📊 เปิด Slide ประจำคาบ (${slideRec.fileName || sess.code})`, sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary");
       openSlBtn.type = "button";
       openSlBtn.addEventListener("click", () => openSessionSlide(sess.id));
       heroActions.appendChild(openSlBtn);
     } else if (ROLE === "faculty") {
-      const upSlBtn = make("button", `⬆ อัปโหลด Slide คาบนี้ (${sess.code})`, "tv-hero-btn is-primary");
+      const upSlBtn = make("button", `⬆ อัปโหลด Slide คาบนี้ (${sess.code})`, sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary");
       upSlBtn.type = "button";
-      upSlBtn.addEventListener("click", () => openFacultySlideStudioForSession(sess.id));
+      upSlBtn.addEventListener("click", () => openHsLectureSlides(sess.code));
       heroActions.appendChild(upSlBtn);
-    } else {
+    } else if (!sessFullDoc) {
       heroActions.appendChild(make("span", "⏳ Slide ประกอบคาบ: รออาจารย์ / วิทยากร Upload", "hs-atv-pending-badge"));
     }
 
@@ -13372,12 +13492,72 @@
     if (ROLE === "faculty" && slideRec) {
       const reUpBtn = make("button", "🔄 อัปเดต Slide คาบนี้", "tv-hero-btn is-glass");
       reUpBtn.type = "button";
-      reUpBtn.addEventListener("click", () => openFacultySlideStudioForSession(sess.id));
+      reUpBtn.addEventListener("click", () => openHsLectureSlides(sess.code));
       heroActions.appendChild(reUpBtn);
     }
 
     hero.append(heroTop, heroBody, heroActions);
     wrap.appendChild(hero);
+
+    if (sessFullDoc || sessConciseDoc) {
+      const docShelf = make("div", null, "sf-detail-card is-accent-card");
+      docShelf.style.marginBottom = "18px";
+      docShelf.append(
+        make("div", `📘 เอกสารคำสอนประจำคาบ ${sess.code} · Guided Learning (Full & Abridged)`, "sf-detail-kicker"),
+        make(
+          "p",
+          "เอกสารคำสอนฉบับสมบูรณ์พร้อมแผนภาพประกอบ 6 ภาพ ตารางวิเคราะห์ แบบจำลองภูเขาน้ำแข็ง 4 ระดับ ตารางทบทวนสาระสำคัญ (Rapid Review) คำศัพท์สำคัญ 14 คำ และแบบทบทวนความรู้ด้วยตนเอง 6 ข้อพร้อม AI Mentor",
+          "sf-detail-lead"
+        )
+      );
+      const docBtnRow = make("div", null, "header-actions");
+      docBtnRow.style.marginTop = "12px";
+      docBtnRow.style.flexWrap = "wrap";
+      if (sessFullDoc) {
+        const bf = make("button", `① อ่านฉบับเต็ม (${sessFullDoc.id})`, "btn sm teal");
+        bf.type = "button";
+        bf.addEventListener("click", () => openTextbookDoc(sessFullDoc.id));
+        docBtnRow.appendChild(bf);
+        if (sessFullDoc.docUrl) {
+          const gf = make("a", "📄 Google Doc (ฉบับเต็ม) ↗", "btn sm");
+          gf.href = sessFullDoc.docUrl;
+          gf.target = "_blank";
+          gf.rel = "noopener";
+          docBtnRow.appendChild(gf);
+        }
+        const pf = make("a", "⬇ PDF (ฉบับเต็ม)", "btn sm pdf-red");
+        pf.href = `exports/pdf/${encodeURIComponent(sessFullDoc.id)}.pdf`;
+        pf.setAttribute("download", `RACM303_${sessFullDoc.id}_Full.pdf`);
+        docBtnRow.appendChild(pf);
+        const df = make("a", "⬇ Word (ฉบับเต็ม)", "btn sm docx-blue");
+        df.href = `exports/docx/${encodeURIComponent(sessFullDoc.id)}.docx`;
+        df.setAttribute("download", `RACM303_${sessFullDoc.id}_Full.docx`);
+        docBtnRow.appendChild(df);
+      }
+      if (sessConciseDoc) {
+        const bc = make("button", `② อ่านฉบับย่อ (Abridged)`, "btn sm primary");
+        bc.type = "button";
+        bc.addEventListener("click", () => openTextbookDoc(sessConciseDoc.id));
+        docBtnRow.appendChild(bc);
+        if (sessConciseDoc.docUrl) {
+          const gc = make("a", "📄 Google Doc (ฉบับย่อ) ↗", "btn sm");
+          gc.href = sessConciseDoc.docUrl;
+          gc.target = "_blank";
+          gc.rel = "noopener";
+          docBtnRow.appendChild(gc);
+        }
+        const pc = make("a", "⬇ PDF (ฉบับย่อ)", "btn sm pdf-red");
+        pc.href = `exports/pdf/${encodeURIComponent(sessConciseDoc.id)}.pdf`;
+        pc.setAttribute("download", `RACM303_${sessConciseDoc.id}_Abridged.pdf`);
+        docBtnRow.appendChild(pc);
+        const dc = make("a", "⬇ Word (ฉบับย่อ)", "btn sm docx-blue");
+        dc.href = `exports/docx/${encodeURIComponent(sessConciseDoc.id)}.docx`;
+        dc.setAttribute("download", `RACM303_${sessConciseDoc.id}_Abridged.docx`);
+        docBtnRow.appendChild(dc);
+      }
+      docShelf.appendChild(docBtnRow);
+      wrap.appendChild(docShelf);
+    }
 
     // 2. Two-Column Pedagogical Detail Cards
     const detailGrid = make("div", null, "sf-detail-grid");
@@ -13577,7 +13757,32 @@
       );
 
       const pills = make("div", null, "hs-atv-ep-pills");
-      const openBtn = make("button", "🧭 ดูกรอบแนวคิด & คำถามชวนคิด", "hs-atv-ep-pill is-solid");
+      if (s.docId) {
+        const bFull = make("button", "① ฉบับเต็ม", "hs-atv-ep-pill is-solid");
+        bFull.type = "button";
+        bFull.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openTextbookDoc(s.docId);
+        });
+        pills.appendChild(bFull);
+        if (s.conciseDocId) {
+          const bCon = make("button", "② ฉบับย่อ", "hs-atv-ep-pill");
+          bCon.type = "button";
+          bCon.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openTextbookDoc(s.conciseDocId);
+          });
+          pills.appendChild(bCon);
+        }
+        const bQuiz = make("button", "③ Self-Quiz", "hs-atv-ep-pill");
+        bQuiz.type = "button";
+        bQuiz.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSelfQuizForModule(s.code, "qa");
+        });
+        pills.appendChild(bQuiz);
+      }
+      const openBtn = make("button", s.docId ? "🧭 กรอบคาบเรียน" : "🧭 ดูกรอบแนวคิด & คำถามชวนคิด", s.docId ? "hs-atv-ep-pill" : "hs-atv-ep-pill is-solid");
       openBtn.type = "button";
       openBtn.addEventListener("click", (ev) => {
         ev.stopPropagation();
@@ -14246,18 +14451,26 @@
       shelf.appendChild(grid);
       stage.appendChild(shelf);
 
-      // Companion Banner highlighting the 6 taught sessions beyond the HS1–HS6 written exam
+      // Companion Banner highlighting ST1 foundational textbook & the 6 taught sessions beyond the HS1–HS6 written exam
       const beyondBanner = make("div", null, "sf-companion-banner");
       const bCopy = make("div", null, "sf-companion-copy");
       bCopy.append(
-        make("div", "🧭 BEYOND THE WRITTEN EXAM · นอกกรอบสอบทฤษฎี HS1–HS6 แต่มีการสอนสด & สำคัญมาก", "sf-why-kicker"),
-        make("h4", "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (6 คาบสำคัญ · 18.5 ชม.)"),
-        make("p", "รวมคาบ Systems Thinking, Global/Planetary Health & HPSR, Panel DHS 6BB+1, Workshop CLD & Archetypes, บทเรียนสุขภาวะข้างถนน และ Policy Exercise — หัวใจภาคสนาม ฟอร์ม 3A และ SRN 1–2")
+        make("div", "🧭 FOUNDATIONAL & BEYOND THE WRITTEN EXAM · ปูรากฐานคิดเชิงระบบ (ST1) & 6 คาบสอนสำคัญ", "sf-why-kicker"),
+        make("h4", "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบ · 18.5 ชม.)"),
+        make("p", "อ่านเอกสารคำสอนคาบปูรากฐาน ST1 (ฉบับเต็ม & ฉบับย่อ · ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์) และดูกรอบคาบ Global/Planetary Health, DHS 6BB+1, Workshop CLD, สุขภาวะข้างถนน และ Policy Exercise")
       );
-      const bBtn = make("button", "🧭 เปิดดูครบ 6 คาบสำคัญ →", "btn teal");
+      const bActs = make("div", null, "header-actions");
+      const bStFull = make("button", "① อ่าน ST1 (ฉบับเต็ม)", "btn sm primary");
+      bStFull.type = "button";
+      bStFull.addEventListener("click", () => openTextbookDoc("ST1"));
+      const bStCon = make("button", "② อ่าน ST1 (ฉบับย่อ)", "btn sm");
+      bStCon.type = "button";
+      bStCon.addEventListener("click", () => openTextbookDoc("ST1-CONCISE"));
+      const bBtn = make("button", "🧭 ดูครบ 6 คาบสำคัญ →", "btn sm teal");
       bBtn.type = "button";
       bBtn.addEventListener("click", () => openSystemsForum(""));
-      beyondBanner.append(bCopy, bBtn);
+      bActs.append(bStFull, bStCon, bBtn);
+      beyondBanner.append(bCopy, bActs);
       stage.appendChild(beyondBanner);
 
       return stage;
@@ -14870,9 +15083,14 @@
     btnDocs.type = "button";
     btnDocs.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
 
-    const btnDisc = make("button", `💬 ไปขั้นที่ 5: Case Discussion (${curMod.code})`, "tv-hero-btn is-glass");
+    const isStSlideMod = curMod.code === "ST1";
+    const btnDisc = make(
+      "button",
+      isStSlideMod ? `🧭 ไปขั้นที่ 5: กรอบคาบเรียน (ST1)` : `💬 ไปขั้นที่ 5: Case Discussion (${curMod.code})`,
+      "tv-hero-btn is-glass"
+    );
     btnDisc.type = "button";
-    btnDisc.addEventListener("click", () => openHsDiscussion(curMod.code));
+    btnDisc.addEventListener("click", () => (isStSlideMod ? openSystemsForum("w1-d1-st") : openHsDiscussion(curMod.code)));
 
     heroActions.append(btnDocs, btnDisc);
     hero.append(heroTop, heroBody, heroActions);
@@ -15359,10 +15577,11 @@
 
     const parsed = parseHsDocInfo(current.id);
     const baseMod =
-      state.activeHsModule && /^HS[1-6]$/i.test(state.activeHsModule)
+      state.activeHsModule && /^(HS[1-6]|ST1)$/i.test(state.activeHsModule)
         ? state.activeHsModule.toUpperCase()
         : parsed.modCode;
     state.activeHsModule = baseMod;
+    const isStReader = baseMod === "ST1";
 
     const isDriveUi = state.hsUiMode === "drive";
     const subMode = state.textbookSubMode || "docs-drive";
@@ -15504,12 +15723,19 @@
           available: true,
           onClick: () => openHsLectureSlides(baseMod)
         },
-        {
-          label: ROLE === "faculty" ? "⑤ Case Discussion & เฉลย" : "⑤ Case Discussion",
-          active: false,
-          available: true,
-          onClick: () => openHsDiscussion(baseMod)
-        }
+        isStReader
+          ? {
+              label: "⑤ กรอบคาบเรียน (ST1)",
+              active: false,
+              available: true,
+              onClick: () => openSystemsForum("w1-d1-st")
+            }
+          : {
+              label: ROLE === "faculty" ? "⑤ Case Discussion & เฉลย" : "⑤ Case Discussion",
+              active: false,
+              available: true,
+              onClick: () => openHsDiscussion(baseMod)
+            }
       ];
       if (modMeta.wbDocId) {
         flowBarItems.push({
@@ -15584,12 +15810,19 @@
         available: true,
         onClick: () => openHsLectureSlides(baseMod)
       },
-      {
-        label: `⑤ ${baseMod} · Case Discussion (${flow.modCases.length} กรณี)`,
-        active: false,
-        available: true,
-        onClick: () => openHsDiscussion(baseMod)
-      }
+      isStReader
+        ? {
+            label: `⑤ ${baseMod} · กรอบคาบเรียน & คำถามชวนคิด`,
+            active: false,
+            available: true,
+            onClick: () => openSystemsForum("w1-d1-st")
+          }
+        : {
+            label: `⑤ ${baseMod} · Case Discussion (${flow.modCases.length} กรณี)`,
+            active: false,
+            available: true,
+            onClick: () => openHsDiscussion(baseMod)
+          }
     ];
     if (modMeta.wbDocId) {
       sidebarSteps.push({
@@ -15611,8 +15844,11 @@
     });
 
     if (jumpHsdBtn) {
-      jumpHsdBtn.textContent =
-        ROLE === "faculty" ? `⑤ Case Discussion & เฉลย ${baseMod} →` : `⑤ Case Discussion ${baseMod} →`;
+      jumpHsdBtn.textContent = isStReader
+        ? `⑤ กรอบคาบเรียน ${baseMod} →`
+        : ROLE === "faculty"
+        ? `⑤ Case Discussion & เฉลย ${baseMod} →`
+        : `⑤ Case Discussion ${baseMod} →`;
     }
 
     const stepPrefix =
@@ -15685,9 +15921,9 @@
       );
       bSlide.type = "button";
       bSlide.addEventListener("click", () => openHsLectureSlides(baseMod));
-      const bCase = make("button", `⑤ Case Discussion in Class`, "btn");
+      const bCase = make("button", isStReader ? `⑤ กรอบคาบเรียน ST1` : `⑤ Case Discussion in Class`, "btn");
       bCase.type = "button";
-      bCase.addEventListener("click", () => openHsDiscussion(baseMod));
+      bCase.addEventListener("click", () => (isStReader ? openSystemsForum("w1-d1-st") : openHsDiscussion(baseMod)));
       nextActs.append(bPrev, bNext, bSlide, bCase);
     } else {
       nextCopy.append(
@@ -15827,7 +16063,8 @@
       const copy = make("div", null, "hs-selfquiz-flow-copy");
       const acts = make("div", null, "hs-selfquiz-flow-acts");
 
-      if (selectedMod && /^HS[1-6]$/.test(selectedMod)) {
+      if (selectedMod && /^(HS[1-6]|ST1)$/.test(selectedMod)) {
+        const isStSelected = selectedMod === "ST1";
         const flow = getHsLogicalFlowModel(selectedMod);
         const progTxt =
           flow.quizProg.answered > 0
@@ -15868,9 +16105,13 @@
         bSlide.addEventListener("click", () => openHsLectureSlides(selectedMod));
         acts.appendChild(bSlide);
 
-        const bNext = make("button", `ไปขั้นที่ 5: Case Discussion (${selectedMod}) →`, "btn sm primary");
+        const bNext = make(
+          "button",
+          isStSelected ? `ไปขั้นที่ 5: กรอบคาบเรียน (ST1) →` : `ไปขั้นที่ 5: Case Discussion (${selectedMod}) →`,
+          "btn sm primary"
+        );
         bNext.type = "button";
-        bNext.addEventListener("click", () => openHsDiscussion(selectedMod));
+        bNext.addEventListener("click", () => (isStSelected ? openSystemsForum("w1-d1-st") : openHsDiscussion(selectedMod)));
         acts.appendChild(bNext);
       } else {
         const allProg = countModuleSelfQuizProgress("");
@@ -27262,7 +27503,7 @@
   }
 
   function getHsLectureSession(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     const sessions = (SCHED && SCHED.sessions) || [];
     return (
       sessions.find((s) => String(s.code || "").toUpperCase() === clean) ||
@@ -27272,7 +27513,7 @@
   }
 
   function getHsSlideInfo(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     const sessions = (SCHED && SCHED.sessions) || [];
     const lecSess = sessions.find((s) => String(s.code || "").toUpperCase() === clean) || null;
     const discSess = sessions.find((s) => String(s.hsModule || "").toUpperCase() === clean) || null;
@@ -27364,7 +27605,7 @@
   }
 
   async function removeHsModuleSlide(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     const sessions = (SCHED && SCHED.sessions) || [];
     const lecSess = sessions.find((s) => String(s.code || "").toUpperCase() === clean);
     const discSess = sessions.find((s) => String(s.hsModule || "").toUpperCase() === clean);
@@ -27452,8 +27693,8 @@
     }
     const id = String(session.id || "");
     const code = String(session.code || "");
-    if (id.includes("st")) {
-      return { kind: "hs", targetId: "HS2-CONCISE", conciseId: "HS2-CONCISE", wbId: "", shortLabel: "📘 เอกสารคำสอน (Systems)", fullLabel: "📘 เอกสารระบบสุขภาพ & Systems Thinking" };
+    if (id.includes("st") || code === "ST1") {
+      return { kind: "hs", targetId: "ST1", conciseId: "ST1-CONCISE", wbId: "", shortLabel: "📘 เอกสารคำสอน (ST1)", fullLabel: "📘 เอกสารคำสอน ST1: Systems & Systems Thinking" };
     }
     if (session.category === "EP") {
       return { kind: "manual", targetId: "man-ch-8", shortLabel: "📘 เอกสาร/ขอบเขตเนื้อหา (EP)", fullLabel: "📘 ขอบเขตเนื้อหา EP (Table Spec)" };
@@ -27537,11 +27778,13 @@
       });
       container.appendChild(bSlideStep);
 
-      const bCase = make("button", `⑤ Case Discussion (${mCode})`, "btn sm");
+      const isStSess = mCode === "ST1";
+      const bCase = make("button", isStSess ? `⑤ กรอบคาบเรียน (${mCode})` : `⑤ Case Discussion (${mCode})`, "btn sm");
       bCase.type = "button";
       bCase.addEventListener("click", () => {
         if (closeModalFirst) closeEventModal();
-        openHsDiscussion(mCode);
+        if (isStSess) openSystemsForum("w1-d1-st");
+        else openHsDiscussion(mCode);
       });
       container.appendChild(bCase);
 
@@ -33885,7 +34128,7 @@
 
   /* ---------- Faculty Teacher Guides & Original Links (#panel-faculty-docs) ---------- */
   function resolveFacultyGuideDocIdForModule(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
     const matched = docs.find(
       (d) =>
@@ -33896,7 +34139,7 @@
   }
 
   function openFacultyGuideForHsModule(modCode) {
-    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     state.activeHsModule = clean;
     state.facultySub = "guides";
     state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
@@ -33934,7 +34177,7 @@
     const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
     const curDoc = docs.find((d) => d.id === state.activeFacultyDocId) || docs[0];
     if (curDoc) {
-      const mMatch = String(curDoc.id || curDoc.title || "").match(/^(HS[1-6])/i);
+      const mMatch = String(curDoc.id || curDoc.title || "").match(/^(HS[1-6]|ST1)/i);
       if (mMatch) state.activeHsModule = mMatch[1].toUpperCase();
     }
 
@@ -33944,7 +34187,7 @@
         buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "faculty-docs", {
           showModuleBar: true,
           onSelectModule: (m) => {
-            const clean = m && /^HS[1-6]$/i.test(m) ? m.toUpperCase() : "HS1";
+            const clean = m && /^(HS[1-6]|ST1)$/i.test(m) ? m.toUpperCase() : "HS1";
             state.activeHsModule = clean;
             state.facultySub = "guides";
             state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
