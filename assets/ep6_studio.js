@@ -1,7 +1,10 @@
 /* ==========================================================================
-   RACM 303 — EP6: Measures of Morbidity & Mortality Interactive Lecture Studio
-   Synchronized YouTube Playback + 43 Captured Slides + Verbatim Quotations
-   -> Conceptualized Insights Organized by 5-Stage Logical Flow
+   RACM 303 — EP6: Measures of Morbidity & Mortality Interactive Lecture Studio (v2)
+   - Protected Google Drive Video Stream (View-Only · No Student Download · Zero YouTube)
+   - Full YouTube-Style Player Functions: Live Thai CC, Speed (0.5x–2x), -15s / +15s Skip,
+     Chaptered Scrubber, Fullscreen, and Auto Picture-in-Picture (PiP) on Scroll
+   - 43 Captured Slides + Verbatim Quotations -> Conceptualized 5-Stage Logical Flow
+   - Zero Unwanted Auto-Scroll on Scrubber + Clickable Logical Flow Slide Bridges
    ========================================================================== */
 (function () {
   "use strict";
@@ -9,34 +12,46 @@
   const DATA = window.RACM303_EP6_MORBIDITY;
   if (!DATA) return;
 
-  let ytApiLoaded = false;
-  let ytApiReady = false;
-  const ytReadyCallbacks = [];
+  const STORAGE_DRIVE_KEY = "racm303_ep6_drive_file_id";
+  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  const MIN_SEC = DATA.meta.startSec || 4;
+  const MAX_SEC = DATA.meta.endSec || 3806;
 
-  function ensureYouTubeIframeAPI(cb) {
-    if (window.YT && window.YT.Player) {
-      ytApiReady = true;
-      cb();
-      return;
-    }
-    ytReadyCallbacks.push(cb);
-    if (ytApiLoaded) return;
-    ytApiLoaded = true;
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function () {
-      ytApiReady = true;
-      if (typeof prev === "function") {
-        try { prev(); } catch (_) {}
-      }
-      while (ytReadyCallbacks.length) {
-        const fn = ytReadyCallbacks.shift();
-        try { fn(); } catch (_) {}
-      }
-    };
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    tag.async = true;
-    document.head.appendChild(tag);
+  function isFacultyPortal() {
+    return (
+      window.PORTAL_ROLE === "faculty" ||
+      (document.body && document.body.classList.contains("role-faculty"))
+    );
+  }
+
+  function extractDriveFileId(rawInput) {
+    const s = String(rawInput || "").trim();
+    if (!s) return "";
+    const mFile = s.match(/\/file\/d\/([a-zA-Z0-9_-]{15,})/);
+    if (mFile) return mFile[1];
+    const mId = s.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+    if (mId) return mId[1];
+    if (/^[a-zA-Z0-9_-]{18,}$/.test(s)) return s;
+    return "";
+  }
+
+  function getActiveDriveFileId() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = extractDriveFileId(params.get("ep6DriveId"));
+      if (fromUrl) return fromUrl;
+      const saved = extractDriveFileId(localStorage.getItem(STORAGE_DRIVE_KEY));
+      if (saved) return saved;
+    } catch (_) {}
+    return DATA.meta.driveFileId || "";
+  }
+
+  function buildDrivePreviewUrl(driveId, sec, autoPlay) {
+    const cleanSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const base = `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/preview`;
+    const qp = [`t=${cleanSec}s`, `start=${cleanSec}`];
+    if (autoPlay) qp.push("autoplay=1");
+    return `${base}?${qp.join("&")}`;
   }
 
   function fmtTime(sec) {
@@ -72,27 +87,32 @@
     }
   }
 
-  // Studio singleton state so switching filters preserves position & preferences
-  const studioState = {
-    currentSec: DATA.meta.startSec || 4,
-    activeSlideId: 1,
-    activeStageId: 1,
-    imgQuality: "hd", // 'hd' | 'yt'
-    theaterMode: "split", // 'split' | 'video' | 'slides'
-    atlasView: "flow", // 'flow' | 'matrix'
-    stageFilter: 0, // 0 = all stages, 1..5 = specific stage
-    searchQuery: "",
-    autoScrollCards: false,
-    simPlaying: false,
-    simSpeed: 1,
-    ytError: false,
-    ytPlaying: false
-  };
-
-  let activeInstance = null;
+  // Binary search over DATA.captions = [[startSec, endSec, text], ...]
+  function findCaptionAtTime(sec) {
+    const cues = DATA.captions;
+    if (!Array.isArray(cues) || !cues.length) return "";
+    const t = Number(sec) || 0;
+    let lo = 0;
+    let hi = cues.length - 1;
+    let bestIdx = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (cues[mid][0] <= t) {
+        bestIdx = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    if (bestIdx >= 0) {
+      const [st, en, txt] = cues[bestIdx];
+      if (t >= st && t <= en + 1.2) return txt;
+    }
+    return "";
+  }
 
   function findSlideAtTime(sec) {
-    const t = Math.max(DATA.meta.startSec, Math.min(DATA.meta.endSec, Number(sec) || 4));
+    const t = Math.max(MIN_SEC, Math.min(MAX_SEC, Number(sec) || MIN_SEC));
     const segs = DATA.timelineSegments || [];
     for (let i = 0; i < segs.length; i++) {
       if (t >= segs[i].startSec && t < segs[i].endSec) {
@@ -113,24 +133,53 @@
     return (DATA.stages || []).find((st) => st.id === id) || DATA.stages[0];
   }
 
+  const studioState = {
+    currentSec: MIN_SEC,
+    activeSlideId: 1,
+    activeStageId: 1,
+    imgQuality: "hd", // 'hd' | 'yt'
+    theaterMode: "split", // 'split' | 'video' | 'slides'
+    atlasView: "flow", // 'flow' | 'matrix'
+    stageFilter: 0,
+    searchQuery: "",
+    isPlaying: false,
+    playbackSpeed: 1,
+    ccEnabled: true,
+    ccLarge: false,
+    syncDriveOnSeek: true,
+    isPipActive: false,
+    isPipMinimized: false,
+    manualPipPinned: false,
+    pipDismissedWhileScrolled: false
+  };
+
   function getSlideImg(slide) {
     return studioState.imgQuality === "yt" ? slide.ytImg : slide.hdImg;
   }
 
+  let activeInstance = null;
+
   function destroyActiveTimers() {
     if (!activeInstance) return;
-    if (activeInstance.pollTimer) {
-      clearInterval(activeInstance.pollTimer);
-      activeInstance.pollTimer = null;
+    if (activeInstance.clockTimer) {
+      clearInterval(activeInstance.clockTimer);
+      activeInstance.clockTimer = null;
     }
-    if (activeInstance.simTimer) {
-      clearInterval(activeInstance.simTimer);
-      activeInstance.simTimer = null;
+    if (activeInstance.seekDebounceTimer) {
+      clearTimeout(activeInstance.seekDebounceTimer);
+      activeInstance.seekDebounceTimer = null;
     }
-    if (activeInstance.ytPlayer && typeof activeInstance.ytPlayer.destroy === "function") {
-      try { activeInstance.ytPlayer.destroy(); } catch (_) {}
-      activeInstance.ytPlayer = null;
+    if (activeInstance.flashTimer) {
+      clearTimeout(activeInstance.flashTimer);
+      activeInstance.flashTimer = null;
     }
+    if (activeInstance.cleanupListeners) {
+      try {
+        activeInstance.cleanupListeners();
+      } catch (_) {}
+      activeInstance.cleanupListeners = null;
+    }
+    activeInstance = null;
   }
 
   function renderEp6MorbidityStudio(container, opts) {
@@ -139,39 +188,73 @@
     container.replaceChildren();
 
     const isCompactEmbed = Boolean(opts && opts.compactHeader);
+    const facultyMode = isFacultyPortal();
+    let currentDriveId = getActiveDriveFileId();
+
     const root = document.createElement("section");
     root.className = "ep6-studio-root";
     root.id = "ep6MorbidityStudioRoot";
+    root.tabIndex = -1;
 
     const instance = {
       root,
-      ytPlayer: null,
-      ytReady: false,
-      pollTimer: null,
-      simTimer: null
+      clockTimer: null,
+      lastTickMs: 0,
+      seekDebounceTimer: null,
+      flashTimer: null,
+      dockedMeasuredHeight: 0,
+      cleanupListeners: null
     };
     activeInstance = instance;
 
-    // 1. Header Banner
+    // 1. Header Banner (Zero YouTube links — Protected Course Stream + Slide PDF)
     const header = document.createElement("div");
     header.className = "ep6-studio-header";
     header.innerHTML = `
       <div class="ep6-head-main">
         <div class="ep6-head-eyebrow">
           <span class="ep6-badge-code">EP6 · สอบ 15%</span>
-          <span class="ep6-badge-meta">43 Captured Slides · Verbatim → Conceptualized Logical Flow</span>
+          <span class="ep6-badge-meta">🔒 Google Drive Protected Stream (ห้ามดาวน์โหลด)</span>
+          <span class="ep6-badge-meta">43 Captured Slides · Verbatim → Conceptualized</span>
           <span class="ep6-badge-meta">⏱ 00:04 – 62:00</span>
         </div>
         <h3 class="ep6-head-title">Measures of Morbidity &amp; Mortality · การวัดการป่วย การตาย ภาระโรค (DALY) และการปรับมาตรฐานอัตรา</h3>
-        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายควบคู่กับการติดตามประเด็นสังเคราะห์เชิงแนวคิด (Conceptualized Insights) และคำพูดต้นฉบับ (Verbatim Quotations) ที่อัปเดตอัตโนมัติตาม Timeline</p>
+        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายจาก Google Drive ผ่านตัวเล่นบนเว็บไซต์โดยตรง (พร้อมคำบรรยายไทย CC, ปรับความเร็ว 0.5x–2x, ถอยหลัง/เดินหน้าครั้งละ 15 วินาที และโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านสไลด์ด้านล่าง)</p>
       </div>
       <div class="ep6-head-actions">
-        <a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf">📥 ดาวน์โหลดสไลด์ (.PDF)</a>
-        <a class="btn sm" id="ep6ExternalYtLink" href="https://www.youtube.com/watch?v=${esc(DATA.meta.youtubeId)}&t=${Math.floor(studioState.currentSec)}s" target="_blank" rel="noopener">▶ เปิดบน YouTube ↗</a>
+        <a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf">📥 ดาวน์โหลดสไลด์ประกอบ (.PDF)</a>
+        ${
+          facultyMode
+            ? `<button type="button" class="btn sm" id="ep6ToggleFacultyDriveBtn">🔐 ตั้งค่าไฟล์วิดีโอ Drive (อาจารย์)</button>`
+            : `<span class="ep6-protected-pill" title="วิดีโอสงวนสิทธิ์เฉพาะการเรียนในรายวิชา RACM 303 ห้ามดาวน์โหลดหรือเผยแพร่ซ้ำ">🔒 เล่นผ่านเว็บเท่านั้น (No Download)</span>`
+        }
       </div>
     `;
     if (!isCompactEmbed) {
       root.appendChild(header);
+    }
+
+    // Faculty-Only Protected Drive Configuration Drawer
+    if (facultyMode) {
+      const facBar = document.createElement("div");
+      facBar.className = "ep6-faculty-drive-bar";
+      facBar.id = "ep6FacultyDriveBar";
+      facBar.hidden = true;
+      facBar.innerHTML = `
+        <div class="ep6-fdb-head">
+          <strong>🔐 จัดการไฟล์วิดีโอใน Google Drive แบบป้องกันนักศึกษาดาวน์โหลด (เฉพาะอาจารย์)</strong>
+          <a class="btn sm" href="https://drive.google.com/drive/folders/${esc(DATA.meta.driveProtectedFolderId)}" target="_blank" rel="noopener">📂 เปิดโฟลเดอร์ Drive ที่ป้องกันสิทธิ์ ↗</a>
+        </div>
+        <p class="ep6-fdb-note">
+          วิธีอัปเดตไฟล์เสียงบรรยายเต็มทับไฟล์เดิมโดยไม่ต้องแก้โค้ด: เปิดโฟลเดอร์ด้านบน → คลิกขวาที่ <code>EP6_Measures_of_Morbidity_and_Mortality.mp4</code> → <strong>จัดการเวอร์ชัน (Manage versions) → อัปโหลดเวอร์ชันใหม่</strong> และในเมนู <strong>แชร์ (Share) → ⚙️</strong> ให้เอาเครื่องหมายถูกออกจาก <em>“ผู้มีสิทธิ์อ่านและผู้แสดงความคิดเห็นจะเห็นตัวเลือกในการดาวน์โหลด พิมพ์ และคัดลอก”</em> หรือวางลิงก์ไฟล์วิดีโอ Drive อื่นเพื่อทดสอบทันทีด้านล่าง:
+        </p>
+        <div class="ep6-fdb-form">
+          <input type="text" id="ep6FacultyDriveInput" class="ep6-search-input" value="${esc(currentDriveId)}" placeholder="วางลิงก์ Google Drive (https://drive.google.com/file/d/.../view) หรือ File ID">
+          <button type="button" class="btn sm primary" id="ep6SaveDriveIdBtn">บันทึก &amp; โหลดวิดีโอใหม่</button>
+          <button type="button" class="btn sm" id="ep6ResetDriveIdBtn">คืนค่าเริ่มต้น</button>
+        </div>
+      `;
+      root.appendChild(facBar);
     }
 
     // 2. 5-Stage Logical Flow Stepper Ribbon
@@ -200,7 +283,7 @@
     `;
     root.appendChild(stepperWrap);
 
-    // 3. Synchronized Theater (Left: Video + Scrubber + Captured Slide | Right: Live Conceptualized Insight + Verbatim)
+    // 3. Synchronized Theater (Left: Protected Drive Player + YouTube-Style Controls + Captured Slide | Right: Live Conceptualized Insight + Verbatim)
     const theater = document.createElement("div");
     theater.className = `ep6-theater mode-${studioState.theaterMode}`;
     theater.id = "ep6TheaterGrid";
@@ -209,34 +292,99 @@
         <div class="ep6-toolbar">
           <div class="ep6-mode-group" role="group" aria-label="รูปแบบการแสดงผลวิดีโอและสไลด์">
             <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "split" ? "is-active" : ""}" data-tmode="split">🎬 วิดีโอ + สไลด์คู่ขนาน</button>
-            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "video" ? "is-active" : ""}" data-tmode="video">📺 เน้นวิดีโอ</button>
-            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "slides" ? "is-active" : ""}" data-tmode="slides">🖼️ เน้นสไลด์ + Timeline จำลอง</button>
+            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "video" ? "is-active" : ""}" data-tmode="video">📺 เน้นวิดีโอใหญ่</button>
+            <button type="button" class="ep6-tool-btn ${studioState.theaterMode === "slides" ? "is-active" : ""}" data-tmode="slides">🖼️ เน้นสไลด์</button>
           </div>
           <div class="ep6-mode-group" role="group" aria-label="ความละเอียดภาพสไลด์">
             <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "hd" ? "is-active" : ""}" data-imgq="hd" title="สไลด์คมชัดสูงสำหรับอ่านสูตรและตาราง">✨ สไลด์คมชัด HD</button>
-            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "yt" ? "is-active" : ""}" data-imgq="yt" title="ภาพ Capture ต้นฉบับจากวิดีโอ YouTube">📸 ภาพจริงจากวิดีโอ</button>
+            <button type="button" class="ep6-tool-btn ${studioState.imgQuality === "yt" ? "is-active" : ""}" data-imgq="yt" title="ภาพ Capture ต้นฉบับขณะบรรยาย">📸 ภาพจริงขณะบรรยาย</button>
           </div>
         </div>
 
-        <div class="ep6-player-stage">
-          <div class="ep6-yt-box" id="ep6YtBox">
-            <div class="ep6-slide-frame-head">
-              <span class="ep6-slide-pill">🎥 วิดีโอบรรยายสด (Synced Timeline)</span>
-              <a class="ep6-zoom-btn" id="ep6MiniYtLink" href="https://www.youtube.com/watch?v=${esc(DATA.meta.youtubeId)}&t=${Math.floor(studioState.currentSec)}s" target="_blank" rel="noopener" style="text-decoration:none">YouTube ↗</a>
+        <div class="ep6-player-stage" id="ep6PlayerStage">
+          <!-- Video Slot stays in place; #ep6VideoDock switches between static & fixed PiP without DOM reparenting (zero iframe reload!) -->
+          <div class="ep6-video-slot" id="ep6VideoSlot">
+            <div class="ep6-pip-placeholder" id="ep6PipPlaceholder" hidden>
+              <div class="ep6-pip-ph-inner">
+                <span class="ep6-pip-ph-icon">⧉</span>
+                <div>
+                  <strong>วิดีโอกำลังแสดงแบบหน้าต่างลอย (Picture-in-Picture) มุมขวาล่าง</strong>
+                  <p>คุณสามารถเลื่อนอ่านแผนผังตรรกะทั้ง 43 สไลด์ด้านล่างควบคู่กับการดูวิดีโอได้ทันที</p>
+                </div>
+                <button type="button" class="btn sm" id="ep6ReturnFromPipBtn">ดึงกลับช่องหลัก</button>
+              </div>
             </div>
-            <div class="ep6-yt-aspect">
-              <iframe
-                id="ep6YtIframeEl"
-                src="https://www.youtube.com/embed/${esc(DATA.meta.youtubeId)}?enablejsapi=1&amp;start=${Math.floor(studioState.currentSec || 4)}&amp;rel=0&amp;modestbranding=1&amp;playsinline=1"
-                title="Measures of Morbidity &amp; Mortality — RACM 303 Epidemiology"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="ep6-yt-fallback" id="ep6YtFallbackBanner" hidden>
-              <span>โหมดออฟไลน์หรือเครือข่ายบล็อก YouTube Embed — คุณยังสามารถกดปุ่ม <strong>“▶ เล่น Timeline จำลอง”</strong> ด้านล่างเพื่อเลื่อนดูสไลด์และประเด็น Conceptualized ตามเวลาจริง หรือ</span>
-              <a id="ep6FallbackYtBtn" href="https://www.youtube.com/watch?v=${esc(DATA.meta.youtubeId)}&t=4s" target="_blank" rel="noopener">เปิดดูวิดีโอบน YouTube โดยตรง ↗</a>
+
+            <div class="ep6-video-dock" id="ep6VideoDock">
+              <div class="ep6-vdock-head">
+                <div class="ep6-vdock-title-wrap">
+                  <span class="ep6-live-dot" id="ep6DockDot"></span>
+                  <span class="ep6-slide-pill" id="ep6DockHeaderLabel">🎥 Google Drive Stream · Slide 1/43</span>
+                </div>
+                <div class="ep6-vdock-actions">
+                  <button type="button" class="ep6-dock-icon-btn" id="ep6PinPipBtn" title="เปิด/ปิด โหมดหน้าต่างลอย (Picture-in-Picture)">⧉ PiP</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipMinBtn" title="ย่อ/ขยาย หน้าต่าง PiP">—</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipTopBtn" title="เลื่อนกลับขึ้นด้านบนสุด">⬆ บนสุด</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipCloseBtn" title="ปิดหน้าต่างลอย PiP ชั่วคราว">✕</button>
+                </div>
+              </div>
+
+              <div class="ep6-drive-aspect" id="ep6DriveAspect">
+                <iframe
+                  id="ep6DriveIframeEl"
+                  src="${esc(buildDrivePreviewUrl(currentDriveId, studioState.currentSec, false))}"
+                  title="Measures of Morbidity &amp; Mortality — RACM 303 Protected Drive Video"
+                  allow="autoplay; fullscreen"
+                  allowfullscreen
+                ></iframe>
+
+                <!-- Shield over Google Drive top-right pop-out icon so students cannot pop out to Drive or download -->
+                <div class="ep6-drive-popout-shield" title="สงวนสิทธิ์การรับชมเฉพาะบนเว็บไซต์รายวิชา RACM 303 (ห้ามดาวน์โหลด)">
+                  <span>🔒 RACM 303</span>
+                </div>
+
+                <!-- YouTube-Style -15s / +15s Skip Visual Feedback Ripple -->
+                <div class="ep6-skip-flash" id="ep6SkipFlash" hidden></div>
+
+                <!-- YouTube-Style Live Thai Closed Captions (CC) Overlay -->
+                <div class="ep6-cc-overlay ${studioState.ccLarge ? "is-large" : ""}" id="ep6CcOverlay" ${studioState.ccEnabled ? "" : "hidden"}>
+                  <span class="ep6-cc-text" id="ep6CcText">กด ▶ เล่น เพื่อซิงก์คำบรรยายภาษาไทย (CC) และสไลด์ตามเวลาจริง</span>
+                </div>
+              </div>
+
+              <!-- Compact YouTube-Style Transport Bar attached directly to Video Dock (works both docked & in Floating PiP!) -->
+              <div class="ep6-ytstyle-bar" id="ep6YtStyleBar">
+                <div class="ep6-ytb-left">
+                  <button type="button" class="ep6-ytb-btn is-play" id="ep6PlayPauseBtn" title="เล่น/หยุดซิงก์วิดีโอและคำบรรยาย (Space / K)">▶ เล่น</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6Rew15Btn" title="ถอยหลัง 15 วินาที (J หรือ ←)">↺ -15s</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6Fwd15Btn" title="เดินหน้า 15 วินาที (L หรือ →)">+15s ↻</button>
+                  <span class="ep6-ytb-time"><strong id="ep6DockTimeTxt">00:04</strong> / 62:00</span>
+                </div>
+                <div class="ep6-ytb-right">
+                  <button type="button" class="ep6-ytb-btn is-cc ${studioState.ccEnabled ? "is-on" : ""}" id="ep6CcToggleBtn" aria-pressed="${studioState.ccEnabled}" title="เปิด/ปิด คำบรรยายภาษาไทย (CC · กด C)">CC</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6CcSizeBtn" title="สลับขนาดตัวอักษรคำบรรยาย CC (ปกติ / ใหญ่)">A+</button>
+                  <div class="ep6-speed-wrap">
+                    <select id="ep6SpeedSelect" class="ep6-speed-select" aria-label="ปรับความเร็วการเล่น (Playback Speed)" title="ปรับความเร็วการซิงก์เวลาและคำบรรยาย (0.5x – 2x)">
+                      ${SPEEDS.map(
+                        (sp) => `<option value="${sp}" ${studioState.playbackSpeed === sp ? "selected" : ""}>${sp}x</option>`
+                      ).join("")}
+                    </select>
+                  </div>
+                  <button type="button" class="ep6-ytb-btn" id="ep6FullscreenBtn" title="ขยายเต็มจอพร้อมคำบรรยาย CC (F)">⛶</button>
+                </div>
+              </div>
+
+              <!-- Live Conceptualized Mini-Caption shown when floating in PiP -->
+              <div class="ep6-pip-caption" id="ep6PipCaption">
+                <div class="ep6-pip-cap-top">
+                  <span class="ep6-pip-cap-slide" id="ep6PipSlideTxt">Slide 1/43</span>
+                  <div class="ep6-pip-cap-nav">
+                    <button type="button" class="ep6-pip-mini-nav" id="ep6PipPrevSlideBtn" title="สไลด์ก่อนหน้า">⏮ สไลด์ก่อน</button>
+                    <button type="button" class="ep6-pip-mini-nav" id="ep6PipNextSlideBtn" title="สไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
+                  </div>
+                </div>
+                <div class="ep6-pip-cap-title" id="ep6PipConceptTxt"></div>
+              </div>
             </div>
           </div>
 
@@ -251,14 +399,16 @@
           </div>
         </div>
 
-        <!-- Custom Interactive Timeline Scrubber with 5-Stage Color Segments & Slide Ticks -->
-        <div class="ep6-scrubber-card">
+        <!-- Custom Interactive Chaptered Timeline Scrubber (ZERO unwanted auto-scroll down!) -->
+        <div class="ep6-scrubber-card" id="ep6ScrubberCard">
           <div class="ep6-scrubber-controls">
             <div class="ep6-transport-btns">
-              <button type="button" class="ep6-ctrl-btn" id="ep6PrevSlideBtn" title="สไลด์ก่อนหน้า">⏮ สไลด์ก่อน</button>
-              <button type="button" class="ep6-ctrl-btn is-primary" id="ep6PlayPauseBtn">▶ เล่น / หยุด</button>
-              <button type="button" class="ep6-ctrl-btn" id="ep6NextSlideBtn" title="สไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
-              <button type="button" class="ep6-ctrl-btn" id="ep6SimToggleBtn" title="เลื่อน Timeline อัตโนมัติแม้ไม่ได้เล่น YouTube">⏱ จำลองเลื่อนเวลา (1x)</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6PrevSlideBtn" title="ข้ามไปสไลด์ก่อนหน้า">⏮ สไลด์ก่อน</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6ScrubRew15Btn" title="ถอยหลัง 15 วินาที">↺ -15 วิ</button>
+              <button type="button" class="ep6-ctrl-btn is-primary" id="ep6MainPlayBtn">▶ เล่น / หยุด</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6ScrubFwd15Btn" title="เดินหน้า 15 วินาที">+15 วิ ↻</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6NextSlideBtn" title="ข้ามไปสไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6ForceSyncDriveBtn" title="ซิงก์ตัวเล่นวิดีโอ Google Drive ให้กระโดดมายังเวลาปัจจุบันบนแถบ Timeline">🎯 ซิงก์วิดีโอมาเวลานี้</button>
             </div>
             <div class="ep6-time-readout">
               <strong id="ep6CurTimeTxt">00:04</strong>
@@ -266,12 +416,12 @@
             </div>
           </div>
 
-          <div class="ep6-track-outer" id="ep6TimelineTrack" role="slider" aria-label="แถบเวลาคาบเรียน Measures of Morbidity & Mortality" aria-valuemin="4" aria-valuemax="3806" aria-valuenow="4" tabindex="0">
+          <div class="ep6-track-outer" id="ep6TimelineTrack" role="slider" aria-label="แถบเวลาคาบเรียน Measures of Morbidity & Mortality" aria-valuemin="${MIN_SEC}" aria-valuemax="${MAX_SEC}" aria-valuenow="${MIN_SEC}" tabindex="0">
             <div class="ep6-track-stages">
               ${DATA.stages
                 .map((st) => {
-                  const leftPct = ((st.startSec - 4) / (3806 - 4)) * 100;
-                  const widthPct = ((st.endSec - st.startSec) / (3806 - 4)) * 100;
+                  const leftPct = ((st.startSec - MIN_SEC) / (MAX_SEC - MIN_SEC)) * 100;
+                  const widthPct = ((st.endSec - st.startSec) / (MAX_SEC - MIN_SEC)) * 100;
                   return `<div class="ep6-track-seg stage-${st.id}" style="left:${leftPct.toFixed(2)}%;width:${widthPct.toFixed(2)}%" title="${esc(st.code)}: ${esc(st.title)}"></div>`;
                 })
                 .join("")}
@@ -279,7 +429,7 @@
             <div class="ep6-track-ticks">
               ${DATA.slides
                 .map((sl) => {
-                  const pct = ((sl.startSec - 4) / (3806 - 4)) * 100;
+                  const pct = ((sl.startSec - MIN_SEC) / (MAX_SEC - MIN_SEC)) * 100;
                   return `<span class="ep6-tick" style="left:${pct.toFixed(2)}%" data-tick-slide="${sl.id}"></span>`;
                 })
                 .join("")}
@@ -308,10 +458,9 @@
             <span id="ep6LiveStageBadge" class="ep6-live-stage-pill">Stage 1/5</span>
             <span id="ep6LiveTimeRange" class="ep6-live-range-txt">00:04 – 04:40</span>
           </div>
-          <label class="ep6-autoscroll-toggle" title="เลื่อนการ์ดด้านล่างตามเวลาวิดีโออัตโนมัติ">
-            <input type="checkbox" id="ep6AutoScrollChk" ${studioState.autoScrollCards ? "checked" : ""}>
-            <span>เลื่อนรายการตามอัตโนมัติ</span>
-          </label>
+          <button type="button" class="ep6-jump-atlas-btn" id="ep6JumpToActiveCardBtn" title="คลิกเมื่อต้องการเลื่อนลงไปดูสไลด์นี้ในตาราง 43 สไลด์ด้านล่าง">
+            ⬇ ดูสไลด์นี้ในผัง 43 สไลด์
+          </button>
         </div>
 
         <div class="ep6-live-card" id="ep6LiveConceptCard"></div>
@@ -319,9 +468,19 @@
     `;
     root.appendChild(theater);
 
+    // Floating Restore Pill when PiP was manually dismissed while scrolled down
+    const pipRestorePill = document.createElement("button");
+    pipRestorePill.type = "button";
+    pipRestorePill.className = "ep6-pip-restore-pill";
+    pipRestorePill.id = "ep6PipRestorePill";
+    pipRestorePill.hidden = true;
+    pipRestorePill.innerHTML = `🎥 เปิดวิดีโอหน้าต่างลอย (PiP)`;
+    root.appendChild(pipRestorePill);
+
     // 4. Complete 43-Slide Logical Flow Atlas & Rapid Review Matrix
     const atlas = document.createElement("div");
     atlas.className = "ep6-atlas-wrap";
+    atlas.id = "ep6AtlasWrap";
     atlas.innerHTML = `
       <div class="ep6-atlas-bar">
         <div class="ep6-atlas-tabs" role="tablist">
@@ -344,9 +503,107 @@
 
     container.appendChild(root);
 
-    // Render sub-sections & bind events
+    // Block casual contextmenu on the Drive aspect wrapper
+    root.querySelector("#ep6DriveAspect")?.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+
+    function showSkipFlash(deltaSec) {
+      const el = root.querySelector("#ep6SkipFlash");
+      if (!el) return;
+      el.textContent = deltaSec < 0 ? `« ถอยหลัง ${Math.abs(deltaSec)} วินาที` : `เดินหน้า +${deltaSec} วินาที »`;
+      el.className = `ep6-skip-flash ${deltaSec < 0 ? "is-left" : "is-right"}`;
+      el.hidden = false;
+      if (instance.flashTimer) clearTimeout(instance.flashTimer);
+      instance.flashTimer = setTimeout(() => {
+        el.hidden = true;
+      }, 750);
+    }
+
+    function syncDriveIframeTo(sec, autoPlay, immediate) {
+      const iframe = root.querySelector("#ep6DriveIframeEl");
+      if (!iframe || !currentDriveId) return;
+      const applySrc = () => {
+        const nextUrl = buildDrivePreviewUrl(currentDriveId, sec, autoPlay);
+        if (iframe.getAttribute("src") !== nextUrl) {
+          iframe.setAttribute("src", nextUrl);
+        }
+      };
+      if (instance.seekDebounceTimer) {
+        clearTimeout(instance.seekDebounceTimer);
+        instance.seekDebounceTimer = null;
+      }
+      if (immediate) {
+        applySrc();
+      } else {
+        instance.seekDebounceTimer = setTimeout(applySrc, 360);
+      }
+    }
+
+    function stopClock() {
+      studioState.isPlaying = false;
+      if (instance.clockTimer) {
+        clearInterval(instance.clockTimer);
+        instance.clockTimer = null;
+      }
+      syncTransportButtons();
+    }
+
+    function startClock(syncDriveNow) {
+      if (instance.clockTimer) clearInterval(instance.clockTimer);
+      studioState.isPlaying = true;
+      instance.lastTickMs = performance.now();
+      if (syncDriveNow) {
+        syncDriveIframeTo(studioState.currentSec, true, true);
+      }
+      instance.clockTimer = setInterval(() => {
+        const now = performance.now();
+        const dtSec = Math.max(0, (now - instance.lastTickMs) / 1000);
+        instance.lastTickMs = now;
+        const next = studioState.currentSec + dtSec * studioState.playbackSpeed;
+        if (next >= MAX_SEC - 0.5) {
+          updateLiveUI(MAX_SEC - 1);
+          stopClock();
+          return;
+        }
+        updateLiveUI(next);
+      }, 250);
+      syncTransportButtons();
+    }
+
+    function syncTransportButtons() {
+      const p1 = root.querySelector("#ep6PlayPauseBtn");
+      const p2 = root.querySelector("#ep6MainPlayBtn");
+      const dot1 = root.querySelector("#ep6LiveDot");
+      const dot2 = root.querySelector("#ep6DockDot");
+      const ccBtn = root.querySelector("#ep6CcToggleBtn");
+      const ccBox = root.querySelector("#ep6CcOverlay");
+      const ccSizeBtn = root.querySelector("#ep6CcSizeBtn");
+      const speedSel = root.querySelector("#ep6SpeedSelect");
+
+      if (p1) p1.textContent = studioState.isPlaying ? "⏸ หยุด" : "▶ เล่น";
+      if (p2) p2.textContent = studioState.isPlaying ? "⏸ หยุดชั่วคราว" : "▶ เล่นวิดีโอ";
+      if (dot1) dot1.classList.toggle("is-playing", studioState.isPlaying);
+      if (dot2) dot2.classList.toggle("is-playing", studioState.isPlaying);
+      if (ccBtn) {
+        ccBtn.classList.toggle("is-on", studioState.ccEnabled);
+        ccBtn.setAttribute("aria-pressed", String(studioState.ccEnabled));
+      }
+      if (ccBox) {
+        ccBox.hidden = !studioState.ccEnabled;
+        ccBox.classList.toggle("is-large", studioState.ccLarge);
+      }
+      if (ccSizeBtn) {
+        ccSizeBtn.classList.toggle("is-on", studioState.ccLarge);
+      }
+      if (speedSel && String(speedSel.value) !== String(studioState.playbackSpeed)) {
+        speedSel.value = String(studioState.playbackSpeed);
+      }
+    }
+
+    // Core UI update — NEVER triggers window scroll or card.scrollIntoView!
     function updateLiveUI(sec, optsUpdate) {
-      const clamped = Math.max(4, Math.min(3806, Number(sec) || 4));
+      const clamped = Math.max(MIN_SEC, Math.min(MAX_SEC, Number(sec) || MIN_SEC));
       studioState.currentSec = clamped;
       const slideId = findSlideAtTime(clamped);
       const slide = getSlideById(slideId);
@@ -355,37 +612,60 @@
       studioState.activeSlideId = slide.id;
       studioState.activeStageId = stage.id;
 
-      // Update scrubber & time readout
-      const pct = ((clamped - 4) / (3806 - 4)) * 100;
+      // 1. Update Scrubber & Time Readouts
+      const pct = ((clamped - MIN_SEC) / (MAX_SEC - MIN_SEC)) * 100;
       const progEl = root.querySelector("#ep6TrackProgress");
       const headEl = root.querySelector("#ep6TrackPlayhead");
       const curTxt = root.querySelector("#ep6CurTimeTxt");
+      const dockTxt = root.querySelector("#ep6DockTimeTxt");
       const trackEl = root.querySelector("#ep6TimelineTrack");
+      const fmt = fmtTime(clamped);
+
       if (progEl) progEl.style.width = `${pct.toFixed(2)}%`;
       if (headEl) headEl.style.left = `${pct.toFixed(2)}%`;
-      if (curTxt) curTxt.textContent = fmtTime(clamped);
+      if (curTxt) curTxt.textContent = fmt;
+      if (dockTxt) dockTxt.textContent = fmt;
       if (trackEl) trackEl.setAttribute("aria-valuenow", String(Math.floor(clamped)));
 
-      const extLink = root.querySelector("#ep6ExternalYtLink");
-      if (extLink) {
-        extLink.href = `https://www.youtube.com/watch?v=${DATA.meta.youtubeId}&t=${Math.floor(clamped)}s`;
-      }
-      const miniLink = root.querySelector("#ep6MiniYtLink");
-      if (miniLink) {
-        miniLink.href = `https://www.youtube.com/watch?v=${DATA.meta.youtubeId}&t=${Math.floor(clamped)}s`;
-      }
-      const fbLink = root.querySelector("#ep6FallbackYtBtn");
-      if (fbLink) {
-        fbLink.href = `https://www.youtube.com/watch?v=${DATA.meta.youtubeId}&t=${Math.floor(clamped)}s`;
+      // 2. Update Live Thai Closed Captions (CC)
+      const ccTxtEl = root.querySelector("#ep6CcText");
+      if (ccTxtEl) {
+        const cue = findCaptionAtTime(clamped);
+        if (cue) {
+          ccTxtEl.textContent = cue;
+          ccTxtEl.parentElement?.classList.remove("is-idle");
+        } else if (!studioState.isPlaying && clamped <= MIN_SEC + 1) {
+          ccTxtEl.textContent = "คำบรรยายไทย (CC) พร้อมแสดงผลตามเวลาการบรรยายของ ศ. นพ.วิชัย เอกพลากร";
+          ccTxtEl.parentElement?.classList.add("is-idle");
+        } else {
+          ccTxtEl.textContent = `Slide ${slide.id}/43 · ${slide.title}`;
+          ccTxtEl.parentElement?.classList.add("is-idle");
+        }
       }
 
-      // Highlight active Stage in Stepper
+      // 3. Update Dock & Floating PiP Labels
+      const dockLabel = root.querySelector("#ep6DockHeaderLabel");
+      if (dockLabel) {
+        dockLabel.textContent = studioState.isPipActive
+          ? `🎥 PiP · Slide ${slide.id}/43 (${fmt})`
+          : `🎥 วิดีโอบรรยาย (Drive Protected) · Slide ${slide.id}/43`;
+      }
+      const pipSlideTxt = root.querySelector("#ep6PipSlideTxt");
+      if (pipSlideTxt) {
+        pipSlideTxt.textContent = `${stage.code} · Slide ${slide.id}/43 (${fmt})`;
+      }
+      const pipConceptTxt = root.querySelector("#ep6PipConceptTxt");
+      if (pipConceptTxt) {
+        pipConceptTxt.textContent = `${slide.title} — ${slide.conceptThesis}`;
+      }
+
+      // 4. Highlight active Stage in Stepper & Legend
       root.querySelectorAll("[data-stage-jump]").forEach((btn) => {
         const sid = Number(btn.getAttribute("data-stage-jump"));
         btn.classList.toggle("is-active", sid === stage.id);
       });
 
-      // Update Synchronized Slide Image
+      // 5. Update Synchronized Slide Image
       const syncImg = root.querySelector("#ep6SyncSlideImg");
       const syncBadge = root.querySelector("#ep6SyncSlideBadge");
       if (syncImg) {
@@ -396,10 +676,10 @@
         syncImg.alt = `Slide ${slide.id}: ${slide.title}`;
       }
       if (syncBadge) {
-        syncBadge.textContent = `Slide ${slide.id} / 43 · หน้าสไลด์ ${slide.deckSlideNo} (${studioState.imgQuality === "hd" ? "คมชัด HD" : "ภาพจากวิดีโอ"})`;
+        syncBadge.textContent = `Slide ${slide.id} / 43 · หน้าสไลด์ ${slide.deckSlideNo} (${studioState.imgQuality === "hd" ? "คมชัด HD" : "ภาพขณะบรรยาย"})`;
       }
 
-      // Update Right-Column Live Conceptualized Card
+      // 6. Update Right-Column Live Conceptualized Card (with Clickable Logical Flow Slide Jump Buttons!)
       const stagePill = root.querySelector("#ep6LiveStageBadge");
       const rangeTxt = root.querySelector("#ep6LiveTimeRange");
       if (stagePill) {
@@ -410,7 +690,6 @@
         rangeTxt.textContent = `Slide ${slide.id}/43 · ${slide.timeLabel}`;
       }
 
-      // Determine active verbatim quote within this slide
       const quotes = slide.verbatimQuotes || [];
       let activeQuoteIdx = 0;
       for (let i = 0; i < quotes.length; i++) {
@@ -420,10 +699,43 @@
       }
 
       const liveCard = root.querySelector("#ep6LiveConceptCard");
-      if (liveCard && (slideChanged || optsUpdate?.forceCard || liveCard.dataset.activeQuote !== String(activeQuoteIdx))) {
+      if (
+        liveCard &&
+        (slideChanged || optsUpdate?.forceCard || liveCard.dataset.activeQuote !== String(activeQuoteIdx))
+      ) {
         liveCard.dataset.activeQuote = String(activeQuoteIdx);
         const prevSlide = slide.id > 1 ? getSlideById(slide.id - 1) : null;
         const nextSlide = slide.id < DATA.slides.length ? getSlideById(slide.id + 1) : null;
+
+        const prevBridgeHtml = prevSlide
+          ? `<button type="button" class="ep6-bridge-step is-prev is-clickable" data-jump-slide="${prevSlide.id}" title="คลิกเพื่อไปยัง Slide ${prevSlide.id}: ${esc(prevSlide.title)}">
+               <div class="ep6-bridge-head">
+                 <span class="ep6-bridge-lbl">← รับช่วงจาก Slide ${prevSlide.id}</span>
+                 <span class="ep6-bridge-go-pill">ไปยัง Slide ${prevSlide.id} (${fmtTime(prevSlide.startSec)})</span>
+               </div>
+               <p>${esc(slide.logicalFlow?.fromPrev || "")}</p>
+             </button>`
+          : `<div class="ep6-bridge-step is-prev">
+               <div class="ep6-bridge-head">
+                 <span class="ep6-bridge-lbl">จุดตั้งต้นคาบเรียน (Slide 1)</span>
+               </div>
+               <p>${esc(slide.logicalFlow?.fromPrev || "")}</p>
+             </div>`;
+
+        const nextBridgeHtml = nextSlide
+          ? `<button type="button" class="ep6-bridge-step is-next is-clickable" data-jump-slide="${nextSlide.id}" title="คลิกเพื่อไปยัง Slide ${nextSlide.id}: ${esc(nextSlide.title)}">
+               <div class="ep6-bridge-head">
+                 <span class="ep6-bridge-lbl">ส่งต่อไปยัง Slide ${nextSlide.id} →</span>
+                 <span class="ep6-bridge-go-pill">ไปยัง Slide ${nextSlide.id} (${fmtTime(nextSlide.startSec)}) →</span>
+               </div>
+               <p>${esc(slide.logicalFlow?.toNext || "")}</p>
+             </button>`
+          : `<div class="ep6-bridge-step is-next">
+               <div class="ep6-bridge-head">
+                 <span class="ep6-bridge-lbl">เชื่อมต่อคาบถัดไป (EP7 Health Survey)</span>
+               </div>
+               <p>${esc(slide.logicalFlow?.toNext || "")}</p>
+             </div>`;
 
         liveCard.innerHTML = `
           <div class="ep6-lc-head">
@@ -443,7 +755,7 @@
           </div>
 
           <div class="ep6-lc-quotes-box">
-            <div class="ep6-lc-sec-tag">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ (Verbatim Quotation · คลิกเวลาเพื่อฟังเสียงช่วงนั้น)</div>
+            <div class="ep6-lc-sec-tag">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ (Verbatim Quotation · คลิกเวลาเพื่อซิงก์เสียงช่วงนั้น)</div>
             <div class="ep6-lc-quotes-list">
               ${quotes
                 .map(
@@ -459,16 +771,10 @@
           </div>
 
           <div class="ep6-lc-flow-bridge">
-            <div class="ep6-lc-sec-tag">🧭 การเชื่อมโยงตาม Logical Flow</div>
+            <div class="ep6-lc-sec-tag">🧭 การเชื่อมโยงตาม Logical Flow (คลิกปุ่มเพื่อข้ามไปยังสไลด์ก่อนหน้า / ถัดไป)</div>
             <div class="ep6-bridge-grid">
-              <div class="ep6-bridge-step is-prev">
-                <span class="ep6-bridge-lbl">${prevSlide ? `← รับช่วงจาก Slide ${prevSlide.id}` : "จุดตั้งต้นคาบเรียน"}</span>
-                <p>${esc(slide.logicalFlow?.fromPrev || "")}</p>
-              </div>
-              <div class="ep6-bridge-step is-next">
-                <span class="ep6-bridge-lbl">${nextSlide ? `ส่งต่อไปยัง Slide ${nextSlide.id} →` : "เชื่อมต่อคาบถัดไป (EP7)"}</span>
-                <p>${esc(slide.logicalFlow?.toNext || "")}</p>
-              </div>
+              ${prevBridgeHtml}
+              ${nextBridgeHtml}
             </div>
           </div>
         `;
@@ -477,21 +783,137 @@
           el.addEventListener("click", (ev) => {
             ev.stopPropagation();
             const target = Number(el.getAttribute("data-seek-sec")) || slide.startSec;
-            seekToSecond(target, true);
+            seekToSecond(target, { syncDrive: true, autoPlay: true });
+          });
+        });
+
+        liveCard.querySelectorAll("[data-jump-slide]").forEach((btn) => {
+          btn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const targetId = Number(btn.getAttribute("data-jump-slide"));
+            if (targetId) {
+              jumpToSlide(targetId, {
+                syncDrive: true,
+                autoPlay: studioState.isPlaying
+              });
+            }
           });
         });
       }
 
-      // Highlight active card in the 43-Slide Atlas below
+      // 7. Highlight active card in the 43-Slide Atlas below (STRICTLY NO scrollIntoView!)
       if (slideChanged || optsUpdate?.forceCard) {
         root.querySelectorAll(".ep6-flow-slide-card").forEach((card) => {
           const cid = Number(card.getAttribute("data-slide-card"));
-          const active = cid === slide.id;
-          card.classList.toggle("is-active-playing", active);
-          if (active && studioState.autoScrollCards && !optsUpdate?.skipAutoScroll) {
-            card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
+          card.classList.toggle("is-active-playing", cid === slide.id);
         });
+      }
+    }
+
+    function seekToSecond(sec, seekOpts) {
+      const o = seekOpts || {};
+      const target = Math.max(MIN_SEC, Math.min(MAX_SEC - 1, Number(sec) || MIN_SEC));
+      updateLiveUI(target, { forceCard: true });
+      if (o.autoPlay) {
+        startClock(false);
+      }
+      if (o.syncDrive !== false) {
+        syncDriveIframeTo(target, Boolean(o.autoPlay || studioState.isPlaying), Boolean(o.immediate));
+      }
+    }
+
+    function jumpToSlide(slideId, jumpOpts) {
+      const sl = getSlideById(Number(slideId) || 1);
+      if (!sl) return;
+      const seg = (DATA.timelineSegments || []).find((sg) => sg.slideId === sl.id);
+      const exactSec = seg ? Math.max(MIN_SEC, seg.startSec + 0.4) : sl.startSec + 0.4;
+      seekToSecond(exactSec, jumpOpts);
+    }
+
+    function skipBySeconds(deltaSec) {
+      showSkipFlash(deltaSec);
+      const target = Math.max(MIN_SEC, Math.min(MAX_SEC - 1, studioState.currentSec + deltaSec));
+      seekToSecond(target, {
+        syncDrive: true,
+        autoPlay: studioState.isPlaying,
+        immediate: false
+      });
+    }
+
+    // Floating Picture-in-Picture (PiP) State Controller
+    function applyPipMode(enablePip) {
+      const slot = root.querySelector("#ep6VideoSlot");
+      const dock = root.querySelector("#ep6VideoDock");
+      const ph = root.querySelector("#ep6PipPlaceholder");
+      const pinBtn = root.querySelector("#ep6PinPipBtn");
+      const restorePill = root.querySelector("#ep6PipRestorePill");
+      if (!slot || !dock) return;
+
+      if (enablePip && studioState.theaterMode !== "slides") {
+        if (!studioState.isPipActive) {
+          const h = slot.offsetHeight;
+          if (h > 120) {
+            instance.dockedMeasuredHeight = h;
+            slot.style.minHeight = `${h}px`;
+          }
+          studioState.isPipActive = true;
+        }
+        dock.classList.add("is-pip-floating");
+        dock.classList.toggle("is-pip-minimized", studioState.isPipMinimized);
+        if (ph) ph.hidden = false;
+        if (restorePill) restorePill.hidden = true;
+      } else {
+        studioState.isPipActive = false;
+        studioState.isPipMinimized = false;
+        dock.classList.remove("is-pip-floating", "is-pip-minimized");
+        slot.style.minHeight = "";
+        if (ph) ph.hidden = true;
+      }
+
+      if (pinBtn) {
+        pinBtn.classList.toggle("is-active", studioState.isPipActive);
+        pinBtn.textContent = studioState.isPipActive ? "⧉ กำลังลอย (PiP)" : "⧉ PiP";
+      }
+      updateLiveUI(studioState.currentSec);
+    }
+
+    function evaluateScrollPiP() {
+      if (!root.isConnected || root.offsetParent === null) {
+        if (studioState.isPipActive) applyPipMode(false);
+        return;
+      }
+      if (studioState.theaterMode === "slides") {
+        if (studioState.isPipActive) applyPipMode(false);
+        return;
+      }
+      const slot = root.querySelector("#ep6VideoSlot");
+      const theaterEl = root.querySelector("#ep6TheaterGrid");
+      const restorePill = root.querySelector("#ep6PipRestorePill");
+      if (!slot || !theaterEl) return;
+
+      const slotRect = slot.getBoundingClientRect();
+      const theaterRect = theaterEl.getBoundingClientRect();
+      const enteredAtlasZone = slotRect.bottom < 40 && theaterRect.bottom < 260;
+      const backInTheaterZone = slotRect.bottom > 120 || theaterRect.bottom > 340;
+
+      if (backInTheaterZone) {
+        studioState.pipDismissedWhileScrolled = false;
+        if (restorePill) restorePill.hidden = true;
+        if (!studioState.manualPipPinned && studioState.isPipActive) {
+          applyPipMode(false);
+        }
+        return;
+      }
+
+      if (enteredAtlasZone) {
+        if (studioState.pipDismissedWhileScrolled && !studioState.manualPipPinned) {
+          if (studioState.isPipActive) applyPipMode(false);
+          if (restorePill) restorePill.hidden = false;
+        } else {
+          if (!studioState.isPipActive) applyPipMode(true);
+        }
+      } else if (studioState.manualPipPinned && !studioState.isPipActive) {
+        applyPipMode(true);
       }
     }
 
@@ -573,7 +995,7 @@
             <div class="ep6-stage-banner">
               <div class="ep6-sb-top">
                 <span class="ep6-sb-pill">${esc(st.code)} · ${esc(st.rangeLabel)}</span>
-                <button type="button" class="btn sm" data-seek-sec="${st.startSec}">▶ เล่นตั้งแต่องก์นี้ (${fmtTime(st.startSec)})</button>
+                <button type="button" class="btn sm" data-atlas-seek="${st.startSec}">▶ เล่นตั้งแต่องก์นี้ (${fmtTime(st.startSec)})</button>
               </div>
               <h4 class="ep6-sb-title">${esc(st.title)} <span class="ep6-sb-en">(${esc(st.enTitle)})</span></h4>
               <p class="ep6-sb-question"><strong>คำถามนำขององก์:</strong> ${esc(st.guidingQuestion)}</p>
@@ -582,13 +1004,15 @@
 
             <div class="ep6-slides-flow-list">
               ${stageSlides
-                .map(
-                  (sl) => `
-                <article class="ep6-flow-slide-card ${sl.id === studioState.activeSlideId ? "is-active-playing" : ""}" data-slide-card="${sl.id}">
+                .map((sl) => {
+                  const prevSl = sl.id > 1 ? getSlideById(sl.id - 1) : null;
+                  const nextSl = sl.id < DATA.slides.length ? getSlideById(sl.id + 1) : null;
+                  return `
+                <article class="ep6-flow-slide-card ${sl.id === studioState.activeSlideId ? "is-active-playing" : ""}" id="ep6AtlasSlideCard-${sl.id}" data-slide-card="${sl.id}">
                   <div class="ep6-fsc-left">
                     <div class="ep6-fsc-meta">
                       <span class="ep6-fsc-num">Slide ${sl.id} / 43 <small>(หน้า ${sl.deckSlideNo})</small></span>
-                      <button type="button" class="ep6-play-chip" data-seek-sec="${sl.startSec}">▶ ${esc(sl.timeLabel)}</button>
+                      <button type="button" class="ep6-play-chip" data-atlas-seek="${sl.startSec}">▶ ${esc(sl.timeLabel)}</button>
                     </div>
                     <div class="ep6-fsc-thumb" data-zoom-slide="${sl.id}" title="คลิกเพื่อขยายภาพสไลด์ขนาดเต็ม">
                       <img src="${esc(getSlideImg(sl))}" alt="Slide ${sl.id}: ${esc(sl.title)}" loading="lazy">
@@ -604,7 +1028,7 @@
                         .map(
                           (vq) => `
                         <div class="ep6-fsc-qitem">
-                          <button type="button" class="ep6-qtime-mini" data-seek-sec="${vq.tSec}">▶ ${esc(vq.time)}</button>
+                          <button type="button" class="ep6-qtime-mini" data-atlas-seek="${vq.tSec}">▶ ${esc(vq.time)}</button>
                           <span>“${esc(vq.text)}”</span>
                         </div>
                       `
@@ -621,12 +1045,16 @@
                       ${(sl.conceptBullets || []).map((b) => `<li>${esc(b)}</li>`).join("")}
                     </ul>
                     <div class="ep6-fsc-bridge">
-                      <span><strong>Logical Flow →</strong> ${esc(sl.logicalFlow?.toNext || "")}</span>
+                      <p class="ep6-fsc-bridge-txt"><strong>Logical Flow →</strong> ${esc(sl.logicalFlow?.toNext || "")}</p>
+                      <div class="ep6-fsc-bridge-btns">
+                        ${prevSl ? `<button type="button" class="ep6-fsc-jump-btn" data-atlas-jump-slide="${prevSl.id}">← ไป Slide ${prevSl.id}</button>` : ""}
+                        ${nextSl ? `<button type="button" class="ep6-fsc-jump-btn is-next" data-atlas-jump-slide="${nextSl.id}">ไป Slide ${nextSl.id} →</button>` : ""}
+                      </div>
                     </div>
                   </div>
                 </article>
-              `
-                )
+              `;
+                })
                 .join("")}
             </div>
           </section>
@@ -640,78 +1068,75 @@
 
       body.innerHTML = htmlParts.join("");
 
-      body.querySelectorAll("[data-seek-sec]").forEach((btn) => {
+      // Clicking ▶ timestamp in the 43-slide Atlas plays right inside the Floating PiP player WITHOUT jumping away from your reading spot!
+      body.querySelectorAll("[data-atlas-seek]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const sec = Number(btn.getAttribute("data-seek-sec")) || 4;
-          seekToSecond(sec, true);
-          root.querySelector("#ep6TheaterGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          const sec = Number(btn.getAttribute("data-atlas-seek")) || MIN_SEC;
+          studioState.pipDismissedWhileScrolled = false;
+          seekToSecond(sec, { syncDrive: true, autoPlay: true, immediate: true });
+          evaluateScrollPiP();
+        });
+      });
+
+      body.querySelectorAll("[data-atlas-jump-slide]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const targetId = Number(btn.getAttribute("data-atlas-jump-slide"));
+          const targetSl = getSlideById(targetId);
+          if (!targetSl) return;
+          jumpToSlide(targetSl.id, {
+            syncDrive: true,
+            autoPlay: studioState.isPlaying
+          });
+          const targetCard = root.querySelector(`#ep6AtlasSlideCard-${targetSl.id}`);
+          if (targetCard) {
+            targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
         });
       });
 
       body.querySelectorAll("[data-zoom-slide]").forEach((el) => {
         el.addEventListener("click", () => {
           const sl = getSlideById(Number(el.getAttribute("data-zoom-slide")));
-          openSlideLightbox(getSlideImg(sl), `Slide ${sl.id}/43 (หน้า ${sl.deckSlideNo} · ${sl.timeLabel}) — ${sl.title}`);
+          openSlideLightbox(
+            getSlideImg(sl),
+            `Slide ${sl.id}/43 (หน้า ${sl.deckSlideNo} · ${sl.timeLabel}) — ${sl.title}`
+          );
         });
       });
     }
 
-    function seekToSecond(sec, autoPlay) {
-      const target = Math.max(4, Math.min(3805, Number(sec) || 4));
-      updateLiveUI(target, { forceCard: true, skipAutoScroll: false });
-      if (instance.ytReady && instance.ytPlayer && typeof instance.ytPlayer.seekTo === "function") {
-        try {
-          instance.ytPlayer.seekTo(target, true);
-          if (autoPlay && typeof instance.ytPlayer.playVideo === "function") {
-            instance.ytPlayer.playVideo();
-          }
-        } catch (_) {}
-      } else if (autoPlay && (studioState.ytError || studioState.theaterMode === "slides")) {
-        startSimulatedTimeline();
-      }
-    }
+    // Wire Faculty Drive Drawer
+    if (facultyMode) {
+      const toggleBtn = root.querySelector("#ep6ToggleFacultyDriveBtn");
+      const bar = root.querySelector("#ep6FacultyDriveBar");
+      const inp = root.querySelector("#ep6FacultyDriveInput");
+      const saveBtn = root.querySelector("#ep6SaveDriveIdBtn");
+      const resetBtn = root.querySelector("#ep6ResetDriveIdBtn");
 
-    function stopSimulatedTimeline() {
-      studioState.simPlaying = false;
-      if (instance.simTimer) {
-        clearInterval(instance.simTimer);
-        instance.simTimer = null;
-      }
-      syncTransportButtons();
-    }
-
-    function startSimulatedTimeline() {
-      stopSimulatedTimeline();
-      studioState.simPlaying = true;
-      instance.simTimer = setInterval(() => {
-        const next = studioState.currentSec + 1 * studioState.simSpeed;
-        if (next >= 3805) {
-          updateLiveUI(3805);
-          stopSimulatedTimeline();
+      toggleBtn?.addEventListener("click", () => {
+        if (bar) bar.hidden = !bar.hidden;
+      });
+      saveBtn?.addEventListener("click", () => {
+        const parsed = extractDriveFileId(inp?.value || "");
+        if (!parsed) {
+          window.alert("กรุณาวางลิงก์ Google Drive หรือ File ID ที่ถูกต้อง");
           return;
         }
-        updateLiveUI(next);
-      }, 1000);
-      syncTransportButtons();
-    }
-
-    function syncTransportButtons() {
-      const playBtn = root.querySelector("#ep6PlayPauseBtn");
-      const simBtn = root.querySelector("#ep6SimToggleBtn");
-      const dot = root.querySelector("#ep6LiveDot");
-      const isPlayingAny = studioState.ytPlaying || studioState.simPlaying;
-      if (playBtn) {
-        playBtn.textContent = isPlayingAny ? "⏸ หยุดชั่วคราว" : "▶ เล่นวิดีโอ";
-      }
-      if (simBtn) {
-        simBtn.textContent = studioState.simPlaying
-          ? `⏹ หยุดจำลองเวลา (${studioState.simSpeed}x)`
-          : `⏱ จำลองเลื่อนเวลา (${studioState.simSpeed}x)`;
-        simBtn.classList.toggle("is-active", studioState.simPlaying);
-      }
-      if (dot) {
-        dot.classList.toggle("is-playing", isPlayingAny);
-      }
+        currentDriveId = parsed;
+        try {
+          localStorage.setItem(STORAGE_DRIVE_KEY, parsed);
+        } catch (_) {}
+        if (inp) inp.value = parsed;
+        syncDriveIframeTo(studioState.currentSec, false, true);
+      });
+      resetBtn?.addEventListener("click", () => {
+        currentDriveId = DATA.meta.driveFileId || "";
+        try {
+          localStorage.removeItem(STORAGE_DRIVE_KEY);
+        } catch (_) {}
+        if (inp) inp.value = currentDriveId;
+        syncDriveIframeTo(studioState.currentSec, false, true);
+      });
     }
 
     // Wire Theater Mode & Image Quality buttons
@@ -722,6 +1147,7 @@
         root.querySelectorAll("[data-tmode]").forEach((b) =>
           b.classList.toggle("is-active", b.getAttribute("data-tmode") === studioState.theaterMode)
         );
+        evaluateScrollPiP();
       });
     });
 
@@ -731,88 +1157,178 @@
         root.querySelectorAll("[data-imgq]").forEach((b) =>
           b.classList.toggle("is-active", b.getAttribute("data-imgq") === studioState.imgQuality)
         );
-        updateLiveUI(studioState.currentSec, { forceCard: true, skipAutoScroll: true });
+        updateLiveUI(studioState.currentSec, { forceCard: true });
         renderAtlasBody();
       });
     });
 
-    // Wire Stage Jump buttons
+    // Wire Stage Jump buttons (strictly NO page scroll!)
     root.querySelectorAll("[data-stage-jump]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const st = getStageById(Number(btn.getAttribute("data-stage-jump")));
-        if (st) seekToSecond(st.startSec, true);
+        if (st && st.slideIds && st.slideIds.length) {
+          jumpToSlide(st.slideIds[0], { syncDrive: true, autoPlay: studioState.isPlaying, immediate: true });
+        }
       });
     });
 
     // Wire Slide Zoom
     const zoomHandler = () => {
       const sl = getSlideById(studioState.activeSlideId);
-      openSlideLightbox(getSlideImg(sl), `Slide ${sl.id}/43 (หน้า ${sl.deckSlideNo} · ${sl.timeLabel}) — ${sl.title}`);
+      openSlideLightbox(
+        getSlideImg(sl),
+        `Slide ${sl.id}/43 (หน้า ${sl.deckSlideNo} · ${sl.timeLabel}) — ${sl.title}`
+      );
     };
     root.querySelector("#ep6ZoomCurrentSlideBtn")?.addEventListener("click", zoomHandler);
     root.querySelector("#ep6SyncSlideImgWrap")?.addEventListener("click", zoomHandler);
 
-    // Wire Transport Controls
-    root.querySelector("#ep6PrevSlideBtn")?.addEventListener("click", () => {
+    // Wire Play/Pause, -15s, +15s, Prev/Next Slide, CC, Speed, Fullscreen, PiP
+    const togglePlayPause = () => {
+      if (studioState.isPlaying) {
+        stopClock();
+      } else {
+        startClock(true);
+      }
+    };
+    root.querySelector("#ep6PlayPauseBtn")?.addEventListener("click", togglePlayPause);
+    root.querySelector("#ep6MainPlayBtn")?.addEventListener("click", togglePlayPause);
+
+    root.querySelector("#ep6Rew15Btn")?.addEventListener("click", () => skipBySeconds(-15));
+    root.querySelector("#ep6ScrubRew15Btn")?.addEventListener("click", () => skipBySeconds(-15));
+    root.querySelector("#ep6Fwd15Btn")?.addEventListener("click", () => skipBySeconds(15));
+    root.querySelector("#ep6ScrubFwd15Btn")?.addEventListener("click", () => skipBySeconds(15));
+
+    const goPrevSlide = () => {
       const prevId = Math.max(1, studioState.activeSlideId - 1);
-      seekToSecond(getSlideById(prevId).startSec, false);
-    });
-    root.querySelector("#ep6NextSlideBtn")?.addEventListener("click", () => {
+      jumpToSlide(prevId, {
+        syncDrive: true,
+        autoPlay: studioState.isPlaying,
+        immediate: false
+      });
+    };
+    const goNextSlide = () => {
       const nextId = Math.min(DATA.slides.length, studioState.activeSlideId + 1);
-      seekToSecond(getSlideById(nextId).startSec, false);
+      jumpToSlide(nextId, {
+        syncDrive: true,
+        autoPlay: studioState.isPlaying,
+        immediate: false
+      });
+    };
+    root.querySelector("#ep6PrevSlideBtn")?.addEventListener("click", goPrevSlide);
+    root.querySelector("#ep6NextSlideBtn")?.addEventListener("click", goNextSlide);
+    root.querySelector("#ep6PipPrevSlideBtn")?.addEventListener("click", goPrevSlide);
+    root.querySelector("#ep6PipNextSlideBtn")?.addEventListener("click", goNextSlide);
+
+    root.querySelector("#ep6ForceSyncDriveBtn")?.addEventListener("click", () => {
+      syncDriveIframeTo(studioState.currentSec, true, true);
+      if (!studioState.isPlaying) startClock(false);
     });
-    root.querySelector("#ep6PlayPauseBtn")?.addEventListener("click", () => {
-      if (studioState.simPlaying) {
-        stopSimulatedTimeline();
-        return;
-      }
-      if (instance.ytReady && instance.ytPlayer && !studioState.ytError) {
-        const st = instance.ytPlayer.getPlayerState ? instance.ytPlayer.getPlayerState() : -1;
-        if (st === 1) {
-          instance.ytPlayer.pauseVideo();
-        } else {
-          instance.ytPlayer.playVideo();
-        }
-      } else {
-        startSimulatedTimeline();
-      }
+
+    root.querySelector("#ep6CcToggleBtn")?.addEventListener("click", () => {
+      studioState.ccEnabled = !studioState.ccEnabled;
+      syncTransportButtons();
     });
-    root.querySelector("#ep6SimToggleBtn")?.addEventListener("click", () => {
-      if (studioState.simPlaying) {
-        if (studioState.simSpeed === 1) {
-          studioState.simSpeed = 2;
-          startSimulatedTimeline();
-        } else if (studioState.simSpeed === 2) {
-          studioState.simSpeed = 4;
-          startSimulatedTimeline();
-        } else {
-          studioState.simSpeed = 1;
-          stopSimulatedTimeline();
-        }
+
+    root.querySelector("#ep6CcSizeBtn")?.addEventListener("click", () => {
+      studioState.ccLarge = !studioState.ccLarge;
+      syncTransportButtons();
+    });
+
+    root.querySelector("#ep6SpeedSelect")?.addEventListener("change", (ev) => {
+      const v = Number(ev.target.value) || 1;
+      studioState.playbackSpeed = v;
+      syncTransportButtons();
+    });
+
+    root.querySelector("#ep6FullscreenBtn")?.addEventListener("click", () => {
+      const dock = root.querySelector("#ep6VideoDock");
+      if (!dock) return;
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.();
       } else {
-        if (instance.ytReady && instance.ytPlayer && studioState.ytPlaying) {
-          try { instance.ytPlayer.pauseVideo(); } catch (_) {}
-        }
-        studioState.simSpeed = 1;
-        startSimulatedTimeline();
+        dock.requestFullscreen?.();
       }
     });
 
-    // Wire Scrubber Drag/Click + Hover Tooltip
+    // PiP Controls
+    root.querySelector("#ep6PinPipBtn")?.addEventListener("click", () => {
+      if (studioState.isPipActive) {
+        studioState.manualPipPinned = false;
+        studioState.pipDismissedWhileScrolled = true;
+        applyPipMode(false);
+        evaluateScrollPiP();
+      } else {
+        studioState.manualPipPinned = true;
+        studioState.pipDismissedWhileScrolled = false;
+        applyPipMode(true);
+      }
+    });
+
+    root.querySelector("#ep6ReturnFromPipBtn")?.addEventListener("click", () => {
+      studioState.manualPipPinned = false;
+      applyPipMode(false);
+    });
+
+    root.querySelector("#ep6PipMinBtn")?.addEventListener("click", () => {
+      studioState.isPipMinimized = !studioState.isPipMinimized;
+      const dock = root.querySelector("#ep6VideoDock");
+      const minBtn = root.querySelector("#ep6PipMinBtn");
+      if (dock) dock.classList.toggle("is-pip-minimized", studioState.isPipMinimized);
+      if (minBtn) minBtn.textContent = studioState.isPipMinimized ? "▢ ขยาย" : "—";
+    });
+
+    root.querySelector("#ep6PipTopBtn")?.addEventListener("click", () => {
+      studioState.manualPipPinned = false;
+      root.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    root.querySelector("#ep6PipCloseBtn")?.addEventListener("click", () => {
+      studioState.manualPipPinned = false;
+      studioState.pipDismissedWhileScrolled = true;
+      applyPipMode(false);
+      evaluateScrollPiP();
+    });
+
+    root.querySelector("#ep6PipRestorePill")?.addEventListener("click", () => {
+      studioState.pipDismissedWhileScrolled = false;
+      applyPipMode(true);
+    });
+
+    // Explicit click-only button to view active slide in the 43-slide Atlas below
+    root.querySelector("#ep6JumpToActiveCardBtn")?.addEventListener("click", () => {
+      if (studioState.atlasView !== "flow") {
+        studioState.atlasView = "flow";
+        root.querySelectorAll("[data-aview]").forEach((b) =>
+          b.classList.toggle("is-active", b.getAttribute("data-aview") === "flow")
+        );
+        renderAtlasBody();
+      }
+      const card = root.querySelector(`#ep6AtlasSlideCard-${studioState.activeSlideId}`);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    // Wire Scrubber Drag/Click + Hover Tooltip — ZERO page scroll!
     const track = root.querySelector("#ep6TimelineTrack");
     const tooltip = root.querySelector("#ep6TrackTooltip");
     if (track) {
       const secFromPointer = (clientX) => {
         const rect = track.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width)));
-        return 4 + ratio * (3806 - 4);
+        return MIN_SEC + ratio * (MAX_SEC - MIN_SEC);
       };
 
       let dragging = false;
       track.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        try {
+          track.focus({ preventScroll: true });
+        } catch (_) {}
         dragging = true;
         track.setPointerCapture(e.pointerId);
-        seekToSecond(secFromPointer(e.clientX), false);
+        updateLiveUI(secFromPointer(e.clientX), { forceCard: true });
       });
       track.addEventListener("pointermove", (e) => {
         const hoverSec = secFromPointer(e.clientX);
@@ -825,13 +1341,17 @@
           tooltip.hidden = false;
         }
         if (dragging) {
-          updateLiveUI(hoverSec, { forceCard: true, skipAutoScroll: true });
+          updateLiveUI(hoverSec, { forceCard: true });
         }
       });
       track.addEventListener("pointerup", (e) => {
         if (dragging) {
           dragging = false;
-          seekToSecond(secFromPointer(e.clientX), false);
+          const targetSec = secFromPointer(e.clientX);
+          updateLiveUI(targetSec, { forceCard: true });
+          if (studioState.isPlaying) {
+            syncDriveIframeTo(targetSec, true, false);
+          }
         }
       });
       track.addEventListener("pointerleave", () => {
@@ -840,21 +1360,33 @@
       track.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           e.preventDefault();
-          seekToSecond(studioState.currentSec + 15, false);
+          skipBySeconds(15);
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          seekToSecond(studioState.currentSec - 15, false);
+          skipBySeconds(-15);
         }
       });
     }
 
-    // Wire Auto-scroll checkbox
-    const autoChk = root.querySelector("#ep6AutoScrollChk");
-    if (autoChk) {
-      autoChk.addEventListener("change", () => {
-        studioState.autoScrollCards = autoChk.checked;
-      });
-    }
+    // YouTube-style keyboard shortcuts when focus is inside the EP6 Studio (outside text inputs)
+    root.addEventListener("keydown", (e) => {
+      const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      if (e.key === "j" || e.key === "J") {
+        e.preventDefault();
+        skipBySeconds(-15);
+      } else if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        skipBySeconds(15);
+      } else if (e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.key === "c" || e.key === "C") {
+        e.preventDefault();
+        studioState.ccEnabled = !studioState.ccEnabled;
+        syncTransportButtons();
+      }
+    });
 
     // Wire Atlas Tabs, Stage Filter & Search
     root.querySelectorAll("[data-aview]").forEach((btn) => {
@@ -883,69 +1415,20 @@
       });
     }
 
+    // Bind scroll & resize listeners for Floating Picture-in-Picture (PiP)
+    const onScrollOrResize = () => evaluateScrollPiP();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize, { passive: true });
+    instance.cleanupListeners = () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+
     // Initial render
     renderAtlasBody();
-    updateLiveUI(studioState.currentSec, { forceCard: true, skipAutoScroll: true });
+    updateLiveUI(studioState.currentSec, { forceCard: true });
     syncTransportButtons();
-
-    // Initialize Official YouTube IFrame Player
-    if (window.location.protocol === "file:") {
-      studioState.ytError = true;
-      const fb = root.querySelector("#ep6YtFallbackBanner");
-      if (fb) fb.hidden = false;
-    }
-
-    ensureYouTubeIframeAPI(() => {
-      if (activeInstance !== instance) return;
-      const iframeEl = root.querySelector("#ep6YtIframeEl");
-      if (!iframeEl || !window.YT || !window.YT.Player) return;
-
-      try {
-        instance.ytPlayer = new window.YT.Player(iframeEl, {
-          events: {
-            onReady: () => {
-              instance.ytReady = true;
-              instance.pollTimer = setInterval(() => {
-                if (!instance.ytPlayer || typeof instance.ytPlayer.getCurrentTime !== "function") return;
-                const st = instance.ytPlayer.getPlayerState ? instance.ytPlayer.getPlayerState() : -1;
-                if (st === 1) {
-                  const t = instance.ytPlayer.getCurrentTime();
-                  if (t >= 3806) {
-                    instance.ytPlayer.pauseVideo();
-                    updateLiveUI(3805);
-                  } else if (Math.abs(t - studioState.currentSec) >= 0.35) {
-                    updateLiveUI(t);
-                  }
-                }
-              }, 300);
-            },
-            onStateChange: (ev) => {
-              const playing = ev.data === 1;
-              studioState.ytPlaying = playing;
-              if (playing && studioState.simPlaying) {
-                stopSimulatedTimeline();
-              }
-              if (instance.ytPlayer && typeof instance.ytPlayer.getCurrentTime === "function") {
-                const t = instance.ytPlayer.getCurrentTime();
-                if (t > 0) updateLiveUI(t);
-              }
-              syncTransportButtons();
-            },
-            onError: () => {
-              studioState.ytError = true;
-              studioState.ytPlaying = false;
-              const fb = root.querySelector("#ep6YtFallbackBanner");
-              if (fb) fb.hidden = false;
-              syncTransportButtons();
-            }
-          }
-        });
-      } catch (_) {
-        studioState.ytError = true;
-        const fb = root.querySelector("#ep6YtFallbackBanner");
-        if (fb) fb.hidden = false;
-      }
-    });
+    requestAnimationFrame(evaluateScrollPiP);
   }
 
   window.RACM303_EP6_STUDIO = {
