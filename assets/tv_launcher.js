@@ -505,8 +505,8 @@
               tone: "tone-slate",
               icon: ICONS.quiz,
               title: t("คำศัพท์ · โจทย์ · คู่มือ", "Flashcards, Quiz & Manual"),
-              sub: t("ทบทวนบัตรคำศัพท์ 111 คำ โจทย์ 82 ข้อ และคู่มือวิชา", "111 flashcards, 82 practice questions & manual"),
-              badge: t("82 ข้อฝึกหัด", "82 Qs"),
+              sub: t("ทบทวนบัตรคำศัพท์ 111 คำ โจทย์ 60 ข้อ และคู่มือวิชา", "111 flashcards, 60 practice questions & manual"),
+              badge: t("60 ข้อฝึกหัด", "60 Qs"),
               action: () => navigateFromTile("app-quiz", () => navigateTvTab("practice"))
             }
           ];
@@ -1327,7 +1327,7 @@
     if (groupKey === "knowledge") {
       siblings = [
         { id: "textbooks", label: t("บทเรียน HS1–HS6", "HS1–HS6 Textbooks") },
-        { id: "practice", label: t("คำศัพท์ & โจทย์ (82 ข้อ)", "Flashcards & Quiz") },
+        { id: "practice", label: t("คำศัพท์ & โจทย์ (60 ข้อ)", "Flashcards & Quiz") },
         { id: "manual", label: t("คู่มือรายวิชา", "Course Manual") }
       ];
       if (ROLE === "faculty") {
