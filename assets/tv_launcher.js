@@ -177,6 +177,10 @@
           <span>สลับภาษา (Language)</span>
           <strong id="tvMenuLangCode">TH / EN</strong>
         </button>
+        <button type="button" class="tv-menu-item" id="tvMenuCourseDriveBtn">
+          <span>📁 โฟลเดอร์ไฟล์ทั้งรายวิชา (Course Drive)</span>
+          <span>→</span>
+        </button>
         ${
           ROLE === "faculty"
             ? `<button type="button" class="tv-menu-item" id="tvMenuUploadSlideBtn"><span>อัปโหลด Slide ประกอบการสอน</span><span>→</span></button>`
@@ -253,6 +257,15 @@
         syncSubpageBar();
       }, 30);
     });
+
+    const cdMenuBtn = $("tvMenuCourseDriveBtn");
+    if (cdMenuBtn) {
+      cdMenuBtn.addEventListener("click", () => {
+        morePop.hidden = true;
+        moreBtn.setAttribute("aria-expanded", "false");
+        openCourseDriveAtPath([]);
+      });
+    }
 
     const upSlideBtn = $("tvMenuUploadSlideBtn");
     if (upSlideBtn) {
@@ -638,11 +651,12 @@
           </div>
         </div>
 
-        <!-- SHELF 2: EPISODES HS1 - HS6 -->
-        <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ HS1 ถึง HS6">
+        <!-- SHELF 2: EPISODES ST1 & HS1 - HS6 -->
+        <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ ST1 และ HS1 ถึง HS6">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6 (เนื้อหาสอบภาคทฤษฎี)", "Health Systems Episodes (HS1–HS6 · Written Exam)"))}</h2>
+              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ ST1 & HS1 – HS6 (เอกสารคำสอน · Self-Quiz · Slide อาจารย์)", "Health Systems ST1 & HS1–HS6 (5-Step Learning Hub)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("คลิก ST1 (รากฐานคิดเชิงระบบ) หรือ HS1–HS6 เพื่อเปิดอ่านฉบับเต็ม ฉบับย่อ ทำ Self-Quiz และอัปโหลด/ดาวน์โหลด Slide", "Click ST1 (Foundation) or HS1–HS6 for Full/Abridged docs, Self-Quiz & Slide Upload/Download"))}</span>
             </div>
             <div class="tv-shelf-controls">
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpisodesTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
@@ -650,9 +664,25 @@
             </div>
           </div>
           <div class="tv-shelf-track is-episodes" id="tvEpisodesTrack">
-            ${modules
-              .map(
-                (m, idx) => `
+            ${(() => {
+              const stMeta = api && api.getHsModuleMeta ? api.getHsModuleMeta("ST1") : null;
+              const stSlide = api && api.getHsSlideInfo ? api.getHsSlideInfo("ST1") : { uploaded: false, extBadge: "" };
+              const stCardHtml = stMeta
+                ? `
+              <button type="button" class="tv-episode-card sf-1" id="tvEpCard-ST1" data-ep-code="ST1" data-ep-num="ST" data-tv-focus data-tv-row="3">
+                <span class="tv-ep-top">
+                  <span class="tv-ep-code">ST1 · รากฐาน</span>
+                  <span class="tv-ep-weight">${esc(stSlide.uploaded ? `✓ Slide (${stSlide.extBadge})` : t("คำสอน Full & ย่อ", "Full & Abridged"))}</span>
+                </span>
+                <span class="tv-ep-bottom">
+                  <span class="tv-ep-title">${esc(stMeta.title)}</span>
+                  <span class="tv-ep-date">${esc(stMeta.scheduleDate.replace(/^วัน/, ""))} · ${esc(stMeta.lectureTime || "09.30 – 12.00 น.")}</span>
+                </span>
+              </button>`
+                : "";
+              const hsCardsHtml = modules
+                .map(
+                  (m, idx) => `
               <button type="button" class="tv-episode-card ep-${idx + 1}" id="tvEpCard-${m.code}" data-ep-code="${esc(m.code)}" data-ep-num="0${idx + 1}" data-tv-focus data-tv-row="3">
                 <span class="tv-ep-top">
                   <span class="tv-ep-code">${esc(m.code)}</span>
@@ -664,8 +694,10 @@
                 </span>
               </button>
             `
-              )
-              .join("")}
+                )
+                .join("");
+              return stCardHtml + hsCardsHtml;
+            })()}
           </div>
         </div>
 
@@ -841,6 +873,10 @@
     panel.querySelectorAll("[data-sf-id]").forEach((card) => {
       card.addEventListener("click", () => {
         lastHomeTileFocusSelector = `#${card.id}`;
+        if (card.dataset.sfId === "w1-d1-st") {
+          openEpisodeModal("ST1");
+          return;
+        }
         if (api && api.openSystemsForum) api.openSystemsForum(card.dataset.sfId);
         else navigateTvTab("systems-forum");
       });
@@ -878,11 +914,14 @@
 
   /* ---------- 3. Episode Quick-Action Sheet Modal (5-Step Logical Flow) ---------- */
   function openEpisodeModal(epCode) {
-    const mod = (HSD.modules || []).find((m) => m.code === epCode);
+    const api = getApi();
+    const mod =
+      (HSD.modules || []).find((m) => m.code === epCode) ||
+      (epCode === "ST1" && api && api.getHsModuleMeta ? api.getHsModuleMeta("ST1") : null);
     if (!mod) return;
     closeAllTvModals();
 
-    const api = getApi();
+    const isStEp = mod.code === "ST1";
     const flow = api && api.getHsLogicalFlowModel ? api.getHsLogicalFlowModel(mod.code) : null;
     const backdrop = document.createElement("div");
     backdrop.className = "tv-modal-backdrop";
@@ -916,17 +955,26 @@
           `⏳ รออาจารย์ Upload สไลด์บรรยายต้นคาบ (${mod.lectureTime || "1 ชม. แรก"})`,
           "Waiting for instructor slide upload (.PPTX / .PDF)"
         );
-    const step5Sub = flow
+    const step5Sub = isStEp
+      ? t(
+          "กรอบคาบเรียน คำถามชวนคิด มุมอัปโหลด Slide/ไฟล์สอน และความเชื่อมโยงสู่ HS1–HS6 · CLD Workshop · ภาคสนาม",
+          "Session framework, guiding questions, slide upload & fieldwork links"
+        )
+      : flow
       ? ROLE === "faculty"
         ? `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) & เฉลย 4 ขั้น · ${mod.discTime || ""}`
         : `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
       : t(`สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Check-in + 16:9 in-class case slides");
 
+    const badgeHeaderTxt = isStEp
+      ? `${mod.code} · ${mod.scheduleDate.replace(/^วัน/, "")} (${mod.lectureTime || "09.30–12.00 น."}) · ปูรากฐานก่อน HS1–HS6`
+      : `${mod.code} · ${mod.scheduleDate.replace(/^วัน/, "")} · สอบ ${mod.examWeight || ""}`;
+
     backdrop.innerHTML = `
       <div class="tv-modal-sheet is-compact">
         <div class="tv-modal-head">
           <div>
-            <span class="tv-app-badge" style="margin-top:0;margin-bottom:8px">${esc(mod.code)} · ${esc(mod.scheduleDate.replace(/^วัน/, ""))} · สอบ ${esc(mod.examWeight || "")}</span>
+            <span class="tv-app-badge" style="margin-top:0;margin-bottom:8px">${esc(badgeHeaderTxt)}</span>
             <h3 class="tv-modal-title">${esc(getLang() === "en" && mod.enTitle ? mod.enTitle : mod.title)}</h3>
             <p class="tv-modal-sub">${esc((flow && flow.profile && flow.profile.thread) || mod.summaryFocus || "")}</p>
           </div>
@@ -973,7 +1021,9 @@
           <button type="button" class="tv-ep-action-btn" id="tvEpActSlides" data-tv-modal-focus>
             <span>
               <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-5">05</span> <span>${esc(
-                ROLE === "faculty"
+                isStEp
+                  ? t(`กรอบคาบเรียน & เชื่อมโยงภาคสนาม (${mod.code})`, `${mod.code} Session Frame & Fieldwork Bridge`)
+                  : ROLE === "faculty"
                   ? t(`Case Discussion in Class & เฉลย (${mod.code})`, `${mod.code} Case Discussion & Teacher Key`)
                   : t(`Case Discussion in Class (${mod.code})`, `${mod.code} Case Discussion in Class`)
               )}</span></span>
@@ -983,8 +1033,15 @@
           </button>
         </div>
 
-        <div class="tv-ep-secondary-row">
+        <div class="tv-ep-secondary-row" style="flex-wrap:wrap;gap:8px">
           <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 5 ขั้นตอน (${mod.code})`, `Open 5-Step Hub (${mod.code})`))}</button>
+          <a class="tv-hosp-chip" href="exports/pdf/${encodeURIComponent(mod.docId || mod.code)}.pdf" download="RACM303_${esc(mod.docId || mod.code)}_Full.pdf" style="text-decoration:none">⬇ PDF ฉบับเต็ม</a>
+          <a class="tv-hosp-chip" href="exports/docx/${encodeURIComponent(mod.docId || mod.code)}.docx" download="RACM303_${esc(mod.docId || mod.code)}_Full.docx" style="text-decoration:none">⬇ Word ฉบับเต็ม</a>
+          ${
+            ROLE === "faculty"
+              ? `<button type="button" class="tv-hosp-chip" id="tvEpActQuickUpload" data-tv-modal-focus>📤 ${esc(t(`มุม Upload Slide / ไฟล์สอน (${mod.code})`, `Upload Slides (${mod.code})`))}</button>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -1023,13 +1080,25 @@
 
     $("tvEpActSlides").addEventListener("click", () => {
       backdrop.remove();
-      if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
+      if (isStEp) {
+        if (api && api.openSystemsForum) api.openSystemsForum("w1-d1-st");
+      } else if (api && api.openHsDiscussion) {
+        api.openHsDiscussion(mod.code);
+      }
     });
 
     $("tvEpActHub").addEventListener("click", () => {
       backdrop.remove();
       if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder(mod.code);
     });
+
+    const quickUpBtn = $("tvEpActQuickUpload");
+    if (quickUpBtn) {
+      quickUpBtn.addEventListener("click", () => {
+        backdrop.remove();
+        if (api && api.openHsLectureSlides) api.openHsLectureSlides(mod.code);
+      });
+    }
 
     requestAnimationFrame(() => {
       const firstBtn = $("tvEpActFull");
@@ -1903,27 +1972,44 @@
         })
       });
 
-      // Step 05: Case Discussion in Class
-      const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
-      const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
-      files.push({
-        id: `hsppt:${m.id}`,
-        folderPath: ["health-systems", m.id],
-        name: `05_${m.code}_Case_Discussion_in_Class.pptx`,
-        title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
-        sub:
-          (flow && flow.steps[4] && flow.steps[4].desc) ||
-          (ROLE === "faculty"
-            ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
-            : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
-        meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
-        badge: ROLE === "faculty" ? `⑤ Case + เฉลย` : `⑤ Case 16:9`,
-        icoCls: "is-pptx",
-        icoTxt: "⑤",
-        onOpen: openFileAction(() => {
-          if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
-        })
-      });
+      // Step 05: Case Discussion in Class (or Systems Forum Frame for ST1)
+      if (m.code === "ST1") {
+        files.push({
+          id: `hssf:${m.id}`,
+          folderPath: ["health-systems", m.id],
+          name: `05_ST1_กรอบคาบเรียนและเชื่อมโยงภาคสนาม.app`,
+          title: `กรอบคาบเรียน & คำถามชวนคิดประจำคาบ ST1: ${m.title}`,
+          sub: "เชื่อมโยงกรอบคิดเชิงระบบจากคาบ ST1 สู่บทเรียน HS1–HS6 เวิร์กชอป CLD และภาคสนาม พร้อมมุมอัปโหลด Slide/ไฟล์สอน",
+          meta: `${m.lectureTime || "09.30–12.00 น."} · ปูรากฐาน`,
+          badge: `⑤ กรอบคาบเรียน`,
+          icoCls: "is-quiz",
+          icoTxt: "⑤",
+          onOpen: openFileAction(() => {
+            if (api && api.openSystemsForum) api.openSystemsForum("w1-d1-st");
+          })
+        });
+      } else {
+        const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
+        const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+        files.push({
+          id: `hsppt:${m.id}`,
+          folderPath: ["health-systems", m.id],
+          name: `05_${m.code}_Case_Discussion_in_Class.pptx`,
+          title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
+          sub:
+            (flow && flow.steps[4] && flow.steps[4].desc) ||
+            (ROLE === "faculty"
+              ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+              : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
+          meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
+          badge: ROLE === "faculty" ? `⑤ Case + เฉลย` : `⑤ Case 16:9`,
+          icoCls: "is-pptx",
+          icoTxt: "⑤",
+          onOpen: openFileAction(() => {
+            if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
+          })
+        });
+      }
 
       // Step 06: Faculty Guide (Faculty Portal only)
       if (ROLE === "faculty") {
@@ -1932,13 +2018,14 @@
           folderPath: ["health-systems", m.id],
           name: `06_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
           title: `คู่มือผู้สอนและแนวทางนำอภิปรายประจำคาบ ${m.code}`,
-          sub: "เฉพาะคณาจารย์ — แผนนำอภิปราย ประเด็นเฉลย 4 ขั้น และเกณฑ์ประเมิน",
+          sub: "เฉพาะคณาจารย์ — แผนการสอน แนวคำตอบ และจุดเน้นสำคัญประจำคาบ",
           meta: "Faculty Member Only",
           badge: "📕 คู่มือผู้สอน",
           icoCls: "is-faculty",
           icoTxt: "📕",
           onOpen: openFileAction(() => {
-            if (api && api.switchTab) api.switchTab("faculty-docs");
+            if (m.code === "ST1" && api && api.openFacultyDoc) api.openFacultyDoc("st1-tg");
+            else if (api && api.switchTab) api.switchTab("faculty-docs");
           })
         });
       }
@@ -2039,11 +2126,27 @@
       },
       "health-systems": {
         id: "health-systems",
-        code: "02_ระบบสุขภาพ (HS1–HS6 & เวทีเชิงระบบ)",
-        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 5 ขั้นตอน และเวทีคิดเชิงระบบ & เสวนา 6 คาบสำคัญ",
-        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
-        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case Discussion", "🧭 เวทีคิดเชิงระบบ (6 คาบ)"],
+        code: "02_ระบบสุขภาพ (ST1 · HS1–HS6 & เวทีเชิงระบบ)",
+        title: "โฟลเดอร์บทเรียน ST1 (รากฐานคิดเชิงระบบ) และ HS1–HS6 ตาม Logical Flow 5 ขั้นตอน พร้อมเวทีเสวนา 6 คาบสำคัญ",
+        meta: "7 โฟลเดอร์บทเรียน (ST1 & HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
+        tags: ["📘 ST1 รากฐาน", "① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case / เวที"],
         subfolders: [
+          ...(api && api.getHsModuleMeta
+            ? (() => {
+                const stMod = api.getHsModuleMeta("ST1");
+                return [
+                  {
+                    id: stMod.id,
+                    code: stMod.code,
+                    title: stMod.title,
+                    examWeight: "",
+                    customPill: "ปูรากฐาน",
+                    meta: `${stMod.scheduleDate.replace(/^วัน/, "")} (${stMod.lectureTime || "09.30–12.00 น."}) · ปูรากฐานก่อน HS1–HS6`,
+                    files: buildHsModuleFiles(stMod)
+                  }
+                ];
+              })()
+            : []),
           ...modules.map((m) => ({
             id: m.id,
             code: m.code,
@@ -2101,10 +2204,10 @@
           {
             id: "hs:practice-all",
             folderPath: ["health-systems"],
-            name: "RACM303_คลัง_Self-Quiz_60ข้อ_และคำศัพท์_111คำ_HS1-HS6.app",
-            title: "Self-Quiz 60 ข้อ (AI Mentor) · บัตรคำศัพท์ 111 คำ · ตาราง Rapid Review",
-            sub: "ทบทวนและทดสอบความเข้าใจครบทุกบทเรียนระบบสุขภาพ",
-            meta: "60 ข้อ · 111 คำศัพท์",
+            name: "RACM303_คลัง_Self-Quiz_66ข้อ_และคำศัพท์_125คำ_ST1_HS1-HS6.app",
+            title: "Self-Quiz 66 ข้อ (AI Mentor) · บัตรคำศัพท์ 125 คำ · ตาราง Rapid Review (ST1 & HS1–HS6)",
+            sub: "ทบทวนและทดสอบความเข้าใจครบทุกบทเรียนระบบสุขภาพตั้งแต่ ST1 ถึง HS6",
+            meta: "66 ข้อ · 125 คำศัพท์",
             badge: "🧠 เปิด Self-Quiz",
             icoCls: "is-quiz",
             icoTxt: "🧠",
@@ -2734,10 +2837,10 @@
           code: sf.code,
           title: sf.title,
           meta: sf.meta,
-          pill: sf.examWeight ? `สอบ ${sf.examWeight}` : "",
-          tags: [
+          pill: sf.customPill || (sf.examWeight ? `สอบ ${sf.examWeight}` : ""),
+          tags: sf.customTags || [
             "📄 คำสอน",
-            "🟠 Discussion .pptx",
+            sf.code === "ST1" ? "🧭 กรอบคาบเรียน" : "🟠 Discussion .pptx",
             sInf.uploaded ? `✓ Slide อ. (${sInf.extBadge})` : "⏳ Slide อ.",
             "🧠 โจทย์"
           ],
@@ -2745,7 +2848,7 @@
           path: ["health-systems", sf.id]
         };
       });
-      renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพเรียงตาม HS1–HS6 (6 โฟลเดอร์)");
+      renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพเรียงตาม ST1 (รากฐาน) & HS1–HS6");
       renderFilesSection(hsF.files, "ไฟล์รวมทั้งหมวดระบบสุขภาพ (HS1–HS6)");
     } else if (rootKey === "health-systems" && subKey) {
       // INSIDE SPECIFIC HS FOLDER (HS1..HS6)
@@ -2823,6 +2926,11 @@
   }
 
   /* ---------- Boot Sequence ---------- */
+  window.RACM_TV_LAUNCHER = {
+    openCourseDriveAtPath,
+    openEpisodeModal
+  };
+
   function bootTvInterface() {
     if (document.body.classList.contains("is-ppt-slideshare-window")) return;
     ensureHomePanelExists();

@@ -9903,6 +9903,14 @@
 
   const docHeadingPreviewCache = {};
 
+  function getAllHsAndFoundationalModules() {
+    const hsMods =
+      HSD_DATA.modules && HSD_DATA.modules.length
+        ? HSD_DATA.modules
+        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    return [getHsModuleMeta("ST1"), ...hsMods.filter((m) => m.code !== "ST1")];
+  }
+
   function getHsLecturerName(modCode) {
     const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     if (clean === "ST1") {
@@ -11122,10 +11130,7 @@
   }
 
   function buildTextbookDriveExplorerDOM(baseMod) {
-    const allModules =
-      HSD_DATA.modules && HSD_DATA.modules.length
-        ? HSD_DATA.modules
-        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const allModules = getAllHsAndFoundationalModules();
     const curMod = getHsModuleMeta(baseMod);
 
     const openFolderForModule = (modId) => {
@@ -11277,38 +11282,62 @@
           }
         });
 
-        // 5. Step 05 Case Discussion in Class (.pptx)
-        const modCases = (HSD_DATA.cases || []).filter((c) => c.module === m.id);
-        const qList = [];
-        modCases.forEach((c) => (c.questions || []).forEach((qObj) => qList.push(qObj)));
-        const firstCase = modCases[0] || {};
-        const firstScenText =
-          (firstCase.scenarioBlocks && firstCase.scenarioBlocks[0] && firstCase.scenarioBlocks[0].text) ||
-          profile.caseFocus ||
-          m.title;
-        const prog = typeof countModuleDraftProgress === "function" ? countModuleDraftProgress(m.id) : { filled: 0, total: 0 };
-        const pptFileName = `05_${m.code}_Case_Discussion_in_Class.pptx`;
-        out.push({
-          uid: `pptx:${m.id}`,
-          entryType: "discussion-pptx",
-          typeGroup: "discussion-pptx",
-          mod: m,
-          fileName: pptFileName,
-          chipLabel:
-            ROLE === "faculty"
-              ? `ขั้นที่ 5 · ★ ${qList.length} ข้อ + เฉลย`
-              : prog.filled > 0
-              ? `ขั้นที่ 5 · ✓ ตอบแล้ว ${prog.filled}/${prog.total}`
-              : `ขั้นที่ 5 · ${modCases.length} กรณี (${qList.length} ข้อ)`,
-          modCases,
-          qList,
-          firstScenText,
-          prog,
-          lecturer,
-          shortDate,
-          searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} case discussion in class pptx สไลด์อภิปราย check-in เช็คชื่อ กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
-          onOpen: () => openDiscussionSlideForModule(m.id)
-        });
+        // 5. Step 05 Case Discussion in Class (.pptx) or Systems Forum Frame for ST1
+        if (m.code === "ST1") {
+          const sfFileName = `05_ST1_กรอบคาบเรียนและเชื่อมโยงภาคสนาม.app`;
+          out.push({
+            uid: `sfframe:${m.id}`,
+            entryType: "systems-forum",
+            typeGroup: "discussion-pptx",
+            mod: m,
+            fileName: sfFileName,
+            kicker: "🧭 ขั้นที่ 5 · กรอบคาบเรียน & ภาคสนาม",
+            chipLabel: "ขั้นที่ 5 · กรอบคาบเรียน ST1",
+            headCls: "is-concise",
+            subDesc: profile.caseFocus || m.summaryFocus || m.title,
+            headings: [
+              "กรอบคาบเรียนและคำถามชวนคิดประจำคาบ ST1",
+              "ความเชื่อมโยงสู่ HS1–HS6 · CLD Workshop · ฟอร์ม 3A · SRN 1–2",
+              "มุมอัปโหลด / ดาวน์โหลด Slide และเอกสารประกอบการสอน"
+            ],
+            lecturer,
+            shortDate,
+            searchText: `${m.code} ${m.title} ${sfFileName} กรอบคาบเรียน systems forum ภาคสนาม ${lecturer}`.toLocaleLowerCase("th"),
+            onOpen: () => openSystemsForum("w1-d1-st")
+          });
+        } else {
+          const modCases = (HSD_DATA.cases || []).filter((c) => c.module === m.id);
+          const qList = [];
+          modCases.forEach((c) => (c.questions || []).forEach((qObj) => qList.push(qObj)));
+          const firstCase = modCases[0] || {};
+          const firstScenText =
+            (firstCase.scenarioBlocks && firstCase.scenarioBlocks[0] && firstCase.scenarioBlocks[0].text) ||
+            profile.caseFocus ||
+            m.title;
+          const prog = typeof countModuleDraftProgress === "function" ? countModuleDraftProgress(m.id) : { filled: 0, total: 0 };
+          const pptFileName = `05_${m.code}_Case_Discussion_in_Class.pptx`;
+          out.push({
+            uid: `pptx:${m.id}`,
+            entryType: "discussion-pptx",
+            typeGroup: "discussion-pptx",
+            mod: m,
+            fileName: pptFileName,
+            chipLabel:
+              ROLE === "faculty"
+                ? `ขั้นที่ 5 · ★ ${qList.length} ข้อ + เฉลย`
+                : prog.filled > 0
+                ? `ขั้นที่ 5 · ✓ ตอบแล้ว ${prog.filled}/${prog.total}`
+                : `ขั้นที่ 5 · ${modCases.length} กรณี (${qList.length} ข้อ)`,
+            modCases,
+            qList,
+            firstScenText,
+            prog,
+            lecturer,
+            shortDate,
+            searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} case discussion in class pptx สไลด์อภิปราย check-in เช็คชื่อ กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
+            onOpen: () => openDiscussionSlideForModule(m.id)
+          });
+        }
 
         // 6. Faculty Guide & Teacher Answer Key (Faculty Portal Only)
         if (ROLE === "faculty") {
@@ -12705,10 +12734,7 @@
   }
 
   function buildLectureSlidesDriveExplorerDOM(baseMod) {
-    const allModules =
-      HSD_DATA.modules && HSD_DATA.modules.length
-        ? HSD_DATA.modules
-        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const allModules = getAllHsAndFoundationalModules();
     const curMod = getHsModuleMeta(baseMod);
     const curLecturer = getHsLecturerName(curMod.code);
 
@@ -13470,15 +13496,43 @@
       bQuiz.addEventListener("click", () => openSelfQuizForModule(sess.code, "qa"));
       heroActions.appendChild(bQuiz);
     }
+    let sfInlineFileInput = null;
+    if (ROLE === "faculty") {
+      sfInlineFileInput = document.createElement("input");
+      sfInlineFileInput.type = "file";
+      sfInlineFileInput.id = `sfInlineSlideFileInput_${sess.id}`;
+      sfInlineFileInput.accept =
+        ".pptx,.ppt,.pdf,.docx,.doc,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      sfInlineFileInput.hidden = true;
+    }
+
+    const sfExtMeta = detectSlideExtMeta(slideRec);
+    const isDirectDl =
+      sfExtMeta.extKind === "pptx" || sfExtMeta.extKind === "key" || sfExtMeta.extKind === "docx";
+
     if (slideRec) {
-      const openSlBtn = make("button", `📊 เปิด Slide ประจำคาบ (${slideRec.fileName || sess.code})`, sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary");
+      const openSlBtn = make(
+        "button",
+        isDirectDl
+          ? `⬇ ดาวน์โหลดไฟล์ ${sfExtMeta.extBadge} (${sess.code})`
+          : `📊 เปิด Slide / ไฟล์สอน (${sess.code} · ${sfExtMeta.extBadge})`,
+        sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary"
+      );
       openSlBtn.type = "button";
-      openSlBtn.addEventListener("click", () => openSessionSlide(sess.id));
+      openSlBtn.addEventListener("click", () => openSessionSlide(sess.id, isDirectDl));
       heroActions.appendChild(openSlBtn);
     } else if (ROLE === "faculty") {
-      const upSlBtn = make("button", `⬆ อัปโหลด Slide คาบนี้ (${sess.code})`, sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary");
+      const upSlBtn = make(
+        "button",
+        `📤 อัปโหลด Slide / ไฟล์สอน (${sess.code})`,
+        sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary"
+      );
       upSlBtn.type = "button";
-      upSlBtn.addEventListener("click", () => openHsLectureSlides(sess.code));
+      upSlBtn.addEventListener("click", () => {
+        const upBox = document.getElementById(`sfInlineUploadCard_${sess.id}`);
+        if (upBox) upBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (sfInlineFileInput) sfInlineFileInput.click();
+      });
       heroActions.appendChild(upSlBtn);
     } else if (!sessFullDoc) {
       heroActions.appendChild(make("span", "⏳ Slide ประกอบคาบ: รออาจารย์ / วิทยากร Upload", "hs-atv-pending-badge"));
@@ -13490,9 +13544,13 @@
     heroActions.appendChild(schedBtn);
 
     if (ROLE === "faculty" && slideRec) {
-      const reUpBtn = make("button", "🔄 อัปเดต Slide คาบนี้", "tv-hero-btn is-glass");
+      const reUpBtn = make("button", "🔄 อัปเดต / เปลี่ยนไฟล์สอน", "tv-hero-btn is-glass");
       reUpBtn.type = "button";
-      reUpBtn.addEventListener("click", () => openHsLectureSlides(sess.code));
+      reUpBtn.addEventListener("click", () => {
+        const upBox = document.getElementById(`sfInlineUploadCard_${sess.id}`);
+        if (upBox) upBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (sfInlineFileInput) sfInlineFileInput.click();
+      });
       heroActions.appendChild(reUpBtn);
     }
 
@@ -13557,6 +13615,258 @@
       }
       docShelf.appendChild(docBtnRow);
       wrap.appendChild(docShelf);
+    }
+
+    // 1B. Direct Inline Slide / Teaching File Upload Box (Faculty) + Inline PDF Preview (Student & Faculty)
+    if (ROLE === "faculty" && sfInlineFileInput) {
+      const upCard = make("section", null, `hs-inline-upload-card ${slideRec ? "is-uploaded" : "is-pending"}`);
+      upCard.id = `sfInlineUploadCard_${sess.id}`;
+      upCard.style.marginBottom = "18px";
+      upCard.setAttribute("aria-label", `อัปโหลดสไลด์หรือไฟล์ประกอบการสอนประจำคาบ ${sess.code}`);
+
+      const upHead = make("div", null, "hs-inline-upload-head");
+      const titleWrap = make("div", null, "hs-inline-upload-title-wrap");
+      const h4 = make("h4");
+      h4.append(
+        make(
+          "span",
+          slideRec
+            ? `✓ Slide / ไฟล์ประกอบการสอนคาบ ${sess.code} เปิดใช้งานแล้ว (${sfExtMeta.extBadge})`
+            : `📤 มุมอัปโหลด Slide / ไฟล์ประกอบการสอนประจำคาบ ${sess.code}`
+        )
+      );
+      const extBadges = make("span", null, "hs-inline-ext-badges");
+      extBadges.append(
+        make("span", "PPTX", "hs-ext-pill is-pptx"),
+        make("span", "PDF", "hs-ext-pill is-pdf"),
+        make("span", "DOCX", "hs-ext-pill"),
+        make("span", "LINK", "hs-ext-pill")
+      );
+      h4.appendChild(extBadges);
+      titleWrap.append(
+        h4,
+        make(
+          "p",
+          slideRec
+            ? "ไฟล์หรือลิงก์ที่อัปโหลดแสดงพร้อมใช้งานแล้วทั้งในหน้าคาบเรียน ปฏิทิน และหน้ารวม Slide อาจารย์ — สามารถอัปโหลดไฟล์ใหม่แทนที่หรือลบออกได้ตลอดเวลา"
+            : "ลากไฟล์ .pptx, .pdf หรือ .docx มาวางในช่องด้านล่าง หรือวางลิงก์ Google Slides / Google Docs / Drive — เมื่อบันทึกแล้วสถานะคาบจะเปลี่ยนจากสีเทาเป็นเปิดใช้งานทันที"
+        )
+      );
+      upHead.appendChild(titleWrap);
+      upCard.appendChild(upHead);
+
+      const dropzone = make("div", null, "hs-inline-dropzone");
+      dropzone.id = `sfInlineDropzone_${sess.id}`;
+      dropzone.appendChild(sfInlineFileInput);
+      dropzone.append(
+        make("span", slideRec ? "✓" : "📂", "hs-inline-dropzone-ico"),
+        make(
+          "div",
+          slideRec
+            ? `ไฟล์ที่เปิดใช้งานอยู่: ${slideRec.fileName} (${slideRec.sizeLabel || sfExtMeta.extBadge})`
+            : `ลากไฟล์ Slide / เอกสาร (.PPTX, .PDF, .DOCX) มาวางที่นี่`,
+          "hs-inline-dropzone-title"
+        ),
+        make(
+          "div",
+          slideRec
+            ? "คลิกหรือลากไฟล์ใหม่มาวางที่นี่หากต้องการอัปเดตสไลด์หรือเอกสารประกอบคาบ"
+            : "รองรับ PowerPoint (.pptx, .ppt), PDF (.pdf), Word (.docx) และ Keynote (.key)",
+          "hs-inline-dropzone-sub"
+        )
+      );
+
+      const btnRow = make("div", null, "hs-inline-upload-btn-row");
+      const pickBtn = make(
+        "button",
+        slideRec ? "🔄 อัปโหลดไฟล์ใหม่แทนที่" : "📤 เลือกไฟล์ PPTX / PDF / DOCX จากเครื่อง…",
+        slideRec ? "btn sm teal" : "btn primary"
+      );
+      pickBtn.type = "button";
+      pickBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        sfInlineFileInput.click();
+      });
+      btnRow.appendChild(pickBtn);
+
+      if (slideRec) {
+        const openTestBtn = make("button", "📊 เปิดดู / ดาวน์โหลดไฟล์ที่อัปโหลด", "btn sm");
+        openTestBtn.type = "button";
+        openTestBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSessionSlide(sess.id, false);
+        });
+        const delBtn = make("button", "🗑 ลบไฟล์ออก", "btn sm");
+        delBtn.type = "button";
+        delBtn.addEventListener("click", async (ev) => {
+          ev.stopPropagation();
+          await removeSessionSlideDirect(sess.id);
+        });
+        btnRow.append(openTestBtn, delBtn);
+      }
+
+      dropzone.appendChild(btnRow);
+      dropzone.addEventListener("click", (ev) => {
+        if (ev.target && ev.target.closest && ev.target.closest("button, input, select, a")) return;
+        sfInlineFileInput.click();
+      });
+      upCard.appendChild(dropzone);
+
+      const metaBar = make("div", null, "hs-inline-meta-bar");
+      const uploaderField = make("div", null, "hs-inline-field");
+      const upLbl = make("label", "อาจารย์ / วิทยากรผู้อัปโหลด");
+      const upSelId = `sfInlineUploaderSel_${sess.id}`;
+      upLbl.setAttribute("for", upSelId);
+      const uploaderSel = document.createElement("select");
+      uploaderSel.id = upSelId;
+      const uploaderCustom = document.createElement("input");
+      uploaderCustom.type = "text";
+      uploaderCustom.placeholder = "ระบุชื่ออาจารย์ / วิทยากรผู้อัปโหลด…";
+      uploaderCustom.hidden = true;
+      uploaderCustom.style.marginTop = "6px";
+
+      const allTeachers = getAllCourseTeachers();
+      const activeTeacherObj = allTeachers.find((t) => t.key === state.myTeacherKey);
+      uploaderSel.add(new Option("— เลือกชื่ออาจารย์ผู้อัปโหลด —", ""));
+      allTeachers.forEach((t) => uploaderSel.add(new Option(t.label, t.label)));
+      if (sess.speakers && !Array.from(uploaderSel.options).some((o) => o.value === sess.speakers)) {
+        uploaderSel.add(new Option(sess.speakers, sess.speakers));
+      }
+      uploaderSel.add(new Option("ทีมผู้ประสานงานรายวิชา RACM 303", "ทีมผู้ประสานงานรายวิชา RACM 303"));
+      uploaderSel.add(new Option("อาจารย์ / วิทยากรท่านอื่น (ระบุชื่อเอง…)", "__CUSTOM__"));
+
+      const hasOptVal = (v) =>
+        Boolean(v) && v !== "__CUSTOM__" && Array.from(uploaderSel.options).some((o) => o.value === v);
+      const preferredUploader =
+        (slideRec && slideRec.uploadedBy) || (activeTeacherObj && activeTeacherObj.label) || sess.speakers || "";
+      if (preferredUploader) {
+        if (hasOptVal(preferredUploader)) {
+          uploaderSel.value = preferredUploader;
+        } else {
+          uploaderSel.value = "__CUSTOM__";
+          uploaderCustom.value = preferredUploader;
+          uploaderCustom.hidden = false;
+        }
+      }
+
+      const resolveChosenUploader = () => {
+        const raw =
+          uploaderSel.value === "__CUSTOM__" ? uploaderCustom.value || "" : uploaderSel.value || "";
+        return raw.trim() || sess.speakers || "อาจารย์ผู้สอน";
+      };
+
+      uploaderSel.addEventListener("change", () => {
+        uploaderCustom.hidden = uploaderSel.value !== "__CUSTOM__";
+        if (!uploaderCustom.hidden) uploaderCustom.focus();
+      });
+      uploaderField.append(upLbl, uploaderSel, uploaderCustom);
+
+      const urlField = make("div", null, "hs-inline-field");
+      const urlLbl = make("label", "หรือวางลิงก์สไลด์ / เอกสารออนไลน์ (Google Slides / Docs / Drive / Canva)");
+      const urlInId = `sfInlineExtUrl_${sess.id}`;
+      urlLbl.setAttribute("for", urlInId);
+      const urlRow = make("div", null, "hs-inline-url-row");
+      const urlInput = document.createElement("input");
+      urlInput.type = "url";
+      urlInput.id = urlInId;
+      urlInput.placeholder = "https://docs.google.com/presentation/d/... หรือลิงก์ Google Drive";
+      urlInput.value = (slideRec && slideRec.externalUrl) || "";
+      const saveUrlBtn = make("button", "บันทึกลิงก์", "btn sm");
+      saveUrlBtn.type = "button";
+      urlRow.append(urlInput, saveUrlBtn);
+      urlField.append(urlLbl, urlRow);
+
+      metaBar.append(uploaderField, urlField);
+      upCard.appendChild(metaBar);
+
+      const feedbackEl = make("div", null, "slide-studio-feedback");
+      feedbackEl.hidden = true;
+      upCard.appendChild(feedbackEl);
+
+      const showInlineErr = (msg) => {
+        feedbackEl.hidden = false;
+        feedbackEl.className = "slide-studio-feedback is-error";
+        feedbackEl.textContent = msg;
+      };
+
+      const handleDirectUpload = async (fileObj) => {
+        if (!fileObj) return;
+        if (!isAllowedSlideFile(fileObj)) {
+          showInlineErr("รองรับไฟล์ .PPTX, .PPT, .PDF, .DOCX, .DOC หรือ .KEY เท่านั้น");
+          return;
+        }
+        pickBtn.disabled = true;
+        pickBtn.textContent = "⏳ กำลังบันทึกไฟล์…";
+        await saveSessionSlideDirect({
+          sessionId: sess.id,
+          fileObj,
+          uploadedBy: resolveChosenUploader()
+        });
+      };
+
+      sfInlineFileInput.addEventListener("change", () => {
+        if (sfInlineFileInput.files && sfInlineFileInput.files[0]) {
+          handleDirectUpload(sfInlineFileInput.files[0]);
+        }
+      });
+
+      dropzone.addEventListener("dragover", (ev) => {
+        ev.preventDefault();
+        dropzone.classList.add("is-dragover");
+      });
+      dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("is-dragover");
+      });
+      dropzone.addEventListener("drop", (ev) => {
+        ev.preventDefault();
+        dropzone.classList.remove("is-dragover");
+        if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]) {
+          handleDirectUpload(ev.dataTransfer.files[0]);
+        }
+      });
+
+      saveUrlBtn.addEventListener("click", async () => {
+        const cleanUrl = (urlInput.value || "").trim();
+        if (!cleanUrl) {
+          showInlineErr("กรุณาวาง URL ของสไลด์/เอกสารออนไลน์ก่อนกดบันทึกลิงก์ หรือเลือกไฟล์ด้านบน");
+          return;
+        }
+        await saveSessionSlideDirect({
+          sessionId: sess.id,
+          externalUrl: cleanUrl,
+          uploadedBy: resolveChosenUploader()
+        });
+      });
+
+      wrap.appendChild(upCard);
+    }
+
+    if (slideRec && sfExtMeta.extKind === "pdf" && !slideRec.externalUrl) {
+      const pdfCard = make("section", null, "hs-inline-pdf-preview-card");
+      pdfCard.style.marginBottom = "18px";
+      const pdfHead = make("div", null, "hs-inline-pdf-head");
+      pdfHead.appendChild(make("strong", `📄 ตัวอย่างสไลด์ / ไฟล์ประกอบคาบ ${sess.code}: ${slideRec.fileName}`));
+      const pdfActs = make("div", null, "header-actions");
+      const newTabBtn = make("button", "↗ เปิดเต็มจอในแท็บใหม่", "btn sm");
+      newTabBtn.type = "button";
+      newTabBtn.addEventListener("click", () => openSessionSlide(sess.id, false));
+      const dlPdfBtn = make("button", "⬇ ดาวน์โหลด PDF", "btn sm teal");
+      dlPdfBtn.type = "button";
+      dlPdfBtn.addEventListener("click", () => openSessionSlide(sess.id, true));
+      pdfActs.append(newTabBtn, dlPdfBtn);
+      pdfHead.appendChild(pdfActs);
+
+      const iframe = document.createElement("iframe");
+      iframe.className = "hs-inline-pdf-frame";
+      iframe.title = `สไลด์ประกอบคาบ ${sess.code} (${slideRec.fileName})`;
+      pdfCard.append(pdfHead, iframe);
+      wrap.appendChild(pdfCard);
+
+      createSessionSlidePreviewBlobUrl(sess.id).then((previewUrl) => {
+        if (previewUrl && iframe.isConnected) {
+          iframe.src = previewUrl;
+        }
+      });
     }
 
     // 2. Two-Column Pedagogical Detail Cards
@@ -13801,11 +14111,16 @@
         });
         pills.appendChild(sBtn);
       } else if (ROLE === "faculty") {
-        const upBtn = make("button", "⬆ อัปโหลด Slide", "hs-atv-ep-pill");
+        const upBtn = make("button", "📤 Upload Slide / ไฟล์สอน", "hs-atv-ep-pill");
         upBtn.type = "button";
         upBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          openFacultySlideStudioForSession(s.id);
+          state.sfSelectedId = s.id;
+          renderSystemsForumView();
+          requestAnimationFrame(() => {
+            const upBox = document.getElementById(`sfInlineUploadCard_${s.id}`);
+            if (upBox) upBox.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
         });
         pills.appendChild(upBtn);
       } else {
@@ -14326,10 +14641,7 @@
   }
 
   function buildTextbookAppleTvDOM(baseMod) {
-    const allModules =
-      HSD_DATA.modules && HSD_DATA.modules.length
-        ? HSD_DATA.modules
-        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const allModules = getAllHsAndFoundationalModules();
     const curMod = getHsModuleMeta(baseMod);
     const scope = state.tbDriveScope || "folders";
 
@@ -14342,10 +14654,10 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
+        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 7 บท (ST1 รากฐาน & HS1 – HS6)", "tv-shelf-title"),
         make(
           "span",
-          "ทุกบทเรียงลำดับ Logical Flow 5 ขั้นตอนเหมือนกัน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class",
+          "เริ่มจาก ST1 (ปูรากฐานระบบและการคิดเชิงระบบ) ต่อเนื่องสู่ HS1–HS6 เรียงตาม Logical Flow 5 ขั้นตอน: ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ ประยุกต์ในชั้นเรียน",
           "tv-shelf-sub"
         )
       );
@@ -14366,8 +14678,12 @@
 
         const top = make("div", null, "tv-ep-top");
         top.append(
-          make("span", m.code, "tv-ep-code"),
-          make("span", `น้ำหนักสอบ ${m.examWeight || ""}`, "tv-ep-weight")
+          make("span", m.code === "ST1" ? "ST1 · รากฐาน" : m.code, "tv-ep-code"),
+          make(
+            "span",
+            m.code === "ST1" ? "ปูรากฐานก่อน HS1–HS6" : `น้ำหนักสอบ ${m.examWeight || ""}`,
+            "tv-ep-weight"
+          )
         );
 
         const mid = make("div", null, "tv-ep-bottom");
@@ -14421,12 +14737,16 @@
         });
         pills.appendChild(bSlide);
 
-        const bDisc = make("button", "⑤ Case", "hs-atv-ep-pill");
+        const isStEp = m.code === "ST1";
+        const bDisc = make("button", isStEp ? "⑤ กรอบคาบเรียน" : "⑤ Case", "hs-atv-ep-pill");
         bDisc.type = "button";
-        bDisc.title = `ขั้นที่ 5: Case Discussion in Class (${m.code})`;
+        bDisc.title = isStEp
+          ? "ขั้นที่ 5: กรอบคาบเรียนและคำถามชวนคิด (ST1)"
+          : `ขั้นที่ 5: Case Discussion in Class (${m.code})`;
         bDisc.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          openHsDiscussion(m.code);
+          if (isStEp) openSystemsForum("w1-d1-st");
+          else openHsDiscussion(m.code);
         });
         pills.appendChild(bDisc);
 
@@ -14824,10 +15144,7 @@
   }
 
   function buildLectureSlidesAppleTvDOM(baseMod) {
-    const allModules =
-      HSD_DATA.modules && HSD_DATA.modules.length
-        ? HSD_DATA.modules
-        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const allModules = getAllHsAndFoundationalModules();
     const curMod = getHsModuleMeta(baseMod);
     const scope = state.lsDriveScope || "folders";
     const hsCounts = countUploadedHsSlides();
@@ -14841,7 +15158,7 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", `④ STEP 04 · Slide อาจารย์ประจำคาบ (HS1 – HS6) · อัปโหลดแล้ว ${hsCounts.uploaded}/${hsCounts.total} คาบ`, "tv-shelf-title"),
+        make("h3", `④ STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (ST1 & HS1 – HS6) · อัปโหลดแล้ว ${hsCounts.uploaded}/${hsCounts.total} คาบ`, "tv-shelf-title"),
         make(
           "span",
           hsCounts.uploaded > 0
@@ -14920,7 +15237,7 @@
         } else if (ROLE === "faculty") {
           const quickInput = document.createElement("input");
           quickInput.type = "file";
-          quickInput.accept = ".pptx,.ppt,.pdf,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
+          quickInput.accept = ".pptx,.ppt,.pdf,.docx,.doc,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
           quickInput.hidden = true;
           quickInput.addEventListener("click", (ev) => ev.stopPropagation());
           quickInput.addEventListener("change", async (ev) => {
@@ -14981,7 +15298,7 @@
       facultyInlineFileInput.type = "file";
       facultyInlineFileInput.id = `hsInlineSlideFileInput_${curMod.code}`;
       facultyInlineFileInput.accept =
-        ".pptx,.ppt,.pdf,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
+        ".pptx,.ppt,.pdf,.docx,.doc,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       facultyInlineFileInput.hidden = true;
     }
 
@@ -14993,7 +15310,7 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backAllBtn = make("button", "← รวมครบทั้ง 6 คาบ (HS1–HS6)", "hs-atv-back-pill");
+    const backAllBtn = make("button", "← รวมครบทั้ง 7 คาบ (ST1 & HS1–HS6)", "hs-atv-back-pill");
     backAllBtn.type = "button";
     backAllBtn.addEventListener("click", () => {
       state.lsDriveScope = "folders";
@@ -15050,7 +15367,7 @@
 
     const heroActions = make("div", null, "tv-hero-actions");
     if (sInfo.uploaded) {
-      const isDirectDlOnly = sInfo.extKind === "pptx" || sInfo.extKind === "key";
+      const isDirectDlOnly = sInfo.extKind === "pptx" || sInfo.extKind === "key" || sInfo.extKind === "docx";
       const btnOpenSlide = make(
         "button",
         isDirectDlOnly
@@ -15115,7 +15432,9 @@
       const extBadges = make("span", null, "hs-inline-ext-badges");
       extBadges.append(
         make("span", "PPTX", "hs-ext-pill is-pptx"),
-        make("span", "PDF", "hs-ext-pill is-pdf")
+        make("span", "PDF", "hs-ext-pill is-pdf"),
+        make("span", "DOCX", "hs-ext-pill"),
+        make("span", "LINK", "hs-ext-pill")
       );
       h4.appendChild(extBadges);
       titleWrap.append(
@@ -15278,7 +15597,7 @@
       const handleDirectFileUpload = async (fileObj) => {
         if (!fileObj) return;
         if (!isAllowedSlideFile(fileObj)) {
-          showInlineError("รองรับเฉพาะไฟล์สไลด์ .PPTX, .PPT, .PDF หรือ .KEY เท่านั้น");
+          showInlineError("รองรับเฉพาะไฟล์ .PPTX, .PPT, .PDF, .DOCX, .DOC หรือ .KEY เท่านั้น");
           return;
         }
         pickBtn.disabled = true;
@@ -15606,20 +15925,20 @@
           allowAllModules: true,
           isAllActive: isFoldersRoot,
           keepFormatTabActiveWhenAll: true,
-          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
+          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (ST1 & HS1–6)" : "📚 รวมทุกบท (ST1 & HS1–6)",
           allHeading:
             subMode === "lecture-slides"
               ? isDriveUi
-                ? "HS1–HS6: STEP 04 · โฟลเดอร์ Slide อาจารย์ประจำคาบ (File Explorer)"
+                ? "ST1 & HS1–HS6: STEP 04 · โฟลเดอร์ Slide อาจารย์ / ไฟล์สอนประจำคาบ"
                 : (() => {
                     const sc = countUploadedHsSlides();
                     return sc.uploaded > 0
-                      ? `HS1–HS6: STEP 04 · Slide อาจารย์ประจำคาบ (อัปโหลดแล้ว ${sc.uploaded}/${sc.total} คาบ)`
-                      : "HS1–HS6: STEP 04 · Slide อาจารย์ประจำคาบ (รออาจารย์ Upload)";
+                      ? `ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (อัปโหลดแล้ว ${sc.uploaded}/${sc.total} คาบ)`
+                      : "ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (รออาจารย์ Upload)";
                   })()
               : isDriveUi
-              ? "Google Drive · ระบบสุขภาพ (HS1–HS6) — เรียงตาม Logical Flow 5 ขั้นตอน"
-              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 5 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · Case Discussion)",
+              ? "Google Drive · ระบบสุขภาพ (ST1 & HS1–HS6) — เรียงตาม Logical Flow 5 ขั้นตอน"
+              : "ST1 & HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 5 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · ประยุกต์ในชั้นเรียน)",
           allDesc:
             subMode === "lecture-slides"
               ? "เลือกบทเรียน HS1–HS6 เพื่อดูหรืออัปโหลดสไลด์ประกอบการบรรยายต้นคาบของอาจารย์ผู้สอน (ขั้นที่ 4)"
@@ -27368,6 +27687,10 @@
       return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     }
     if (lower.endsWith(".ppt")) return "application/vnd.ms-powerpoint";
+    if (lower.endsWith(".docx")) {
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    }
+    if (lower.endsWith(".doc")) return "application/msword";
     if (lower.endsWith(".key")) return "application/x-iwork-keynote-sffkey";
     return rawMime || "application/octet-stream";
   }
@@ -27375,12 +27698,14 @@
   function isAllowedSlideFile(fileObj) {
     if (!fileObj) return false;
     const lower = String(fileObj.name || "").trim().toLowerCase();
-    if (/\.(pdf|pptx|ppt|key)$/i.test(lower)) return true;
+    if (/\.(pdf|pptx|ppt|docx|doc|key)$/i.test(lower)) return true;
     const mt = String(fileObj.type || "").toLowerCase();
     return (
       mt === "application/pdf" ||
       mt.includes("powerpoint") ||
       mt.includes("presentationml") ||
+      mt.includes("wordprocessingml") ||
+      mt === "application/msword" ||
       mt.includes("keynote")
     );
   }
@@ -27398,11 +27723,14 @@
     if (fn.endsWith(".pptx") || fn.endsWith(".ppt") || mt.includes("presentation") || mt.includes("powerpoint")) {
       return { extKind: "pptx", extBadge: "PPTX", icoCls: "is-pptx", icoTxt: "P" };
     }
+    if (fn.endsWith(".docx") || fn.endsWith(".doc") || mt.includes("wordprocessingml") || mt === "application/msword") {
+      return { extKind: "docx", extBadge: "DOCX", icoCls: "is-docx", icoTxt: "W" };
+    }
     if (fn.endsWith(".key") || mt.includes("keynote")) {
       return { extKind: "key", extBadge: "KEY", icoCls: "is-pptx", icoTxt: "K" };
     }
     if (rec.externalUrl) {
-      return { extKind: "link", extBadge: "SLIDES", icoCls: "is-pptx", icoTxt: "↗" };
+      return { extKind: "link", extBadge: "LINK", icoCls: "is-pptx", icoTxt: "↗" };
     }
     return { extKind: "file", extBadge: "SLIDE", icoCls: "is-pptx", icoTxt: "P" };
   }
@@ -27546,7 +27874,7 @@
   }
 
   function countUploadedHsSlides() {
-    const codes = ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
+    const codes = ["ST1", "HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
     const uploaded = codes.filter((c) => getHsSlideInfo(c).uploaded).length;
     return { uploaded, total: codes.length };
   }
@@ -27554,6 +27882,8 @@
   function refreshPortalAfterSlidesChange() {
     if (state.activeTab === "textbooks") {
       renderTextbookReader();
+    } else if (state.activeTab === "systems-forum") {
+      renderSystemsForumView();
     } else if (state.activeTab === "hs-discussion") {
       renderHsDiscussionView();
     } else if (state.activeTab === "practice") {
@@ -27569,6 +27899,49 @@
       renderFacultyDocsView();
     }
     window.dispatchEvent(new CustomEvent("racm:slideschange", { detail: { role: ROLE } }));
+  }
+
+  async function saveSessionSlideDirect(opts) {
+    const o = opts || {};
+    const targetSid = String(o.sessionId || "").trim();
+    if (!targetSid) return null;
+    const fileObj = o.fileObj || null;
+    const extUrl = String(o.externalUrl || "").trim();
+    const uploader = String(o.uploadedBy || "").trim() || "อาจารย์ผู้สอน";
+    if (!fileObj && !extUrl) return null;
+
+    const storedMeta = {
+      sessionId: targetSid,
+      fileName: fileObj ? fileObj.name : "Slide / เอกสารออนไลน์",
+      mime: fileObj ? inferSlideMimeType(fileObj.name, fileObj.type) : "",
+      sizeLabel: fileObj ? formatFileSize(fileObj.size) : "ลิงก์ออนไลน์",
+      externalUrl: fileObj ? "" : extUrl,
+      dataUrl: "",
+      uploadedBy: uploader,
+      uploadedAt: new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })
+    };
+
+    if (fileObj) {
+      const binRes = await saveSlideBinaryToIdb(targetSid, fileObj);
+      storedMeta.dataUrl = binRes.dataUrl || "";
+      storedMeta.mime = binRes.mime || storedMeta.mime;
+    }
+
+    const nextReg = Object.assign({}, getSlidesRegistry());
+    nextReg[targetSid] = storedMeta;
+    persistSlidesRegistry(nextReg);
+    refreshPortalAfterSlidesChange();
+    return storedMeta;
+  }
+
+  async function removeSessionSlideDirect(sessionId) {
+    const targetSid = String(sessionId || "").trim();
+    if (!targetSid) return;
+    const nextReg = Object.assign({}, getSlidesRegistry());
+    delete nextReg[targetSid];
+    await deleteSlideBinaryFromIdb(targetSid);
+    persistSlidesRegistry(nextReg);
+    refreshPortalAfterSlidesChange();
   }
 
   async function saveHsModuleSlide(opts) {
@@ -28103,8 +28476,8 @@
             <select id="slideTargetSessionSelect"></select>
           </div>
           <div class="slide-dropzone" id="slideFileDropzone">
-            <input type="file" id="slideFileInput" accept=".pdf,.ppt,.pptx,.key" hidden>
-            <div><strong>📂 ลากไฟล์ Slide มาวางที่นี่</strong> หรือกดเลือกไฟล์จากเครื่อง (<code>.pdf</code>, <code>.pptx</code>, <code>.key</code>)</div>
+            <input type="file" id="slideFileInput" accept=".pdf,.ppt,.pptx,.doc,.docx,.key" hidden>
+            <div><strong>📂 ลากไฟล์ Slide / เอกสารสอนมาวางที่นี่</strong> หรือกดเลือกไฟล์จากเครื่อง (<code>.pdf</code>, <code>.pptx</code>, <code>.docx</code>, <code>.key</code>)</div>
             <button type="button" class="btn sm teal" id="pickSlideFileBtn">เลือกไฟล์ Slide จากเครื่อง…</button>
             <div id="slideSelectedFileBadge" class="slide-file-badge" hidden></div>
           </div>
@@ -34834,6 +35207,7 @@
     getHsSlideInfo: (mod) => getHsSlideInfo(mod),
     countUploadedHsSlides: () => countUploadedHsSlides(),
     openSessionSlide: (sid, forceDl) => openSessionSlide(sid, forceDl),
+    getHsModuleMeta: (mod) => getHsModuleMeta(mod),
     getHsLogicalFlowModel: (mod) => getHsLogicalFlowModel(mod),
     openSelfQuizForModule: (mod, sub) => openSelfQuizForModule(mod, sub),
     setHsUiMode: (mode, opts) => setHsUiMode(mode, opts),
