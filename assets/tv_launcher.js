@@ -748,9 +748,9 @@
           </div>
           <div class="tv-quick-grid">
             <a class="tv-quick-card" href="https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
-              <span class="tv-quick-tag">ZOOM · ศ. 27 พ.ย. 69</span>
-              <span class="tv-quick-title">EP1 – EP3 &amp; Exercise 1–2</span>
-              <span class="tv-quick-meta">ID: 910 2256 1292 · Pass: 346256</span>
+              <span class="tv-quick-tag">ZOOM · ศ. 27 พ.ย. 69 (08.30–11.00 น.)</span>
+              <span class="tv-quick-title">EP1 – EP3 (Hybrid · Auditorium)</span>
+              <span class="tv-quick-meta">ID: 910 2256 1292 · Pass: 346256 · หลัง 11.00 SDL ใน E-learning</span>
             </a>
             <a class="tv-quick-card" href="https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
               <span class="tv-quick-tag">ZOOM · พ. 2 ธ.ค. 69</span>

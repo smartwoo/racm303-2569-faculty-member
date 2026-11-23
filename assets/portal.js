@@ -3175,7 +3175,8 @@
       );
     }
     if (session.actionUrl) {
-      descParts.push(`🔗 ลิงก์ส่งงาน/แบบฟอร์ม: ${session.actionUrl}`, "");
+      const actPrefix = session.actionLabel ? session.actionLabel.replace(/\s*↗$/, "") : "ลิงก์ส่งงาน/แบบฟอร์ม";
+      descParts.push(`🔗 ${actPrefix}: ${session.actionUrl}`, "");
     }
     if (session.objectives) {
       descParts.push(`วัตถุประสงค์: ${session.objectives}`);
@@ -25832,6 +25833,13 @@
       zLink.target = "_blank";
       zLink.rel = "noopener";
       actRow.appendChild(zLink);
+    } else if (sess.actionUrl) {
+      const aLink = make("a", sess.actionLabel || "E-learning ↗", "cq-link-btn is-primary");
+      aLink.href = sess.actionUrl;
+      aLink.target = "_blank";
+      aLink.rel = "noopener";
+      aLink.addEventListener("click", (ev) => ev.stopPropagation());
+      actRow.appendChild(aLink);
     }
     if (sess.conciseLink || sess.docLink) {
       const readBtn = make("button", `สรุป ${sess.code.replace("-DISC", "")} →`, "cq-link-btn");
@@ -33838,10 +33846,11 @@
       zoomRooms.forEach((zr, idx) => {
         const zCard = make("div", null, "ep-zoom-card");
         const dayTag = idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : "Day 3 · พฤ. 3 ธ.ค. 69";
+        const zoomTime = zr.timeLabel || (idx === 0 ? "08.30 – 11.00 น." : "09.00 – 16.30 น.");
         zCard.innerHTML = `
           <div class="ep-zoom-top">
             <span class="ep-zoom-tag">ZOOM · ${escapeHtml(dayTag)}</span>
-            <span class="ep-zoom-time">09.00 – 16.30 น.</span>
+            <span class="ep-zoom-time">${escapeHtml(zoomTime)}</span>
           </div>
           <div class="ep-zoom-label">${escapeHtml(zr.label || "")}</div>
           <div class="ep-zoom-creds">
@@ -33952,6 +33961,12 @@
             zLink.target = "_blank";
             zLink.rel = "noopener";
             actRow.appendChild(zLink);
+          } else if (s.actionUrl) {
+            const aLink = make("a", s.actionLabel || "E-learning ↗", "btn sm primary");
+            aLink.href = s.actionUrl;
+            aLink.target = "_blank";
+            aLink.rel = "noopener";
+            actRow.appendChild(aLink);
           }
           const infoBtn = make("button", tr("รายละเอียดคาบ", "Details"), "btn sm");
           infoBtn.type = "button";

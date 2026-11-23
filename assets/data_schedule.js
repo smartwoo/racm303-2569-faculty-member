@@ -22,7 +22,8 @@ window.RACM_SCHEDULE_DATA = {
         "url": "https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1",
         "id": "910 2256 1292",
         "pass": "346256",
-        "label": "ระบาดวิทยา วันศุกร์ที่ 27 พ.ย. 2569 (09.00–16.30 น.) · EP1–EP3 & Exercise 1–2"
+        "label": "ระบาดวิทยา วันศุกร์ที่ 27 พ.ย. 2569 (08.30–11.00 น.) · EP1–EP3 (หลัง 11.00 น. ทำ Exercise SDL ใน E-learning)",
+        "timeLabel": "08.30 – 11.00 น."
       },
       {
         "url": "https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1",
@@ -474,7 +475,7 @@ window.RACM_SCHEDULE_DATA = {
       "tue": "24 พ.ย. · วันเตรียมขึ้นกองของภาควิชาฯ (นศพ. ยังไม่มีเรียน)",
       "wed": "25 พ.ย. · เช้า: Orientation & Systems Thinking (อ.ณัฐวุฒิ) | บ่าย: Global/Planetary Health & HPSR (นพ.ทักษพล, นพ.วิรุฬ)",
       "thu": "26 พ.ย. · เช้า: HS1 สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention) (อ.วริษา + 6 กลุ่ม) | บ่าย: กลุ่มย่อย ครั้งที่ 1 (9 กลุ่ม)",
-      "fri": "27 พ.ย. · เช้า: EP1–EP3 + Ex 1–2 (อ.จักรกฤษณ์, Auditorium) | บ่าย: Exercise Day 1 (Online)",
+      "fri": "27 พ.ย. · 08.30–11.00: EP1–EP3 (อ.จักรกฤษณ์, Auditorium/Hybrid) | หลัง 11.00: Exercise 1–2 & Day 1 (SDL ใน E-learning)",
       "wknd": "28–29 พ.ย. · วันหยุดสุดสัปดาห์ (29 พ.ย. เจ้าหน้าที่เตรียมห้อง)"
     },
     {
@@ -805,9 +806,9 @@ window.RACM_SCHEDULE_DATA = {
       "week": 1,
       "dateISO": "2026-11-27",
       "dateTH": "วันศุกร์ที่ 27 พฤศจิกายน 2569",
-      "startTime": "09:00",
+      "startTime": "08:30",
       "endTime": "11:00",
-      "timeLabel": "09.00 – 11.00 น.",
+      "timeLabel": "08.30 – 11.00 น.",
       "category": "EP",
       "code": "EP1–EP3",
       "title": "EP1: Introduction to Epidemiology · EP2: Diagnostic Test · EP3: Errors in Epidemiology",
@@ -831,41 +832,35 @@ window.RACM_SCHEDULE_DATA = {
       "endTime": "12:00",
       "timeLabel": "11.00 – 12.00 น.",
       "category": "EP",
-      "code": "EX1–EX2",
-      "title": "EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal)",
-      "objectives": "ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์",
-      "lecturers": "อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา",
-      "format": "Online",
-      "room": "Online (Zoom)",
-      "checkIn": "ต่อเนื่อง",
-      "zoom": {
-        "url": "https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1",
-        "id": "910 2256 1292",
-        "pass": "346256"
-      }
+      "code": "EX1–EX2 (SDL)",
+      "title": "EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal) — SDL ใน E-learning",
+      "objectives": "ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์ด้วยตนเองผ่านระบบ E-learning",
+      "lecturers": "นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)",
+      "format": "Self-Directed Learning (SDL) · E-learning",
+      "room": "ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)",
+      "checkIn": "ไม่เช็คชื่อ",
+      "actionUrl": "https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398",
+      "actionLabel": "ทำแบบฝึกหัดใน E-learning ↗"
     },
     {
       "id": "w1-d3-exday1",
       "week": 1,
       "dateISO": "2026-11-27",
       "dateTH": "วันศุกร์ที่ 27 พฤศจิกายน 2569",
-      "startTime": "13:00",
+      "startTime": "13:30",
       "endTime": "16:30",
-      "timeLabel": "13.00 – 16.30 น.",
+      "timeLabel": "13.30 – 16.30 น.",
       "category": "EP",
       "code": "EX-SDL",
-      "title": "Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเอง)",
-      "objectives": "ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเอง เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569",
-      "lecturers": "นักศึกษาทำแบบฝึกหัดด้วยตนเอง",
-      "format": "Online / SDL",
-      "room": "Online",
+      "title": "Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเองในระบบ E-learning)",
+      "objectives": "ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเองในระบบ E-learning เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569",
+      "lecturers": "นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)",
+      "format": "Self-Directed Learning (SDL) · E-learning",
+      "room": "ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)",
       "checkIn": "ไม่เช็คชื่อ",
-      "facultyNote": "รอยืนยัน: ตรวจสอบว่าปี 2569 ยังมีแบบฝึกหัดพาร์ต Medical Statistics ในช่วงบ่ายวันที่ 27 พ.ย. เหมือน Table Spec ปี 2568 หรือไม่",
-      "zoom": {
-        "url": "https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1",
-        "id": "910 2256 1292",
-        "pass": "346256"
-      }
+      "facultyNote": "ปรับเวลาบรรยาย EP1–EP3 เป็น 08.30–11.00 น. และตั้งแต่เวลา 11.00 น. เป็นต้นไปให้นักศึกษาทำ Exercise 1–2 และ Exercise Day 1 แบบ SDL ในระบบ E-learning ด้วยตนเอง (ไม่เช็คชื่อ)",
+      "actionUrl": "https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398",
+      "actionLabel": "ทำแบบฝึกหัดใน E-learning ↗"
     },
     {
       "id": "w2-d1-hs2-lec",
@@ -1916,9 +1911,9 @@ window.RACM_SCHEDULE_DATA = {
     },
     {
       "id": "aud-7",
-      "session": "ศ. 27 พ.ย. (บ่าย) & พ. 9 ธ.ค. (17.00 น.) & Table Spec ระบบสุขภาพ",
-      "issue": "ตรวจสอบว่ายังมี Exercise: Medical Statistics หรือไม่ | เวลาส่ง SRN 1 (17.00 น.) กระชั้นชิดหลังเลิกเรียน 16.30 น. | ยืนยันสัดส่วนคะแนนข้อสอบระบบสุขภาพปี 2569",
-      "action": "ยืนยันพาร์ต Medical Statistics, พิจารณาขยายส่ง SRN 1 เป็น 22.00 น. และยืนยันน้ำหนัก Table Spec"
+      "session": "พ. 9 ธ.ค. (17.00 น.) & Table Spec ระบบสุขภาพ",
+      "issue": "เวลาส่ง SRN 1 (17.00 น.) กระชั้นชิดหลังเลิกเรียน 16.30 น. | ยืนยันสัดส่วนคะแนนข้อสอบระบบสุขภาพปี 2569",
+      "action": "พิจารณาขยายส่ง SRN 1 เป็น 22.00 น. และยืนยันน้ำหนัก Table Spec"
     }
   ],
   "fixedSummary": [
@@ -1939,8 +1934,9 @@ window.RACM_SCHEDULE_DATA = {
       ]
     },
     {
-      "title": "3. ซ่อมเวลาเรียน รูปแบบ Online และล้างสูตร #VALUE! ทั้ง 18 จุด",
+      "title": "3. ซ่อมเวลาเรียน รูปแบบ Online/SDL และล้างสูตร #VALUE! ทั้ง 18 จุด",
       "items": [
+        "วันศุกร์ที่ 27 พ.ย. 2569 (ระบาดวิทยา Day 1): ปรับเวลาบรรยาย EP1–EP3 เป็น 08.30–11.00 น. (Hybrid ห้อง Auditorium) และตั้งแต่ 11.00 น. เป็นต้นไป (11.00–12.00 น. และ 13.30–16.30 น.) ปรับเป็น Exercise SDL ในระบบ E-learning ด้วยตนเอง (ไม่เช็คชื่อ)",
         "วันพุธที่ 9 ธ.ค. บ่าย (กลุ่มย่อย ครั้งที่ 4): แก้เวลาเริ่มจาก 14.30 น. กลับเป็น 13.00–16.30 น. ตามตารางจองห้อง",
         "อัปเดตสถานะ Online ของอาจารย์ที่ปรึกษาที่ติดนิเทศ นศพ. ปี 5 ในวันที่ 8–9 ธ.ค. (เพชรบูรณ์ 2, อุบลรัตน์, อุ้มผาง)",
         "ลบข้อมูลค้างในวันหยุด 10 ธ.ค. และแก้สูตร Excel ที่ขึ้น #VALUE! ครบทั้ง 18 เซลล์"

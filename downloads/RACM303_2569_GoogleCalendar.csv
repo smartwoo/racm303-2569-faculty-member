@@ -1,4 +1,4 @@
-﻿Subject,Start Date,Start Time,End Date,End Time,All Day Event,Description,Location,Private
+﻿"Subject","Start Date","Start Time","End Date","End Time","All Day Event","Description","Location","Private"
 "[RACM 303] วันทำการ เตรียมขึ้นกองภาควิชาเวชศาสตร์ชุมชน (นักศึกษาแพทย์ยังไม่มีเรียน)","11/24/2026","","11/24/2026","","True","วัตถุประสงค์: ประชุมซักซ้อมคณาจารย์และเจ้าหน้าที่ประจำรายวิชา ตรวจสอบความพร้อมของห้องเรียนและระบบประเมินผล
 อาจารย์ผู้สอน: คณาจารย์และเจ้าหน้าที่ภาควิชาเวชศาสตร์ชุมชน
 สถานที่/ห้องเรียน: ภาควิชาเวชศาสตร์ชุมชน
@@ -27,27 +27,25 @@
 อาจารย์ผู้สอน: อาจารย์ที่ปรึกษาประจำกลุ่มภาคสนามทั้ง 9 กลุ่ม
 สถานที่/ห้องเรียน: ห้องประจำกลุ่มย่อย 9 ห้อง (1C1-02..07 และ 3B1-01/05/06)
 รูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)","ห้องประจำกลุ่มย่อย 9 ห้อง (1C1-02..07 และ 3B1-01/05/06)","False"
-"[RACM 303] EP1: Introduction to Epidemiology · EP2: Diagnostic Test · EP3: Errors in Epidemiology","11/27/2026","09:00 AM","11/27/2026","11:00 AM","False","🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
+"[RACM 303] EP1: Introduction to Epidemiology · EP2: Diagnostic Test · EP3: Errors in Epidemiology","11/27/2026","08:30 AM","11/27/2026","11:00 AM","False","🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
 Meeting ID: 910 2256 1292 | Passcode: 346256
 
 วัตถุประสงค์: เข้าใจบทบาทระบาดวิทยาในเวชปฏิบัติ คำนวณและแปลผล Sensitivity, Specificity, PPV, NPV, Likelihood Ratio และจำแนกความคลาดเคลื่อนทางระบาดวิทยา (Random Error, Bias, Confounding)
 อาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา
 สถานที่/ห้องเรียน: ห้อง Auditorium (2A01) ชั้น 2 อาคารศูนย์การเรียนรู้
 รูปแบบ: Onsite + Online (Hybrid) (เช็คชื่อ)","ห้อง Auditorium (2A01) ชั้น 2 อาคารศูนย์การเรียนรู้ | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1","False"
-"[RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal)","11/27/2026","11:00 AM","11/27/2026","12:00 PM","False","🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-Meeting ID: 910 2256 1292 | Passcode: 346256
+"[RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal) — SDL ใน E-learning","11/27/2026","11:00 AM","11/27/2026","12:00 PM","False","🔗 ทำแบบฝึกหัดใน E-learning: https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
 
-วัตถุประสงค์: ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์
-อาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา
-สถานที่/ห้องเรียน: Online (Zoom)
-รูปแบบ: Online (ต่อเนื่อง)","Online (Zoom) | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1","False"
-"[RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเอง)","11/27/2026","01:00 PM","11/27/2026","04:30 PM","False","🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-Meeting ID: 910 2256 1292 | Passcode: 346256
+วัตถุประสงค์: ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์ด้วยตนเองผ่านระบบ E-learning
+อาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)
+สถานที่/ห้องเรียน: ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+รูปแบบ: Self-Directed Learning (SDL) · E-learning (ไม่เช็คชื่อ)","ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)","False"
+"[RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเองในระบบ E-learning)","11/27/2026","01:30 PM","11/27/2026","04:30 PM","False","🔗 ทำแบบฝึกหัดใน E-learning: https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
 
-วัตถุประสงค์: ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเอง เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569
-อาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง
-สถานที่/ห้องเรียน: Online
-รูปแบบ: Online / SDL (ไม่เช็คชื่อ)","Online | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1","False"
+วัตถุประสงค์: ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเองในระบบ E-learning เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569
+อาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)
+สถานที่/ห้องเรียน: ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+รูปแบบ: Self-Directed Learning (SDL) · E-learning (ไม่เช็คชื่อ)","ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)","False"
 "[RACM 303] *HS2: หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care) (Guided Learning Synthesis)","11/30/2026","08:30 AM","11/30/2026","09:30 AM","False","วัตถุประสงค์: 1) จำแนกขอบเขตของระบบสุขภาพตามนิยาม WHO (Primary intent) และ พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 | 2) เปรียบเทียบเป้าหมายระบบสุขภาพตามกรอบ WHO และ Triple/Quadruple/Quintuple Aim | 3) วิเคราะห์ระบบบริการด้วย Six Building Blocks, CAS และ Results Chain | 4) ประยุกต์ใช้กรอบ 6W เลือกรูปแบบการดูแล (7 Models of Care)
 อาจารย์ผู้สอน: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์
 สถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก

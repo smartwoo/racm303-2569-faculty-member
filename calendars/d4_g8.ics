@@ -111,12 +111,18 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:w1-d3-ep123@racm303-2569.mahidol.ac.th
-DTSTAMP:20261119T160000Z
-DTSTART;TZID=Asia/Bangkok:20261127T090000
+DTSTAMP:20261123T013000Z
+DTSTART;TZID=Asia/Bangkok:20261127T083000
 DTEND;TZID=Asia/Bangkok:20261127T110000
 SUMMARY:[RACM 303] EP1: Introduction to Epidemiology · EP2: Diagnostic Test · EP3: Errors in Epidemiology
 LOCATION:ห้อง Auditorium (2A01) ชั้น 2 อาคารศูนย์การเรียนรู้ | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1\nMeeting ID: 910 2256 1292 | Passcode: 346256\n\nวัตถุประสงค์: เข้าใจบทบาทระบาดวิทยาในเวชปฏิบัติ คำนวณและแปลผล Sensitivity\, Specificity\, PPV\, NPV\, Likelihood Ratio และจำแนกความคลาดเคลื่อนทางระบาดวิทยา (Random Error\, Bias\, Confounding)\nอาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา\nสถานที่/ห้องเรียน: ห้อง Auditorium (2A01) ชั้น 2 อาคารศูนย์การเรียนรู้\nรูปแบบ: Onsite + Online (Hybrid) (เช็คชื่อ)
+DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
+Meeting ID: 910 2256 1292 | Passcode: 346256
+
+วัตถุประสงค์: เข้าใจบทบาทระบาดวิทยาในเวชปฏิบัติ คำนวณและแปลผล Sensitivity\, Specificity\, PPV\, NPV\, Likelihood Ratio และจำแนกความคลาดเคลื่อนทางระบาดวิทยา (Random Error\, Bias\, Confounding)
+อาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา
+สถานที่/ห้องเรียน: ห้อง Auditorium (2A01) ชั้น 2 อาคารศูนย์การเรียนรู้
+รูปแบบ: Onsite + Online (Hybrid) (เช็คชื่อ)
 URL:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
 X-GOOGLE-CONFERENCE:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
 BEGIN:VALARM
@@ -127,34 +133,42 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:w1-d3-ex12@racm303-2569.mahidol.ac.th
-DTSTAMP:20261119T160000Z
+DTSTAMP:20261123T013000Z
 DTSTART;TZID=Asia/Bangkok:20261127T110000
 DTEND;TZID=Asia/Bangkok:20261127T120000
-SUMMARY:[RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal)
-LOCATION:Online (Zoom) | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1\nMeeting ID: 910 2256 1292 | Passcode: 346256\n\nวัตถุประสงค์: ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์\nอาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา\nสถานที่/ห้องเรียน: Online (Zoom)\nรูปแบบ: Online (ต่อเนื่อง)
-URL:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-X-GOOGLE-CONFERENCE:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
+SUMMARY:[RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal) — SDL ใน E-learning
+LOCATION:ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+DESCRIPTION:🔗 ทำแบบฝึกหัดใน E-learning: https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
+
+วัตถุประสงค์: ฝึกคำนวณและแปลผลค่าสถิติการตรวจวินิจฉัยโรค และวิเคราะห์อคติ/ตัวกวนในงานวิจัยทางการแพทย์ด้วยตนเองผ่านระบบ E-learning
+อาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)
+สถานที่/ห้องเรียน: ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+รูปแบบ: Self-Directed Learning (SDL) · E-learning (ไม่เช็คชื่อ)
+URL:https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] EXERCISE 1: Diagnostic Test & Errors in Epidemiology · EXERCISE 2: Errors in Epidemiology (Case Appraisal) — SDL ใน E-learning
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:w1-d3-exday1@racm303-2569.mahidol.ac.th
-DTSTAMP:20261119T160000Z
-DTSTART;TZID=Asia/Bangkok:20261127T130000
+DTSTAMP:20261123T013000Z
+DTSTART;TZID=Asia/Bangkok:20261127T133000
 DTEND;TZID=Asia/Bangkok:20261127T163000
-SUMMARY:[RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเอง)
-LOCATION:Online | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1\nMeeting ID: 910 2256 1292 | Passcode: 346256\n\nวัตถุประสงค์: ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเอง เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569\nอาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง\nสถานที่/ห้องเรียน: Online\nรูปแบบ: Online / SDL (ไม่เช็คชื่อ)
-URL:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
-X-GOOGLE-CONFERENCE:https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
+SUMMARY:[RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเองในระบบ E-learning)
+LOCATION:ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+DESCRIPTION:🔗 ทำแบบฝึกหัดใน E-learning: https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
+
+วัตถุประสงค์: ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเองในระบบ E-learning เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569
+อาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดด้วยตนเอง (SDL)
+สถานที่/ห้องเรียน: ระบบ E-learning รามาธิบดี (ศึกษาด้วยตนเอง)
+รูปแบบ: Self-Directed Learning (SDL) · E-learning (ไม่เช็คชื่อ)
+URL:https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเอง)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Exercise Day 1 (ทำแบบฝึกหัดต่อเนื่องด้วยตนเองในระบบ E-learning)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
