@@ -25598,5 +25598,439 @@ html[data-theme="dark"] .ppt-thumb-wire.is-cs-wire span {
   }
 }
 
+/* ---------- Coherent 4-Step Logical Flow UI (HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion) ---------- */
+.hs-flow-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: var(--tv-surface, #ffffff);
+  border: 1px solid var(--tv-card-border, rgba(15, 29, 53, 0.08));
+  box-shadow: var(--tv-shadow-rest, 0 6px 20px -4px rgba(10, 28, 64, 0.07));
+  overflow-x: auto;
+}
+
+.hs-flow-step-node {
+  flex: 1 1 0;
+  min-width: 150px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tv-ink, #0c1829);
+  font-family: var(--font-display);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.hs-flow-step-node:hover {
+  transform: translateY(-1px);
+  background: rgba(148, 163, 184, 0.1);
+  border-color: var(--tv-card-border, rgba(15, 29, 53, 0.1));
+}
+
+.hs-flow-step-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.hs-flow-step-node.is-step-1 .hs-flow-step-num,
+.tv-ep-step-pill.is-step-1 {
+  background: linear-gradient(135deg, #1d4ed8 0%, #0b46a6 100%);
+}
+.hs-flow-step-node.is-step-2 .hs-flow-step-num,
+.tv-ep-step-pill.is-step-2 {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+}
+.hs-flow-step-node.is-step-3 .hs-flow-step-num,
+.tv-ep-step-pill.is-step-3 {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+.hs-flow-step-node.is-step-4 .hs-flow-step-num,
+.tv-ep-step-pill.is-step-4 {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+.hs-flow-step-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hs-flow-step-name {
+  font-size: 13.4px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--tv-ink, #0c1829);
+}
+
+.hs-flow-step-sub {
+  font-size: 11.6px;
+  font-weight: 600;
+  color: var(--tv-ink-muted, #55657d);
+  margin-top: 1px;
+}
+
+.hs-flow-step-arrow {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tv-ink-muted, #64748b);
+  opacity: 0.65;
+  user-select: none;
+}
+
+.hs-flow-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.hs-flow-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+  padding: 20px 22px !important;
+  border-radius: 22px !important;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.hs-flow-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.hs-flow-card.is-step-1::before { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
+.hs-flow-card.is-step-2::before { background: linear-gradient(90deg, #0d9488, #14b8a6); }
+.hs-flow-card.is-step-3::before { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.hs-flow-card.is-step-4::before { background: linear-gradient(90deg, #dc2626, #f43f5e); }
+
+.hs-flow-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hs-flow-step-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 11.4px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.hs-flow-step-pill.is-step-1 {
+  background: rgba(29, 78, 216, 0.11);
+  color: #1d4ed8;
+}
+.hs-flow-step-pill.is-step-2 {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+}
+.hs-flow-step-pill.is-step-3 {
+  background: rgba(217, 119, 6, 0.13);
+  color: #b45309;
+}
+.hs-flow-step-pill.is-step-4 {
+  background: rgba(220, 38, 38, 0.11);
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .hs-flow-step-pill.is-step-1 {
+  background: rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+}
+html[data-theme="dark"] .hs-flow-step-pill.is-step-2 {
+  background: rgba(20, 184, 166, 0.22);
+  color: #5eead4;
+}
+html[data-theme="dark"] .hs-flow-step-pill.is-step-3 {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fcd34d;
+}
+html[data-theme="dark"] .hs-flow-step-pill.is-step-4 {
+  background: rgba(244, 63, 94, 0.22);
+  color: #fda4af;
+}
+
+.hs-flow-timing-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--tv-ink-muted, #475569);
+  font-family: var(--font-display);
+  font-size: 11.4px;
+  font-weight: 700;
+}
+
+.hs-flow-card-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  flex: 1;
+}
+
+.hs-flow-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--tv-ink, #0c1829);
+}
+
+.hs-flow-card-desc {
+  margin: 6px 0 0;
+  font-size: 13.7px;
+  line-height: 1.52;
+  color: var(--tv-ink-muted, #475569);
+}
+
+.hs-flow-card-bridge {
+  margin: 8px 0 0;
+  font-size: 12.6px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--tv-accent, #0b46a6);
+}
+
+html[data-theme="dark"] .hs-flow-card-bridge {
+  color: #93c5fd;
+}
+
+html[data-role="faculty"][data-theme="dark"] .hs-flow-card-bridge {
+  color: #fda4af;
+}
+
+.hs-flow-card-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--tv-card-border, rgba(15, 29, 53, 0.08));
+}
+
+.hs-flow-primary-cta {
+  margin-top: 0 !important;
+}
+
+.hs-flow-card-foot button.hs-atv-mini-dl {
+  cursor: pointer;
+}
+
+.hs-flow-supp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(217, 119, 6, 0.07);
+  border: 1px dashed rgba(217, 119, 6, 0.28);
+}
+
+html[data-theme="dark"] .hs-flow-supp-row {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.hs-flow-supp-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tv-ink-muted, #475569);
+}
+
+.hs-flow-supp-btns {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hs-flow-supp-btns button.hs-atv-mini-dl {
+  cursor: pointer;
+}
+
+/* Bottom-of-Document Next-Step Logical Flow Callout */
+.hs-flow-next-banner {
+  margin-top: 32px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(11, 70, 166, 0.06) 0%, rgba(13, 148, 136, 0.08) 100%);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+}
+
+html[data-theme="dark"] .hs-flow-next-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.14) 0%, rgba(20, 184, 166, 0.14) 100%);
+  border-color: rgba(94, 234, 212, 0.22);
+}
+
+.hs-flow-next-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 600px;
+}
+
+.hs-flow-next-kicker {
+  font-family: var(--font-display);
+  font-size: 11.8px;
+  font-weight: 800;
+  color: var(--teal-deep, #0f766e);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hs-flow-next-copy strong {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  color: var(--tv-ink, #0c1829);
+}
+
+.hs-flow-next-copy p {
+  margin: 0 !important;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--tv-ink-muted, #475569);
+}
+
+.hs-flow-next-acts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Step 03 Self-Quiz Context & Handoff Strip */
+.hs-selfquiz-flow-bar {
+  margin: 12px 0 16px;
+  padding: 15px 18px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--tv-surface, #ffffff);
+  border: 1px solid rgba(217, 119, 6, 0.24);
+  box-shadow: var(--tv-shadow-rest, 0 6px 18px -6px rgba(10, 28, 64, 0.08));
+}
+
+.hs-selfquiz-flow-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 660px;
+}
+
+.hs-selfquiz-flow-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hs-selfquiz-flow-copy p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.48;
+  color: var(--tv-ink-muted, #475569);
+}
+
+.hs-selfquiz-flow-acts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Episode Modal Numbered Step Pill & Secondary Links */
+.tv-ep-step-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.tv-ep-action-btn.is-primary .tv-ep-step-pill {
+  background: rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff;
+}
+
+.tv-ep-secondary-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tv-card-border, rgba(15, 29, 53, 0.08));
+}
+
+@media (max-width: 900px) {
+  .hs-flow-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hs-flow-stepper {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .hs-flow-step-node {
+    min-width: 132px;
+    padding: 6px 8px;
+  }
+  .hs-flow-card {
+    padding: 16px 16px !important;
+  }
+}
+
 
 

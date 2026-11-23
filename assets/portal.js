@@ -54,7 +54,7 @@
     showCalSubDrawer: false,
     calScope: "student", // student | group | teacher | all
     calWeek: 1,
-    practiceSub: "rapid",
+    practiceSub: "qa",
     epSection: "all", // all | sessions | zoom-spss | exam-field
     facultySub: "guides",
     hsdModule: /^HS[1-6]$/.test(localStorage.getItem("racm303_hsd_deck_mod") || "")
@@ -135,9 +135,9 @@
     inspectedPdfBytes: null,
     inspectedPdfOrigName: "",
     manualChapterId: "ALL",
-    activeDocId: "HS1-CONCISE",
+    activeDocId: "HS1",
     activeHsModule: "HS1",
-    preferredHsFormat: "concise",
+    preferredHsFormat: "full",
     hsUiMode: "apple-tv",
     textbookSubMode: "docs-drive",
     tbDriveScope: "folders",
@@ -9979,14 +9979,298 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function openSelfQuizForModule(modCode, subTab) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
+    if (clean) state.activeHsModule = clean;
+    const nextSub = subTab || "qa";
+    state.practiceSub = nextSub;
+    document.querySelectorAll("[data-practice-sub]").forEach((b) =>
+      b.setAttribute("aria-pressed", b.dataset.practiceSub === nextSub ? "true" : "false")
+    );
+    if ($("practiceModuleFilter")) {
+      $("practiceModuleFilter").value = clean;
+    }
+    switchTab("practice");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openCaseDiscussionScrollForModule(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "ALL";
+    state.hsdViewMode = "scroll";
+    state.hsdModule = clean;
+    if (/^HS[1-6]$/.test(clean)) {
+      state.activeHsModule = clean;
+      state.hsdSlideDeckMod = clean;
+    }
+    state.hsdDriveFolderOpen = false;
+    try {
+      localStorage.setItem("racm303_hsd_vmode", "scroll");
+    } catch (_) {}
+    if ($("hsdModuleSelect")) $("hsdModuleSelect").value = clean;
+    if (typeof syncViewModeButtonsUI === "function") syncViewModeButtonsUI();
+    switchTab("hs-discussion");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const HS_LOGICAL_FLOW_PROFILES = {
+    HS1: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพ, ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Primordial–Quaternary) → สกัดแผนภาพเปรียบเทียบ → เช็กความแม่นยำด้วย Self-Quiz → วิเคราะห์กรณีศึกษาคนทำงานโรงงานอุตสาหกรรมในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพในธรรมนูญสุขภาพแห่งชาติ, ปัจจัยกำหนดสุขภาพหลายระดับ และการป้องกันโรคทุกระดับ (Primordial–Quaternary) พร้อมกรณีตัวอย่างและเอกสารอ้างอิงครบถ้วน",
+      fullBridge: "ปูฐานแนวคิดครบทุกมิติ เพื่อต่อยอดสู่การสกัดภาพรวมในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพความเชื่อมโยงและตารางเปรียบเทียบระดับการป้องกันโรคที่มักสับสน สำหรับทบทวนก่อนเข้าคาบและย่อโน้ตสอบ Open Note",
+      abridgedBridge: "จับโครงสร้างบทเรียนให้คมชัด แล้วทดสอบจุดที่ยังสับสนในขั้นที่ 3",
+      quizFocus: "การแยกมิติความป่วย ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค (Primordial–Quaternary)",
+      quizBridge: "เช็กความแม่นยำก่อนนำกรอบคิดไปวิเคราะห์สถานการณ์จริงในห้องอภิปราย",
+      caseFocus: "สุขภาวะคนทำงานโรงงานอุตสาหกรรม ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน"
+    },
+    HS2: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐานกรอบ WHO 6 Building Blocks และรูปแบบการดูแล 6W → สกัดแผนภาพโครงสร้างระบบบริการ → เช็กความแม่นยำด้วย Self-Quiz → วิเคราะห์วิกฤตแพทย์ใช้ทุนและ Models of Care ในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานขอบเขตและหน้าที่ระบบสุขภาพตามกรอบ WHO 6 Building Blocks, เป้าหมายระบบสุขภาพ 5 ประการ, โครงสร้างหน่วยบริการไทย และการออกแบบรูปแบบการดูแล (Models of Care) ตามกรอบ 6W ฉบับสมบูรณ์",
+      fullBridge: "เข้าใจโครงสร้างและหน้าที่เชิงระบบ เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพโครงสร้างระบบบริการและตารางเปรียบเทียบ Acute vs Chronic/Ambulatory Care ตามกรอบ WHAT–WHY–HOW สำหรับทบทวนและสอบ Open Note",
+      abridgedBridge: "เชื่อมความสัมพันธ์ของ 6 Building Blocks ให้เห็นภาพ แล้วทดสอบความเข้าใจในขั้นที่ 3",
+      quizFocus: "ขอบเขตระบบสุขภาพ WHO 6 Building Blocks และเกณฑ์เลือกรูปแบบการดูแล 6W",
+      quizBridge: "เช็กความแม่นยำก่อนสวมบทบาทผู้บริหารโรงพยาบาลชุมชนในห้องอภิปราย",
+      caseFocus: "วิกฤตภาระงานแพทย์ใช้ทุน (Intern) ใน รพช. และการเปรียบเทียบ Models of Care ผู้ป่วย 2 ระยะ",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการคิดเชิงระบบร่วมกับเพื่อนและอาจารย์ในชั้นเรียน"
+    },
+    HS3: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐานคุณลักษณะระบบบริการ EQESaRR ทั้งองค์ประกอบหลัก–ย่อย → สกัดตารางจำแนกมิติและตัวชี้วัด → เช็กความแม่นยำด้วย Self-Quiz → ประเมินนโยบาย Cancer Anywhere และ Palliative Care ในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานที่มา นิยาม และตัวชี้วัดของคุณลักษณะระบบบริการสุขภาพที่พึงประสงค์ EQESaRR (Equity, Quality, Efficiency, Safety, Responsiveness, Resilience) พร้อมหลักฐานอ้างอิงฉบับสมบูรณ์",
+      fullBridge: "เข้าใจนิยามและตัวชี้วัดครบทั้ง 6 คุณลักษณะ เพื่อต่อยอดสู่การสกัดแก่นในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพสรุปและตารางจำแนกองค์ประกอบหลัก–ย่อยของ EQESaRR ช่วยแยกมิติที่มักปะปนกันและจัดทำโน้ตสอบ Open Note",
+      abridgedBridge: "แยกจุดตัดของแต่ละคุณลักษณะให้ขาด แล้วทดสอบการประเมินด้วยตนเองในขั้นที่ 3",
+      quizFocus: "การจำแนกมิติ EQESaRR และความเชื่อมโยงของตัวชี้วัดคุณภาพ–ความเป็นธรรม–ความยืดหยุ่น",
+      quizBridge: "เช็กความแม่นยำก่อนนำกรอบ EQESaRR ไปประเมินนโยบายระดับประเทศในชั้นเรียน",
+      caseFocus: "จุดแข็ง–ช่องว่างของนโยบาย “Cancer Anywhere” และบริการดูแลแบบประคับประคอง (Palliative Care)",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการประเมินนโยบายอย่างมีหลักฐานร่วมกับเพื่อนและอาจารย์"
+    },
+    HS4: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐาน CDoH–COM-B–ความรอบรู้ด้านสุขภาพ–กฎบัตรออตตาวา → สกัดแผนภาพเชื่อมกลไกพฤติกรรม → เช็กความแม่นยำด้วย Self-Quiz → วิเคราะห์กรณีศึกษาเกษตรกรไทยในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานพฤติกรรมสุขภาพ ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ (CDoH), ตัวแบบ COM-B, ความรอบรู้ด้านสุขภาพ (Health Literacy) และยุทธศาสตร์การสร้างเสริมสุขภาพ 5 ด้านตามกฎบัตรออตตาวาฉบับสมบูรณ์",
+      fullBridge: "เข้าใจเหตุปัจจัยที่กำหนดพฤติกรรมเชิงโครงสร้าง เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพเชื่อมโยง COM-B สู่มาตรการสร้างเสริมสุขภาพ 5 ด้านตามกฎบัตรออตตาวา สำหรับทบทวนก่อนเข้าคาบและเตรียมสอบ Open Note",
+      abridgedBridge: "มองเห็นภาพรวมจากพฤติกรรมรายบุคคลสู่นโยบายสาธารณะ แล้วทดสอบความเข้าใจในขั้นที่ 3",
+      quizFocus: "การวิเคราะห์ COM-B, ปัจจัยเชิงพาณิชย์ (CDoH) และยุทธศาสตร์กฎบัตรออตตาวา 5 ด้าน",
+      quizBridge: "เช็กความแม่นยำก่อนออกแบบทางออกที่ก้าวข้ามการให้สุขศึกษาแบบเดิมในห้องอภิปราย",
+      caseFocus: "กับดักสารเคมีและทางออกที่ยั่งยืนของเกษตรกรไทยผ่านเลนส์ CDoH, COM-B และ Ottawa Charter",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการออกแบบมาตรการสร้างเสริมสุขภาพร่วมกับเพื่อนและอาจารย์"
+    },
+    HS5: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐานพัฒนาการ PHC (Alma-Ata สู่ Astana 3 เสาหลัก) และ Primary Care 5 คุณลักษณะ → สกัดตารางแยกความต่าง → เช็กความแม่นยำด้วย Self-Quiz → วิเคราะห์โครงการ “สุขภาวะข้างถนน” ในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานพัฒนาการระบบบริการสุขภาพปฐมภูมิจากอัลมา-อาตา สู่ปฏิญญาแอสทานา (3 เสาหลัก PHC), 5 คุณลักษณะบริการปฐมภูมิ (Primary Care), หน้าที่สาธารณสุขที่จำเป็น (EPHFs) และบทบาทต่อ UHC ฉบับสมบูรณ์",
+      fullBridge: "เข้าใจแก่นปรัชญาและโครงสร้างระบบปฐมภูมิ เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพสรุปและตารางเปรียบเทียบ Primary Care vs Primary Health Care อย่างคมชัด สำหรับทบทวนก่อนเข้าคาบและสอบ Open Note",
+      abridgedBridge: "แยกบทบาทบริการด่านแรกออกจากยุทธศาสตร์ทั้งสังคมให้ชัด แล้วทดสอบความเข้าใจในขั้นที่ 3",
+      quizFocus: "ความต่างของ Primary Care (5 คุณลักษณะ) กับ Primary Health Care (3 เสาหลัก Astana)",
+      quizBridge: "เช็กความแม่นยำก่อนนำกรอบคิดไปต่อจิ๊กซอว์ระบบดูแลกลุ่มเปราะบางในชั้นเรียน",
+      caseFocus: "โครงการ “สุขภาวะข้างถนน” ภารกิจต่อจิ๊กซอว์สุขภาพเพื่อคนไร้บ้านด้วยเลนส์ Primary Care & PHC",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการวิเคราะห์ระบบดูแลกลุ่มเปราะบางร่วมกับเพื่อนและอาจารย์"
+    },
+    HS6: {
+      thread:
+        "เส้นทางการเรียนรู้ 4 ขั้นตอน: ปูฐานทฤษฎีประกันสุขภาพ–3 กองทุนไทย–กลไกจ่ายเงิน–Moral Hazard → สกัดตารางเปรียบเทียบแรงจูงใจ → เช็กความแม่นยำด้วย Self-Quiz → วิเคราะห์ UHC โลก ช่องว่างแรงงานนอกระบบ และ FFS/Capitation/P4P ในห้องเรียน",
+      fullDesc:
+        "ปูพื้นฐานหลักการและองค์ประกอบการประกันสุขภาพ, ระบบ 3 กองทุนสุขภาพไทย, รูปแบบการจ่ายค่าบริการผู้ให้บริการ (FFS, Capitation, DRG, Global Budget) และปัญหา Moral Hazard ฉบับสมบูรณ์",
+      fullBridge: "เข้าใจหลักการคลังสุขภาพและกลไกการจ่ายเงิน เพื่อต่อยอดสู่การสกัดตารางเปรียบเทียบในขั้นที่ 2",
+      abridgedDesc:
+        "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพสรุปและตารางเปรียบเทียบแรงจูงใจ–ความเสี่ยงของกลไกจ่ายเงินแต่ละแบบ พร้อมมาตรการควบคุมค่าใช้จ่ายสำหรับสอบ Open Note",
+      abridgedBridge: "เปรียบเทียบแรงจูงใจฝั่งผู้ให้บริการและผู้รับบริการให้แม่น แล้วทดสอบความเข้าใจในขั้นที่ 3",
+      quizFocus: "ทฤษฎีการเฉลี่ยความเสี่ยง, 3 กองทุนไทย, แรงจูงใจของ FFS/Capitation และ Moral Hazard",
+      quizBridge: "เช็กความแม่นยำก่อนวิเคราะห์ข้อมูล UHC โลกและกรณีศึกษากลไกการคลังในชั้นเรียน",
+      caseFocus: "สถานการณ์ UHC โลก (SDG 3.8), ช่องว่างสิทธิแรงงานนอกระบบ และแรงจูงใจของ FFS vs Capitation & P4P",
+      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการวิเคราะห์นโยบายการคลังสุขภาพร่วมกับเพื่อนและอาจารย์"
+    }
+  };
+
+  function countModuleSelfQuizProgress(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "";
+    const items = (HS.selfCheck || []).filter((it) => !clean || it.module === clean);
+    let answered = 0;
+    try {
+      const store = JSON.parse(localStorage.getItem("racm303_iq_answers_v1") || "{}");
+      items.forEach((it) => {
+        const rec = store[`selfcheck_${it.id}`];
+        if (rec && String(rec.text || "").trim().length > 0) answered += 1;
+      });
+    } catch (_) {}
+    return { answered, total: items.length };
+  }
+
+  function countDocFigures(docObj) {
+    if (!docObj || !docObj.html) return 0;
+    const matches = String(docObj.html).match(/<img\b/gi);
+    return matches ? matches.length : 0;
+  }
+
+  function getHsLogicalFlowModel(modCode) {
+    const mod = getHsModuleMeta(modCode);
+    const code = mod.code;
+    const profile = HS_LOGICAL_FLOW_PROFILES[code] || HS_LOGICAL_FLOW_PROFILES.HS1;
+    const docs = HS.docs || [];
+    const fullDoc = docs.find((d) => d.id === mod.docId) || null;
+    const abridgedDoc = docs.find((d) => d.id === mod.conciseDocId) || null;
+    const wbDoc = mod.wbDocId ? docs.find((d) => d.id === mod.wbDocId) || null : null;
+    const fullFigs = countDocFigures(fullDoc);
+    const abridgedFigs = countDocFigures(abridgedDoc);
+    const qaList = (HS.selfCheck || []).filter((q) => q.module === code);
+    const glList = (HS.glossary || []).filter((g) => g.module === code);
+    const quizProg = countModuleSelfQuizProgress(code);
+    const modCases = (HSD_DATA.cases || []).filter((c) => c.module === mod.id);
+    const subQCnt = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+    const discProg = typeof countModuleDraftProgress === "function" ? countModuleDraftProgress(mod.id) : { filled: 0, total: 0 };
+
+    const makeDl = (docObj) => {
+      if (!docObj) return { pdfHref: "", docxHref: "", dlStem: "" };
+      return {
+        pdfHref: `exports/pdf/${encodeURIComponent(docObj.id)}.pdf`,
+        docxHref: `exports/docx/${encodeURIComponent(docObj.id)}.docx`,
+        dlStem: `RACM303_${sanitizeFilenamePart(`${docObj.id}_${docObj.title}`).replace(/\s+/g, "_").slice(0, 72)}`
+      };
+    };
+
+    const fullDl = makeDl(fullDoc);
+    const abridgedDl = makeDl(abridgedDoc);
+    const wbDl = makeDl(wbDoc);
+
+    const steps = [
+      {
+        num: "01",
+        circle: "①",
+        key: "full",
+        stepTag: "STEP 01 · ปูพื้นฐานเชิงลึก",
+        stepperTitle: "ปูพื้นฐาน",
+        stepperSub: "Full",
+        shortLabel: "ฉบับเต็ม (Full)",
+        title: `เอกสารคำสอนฉบับเต็ม (Full)`,
+        timing: fullFigs > 0 ? `ก่อนเข้าเรียน · ${fullFigs} แผนภาพ` : "ก่อนเข้าเรียน",
+        tone: "tone-blue",
+        icon: "📚",
+        doc: fullDoc,
+        desc: profile.fullDesc,
+        bridge: profile.fullBridge,
+        primaryLabel: "▶ เปิดอ่านฉบับเต็ม",
+        onPrimary: () => fullDoc && openTextbookDoc(fullDoc.id),
+        pdfHref: fullDl.pdfHref,
+        docxHref: fullDl.docxHref,
+        dlStem: fullDl.dlStem
+      },
+      {
+        num: "02",
+        circle: "②",
+        key: "abridged",
+        stepTag: "STEP 02 · สรุปแก่นสำคัญ",
+        stepperTitle: "สรุปแก่น",
+        stepperSub: "Abridged",
+        shortLabel: "ฉบับย่อ (Abridged)",
+        title: `เอกสารคำสอนฉบับย่อ (Abridged)`,
+        timing: abridgedFigs > 0 ? `ทบทวนไว · ${abridgedFigs} แผนภาพ` : "ทบทวนไว · Open Note",
+        tone: "tone-teal",
+        icon: "⚡",
+        doc: abridgedDoc,
+        desc: profile.abridgedDesc,
+        bridge: profile.abridgedBridge,
+        primaryLabel: "▶ เปิดอ่านฉบับย่อ",
+        onPrimary: () => abridgedDoc && openTextbookDoc(abridgedDoc.id),
+        pdfHref: abridgedDl.pdfHref,
+        docxHref: abridgedDl.docxHref,
+        dlStem: abridgedDl.dlStem
+      },
+      {
+        num: "03",
+        circle: "③",
+        key: "self-quiz",
+        stepTag: "STEP 03 · ประเมินตนเอง",
+        stepperTitle: "ทดสอบตนเอง",
+        stepperSub: "Self-Quiz",
+        shortLabel: "Self-Quiz",
+        title: `Self-Quiz`,
+        timing:
+          quizProg.answered > 0
+            ? `✓ ทำแล้ว ${quizProg.answered}/${quizProg.total} ข้อ`
+            : `ก่อนเข้าคาบ · ${qaList.length} ข้อ · ${glList.length} คำศัพท์`,
+        tone: "tone-amber",
+        icon: "🧠",
+        qaCount: qaList.length,
+        glossaryCount: glList.length,
+        quizProg,
+        wbDoc,
+        wbDl,
+        desc: `ฝึกดึงความรู้ (Active Recall) เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${qaList.length} ข้อพร้อม AI Mentor ตรวจแนวคำตอบ, บัตรคำศัพท์ ${glList.length} คำ และตาราง Rapid Review`,
+        bridge: profile.quizBridge,
+        primaryLabel: `▶ เริ่มทำ Self-Quiz (${qaList.length} ข้อ)`,
+        onPrimary: () => openSelfQuizForModule(code, "qa")
+      },
+      {
+        num: "04",
+        circle: "④",
+        key: "case-discussion",
+        stepTag: "STEP 04 · ประยุกต์ในชั้นเรียน",
+        stepperTitle: "อภิปรายในห้อง",
+        stepperSub: "Case Discussion",
+        shortLabel: "Case Discussion in Class",
+        title: `Case Discussion in Class`,
+        timing:
+          ROLE === "faculty"
+            ? `★ ในคาบ ${mod.discTime || ""} · เฉลย 4 ขั้น`
+            : discProg.filled > 0
+            ? `✓ ตอบแล้ว ${discProg.filled}/${discProg.total} · ${mod.discTime || ""}`
+            : `ในคาบ · ${mod.discTime || ""}`,
+        tone: "tone-crimson",
+        icon: "💬",
+        modCases,
+        subQCnt,
+        discProg,
+        desc:
+          ROLE === "faculty"
+            ? `สไลด์อภิปรายกลุ่มย่อย 16:9 พร้อมเฉลย Teacher Key ครบ 4 ขั้น (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อ Kahoot`
+            : `นำกรอบคิดที่ฝึกไว้มาวิเคราะห์จริงในห้องกลุ่มย่อย (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อ Kahoot และสไลด์ 16:9`,
+        bridge: profile.caseBridge,
+        primaryLabel: ROLE === "faculty" ? "▶ เปิดสไลด์ + เฉลย (16:9)" : "▶ เปิดสไลด์ในชั้นเรียน (16:9)",
+        onPrimary: () => openHsDiscussion(code)
+      }
+    ];
+
+    return {
+      mod,
+      code,
+      profile,
+      lecturer: getHsLecturerName(code),
+      shortDate: formatHsShortDate(mod.scheduleDate),
+      fullDoc,
+      abridgedDoc,
+      wbDoc,
+      qaCount: qaList.length,
+      glossaryCount: glList.length,
+      quizProg,
+      modCases,
+      subQCnt,
+      discProg,
+      steps
+    };
+  }
+
   function buildUnifiedHsModuleBanner(modCode, activeFormat, opts) {
     const options = opts || {};
     const isAllActive = Boolean(options.isAllActive);
     const mod = getHsModuleMeta(modCode || state.activeHsModule || "HS1");
-    const effectiveFormat =
-      activeFormat === "concise" || activeFormat === "full" || activeFormat === "docs"
-        ? "docs"
-        : activeFormat;
+    const effectiveFormat = activeFormat === "wb" ? "practice" : activeFormat;
 
     const banner = make(
       "div",
@@ -10032,11 +10316,11 @@
     const infoWrap = make("div", null, "hsd-banner-info");
     if (isAllActive) {
       infoWrap.append(
-        make("h3", options.allHeading || "HS1–HS6: คลังทบทวนรวมครบทุกบทเรียนระบบสุขภาพ"),
+        make("h3", options.allHeading || "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 4 ขั้นตอน"),
         make(
           "p",
           options.allDesc ||
-            `กำลังแสดงรวมครบทุกบท — เลือกปุ่ม HS1–HS6 ด้านบนเพื่อเจาะจงรายบท หรือสลับไปยังรูปแบบสื่อการเรียนรู้ของ ${mod.code} ด้านล่างได้ทันที`
+            `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class`
         )
       );
     } else {
@@ -10059,7 +10343,7 @@
 
     const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
     tabsRow.setAttribute("role", "tablist");
-    tabsRow.setAttribute("aria-label", `สลับรูปแบบเอกสารและกิจกรรมของ ${isAllActive ? "HS1–HS6" : mod.code}`);
+    tabsRow.setAttribute("aria-label", `สลับขั้นตอนการเรียนรู้ 4 ขั้นของ ${isAllActive ? "HS1–HS6" : mod.code}`);
 
     const makeTabBtn = (label, kind, available, onClick, disabledTitle, badgeText) => {
       const isAct = (!isAllActive || Boolean(options.keepFormatTabActiveWhenAll)) && available && effectiveFormat === kind;
@@ -10087,52 +10371,60 @@
     };
 
     const isDriveUi = state.hsUiMode === "drive";
+    const modTag = isAllActive ? "HS1–HS6" : mod.code;
+
+    // Hub Overview / Drive Folder
     tabsRow.appendChild(
       makeTabBtn(
-        isAllActive
-          ? isDriveUi
-            ? "📁 โฟลเดอร์รวม & เอกสารคำสอน (HS1–HS6)"
-            : "📖 เอกสารคำสอน (HS1–HS6)"
-          : isDriveUi
-          ? `📁 โฟลเดอร์ & เอกสารคำสอน (${mod.code})`
-          : `📖 เอกสารคำสอน (${mod.code})`,
+        isDriveUi ? `📁 โฟลเดอร์ (${modTag})` : `🧭 ภาพรวม 4 ขั้น (${modTag})`,
         "docs",
-        Boolean(mod.conciseDocId || mod.docId),
+        true,
         () => {
           openTextbookDriveFolder(isAllActive ? "FOLDERS" : mod.code);
         }
       )
     );
 
+    // Step 1: Full Textbook
     tabsRow.appendChild(
       makeTabBtn(
-        isAllActive ? "🖥️ Slide อาจารย์ (HS1–HS6)" : `🖥️ Slide อาจารย์ (${mod.code})`,
-        "lecture-slides",
+        `① ฉบับเต็ม · Full (${mod.code})`,
+        "full",
+        Boolean(mod.docId),
+        () => {
+          openTextbookDoc(mod.docId);
+        }
+      )
+    );
+
+    // Step 2: Abridged Textbook
+    tabsRow.appendChild(
+      makeTabBtn(
+        `② ฉบับย่อ · Abridged (${mod.code})`,
+        "concise",
+        Boolean(mod.conciseDocId),
+        () => {
+          openTextbookDoc(mod.conciseDocId);
+        }
+      )
+    );
+
+    // Step 3: Self-Quiz
+    tabsRow.appendChild(
+      makeTabBtn(
+        `③ Self-Quiz (${isAllActive ? "HS1–HS6" : mod.code})`,
+        "practice",
         true,
         () => {
-          openHsLectureSlides(isAllActive ? "FOLDERS" : mod.code);
-        },
-        "",
-        "รออาจารย์ Upload"
+          openSelfQuizForModule(isAllActive ? "" : mod.code, "qa");
+        }
       )
     );
 
+    // Step 4: Case Discussion in Class
     tabsRow.appendChild(
       makeTabBtn(
-        `Worksheet (${mod.code})`,
-        "wb",
-        Boolean(mod.wbDocId),
-        () => {
-          state.preferredHsFormat = "wb";
-          openTextbookDoc(mod.wbDocId);
-        },
-        `บทเรียน ${mod.code} ไม่มีสมุด Worksheet แยกต่างหาก — สามารถทำโจทย์ในแท็บโจทย์อภิปรายหรือคำศัพท์ & โจทย์ได้ทันที`
-      )
-    );
-
-    tabsRow.appendChild(
-      makeTabBtn(
-        `${ROLE === "faculty" ? "โจทย์อภิปราย & เฉลย" : "โจทย์อภิปราย"} (${mod.code})`,
+        `${ROLE === "faculty" ? "④ Case Discussion & เฉลย" : "④ Case Discussion"} (${mod.code})`,
         "discussion",
         true,
         () => {
@@ -10146,18 +10438,23 @@
       )
     );
 
+    // Supporting Resources: Instructor Slides, Faculty Guide, Course Manual
     tabsRow.appendChild(
-      makeTabBtn(`คำศัพท์ & โจทย์ (${mod.code})`, "practice", true, () => {
-        state.activeHsModule = mod.code;
-        if ($("practiceModuleFilter")) $("practiceModuleFilter").value = mod.code;
-        switchTab("practice");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      })
+      makeTabBtn(
+        `🖥️ Slide อาจารย์ (${modTag})`,
+        "lecture-slides",
+        true,
+        () => {
+          openHsLectureSlides(isAllActive ? "FOLDERS" : mod.code);
+        },
+        "",
+        "รออาจารย์ Upload"
+      )
     );
 
     if (ROLE === "faculty") {
       tabsRow.appendChild(
-        makeTabBtn(`คู่มือผู้สอน (${mod.code})`, "faculty-docs", true, () => {
+        makeTabBtn(`📕 คู่มือผู้สอน (${mod.code})`, "faculty-docs", true, () => {
           state.activeHsModule = mod.code;
           if (typeof openFacultyGuideForHsModule === "function") {
             openFacultyGuideForHsModule(mod.code);
@@ -10192,33 +10489,34 @@
     modList.forEach((m) => {
       const lecturer = getHsLecturerName(m.code);
       const shortDate = formatHsShortDate(m.scheduleDate);
+      const profile = HS_LOGICAL_FLOW_PROFILES[m.code] || HS_LOGICAL_FLOW_PROFILES.HS1;
       const candidates = [
-        {
-          docId: m.conciseDocId,
-          kind: "concise",
-          fileName: `RACM303_${m.code}_เอกสารคำสอน_ฉบับย่อ_(Abridged).gdoc`,
-          kicker: `⚡ ฉบับย่อ (Abridged + แผนภาพ)`,
-          chipLabel: "ฉบับย่อ · อ่านไว + แผนภาพ",
-          headCls: "is-concise",
-          subDesc: "สรุปประเด็นสำคัญ กระชับ เข้าใจง่าย พร้อมแผนภาพและตารางเปรียบเทียบเตรียมสอบ"
-        },
         {
           docId: m.docId,
           kind: "full",
-          fileName: `RACM303_${m.code}_เอกสารคำสอน_ฉบับเต็ม_(Full_Textbook).gdoc`,
-          kicker: `📚 ฉบับเต็ม (Full Guided Textbook)`,
-          chipLabel: "ฉบับเต็ม · เนื้อหาละเอียด",
+          fileName: `01_${m.code}_เอกสารคำสอนฉบับเต็ม_(Full).gdoc`,
+          kicker: `① STEP 01 · เอกสารคำสอนฉบับเต็ม (Full)`,
+          chipLabel: "ขั้นที่ 1 · ฉบับเต็ม (Full)",
           headCls: "is-full",
-          subDesc: "เอกสารคำสอนฉบับสมบูรณ์ อธิบายทฤษฎี กรอบแนวคิด กรณีตัวอย่าง และเอกสารอ้างอิงครบถ้วน"
+          subDesc: profile.fullDesc
+        },
+        {
+          docId: m.conciseDocId,
+          kind: "concise",
+          fileName: `02_${m.code}_เอกสารคำสอนฉบับย่อ_(Abridged).gdoc`,
+          kicker: `② STEP 02 · เอกสารคำสอนฉบับย่อ (Abridged)`,
+          chipLabel: "ขั้นที่ 2 · ฉบับย่อ (Abridged)",
+          headCls: "is-concise",
+          subDesc: profile.abridgedDesc
         },
         {
           docId: m.wbDocId,
           kind: "wb",
-          fileName: `RACM303_${m.code}_สมุดใบงาน_Worksheet.gdoc`,
-          kicker: `📋 สมุดใบงาน (Worksheet)`,
-          chipLabel: "Worksheet · ฝึกคิดก่อนเข้าคาบ",
+          fileName: `03b_${m.code}_แบบฝึกหัดเสริม_(Workbook).gdoc`,
+          kicker: `📝 เสริมขั้นที่ 3 · แบบฝึกหัดและเฉลย (Workbook)`,
+          chipLabel: "แบบฝึกหัดเสริม (Workbook)",
           headCls: "is-wb",
-          subDesc: "ใบงานเตรียมความพร้อมก่อนเข้าอภิปรายกลุ่มย่อย พร้อมแนวคำตอบ"
+          subDesc: `ชุดแบบฝึกหัดเสริมท้ายบทพร้อมเฉลยละเอียดสำหรับทบทวนเพิ่มเติมในบท ${m.code}`
         }
       ];
 
@@ -10291,14 +10589,7 @@
     };
 
     const openPracticeForModule = (modId) => {
-      if (modId && /^HS[1-6]$/i.test(String(modId))) {
-        state.activeHsModule = String(modId).toUpperCase();
-        if ($("practiceModuleFilter")) $("practiceModuleFilter").value = String(modId).toUpperCase();
-      } else {
-        if ($("practiceModuleFilter")) $("practiceModuleFilter").value = "";
-      }
-      switchTab("practice");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      openSelfQuizForModule(modId, "qa");
     };
 
     const setDriveScopeAndSync = (nextScope) => {
@@ -10324,11 +10615,15 @@
         const lecturer = getHsLecturerName(m.code);
         const shortDate = formatHsShortDate(m.scheduleDate);
         const lecTime = m.lectureTime || "08.30 – 09.30 น.";
+        const profile = HS_LOGICAL_FLOW_PROFILES[m.code] || HS_LOGICAL_FLOW_PROFILES.HS1;
 
-        // 1. Teaching Docs (Concise, Full, Worksheet)
+        // 1 & 2. Step 01 Full & Step 02 Abridged (ordered 01 -> 02)
         const docEntries = getTeachingDocEntriesForModules([m], "all", "");
-        docEntries.forEach((de) => {
-          const typeGroup = de.kind === "wb" ? "worksheet-quiz" : "teaching-doc";
+        const mainDocs = docEntries.filter((de) => de.kind !== "wb");
+        const wbDocs = docEntries.filter((de) => de.kind === "wb");
+
+        mainDocs.forEach((de) => {
+          const typeGroup = de.kind === "full" ? "full" : "abridged";
           out.push({
             uid: `doc:${de.doc.id}`,
             entryType: "gdoc",
@@ -10352,36 +10647,91 @@
           });
         });
 
-        // 2. Discussion Case Slides (.pptx)
+        // 3. Step 03 Self-Quiz (.app) — coherent across all HS1-HS6
+        const modGlossaryCount = (HS.glossary || []).filter((g) => g.module === m.code).length;
+        const modQaCount = (HS.selfCheck || []).filter((it) => it.module === m.code).length;
+        const quizFileName = `03_${m.code}_Self-Quiz_และคำศัพท์ทบทวน_(Active_Recall).app`;
+        out.push({
+          uid: `quiz:${m.id}`,
+          entryType: "quiz-app",
+          typeGroup: "self-quiz",
+          mod: m,
+          fileName: quizFileName,
+          kicker: "③ STEP 03 · Self-Quiz (ทดสอบความเข้าใจด้วยตนเอง)",
+          chipLabel: `ขั้นที่ 3 · ${modQaCount} โจทย์ · ${modGlossaryCount} คำศัพท์`,
+          headCls: "is-quiz",
+          subDesc: `ฝึกดึงความรู้เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${modQaCount} ข้อพร้อม AI Mentor, บัตรคำศัพท์ ${modGlossaryCount} คำ และ Rapid Review`,
+          headings: [
+            `แบบทดสอบ Self-Quiz พร้อม AI Mentor (${modQaCount} ข้อ)`,
+            `บัตรคำศัพท์สำคัญ 2 ภาษา (${modGlossaryCount} คำ)`,
+            `ตารางทบทวนเร็ว High-Yield Rapid Review (${m.code})`
+          ],
+          lecturer,
+          shortDate,
+          searchText: `${m.code} ${m.title} ${quizFileName} self-quiz คำศัพท์ โจทย์ quiz flashcards rapid review active recall`.toLocaleLowerCase("th"),
+          onOpen: () => openPracticeForModule(m.code)
+        });
+
+        // 3b. Optional Supplemental Workbook (HS1 & HS2 only, grouped cleanly under Self-Quiz)
+        wbDocs.forEach((de) => {
+          out.push({
+            uid: `doc:${de.doc.id}`,
+            entryType: "gdoc",
+            typeGroup: "self-quiz",
+            mod: m,
+            doc: de.doc,
+            kind: de.kind,
+            fileName: de.fileName,
+            kicker: de.kicker,
+            chipLabel: de.chipLabel,
+            headCls: de.headCls,
+            subDesc: de.subDesc,
+            headings: de.headings,
+            lecturer,
+            shortDate,
+            pdfHref: de.pdfHref,
+            docxHref: de.docxHref,
+            dlStem: de.dlStem,
+            searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${de.fileName} ${de.kicker} ${de.subDesc} workbook แบบฝึกหัด ${lecturer} ${de.doc.title || ""} ${de.headings.join(" ")}`.toLocaleLowerCase("th"),
+            onOpen: () => openTextbookDoc(de.doc.id)
+          });
+        });
+
+        // 4. Step 04 Case Discussion in Class (.pptx)
         const modCases = (HSD_DATA.cases || []).filter((c) => c.module === m.id);
         const qList = [];
         modCases.forEach((c) => (c.questions || []).forEach((qObj) => qList.push(qObj)));
         const firstCase = modCases[0] || {};
         const firstScenText =
           (firstCase.scenarioBlocks && firstCase.scenarioBlocks[0] && firstCase.scenarioBlocks[0].text) ||
-          m.summaryFocus ||
+          profile.caseFocus ||
           m.title;
         const prog = typeof countModuleDraftProgress === "function" ? countModuleDraftProgress(m.id) : { filled: 0, total: 0 };
-        const pptFileName = `RACM303_คาบ_${m.code}_Case_Discussion.pptx`;
+        const pptFileName = `04_${m.code}_Case_Discussion_in_Class.pptx`;
         out.push({
           uid: `pptx:${m.id}`,
           entryType: "discussion-pptx",
           typeGroup: "discussion-pptx",
           mod: m,
           fileName: pptFileName,
-          chipLabel: ROLE === "faculty" ? `★ ${qList.length} ข้อ · เฉลย 4 ขั้น` : prog.filled > 0 ? `✓ ตอบแล้ว ${prog.filled}/${prog.total}` : `${modCases.length} กรณี · ${qList.length} ข้อ`,
+          chipLabel:
+            ROLE === "faculty"
+              ? `ขั้นที่ 4 · ★ ${qList.length} ข้อ + เฉลย`
+              : prog.filled > 0
+              ? `ขั้นที่ 4 · ✓ ตอบแล้ว ${prog.filled}/${prog.total}`
+              : `ขั้นที่ 4 · ${modCases.length} กรณี (${qList.length} ข้อ)`,
           modCases,
           qList,
           firstScenText,
           prog,
           lecturer,
           shortDate,
-          searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} discussion pptx สไลด์อภิปราย kahoot กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
+          searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} case discussion in class pptx สไลด์อภิปราย kahoot กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
           onOpen: () => openDiscussionSlideForModule(m.id)
         });
 
-        // 3. Instructor Lecture Slides (.pptx — Pending Upload)
-        const lecSlideName = `RACM303_คาบ_${m.code}_Slide_อาจารย์บรรยาย.pptx`;
+        // 5. Instructor Lecture Slides (.pptx — Pending Upload)
+        const lecSlideName = `05_${m.code}_Slide_อาจารย์บรรยาย.pptx`;
         out.push({
           uid: `lecslide:${m.id}`,
           entryType: "lecture-slide",
@@ -10406,34 +10756,9 @@
           }
         });
 
-        // 4. Active Recall Flashcards & Self-Check Quiz (.app)
-        const modGlossaryCount = (HS.glossary || []).filter((g) => g.module === m.code).length;
-        const modQaCount = (HS.selfCheck || []).filter((it) => it.module === m.code).length;
-        const quizFileName = `RACM303_${m.code}_คำศัพท์และโจทย์ทบทวน_(Active_Recall).app`;
-        out.push({
-          uid: `quiz:${m.id}`,
-          entryType: "quiz-app",
-          typeGroup: "worksheet-quiz",
-          mod: m,
-          fileName: quizFileName,
-          kicker: "🧠 คลังคำศัพท์ & โจทย์ฝึกหัด (Active Recall)",
-          chipLabel: `${modGlossaryCount} คำศัพท์ · ${modQaCount} โจทย์`,
-          headCls: "is-quiz",
-          subDesc: `ทบทวนเร็ว (Rapid Review), บัตรคำศัพท์ ${modGlossaryCount} คำ และโจทย์ตรวจสอบความเข้าใจ ${modQaCount} ข้อประจำบท ${m.code}`,
-          headings: [
-            `ตารางทบทวนเร็ว High-Yield (${m.code})`,
-            `บัตรคำศัพท์สำคัญ ${modGlossaryCount} คำ`,
-            `โจทย์ฝึกคิดพร้อมเฉลย ${modQaCount} ข้อ`
-          ],
-          lecturer,
-          shortDate,
-          searchText: `${m.code} ${m.title} ${quizFileName} คำศัพท์ โจทย์ quiz flashcards rapid review active recall`.toLocaleLowerCase("th"),
-          onOpen: () => openPracticeForModule(m.code)
-        });
-
-        // 5. Faculty Guide & Teacher Answer Key (Faculty Portal Only)
+        // 6. Faculty Guide & Teacher Answer Key (Faculty Portal Only)
         if (ROLE === "faculty") {
-          const facFileName = `RACM303_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`;
+          const facFileName = `06_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`;
           out.push({
             uid: `facguide:${m.id}`,
             entryType: "faculty-guide",
@@ -10466,10 +10791,11 @@
 
       return out.filter((item) => {
         if (typeFilter && typeFilter !== "all") {
+          if (typeFilter === "teaching-doc" && item.typeGroup !== "full" && item.typeGroup !== "abridged") return false;
           if (typeFilter === "concise" && item.kind !== "concise") return false;
           if (typeFilter === "full" && item.kind !== "full") return false;
           if (
-            !["concise", "full"].includes(typeFilter) &&
+            !["teaching-doc", "concise", "full"].includes(typeFilter) &&
             item.typeGroup !== typeFilter
           ) {
             return false;
@@ -11239,11 +11565,11 @@
           fCard.setAttribute("aria-label", `เปิดโฟลเดอร์ ${m.code}: ${m.title} (${modAllFiles.length} ไฟล์)`);
 
           const tagParts = [];
-          if (m.conciseDocId || m.docId) tagParts.push(`<span class="gdrive-folder-tag is-concise">📄 เอกสารคำสอน</span>`);
-          if (m.wbDocId) tagParts.push(`<span class="gdrive-folder-tag is-wb">📋 Worksheet</span>`);
-          tagParts.push(`<span class="gdrive-folder-tag is-pptx">🟠 Discussion .pptx</span>`);
+          if (m.docId) tagParts.push(`<span class="gdrive-folder-tag is-full">① Full</span>`);
+          if (m.conciseDocId) tagParts.push(`<span class="gdrive-folder-tag is-concise">② Abridged</span>`);
+          tagParts.push(`<span class="gdrive-folder-tag is-quiz">③ Self-Quiz</span>`);
+          tagParts.push(`<span class="gdrive-folder-tag is-pptx">④ Case Discussion</span>`);
           tagParts.push(`<span class="gdrive-folder-tag is-pending">⏳ Slide อาจารย์</span>`);
-          tagParts.push(`<span class="gdrive-folder-tag is-quiz">🧠 คำศัพท์ & โจทย์</span>`);
           if (ROLE === "faculty") tagParts.push(`<span class="gdrive-folder-tag is-faculty">📕 คู่มือผู้สอน</span>`);
 
           fCard.innerHTML =
@@ -11281,12 +11607,12 @@
             `<div class="gdrive-folder-head-left">${GDRIVE_FOLDER_SVG}<span class="gdrive-folder-code">00_เอกสารรวมทั้งรายวิชา</span></div>` +
             `<span class="gdrive-folder-weight">RACM 303</span>` +
             `</div>` +
-            `<div class="gdrive-folder-title">คู่มือรายวิชา 2569 (17 บท) · ใบงาน Discussion รวม HS1–HS6 · คลังคำศัพท์ & โจทย์รวม</div>` +
+            `<div class="gdrive-folder-title">คู่มือรายวิชา 2569 (17 บท) · ใบงาน Discussion รวม HS1–HS6 · คลัง Self-Quiz รวม</div>` +
             `<div class="gdrive-folder-meta">📘 เอกสารอ้างอิงกลาง · ไฟล์รวมพร้อมพิมพ์ PDF / Word</div>` +
             `<div class="gdrive-folder-tags">` +
             `<span class="gdrive-folder-tag is-full">📘 คู่มือวิชา 17 บท</span>` +
             `<span class="gdrive-folder-tag is-concise">📜 ใบงานรวม (Web/PDF/W)</span>` +
-            `<span class="gdrive-folder-tag is-quiz">🧠 111 คำศัพท์ · 60 โจทย์</span>` +
+            `<span class="gdrive-folder-tag is-quiz">🧠 60 Self-Quiz · 111 คำศัพท์</span>` +
             (ROLE === "faculty" ? `<span class="gdrive-folder-tag is-faculty">📕 คู่มือผู้สอนรวม</span>` : "") +
             `</div>` +
             `<div class="gdrive-folder-foot">` +
@@ -11313,7 +11639,7 @@
       tbl.innerHTML =
         `<thead><tr>` +
         `<th>ชื่อโฟลเดอร์ (Folder Name)</th>` +
-        `<th>ไฟล์ภายในโฟลเดอร์</th>` +
+        `<th>ไฟล์ภายในโฟลเดอร์ (Logical Flow)</th>` +
         `<th>อาจารย์ / กำหนดการ</th>` +
         `<th>การดำเนินการ</th>` +
         `</tr></thead>`;
@@ -11328,11 +11654,11 @@
         trEl.tabIndex = 0;
 
         const tagsHtml = [
-          `<span class="gdrive-folder-tag is-concise">📄 คำสอน</span>`,
-          m.wbDocId ? `<span class="gdrive-folder-tag is-wb">📋 WB</span>` : "",
-          `<span class="gdrive-folder-tag is-pptx">🟠 .pptx</span>`,
-          `<span class="gdrive-folder-tag is-pending">⏳ Slide อ.</span>`,
-          `<span class="gdrive-folder-tag is-quiz">🧠 โจทย์</span>`
+          `<span class="gdrive-folder-tag is-full">① Full</span>`,
+          `<span class="gdrive-folder-tag is-concise">② Abridged</span>`,
+          `<span class="gdrive-folder-tag is-quiz">③ Self-Quiz</span>`,
+          `<span class="gdrive-folder-tag is-pptx">④ Case</span>`,
+          `<span class="gdrive-folder-tag is-pending">⏳ Slide อ.</span>`
         ]
           .filter(Boolean)
           .join(" ");
@@ -11374,8 +11700,8 @@
         trC.className = "gdrive-list-row";
         trC.tabIndex = 0;
         trC.innerHTML =
-          `<td><div class="gdrive-list-name-cell"><span style="display:inline-flex;align-items:center;flex-shrink:0">${GDRIVE_FOLDER_SVG}</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">00_เอกสารรวมทั้งรายวิชา (คู่มือ · ใบงานรวม · คลังโจทย์)</span><span class="gdrive-list-fsub">${courseRootCount} ไฟล์รวมทั้งรายวิชา RACM 303</span></div></div></td>` +
-          `<td><div class="gdrive-folder-tags"><span class="gdrive-folder-tag is-full">📘 คู่มือ 17 บท</span> <span class="gdrive-folder-tag is-concise">📜 ใบงานรวม</span> <span class="gdrive-folder-tag is-quiz">🧠 60 โจทย์</span></div></td>` +
+          `<td><div class="gdrive-list-name-cell"><span style="display:inline-flex;align-items:center;flex-shrink:0">${GDRIVE_FOLDER_SVG}</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">00_เอกสารรวมทั้งรายวิชา (คู่มือ · ใบงานรวม · คลัง Self-Quiz)</span><span class="gdrive-list-fsub">${courseRootCount} ไฟล์รวมทั้งรายวิชา RACM 303</span></div></div></td>` +
+          `<td><div class="gdrive-folder-tags"><span class="gdrive-folder-tag is-full">📘 คู่มือ 17 บท</span> <span class="gdrive-folder-tag is-concise">📜 ใบงานรวม</span> <span class="gdrive-folder-tag is-quiz">🧠 60 Self-Quiz</span></div></td>` +
           `<td>RACM 303 (2569)</td>`;
         const tdActs = document.createElement("td");
         const openBtn = make("button", "📂 เปิดโฟลเดอร์ →", "gdrive-row-open-btn");
@@ -11506,7 +11832,7 @@
         canvas.appendChild(
           make(
             "div",
-            "ดาวน์โหลดไฟล์ PDF หรือ Microsoft Word (.docx) ของเอกสารคำสอนและ Worksheet สำหรับอ่านบน iPad หรือพิมพ์เตรียมสอบ Open Note",
+            "ดาวน์โหลดไฟล์ PDF หรือ Microsoft Word (.docx) ของเอกสารคำสอนฉบับเต็ม (Full) และฉบับย่อ (Abridged) สำหรับอ่านบน iPad หรือพิมพ์เตรียมสอบ Open Note",
             "gdrive-folder-hint"
           )
         );
@@ -11561,9 +11887,18 @@
         return;
       }
 
-      // Filter Chips Row (Real Google Drive Type Filters!)
+      // Filter Chips Row (Ordered 01 -> 04 Logical Flow!)
       const chipsRow = make("div", null, "gdrive-chips-row");
       const filterChips = make("div", null, "gdrive-filter-chips");
+      const makeFilterToggle = (chipId) => () => {
+        if (scope === "folders") {
+          state.tbDriveFormatChip = chipId;
+          setDriveScopeAndSync("all");
+        } else {
+          state.tbDriveFormatChip = fmtChip === chipId ? "all" : chipId;
+          renderCanvas();
+        }
+      };
       const typeChips = [
         {
           id: "all",
@@ -11571,65 +11906,38 @@
           label: scope === "folders" ? "📁 โฟลเดอร์ HS1–HS6" : "ทั้งหมดในโฟลเดอร์",
           onClick: () => {
             state.tbDriveFormatChip = "all";
-            if (scope === "folders") renderCanvas();
-            else renderCanvas();
+            renderCanvas();
           }
         },
         {
-          id: "teaching-doc",
-          active: scope !== "folders" && fmtChip === "teaching-doc",
-          label: "📄 เอกสารคำสอน (ย่อ/เต็ม)",
-          onClick: () => {
-            if (scope === "folders") {
-              state.tbDriveFormatChip = "teaching-doc";
-              setDriveScopeAndSync("all");
-            } else {
-              state.tbDriveFormatChip = fmtChip === "teaching-doc" ? "all" : "teaching-doc";
-              renderCanvas();
-            }
-          }
+          id: "full",
+          active: scope !== "folders" && fmtChip === "full",
+          label: "📚 ① ฉบับเต็ม (Full)",
+          onClick: makeFilterToggle("full")
+        },
+        {
+          id: "abridged",
+          active: scope !== "folders" && fmtChip === "abridged",
+          label: "⚡ ② ฉบับย่อ (Abridged)",
+          onClick: makeFilterToggle("abridged")
+        },
+        {
+          id: "self-quiz",
+          active: scope !== "folders" && fmtChip === "self-quiz",
+          label: "🧠 ③ Self-Quiz",
+          onClick: makeFilterToggle("self-quiz")
         },
         {
           id: "discussion-pptx",
           active: scope !== "folders" && fmtChip === "discussion-pptx",
-          label: "🟠 สไลด์ Discussion (.pptx)",
-          onClick: () => {
-            if (scope === "folders") {
-              state.tbDriveFormatChip = "discussion-pptx";
-              setDriveScopeAndSync("all");
-            } else {
-              state.tbDriveFormatChip = fmtChip === "discussion-pptx" ? "all" : "discussion-pptx";
-              renderCanvas();
-            }
-          }
+          label: "💬 ④ Case Discussion (.pptx)",
+          onClick: makeFilterToggle("discussion-pptx")
         },
         {
           id: "lecture-slide",
           active: scope !== "folders" && fmtChip === "lecture-slide",
           label: "🖥️ Slide อาจารย์",
-          onClick: () => {
-            if (scope === "folders") {
-              state.tbDriveFormatChip = "lecture-slide";
-              setDriveScopeAndSync("all");
-            } else {
-              state.tbDriveFormatChip = fmtChip === "lecture-slide" ? "all" : "lecture-slide";
-              renderCanvas();
-            }
-          }
-        },
-        {
-          id: "worksheet-quiz",
-          active: scope !== "folders" && fmtChip === "worksheet-quiz",
-          label: "📋 Worksheet & โจทย์ฝึกหัด",
-          onClick: () => {
-            if (scope === "folders") {
-              state.tbDriveFormatChip = "worksheet-quiz";
-              setDriveScopeAndSync("all");
-            } else {
-              state.tbDriveFormatChip = fmtChip === "worksheet-quiz" ? "all" : "worksheet-quiz";
-              renderCanvas();
-            }
-          }
+          onClick: makeFilterToggle("lecture-slide")
         }
       ];
       if (ROLE === "faculty") {
@@ -11637,15 +11945,7 @@
           id: "faculty-guide",
           active: scope !== "folders" && fmtChip === "faculty-guide",
           label: "📕 คู่มือผู้สอน",
-          onClick: () => {
-            if (scope === "folders") {
-              state.tbDriveFormatChip = "faculty-guide";
-              setDriveScopeAndSync("all");
-            } else {
-              state.tbDriveFormatChip = fmtChip === "faculty-guide" ? "all" : "faculty-guide";
-              renderCanvas();
-            }
-          }
+          onClick: makeFilterToggle("faculty-guide")
         });
       }
 
@@ -11660,8 +11960,8 @@
         make(
           "span",
           scope === "folders"
-            ? "เลือกโฟลเดอร์ HS1–HS6 เพื่อเปิดดูไฟล์ทั้งหมดของบทนั้น (คำสอน · .pptx · Slide อาจารย์ · โจทย์)"
-            : "คลิกที่ไฟล์เพื่อเปิดใช้งานทันที หรือกด PDF / W / .pptx เพื่อดาวน์โหลด",
+            ? "เลือกโฟลเดอร์ HS1–HS6 เพื่อเปิดดูไฟล์ครบทั้ง 4 ขั้นตอน (① Full · ② Abridged · ③ Self-Quiz · ④ Case Discussion)"
+            : "ไฟล์เรียงตามลำดับการเรียนรู้ 01 Full → 02 Abridged → 03 Self-Quiz → 04 Case Discussion",
           "gdrive-folder-hint"
         )
       );
@@ -12437,17 +12737,17 @@
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", "เอกสารคำสอนระบบสุขภาพ (โหมดเรียน)");
+    stage.setAttribute("aria-label", "เส้นทางการเรียนรู้ระบบสุขภาพ 4 ขั้นตอน (โหมดเรียน)");
 
     if (scope === "folders") {
       const shelf = make("div", null, "tv-shelf");
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", "เอกสารคำสอนระบบสุขภาพครบทั้ง 6 ตอน (HS1 – HS6)", "tv-shelf-title"),
+        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
         make(
           "span",
-          "คลิกเลือกตอนเพื่อดูภาพรวมของบทเรียน หรือกดปุ่มลัดบนการ์ดเพื่อเปิดอ่านฉบับย่อ / ฉบับเต็มได้ทันที",
+          "ทุกบทเรียงลำดับ Logical Flow 4 ขั้นตอนเหมือนกัน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class",
           "tv-shelf-sub"
         )
       );
@@ -12478,33 +12778,43 @@
         );
 
         const pills = make("div", null, "hs-atv-ep-pills");
-        if (m.conciseDocId) {
-          const bCon = make("button", "⚡ อ่านฉบับย่อ", "hs-atv-ep-pill is-solid");
-          bCon.type = "button";
-          bCon.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            openTextbookDoc(m.conciseDocId);
-          });
-          pills.appendChild(bCon);
-        }
         if (m.docId) {
-          const bFull = make("button", "📚 ฉบับเต็ม", "hs-atv-ep-pill");
+          const bFull = make("button", "① Full", "hs-atv-ep-pill is-solid");
           bFull.type = "button";
+          bFull.title = `ขั้นที่ 1: เอกสารคำสอนฉบับเต็ม (${m.code})`;
           bFull.addEventListener("click", (ev) => {
             ev.stopPropagation();
             openTextbookDoc(m.docId);
           });
           pills.appendChild(bFull);
         }
-        if (m.wbDocId) {
-          const bWb = make("button", "📋 Worksheet", "hs-atv-ep-pill");
-          bWb.type = "button";
-          bWb.addEventListener("click", (ev) => {
+        if (m.conciseDocId) {
+          const bCon = make("button", "② Abridged", "hs-atv-ep-pill");
+          bCon.type = "button";
+          bCon.title = `ขั้นที่ 2: เอกสารคำสอนฉบับย่อ (${m.code})`;
+          bCon.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            openTextbookDoc(m.wbDocId);
+            openTextbookDoc(m.conciseDocId);
           });
-          pills.appendChild(bWb);
+          pills.appendChild(bCon);
         }
+        const bQuiz = make("button", "③ Self-Quiz", "hs-atv-ep-pill");
+        bQuiz.type = "button";
+        bQuiz.title = `ขั้นที่ 3: Self-Quiz ประเมินตนเอง (${m.code})`;
+        bQuiz.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSelfQuizForModule(m.code, "qa");
+        });
+        pills.appendChild(bQuiz);
+
+        const bDisc = make("button", "④ Case", "hs-atv-ep-pill");
+        bDisc.type = "button";
+        bDisc.title = `ขั้นที่ 4: Case Discussion in Class (${m.code})`;
+        bDisc.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openHsDiscussion(m.code);
+        });
+        pills.appendChild(bDisc);
 
         const openModSpotlight = () => {
           state.activeHsModule = m.id;
@@ -12529,10 +12839,9 @@
       return stage;
     }
 
-    // Focused Episode Spotlight (scope !== "folders")
+    // Focused Episode Spotlight (scope !== "folders") — Coherent 4-Step Logical Flow
+    const flow = getHsLogicalFlowModel(curMod.code);
     const epIdx = getEpNumIndex(curMod.code);
-    const lecturer = getHsLecturerName(curMod.code);
-    const entries = getTeachingDocEntriesForModules([curMod], "all", "");
 
     const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
     hero.setAttribute("data-ep-num", `0${epIdx}`);
@@ -12547,93 +12856,173 @@
     });
     heroTop.append(
       backAllBtn,
-      make("span", `📖 เอกสารคำสอนประจำคาบ ${curMod.code} · สอบ ${curMod.examWeight || ""}`, "tv-hero-kicker")
+      make("span", `🧭 เส้นทางการเรียนรู้ 4 ขั้นตอน · ${curMod.code} · สอบ ${curMod.examWeight || ""}`, "tv-hero-kicker")
     );
 
     const heroBody = make("div", null, "tv-hero-body");
     heroBody.append(
       make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
-      make("p", `📅 ${curMod.scheduleDate} · อาจารย์ผู้สอน: ${lecturer}`, "tv-hero-meta")
+      make("p", `📅 ${curMod.scheduleDate} · อาจารย์ผู้สอน: ${flow.lecturer}`, "tv-hero-meta"),
+      make("p", flow.profile.thread, "hs-atv-hero-note")
     );
 
     const heroActions = make("div", null, "tv-hero-actions");
-    if (curMod.conciseDocId) {
-      const btnCon = make("button", "▶ อ่านฉบับย่อ + แผนภาพ (Concise)", "tv-hero-btn is-primary");
-      btnCon.type = "button";
-      btnCon.addEventListener("click", () => openTextbookDoc(curMod.conciseDocId));
-      heroActions.appendChild(btnCon);
-    }
-    if (curMod.docId) {
-      const btnFull = make("button", "📚 อ่านฉบับเต็ม (Full Textbook)", "tv-hero-btn is-glass");
-      btnFull.type = "button";
-      btnFull.addEventListener("click", () => openTextbookDoc(curMod.docId));
-      heroActions.appendChild(btnFull);
-    }
-    if (curMod.wbDocId) {
-      const btnWb = make("button", "📋 เปิดสมุดใบงาน (Worksheet)", "tv-hero-btn is-glass");
-      btnWb.type = "button";
-      btnWb.addEventListener("click", () => openTextbookDoc(curMod.wbDocId));
-      heroActions.appendChild(btnWb);
-    }
+    flow.steps.forEach((step, idx) => {
+      const btnLabel =
+        step.key === "full"
+          ? "① อ่านฉบับเต็ม (Full)"
+          : step.key === "abridged"
+          ? "② อ่านฉบับย่อ (Abridged)"
+          : step.key === "self-quiz"
+          ? `③ ทำ Self-Quiz (${step.qaCount} ข้อ)`
+          : ROLE === "faculty"
+          ? "④ Case Discussion & เฉลย"
+          : "④ Case Discussion in Class";
+      const hBtn = make("button", btnLabel, `tv-hero-btn ${idx === 0 ? "is-primary" : "is-glass"}`);
+      hBtn.type = "button";
+      hBtn.addEventListener("click", step.onPrimary);
+      heroActions.appendChild(hBtn);
+    });
 
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
-    // Tactile Apple TV Media Cards for the Episode
-    const tilesGrid = make("div", null, "hs-atv-tiles-grid");
-    entries.forEach((en) => {
-      const toneCls = en.kind === "concise" ? "tone-teal" : en.kind === "wb" ? "tone-amber" : "tone-blue";
-      const iconSym = en.kind === "concise" ? "⚡" : en.kind === "wb" ? "📋" : "📚";
-      const tile = make("div", null, "tv-app-tile hs-atv-doc-tile");
-      tile.tabIndex = 0;
-      tile.setAttribute("role", "button");
+    // Visual 4-Step Logical Flow Stepper Bar
+    const stepper = make("nav", null, "hs-flow-stepper");
+    stepper.setAttribute("aria-label", `ลำดับการเรียนรู้ 4 ขั้นตอนของ ${curMod.code}`);
+    flow.steps.forEach((step, idx) => {
+      const node = make("button", null, `hs-flow-step-node is-step-${idx + 1}`);
+      node.type = "button";
+      node.innerHTML =
+        `<span class="hs-flow-step-num">${step.num}</span>` +
+        `<span class="hs-flow-step-meta">` +
+        `<span class="hs-flow-step-name">${escapeHtml(step.stepperTitle)}</span>` +
+        `<span class="hs-flow-step-sub">${escapeHtml(step.stepperSub)}</span>` +
+        `</span>`;
+      node.addEventListener("click", step.onPrimary);
+      stepper.appendChild(node);
+      if (idx < flow.steps.length - 1) {
+        stepper.appendChild(make("span", "→", "hs-flow-step-arrow"));
+      }
+    });
+    stage.appendChild(stepper);
 
-      const ico = make("span", iconSym, `tv-app-icon ${toneCls} hs-atv-emoji-ico`);
-      const copy = make("div", null, "tv-app-copy");
-      copy.append(
-        make(
-          "span",
-          en.kind === "concise"
-            ? `สรุปฉบับย่อ + แผนภาพ (${en.mod.code})`
-            : en.kind === "wb"
-            ? `สมุดใบงานเตรียมอภิปราย (${en.mod.code})`
-            : `เอกสารคำสอนฉบับเต็ม (${en.mod.code})`,
-          "tv-app-title"
-        ),
-        make("span", en.subDesc, "tv-app-sub")
+    // Coherent 4-Step Logical Flow Cards Grid (2x2 balanced across all HS1-HS6)
+    const cardsGrid = make("div", null, "hs-flow-cards-grid");
+    flow.steps.forEach((step, idx) => {
+      const card = make("article", null, `tv-app-tile hs-flow-card is-step-${idx + 1}`);
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `${step.stepTag}: ${step.title} (${curMod.code})`);
+
+      const topBar = make("div", null, "hs-flow-card-top");
+      topBar.append(
+        make("span", step.stepTag, `hs-flow-step-pill is-step-${idx + 1}`),
+        make("span", step.timing, "hs-flow-timing-pill")
       );
 
-      const foot = make("div", null, "hs-atv-dl-row");
-      foot.appendChild(make("span", "▶ เปิดอ่านบนเว็บ", "tv-app-badge"));
+      const mainRow = make("div", null, "hs-flow-card-main");
+      const ico = make("span", step.icon, `tv-app-icon ${step.tone} hs-atv-emoji-ico`);
+      const copy = make("div", null, "tv-app-copy");
+      copy.append(
+        make("h4", `${step.title} · ${curMod.code}`, "hs-flow-card-title"),
+        make("p", step.desc, "hs-flow-card-desc"),
+        make("p", `↳ ${step.bridge}`, "hs-flow-card-bridge")
+      );
+      mainRow.append(ico, copy);
 
-      const pdfA = document.createElement("a");
-      pdfA.className = "hs-atv-mini-dl";
-      pdfA.href = en.pdfHref;
-      pdfA.setAttribute("download", `${en.dlStem}.pdf`);
-      pdfA.textContent = "⬇ PDF";
-      pdfA.addEventListener("click", (ev) => ev.stopPropagation());
+      const foot = make("div", null, "hs-flow-card-foot");
+      const primaryBadge = make("span", step.primaryLabel, "tv-app-badge hs-flow-primary-cta");
+      foot.appendChild(primaryBadge);
 
-      const docxA = document.createElement("a");
-      docxA.className = "hs-atv-mini-dl";
-      docxA.href = en.docxHref;
-      docxA.setAttribute("download", `${en.dlStem}.docx`);
-      docxA.textContent = "⬇ Word";
-      docxA.addEventListener("click", (ev) => ev.stopPropagation());
+      if (step.key === "full" || step.key === "abridged") {
+        if (step.pdfHref) {
+          const pdfA = document.createElement("a");
+          pdfA.className = "hs-atv-mini-dl";
+          pdfA.href = step.pdfHref;
+          pdfA.setAttribute("download", `${step.dlStem}.pdf`);
+          pdfA.textContent = "⬇ PDF";
+          pdfA.addEventListener("click", (ev) => ev.stopPropagation());
+          foot.appendChild(pdfA);
+        }
+        if (step.docxHref) {
+          const docxA = document.createElement("a");
+          docxA.className = "hs-atv-mini-dl";
+          docxA.href = step.docxHref;
+          docxA.setAttribute("download", `${step.dlStem}.docx`);
+          docxA.textContent = "⬇ Word";
+          docxA.addEventListener("click", (ev) => ev.stopPropagation());
+          foot.appendChild(docxA);
+        }
+      } else if (step.key === "self-quiz") {
+        const fcBtn = make("button", `🗂 บัตรคำศัพท์ (${step.glossaryCount})`, "hs-atv-mini-dl");
+        fcBtn.type = "button";
+        fcBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSelfQuizForModule(curMod.code, "flashcards");
+        });
+        const rrBtn = make("button", "📋 ตารางทบทวนเร็ว", "hs-atv-mini-dl");
+        rrBtn.type = "button";
+        rrBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSelfQuizForModule(curMod.code, "rapid");
+        });
+        foot.append(fcBtn, rrBtn);
+      } else if (step.key === "case-discussion") {
+        const scrollBtn = make("button", "≡ ใบงานอ่านยาว", "hs-atv-mini-dl");
+        scrollBtn.type = "button";
+        scrollBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openCaseDiscussionScrollForModule(curMod.code);
+        });
+        const pptBtn = make("button", "⬇ .pptx", "hs-atv-mini-dl");
+        pptBtn.type = "button";
+        pptBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          downloadSingleModulePptx(curMod.id);
+        });
+        foot.append(scrollBtn, pptBtn);
+      }
 
-      foot.append(pdfA, docxA);
-      copy.appendChild(foot);
+      card.append(topBar, mainRow, foot);
 
-      tile.append(ico, copy);
-      tile.addEventListener("click", () => openTextbookDoc(en.doc.id));
-      tile.addEventListener("keydown", (ev) => {
+      // Optional Supplemental Workbook strip inside Step 03 (for HS1 & HS2 without breaking 4-card parity)
+      if (step.key === "self-quiz" && step.wbDoc) {
+        const extraRow = make("div", null, "hs-flow-supp-row");
+        extraRow.addEventListener("click", (ev) => ev.stopPropagation());
+        extraRow.appendChild(make("span", `📝 เสริมพิเศษ (${curMod.code}): แบบฝึกหัดและเฉลย (Workbook)`, "hs-flow-supp-label"));
+        const extraBtns = make("div", null, "hs-flow-supp-btns");
+        const openWbBtn = make("button", "เปิดอ่าน", "hs-atv-mini-dl");
+        openWbBtn.type = "button";
+        openWbBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openTextbookDoc(step.wbDoc.id);
+        });
+        const wbPdf = document.createElement("a");
+        wbPdf.className = "hs-atv-mini-dl";
+        wbPdf.href = step.wbDl.pdfHref;
+        wbPdf.setAttribute("download", `${step.wbDl.dlStem}.pdf`);
+        wbPdf.textContent = "⬇ PDF";
+        const wbDocx = document.createElement("a");
+        wbDocx.className = "hs-atv-mini-dl";
+        wbDocx.href = step.wbDl.docxHref;
+        wbDocx.setAttribute("download", `${step.wbDl.dlStem}.docx`);
+        wbDocx.textContent = "⬇ Word";
+        extraBtns.append(openWbBtn, wbPdf, wbDocx);
+        extraRow.appendChild(extraBtns);
+        card.appendChild(extraRow);
+      }
+
+      card.addEventListener("click", step.onPrimary);
+      card.addEventListener("keydown", (ev) => {
         if (ev.key === "Enter" || ev.key === " ") {
           ev.preventDefault();
-          openTextbookDoc(en.doc.id);
+          step.onPrimary();
         }
       });
-      tilesGrid.appendChild(tile);
+      cardsGrid.appendChild(card);
     });
-    stage.appendChild(tilesGrid);
+    stage.appendChild(cardsGrid);
 
     return stage;
   }
@@ -12688,7 +13077,7 @@
         );
 
         const pills = make("div", null, "hs-atv-ep-pills");
-        const docBtn = make("button", "📖 อ่านเอกสารคำสอนระหว่างรอ →", "hs-atv-ep-pill is-solid");
+        const docBtn = make("button", "🧭 ดู 4 ขั้นตอนการเรียนรู้ระหว่างรอ →", "hs-atv-ep-pill is-solid");
         docBtn.type = "button";
         docBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
@@ -12747,24 +13136,19 @@
       ),
       make(
         "p",
-        "สไลด์ประกอบการบรรยายของอาจารย์ประจำคาบจะเปิดให้คลิกดูบนหน้านี้ทันทีที่อัปโหลด ในระหว่างรอสามารถเปิดอ่านเอกสารคำสอนหรือโจทย์อภิปรายได้ทันที",
+        "สไลด์ประกอบการบรรยายของอาจารย์ประจำคาบจะเปิดให้คลิกดูบนหน้านี้ทันทีที่อัปโหลด ในระหว่างรอสามารถเริ่มเรียนรู้ตามลำดับ ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Case Discussion ได้ทันที",
         "hs-atv-hero-note"
       )
     );
 
     const heroActions = make("div", null, "tv-hero-actions");
-    const btnDocs = make("button", `📖 เปิดเอกสารคำสอน (${curMod.code})`, "tv-hero-btn is-primary");
+    const btnDocs = make("button", `🧭 เปิดหน้า 4 ขั้นตอน (${curMod.code})`, "tv-hero-btn is-primary");
     btnDocs.type = "button";
     btnDocs.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
 
-    const btnDisc = make("button", `💬 เปิดโจทย์อภิปราย (${curMod.code})`, "tv-hero-btn is-glass");
+    const btnDisc = make("button", `💬 ไปขั้นที่ 4: Case Discussion (${curMod.code})`, "tv-hero-btn is-glass");
     btnDisc.type = "button";
-    btnDisc.addEventListener("click", () => {
-      state.activeHsModule = curMod.code;
-      state.hsdSlideDeckMod = curMod.code;
-      openHsGoogleDriveFolder();
-      switchTab("hs-discussion");
-    });
+    btnDisc.addEventListener("click", () => openHsDiscussion(curMod.code));
 
     heroActions.append(btnDocs, btnDisc);
     hero.append(heroTop, heroBody, heroActions);
@@ -12778,24 +13162,29 @@
         ? HSD_DATA.modules
         : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
     const curMod = getHsModuleMeta(activeMod);
+    const flow = getHsLogicalFlowModel(curMod.code);
     const epIdx = getEpNumIndex(curMod.code);
-    const modCases = (HSD_DATA.cases || []).filter((c) => c.module === curMod.id);
-    const qCnt = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
-    const prog = countModuleDraftProgress(curMod.id);
+    const modCases = flow.modCases;
+    const qCnt = flow.subQCnt;
+    const prog = flow.discProg;
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", `โจทย์อภิปรายระบบสุขภาพ ${curMod.code} (โหมดเรียน)`);
+    stage.setAttribute("aria-label", `Case Discussion in Class ${curMod.code} (โหมดเรียน)`);
 
     // 1. Featured Episode Hero
     const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
+    const backFlowBtn = make("button", `← ภาพรวม 4 ขั้นตอน (${curMod.code})`, "hs-atv-back-pill");
+    backFlowBtn.type = "button";
+    backFlowBtn.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
     heroTop.append(
+      backFlowBtn,
       make(
         "span",
-        `💬 อภิปรายกลุ่มย่อย ${curMod.code} · ${curMod.discTime || ""} · สอบ ${curMod.examWeight || ""}`,
+        `💬 STEP 04 · CASE DISCUSSION IN CLASS (${curMod.code}) · ${curMod.discTime || ""} · สอบ ${curMod.examWeight || ""}`,
         "tv-hero-kicker"
       ),
       make(
@@ -12814,7 +13203,7 @@
       make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
       make(
         "p",
-        `📅 ${curMod.scheduleDate} — เริ่มด้วยสไลด์เปิดคาบเช็คชื่อ Kahoot ตามด้วยโจทย์กรณีศึกษา ${modCases.length} กรณี (${qCnt} ข้อย่อย)`,
+        `📅 ${curMod.scheduleDate} · นำความรู้จากเอกสารคำสอนและ Self-Quiz มาวิเคราะห์ ${modCases.length} กรณีศึกษา (${qCnt} ข้อย่อย): ${flow.profile.caseFocus}`,
         "tv-hero-meta"
       )
     );
@@ -12822,7 +13211,7 @@
     const heroActions = make("div", null, "tv-hero-actions");
     const playSlidesBtn = make(
       "button",
-      `▶ เริ่มเปิดสไลด์ 16:9 (${curMod.code})`,
+      ROLE === "faculty" ? `▶ เริ่มเปิดสไลด์ 16:9 + เฉลย (${curMod.code})` : `▶ เริ่มเปิดสไลด์ในชั้นเรียน 16:9 (${curMod.code})`,
       "tv-hero-btn is-primary"
     );
     playSlidesBtn.type = "button";
@@ -12831,22 +13220,18 @@
     const scrollModeBtn = make("button", "≡ เปิดใบงานเลื่อนอ่านยาว", "tv-hero-btn is-glass");
     scrollModeBtn.type = "button";
     scrollModeBtn.addEventListener("click", () => {
-      state.hsdViewMode = "scroll";
-      state.hsdModule = curMod.id;
-      state.hsdDriveFolderOpen = false;
-      try {
-        localStorage.setItem("racm303_hsd_vmode", "scroll");
-      } catch (_) {}
-      if ($("hsdModuleSelect")) $("hsdModuleSelect").value = curMod.id;
-      syncViewModeButtonsUI();
-      renderHsDiscussionView();
+      openCaseDiscussionScrollForModule(curMod.id);
     });
 
     const dlPptxBtn = make("button", "⬇ ดาวน์โหลดสไลด์ .pptx", "tv-hero-btn is-glass");
     dlPptxBtn.type = "button";
     dlPptxBtn.addEventListener("click", () => downloadSingleModulePptx(curMod.id));
 
-    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn);
+    const backQuizBtn = make("button", `🧠 ทบทวน ③ Self-Quiz (${curMod.code})`, "tv-hero-btn is-glass");
+    backQuizBtn.type = "button";
+    backQuizBtn.addEventListener("click", () => openSelfQuizForModule(curMod.code, "qa"));
+
+    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn, backQuizBtn);
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
@@ -12902,7 +13287,7 @@
     // 3. Episode Poster Grid (HS1 – HS6)
     const shelf = make("div", null, "tv-shelf");
     const sHead = make("div", null, "tv-shelf-head");
-    sHead.appendChild(make("h3", "คาบอภิปรายระบบสุขภาพทั้งหมด (HS1 – HS6)", "tv-shelf-title"));
+    sHead.appendChild(make("h3", "Case Discussion in Class ครบทุกบท (HS1 – HS6)", "tv-shelf-title"));
     shelf.appendChild(sHead);
 
     const epGrid = make("div", null, "hs-atv-episodes-grid");
@@ -12993,8 +13378,12 @@
     const bannerActiveFmt =
       subMode === "lecture-slides"
         ? "lecture-slides"
-        : subMode === "doc-reader" && parsed.format === "wb"
-        ? "wb"
+        : subMode === "doc-reader"
+        ? parsed.format === "concise"
+          ? "concise"
+          : parsed.format === "wb"
+          ? "practice"
+          : "full"
         : "docs";
 
     if (bannerWrap) {
@@ -13011,14 +13400,14 @@
                 ? "HS1–HS6: โฟลเดอร์ Slide อาจารย์ประจำคาบ (File Explorer)"
                 : "HS1–HS6: สไลด์ประกอบการบรรยายประจำคาบ (รออาจารย์ Upload)"
               : isDriveUi
-              ? "Google Drive · ระบบสุขภาพ (HS1–HS6) — เลือกโฟลเดอร์แต่ละบทเพื่อดูไฟล์ทั้งหมด"
-              : "HS1–HS6: เอกสารคำสอนระบบสุขภาพ (ฉบับย่อ & ฉบับเต็ม)",
+              ? "Google Drive · ระบบสุขภาพ (HS1–HS6) — เรียงตาม Logical Flow 4 ขั้นตอน"
+              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 4 ขั้นตอน (Full · Abridged · Self-Quiz · Case Discussion)",
           allDesc:
             subMode === "lecture-slides"
               ? "เลือกบทเรียน HS1–HS6 เพื่อดูรายละเอียดคาบบรรยายและสถานะการอัปโหลดสไลด์ของอาจารย์ผู้สอน"
               : isDriveUi
-              ? "File Explorer รวมไฟล์ทุกรูปแบบในโฟลเดอร์ HS1–HS6 (เอกสารคำสอน ฉบับย่อ/เต็ม · สไลด์ Discussion .pptx · Slide อาจารย์ · Worksheet · โจทย์ฝึกหัด · คู่มือวิชา)"
-              : "เลือกบทเรียน HS1–HS6 เพื่อเปิดอ่านสรุปฉบับย่อ (Abridged) ฉบับเต็ม หรือดาวน์โหลดไฟล์ PDF / Word",
+              ? "File Explorer รวมไฟล์ทุกบทเรียน HS1–HS6 เรียงตามลำดับ 01 ฉบับเต็ม (Full) → 02 ฉบับย่อ (Abridged) → 03 Self-Quiz → 04 Case Discussion in Class"
+              : "เลือกบทเรียน HS1–HS6 เพื่อเดินตามเส้นทางการเรียนรู้ 4 ขั้นตอนอย่างต่อเนื่อง ตั้งแต่ปูพื้นฐาน สรุปแก่น ทดสอบตนเอง จนถึงอภิปรายกรณีศึกษาในชั้นเรียน",
           onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
         })
       );
@@ -13049,11 +13438,13 @@
     // Mode: "doc-reader" — Ensure current doc matches baseMod
     let readerDoc = current;
     if (parseHsDocInfo(readerDoc.id).modCode !== baseMod) {
-      const resolvedId = resolveDocIdForModuleAndFormat(baseMod, state.preferredHsFormat || "concise");
+      const resolvedId = resolveDocIdForModuleAndFormat(baseMod, state.preferredHsFormat || "full");
       readerDoc = docs.find((d) => d.id === resolvedId) || current;
       state.activeDocId = readerDoc.id;
     }
+    const readerParsed = parseHsDocInfo(readerDoc.id);
     const modMeta = getHsModuleMeta(baseMod);
+    const flow = getHsLogicalFlowModel(baseMod);
 
     if (driveMount) {
       driveMount.hidden = true;
@@ -13061,7 +13452,7 @@
     }
     if (readerWrap) readerWrap.hidden = false;
 
-    // Populate Top File Switcher Bar inside Reader
+    // Populate Top 4-Step Flow Switcher Bar inside Reader
     if (readerBar) {
       readerBar.replaceChildren();
       const backGroup = make("div", null, "tb-drive-file-pills");
@@ -13074,7 +13465,7 @@
       backAllBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
       const backDriveBtn = make(
         "button",
-        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `← หน้าบทเรียน ${baseMod}`,
+        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `🧭 ← ภาพรวม 4 ขั้น (${baseMod})`,
         "btn sm"
       );
       backDriveBtn.type = "button";
@@ -13083,25 +13474,54 @@
       readerBar.appendChild(backGroup);
 
       const fileSwitchGroup = make("div", null, "tb-drive-file-pills");
-      fileSwitchGroup.appendChild(make("span", `เอกสารคาบ ${baseMod}:`, "tb-drive-file-label"));
-      [
-        { id: modMeta.conciseDocId, fmt: "concise", label: "⚡ ฉบับย่อ (Abridged)" },
-        { id: modMeta.docId, fmt: "full", label: "📚 ฉบับเต็ม (Full Textbook)" },
-        { id: modMeta.wbDocId, fmt: "wb", label: "📋 Worksheet" }
-      ].forEach((fItem) => {
-        if (!fItem.id) return;
-        const isCurrentFile = readerDoc.id === fItem.id;
-        const fBtn = make("button", fItem.label, `btn sm${isCurrentFile ? " teal" : ""}`);
+      fileSwitchGroup.appendChild(make("span", `เส้นทาง ${baseMod}:`, "tb-drive-file-label"));
+      const flowBarItems = [
+        {
+          label: "① ฉบับเต็ม (Full)",
+          active: readerDoc.id === modMeta.docId,
+          available: Boolean(modMeta.docId),
+          onClick: () => openTextbookDoc(modMeta.docId)
+        },
+        {
+          label: "② ฉบับย่อ (Abridged)",
+          active: readerDoc.id === modMeta.conciseDocId,
+          available: Boolean(modMeta.conciseDocId),
+          onClick: () => openTextbookDoc(modMeta.conciseDocId)
+        },
+        {
+          label: `③ Self-Quiz (${flow.qaCount} ข้อ)`,
+          active: false,
+          available: true,
+          onClick: () => openSelfQuizForModule(baseMod, "qa")
+        },
+        {
+          label: ROLE === "faculty" ? "④ Case Discussion & เฉลย" : "④ Case Discussion",
+          active: false,
+          available: true,
+          onClick: () => openHsDiscussion(baseMod)
+        }
+      ];
+      if (modMeta.wbDocId) {
+        flowBarItems.push({
+          label: "📝 Workbook เสริม",
+          active: readerDoc.id === modMeta.wbDocId,
+          available: true,
+          onClick: () => openTextbookDoc(modMeta.wbDocId)
+        });
+      }
+      flowBarItems.forEach((fItem) => {
+        if (!fItem.available) return;
+        const fBtn = make("button", fItem.label, `btn sm${fItem.active ? " teal" : ""}`);
         fBtn.type = "button";
-        fBtn.addEventListener("click", () => openTextbookDoc(fItem.id));
+        fBtn.addEventListener("click", fItem.onClick);
         fileSwitchGroup.appendChild(fBtn);
       });
       readerBar.appendChild(fileSwitchGroup);
     }
 
-    // Populate Left Sidebar
+    // Populate Left Sidebar (Coherent 4-Step Logical Flow)
     if (sidebarLabel) {
-      sidebarLabel.textContent = isDriveUi ? `ไฟล์ในโฟลเดอร์ ${baseMod} (Drive)` : `เอกสารคำสอนคาบ ${baseMod}`;
+      sidebarLabel.textContent = `เส้นทางการเรียนรู้ 4 ขั้น (${baseMod})`;
     }
     picker.replaceChildren();
     const backRootLi = document.createElement("li");
@@ -13118,7 +13538,7 @@
     const backLi = document.createElement("li");
     const backSideBtn = make(
       "button",
-      isDriveUi ? `📁 โฟลเดอร์คาบ ${baseMod} (Drive)` : `← หน้าบทเรียน ${baseMod}`,
+      isDriveUi ? `📁 โฟลเดอร์คาบ ${baseMod} (Drive)` : `🧭 ภาพรวม 4 ขั้นตอน (${baseMod})`,
       "doc-picker-btn"
     );
     backSideBtn.type = "button";
@@ -13126,28 +13546,65 @@
     backLi.appendChild(backSideBtn);
     picker.appendChild(backLi);
 
-    [
-      { id: modMeta.conciseDocId, label: `⚡ ${baseMod} · ฉบับย่อ (Abridged)` },
-      { id: modMeta.docId, label: `📚 ${baseMod} · ฉบับเต็ม (Full)` },
-      { id: modMeta.wbDocId, label: `📋 ${baseMod} · สมุดใบงาน (Worksheet)` }
-    ].forEach((fItem) => {
-      if (!fItem.id) return;
+    const sidebarSteps = [
+      {
+        label: `① ${baseMod} · เอกสารคำสอนฉบับเต็ม (Full)`,
+        active: readerDoc.id === modMeta.docId,
+        available: Boolean(modMeta.docId),
+        onClick: () => openTextbookDoc(modMeta.docId)
+      },
+      {
+        label: `② ${baseMod} · เอกสารคำสอนฉบับย่อ (Abridged)`,
+        active: readerDoc.id === modMeta.conciseDocId,
+        available: Boolean(modMeta.conciseDocId),
+        onClick: () => openTextbookDoc(modMeta.conciseDocId)
+      },
+      {
+        label: `③ ${baseMod} · Self-Quiz (${flow.qaCount} ข้อ · ${flow.glossaryCount} คำ)`,
+        active: false,
+        available: true,
+        onClick: () => openSelfQuizForModule(baseMod, "qa")
+      },
+      {
+        label: `④ ${baseMod} · Case Discussion (${flow.modCases.length} กรณี)`,
+        active: false,
+        available: true,
+        onClick: () => openHsDiscussion(baseMod)
+      }
+    ];
+    if (modMeta.wbDocId) {
+      sidebarSteps.push({
+        label: `📝 ${baseMod} · แบบฝึกหัดเสริม (Workbook)`,
+        active: readerDoc.id === modMeta.wbDocId,
+        available: true,
+        onClick: () => openTextbookDoc(modMeta.wbDocId)
+      });
+    }
+    sidebarSteps.forEach((sItem) => {
+      if (!sItem.available) return;
       const li = document.createElement("li");
-      const btn = make("button", fItem.label, "doc-picker-btn");
+      const btn = make("button", sItem.label, "doc-picker-btn");
       btn.type = "button";
-      btn.setAttribute("aria-current", readerDoc.id === fItem.id ? "true" : "false");
-      btn.addEventListener("click", () => openTextbookDoc(fItem.id));
+      btn.setAttribute("aria-current", sItem.active ? "true" : "false");
+      btn.addEventListener("click", sItem.onClick);
       li.appendChild(btn);
       picker.appendChild(li);
     });
 
     if (jumpHsdBtn) {
       jumpHsdBtn.textContent =
-        ROLE === "faculty" ? `💬 สไลด์โจทย์ & เฉลย ${baseMod} →` : `💬 โจทย์อภิปราย ${baseMod} →`;
+        ROLE === "faculty" ? `④ Case Discussion & เฉลย ${baseMod} →` : `④ Case Discussion ${baseMod} →`;
     }
 
+    const stepPrefix =
+      readerParsed.format === "full"
+        ? "STEP 01 · เอกสารคำสอนฉบับเต็ม (Full)"
+        : readerParsed.format === "concise"
+        ? "STEP 02 · เอกสารคำสอนฉบับย่อ (Abridged)"
+        : "เสริม STEP 03 · แบบฝึกหัดและเฉลย (Workbook)";
+
     if (metaTitle) {
-      metaTitle.textContent = `${readerDoc.badge} — ${readerDoc.sessionInfo || readerDoc.subtitle || ""}`;
+      metaTitle.textContent = `${stepPrefix} · ${readerDoc.badge} — ${readerDoc.sessionInfo || readerDoc.subtitle || ""}`;
     }
     const dlStem = `RACM303_${sanitizeFilenamePart(`${readerDoc.id}_${readerDoc.title}`).replace(/\s+/g, "_").slice(0, 72)}`;
     if (pdfBtn) {
@@ -13169,9 +13626,60 @@
 
     prose.innerHTML = readerDoc.html;
     attachProseEnhancements(prose, toc);
+
+    // Append Coherent Bottom Next-Step Logical Flow Progression Banner (non-print)
+    const nextBanner = make("div", null, "hs-flow-next-banner hsd-no-print");
+    const nextCopy = make("div", null, "hs-flow-next-copy");
+    const nextActs = make("div", null, "hs-flow-next-acts");
+
+    if (readerParsed.format === "full") {
+      nextCopy.append(
+        make("span", `จบขั้นที่ 1 · เอกสารคำสอนฉบับเต็ม (${baseMod})`, "hs-flow-next-kicker"),
+        make("strong", "พร้อมสกัดแก่นและดูแผนภาพสรุปของบทนี้แล้วหรือยัง?"),
+        make("p", flow.profile.fullBridge)
+      );
+      const bNext = make("button", `ไปขั้นที่ 2: เอกสารคำสอนฉบับย่อ (Abridged) →`, "btn primary");
+      bNext.type = "button";
+      bNext.addEventListener("click", () => openTextbookDoc(modMeta.conciseDocId));
+      const bSkip = make("button", `ไปขั้นที่ 3: Self-Quiz (${flow.qaCount} ข้อ)`, "btn");
+      bSkip.type = "button";
+      bSkip.addEventListener("click", () => openSelfQuizForModule(baseMod, "qa"));
+      nextActs.append(bNext, bSkip);
+    } else if (readerParsed.format === "concise") {
+      nextCopy.append(
+        make("span", `จบขั้นที่ 2 · เอกสารคำสอนฉบับย่อ (${baseMod})`, "hs-flow-next-kicker"),
+        make("strong", "ลองทดสอบความเข้าใจด้วยตนเองก่อนเข้าห้องอภิปราย"),
+        make("p", flow.profile.abridgedBridge)
+      );
+      const bNext = make("button", `ไปขั้นที่ 3: ทำ Self-Quiz (${flow.qaCount} ข้อ) →`, "btn primary");
+      bNext.type = "button";
+      bNext.addEventListener("click", () => openSelfQuizForModule(baseMod, "qa"));
+      const bPrev = make("button", `← กลับไปอ่านฉบับเต็ม (Full)`, "btn");
+      bPrev.type = "button";
+      bPrev.addEventListener("click", () => openTextbookDoc(modMeta.docId));
+      const bCase = make("button", `④ Case Discussion in Class`, "btn");
+      bCase.type = "button";
+      bCase.addEventListener("click", () => openHsDiscussion(baseMod));
+      nextActs.append(bPrev, bNext, bCase);
+    } else {
+      nextCopy.append(
+        make("span", `จบแบบฝึกหัดเสริม (${baseMod} Workbook)`, "hs-flow-next-kicker"),
+        make("strong", "พร้อมเช็กโจทย์ Self-Quiz และเข้าอภิปรายกรณีศึกษาในชั้นเรียน"),
+        make("p", flow.profile.quizBridge)
+      );
+      const bQuiz = make("button", `ไปขั้นที่ 3: Self-Quiz (${flow.qaCount} ข้อ)`, "btn");
+      bQuiz.type = "button";
+      bQuiz.addEventListener("click", () => openSelfQuizForModule(baseMod, "qa"));
+      const bNext = make("button", `ไปขั้นที่ 4: Case Discussion in Class →`, "btn primary");
+      bNext.type = "button";
+      bNext.addEventListener("click", () => openHsDiscussion(baseMod));
+      nextActs.append(bQuiz, bNext);
+    }
+    nextBanner.append(nextCopy, nextActs);
+    prose.appendChild(nextBanner);
   }
 
-  /* ---------- Tab 5: Rapid Review, 111 Flashcards & 60 Self-Check Q&A ---------- */
+  /* ---------- Tab 5: Step 03 Self-Quiz (Active Recall Q&A, 111 Flashcards & Rapid Review) ---------- */
   function initPracticeControls() {
     document.querySelectorAll("[data-practice-sub]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -13206,7 +13714,7 @@
         if (!isPracticeFiltered()) return;
         ev.preventDefault();
         const m = ($("practiceModuleFilter") && $("practiceModuleFilter").value) || "Filtered";
-        printWithCleanTitle(`คลังทบทวน_${sanitizeFilenamePart(m)}_RACM303_2569`);
+        printWithCleanTitle(`SelfQuiz_${sanitizeFilenamePart(m)}_RACM303_2569`);
       });
     }
 
@@ -13233,10 +13741,10 @@
           html = items.map((it) => `<h3>[${escapeHtml(it.module)} · ข้อ ${it.num}] ${escapeHtml(it.question)}</h3>${it.answerHtml}`).join("");
         }
         downloadHtmlAsGenuineDocx(
-          `คลังทบทวนความรู้ RACM 303 (${mod || "ผลการค้นหา"})`,
+          `Self-Quiz & คลังทบทวน RACM 303 (${mod || "ผลการค้นหา"})`,
           "วิทยาศาสตร์ระบบสุขภาพ (HS1–HS6) · ปีการศึกษา 2569",
           html,
-          `คลังทบทวน_${sanitizeFilenamePart(mod || "Filtered")}_RACM303_2569.docx`
+          `SelfQuiz_${sanitizeFilenamePart(mod || "Filtered")}_RACM303_2569.docx`
         );
       });
     }
@@ -13256,6 +13764,10 @@
           showModuleBar: true,
           allowAllModules: true,
           isAllActive: !selectedMod,
+          keepFormatTabActiveWhenAll: true,
+          allHeading: "HS1–HS6: STEP 03 · Self-Quiz (แบบทดสอบประเมินตนเอง · บัตรคำศัพท์ · Rapid Review)",
+          allDesc:
+            "ฝึกดึงความรู้ (Active Recall) จากเอกสารคำสอนขั้นที่ 1–2 ให้แม่นยำ เลือกปุ่ม HS1–HS6 ด้านบนเพื่อเจาะจงทำ Self-Quiz รายบทก่อนเข้าห้องอภิปราย",
           onSelectModule: (m) => {
             if ($("practiceModuleFilter")) $("practiceModuleFilter").value = m || "";
             if (m) state.activeHsModule = m;
@@ -13263,6 +13775,83 @@
           }
         })
       );
+    }
+
+    // Sync subnav active state
+    document.querySelectorAll("[data-practice-sub]").forEach((b) =>
+      b.setAttribute("aria-pressed", b.dataset.practiceSub === state.practiceSub ? "true" : "false")
+    );
+
+    // Render Step 03 Logical Flow Context & Handoff Strip
+    const flowBar = $("practiceFlowContextBar");
+    if (flowBar) {
+      flowBar.replaceChildren();
+      const box = make("div", null, "hs-selfquiz-flow-bar");
+      const copy = make("div", null, "hs-selfquiz-flow-copy");
+      const acts = make("div", null, "hs-selfquiz-flow-acts");
+
+      if (selectedMod && /^HS[1-6]$/.test(selectedMod)) {
+        const flow = getHsLogicalFlowModel(selectedMod);
+        const progTxt =
+          flow.quizProg.answered > 0
+            ? `✓ ตอบแล้ว ${flow.quizProg.answered}/${flow.quizProg.total} ข้อ`
+            : `${flow.qaCount} ข้อ Self-Quiz · ${flow.glossaryCount} คำศัพท์`;
+        copy.append(
+          make("div", null, "hs-selfquiz-flow-top"),
+          make(
+            "p",
+            `เช็กความแม่นยำเรื่อง${flow.profile.quizFocus} — พิมพ์ร่างคำตอบด้วยตนเองก่อนให้ AI Mentor ตรวจหรือเปิดแนวคำตอบ`
+          )
+        );
+        copy.firstChild.append(
+          make("span", `STEP 03 · SELF-QUIZ (${selectedMod})`, "hs-flow-step-pill is-step-3"),
+          make("span", progTxt, "hs-flow-timing-pill")
+        );
+
+        const bPrev = make("button", `← ทบทวน ② ฉบับย่อ (${selectedMod})`, "btn sm");
+        bPrev.type = "button";
+        bPrev.addEventListener("click", () => openTextbookDoc(flow.mod.conciseDocId));
+        acts.appendChild(bPrev);
+
+        if (flow.wbDoc) {
+          const bWb = make("button", `📝 แบบฝึกหัดเสริม (${selectedMod} Workbook)`, "btn sm");
+          bWb.type = "button";
+          bWb.addEventListener("click", () => openTextbookDoc(flow.wbDoc.id));
+          acts.appendChild(bWb);
+        }
+
+        const bNext = make("button", `ไปขั้นที่ 4: Case Discussion (${selectedMod}) →`, "btn sm primary");
+        bNext.type = "button";
+        bNext.addEventListener("click", () => openHsDiscussion(selectedMod));
+        acts.appendChild(bNext);
+      } else {
+        const allProg = countModuleSelfQuizProgress("");
+        const topLine = make("div", null, "hs-selfquiz-flow-top");
+        topLine.append(
+          make("span", "STEP 03 · SELF-QUIZ รวมทุกบท (HS1–HS6)", "hs-flow-step-pill is-step-3"),
+          make(
+            "span",
+            allProg.answered > 0
+              ? `✓ ตอบแล้ว ${allProg.answered}/${allProg.total} ข้อ`
+              : `${allProg.total} ข้อ Self-Quiz · ${(HS.glossary || []).length} คำศัพท์`,
+            "hs-flow-timing-pill"
+          )
+        );
+        copy.append(
+          topLine,
+          make(
+            "p",
+            "เลือกบทเรียน HS1–HS6 จากแถบด้านบนเพื่อทำ Self-Quiz รายบท พร้อมตรวจคำตอบด้วย AI Mentor ก่อนเข้าห้อง Case Discussion in Class"
+          )
+        );
+        const bHub = make("button", "🧭 ดูภาพรวม 4 ขั้นตอน (HS1–HS6)", "btn sm");
+        bHub.type = "button";
+        bHub.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+        acts.appendChild(bHub);
+      }
+
+      box.append(copy, acts);
+      flowBar.appendChild(box);
     }
 
     $("practiceRapidWrap").hidden = state.practiceSub !== "rapid";
@@ -20543,35 +21132,35 @@
 
       ribbon.append(gDriveGrp.grp, gExport.grp, gClose.grp);
     } else if (activeTab === "ref") {
-      const gDocs = makeGroup(`เอกสารคำสอน & สไลด์คาบ ${cur.mod.code}`);
+      const gDocs = makeGroup(`เส้นทาง 4 ขั้นตอน & สไลด์คาบ ${cur.mod.code}`);
       if (cur.mod) {
-        const bFolder = make("button", `📁 โฟลเดอร์เอกสารคำสอน (${cur.mod.code})`, "ppt-rb-cmd is-primary-teal");
+        const bFolder = make("button", `🧭 ภาพรวม 4 ขั้น (${cur.mod.code})`, "ppt-rb-cmd is-primary-teal");
         bFolder.type = "button";
         bFolder.addEventListener("click", () => openTextbookDriveFolder(cur.mod.code));
         gDocs.body.appendChild(bFolder);
+      }
+      if (cur.mod && cur.mod.docId) {
+        const bFull = make("button", `📚 ① ฉบับเต็ม (${cur.mod.code})`, "ppt-rb-cmd");
+        bFull.type = "button";
+        bFull.addEventListener("click", () => openTextbookDoc(cur.mod.docId));
+        gDocs.body.appendChild(bFull);
+      }
+      if (cur.mod && cur.mod.conciseDocId) {
+        const bConcise = make("button", `⚡ ② ฉบับย่อ (${cur.mod.code})`, "ppt-rb-cmd");
+        bConcise.type = "button";
+        bConcise.addEventListener("click", () => openTextbookDoc(cur.mod.conciseDocId));
+        gDocs.body.appendChild(bConcise);
+      }
+      if (cur.mod) {
+        const bQuiz = make("button", `🧠 ③ Self-Quiz (${cur.mod.code})`, "ppt-rb-cmd");
+        bQuiz.type = "button";
+        bQuiz.addEventListener("click", () => openSelfQuizForModule(cur.mod.code, "qa"));
+        gDocs.body.appendChild(bQuiz);
 
         const bLecSlides = make("button", `🖥️ Slide อาจารย์ (${cur.mod.code} · รอ Upload)`, "ppt-rb-cmd");
         bLecSlides.type = "button";
         bLecSlides.addEventListener("click", () => openHsLectureSlides(cur.mod.code));
         gDocs.body.appendChild(bLecSlides);
-      }
-      if (cur.mod && cur.mod.conciseDocId) {
-        const bConcise = make("button", `⚡ ฉบับย่อ (${cur.mod.code})`, "ppt-rb-cmd");
-        bConcise.type = "button";
-        bConcise.addEventListener("click", () => openTextbookDoc(cur.mod.conciseDocId));
-        gDocs.body.appendChild(bConcise);
-      }
-      if (cur.mod && cur.mod.docId) {
-        const bFull = make("button", `📚 ฉบับเต็ม (${cur.mod.code})`, "ppt-rb-cmd");
-        bFull.type = "button";
-        bFull.addEventListener("click", () => openTextbookDoc(cur.mod.docId));
-        gDocs.body.appendChild(bFull);
-      }
-      if (cur.mod && cur.mod.wbDocId) {
-        const bWb = make("button", `📋 Worksheet (${cur.mod.code})`, "ppt-rb-cmd");
-        bWb.type = "button";
-        bWb.addEventListener("click", () => openTextbookDoc(cur.mod.wbDocId));
-        gDocs.body.appendChild(bWb);
       }
       ribbon.appendChild(gDocs.grp);
 
@@ -24320,15 +24909,7 @@
     const docInfo = resolveSessionTeachingDoc(session);
     if (session.conciseLink && session.docLink) {
       const mCode = session.hsModule || session.docLink;
-      const bConcise = make("button", `ฉบับย่อ (${mCode})`, "btn sm teal");
-      bConcise.type = "button";
-      bConcise.addEventListener("click", () => {
-        if (closeModalFirst) closeEventModal();
-        openTextbookDoc(session.conciseLink);
-      });
-      container.appendChild(bConcise);
-
-      const bFull = make("button", `ฉบับเต็ม (${mCode})`, "btn sm");
+      const bFull = make("button", `① ฉบับเต็ม (${mCode})`, "btn sm teal");
       bFull.type = "button";
       bFull.addEventListener("click", () => {
         if (closeModalFirst) closeEventModal();
@@ -24336,18 +24917,29 @@
       });
       container.appendChild(bFull);
 
-      const bWb = make("button", `Worksheet (${mCode})`, session.wbLink ? "btn sm" : "btn sm is-disabled-hs-tab");
-      bWb.type = "button";
-      if (session.wbLink) {
-        bWb.addEventListener("click", () => {
-          if (closeModalFirst) closeEventModal();
-          openTextbookDoc(session.wbLink);
-        });
-      } else {
-        bWb.disabled = true;
-        bWb.title = `บทเรียน ${mCode} ไม่มีสมุด Worksheet แยกต่างหาก`;
-      }
-      container.appendChild(bWb);
+      const bConcise = make("button", `② ฉบับย่อ (${mCode})`, "btn sm");
+      bConcise.type = "button";
+      bConcise.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openTextbookDoc(session.conciseLink);
+      });
+      container.appendChild(bConcise);
+
+      const bQuiz = make("button", `③ Self-Quiz (${mCode})`, "btn sm");
+      bQuiz.type = "button";
+      bQuiz.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openSelfQuizForModule(mCode, "qa");
+      });
+      container.appendChild(bQuiz);
+
+      const bCase = make("button", `④ Case Discussion (${mCode})`, "btn sm");
+      bCase.type = "button";
+      bCase.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openHsDiscussion(mCode);
+      });
+      container.appendChild(bCase);
     } else if (docInfo) {
       const bDoc = make("button", docInfo.fullLabel, "btn sm teal");
       bDoc.type = "button";
@@ -30478,12 +31070,12 @@
         "Searchable official syllabus, attendance rules, assessment rubrics, fieldwork regulations, and forms."
       ],
       "panel-textbooks": [
-        "Health Systems Exam Study Materials (HS1–HS6) · Full · Abridged & Worksheets",
-        "Complete self-contained study chapters across HS1–HS6 with abridged versions, infographics, and guided worksheets."
+        "Health Systems 4-Step Learning Flow (HS1–HS6) · Full · Abridged · Self-Quiz · Case Discussion",
+        "Follow a coherent 4-step study progression across HS1–HS6: Full Textbook → Abridged Summary → Self-Quiz → Case Discussion in Class."
       ],
       "panel-practice": [
-        "Active Recall Flashcards · Key Terms & 82 Practice Questions",
-        "Review high-yield concepts across Health Systems and Epidemiology with instant explanations."
+        "Step 03 · Self-Quiz (60 Active Recall Qs) · 111 Key Terms & Rapid Review",
+        "Test your understanding from Full & Abridged textbooks with AI Mentor feedback before Case Discussion in Class."
       ]
     };
     Object.keys(secHeaders).forEach((pid) => {
@@ -31256,6 +31848,8 @@
     openTextbookDoc: (docId) => openTextbookDoc(docId),
     openTextbookDriveFolder: (mod) => openTextbookDriveFolder(mod),
     openHsLectureSlides: (mod) => openHsLectureSlides(mod),
+    getHsLogicalFlowModel: (mod) => getHsLogicalFlowModel(mod),
+    openSelfQuizForModule: (mod, sub) => openSelfQuizForModule(mod, sub),
     setHsUiMode: (mode, opts) => setHsUiMode(mode, opts),
     openFacultyDoc: (docId) => {
       if (docId) state.activeFacultyDocId = docId;
@@ -31264,17 +31858,7 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
     openPractice: (mod, sub) => {
-      if (sub) {
-        state.practiceSub = sub;
-        document.querySelectorAll("[data-practice-sub]").forEach((b) =>
-          b.setAttribute("aria-pressed", b.dataset.practiceSub === sub ? "true" : "false")
-        );
-      }
-      if ($("practiceModuleFilter") && mod !== undefined) {
-        $("practiceModuleFilter").value = mod || "";
-      }
-      switchTab("practice");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      openSelfQuizForModule(mod, sub || "qa");
     },
     openFieldworkSite: (shortName) => {
       setSyncedFieldworkArea(shortName || "");

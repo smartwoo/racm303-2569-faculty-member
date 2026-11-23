@@ -457,8 +457,8 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · Google Drive", "Health Systems · Google Drive"),
-              sub: t("File Explorer รวมโฟลเดอร์ HS1–HS6: เอกสารคำสอน สไลด์ Discussion .pptx เฉลย และ Slide อาจารย์", "Unified File Explorer for HS1–HS6 folders: docs, Discussion .pptx, Teacher Key & lecture slides"),
+              title: t("ระบบสุขภาพ · 4 ขั้นตอน (HS1–HS6)", "Health Systems · 4-Step Flow"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion & เฉลย ครบทุกบท", "4-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion & Key"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -470,8 +470,8 @@
               id: "app-guides",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("คู่มือผู้สอน & โจทย์อภิปราย", "Facilitator Guides & Key"),
-              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ 60 ข้อ และเอกสารต้นฉบับ HS1–HS6", "Facilitator guides, Teacher Key, 60 practice items & HS1–HS6 references"),
+              title: t("คู่มือผู้สอน & เฉลย Teacher Key", "Facilitator Guides & Key"),
+              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ Self-Quiz 60 ข้อ และเอกสารต้นฉบับ HS1–HS6", "Facilitator guides, Teacher Key, 60 Self-Quiz items & HS1–HS6 references"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
             },
@@ -517,8 +517,8 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · Google Drive", "Health Systems · Google Drive"),
-              sub: t("เปิด File Explorer โฟลเดอร์ HS1–HS6 รวมเอกสารคำสอน สไลด์ Discussion .pptx และ Slide อาจารย์", "Unified File Explorer for HS1–HS6 folders: docs, Discussion .pptx, lecture slides & worksheets"),
+              title: t("ระบบสุขภาพ · 4 ขั้นตอน (HS1–HS6)", "Health Systems · 4-Step Flow"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class ครบทุกบท", "Coherent 4-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion"),
               badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -529,11 +529,15 @@
             {
               id: "app-books",
               tone: "tone-amber",
-              icon: ICONS.book,
-              title: t("คำศัพท์ 111 คำ & โจทย์ 60 ข้อ", "111 Flashcards & 60 Quiz"),
-              sub: t("ตารางทบทวนเร็ว High-Yield บัตรคำศัพท์ และโจทย์ฝึกคิด Active Recall ครบ HS1–HS6", "High-Yield rapid review, flashcards & 60 active recall questions"),
-              badge: t("HS1 – HS6", "HS1 – HS6"),
-              action: () => navigateFromTile("app-books", () => navigateTvTab("practice"))
+              icon: ICONS.quiz,
+              title: t("Self-Quiz (60 ข้อ) & คำศัพท์ 111 คำ", "Self-Quiz (60 Qs) & 111 Flashcards"),
+              sub: t("ทดสอบความเข้าใจ Active Recall พร้อม AI Mentor บัตรคำศัพท์ และตาราง Rapid Review ครบ HS1–HS6", "Active recall Self-Quiz with AI Mentor, 111 flashcards & Rapid Review"),
+              badge: t("STEP 03 · HS1–HS6", "STEP 03 · HS1–HS6"),
+              action: () => navigateFromTile("app-books", () => {
+                const a = getApi();
+                if (a && a.openPractice) a.openPractice("", "qa");
+                else navigateTvTab("practice");
+              })
             },
             {
               id: "app-epi",
@@ -792,70 +796,87 @@
     fn();
   }
 
-  /* ---------- 3. Episode Quick-Action Sheet Modal ---------- */
+  /* ---------- 3. Episode Quick-Action Sheet Modal (4-Step Logical Flow) ---------- */
   function openEpisodeModal(epCode) {
     const mod = (HSD.modules || []).find((m) => m.code === epCode);
     if (!mod) return;
     closeAllTvModals();
 
     const api = getApi();
+    const flow = api && api.getHsLogicalFlowModel ? api.getHsLogicalFlowModel(mod.code) : null;
     const backdrop = document.createElement("div");
     backdrop.className = "tv-modal-backdrop";
     backdrop.id = "tvEpisodeModal";
     backdrop.setAttribute("role", "dialog");
     backdrop.setAttribute("aria-modal", "true");
 
+    const step1Sub = flow
+      ? flow.steps[0].bridge
+      : t("ปูพื้นฐานทฤษฎี กรอบแนวคิด กรณีตัวอย่าง และเอกสารอ้างอิงฉบับสมบูรณ์", "Full conceptual foundation & references");
+    const step2Sub = flow
+      ? flow.steps[1].bridge
+      : t("สกัดแก่นสำคัญ แผนภาพสรุป และตารางเปรียบเทียบเตรียมสอบ Open Note", "Abridged high-yield summary & diagrams");
+    const step3Sub = flow
+      ? `${flow.qaCount} ข้อ Self-Quiz พร้อม AI Mentor · ${flow.glossaryCount} คำศัพท์ · ตาราง Rapid Review`
+      : t("ทดสอบความเข้าใจ Active Recall พร้อมคำศัพท์และตารางทบทวนเร็ว", "Active recall Self-Quiz & flashcards");
+    const step4Sub = flow
+      ? ROLE === "faculty"
+        ? `สไลด์เปิดคาบ Kahoot + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) & เฉลย 4 ขั้น · ${mod.discTime || ""}`
+        : `สไลด์เปิดคาบ Kahoot + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
+      : t(`สไลด์เปิดคาบ Kahoot + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Kahoot + 16:9 in-class case slides");
+
     backdrop.innerHTML = `
       <div class="tv-modal-sheet is-compact">
         <div class="tv-modal-head">
           <div>
-            <span class="tv-app-badge" style="margin-top:0;margin-bottom:8px">${esc(mod.code)} · ${esc(mod.scheduleDate.replace(/^วัน/, ""))}</span>
+            <span class="tv-app-badge" style="margin-top:0;margin-bottom:8px">${esc(mod.code)} · ${esc(mod.scheduleDate.replace(/^วัน/, ""))} · สอบ ${esc(mod.examWeight || "")}</span>
             <h3 class="tv-modal-title">${esc(getLang() === "en" && mod.enTitle ? mod.enTitle : mod.title)}</h3>
-            <p class="tv-modal-sub">${esc(mod.summaryFocus || "")}</p>
+            <p class="tv-modal-sub">${esc((flow && flow.profile && flow.profile.thread) || mod.summaryFocus || "")}</p>
           </div>
           <button type="button" class="tv-modal-close" id="tvCloseEpModalBtn" aria-label="ปิด">✕</button>
         </div>
 
         <div class="tv-ep-action-list">
-          <button type="button" class="tv-ep-action-btn is-primary" id="tvEpActSlides" data-tv-modal-focus>
+          <button type="button" class="tv-ep-action-btn is-primary" id="tvEpActFull" data-tv-modal-focus>
             <span>
-              <span class="tv-ep-action-title-row">▶ <span>${esc(
-                ROLE === "faculty"
-                  ? t(`เปิดไฟล์สไลด์ Discussion ระบบสุขภาพ (${mod.code}.pptx) & เฉลย`, `Open ${mod.code}.pptx Discussion Slides & Key`)
-                  : t(`เปิดไฟล์สไลด์ Discussion ระบบสุขภาพ (${mod.code}.pptx)`, `Open ${mod.code}.pptx Discussion Slides`)
-              )}</span></span>
-              <span class="tv-ep-action-sub">${esc(
-                ROLE === "faculty"
-                  ? t(`เริ่มด้วยสไลด์เปิดคาบเช็คชื่อ Kahoot + โจทย์ 16:9 และเฉลย · คาบ ${mod.discTime}`, `Starts with Opening Kahoot slide + 16:9 Case Slides & Key · ${mod.discTime}`)
-                  : t(`สไลด์หน้าแรกเช็คชื่อกลุ่มย่อย Kahoot + โจทย์สไลด์ 16:9 · คาบ ${mod.discTime}`, `Slide 1 Opening Kahoot check-in + 16:9 Case Slides · ${mod.discTime}`)
-              )}</span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-1">01</span> <span>${esc(t(`เอกสารคำสอนฉบับเต็ม · Full (${mod.code})`, `Full Teaching Document (${mod.code})`))}</span></span>
+              <span class="tv-ep-action-sub">${esc(step1Sub)}</span>
             </span>
             <span>→</span>
           </button>
 
-          <button type="button" class="tv-ep-action-btn" id="tvEpActDocsDrive" data-tv-modal-focus>
+          <button type="button" class="tv-ep-action-btn" id="tvEpActAbridged" data-tv-modal-focus>
             <span>
-              <span class="tv-ep-action-title-row">${ICONS.book} <span>${esc(t(`เอกสารคำสอน (${mod.code} · ฉบับย่อ & ฉบับเต็ม)`, `Open ${mod.code} Teaching Docs (Concise & Full)`))}</span></span>
-              <span class="tv-ep-action-sub">${esc(t("เลือกอ่านฉบับย่อ (Abridged) หรือฉบับเต็ม พร้อมดาวน์โหลด PDF / Word", "Concise & Full textbooks + PDF/Word downloads"))}</span>
-            </span>
-            <span>→</span>
-          </button>
-
-          <button type="button" class="tv-ep-action-btn" id="tvEpActLecSlides" data-tv-modal-focus>
-            <span>
-              <span class="tv-ep-action-title-row">${ICONS.slides} <span>${esc(t(`Slide อาจารย์ประจำคาบ ${mod.code} (รออาจารย์ Upload)`, `${mod.code} Instructor Lecture Slides (Pending Upload)`))}</span></span>
-              <span class="tv-ep-action-sub">${esc(t(`สไลด์ประกอบการบรรยายช่วงต้นคาบ (${mod.lectureTime || "1 ชม. แรก"})`, "Instructor lecture slides"))}</span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-2">02</span> <span>${esc(t(`เอกสารคำสอนฉบับย่อ · Abridged (${mod.code})`, `Abridged Summary & Diagrams (${mod.code})`))}</span></span>
+              <span class="tv-ep-action-sub">${esc(step2Sub)}</span>
             </span>
             <span>→</span>
           </button>
 
           <button type="button" class="tv-ep-action-btn" id="tvEpActQuiz" data-tv-modal-focus>
             <span>
-              <span class="tv-ep-action-title-row">${ICONS.quiz} <span>${esc(t(`ฝึกทำโจทย์และคำศัพท์ประจำบท ${mod.code}`, `Practice ${mod.code} Quiz & Flashcards`))}</span></span>
-              <span class="tv-ep-action-sub">${esc(t("เช็กความเข้าใจด้วยโจทย์ Active Recall", "Active recall questions & key terms"))}</span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-3">03</span> <span>${esc(t(`Self-Quiz ประเมินตนเอง (${mod.code})`, `${mod.code} Self-Quiz & Active Recall`))}</span></span>
+              <span class="tv-ep-action-sub">${esc(step3Sub)}</span>
             </span>
             <span>→</span>
           </button>
+
+          <button type="button" class="tv-ep-action-btn" id="tvEpActSlides" data-tv-modal-focus>
+            <span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-4">04</span> <span>${esc(
+                ROLE === "faculty"
+                  ? t(`Case Discussion in Class & เฉลย (${mod.code})`, `${mod.code} Case Discussion & Teacher Key`)
+                  : t(`Case Discussion in Class (${mod.code})`, `${mod.code} Case Discussion in Class`)
+              )}</span></span>
+              <span class="tv-ep-action-sub">${esc(step4Sub)}</span>
+            </span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <div class="tv-ep-secondary-row">
+          <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 4 ขั้นตอน (${mod.code})`, `Open 4-Step Hub (${mod.code})`))}</button>
+          <button type="button" class="tv-hosp-chip" id="tvEpActLecSlides" data-tv-modal-focus>🖥️ ${esc(t(`Slide อาจารย์ (${mod.code} · รอ Upload)`, `Instructor Slides (Pending)`))}</button>
         </div>
       </div>
     `;
@@ -872,23 +893,14 @@
       if (e.target === backdrop) close();
     });
 
-    $("tvEpActSlides").addEventListener("click", () => {
+    $("tvEpActFull").addEventListener("click", () => {
       backdrop.remove();
-      if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
+      if (api && api.openTextbookDoc) api.openTextbookDoc(mod.docId || mod.code);
     });
 
-    $("tvEpActDocsDrive").addEventListener("click", () => {
+    $("tvEpActAbridged").addEventListener("click", () => {
       backdrop.remove();
-      if (api && api.openTextbookDriveFolder) {
-        api.openTextbookDriveFolder(mod.code);
-      } else if (api && api.openTextbookDoc) {
-        api.openTextbookDoc(mod.conciseDocId || `${mod.code}-CONCISE`);
-      }
-    });
-
-    $("tvEpActLecSlides").addEventListener("click", () => {
-      backdrop.remove();
-      if (api && api.openHsLectureSlides) api.openHsLectureSlides(mod.code);
+      if (api && api.openTextbookDoc) api.openTextbookDoc(mod.conciseDocId || `${mod.code}-CONCISE`);
     });
 
     $("tvEpActQuiz").addEventListener("click", () => {
@@ -896,8 +908,23 @@
       if (api && api.openPractice) api.openPractice(mod.code, "qa");
     });
 
+    $("tvEpActSlides").addEventListener("click", () => {
+      backdrop.remove();
+      if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
+    });
+
+    $("tvEpActHub").addEventListener("click", () => {
+      backdrop.remove();
+      if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder(mod.code);
+    });
+
+    $("tvEpActLecSlides").addEventListener("click", () => {
+      backdrop.remove();
+      if (api && api.openHsLectureSlides) api.openHsLectureSlides(mod.code);
+    });
+
     requestAnimationFrame(() => {
-      const firstBtn = $("tvEpActSlides");
+      const firstBtn = $("tvEpActFull");
       if (firstBtn) firstBtn.focus();
     });
   }
@@ -1675,14 +1702,15 @@
     const buildHsModuleFiles = (m) => {
       const files = [];
       const docs = HS_DATA.docs || [];
-      const addDoc = (docId, suffix, kicker, icoCls, icoTxt, chip) => {
+      const flow = api && api.getHsLogicalFlowModel ? api.getHsLogicalFlowModel(m.code) : null;
+      const addDoc = (docId, fileName, kicker, icoCls, icoTxt, chip) => {
         if (!docId) return;
         const docObj = docs.find((d) => d.id === docId);
         if (!docObj) return;
         files.push({
           id: `hsdoc:${docId}`,
           folderPath: ["health-systems", m.id],
-          name: `RACM303_${m.code}_${suffix}.gdoc`,
+          name: fileName,
           title: `${m.code}: ${docObj.title || m.title}`,
           sub: kicker,
           meta: `${m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : ""} · น้ำหนักสอบ ${m.examWeight || ""}`,
@@ -1697,31 +1725,80 @@
         });
       };
 
-      addDoc(m.conciseDocId, "เอกสารคำสอน_ฉบับย่อ_(Abridged)", "⚡ เอกสารคำสอนฉบับย่อ + แผนภาพเตรียมสอบ", "is-gdoc", "≡", "ฉบับย่อ · อ่านไว");
-      addDoc(m.docId, "เอกสารคำสอน_ฉบับเต็ม_(Full_Textbook)", "📚 เอกสารคำสอนฉบับสมบูรณ์พร้อมอ้างอิง", "is-gdoc", "≡", "ฉบับเต็ม");
-      addDoc(m.wbDocId, "สมุดใบงาน_Worksheet", "📋 ใบงานฝึกคิดเตรียมความพร้อมก่อนเข้าคาบ", "is-gdoc", "📋", "Worksheet");
+      // Step 01: Full
+      addDoc(
+        m.docId,
+        `01_${m.code}_เอกสารคำสอนฉบับเต็ม_(Full).gdoc`,
+        (flow && flow.steps[0].desc) || "① STEP 01 · เอกสารคำสอนฉบับเต็ม ปูพื้นฐานทฤษฎีและอ้างอิงครบถ้วน",
+        "is-gdoc",
+        "①",
+        "① Full"
+      );
+      // Step 02: Abridged
+      addDoc(
+        m.conciseDocId,
+        `02_${m.code}_เอกสารคำสอนฉบับย่อ_(Abridged).gdoc`,
+        (flow && flow.steps[1].desc) || "② STEP 02 · เอกสารคำสอนฉบับย่อ สกัดแก่นสำคัญและแผนภาพเตรียมสอบ",
+        "is-gdoc",
+        "②",
+        "② Abridged"
+      );
 
+      // Step 03: Self-Quiz
+      const gCnt = (HS_DATA.glossary || []).filter((g) => g.module === m.code).length;
+      const qCnt = (HS_DATA.selfCheck || []).filter((q) => q.module === m.code).length;
+      files.push({
+        id: `hsquiz:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: `03_${m.code}_Self-Quiz_และคำศัพท์ทบทวน_(Active_Recall).app`,
+        title: `Self-Quiz (${qCnt} ข้อ) · บัตรคำศัพท์ ${gCnt} คำ · Rapid Review (${m.code})`,
+        sub: (flow && flow.steps[2].desc) || "③ STEP 03 · ฝึกดึงความรู้ Active Recall พร้อม AI Mentor ก่อนเข้าห้องอภิปราย",
+        meta: `${qCnt} ข้อ · ${gCnt} คำศัพท์`,
+        badge: "③ Self-Quiz",
+        icoCls: "is-quiz",
+        icoTxt: "③",
+        onOpen: openFileAction(() => {
+          if (api && api.openPractice) api.openPractice(m.code, "qa");
+        })
+      });
+
+      // Step 03b: Optional Supplemental Workbook (HS1 & HS2)
+      addDoc(
+        m.wbDocId,
+        `03b_${m.code}_แบบฝึกหัดเสริม_(Workbook).gdoc`,
+        `📝 เสริมขั้นที่ 3 · แบบฝึกหัดและเฉลยละเอียดประจำบท ${m.code}`,
+        "is-gdoc",
+        "📝",
+        "Workbook เสริม"
+      );
+
+      // Step 04: Case Discussion in Class
       const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
       const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
       files.push({
         id: `hsppt:${m.id}`,
         folderPath: ["health-systems", m.id],
-        name: `RACM303_คาบ_${m.code}_Case_Discussion.pptx`,
-        title: `สไลด์อภิปรายกลุ่มย่อย 16:9 · ${m.code}: ${m.title}`,
-        sub: ROLE === "faculty" ? `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key` : `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`,
+        name: `04_${m.code}_Case_Discussion_in_Class.pptx`,
+        title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
+        sub:
+          (flow && flow.steps[3].desc) ||
+          (ROLE === "faculty"
+            ? `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+            : `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
         meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
-        badge: ROLE === "faculty" ? `★ สไลด์ + เฉลย` : `▶ สไลด์ 16:9`,
+        badge: ROLE === "faculty" ? `④ Case + เฉลย` : `④ Case 16:9`,
         icoCls: "is-pptx",
-        icoTxt: "P",
+        icoTxt: "④",
         onOpen: openFileAction(() => {
           if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
         })
       });
 
+      // Step 05: Instructor Lecture Slides
       files.push({
         id: `hslec:${m.id}`,
         folderPath: ["health-systems", m.id],
-        name: `RACM303_คาบ_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
+        name: `05_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
         title: `สไลด์ประกอบการบรรยายโดยอาจารย์ประจำคาบ ${m.code}`,
         sub: `ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
         meta: m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : "",
@@ -1734,28 +1811,12 @@
         })
       });
 
-      const gCnt = (HS_DATA.glossary || []).filter((g) => g.module === m.code).length;
-      const qCnt = (HS_DATA.selfCheck || []).filter((q) => q.module === m.code).length;
-      files.push({
-        id: `hsquiz:${m.id}`,
-        folderPath: ["health-systems", m.id],
-        name: `RACM303_${m.code}_คำศัพท์และโจทย์ทบทวน_(Active_Recall).app`,
-        title: `ตารางทบทวนเร็ว · คำศัพท์ ${gCnt} คำ · โจทย์ ${qCnt} ข้อ (${m.code})`,
-        sub: "ฝึกพลิกบัตรคำศัพท์และตอบคำถาม Active Recall เฉพาะบทนี้",
-        meta: `${gCnt} คำศัพท์ · ${qCnt} ข้อ`,
-        badge: "🧠 ฝึกทำโจทย์",
-        icoCls: "is-quiz",
-        icoTxt: "🧠",
-        onOpen: openFileAction(() => {
-          if (api && api.openPractice) api.openPractice(m.code, "qa");
-        })
-      });
-
+      // Step 06: Faculty Guide (Faculty Portal only)
       if (ROLE === "faculty") {
         files.push({
           id: `hsfac:${m.id}`,
           folderPath: ["health-systems", m.id],
-          name: `RACM303_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
+          name: `06_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
           title: `คู่มือผู้สอนและแนวทางนำอภิปรายประจำคาบ ${m.code}`,
           sub: "เฉพาะคณาจารย์ — แผนนำอภิปราย ประเด็นเฉลย 4 ขั้น และเกณฑ์ประเมิน",
           meta: "Faculty Member Only",
@@ -1850,9 +1911,9 @@
       "health-systems": {
         id: "health-systems",
         code: "02_ระบบสุขภาพ (HS1–HS6)",
-        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 รวมเอกสารคำสอน สไลด์ Discussion .pptx Slide อาจารย์ และโจทย์",
+        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 4 ขั้นตอน: ① Full → ② Abridged → ③ Self-Quiz → ④ Case Discussion",
         meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + เอกสารรวม",
-        tags: ["📁 HS1–HS6", "📄 คำสอนย่อ/เต็ม", "🟠 Discussion .pptx", "⏳ Slide อาจารย์"],
+        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Case Discussion"],
         subfolders: modules.map((m) => ({
           id: m.id,
           code: m.code,
@@ -1885,15 +1946,15 @@
           {
             id: "hs:practice-all",
             folderPath: ["health-systems"],
-            name: "RACM303_คลังคำศัพท์_111คำ_และโจทย์ฝึกหัด_60ข้อ_HS1-HS6.app",
-            title: "ตารางทบทวนเร็ว High-Yield · บัตรคำศัพท์ 111 คำ · โจทย์ 60 ข้อ",
-            sub: "ทบทวนครบทุกบทเรียนระบบสุขภาพพร้อมโหมดพลิกบัตรคำศัพท์",
-            meta: "111 คำศัพท์ · 60 ข้อ",
-            badge: "🧠 เปิดคลังทบทวน",
+            name: "RACM303_คลัง_Self-Quiz_60ข้อ_และคำศัพท์_111คำ_HS1-HS6.app",
+            title: "Self-Quiz 60 ข้อ (AI Mentor) · บัตรคำศัพท์ 111 คำ · ตาราง Rapid Review",
+            sub: "ทบทวนและทดสอบความเข้าใจครบทุกบทเรียนระบบสุขภาพ",
+            meta: "60 ข้อ · 111 คำศัพท์",
+            badge: "🧠 เปิด Self-Quiz",
             icoCls: "is-quiz",
             icoTxt: "🧠",
             onOpen: openFileAction(() => {
-              if (api && api.openPractice) api.openPractice("", "rapid");
+              if (api && api.openPractice) api.openPractice("", "qa");
             })
           }
         ]
