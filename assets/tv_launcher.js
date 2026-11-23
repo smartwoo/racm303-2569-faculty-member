@@ -162,6 +162,11 @@
         </div>
 
         <div class="tv-utility-cluster">
+          <button type="button" class="tv-corner-upload-pill ${ROLE === "faculty" ? "is-faculty-upload" : "is-student-materials"}" id="tvCornerUploadBtn" data-tv-focus data-tv-row="0" title="${ROLE === "faculty" ? "มุม Upload Slide & ไฟล์ประกอบการสอน (ซิงค์เว็บ & GitHub)" : "คลังดาวน์โหลด Slide อาจารย์ & เอกสารคำสอน"}">
+            ${ROLE === "faculty" ? ICONS.upload : ICONS.download}
+            <span class="tv-corner-upload-label">${ROLE === "faculty" ? "Upload สื่อสอน" : "คลัง Slide"}</span>
+            <span class="tv-corner-upload-count" id="tvCornerUploadCount">0</span>
+          </button>
           <button type="button" class="tv-icon-pill" id="tvSearchBtn" data-tv-focus data-tv-row="0" title="ค้นหาด่วน (⌘K หรือ /)" aria-label="ค้นหา">${ICONS.search}</button>
           <button type="button" class="tv-profile-pill" id="tvProfileBtn" data-tv-focus data-tv-row="0" title="ตั้งค่าชื่อหรือกลุ่มของฉัน">
             <span class="tv-profile-avatar" id="tvProfileAvatar">${ICONS.user}</span>
@@ -267,12 +272,28 @@
       });
     }
 
+    const cornerUpBtn = $("tvCornerUploadBtn");
+    if (cornerUpBtn) {
+      cornerUpBtn.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
+    }
+
+    if (ROLE === "faculty" && !$("tvFloatingUploadFab")) {
+      const fab = document.createElement("button");
+      fab.type = "button";
+      fab.className = "tv-floating-upload-fab hsd-no-print";
+      fab.id = "tvFloatingUploadFab";
+      fab.title = "เปิดมุม Upload Slide / ไฟล์ประกอบการสอน & ซิงค์ GitHub";
+      fab.innerHTML = `${ICONS.upload} <span>Upload Slide / GitHub</span>`;
+      fab.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
+      document.body.appendChild(fab);
+    }
+
     const upSlideBtn = $("tvMenuUploadSlideBtn");
     if (upSlideBtn) {
       upSlideBtn.addEventListener("click", () => {
         morePop.hidden = true;
         moreBtn.setAttribute("aria-expanded", "false");
-        if ($("facQuickSlideTopBtn")) $("facQuickSlideTopBtn").click();
+        openGlobalUploadModal("w1-d1-st");
       });
     }
 
@@ -285,6 +306,7 @@
 
     syncThemeIcon();
     syncProfilePill();
+    setTimeout(syncUploadCountBadge, 60);
   }
 
   function syncThemeIcon() {
@@ -453,9 +475,9 @@
               id: "app-sched",
               tone: "tone-blue",
               icon: ICONS.calendar,
-              title: t("ตารางสอน & อัปโหลด Slide", "Teaching Schedule & Slides"),
-              sub: t("ดูภาระงานสอนรายอาจารย์ ซิงค์ปฏิทิน และแนบสไลด์", "Personal teaching calendar & slide upload"),
-              badge: t("6 สัปดาห์", "6 Weeks"),
+              title: t("ตารางสอน & ปฏิทินภาระงาน", "Teaching Schedule & Calendar"),
+              sub: t("ดูภาระงานสอนรายอาจารย์ ซิงค์ปฏิทิน (.ics) และอัปโหลด Slide ประจำคาบ", "Personal teaching calendar, .ics sync & slide studio"),
+              badge: t("6 สัปดาห์ · อัปโหลด Slide", "6 Weeks · Slide Studio"),
               action: () => navigateFromTile("app-sched", () => navigateTvTab("schedule"))
             },
             {
@@ -471,9 +493,9 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 5 ขั้นตอน (HS1–HS6)", "Health Systems · 5-Step Flow"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion & เฉลย", "5-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Case Discussion & Key"),
-              badge: "HS1 – HS6",
+              title: t("ระบบสุขภาพ · 5 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 5-Step Flow (ST1 & HS1–6)"),
+              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion & กรอบคาบเรียน", "5-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion"),
+              badge: "ST1 · HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
                 if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
@@ -484,9 +506,9 @@
               id: "app-guides",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("คู่มือผู้สอน & เฉลย Teacher Key", "Facilitator Guides & Key"),
-              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ Self-Quiz 60 ข้อ และเอกสารต้นฉบับ HS1–HS6", "Facilitator guides, Teacher Key, 60 Self-Quiz items & HS1–HS6 references"),
-              badge: "HS1 – HS6",
+              title: t("คู่มือผู้สอน · Key & ต้นฉบับ", "Facilitator Guides & Key"),
+              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ Self-Quiz 66 ข้อ และต้นฉบับ ST1 & HS1–HS6", "Facilitator guides, Teacher Key, 66 Self-Quiz items & ST1 + HS1–HS6 originals"),
+              badge: "ST1 · HS1 – HS6",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
             },
             {
@@ -531,9 +553,9 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 5 ขั้นตอน (HS1–HS6)", "Health Systems · 5-Step Flow"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class", "Coherent 5-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Case Discussion"),
-              badge: t("HS1 – HS6", "HS1 – HS6"),
+              title: t("ระบบสุขภาพ · 5 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 5-Step Flow (ST1 & HS1–6)"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ กรอบคาบเรียน & Case Discussion", "Coherent 5-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion"),
+              badge: t("ST1 · HS1 – HS6", "ST1 · HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
                 if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
@@ -544,9 +566,9 @@
               id: "app-books",
               tone: "tone-amber",
               icon: ICONS.quiz,
-              title: t("Self-Quiz (60 ข้อ) & คำศัพท์ 111 คำ", "Self-Quiz (60 Qs) & 111 Flashcards"),
-              sub: t("ทดสอบความเข้าใจ Active Recall พร้อม AI Mentor บัตรคำศัพท์ และตาราง Rapid Review ครบ HS1–HS6", "Active recall Self-Quiz with AI Mentor, 111 flashcards & Rapid Review"),
-              badge: t("STEP 03 · HS1–HS6", "STEP 03 · HS1–HS6"),
+              title: t("Self-Quiz (66 ข้อ) & คำศัพท์ 125 คำ", "Self-Quiz (66 Qs) & 125 Flashcards"),
+              sub: t("ทดสอบความเข้าใจ Active Recall พร้อม AI Mentor บัตรคำศัพท์ และตาราง Rapid Review ครบ ST1 & HS1–HS6", "Active recall Self-Quiz with AI Mentor, 125 flashcards & Rapid Review"),
+              badge: t("STEP 03 · ST1 & HS1–6", "STEP 03 · ST1 & HS1–6"),
               action: () => navigateFromTile("app-books", () => {
                 const a = getApi();
                 if (a && a.openPractice) a.openPractice("", "qa");
@@ -613,6 +635,13 @@
                     )}</span></button>`
             }
             ${
+              ROLE === "faculty"
+                ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroUploadBtn" data-tv-focus data-tv-row="1">${ICONS.upload} <span>${esc(
+                    t("อัปโหลด Slide / ไฟล์สอน (GitHub)", "Upload Slides / Files")
+                  )}</span></button>`
+                : ""
+            }
+            ${
               hasProfile
                 ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroSyncIcsBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(t("บันทึกเข้าปฏิทินมือถือ (.ics)", "Add to Calendar (.ics)"))}</span></button>
                    <button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.edit} <span>${esc(t("เปลี่ยนโปรไฟล์", "Switch Profile"))}</span></button>`
@@ -624,6 +653,46 @@
             }
           </div>
         </div>
+
+        ${
+          ROLE === "faculty"
+            ? (() => {
+                const quickMods = [
+                  { code: "ST1", sid: "w1-d1-st", label: "ST1 · Systems Thinking" },
+                  { code: "HS1", sid: "w1-d2-hs1", label: "HS1" },
+                  { code: "HS2", sid: "w2-d1-hs2", label: "HS2" },
+                  { code: "HS3", sid: "w2-d1-hs3", label: "HS3" },
+                  { code: "HS4", sid: "w2-d2-hs4", label: "HS4" },
+                  { code: "HS5", sid: "w2-d2-hs5", label: "HS5" },
+                  { code: "HS6", sid: "w3-d1-hs6", label: "HS6" },
+                  { code: "EP", sid: "w1-d3-ep123", label: "EP1–EP9" },
+                  { code: "PANEL", sid: "w1-d1-panel", label: "เวทีเสวนา (6 คาบ)" }
+                ];
+                const chipsHtml = quickMods
+                  .map((qm) => {
+                    const sInf =
+                      qm.code !== "EP" && qm.code !== "PANEL" && api && api.getHsSlideInfo
+                        ? api.getHsSlideInfo(qm.code)
+                        : { uploaded: Boolean(api && api.getSessionSlideRecord && api.getSessionSlideRecord(qm.sid)) };
+                    return `<button type="button" class="tv-huc-chip ${sInf.uploaded ? "is-uploaded" : ""}" data-quick-upload-sid="${esc(qm.sid)}">${sInf.uploaded ? "✓" : "📤"} ${esc(qm.label)}</button>`;
+                  })
+                  .join("");
+                return `
+        <section class="tv-home-upload-corner-bar" id="tvHomeUploadCornerBar" aria-label="มุมอัปโหลด Slide และเอกสารประกอบการสอนขึ้น GitHub">
+          <div class="tv-huc-left">
+            <span class="tv-huc-kicker">📤 GITHUB &amp; PORTAL UPLOAD CORNER · มุมอัปโหลดสื่อการสอนประจำคาบ</span>
+            <h2 class="tv-huc-title">${esc(t("อัปโหลด Slide / ไฟล์ประกอบการสอน (.pptx, .pdf, .docx, ลิงก์) และซิงค์ขึ้น GitHub", "Upload Lecture Slides & Teaching Files (.pptx, .pdf, .docx, Link) + GitHub Sync"))}</h2>
+            <p class="tv-huc-sub">${esc(t("เลือกคาบเรียนด้านล่างเพื่อลากไฟล์วางได้ทันที หรือกดอัปโหลดเข้าคลัง GitHub ของรายวิชาให้นักศึกษาทุกคนเปิดดูได้ทุกเครื่อง", "Pick any session chip below to drag-and-drop files instantly or push directly to both GitHub repositories."))}</p>
+            <div class="tv-huc-pills">${chipsHtml}</div>
+          </div>
+          <div class="tv-huc-actions">
+            <button type="button" class="tv-huc-primary-btn" id="tvHomeOpenUploadCenterBtn">${ICONS.upload} <span>${esc(t("เปิดศูนย์ Upload สื่อสอน →", "Open Upload Center →"))}</span></button>
+            <a class="tv-huc-gh-link" href="https://github.com/smartwoo/racm303-2569-student/upload/main/exports/slides" target="_blank" rel="noopener" title="อัปโหลดไฟล์เข้าโฟลเดอร์ exports/slides บนเว็บ GitHub.com โดยตรง">🐙 GitHub Web Upload ↗</a>
+          </div>
+        </section>`;
+              })()
+            : ""
+        }
 
         <!-- SHELF 1: MAIN APPS -->
         <div class="tv-shelf" aria-label="เมนูหลัก">
@@ -843,6 +912,22 @@
         if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
       });
     }
+
+    const heroUpBtn = $("tvHeroUploadBtn");
+    if (heroUpBtn) {
+      heroUpBtn.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
+    }
+
+    const homeOpenUpBtn = $("tvHomeOpenUploadCenterBtn");
+    if (homeOpenUpBtn) {
+      homeOpenUpBtn.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
+    }
+
+    panel.querySelectorAll("[data-quick-upload-sid]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        openGlobalUploadModal(chip.dataset.quickUploadSid || "w1-d1-st");
+      });
+    });
 
     const heroProfBtn = $("tvHeroProfileBtn");
     if (heroProfBtn) {
@@ -2926,9 +3011,664 @@
   }
 
   /* ---------- Boot Sequence ---------- */
+
+  /* ---------- Global GitHub & Instant Slide/File Upload Corner Modal ---------- */
+  const GH_PAT_STORAGE_KEY = "racm303_gh_pat_local_v1";
+  const GH_TARGET_REPOS = [
+    "smartwoo/racm303-2569-faculty-member",
+    "smartwoo/racm303-2569-student"
+  ];
+
+  function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function base64ToUtf8(b64) {
+    return decodeURIComponent(escape(atob(String(b64 || "").replace(/\s+/g, ""))));
+  }
+
+  async function arrayBufferToB64(buf) {
+    const bytes = new Uint8Array(buf);
+    const chunk = 0x8000;
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  }
+
+  function sanitizeRepoSlideFilename(sessionCode, sessionId, rawName) {
+    const cleanBase = String(rawName || "Slide.pdf")
+      .trim()
+      .replace(/[^A-Za-z0-9ก-๙._-]+/g, "_")
+      .replace(/_+/g, "_");
+    const prefix = String(sessionCode || sessionId || "RACM303")
+      .trim()
+      .replace(/[^A-Za-z0-9_-]+/g, "");
+    return cleanBase.toUpperCase().startsWith(prefix.toUpperCase())
+      ? cleanBase
+      : `${prefix}_${cleanBase}`;
+  }
+
+  async function ghGetFileShaAndContent(repo, path, token) {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json"
+      }
+    });
+    if (res.status === 404) return { sha: null, content: null };
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`GitHub GET ${repo}/${path} failed (${res.status}): ${txt.slice(0, 140)}`);
+    }
+    const data = await res.json();
+    return { sha: data.sha || null, content: data.content || null };
+  }
+
+  async function ghPutFile(repo, path, b64Content, message, token, sha) {
+    const body = { message, content: b64Content };
+    if (sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`GitHub PUT ${repo}/${path} failed (${res.status}): ${txt.slice(0, 160)}`);
+    }
+    return res.json();
+  }
+
+  async function pushSlideToGitHubRepos(opts) {
+    const { sessionObj, fileObj, externalUrl, uploadedBy, token, onStatus } = opts;
+    const sid = sessionObj.id;
+    const sCode = sessionObj.code || sid;
+    let repoPath = "";
+    let fileB64 = "";
+    let sizeLabel = "ลิงก์ออนไลน์";
+    let fileName = "Slide / เอกสารออนไลน์";
+
+    if (fileObj) {
+      const safeName = sanitizeRepoSlideFilename(sCode, sid, fileObj.name);
+      repoPath = `exports/slides/${safeName}`;
+      fileName = fileObj.name;
+      sizeLabel = `${(fileObj.size / (1024 * 1024)).toFixed(2)} MB`;
+      if (onStatus) onStatus(`กำลังอ่านไฟล์ ${fileObj.name}…`);
+      fileB64 = await arrayBufferToB64(await fileObj.arrayBuffer());
+    }
+
+    const entryMeta = {
+      sessionId: sid,
+      fileName,
+      repoPath,
+      externalUrl: fileObj ? "" : String(externalUrl || "").trim(),
+      mime: fileObj ? fileObj.type || "" : "",
+      sizeLabel,
+      uploadedBy: uploadedBy || "คณาจารย์ผู้สอน",
+      uploadedAt: new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })
+    };
+
+    for (const repo of GH_TARGET_REPOS) {
+      if (fileObj && repoPath) {
+        if (onStatus) onStatus(`กำลังอัปโหลดไฟล์เข้า ${repo}/${repoPath}…`);
+        const existing = await ghGetFileShaAndContent(repo, repoPath, token);
+        await ghPutFile(
+          repo,
+          repoPath,
+          fileB64,
+          `feat(slides): upload ${sCode} teaching file (${fileObj.name})`,
+          token,
+          existing.sha
+        );
+      }
+
+      if (onStatus) onStatus(`กำลังอัปเดตสารบัญสไลด์ใน ${repo}…`);
+      const manPath = "assets/data_slides_manifest.js";
+      const curMan = await ghGetFileShaAndContent(repo, manPath, token);
+      let parsed = {};
+      if (curMan.content) {
+        try {
+          const rawJs = base64ToUtf8(curMan.content);
+          const m = rawJs.match(/window\.RACM_REPO_SLIDES_MANIFEST\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
+          if (m) parsed = JSON.parse(m[1]);
+        } catch (_) {}
+      }
+      parsed[sid] = entryMeta;
+      const nextJs =
+        "/* Auto-synced manifest of instructor slides & teaching files committed to GitHub */\n" +
+        "window.RACM_REPO_SLIDES_MANIFEST = " +
+        JSON.stringify(parsed, null, 2) +
+        ";\n";
+      await ghPutFile(
+        repo,
+        manPath,
+        utf8ToBase64(nextJs),
+        `chore(slides): register ${sCode} slide in manifest`,
+        token,
+        curMan.sha
+      );
+    }
+
+    window.RACM_REPO_SLIDES_MANIFEST = window.RACM_REPO_SLIDES_MANIFEST || {};
+    window.RACM_REPO_SLIDES_MANIFEST[sid] = entryMeta;
+    return entryMeta;
+  }
+
+  function syncUploadCountBadge() {
+    const badge = $("tvCornerUploadCount");
+    if (!badge) return;
+    const api = getApi();
+    if (!api || !api.getTeachableSlideSessions || !api.getSessionSlideRecord) return;
+    const sessions = api.getTeachableSlideSessions();
+    const cnt = sessions.filter((s) => Boolean(api.getSessionSlideRecord(s.id))).length;
+    badge.textContent = String(cnt);
+  }
+
+  function classifySessionTrack(s) {
+    const id = String(s.id || "");
+    const code = String(s.code || "").toUpperCase();
+    if (
+      code === "ST1" ||
+      id.includes("panel") ||
+      id.includes("dhs") ||
+      id.includes("cld") ||
+      id.includes("policy") ||
+      s.category === "PANEL"
+    ) {
+      return "st-panel";
+    }
+    if (/^HS[1-6]$/i.test(code) || /^HS[1-6]$/i.test(s.hsModule || "") || s.category === "HS") {
+      return "hs";
+    }
+    if (s.category === "EP" || id.includes("spss")) {
+      return "ep";
+    }
+    return "other";
+  }
+
+  function openGlobalUploadModal(preselectSessionId) {
+    closeAllTvModals();
+    const api = getApi();
+    if (!api) return;
+
+    const allSessions = (api.getTeachableSlideSessions ? api.getTeachableSlideSessions() : SCHED.sessions || []).slice();
+    // Put ST1 & HS1-HS6 right near the top when sorting default if preselect is ST1
+    let activeTrack = "all";
+    let selectedSid = preselectSessionId || "w1-d1-st";
+    if (!allSessions.some((x) => x.id === selectedSid) && allSessions[0]) {
+      selectedSid = allSessions[0].id;
+    }
+    let stagedFile = null;
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "tv-modal-backdrop";
+    backdrop.id = "tvGlobalUploadModal";
+    backdrop.setAttribute("role", "dialog");
+    backdrop.setAttribute("aria-modal", "true");
+
+    if (ROLE !== "faculty") {
+      // Student Slide & Handout Download Center
+      const uploadedRows = allSessions
+        .map((s) => ({ s, rec: api.getSessionSlideRecord ? api.getSessionSlideRecord(s.id) : null }))
+        .filter((x) => Boolean(x.rec));
+      backdrop.innerHTML = `
+        <div class="tv-modal-sheet tv-upload-modal-sheet">
+          <div class="tv-modal-head">
+            <div>
+              <span class="tv-app-badge" style="margin-top:0;margin-bottom:6px">📥 SLIDES &amp; TEXTBOOKS HUB</span>
+              <h3 class="tv-modal-title">คลังดาวน์โหลด Slide อาจารย์ &amp; เอกสารคำสอนประจำคาบ</h3>
+              <p class="tv-modal-sub">รวมเอกสารคำสอน ST1 &amp; HS1–HS6 (PDF / Word) และไฟล์สไลด์ที่คณาจารย์อัปโหลดแล้ว (${uploadedRows.length} คาบ)</p>
+            </div>
+            <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+          </div>
+          <div class="tv-up-tracks">
+            <a class="tv-hosp-chip" href="exports/pdf/ST1.pdf" download="RACM303_ST1_Full.pdf" style="text-decoration:none">⬇ ST1 ฉบับเต็ม (.pdf)</a>
+            <a class="tv-hosp-chip" href="exports/pdf/ST1-CONCISE.pdf" download="RACM303_ST1_Abridged.pdf" style="text-decoration:none">⬇ ST1 ฉบับย่อ (.pdf)</a>
+            <button type="button" class="tv-hosp-chip" id="stuOpenHsSlidesHubBtn">🖥️ ดูหน้ารวม Slide อาจารย์ (ST1 &amp; HS1–HS6) →</button>
+          </div>
+          <div class="tv-up-list" id="stuUploadedSlidesList"></div>
+        </div>
+      `;
+      document.body.appendChild(backdrop);
+      const listEl = backdrop.querySelector("#stuUploadedSlidesList");
+      uploadedRows.forEach(({ s, rec }) => {
+        const extMeta = api.detectSlideExtMeta ? api.detectSlideExtMeta(rec) : { extBadge: "SLIDE" };
+        const row = document.createElement("div");
+        row.className = "tv-up-row is-uploaded";
+        row.innerHTML = `
+          <div class="tv-up-row-info">
+            <strong>[${esc(s.code)}] ${esc(s.title)}</strong>
+            <small>${esc(s.dateTH || "")} · ✓ ${esc(rec.fileName || extMeta.extBadge)}</small>
+          </div>
+          <div class="tv-up-row-acts">
+            <button type="button" class="btn sm primary">📊 เปิดดู / ดาวน์โหลด</button>
+          </div>
+        `;
+        row.querySelector("button").addEventListener("click", () => {
+          backdrop.remove();
+          api.openSessionSlide(s.id, false);
+        });
+        listEl.appendChild(row);
+      });
+      backdrop.querySelector("#tvCloseGlobalUpBtn").addEventListener("click", () => backdrop.remove());
+      backdrop.querySelector("#stuOpenHsSlidesHubBtn").addEventListener("click", () => {
+        backdrop.remove();
+        if (api.openHsLectureSlides) api.openHsLectureSlides("FOLDERS");
+      });
+      backdrop.addEventListener("click", (ev) => {
+        if (ev.target === backdrop) backdrop.remove();
+      });
+      return;
+    }
+
+    // Faculty Upload & GitHub Sync Center
+    const savedPat = (() => {
+      try {
+        return localStorage.getItem(GH_PAT_STORAGE_KEY) || "";
+      } catch (_) {
+        return "";
+      }
+    })();
+
+    backdrop.innerHTML = `
+      <div class="tv-modal-sheet tv-upload-modal-sheet">
+        <div class="tv-modal-head">
+          <div>
+            <span class="tv-app-badge" style="margin-top:0;margin-bottom:6px">📤 FACULTY UPLOAD &amp; GITHUB SYNC CORNER</span>
+            <h3 class="tv-modal-title">มุมอัปโหลด Slide &amp; ไฟล์ประกอบการสอนประจำคาบ (ST1 · HS1–HS6 · EP1–EP9 · เวทีเสวนา)</h3>
+            <p class="tv-modal-sub">ลากไฟล์ <code>.pptx</code>, <code>.pdf</code>, <code>.docx</code> หรือวางลิงก์ออนไลน์ — เลือกบันทึกแสดงผลทันที หรืออัปโหลดเข้าคลัง GitHub ทั้ง 2 ฝั่ง (อาจารย์ + นักศึกษา)</p>
+          </div>
+          <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+        </div>
+
+        <div class="tv-up-tracks" id="tvUpTrackBar">
+          <button type="button" class="tv-up-track-pill is-active" data-up-track="all">🌟 ทุกคาบสอน</button>
+          <button type="button" class="tv-up-track-pill" data-up-track="st-panel">🧭 ST1 &amp; เวทีคิดเชิงระบบ (6 คาบ)</button>
+          <button type="button" class="tv-up-track-pill" data-up-track="hs">🏥 ระบบสุขภาพ (HS1–HS6)</button>
+          <button type="button" class="tv-up-track-pill" data-up-track="ep">📊 ระบาดวิทยา (EP1–EP9)</button>
+          <button type="button" class="tv-up-track-pill" data-up-track="other">🗣️ กลุ่มย่อย &amp; ปฐมนิเทศ</button>
+        </div>
+
+        <div class="tv-up-grid">
+          <div class="tv-up-pane">
+            <div class="tv-up-field">
+              <label for="tvUpSessionSelect">1. เลือกคาบเรียนที่ต้องการอัปโหลด Slide / เอกสารสอน</label>
+              <select id="tvUpSessionSelect"></select>
+            </div>
+
+            <div class="tv-up-dropzone" id="tvUpDropzone" style="padding:14px 14px">
+              <input type="file" id="tvUpFileInput" accept=".pdf,.ppt,.pptx,.doc,.docx,.key" hidden>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:14px" id="tvUpDropTitle">📂 ลากไฟล์ .PPTX, .PDF หรือ .DOCX มาวางในช่องนี้</div>
+              <div style="font-size:12.2px;color:var(--tv-ink-muted)" id="tvUpDropSub">หรือคลิกปุ่มด้านล่างเพื่อเลือกไฟล์จากเครื่องคอมพิวเตอร์ / iPad</div>
+              <button type="button" class="btn sm primary" id="tvUpPickFileBtn">📤 เลือกไฟล์จากเครื่อง…</button>
+            </div>
+
+            <div class="tv-up-field">
+              <label for="tvUpExtUrlInput">หรือวางลิงก์ออนไลน์ (Google Slides / Google Docs / Google Drive / Canva)</label>
+              <input type="url" id="tvUpExtUrlInput" placeholder="https://docs.google.com/presentation/d/... หรือลิงก์ Google Drive">
+            </div>
+
+            <div class="tv-up-field">
+              <label for="tvUpTeacherSelect">ชื่ออาจารย์ / วิทยากรผู้อัปโหลด</label>
+              <select id="tvUpTeacherSelect"></select>
+              <input type="text" id="tvUpTeacherCustom" placeholder="ระบุชื่ออาจารย์ / วิทยากร…" style="margin-top:6px" hidden>
+            </div>
+
+            <div class="tv-up-btn-row">
+              <button type="button" class="btn primary" id="tvUpSaveLocalBtn">💾 บันทึก &amp; เปิดใช้งานทันทีบนเว็บนี้</button>
+              <button type="button" class="btn sm" id="tvUpJumpHsStep4Btn">🖥️ เปิดหน้า Slide ประจำบท</button>
+            </div>
+
+            <div class="tv-up-gh-box">
+              <div class="tv-up-gh-title">
+                <span>🐙 อัปโหลดขึ้นคลัง GitHub ถาวร (ให้นักศึกษาทุกคนเห็นทุกเครื่อง)</span>
+              </div>
+              <div style="font-size:12.3px;color:var(--tv-ink-muted);line-height:1.45">
+                เลือกได้ 2 วิธี: <strong>(1)</strong> กดเปิดหน้า GitHub Web Upload เพื่อลากไฟล์เข้าโฟลเดอร์ <code>exports/slides/</code> โดยตรง หรือ <strong>(2)</strong> ใส่ GitHub Token ครั้งเดียวเพื่อกด Push ขึ้นทั้งคลัง Faculty + Student อัตโนมัติ
+              </div>
+              <div class="tv-up-btn-row">
+                <a class="btn sm teal" id="tvUpGhWebStudentLink" href="https://github.com/smartwoo/racm303-2569-student/upload/main/exports/slides" target="_blank" rel="noopener" style="text-decoration:none">🐙 เปิด GitHub Upload (Student) ↗</a>
+                <a class="btn sm" id="tvUpGhWebFacultyLink" href="https://github.com/smartwoo/racm303-2569-faculty-member/upload/main/exports/slides" target="_blank" rel="noopener" style="text-decoration:none">🐙 เปิด GitHub Upload (Faculty) ↗</a>
+                <button type="button" class="btn sm" id="tvUpTogglePatBtn">⚡ ตั้งค่า Auto-Push ด้วย Token ▾</button>
+              </div>
+              <div id="tvUpPatDrawer" style="margin-top:10px" ${savedPat ? "" : "hidden"}>
+                <div class="tv-up-field" style="margin-bottom:8px">
+                  <label for="tvUpGhPatInput">GitHub Personal Access Token (เก็บเฉพาะในเบราว์เซอร์เครื่องนี้เท่านั้น · สิทธิ์ Contents: Read &amp; Write)</label>
+                  <input type="password" id="tvUpGhPatInput" placeholder="ghp_... หรือ github_pat_..." value="${esc(savedPat)}">
+                </div>
+                <button type="button" class="btn sm primary" id="tvUpPushBothGhBtn">⚡ Push ไฟล์/ลิงก์ขึ้น GitHub ทั้ง 2 คลังอัตโนมัติ (Faculty + Student)</button>
+              </div>
+            </div>
+
+            <div id="tvUpFeedback" class="slide-studio-feedback" style="margin-top:10px" hidden></div>
+          </div>
+
+          <div class="tv-up-pane">
+            <div class="tv-up-field" style="margin-bottom:10px">
+              <label for="tvUpMatrixSearch">ค้นหาและเช็กสถานะสื่อการสอนประจำคาบ</label>
+              <input type="search" id="tvUpMatrixSearch" placeholder="พิมพ์รหัสคาบ เช่น ST1, HS1, EP6, CLD, ชื่ออาจารย์…">
+            </div>
+            <div class="tv-up-list" id="tvUpMatrixList"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+
+    const selEl = $("tvUpSessionSelect");
+    const fileIn = $("tvUpFileInput");
+    const dropEl = $("tvUpDropzone");
+    const dropTitle = $("tvUpDropTitle");
+    const dropSub = $("tvUpDropSub");
+    const extUrlIn = $("tvUpExtUrlInput");
+    const teacherSel = $("tvUpTeacherSelect");
+    const teacherCustom = $("tvUpTeacherCustom");
+    const fbEl = $("tvUpFeedback");
+    const searchIn = $("tvUpMatrixSearch");
+    const listEl = $("tvUpMatrixList");
+
+    const teachers = api.getAllCourseTeachers ? api.getAllCourseTeachers() : [];
+    const st = api.getState ? api.getState() : {};
+    const activeTeacher = teachers.find((tObj) => tObj.key === st.myTeacherKey);
+    teacherSel.add(new Option("— เลือกชื่ออาจารย์ / วิทยากรผู้อัปโหลด —", ""));
+    teachers.forEach((tObj) => teacherSel.add(new Option(tObj.label, tObj.label)));
+    teacherSel.add(new Option("ทีมผู้ประสานงานรายวิชา RACM 303", "ทีมผู้ประสานงานรายวิชา RACM 303"));
+    teacherSel.add(new Option("อาจารย์ / วิทยากรท่านอื่น (ระบุชื่อเอง…)", "__CUSTOM__"));
+    teacherSel.addEventListener("change", () => {
+      teacherCustom.hidden = teacherSel.value !== "__CUSTOM__";
+      if (!teacherCustom.hidden) teacherCustom.focus();
+    });
+
+    const showFeedback = (msg, isErr) => {
+      fbEl.hidden = false;
+      fbEl.className = `slide-studio-feedback ${isErr ? "is-error" : "is-ok"}`;
+      fbEl.textContent = msg;
+    };
+
+    const getFilteredSessions = () => {
+      const base =
+        activeTrack === "all"
+          ? allSessions
+          : allSessions.filter((s) => classifySessionTrack(s) === activeTrack);
+      // Float ST1 to top when in 'all' or 'st-panel'
+      return base.slice().sort((a, b) => {
+        if (a.id === "w1-d1-st") return -1;
+        if (b.id === "w1-d1-st") return 1;
+        return 0;
+      });
+    };
+
+    const syncFormForSelectedSession = () => {
+      const sessObj = allSessions.find((x) => x.id === selectedSid) || allSessions[0];
+      if (!sessObj) return;
+      const rec = api.getSessionSlideRecord ? api.getSessionSlideRecord(sessObj.id) : null;
+      extUrlIn.value = (rec && rec.externalUrl) || "";
+      stagedFile = null;
+      if (rec && rec.fileName && !rec.externalUrl) {
+        dropTitle.textContent = `✓ มีไฟล์เปิดใช้งานอยู่: ${rec.fileName}`;
+        dropSub.textContent = "ลากไฟล์ใหม่มาวางหรือกดเลือกไฟล์หากต้องการอัปเดตแทนที่";
+      } else {
+        dropTitle.textContent = `ลากไฟล์ .PPTX, .PDF หรือ .DOCX ของคาบ ${sessObj.code} มาวางที่นี่`;
+        dropSub.textContent = "รองรับ PowerPoint (.pptx), PDF (.pdf), Word (.docx) และ Keynote (.key)";
+      }
+
+      const hasOpt = (val) =>
+        Boolean(val) && val !== "__CUSTOM__" && Array.from(teacherSel.options).some((o) => o.value === val);
+      const preferred =
+        (rec && rec.uploadedBy) ||
+        (activeTeacher && activeTeacher.label) ||
+        teachers.find((tObj) => String(sessObj.lecturers || "").includes(tObj.key))?.label ||
+        "";
+      if (preferred) {
+        if (hasOpt(preferred)) {
+          teacherSel.value = preferred;
+          teacherCustom.hidden = true;
+        } else {
+          teacherSel.value = "__CUSTOM__";
+          teacherCustom.value = preferred;
+          teacherCustom.hidden = false;
+        }
+      }
+    };
+
+    const rebuildSelectAndList = () => {
+      const filtered = getFilteredSessions();
+      selEl.replaceChildren();
+      filtered.forEach((s) => {
+        const rec = api.getSessionSlideRecord ? api.getSessionSlideRecord(s.id) : null;
+        selEl.add(new Option(`${rec ? "✓ " : "○ "}[${s.code}] ${s.title.slice(0, 62)} (${s.dateTH || ""})`, s.id));
+      });
+      if (filtered.some((x) => x.id === selectedSid)) {
+        selEl.value = selectedSid;
+      } else if (filtered[0]) {
+        selectedSid = filtered[0].id;
+        selEl.value = selectedSid;
+      }
+      syncFormForSelectedSession();
+      renderRightMatrix();
+    };
+
+    const renderRightMatrix = () => {
+      const q = String(searchIn.value || "").trim().toLocaleLowerCase("th");
+      const filtered = getFilteredSessions().filter(
+        (s) => !q || `${s.code} ${s.title} ${s.dateTH} ${s.lecturers || ""}`.toLocaleLowerCase("th").includes(q)
+      );
+      listEl.replaceChildren();
+      filtered.forEach((s) => {
+        const rec = api.getSessionSlideRecord ? api.getSessionSlideRecord(s.id) : null;
+        const extMeta = api.detectSlideExtMeta ? api.detectSlideExtMeta(rec) : { extBadge: "SLIDE" };
+        const row = document.createElement("div");
+        row.className = `tv-up-row ${rec ? "is-uploaded" : ""}`;
+        row.innerHTML = `
+          <div class="tv-up-row-info">
+            <strong>[${esc(s.code)}] ${esc(s.title)}</strong>
+            <small>${esc(s.dateTH || "")} (${esc(s.timeLabel || "")})${
+          rec ? ` · ✓ ${esc(rec.fileName || extMeta.extBadge)}` : " · ⏳ รอ Upload"
+        }</small>
+          </div>
+          <div class="tv-up-row-acts"></div>
+        `;
+        const acts = row.querySelector(".tv-up-row-acts");
+        const pickRowBtn = document.createElement("button");
+        pickRowBtn.type = "button";
+        pickRowBtn.className = selectedSid === s.id ? "btn sm primary" : "btn sm";
+        pickRowBtn.textContent = selectedSid === s.id ? "✓ เลือกอยู่" : "📤 เลือก";
+        pickRowBtn.addEventListener("click", () => {
+          selectedSid = s.id;
+          selEl.value = s.id;
+          syncFormForSelectedSession();
+          renderRightMatrix();
+        });
+        acts.appendChild(pickRowBtn);
+
+        if (rec) {
+          const openBtn = document.createElement("button");
+          openBtn.type = "button";
+          openBtn.className = "btn sm teal";
+          openBtn.textContent = "เปิดดู";
+          openBtn.addEventListener("click", () => api.openSessionSlide(s.id, false));
+          acts.appendChild(openBtn);
+
+          if (!rec.isBuiltInOrientation && !rec.isRepoCommitted) {
+            const delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.className = "btn sm";
+            delBtn.textContent = "ลบ";
+            delBtn.addEventListener("click", async () => {
+              await api.removeSessionSlideDirect(s.id);
+              syncUploadCountBadge();
+              rebuildSelectAndList();
+            });
+            acts.appendChild(delBtn);
+          }
+        }
+        listEl.appendChild(row);
+      });
+    };
+
+    backdrop.querySelectorAll("[data-up-track]").forEach((b) => {
+      b.addEventListener("click", () => {
+        activeTrack = b.dataset.upTrack || "all";
+        backdrop.querySelectorAll("[data-up-track]").forEach((x) => x.classList.toggle("is-active", x === b));
+        rebuildSelectAndList();
+      });
+    });
+
+    selEl.addEventListener("change", () => {
+      selectedSid = selEl.value;
+      syncFormForSelectedSession();
+      renderRightMatrix();
+    });
+
+    searchIn.addEventListener("input", renderRightMatrix);
+
+    const handleFilePicked = (f) => {
+      if (!f) return;
+      stagedFile = f;
+      dropTitle.textContent = `✓ เลือกไฟล์พร้อมอัปโหลด: ${f.name} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`;
+      dropSub.textContent = "กดปุ่ม '💾 บันทึกทันที' หรือ '⚡ Push ขึ้น GitHub ทั้ง 2 คลัง' ด้านล่าง";
+    };
+
+    $("tvUpPickFileBtn").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      fileIn.click();
+    });
+    dropEl.addEventListener("click", (ev) => {
+      if (ev.target && ev.target.closest && ev.target.closest("button, input, select, a")) return;
+      fileIn.click();
+    });
+    fileIn.addEventListener("change", () => {
+      if (fileIn.files && fileIn.files[0]) handleFilePicked(fileIn.files[0]);
+    });
+    dropEl.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      dropEl.classList.add("is-dragover");
+    });
+    dropEl.addEventListener("dragleave", () => dropEl.classList.remove("is-dragover"));
+    dropEl.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      dropEl.classList.remove("is-dragover");
+      if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]) {
+        handleFilePicked(ev.dataTransfer.files[0]);
+      }
+    });
+
+    const resolveUploaderName = () => {
+      const raw = teacherSel.value === "__CUSTOM__" ? teacherCustom.value || "" : teacherSel.value || "";
+      return raw.trim() || "คณาจารย์ผู้สอน";
+    };
+
+    $("tvUpSaveLocalBtn").addEventListener("click", async () => {
+      const extUrl = String(extUrlIn.value || "").trim();
+      if (!stagedFile && !extUrl) {
+        showFeedback("กรุณาเลือกไฟล์ (.pptx, .pdf, .docx) หรือวางลิงก์ออนไลน์อย่างน้อย 1 อย่าง", true);
+        return;
+      }
+      await api.saveSessionSlideDirect({
+        sessionId: selectedSid,
+        fileObj: stagedFile,
+        externalUrl: extUrl,
+        uploadedBy: resolveUploaderName()
+      });
+      syncUploadCountBadge();
+      if ($("panel-home") && !$("panel-home").hidden) renderHomeLauncher();
+      rebuildSelectAndList();
+      showFeedback("✓ บันทึกและเปิดใช้งานสื่อการสอนเรียบร้อยแล้ว! (การ์ดและปุ่มเปลี่ยนเป็นสีเปิดใช้งานทันที)", false);
+    });
+
+    $("tvUpJumpHsStep4Btn").addEventListener("click", () => {
+      const sessObj = allSessions.find((x) => x.id === selectedSid);
+      backdrop.remove();
+      const code = String((sessObj && (sessObj.hsModule || sessObj.code)) || "").toUpperCase();
+      if (/^(HS[1-6]|ST1)$/.test(code) && api.openHsLectureSlides) {
+        api.openHsLectureSlides(code);
+      } else if (sessObj && classifySessionTrack(sessObj) === "st-panel" && api.openSystemsForum) {
+        api.openSystemsForum(sessObj.id);
+      } else if (api.openFacultySlideStudioForSession) {
+        api.openFacultySlideStudioForSession(selectedSid);
+      }
+    });
+
+    $("tvUpTogglePatBtn").addEventListener("click", () => {
+      const dr = $("tvUpPatDrawer");
+      dr.hidden = !dr.hidden;
+    });
+
+    $("tvUpPushBothGhBtn").addEventListener("click", async () => {
+      const pat = String(($("tvUpGhPatInput") && $("tvUpGhPatInput").value) || "").trim();
+      const extUrl = String(extUrlIn.value || "").trim();
+      if (!pat) {
+        showFeedback("กรุณาวาง GitHub Personal Access Token ก่อนกด Auto-Push หรือใช้ปุ่ม '🐙 เปิด GitHub Upload' ด้านบน", true);
+        return;
+      }
+      if (!stagedFile && !extUrl) {
+        showFeedback("กรุณาเลือกไฟล์ (.pptx, .pdf, .docx) หรือวางลิงก์ออนไลน์ที่จะ Push ขึ้น GitHub", true);
+        return;
+      }
+      try {
+        localStorage.setItem(GH_PAT_STORAGE_KEY, pat);
+      } catch (_) {}
+
+      const sessObj = allSessions.find((x) => x.id === selectedSid);
+      const pushBtn = $("tvUpPushBothGhBtn");
+      pushBtn.disabled = true;
+      try {
+        await api.saveSessionSlideDirect({
+          sessionId: selectedSid,
+          fileObj: stagedFile,
+          externalUrl: extUrl,
+          uploadedBy: resolveUploaderName()
+        });
+        await pushSlideToGitHubRepos({
+          sessionObj: sessObj,
+          fileObj: stagedFile,
+          externalUrl: extUrl,
+          uploadedBy: resolveUploaderName(),
+          token: pat,
+          onStatus: (msg) => showFeedback(`⏳ ${msg}`, false)
+        });
+        if (api.refreshPortalAfterSlidesChange) api.refreshPortalAfterSlidesChange();
+        syncUploadCountBadge();
+        if ($("panel-home") && !$("panel-home").hidden) renderHomeLauncher();
+        rebuildSelectAndList();
+        showFeedback(
+          "✓ Push ขึ้น GitHub ทั้ง 2 คลัง (racm303-2569-faculty-member & racm303-2569-student) สำเร็จแล้ว! นักศึกษาทุกคนจะเห็นไฟล์อัตโนมัติภายใน ~30 วินาที",
+          false
+        );
+      } catch (err) {
+        showFeedback(`ไม่สามารถ Push ขึ้น GitHub ได้: ${err && err.message ? err.message : err}`, true);
+      } finally {
+        pushBtn.disabled = false;
+      }
+    });
+
+    $("tvCloseGlobalUpBtn").addEventListener("click", () => backdrop.remove());
+    backdrop.addEventListener("click", (ev) => {
+      if (ev.target === backdrop) backdrop.remove();
+    });
+
+    rebuildSelectAndList();
+  }
+
+  window.addEventListener("racm:slideschange", () => {
+    syncUploadCountBadge();
+    if ($("panel-home") && !$("panel-home").hidden) {
+      renderHomeLauncher();
+    }
+  });
+
   window.RACM_TV_LAUNCHER = {
     openCourseDriveAtPath,
-    openEpisodeModal
+    openEpisodeModal,
+    openGlobalUploadModal,
+    syncUploadCountBadge
   };
 
   function bootTvInterface() {

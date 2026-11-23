@@ -27809,7 +27809,10 @@
     if (!rec) {
       return { extKind: "none", extBadge: "ยังไม่ Upload", icoCls: "is-pptx is-muted-pptx", icoTxt: "P" };
     }
-    const fn = String(rec.fileName || "").toLowerCase();
+    if (rec.isBuiltInOrientation) {
+      return { extKind: "pptx", extBadge: "15 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
+    }
+    const fn = String(rec.fileName || rec.repoPath || "").toLowerCase();
     const mt = String(rec.mime || "").toLowerCase();
     const url = String(rec.externalUrl || "").toLowerCase();
     if (fn.endsWith(".pdf") || mt === "application/pdf" || (!fn && url.endsWith(".pdf"))) {
@@ -27897,6 +27900,10 @@
     if (!sessionId) return null;
     const reg = getSlidesRegistry();
     if (reg[sessionId]) return reg[sessionId];
+    const repoMan = window.RACM_REPO_SLIDES_MANIFEST || {};
+    if (repoMan[sessionId]) {
+      return Object.assign({ sessionId, isRepoCommitted: true }, repoMan[sessionId]);
+    }
     if (sessionId === "w1-d1-orient") {
       return {
         sessionId,
@@ -28094,6 +28101,8 @@
   async function createSessionSlidePreviewBlobUrl(sessionId) {
     const rec = getSessionSlideRecord(sessionId);
     if (!rec) return "";
+    if (rec.repoPath) return rec.repoPath;
+    if (rec.pdfHref) return rec.pdfHref;
     if (rec.dataUrl) return rec.dataUrl;
     const idbItem = await readSlideBinaryFromIdb(sessionId);
     if (idbItem && idbItem.bytes) {
@@ -28107,6 +28116,36 @@
   async function openSessionSlide(sessionId, forceDownload) {
     const rec = getSessionSlideRecord(sessionId);
     if (!rec) return;
+    if (rec.isBuiltInOrientation) {
+      if (!forceDownload && window.RACM_ORIENTATION_DECK) {
+        window.RACM_ORIENTATION_DECK.open(0);
+        return;
+      }
+      const href = rec.pptxHref || rec.pdfHref;
+      if (href) {
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = href.split("/").pop() || "RACM303_Orientation_Slides.pptx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      return;
+    }
+    if (rec.repoPath) {
+      const lowerPath = String(rec.repoPath).toLowerCase();
+      if (!forceDownload && lowerPath.endsWith(".pdf")) {
+        window.open(rec.repoPath, "_blank", "noopener");
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = rec.repoPath;
+      a.download = rec.fileName || rec.repoPath.split("/").pop() || `${sessionId}_slide`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return;
+    }
     if (rec.externalUrl) {
       window.open(rec.externalUrl, "_blank", "noopener");
       return;
@@ -35313,6 +35352,16 @@
     getHsSlideInfo: (mod) => getHsSlideInfo(mod),
     countUploadedHsSlides: () => countUploadedHsSlides(),
     openSessionSlide: (sid, forceDl) => openSessionSlide(sid, forceDl),
+    getSessionSlideRecord: (sid) => getSessionSlideRecord(sid),
+    getSlidesRegistry: () => getSlidesRegistry(),
+    getTeachableSlideSessions: () => getTeachableSlideSessions(),
+    saveSessionSlideDirect: (opts) => saveSessionSlideDirect(opts),
+    removeSessionSlideDirect: (sid) => removeSessionSlideDirect(sid),
+    detectSlideExtMeta: (rec) => detectSlideExtMeta(rec),
+    getAllCourseTeachers: () => getAllCourseTeachers(),
+    refreshPortalAfterSlidesChange: () => refreshPortalAfterSlidesChange(),
+    openFacultySlideStudioForSession: (sid) =>
+      typeof openFacultySlideStudioForSession === "function" ? openFacultySlideStudioForSession(sid) : null,
     getHsModuleMeta: (mod) => getHsModuleMeta(mod),
     getHsLogicalFlowModel: (mod) => getHsLogicalFlowModel(mod),
     openSelfQuizForModule: (mod, sub) => openSelfQuizForModule(mod, sub),
