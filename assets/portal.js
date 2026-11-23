@@ -760,26 +760,106 @@
   }
 
   /* ---------- Student Lookup & Personalization Sync ---------- */
-  function findStudentByQuery(rawVal) {
-    const q = String(rawVal || "").trim().toLocaleLowerCase("th");
-    if (!q) return null;
-    const m = q.match(/^(\d{7})\b/);
-    if (m) {
-      const byId = ROSTER.students.find((s) => s.id === m[1]);
-      if (byId) return byId;
+  function matchStudentsByShortNoOrQuery(rawVal, preferredRoomId) {
+    const raw = String(rawVal || "").trim();
+    const q = raw.toLocaleLowerCase("th");
+    const prefRoom = Number(preferredRoomId) || 0;
+    if (!q) {
+      return { exactSingle: null, inRoomMatches: [], allMatches: [], isShortNo: false, paddedShortNo: "" };
     }
-    return (
-      ROSTER.students.find((s) => {
+
+    // 1. Exact 7-digit Student ID
+    const m7 = q.match(/^(\d{7})\b/);
+    if (m7) {
+      const byId = (ROSTER.students || []).find((s) => String(s.id) === m7[1]) || null;
+      return {
+        exactSingle: byId,
+        inRoomMatches: byId && Number(byId.disc) === prefRoom ? [byId] : [],
+        allMatches: byId ? [byId] : [],
+        isShortNo: false,
+        paddedShortNo: byId ? String(byId.id).slice(-3) : ""
+      };
+    }
+
+    // 2. 1–3 digit Student Number ("เบอร์ตัวเอง" เช่น 35 หรือ 035)
+    const mShort = q.match(/^#?(\d{1,3})$/);
+    if (mShort) {
+      const numVal = Number(mShort[1]);
+      const padded = String(numVal).padStart(3, "0");
+      const allMatches = (ROSTER.students || [])
+        .filter((s) => String(s.id).slice(-3) === padded)
+        .sort((a, b) => {
+          const aPref = prefRoom && Number(a.disc) === prefRoom ? 0 : 1;
+          const bPref = prefRoom && Number(b.disc) === prefRoom ? 0 : 1;
+          if (aPref !== bPref) return aPref - bPref;
+          return String(a.id).localeCompare(String(b.id));
+        });
+      const inRoomMatches = prefRoom
+        ? allMatches.filter((s) => Number(s.disc) === prefRoom)
+        : [];
+      const exactSingle =
+        allMatches.length === 1
+          ? allMatches[0]
+          : inRoomMatches.length === 1
+          ? inRoomMatches[0]
+          : null;
+      return {
+        exactSingle,
+        inRoomMatches,
+        allMatches,
+        isShortNo: true,
+        paddedShortNo: padded
+      };
+    }
+
+    // 3. Nickname / Full Name / Partial ID
+    const exactList = (ROSTER.students || []).filter((s) => {
+      const nick = getEffectiveNickname(s).toLocaleLowerCase("th");
+      return (
+        q.startsWith(String(s.id)) ||
+        (nick && nick === q) ||
+        s.fullName.toLocaleLowerCase("th") === q ||
+        s.name.toLocaleLowerCase("th") === q ||
+        `${s.id} — ${s.fullName}`.toLocaleLowerCase("th") === q
+      );
+    });
+    if (exactList.length === 1) {
+      return {
+        exactSingle: exactList[0],
+        inRoomMatches: prefRoom && Number(exactList[0].disc) === prefRoom ? [exactList[0]] : [],
+        allMatches: exactList,
+        isShortNo: false,
+        paddedShortNo: String(exactList[0].id).slice(-3)
+      };
+    }
+    const fuzzy = (ROSTER.students || [])
+      .filter((s) => {
         const nick = getEffectiveNickname(s).toLocaleLowerCase("th");
         return (
-          q.startsWith(s.id) ||
-          (nick && nick === q) ||
-          s.fullName.toLocaleLowerCase("th") === q ||
-          s.name.toLocaleLowerCase("th") === q ||
-          `${s.id} — ${s.fullName}`.toLocaleLowerCase("th") === q
+          String(s.id).includes(q) ||
+          (nick && nick.includes(q)) ||
+          String(s.fullName || "").toLocaleLowerCase("th").includes(q)
         );
-      }) || null
-    );
+      })
+      .sort((a, b) => {
+        const aPref = prefRoom && Number(a.disc) === prefRoom ? 0 : 1;
+        const bPref = prefRoom && Number(b.disc) === prefRoom ? 0 : 1;
+        return aPref - bPref;
+      })
+      .slice(0, 6);
+    const inRoomFuzzy = prefRoom ? fuzzy.filter((s) => Number(s.disc) === prefRoom) : [];
+    return {
+      exactSingle: exactList.length > 1 && inRoomFuzzy.length === 1 ? inRoomFuzzy[0] : null,
+      inRoomMatches: inRoomFuzzy,
+      allMatches: exactList.length ? exactList : fuzzy,
+      isShortNo: false,
+      paddedShortNo: ""
+    };
+  }
+
+  function findStudentByQuery(rawVal, preferredRoomId) {
+    const res = matchStudentsByShortNoOrQuery(rawVal, preferredRoomId);
+    return res.exactSingle || null;
   }
 
   function clearAllPersonalization() {
@@ -17167,20 +17247,30 @@
 
   function getKahootRoomRosterStatus(roomIdOpt) {
     const rId = Number(roomIdOpt || (LIVE ? LIVE.getRoomId() : 1)) || 1;
-    const rDef = LIVE ? LIVE.getRoomDef(rId) : { id: rId, roomCode: `1C1-0${rId + 1}`, label: `กลุ่ม ${rId}` };
+    const rDef = LIVE ? LIVE.getRoomDef(rId) : { id: rId, roomCode: `1C1-0${rId + 1}`, label: `ห้อง ${rId}` };
     const assigned = getRoomAssignedRoster(rId);
-    const pres = LIVE ? LIVE.getPresenceSummary() : { students: 0, teachers: 0, joinedStudents: [], list: [] };
+    const pres = LIVE
+      ? LIVE.getPresenceSummary()
+      : { students: 0, teachers: 0, joinedStudents: [], list: [], teamCounts: { 1: 0, 2: 0, 3: 0 }, teamMembers: { 1: [], 2: [], 3: [] } };
     const joinedRaw = Array.isArray(pres.joinedStudents) ? pres.joinedStudents : [];
     const rosterById = new Map((ROSTER.students || []).map((s) => [String(s.id), s]));
     const joinedBySid = new Map();
+    const teamBySid = new Map();
+    const teamCounts = { 1: 0, 2: 0, 3: 0 };
+    const teamMembers = { 1: [], 2: [], 3: [] };
     const enrichedJoined = [];
 
     joinedRaw.forEach((p) => {
-      const sid = String(p.studentId || (p.participantId && p.participantId.startsWith("sid_") ? p.participantId.slice(4) : "") || "").trim();
+      const sid = String(
+        p.studentId || (p.participantId && p.participantId.startsWith("sid_") ? p.participantId.slice(4) : "") || ""
+      ).trim();
       const stu = sid ? rosterById.get(sid) : null;
+      const tid = Number(p.teamId) >= 1 && Number(p.teamId) <= 3 ? Number(p.teamId) : 0;
       const item = {
         participantId: p.participantId,
+        teamId: tid,
         studentId: sid || "",
+        shortNo: p.shortNo || (sid ? sid.slice(-3) : ""),
         fullName: (stu && stu.fullName) || p.fullName || p.name || "นักศึกษาในห้อง",
         nickname: (stu && stu.nickname) || p.nickname || "",
         area: (stu && stu.area) || p.area || "",
@@ -17189,9 +17279,44 @@
         activeQuestionId: p.activeQuestionId || "",
         joinedWallMs: p.joinedWallMs || p.lastSeenMs || 0
       };
-      if (sid) joinedBySid.set(sid, item);
+      if (sid) {
+        joinedBySid.set(sid, item);
+        if (tid) teamBySid.set(sid, tid);
+      }
+      if (tid >= 1 && tid <= 3) {
+        teamCounts[tid] += 1;
+        teamMembers[tid].push(item);
+      }
       enrichedJoined.push(item);
     });
+
+    // Reflect local student session immediately if on the same room
+    if (ROLE === "student" && state.hsdSessionJoined && state.myStudent && Number(state.myStudent.disc || rId) === rId) {
+      const mySid = String(state.myStudent.id || "");
+      const myTid = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+      if (mySid && !joinedBySid.has(mySid)) {
+        const selfItem = {
+          participantId: `sid_${mySid}`,
+          teamId: myTid,
+          studentId: mySid,
+          shortNo: mySid.slice(-3),
+          fullName: state.myStudent.fullName || "",
+          nickname: state.myStudent.nickname || "",
+          area: state.myStudent.area || "",
+          disc: Number(state.myStudent.disc) || rId,
+          activeModule: state.hsdModule !== "ALL" ? state.hsdModule : "",
+          activeQuestionId: state.hsdLastSelectedQId || "",
+          joinedWallMs: Date.now()
+        };
+        joinedBySid.set(mySid, selfItem);
+        if (myTid >= 1 && myTid <= 3) {
+          teamBySid.set(mySid, myTid);
+          teamCounts[myTid] += 1;
+          teamMembers[myTid].push(selfItem);
+        }
+        enrichedJoined.push(selfItem);
+      }
+    }
 
     const waitingList = assigned.filter((s) => !joinedBySid.has(String(s.id)));
     const activePtr = LIVE && typeof LIVE.getTeacherPointer === "function" ? LIVE.getTeacherPointer() : null;
@@ -17201,11 +17326,336 @@
       assigned,
       totalExpected: assigned.length || 28,
       joinedList: enrichedJoined,
+      joinedBySid,
+      teamBySid,
+      teamCounts,
+      teamMembers,
       waitingList,
       joinedCount: enrichedJoined.length,
       teacherOnline: pres.teachers > 0 || ROLE === "faculty",
       activePtr
     };
+  }
+
+  function refreshSmartTeamPickerWidgetsDOM() {
+    document.querySelectorAll("[data-smart-team-picker='1']").forEach((el) => {
+      if (typeof el._refreshTeamBalanceUI === "function") {
+        el._refreshTeamBalanceUI();
+      }
+    });
+  }
+
+  function buildSmartTeamCheckinWidgetDOM(opts) {
+    const cfg = opts || {};
+    const compact = Boolean(cfg.compact);
+    let activeRoomId = Number(cfg.roomId || (LIVE ? LIVE.getRoomId() : 1)) || 1;
+    let activeModId = String(cfg.modId || (state.hsdModule && state.hsdModule !== "ALL" ? state.hsdModule : "HS1"));
+
+    const wrap = make("div", null, `hsd-smart-checkin-widget${compact ? " is-compact" : ""}`);
+    wrap.setAttribute("data-smart-team-picker", "1");
+
+    let candidateStu = state.myStudent || null;
+    if (!candidateStu) {
+      const savedSid = localStorage.getItem("racm303_my_sid") || "";
+      if (savedSid) candidateStu = findStudentByQuery(savedSid, activeRoomId) || null;
+    }
+    let selectedTeam = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+
+    // Step 1: 3-Digit Student Number Input + Instant Verification / Disambiguation
+    const step1Label = make(
+      "div",
+      compact
+        ? "กรอกเบอร์ตัวเอง 3 หลัก แล้วเลือกเข้า กลุ่ม 1 / 2 / 3 (ระบบเกลี่ยจำนวนคนเท่ากันอัตโนมัติ)"
+        : "① กรอกเบอร์ตัวเอง (เลขท้ายรหัส 3 หลัก เช่น 035 หรือ 35) หรือแตะชื่อตัวเองทางขวา",
+      "hsd-scw-step-label"
+    );
+    wrap.appendChild(step1Label);
+
+    const numRow = make("div", null, "hsd-scw-num-row");
+    const numInput = document.createElement("input");
+    numInput.type = "search";
+    numInput.inputMode = "search";
+    numInput.autocomplete = "off";
+    numInput.className = "hsd-scw-num-input";
+    numInput.setAttribute("data-ppt-ok-sid-input", "1");
+    numInput.placeholder = compact
+      ? "เบอร์ตัวเอง 3 หลัก เช่น 035…"
+      : "กรอกเบอร์ 3 หลัก (เช่น 035 หรือ 35) / ชื่อเล่น…";
+    if (candidateStu && candidateStu.id) {
+      numInput.value = String(candidateStu.id).slice(-3);
+    }
+
+    const verifiedPill = make("div", null, "hsd-scw-verified-pill is-empty");
+    numRow.append(numInput, verifiedPill);
+    wrap.appendChild(numRow);
+
+    const disambigRow = make("div", null, "hsd-scw-disambig-row");
+    disambigRow.hidden = true;
+    wrap.appendChild(disambigRow);
+
+    // Step 2: 3 Balanced Intra-Room Sub-Groups (กลุ่ม 1 / กลุ่ม 2 / กลุ่ม 3)
+    if (!compact) {
+      wrap.appendChild(
+        make(
+          "div",
+          "② เลือกเข้า กลุ่ม 1 / 2 / 3 ในห้อง (เฉลี่ยกลุ่มละเท่าๆ กัน · ล็อกชั่วคราวเมื่อกลุ่มนำเกิน 1 คน)",
+          "hsd-scw-step-label"
+        )
+      );
+    }
+
+    const teamGrid = make("div", null, "hsd-scw-team-grid");
+    const ctaRow = make("div", null, "hsd-scw-cta-row");
+    const joinBtn = make("button", "", "hsd-scw-join-btn");
+    joinBtn.type = "button";
+    const statusHint = make("div", "", "hsd-scw-hint");
+    ctaRow.append(joinBtn, statusHint);
+    wrap.append(teamGrid, ctaRow);
+
+    function computeBalance() {
+      const st = getKahootRoomRosterStatus(activeRoomId);
+      const bal =
+        LIVE && typeof LIVE.getSmartTeamBalance === "function"
+          ? LIVE.getSmartTeamBalance(candidateStu && candidateStu.id, st.totalExpected)
+          : {
+              counts: { 1: 0, 2: 0, 3: 0 },
+              otherCounts: { 1: 0, 2: 0, 3: 0 },
+              maxQuota: 10,
+              minOther: 0,
+              recommendedTeam: 1,
+              teams: {
+                1: { id: 1, count: 0, otherCount: 0, maxQuota: 10, locked: false, isRecommended: true, lockReason: "" },
+                2: { id: 2, count: 0, otherCount: 0, maxQuota: 10, locked: false, isRecommended: true, lockReason: "" },
+                3: { id: 3, count: 0, otherCount: 0, maxQuota: 10, locked: false, isRecommended: true, lockReason: "" }
+              }
+            };
+      if (!selectedTeam || (bal.teams[selectedTeam] && bal.teams[selectedTeam].locked)) {
+        selectedTeam = bal.recommendedTeam;
+      }
+      return { st, bal };
+    }
+
+    function updateVerifiedBadge() {
+      if (candidateStu) {
+        const sNo = String(candidateStu.id).slice(-3);
+        const rNum = Number(candidateStu.disc) || activeRoomId;
+        const rot = (SCHED.hsRotation || []).find((r) => r.group === rNum) || {};
+        const rCode = (rot[activeModId] && rot[activeModId].room) || rot.room || `1C1-0${rNum + 1}`;
+        verifiedPill.className = "hsd-scw-verified-pill is-verified";
+        verifiedPill.innerHTML =
+          `<span class="hsd-scw-vcheck">✓ เบอร์ ${escapeHtml(sNo)}</span>` +
+          `<strong>${escapeHtml(candidateStu.nickname ? `${candidateStu.nickname} (${candidateStu.fullName})` : candidateStu.fullName)}</strong>` +
+          `<span class="hsd-scw-vroom">ห้อง ${escapeHtml(rCode)}</span>`;
+      } else {
+        verifiedPill.className = "hsd-scw-verified-pill is-empty";
+        verifiedPill.textContent = numInput.value.trim()
+          ? "เลือกชื่อด้านล่าง หรือพิมพ์เบอร์ 3 หลักให้ตรง"
+          : "พิมพ์เบอร์ 3 หลัก เช่น 035 เพื่อยืนยันชื่อ";
+      }
+    }
+
+    function refreshTeamBalanceUI() {
+      const { bal } = computeBalance();
+      teamGrid.replaceChildren();
+
+      [1, 2, 3].forEach((tid) => {
+        const tInfo = bal.teams[tid];
+        const isSel = selectedTeam === tid && !tInfo.locked;
+        const btn = make(
+          "button",
+          null,
+          `hsd-smart-team-btn is-team-${tid}${isSel ? " is-selected" : ""}${tInfo.locked ? " is-locked" : ""}${tInfo.isRecommended ? " is-recommended" : ""}`
+        );
+        btn.type = "button";
+        btn.disabled = Boolean(tInfo.locked);
+        btn.setAttribute("data-pick-team", String(tid));
+        btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+        btn.title = tInfo.locked
+          ? `กลุ่ม ${tid}: ${tInfo.lockReason}`
+          : `เลือกอยู่กลุ่ม ${tid} (ปัจจุบัน ${tInfo.otherCount}/${tInfo.maxQuota} คน)`;
+
+        const pillTag = tInfo.locked
+          ? "รอกลุ่มอื่นเกลี่ย"
+          : tInfo.isRecommended
+          ? "แนะนำ"
+          : "ว่าง";
+        const pctFill = Math.min(100, Math.round((tInfo.otherCount / Math.max(1, tInfo.maxQuota)) * 100));
+
+        btn.innerHTML =
+          `<div class="hsd-stb-head">` +
+          `<span class="hsd-stb-name">กลุ่ม ${tid}</span>` +
+          `<span class="hsd-stb-badge">${escapeHtml(pillTag)}</span>` +
+          `</div>` +
+          `<div class="hsd-stb-count"><strong>${tInfo.otherCount}</strong><span>/ ${tInfo.maxQuota} คน</span></div>` +
+          `<div class="hsd-stb-bar"><span style="width:${pctFill}%"></span></div>`;
+
+        btn.addEventListener("click", () => {
+          if (tInfo.locked) return;
+          selectedTeam = tid;
+          refreshTeamBalanceUI();
+        });
+        teamGrid.appendChild(btn);
+      });
+
+      if (candidateStu) {
+        const sNo = String(candidateStu.id).slice(-3);
+        const nick = candidateStu.nickname ? ` ${candidateStu.nickname}` : "";
+        joinBtn.textContent = `เข้ากลุ่ม ${selectedTeam} (เบอร์ ${sNo}${nick}) & เปิดใบงานกลุ่ม ${selectedTeam} →`;
+        joinBtn.classList.add("is-ready");
+      } else {
+        joinBtn.textContent = `กรอกเบอร์ 3 หลัก แล้วกดเข้า กลุ่ม ${selectedTeam} →`;
+        joinBtn.classList.remove("is-ready");
+      }
+    }
+
+    function selectStudentObj(stu, syncInputVal) {
+      candidateStu = stu || null;
+      disambigRow.hidden = true;
+      disambigRow.replaceChildren();
+      if (stu) {
+        if (syncInputVal !== false) {
+          numInput.value = String(stu.id).slice(-3);
+        }
+        const targetRoom = Number(stu.disc) >= 1 && Number(stu.disc) <= 6 ? Number(stu.disc) : activeRoomId;
+        if (targetRoom !== activeRoomId) {
+          activeRoomId = targetRoom;
+          if (LIVE) LIVE.setRoom(targetRoom, false);
+          renderHsLiveClassroomBar();
+          renderHsDiscussionContextBar();
+          if (typeof refreshOpeningKahootSlideRosterDOM === "function") {
+            refreshOpeningKahootSlideRosterDOM();
+          }
+          if (typeof cfg.onRoomChanged === "function") {
+            cfg.onRoomChanged(targetRoom);
+          }
+        }
+      }
+      statusHint.textContent = "";
+      updateVerifiedBadge();
+      refreshTeamBalanceUI();
+    }
+
+    numInput.addEventListener("input", () => {
+      const raw = numInput.value.trim();
+      statusHint.textContent = "";
+      if (!raw) {
+        candidateStu = null;
+        disambigRow.hidden = true;
+        updateVerifiedBadge();
+        refreshTeamBalanceUI();
+        return;
+      }
+      const res = matchStudentsByShortNoOrQuery(raw, activeRoomId);
+      if (res.exactSingle) {
+        selectStudentObj(res.exactSingle, false);
+        // If there is also another student in a different room with the same 3-digit number, offer a switch chip
+        if (res.allMatches.length > 1) {
+          disambigRow.replaceChildren();
+          res.allMatches.forEach((m) => {
+            const b = make(
+              "button",
+              `เบอร์ ${String(m.id).slice(-3)} ${m.nickname || m.name} (ห้อง ${m.disc} · ${m.id})`,
+              `hsd-scw-cand-chip${candidateStu && candidateStu.id === m.id ? " is-active" : ""}`
+            );
+            b.type = "button";
+            b.addEventListener("click", () => selectStudentObj(m, true));
+            disambigRow.appendChild(b);
+          });
+          disambigRow.hidden = false;
+        }
+        return;
+      }
+      candidateStu = null;
+      disambigRow.replaceChildren();
+      if (res.allMatches.length > 0) {
+        res.allMatches.slice(0, 5).forEach((m) => {
+          const b = make(
+            "button",
+            `เบอร์ ${String(m.id).slice(-3)} ${m.nickname || m.name} (ห้อง ${m.disc})`,
+            "hsd-scw-cand-chip"
+          );
+          b.type = "button";
+          b.addEventListener("click", () => selectStudentObj(m, true));
+          disambigRow.appendChild(b);
+        });
+        disambigRow.hidden = false;
+      } else {
+        disambigRow.hidden = true;
+      }
+      updateVerifiedBadge();
+      refreshTeamBalanceUI();
+    });
+
+    function submitJoinTeam() {
+      if (!candidateStu && numInput.value.trim()) {
+        const res = matchStudentsByShortNoOrQuery(numInput.value.trim(), activeRoomId);
+        if (res.exactSingle) candidateStu = res.exactSingle;
+        else if (res.allMatches.length === 1) candidateStu = res.allMatches[0];
+      }
+      if (!candidateStu) {
+        statusHint.textContent = "กรุณากรอกเบอร์ตัวเอง 3 หลัก (เช่น 035 หรือ 35) หรือแตะเลือกชื่อตัวเองก่อนเข้ากลุ่ม";
+        statusHint.classList.add("is-err");
+        numInput.focus();
+        return;
+      }
+      const targetRoom = Number(candidateStu.disc) >= 1 && Number(candidateStu.disc) <= 6 ? Number(candidateStu.disc) : activeRoomId;
+      activeRoomId = targetRoom;
+      const { bal } = computeBalance();
+      const finalTeam =
+        selectedTeam && bal.teams[selectedTeam] && !bal.teams[selectedTeam].locked
+          ? selectedTeam
+          : bal.recommendedTeam;
+
+      state.hsdRoomConfirmed = true;
+      state.hsdSessionJoined = true;
+      state.hsdShowJoinGate = false;
+      try {
+        sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
+        sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
+      } catch (_) {}
+
+      applyMyStudent(candidateStu, true);
+      if (LIVE) {
+        LIVE.setFollowTeacher(true);
+        if (typeof LIVE.joinSessionWithStudent === "function") {
+          LIVE.joinSessionWithStudent(candidateStu, targetRoom, activeModId, finalTeam);
+        } else {
+          LIVE.setRoom(targetRoom, false);
+        }
+      }
+      if (typeof syncStudentTeamWorksheetFromLive === "function") {
+        syncStudentTeamWorksheetFromLive("*");
+      }
+      renderHsLiveClassroomBar();
+      renderHsDiscussionView();
+      broadcastPptPresentationState();
+      if (typeof cfg.onJoined === "function") {
+        cfg.onJoined(candidateStu, targetRoom, finalTeam);
+      }
+    }
+
+    joinBtn.addEventListener("click", submitJoinTeam);
+    numInput.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        submitJoinTeam();
+      }
+    });
+
+    wrap._refreshTeamBalanceUI = refreshTeamBalanceUI;
+    wrap._setActiveRoom = (rId, mId) => {
+      if (rId) activeRoomId = Number(rId) || 1;
+      if (mId) activeModId = String(mId);
+      updateVerifiedBadge();
+      refreshTeamBalanceUI();
+    };
+    wrap._pickStudentFromRoster = (stu) => {
+      selectStudentObj(stu, true);
+    };
+
+    updateVerifiedBadge();
+    refreshTeamBalanceUI();
+    return wrap;
   }
 
   function findQuestionLabelByQId(qId) {
@@ -17280,16 +17730,23 @@
     renderHsDiscussionView();
   }
 
+  function formatLobbyBtnText(st) {
+    if (st.joinedCount > 0) {
+      return `เข้ากลุ่ม ${st.joinedCount}/${st.totalExpected} (ก.1:${st.teamCounts[1]} · ก.2:${st.teamCounts[2]} · ก.3:${st.teamCounts[3]})`;
+    }
+    return `เช็คชื่อกลุ่ม 1–3 (${st.joinedCount}/${st.totalExpected})`;
+  }
+
   function buildKahootLobbyTriggerBtnDOM(clsName) {
     const st = getKahootRoomRosterStatus();
     const btn = make(
       "button",
-      `Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`,
+      formatLobbyBtnText(st),
       clsName || "hsd-kahoot-lobby-btn"
     );
     btn.type = "button";
     btn.setAttribute("data-kahoot-lobby-btn", "1");
-    btn.title = "คลิกเพื่อดูรายชื่อนักศึกษาที่ Login รหัสนักศึกษาเข้าคาบเรียนสดแล้ว (Live Check-in Lobby)";
+    btn.title = "คลิกเพื่อดูสมาชิกที่แบ่งเข้า กลุ่ม 1 / กลุ่ม 2 / กลุ่ม 3 ในห้องเรียนนี้แบบสด";
     btn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       openHsdKahootLobbyModal();
@@ -17338,16 +17795,17 @@
       ? `${cur.mod.code} · ${getClearQuestionHeadingLabel(cur.qObj, 0)}`
       : findQuestionLabelByQId(curSlideQId) || `${activeMod} · สไลด์ที่ 1`;
     const pct = Math.min(100, Math.round((st.joinedCount / Math.max(1, st.totalExpected)) * 100));
+    const maxPerTeam = Math.ceil(st.totalExpected / 3);
 
     const dialog = make("div", null, "hsd-kahoot-modal-card");
 
     // 1. Live Check-in Lobby Header
     const head = make("div", null, "hsd-km-head");
     const hLeft = make("div", null, "hsd-km-head-left");
-    const pinBadge = make("div", `CHECK-IN PIN: ${activeMod}-G${st.roomId} · ห้อง ${roomCode}`, "hsd-km-pin-badge");
+    const pinBadge = make("div", `ห้อง ${roomCode} (ห้องอภิปรายที่ ${st.roomId}) · แบ่งกลุ่มย่อย 1 / 2 / 3`, "hsd-km-pin-badge");
     const hTitle = make(
       "h3",
-      `เช็คชื่อสดเข้ากลุ่ม — กลุ่ม Discussion ที่ ${st.roomId} (${st.joinedCount}/${st.totalExpected} คน)`,
+      `ผังสมาชิก กลุ่ม 1 · กลุ่ม 2 · กลุ่ม 3 — เช็คชื่อแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
       "hsd-km-title"
     );
     const hSub = make(
@@ -17359,13 +17817,13 @@
 
     const hRight = make("div", null, "hsd-km-head-actions");
     if (ROLE === "faculty") {
-      const syncAllBtn = make("button", "ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที", "btn sm primary");
+      const syncAllBtn = make("button", "ดึงหน้าจอทั้ง 3 กลุ่มมาสไลด์ข้อนี้ทันที", "btn sm primary");
       syncAllBtn.type = "button";
       syncAllBtn.addEventListener("click", () => {
         broadcastActiveFacultySlideToStudents(true);
         syncAllBtn.textContent = "✓ ส่งสัญญาณ Sync ทุกจอแล้ว!";
         setTimeout(() => {
-          syncAllBtn.textContent = "ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที";
+          syncAllBtn.textContent = "ดึงหน้าจอทั้ง 3 กลุ่มมาสไลด์ข้อนี้ทันที";
         }, 1600);
       });
       hRight.appendChild(syncAllBtn);
@@ -17380,7 +17838,7 @@
         }
         closeHsdKahootLobbyModal();
       });
-      const switchIdBtn = make("button", "สลับรหัส นศ. / ห้อง", "btn sm");
+      const switchIdBtn = make("button", "เปลี่ยนเบอร์ / เปลี่ยนกลุ่ม", "btn sm");
       switchIdBtn.type = "button";
       switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
       hRight.append(syncMeBtn, switchIdBtn);
@@ -17397,7 +17855,7 @@
     const roomStrip = make("div", null, "hsd-km-room-strip");
     const rPills = make("div", null, "hsd-room-pills");
     (LIVE ? LIVE.rooms : []).forEach((rm) => {
-      const rb = make("button", `กลุ่ม ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
+      const rb = make("button", `ห้อง ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
       rb.type = "button";
       rb.setAttribute("aria-pressed", rm.id === st.roomId ? "true" : "false");
       rb.addEventListener("click", () => {
@@ -17411,73 +17869,72 @@
     const progWrap = make("div", null, "hsd-km-progress-wrap");
     progWrap.innerHTML =
       `<div class="hsd-km-prog-labels">` +
-      `<strong>Login รหัสเข้าคาบเรียนแล้ว ${st.joinedCount} / ${st.totalExpected} คน (${pct}%)</strong>` +
-      `<span>รอเข้าห้องอีก ${st.waitingList.length} คน</span>` +
+      `<strong>เข้ากลุ่มย่อยแล้ว ${st.joinedCount} / ${st.totalExpected} คน · กลุ่ม 1 (${st.teamCounts[1]}) · กลุ่ม 2 (${st.teamCounts[2]}) · กลุ่ม 3 (${st.teamCounts[3]})</strong>` +
+      `<span>ยังไม่เลือกกลุ่มอีก ${st.waitingList.length} คน</span>` +
       `</div>` +
       `<div class="hsd-km-prog-track"><div class="hsd-km-prog-fill" style="width:${pct}%"></div></div>`;
     roomStrip.append(rPills, progWrap);
     dialog.appendChild(roomStrip);
 
-    // 3. Joined vs Waiting Columns
-    const cols = make("div", null, "hsd-km-columns");
-
-    const joinedCol = make("div", null, "hsd-km-col is-joined-col");
-    joinedCol.appendChild(
-      make("h4", `เข้าห้องเรียนแล้ว (${st.joinedCount} คน)`, "hsd-km-col-title")
-    );
-    if (!st.joinedList.length) {
-      joinedCol.appendChild(
-        make(
-          "div",
-          "ยังไม่มีนักศึกษา Login เข้าห้องกลุ่มนี้ — ให้นักศึกษาเปิดหน้า กรณีศึกษา & ใบงานระบบสุขภาพ แล้วกรอกรหัสนักศึกษา 7 หลักเพื่อกด Join",
-          "hsd-km-empty"
-        )
+    // 3. Three Balanced Intra-Room Team Columns (กลุ่ม 1 | กลุ่ม 2 | กลุ่ม 3)
+    const teamCols = make("div", null, "hsd-km-team-columns");
+    [1, 2, 3].forEach((tid) => {
+      const members = st.teamMembers[tid] || [];
+      const tCol = make("div", null, `hsd-km-col is-team-col is-team-${tid}`);
+      tCol.appendChild(
+        make("h4", `กลุ่ม ${tid} (${members.length} / ${maxPerTeam} คน)`, "hsd-km-col-title")
       );
-    } else {
-      const jGrid = make("div", null, "hsd-km-chip-grid");
-      st.joinedList.forEach((p) => {
-        const isSyncedSlide = Boolean(curSlideQId && p.activeQuestionId === curSlideQId);
-        const chip = make("div", null, `hsd-km-stu-chip is-joined${isSyncedSlide ? " is-on-slide" : ""}`);
-        const avatarTxt = getStudentAvatarShortLabel(p.nickname, p.studentId);
-        const syncLbl = p.activeQuestionId
-          ? isSyncedSlide
-            ? "✓ ตรงสไลด์ปัจจุบัน"
-            : findQuestionLabelByQId(p.activeQuestionId)
-          : "ซิงค์พร้อมเรียน";
-        chip.innerHTML =
-          `<div class="hsd-km-avatar">${escapeHtml(avatarTxt)}</div>` +
-          `<div class="hsd-km-stu-meta">` +
-          `<div class="hsd-km-stu-top">` +
-          `<strong>${escapeHtml(p.nickname ? `${p.nickname} · ${p.studentId}` : p.studentId || p.fullName)}</strong>` +
-          `<span class="hsd-km-sync-tag${isSyncedSlide ? " is-match" : ""}">${escapeHtml(syncLbl)}</span>` +
-          `</div>` +
-          `<div class="hsd-km-stu-name">${escapeHtml(p.fullName)}${p.area ? ` · ${escapeHtml(p.area)}` : ""}</div>` +
-          `</div>`;
-        jGrid.appendChild(chip);
-      });
-      joinedCol.appendChild(jGrid);
-    }
+      if (!members.length) {
+        tCol.appendChild(
+          make(
+            "div",
+            `ยังไม่มีสมาชิกเลือกเข้ากลุ่ม ${tid} — กรอกเบอร์ 3 หลักแล้วกดเลือกกลุ่ม ${tid} ได้ทันที`,
+            "hsd-km-empty"
+          )
+        );
+      } else {
+        const jGrid = make("div", null, "hsd-km-chip-grid");
+        members.forEach((p) => {
+          const isSyncedSlide = Boolean(curSlideQId && p.activeQuestionId === curSlideQId);
+          const chip = make("div", null, `hsd-km-stu-chip is-joined is-team-${tid}${isSyncedSlide ? " is-on-slide" : ""}`);
+          const sNo = p.shortNo || getStudentAvatarShortLabel(p.nickname, p.studentId);
+          chip.innerHTML =
+            `<div class="hsd-km-avatar">${escapeHtml(sNo)}</div>` +
+            `<div class="hsd-km-stu-meta">` +
+            `<div class="hsd-km-stu-top">` +
+            `<strong>${escapeHtml(p.nickname ? `${sNo} ${p.nickname}` : `${sNo} ${p.fullName}`)}</strong>` +
+            `<span class="hsd-km-sync-tag is-match">กลุ่ม ${tid}</span>` +
+            `</div>` +
+            `<div class="hsd-km-stu-name">${escapeHtml(p.fullName)}</div>` +
+            `</div>`;
+          jGrid.appendChild(chip);
+        });
+        tCol.appendChild(jGrid);
+      }
+      teamCols.appendChild(tCol);
+    });
+    dialog.appendChild(teamCols);
 
+    // 4. Compact Waiting Strip for Remaining Students in the Room
     const waitCol = make("div", null, "hsd-km-col is-waiting-col");
+    waitCol.style.marginTop = "12px";
     waitCol.appendChild(
-      make("h4", `ยังไม่ได้ Login เข้าห้อง (${st.waitingList.length} คน)`, "hsd-km-col-title")
+      make("h4", `ยังไม่ได้กรอกเบอร์เลือกกลุ่มในห้องนี้ (${st.waitingList.length} คน)`, "hsd-km-col-title")
     );
     if (!st.waitingList.length) {
-      waitCol.appendChild(make("div", "นักศึกษากลุ่มนี้ Login เข้าห้องครบทุกคนแล้ว", "hsd-km-empty is-all-in"));
+      waitCol.appendChild(make("div", "นักศึกษาในห้องนี้เลือกเข้ากลุ่ม 1 / 2 / 3 ครบทุกคนแล้ว", "hsd-km-empty is-all-in"));
     } else {
       const wGrid = make("div", null, "hsd-km-wait-grid");
       st.waitingList.forEach((s) => {
         const wItem = make("div", null, "hsd-km-wait-chip");
         wItem.innerHTML =
-          `<span class="hsd-km-wait-id">${escapeHtml(s.id)}</span>` +
-          `<span class="hsd-km-wait-name">${escapeHtml(s.fullName)}${s.nickname ? ` (${escapeHtml(s.nickname)})` : ""}</span>`;
+          `<span class="hsd-km-wait-id">${escapeHtml(String(s.id).slice(-3))}</span>` +
+          `<span class="hsd-km-wait-name">${escapeHtml(s.nickname ? `${s.nickname} (${s.fullName})` : s.fullName)}</span>`;
         wGrid.appendChild(wItem);
       });
       waitCol.appendChild(wGrid);
     }
-
-    cols.append(joinedCol, waitCol);
-    dialog.appendChild(cols);
+    dialog.appendChild(waitCol);
     modal.appendChild(dialog);
   }
 
@@ -17495,17 +17952,19 @@
     box.replaceChildren();
     const top = make("div", null, "hsd-gate-live-top");
     top.innerHTML =
-      `<strong>เพื่อนในกลุ่มที่ ${st.roomId} ที่เช็คชื่อแล้ว: ${st.joinedCount} / ${st.totalExpected} คน</strong>` +
+      `<strong>ห้องที่ ${st.roomId} (${escapeHtml(st.roomDef.roomCode)}) · เข้ากลุ่มแล้ว ${st.joinedCount}/${st.totalExpected} คน — กลุ่ม 1 (${st.teamCounts[1]}) · กลุ่ม 2 (${st.teamCounts[2]}) · กลุ่ม 3 (${st.teamCounts[3]})</strong>` +
       `<span class="hsd-gate-live-ptr">${escapeHtml(ptrText)}</span>`;
     box.appendChild(top);
 
     const pills = make("div", null, "hsd-gate-joined-pills");
     if (!st.joinedList.length) {
-      pills.appendChild(make("span", "เป็นคนแรกของกลุ่มที่ Login เข้าห้องคาบนี้ได้เลย!", "hsd-gate-joined-empty"));
+      pills.appendChild(make("span", "กรอกเบอร์ตัวเอง 3 หลัก แล้วเลือกเข้า กลุ่ม 1 / 2 / 3 ได้เลย!", "hsd-gate-joined-empty"));
     } else {
       st.joinedList.forEach((p) => {
-        const lbl = p.nickname ? `${p.nickname} (${p.studentId})` : `${p.studentId || p.fullName}`;
-        pills.appendChild(make("span", lbl, "hsd-gate-joined-pill"));
+        const sNo = p.shortNo || (p.studentId ? String(p.studentId).slice(-3) : "");
+        const tTag = p.teamId ? `[ก.${p.teamId}] ` : "";
+        const lbl = `${tTag}${sNo} ${p.nickname || p.fullName}`;
+        pills.appendChild(make("span", lbl, `hsd-gate-joined-pill${p.teamId ? ` is-team-${p.teamId}` : ""}`));
       });
     }
     box.appendChild(pills);
@@ -17523,14 +17982,15 @@
     }
     const pill = $("hsdPresencePill");
     if (pill) {
-      pill.textContent = `${st.roomDef.label} · Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`;
+      pill.textContent = `${st.roomDef.label} · กลุ่ม 1:${st.teamCounts[1]} · 2:${st.teamCounts[2]} · 3:${st.teamCounts[3]}`;
       pill.title = conn.label;
     }
     document.querySelectorAll("[data-kahoot-lobby-btn='1']").forEach((btn) => {
-      btn.textContent = `Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`;
+      btn.textContent = formatLobbyBtnText(st);
       btn.classList.toggle("has-joined-students", st.joinedCount > 0);
     });
     refreshGateLiveJoinedPreviewDOM();
+    refreshSmartTeamPickerWidgetsDOM();
     if (typeof refreshOpeningKahootSlideRosterDOM === "function") {
       refreshOpeningKahootSlideRosterDOM();
     }
@@ -17548,15 +18008,15 @@
     const brand = make("div", null, "hsd-live-brand");
     const dot = make("span", null, "hsd-live-dot");
     dot.id = "hsdConnDot";
-    brand.append(dot, make("span", "ห้อง Case Discussion สด:"));
+    brand.append(dot, make("span", "ห้อง Case Discussion:"));
     left.appendChild(brand);
 
     const roomPills = make("div", null, "hsd-room-pills");
     roomPills.setAttribute("role", "group");
-    roomPills.setAttribute("aria-label", "เลือกห้องกลุ่มย่อย 1–6");
+    roomPills.setAttribute("aria-label", "เลือกห้องอภิปราย 1–6");
     const curRoom = LIVE.getRoomId();
     LIVE.rooms.forEach((rm) => {
-      const rb = make("button", `กลุ่ม ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
+      const rb = make("button", `ห้อง ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
       rb.type = "button";
       rb.setAttribute("aria-pressed", rm.id === curRoom ? "true" : "false");
       rb.addEventListener("click", () => {
@@ -17575,13 +18035,13 @@
     });
     left.appendChild(roomPills);
 
-    // Live Check-in Who-Joined Roster Button (Both Faculty & Student)
+    // Live Check-in 3-Team Roster Button (Both Faculty & Student)
     left.appendChild(buildKahootLobbyTriggerBtnDOM("hsd-kahoot-lobby-btn"));
 
     if (ROLE === "faculty") {
-      const syncStudentsBtn = make("button", "Sync สไลด์ นศ.", "hsd-tbtn primary");
+      const syncStudentsBtn = make("button", "Sync สไลด์ทั้ง 3 กลุ่ม", "hsd-tbtn primary");
       syncStudentsBtn.type = "button";
-      syncStudentsBtn.title = "ดึงหน้าจอนักศึกษาทุกคนในห้องกลุ่มนี้ให้ซิงค์มาที่สไลด์ข้อปัจจุบันทันที";
+      syncStudentsBtn.title = "ดึงหน้าจอนักศึกษาทั้ง 3 กลุ่มในห้องนี้ให้ซิงค์มาที่สไลด์ข้อปัจจุบันทันที";
       syncStudentsBtn.addEventListener("click", () => {
         broadcastActiveFacultySlideToStudents(true);
         const orig = syncStudentsBtn.textContent;
@@ -17596,17 +18056,19 @@
     if (ROLE === "student") {
       if (state.hsdSessionJoined && state.myStudent) {
         const s = state.myStudent;
+        const myTeam = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 1;
+        const sNo = String(s.id || "").slice(-3);
         const myBadge = make(
           "span",
-          `${s.nickname ? `${s.nickname} · ${s.id}` : s.id}`,
-          "hsd-presence-pill is-student-id-pill"
+          `เบอร์ ${sNo}${s.nickname ? ` ${s.nickname}` : ""} · กลุ่ม ${myTeam}`,
+          `hsd-presence-pill is-student-id-pill is-team-${myTeam}`
         );
-        myBadge.title = `${s.fullName} · กลุ่ม Discussion ที่ ${s.disc}`;
+        myBadge.title = `${s.fullName} · ห้อง ${s.disc} · ตอบร่วมกันในใบงานกลางของกลุ่ม ${myTeam}`;
         left.appendChild(myBadge);
 
-        const switchRoomGateBtn = make("button", tr("สลับรหัส/ห้อง", "Switch ID / Room"), "hsd-tbtn");
+        const switchRoomGateBtn = make("button", tr("เปลี่ยนเบอร์/กลุ่ม", "Switch No. / Team"), "hsd-tbtn");
         switchRoomGateBtn.type = "button";
-        switchRoomGateBtn.title = tr("กลับไปหน้า Login รหัสนักศึกษา / เลือกห้องกลุ่มย่อยใหม่", "Return to Student ID Login & Room Lobby");
+        switchRoomGateBtn.title = tr("เปลี่ยนเบอร์นักศึกษาหรือสลับกลุ่ม 1 / 2 / 3", "Switch student number or sub-group 1 / 2 / 3");
         switchRoomGateBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
         left.appendChild(switchRoomGateBtn);
       }
@@ -17721,6 +18183,9 @@
       LIVE.on("responses", (ev) => {
         if (ROLE === "faculty" && typeof refreshLiveWallByQuestionId === "function") {
           refreshLiveWallByQuestionId(ev && ev.questionId ? ev.questionId : "*");
+        }
+        if (ROLE === "student" && (!ev || !ev.localOrigin) && typeof syncStudentTeamWorksheetFromLive === "function") {
+          syncStudentTeamWorksheetFromLive(ev && ev.questionId ? ev.questionId : "*");
         }
       });
       LIVE.on("pointer", (ptr) => {
@@ -18878,10 +19343,112 @@
     return qHead;
   }
 
+  function syncStudentTeamWorksheetFromLive(targetQId) {
+    if (ROLE !== "student" || !LIVE || typeof LIVE.getMyTeamResponse !== "function") return;
+    const myTeam = typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+    if (!myTeam) return;
+
+    const qIds = [];
+    if (targetQId && targetQId !== "*") {
+      qIds.push(targetQId);
+    } else {
+      (HSD_DATA.cases || []).forEach((c) => {
+        (c.questions || []).forEach((q) => qIds.push(q.id));
+      });
+    }
+
+    qIds.forEach((qid) => {
+      const teamRec = LIVE.getMyTeamResponse(qid);
+      if (!teamRec || !teamRec.cells) return;
+      const qObj = findHsQuestionById(qid);
+      if (!qObj || !qObj.worksheet || !Array.isArray(qObj.worksheet.rows)) return;
+
+      qObj.worksheet.rows.forEach((r) => {
+        (r.cells || []).forEach((cell) => {
+          if (!cell || !cell.inputId) return;
+          const remoteVal = teamRec.cells[cell.inputId];
+          if (remoteVal === undefined) return;
+          const clamped = enforceA4ConciseText(String(remoteVal), cell, false);
+          document.querySelectorAll(`textarea[data-input-id="${cell.inputId}"]`).forEach((ta) => {
+            if (ta.id && ta.id.startsWith("demo_")) return;
+            if (document.activeElement === ta) return;
+            if (ta.value !== clamped) {
+              ta.value = clamped;
+              persistHsdDraft(cell.inputId, clamped);
+              if (typeof ta._refreshFromTeamSync === "function") {
+                ta._refreshFromTeamSync();
+              }
+            } else if (typeof ta._refreshFromTeamSync === "function") {
+              ta._refreshFromTeamSync();
+            }
+          });
+          if (!document.querySelector(`textarea[data-input-id="${cell.inputId}"]`)) {
+            persistHsdDraft(cell.inputId, clamped);
+          }
+        });
+      });
+
+      document.querySelectorAll(`[data-team-live-editor="${qid}"]`).forEach((el) => {
+        if (teamRec.editorLabel) {
+          el.textContent = `อัปเดตล่าสุดโดย ${teamRec.editorLabel}`;
+        }
+      });
+    });
+    syncLiveBarQuestionPickerDOM();
+  }
+
   function buildWideWorksheetTableDOM(qObj, forceInteractive) {
     const frag = document.createDocumentFragment();
     const ws = qObj.worksheet;
     if (!ws || ws.type !== "table") return frag;
+
+    const isStudentLiveSheet = Boolean(LIVE && ROLE === "student" && !forceInteractive);
+    const activeTeamId =
+      isStudentLiveSheet && state.hsdSessionJoined && typeof LIVE.getTeamId === "function"
+        ? LIVE.getTeamId()
+        : 0;
+    const teamRecOnMount =
+      activeTeamId && typeof LIVE.getMyTeamResponse === "function"
+        ? LIVE.getMyTeamResponse(qObj.id)
+        : null;
+
+    if (isStudentLiveSheet && !state.isPptSlideSharePopup) {
+      if (activeTeamId && state.myStudent) {
+        const st = getKahootRoomRosterStatus();
+        const sNo = String(state.myStudent.id || "").slice(-3);
+        const nick = state.myStudent.nickname ? ` ${state.myStudent.nickname}` : "";
+        const memberCnt = (st.teamCounts && st.teamCounts[activeTeamId]) || 1;
+        const banner = make("div", null, `hsd-team-sheet-banner is-team-${activeTeamId} hsd-no-print`);
+        const leftMeta = make("div", null, "hsd-tsb-left");
+        leftMeta.innerHTML =
+          `<span class="hsd-tsb-pill is-team-${activeTeamId}">กลุ่ม ${activeTeamId}</span>` +
+          `<span class="hsd-tsb-title">ใบงานกลางร่วมกัน (${memberCnt} คน) · เบอร์ ${escapeHtml(sNo)}${escapeHtml(nick)}</span>`;
+        const rightMeta = make("div", null, "hsd-tsb-right");
+        const editorTag = make(
+          "span",
+          teamRecOnMount && teamRecOnMount.editorLabel
+            ? `อัปเดตล่าสุดโดย ${teamRecOnMount.editorLabel}`
+            : "พิมพ์และส่งร่วมกันในนามกลุ่ม",
+          "hsd-tsb-editor"
+        );
+        editorTag.setAttribute("data-team-live-editor", qObj.id);
+        const switchBtn = make("button", "เปลี่ยนเบอร์/กลุ่ม", "hsd-tsb-switch-btn");
+        switchBtn.type = "button";
+        switchBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
+        rightMeta.append(editorTag, switchBtn);
+        banner.append(leftMeta, rightMeta);
+        frag.appendChild(banner);
+      } else {
+        const inlineGate = make("div", null, "hsd-inline-team-gate hsd-no-print");
+        inlineGate.appendChild(
+          buildSmartTeamCheckinWidgetDOM({
+            compact: true,
+            modId: state.hsdModule !== "ALL" ? state.hsdModule : "HS1"
+          })
+        );
+        frag.appendChild(inlineGate);
+      }
+    }
 
     const wsWrap = make("div", null, "hsd-ws-wrap");
     const tbl = make("table", null, "hsd-ws-table");
@@ -18904,6 +19471,18 @@
 
     const cellSyncCallbacks = [];
 
+    const ensureJoinedBeforeLiveSend = () => {
+      const curTid = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+      if (state.hsdSessionJoined && curTid >= 1 && curTid <= 3) return curTid;
+      const numInp = document.querySelector("[data-ppt-ok-sid-input='1']");
+      if (numInp) {
+        numInp.scrollIntoView({ behavior: "smooth", block: "center" });
+        numInp.focus();
+      }
+      showStudentSlideSyncToast("กรุณากรอกเบอร์ตัวเอง 3 หลัก และเลือกเข้า กลุ่ม 1 / 2 / 3 ก่อนส่งคำตอบกลุ่ม");
+      return 0;
+    };
+
     const tbody = document.createElement("tbody");
     (ws.rows || []).forEach((r) => {
       const tr = document.createElement("tr");
@@ -18921,7 +19500,18 @@
           const isCompact = Boolean(cell.compact);
           const minPx = isCompact ? 40 : 52;
           const maxPx = isCompact ? 92 : 170;
-          const savedVal = enforceA4ConciseText(state.hsdDrafts[cell.inputId] || "", cell, false);
+          const remoteTeamVal =
+            teamRecOnMount && teamRecOnMount.cells && teamRecOnMount.cells[cell.inputId]
+              ? String(teamRecOnMount.cells[cell.inputId])
+              : "";
+          if (remoteTeamVal && state.hsdDrafts[cell.inputId] !== remoteTeamVal) {
+            state.hsdDrafts[cell.inputId] = remoteTeamVal;
+          }
+          const savedVal = enforceA4ConciseText(
+            remoteTeamVal || state.hsdDrafts[cell.inputId] || "",
+            cell,
+            false
+          );
 
           const ta = document.createElement("textarea");
           ta.className = `hsd-input${isCompact ? " is-compact" : ""}`;
@@ -18929,7 +19519,7 @@
           ta.dataset.inputId = cell.inputId;
           ta.maxLength = maxChars;
           ta.rows = isCompact ? 1 : 2;
-          ta.placeholder = cell.placeholder || "พิมพ์คำตอบกระชับตรงประเด็น…";
+          ta.placeholder = cell.placeholder || "พิมพ์คำตอบกระชับร่วมกันในนามกลุ่ม…";
           ta.value = savedVal;
 
           const foot = make("div", null, "hsd-cell-foot");
@@ -18939,6 +19529,8 @@
           let cellSendBtn = null;
           const syncCellSendBtnUI = () => {
             if (!cellSendBtn || !LIVE) return;
+            const curTid = typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+            const teamTag = curTid ? `กลุ่ม ${curTid}` : "กลุ่ม";
             const st =
               typeof LIVE.getCellSubmissionState === "function"
                 ? LIVE.getCellSubmissionState(cell.inputId, ta.value)
@@ -18950,27 +19542,28 @@
             cellSendBtn.classList.toggle("is-dirty", st === "dirty");
             ta.classList.toggle("is-cell-submitted", st === "submitted");
             if (st === "submitted") {
-              cellSendBtn.textContent = "✓ ส่งแล้ว";
-              cellSendBtn.title = "ส่งคำตอบช่องนี้ขึ้นจออาจารย์เรียบร้อยแล้ว (พิมพ์แก้และกดอัปเดตได้ตลอด)";
+              cellSendBtn.textContent = `✓ ${teamTag} ส่งแล้ว`;
+              cellSendBtn.title = `ส่งคำตอบช่องนี้ในนาม${teamTag}ขึ้นจออาจารย์เรียบร้อยแล้ว`;
             } else if (st === "dirty") {
-              cellSendBtn.textContent = "อัปเดตช่องนี้ ↗";
-              cellSendBtn.title = "ส่งข้อความที่แก้ไขในช่องนี้ขึ้นจออาจารย์ (หรือกด Ctrl+Enter)";
+              cellSendBtn.textContent = `อัปเดต${teamTag} ↗`;
+              cellSendBtn.title = `ส่งข้อความที่แก้ไขในช่องนี้ในนาม${teamTag} (หรือกด Ctrl+Enter)`;
             } else if (st === "ready") {
-              cellSendBtn.textContent = "ส่งช่องนี้ ✓";
-              cellSendBtn.title = "ส่งเฉพาะช่องนี้ขึ้นจออาจารย์ทันที ไม่ต้องรอกรอกช่องอื่น (หรือกด Ctrl+Enter)";
+              cellSendBtn.textContent = `ส่งในนาม${teamTag} ✓`;
+              cellSendBtn.title = `ส่งเฉพาะช่องนี้ในนาม${teamTag}ขึ้นจออาจารย์ทันที (หรือกด Ctrl+Enter)`;
             } else {
-              cellSendBtn.textContent = "ส่งช่องนี้";
-              cellSendBtn.title = "พิมพ์คำตอบในช่องนี้แล้วกดส่งแยกเฉพาะช่องได้ทันที";
+              cellSendBtn.textContent = `ส่งในนาม${teamTag}`;
+              cellSendBtn.title = "พิมพ์คำตอบในช่องนี้แล้วกดส่งร่วมกันในนามกลุ่มได้ทันที";
             }
           };
 
           if (LIVE && ROLE === "student") {
-            cellSendBtn = make("button", "ส่งช่องนี้", "hsd-cell-send-btn hsd-no-print");
+            cellSendBtn = make("button", "ส่งในนามกลุ่ม", "hsd-cell-send-btn hsd-no-print");
             cellSendBtn.type = "button";
             cellSendBtn.dataset.sendCellId = cell.inputId;
             cellSendBtn.addEventListener("click", () => {
-              const map = collectQuestionCellsMap(qObj);
               if (!String(ta.value || "").trim()) return;
+              if (!ensureJoinedBeforeLiveSend()) return;
+              const map = collectQuestionCellsMap(qObj);
               map[cell.inputId] = ta.value;
               LIVE.submitSingleCell(qObj.id, cell.inputId, map);
               syncCellSendBtnUI();
@@ -19005,11 +19598,16 @@
             ta.style.height = `${Math.min(maxPx, Math.max(minPx, sH))}px`;
             syncCellSendBtnUI();
           };
+          ta._refreshFromTeamSync = () => {
+            mirror.textContent = ta.value.trim() || "(พื้นที่เขียนคำตอบกระชับในกรอบ A4)";
+            refreshMetricsAndFit();
+          };
 
           ta.addEventListener("keydown", (ev) => {
             if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter" && LIVE && ROLE === "student") {
               ev.preventDefault();
               if (!String(ta.value || "").trim()) return;
+              if (!ensureJoinedBeforeLiveSend()) return;
               const map = collectQuestionCellsMap(qObj);
               map[cell.inputId] = ta.value;
               LIVE.submitSingleCell(qObj.id, cell.inputId, map);
@@ -19027,8 +19625,8 @@
             mirror.textContent = ta.value.trim() || "(พื้นที่เขียนคำตอบกระชับในกรอบ A4)";
             persistHsdDraft(cell.inputId, ta.value);
             refreshMetricsAndFit();
-            if (LIVE && ROLE === "student") {
-              LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj));
+            if (LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId()) {
+              LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), cell.inputId);
             }
           });
           ta.addEventListener("input", () => {
@@ -19039,12 +19637,12 @@
             mirror.textContent = ta.value.trim() || "(พื้นที่เขียนคำตอบกระชับในกรอบ A4)";
             persistHsdDraft(cell.inputId, ta.value);
             refreshMetricsAndFit();
-            if (LIVE && ROLE === "student") {
-              LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj));
+            if (LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId()) {
+              LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), cell.inputId);
             }
           });
           ta.addEventListener("change", () => {
-            if (LIVE && ROLE === "student" && typeof LIVE.flushLiveTyping === "function") {
+            if (LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId() && typeof LIVE.flushLiveTyping === "function") {
               LIVE.flushLiveTyping(qObj.id, collectQuestionCellsMap(qObj));
             }
           });
@@ -19064,12 +19662,12 @@
     if (LIVE && ROLE === "student") {
       const subBar = make("div", null, "hsd-q-submit-bar hsd-no-print");
       const rNum = LIVE.getRoomId();
+      const curTid = typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
       const hint = make(
         "span",
-        tr(
-          `● กด “ส่งช่องนี้ ✓” ใต้แต่ละช่องได้ทันทีโดยไม่ต้องรอกรอกครบทุกช่อง (ซิงค์เข้าห้องกลุ่มที่ ${rNum})`,
-          `● Click “Send Cell ✓” under any cell anytime, or submit all filled cells to Group ${rNum}`
-        ),
+        curTid
+          ? `● ใบงานกลางของกลุ่ม ${curTid} (ห้อง ${rNum}) — พิมพ์และกดส่งร่วมกันในนามกลุ่ม (รวม 3 กลุ่มต่อห้อง)`
+          : `● กรอกเบอร์ 3 หลักและเลือกเข้า กลุ่ม 1 / 2 / 3 ด้านบนเพื่อส่งคำตอบร่วมกันในนามกลุ่ม`,
         "hsd-live-sync-hint"
       );
 
@@ -19078,24 +19676,26 @@
       prevQBtn.type = "button";
       prevQBtn.addEventListener("click", () => manualStepHsSlide(-1));
 
-      const sendBtn = make("button", tr("ส่งทุกช่องที่กรอกแล้วขึ้นจอ ✓", "Submit All Filled Cells ✓"), "btn sm teal");
+      const defaultSendLbl = curTid
+        ? `ส่งคำตอบกลุ่ม ${curTid} ขึ้นจอ ✓`
+        : "เลือกกลุ่ม 1–3 & ส่งคำตอบ ✓";
+      const sendBtn = make("button", defaultSendLbl, "btn sm teal");
       sendBtn.type = "button";
       sendBtn.addEventListener("click", () => {
         const map = collectQuestionCellsMap(qObj);
         if (!Object.keys(map).length) {
-          hint.textContent = tr("กรุณาพิมพ์คำตอบอย่างน้อย 1 ช่องก่อนกดส่งขึ้นจอ", "Please type at least 1 cell before submitting");
+          hint.textContent = "กรุณาพิมพ์คำตอบอย่างน้อย 1 ช่องก่อนกดส่งขึ้นจอ";
           return;
         }
+        const tidNow = ensureJoinedBeforeLiveSend();
+        if (!tidNow) return;
         LIVE.submitQuestionFinal(qObj.id, map);
         cellSyncCallbacks.forEach((fn) => fn());
-        sendBtn.textContent = tr("✓ ส่งทุกช่องที่กรอกแล้ว!", "✓ Submitted All Filled Cells!");
-        hint.textContent = tr(
-          `ส่งคำตอบทุกช่องที่กรอกขึ้นจอห้องกลุ่มที่ ${LIVE.getRoomId()} เรียบร้อยแล้ว`,
-          `Submitted all filled cells to Group ${LIVE.getRoomId()} screen`
-        );
+        sendBtn.textContent = `✓ ส่งคำตอบกลุ่ม ${tidNow} แล้ว!`;
+        hint.textContent = `ส่งคำตอบใบงานกลางของกลุ่ม ${tidNow} ขึ้นจอห้องที่ ${LIVE.getRoomId()} เรียบร้อยแล้ว`;
         syncLiveBarQuestionPickerDOM();
         setTimeout(() => {
-          sendBtn.textContent = tr("ส่งทุกช่องที่กรอกแล้วขึ้นจอ ✓", "Submit All Filled Cells ✓");
+          sendBtn.textContent = `ส่งคำตอบกลุ่ม ${tidNow} ขึ้นจอ ✓`;
         }, 2000);
       });
 
@@ -20148,70 +20748,68 @@
 
   function renderHsStudentRoomGateCard(container) {
     const gate = make("div", null, "hsd-room-gate-card is-kahoot-lobby");
-    let candidateStu = state.myStudent || null;
-    if (!candidateStu) {
-      const savedSid = localStorage.getItem("racm303_my_sid") || "";
-      if (savedSid) candidateStu = findStudentByQuery(savedSid) || null;
-    }
     let selectedMod = state.hsdModule && state.hsdModule !== "ALL" ? state.hsdModule : "HS1";
     const activePtr = LIVE && typeof LIVE.getTeacherPointer === "function" ? LIVE.getTeacherPointer() : null;
     if (state.hsdModule === "ALL" && activePtr && activePtr.module) {
       selectedMod = activePtr.module;
     }
-    let selectedRoom = candidateStu && candidateStu.disc
-      ? Number(candidateStu.disc)
-      : LIVE
-      ? LIVE.getRoomId()
-      : 1;
+    let selectedRoom =
+      state.myStudent && state.myStudent.disc
+        ? Number(state.myStudent.disc)
+        : LIVE
+        ? LIVE.getRoomId()
+        : 1;
     if (LIVE && LIVE.getRoomId() !== selectedRoom) {
       LIVE.setRoom(selectedRoom, true);
     }
 
-    const getPinCode = () => `${selectedMod}-G${selectedRoom}`;
+    const getPinCode = () => `${selectedMod}-R${selectedRoom}`;
 
-    // 1. Live Check-in Lobby Hero Header
+    // 1. Hero Header
     const head = make("div", null, "hsd-room-gate-head");
     const badgeRow = make("div", null, "hsd-kahoot-gate-badges");
-    const livePinEl = make("span", `CHECK-IN PIN: ${getPinCode()}`, "hsd-km-pin-badge");
+    const livePinEl = make("span", `ROOM PIN: ${getPinCode()}`, "hsd-km-pin-badge");
     badgeRow.append(
-      make("span", "LIVE CLASSROOM · CHECK-IN MODE", "hsd-rg-badge"),
+      make("span", "TEAM DISCUSSION · กลุ่ม 1 / 2 / 3", "hsd-rg-badge"),
       livePinEl
     );
     head.append(
       badgeRow,
-      make("h3", "Login รหัสนักศึกษา 7 หลัก เพื่อเช็คชื่อเข้าคาบ HS Discussion & ซิงค์สไลด์ตามอาจารย์"),
+      make("h3", "กรอกเบอร์ตัวเอง 3 หลัก & เลือกเข้า กลุ่ม 1 / 2 / 3 (ตอบร่วมกันเป็นใบงานกลุ่ม)"),
       make(
         "p",
-        "กรอกรหัสนักศึกษาของคุณก่อนเข้าคาบเรียน เพื่อให้ระบบแสดงรายชื่อผู้เข้าร่วม (ใคร Join แล้วบ้าง) ให้อาจารย์และเพื่อนในกลุ่มเห็นแบบสด และซิงค์หน้าจอตามสไลด์อาจารย์ทีละข้อ (Each Slide)"
+        "กรอกเลขท้ายรหัสนักศึกษา 3 หลัก (เช่น 035 หรือ 35) ระบบจะจัดห้องเรียนของคุณให้อัตโนมัติ จากนั้นเลือกเข้า กลุ่ม 1, กลุ่ม 2 หรือ กลุ่ม 3 โดยระบบเกลี่ยจำนวนคนให้เท่ากันทุกกลุ่ม และซิงค์ใบงานกลางร่วมกันในกลุ่ม"
       )
     );
     gate.appendChild(head);
 
-    // 2. Step 1: Session Module Picker (HS1–HS6)
+    // 2. Session Module Picker (HS1–HS6)
     const modSection = make("div", null, "hsd-gate-step-box");
-    modSection.appendChild(make("div", "① เลือกคาบเรียนอภิปรายกลุ่มย่อย (HS Discussion Session)", "hsd-gate-step-label"));
+    modSection.appendChild(make("div", "คาบเรียนอภิปรายกลุ่มย่อย (HS1–HS6)", "hsd-gate-step-label"));
     const modPills = make("div", null, "hsd-gate-mod-pills");
-    const modChoices = (HSD_DATA.modules || []).map((m) => ({
-      id: m.id,
-      label: `คาบ ${m.code} · ${m.scheduleDate.replace(/^วัน/, "")}`,
-      sub: m.title
-    }));
-    modChoices.forEach((mc) => {
-      const mb = make("button", mc.label, `hsd-gate-mod-pill${selectedMod === mc.id ? " is-active" : ""}`);
+    let smartWidget = null;
+    (HSD_DATA.modules || []).forEach((m) => {
+      const mb = make(
+        "button",
+        `คาบ ${m.code} · ${m.scheduleDate.replace(/^วัน/, "")}`,
+        `hsd-gate-mod-pill${selectedMod === m.id ? " is-active" : ""}`
+      );
       mb.type = "button";
-      mb.dataset.gateMod = mc.id;
-      mb.title = mc.sub;
+      mb.title = m.title;
       mb.addEventListener("click", () => {
-        selectedMod = mc.id;
-        state.hsdModule = mc.id;
-        state.hsdSlideDeckMod = mc.id;
+        selectedMod = m.id;
+        state.hsdModule = m.id;
+        state.hsdSlideDeckMod = m.id;
         try {
-          localStorage.setItem("racm303_hsd_deck_mod", mc.id);
+          localStorage.setItem("racm303_hsd_deck_mod", m.id);
         } catch (_) {}
-        if ($("hsdModuleSelect")) $("hsdModuleSelect").value = mc.id;
+        if ($("hsdModuleSelect")) $("hsdModuleSelect").value = m.id;
         modPills.querySelectorAll(".hsd-gate-mod-pill").forEach((el) => el.classList.remove("is-active"));
         mb.classList.add("is-active");
-        livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
+        livePinEl.textContent = `ROOM PIN: ${getPinCode()}`;
+        if (smartWidget && typeof smartWidget._setActiveRoom === "function") {
+          smartWidget._setActiveRoom(selectedRoom, selectedMod);
+        }
         rebuildRoomsGrid();
       });
       modPills.appendChild(mb);
@@ -20219,150 +20817,38 @@
     modSection.appendChild(modPills);
     gate.appendChild(modSection);
 
-    // 3. Step 2: 7-Digit Student ID Login Input + Verified Card + Instant Suggestions
-    const loginSection = make("div", null, "hsd-gate-step-box is-login-focus");
-    loginSection.appendChild(
-      make("div", "② กรอกรหัสนักศึกษา 7 หลักของคุณ (หรือพิมพ์ชื่อ / ชื่อเล่นเพื่อค้นหา)", "hsd-gate-step-label")
-    );
-
-    const inputRow = make("div", null, "hsd-kahoot-id-row");
-    const idIn = document.createElement("input");
-    idIn.type = "search";
-    idIn.id = "hsdKahootStudentIdInput";
-    idIn.className = "hsd-kahoot-id-input";
-    idIn.autocomplete = "off";
-    idIn.placeholder = "กรอกรหัสนักศึกษา 7 หลัก เช่น 6702006 หรือพิมพ์ชื่อเล่น…";
-    if (candidateStu) {
-      idIn.value = candidateStu.id;
-    }
-
-    const clearIdBtn = make("button", "ล้างรหัส", "btn sm");
-    clearIdBtn.type = "button";
-    clearIdBtn.hidden = !candidateStu;
-
-    inputRow.append(idIn, clearIdBtn);
-    loginSection.appendChild(inputRow);
-
-    const suggestBox = make("div", null, "hsd-kahoot-suggest-list");
-    suggestBox.hidden = true;
-    loginSection.appendChild(suggestBox);
-
-    const verifiedCard = make("div", null, "hsd-kahoot-verified-card");
-    const warnMsg = make("div", "", "hsd-kahoot-warn-msg");
-    warnMsg.hidden = true;
-    loginSection.append(verifiedCard, warnMsg);
-
-    const updateVerifiedUI = () => {
-      clearIdBtn.hidden = !idIn.value.trim();
-      if (candidateStu) {
-        warnMsg.hidden = true;
-        verifiedCard.className = "hsd-kahoot-verified-card is-verified";
-        const rot = (SCHED.hsRotation || []).find((r) => r.group === Number(candidateStu.disc)) || {};
-        verifiedCard.innerHTML =
-          `<div class="hsd-kv-avatar">${escapeHtml(getStudentAvatarShortLabel(candidateStu.nickname, candidateStu.id))}</div>` +
-          `<div class="hsd-kv-info">` +
-          `<div class="hsd-kv-top">` +
-          `<span class="hsd-kv-check">✓ ยืนยันรหัสนักศึกษา</span>` +
-          `<strong>${escapeHtml(candidateStu.id)} · ${escapeHtml(candidateStu.fullName)}${candidateStu.nickname ? ` (${escapeHtml(candidateStu.nickname)})` : ""}</strong>` +
-          `</div>` +
-          `<div class="hsd-kv-sub">★ สังกัด <strong>กลุ่ม Discussion ที่ ${candidateStu.disc}</strong> (ห้อง ${escapeHtml(rot.room || "")}) · พื้นที่ภาคสนาม: ${escapeHtml(candidateStu.area || "-")}</div>` +
-          `</div>`;
-      } else {
-        verifiedCard.className = "hsd-kahoot-verified-card is-pending";
-        verifiedCard.innerHTML =
-          `<span>ยังไม่ได้เลือกรหัสนักศึกษา — พิมพ์รหัส 7 หลักด้านบนเพื่อแสดงชื่อและกลุ่ม Discussion ของคุณอัตโนมัติ</span>`;
-      }
-      updateJoinButtonLabel();
-    };
-
-    const pickStudentCandidate = (stu) => {
-      candidateStu = stu;
-      idIn.value = stu ? stu.id : "";
-      suggestBox.hidden = true;
-      if (stu && stu.disc >= 1 && stu.disc <= 6) {
-        selectedRoom = Number(stu.disc);
-        if (LIVE) LIVE.setRoom(selectedRoom, true);
-        livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
+    // 3. Smart 3-Digit Number + 3-Group Balanced Picker
+    const checkinBox = make("div", null, "hsd-gate-step-box is-login-focus");
+    smartWidget = buildSmartTeamCheckinWidgetDOM({
+      roomId: selectedRoom,
+      modId: selectedMod,
+      onRoomChanged: (nextRoom) => {
+        selectedRoom = nextRoom;
+        livePinEl.textContent = `ROOM PIN: ${getPinCode()}`;
         rebuildRoomsGrid();
         refreshGateLiveJoinedPreviewDOM();
-      }
-      updateVerifiedUI();
-    };
-
-    clearIdBtn.addEventListener("click", () => {
-      candidateStu = null;
-      idIn.value = "";
-      suggestBox.hidden = true;
-      updateVerifiedUI();
-      idIn.focus();
-    });
-
-    idIn.addEventListener("input", () => {
-      const q = idIn.value.trim();
-      if (!q) {
-        candidateStu = null;
-        suggestBox.hidden = true;
-        updateVerifiedUI();
-        return;
-      }
-      const exact = (ROSTER.students || []).find((s) => String(s.id) === q);
-      if (exact) {
-        pickStudentCandidate(exact);
-        return;
-      }
-      const lower = q.toLocaleLowerCase("th");
-      const matches = (ROSTER.students || [])
-        .filter(
-          (s) =>
-            String(s.id).includes(q) ||
-            String(s.fullName || "").toLocaleLowerCase("th").includes(lower) ||
-            String(s.nickname || "").toLocaleLowerCase("th").includes(lower)
-        )
-        .slice(0, 6);
-
-      if (matches.length === 1 && q.length >= 4 && String(matches[0].id) === q) {
-        pickStudentCandidate(matches[0]);
-        return;
-      }
-
-      candidateStu = matches.length === 1 && q.length >= 7 ? matches[0] : null;
-      suggestBox.replaceChildren();
-      if (matches.length > 0) {
-        matches.forEach((m) => {
-          const sb = make("button", null, "hsd-kahoot-suggest-item");
-          sb.type = "button";
-          sb.innerHTML =
-            `<strong>${escapeHtml(m.id)}</strong> · ${escapeHtml(m.fullName)}${m.nickname ? ` <em>(${escapeHtml(m.nickname)})</em>` : ""}` +
-            `<span class="hsd-ks-grp">กลุ่ม ${m.disc}</span>`;
-          sb.addEventListener("click", () => pickStudentCandidate(m));
-          suggestBox.appendChild(sb);
-        });
-        suggestBox.hidden = false;
-      } else {
-        suggestBox.hidden = true;
-      }
-      updateVerifiedUI();
-    });
-
-    idIn.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        if (!candidateStu && idIn.value.trim()) {
-          const found = findStudentByQuery(idIn.value.trim());
-          if (found) pickStudentCandidate(found);
+      },
+      onJoined: () => {
+        state.hsdModule = selectedMod;
+        if ($("hsdModuleSelect")) $("hsdModuleSelect").value = selectedMod;
+        const ptr = LIVE && typeof LIVE.getTeacherPointer === "function" ? LIVE.getTeacherPointer() : null;
+        if (ptr && ptr.questionId) {
+          jumpStudentToTeacherQuestion(ptr);
         }
-        if (candidateStu) triggerJoinNow();
+        requestAnimationFrame(() => {
+          const pEl = $("panel-hs-discussion");
+          if (pEl) pEl.scrollIntoView({ behavior: "instant", block: "start" });
+        });
       }
     });
+    checkinBox.appendChild(smartWidget);
+    gate.appendChild(checkinBox);
 
-    gate.appendChild(loginSection);
-
-    // 4. Step 3: Live Who-Joined Preview + 6-Group Room Selector + Big Join CTA
+    // 4. Live Room Preview + 6-Classroom Switcher
     const roomSection = make("div", null, "hsd-gate-step-box");
     roomSection.appendChild(
-      make("div", "③ ห้องเรียนกลุ่มย่อยของคุณ & เพื่อนที่ Join เข้ามาแล้วแบบสด", "hsd-gate-step-label")
+      make("div", "ห้องเรียนอภิปราย (1C1-02 ถึง 1C1-07) & สมาชิกที่เข้ากลุ่ม 1–3 แล้ว", "hsd-gate-step-label")
     );
-
     const liveJoinedBox = make("div", null, "hsd-gate-live-joined-box");
     liveJoinedBox.id = "hsdGateLiveJoinedBox";
     roomSection.appendChild(liveJoinedBox);
@@ -20373,7 +20859,7 @@
 
     function rebuildRoomsGrid() {
       roomsGrid.replaceChildren();
-      const myGrp = candidateStu ? Number(candidateStu.disc) : 0;
+      const myGrp = state.myStudent ? Number(state.myStudent.disc) : 0;
       const modKey = selectedMod !== "ALL" ? selectedMod : "HS1";
       roomsList.forEach((rm) => {
         const rot = (SCHED.hsRotation || []).find((r) => r.group === rm.id) || {};
@@ -20391,19 +20877,21 @@
         btn.type = "button";
         btn.innerHTML =
           `<div class="hsd-rg-top">` +
-          `<span class="hsd-rg-num">กลุ่มที่ ${rm.id}</span>` +
-          `${isMine ? `<span class="hsd-rg-mine-pill">★ กลุ่มของคุณ</span>` : `<span class="hsd-rg-code">ห้อง ${escapeHtml(roomName)}</span>`}` +
+          `<span class="hsd-rg-num">ห้องที่ ${rm.id}</span>` +
+          `${isMine ? `<span class="hsd-rg-mine-pill">★ ห้องของคุณ</span>` : `<span class="hsd-rg-code">${escapeHtml(roomName)}</span>`}` +
           `</div>` +
           `<strong class="hsd-rg-room">ห้อง ${escapeHtml(roomName)}</strong>` +
-          `<span class="hsd-rg-inst">อ.ประจำกลุ่ม (${escapeHtml(modKey)}): ${escapeHtml(instName)}</span>`;
+          `<span class="hsd-rg-inst">อ.ประจำห้อง (${escapeHtml(modKey)}): ${escapeHtml(instName)}</span>`;
 
         btn.addEventListener("click", () => {
           selectedRoom = rm.id;
           if (LIVE) LIVE.setRoom(rm.id, false);
-          livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
+          livePinEl.textContent = `ROOM PIN: ${getPinCode()}`;
+          if (smartWidget && typeof smartWidget._setActiveRoom === "function") {
+            smartWidget._setActiveRoom(selectedRoom, selectedMod);
+          }
           rebuildRoomsGrid();
           refreshGateLiveJoinedPreviewDOM();
-          updateJoinButtonLabel();
         });
         roomsGrid.appendChild(btn);
       });
@@ -20412,72 +20900,7 @@
     roomSection.appendChild(roomsGrid);
     gate.appendChild(roomSection);
 
-    // 5. Big Check-in Join CTA Bar
-    const ctaWrap = make("div", null, "hsd-kahoot-join-cta-row");
-    const joinBtn = make("button", "", "hsd-kahoot-join-btn");
-    joinBtn.type = "button";
-    joinBtn.id = "hsdKahootJoinSubmitBtn";
-
-    function updateJoinButtonLabel() {
-      if (candidateStu) {
-        const nick = candidateStu.nickname ? ` (${candidateStu.nickname})` : "";
-        joinBtn.textContent = `Join เข้าคาบ ${selectedMod} · กลุ่มที่ ${selectedRoom} ในชื่อ ${candidateStu.id}${nick} & Sync สไลด์สด →`;
-        joinBtn.classList.add("is-ready");
-      } else {
-        joinBtn.textContent = `กรอกรหัสนักศึกษา 7 หลักด้านบนก่อนกด Join เข้ากลุ่มที่ ${selectedRoom}`;
-        joinBtn.classList.remove("is-ready");
-      }
-    }
-
-    function triggerJoinNow() {
-      if (!candidateStu && idIn.value.trim()) {
-        const found = findStudentByQuery(idIn.value.trim());
-        if (found) candidateStu = found;
-      }
-      if (!candidateStu) {
-        warnMsg.textContent = "กรุณากรอกรหัสนักศึกษา 7 หลักที่ถูกต้อง (เช่น 6702006) หรือเลือกชื่อของคุณจากรายการก่อนเข้าห้องเรียนสด";
-        warnMsg.hidden = false;
-        idIn.focus();
-        return;
-      }
-      state.hsdModule = selectedMod;
-      if ($("hsdModuleSelect")) $("hsdModuleSelect").value = selectedMod;
-      state.hsdRoomConfirmed = true;
-      state.hsdSessionJoined = true;
-      state.hsdViewMode = "slide";
-      try {
-        sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
-        sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
-        localStorage.setItem("racm303_hsd_vmode", "slide");
-      } catch (_) {}
-
-      applyMyStudent(candidateStu, true);
-      if (LIVE) {
-        LIVE.setFollowTeacher(true);
-        if (typeof LIVE.joinSessionWithStudent === "function") {
-          LIVE.joinSessionWithStudent(candidateStu, selectedRoom, selectedMod);
-        } else {
-          LIVE.setRoom(selectedRoom, false);
-        }
-        const ptr = typeof LIVE.getTeacherPointer === "function" ? LIVE.getTeacherPointer() : null;
-        if (ptr && ptr.questionId) {
-          jumpStudentToTeacherQuestion(ptr);
-        }
-      }
-      renderHsLiveClassroomBar();
-      renderHsDiscussionView();
-      requestAnimationFrame(() => {
-        const pEl = $("panel-hs-discussion");
-        if (pEl) pEl.scrollIntoView({ behavior: "instant", block: "start" });
-      });
-    }
-
-    joinBtn.addEventListener("click", triggerJoinNow);
-    ctaWrap.appendChild(joinBtn);
-    gate.appendChild(ctaWrap);
-
     rebuildRoomsGrid();
-    updateVerifiedUI();
     container.appendChild(gate);
     requestAnimationFrame(() => refreshGateLiveJoinedPreviewDOM());
   }
@@ -21848,6 +22271,7 @@
     if (!cardEl) return;
     const isInteractive = cardEl.dataset.pptOkInteractive === "1" && !state.isPptSlideSharePopup;
     const st = getKahootRoomRosterStatus();
+    const maxPerTeam = Math.ceil(st.totalExpected / 3);
     const joinedSet = new Set(
       (st.joinedList || [])
         .map((p) => String(p.studentId || "").trim())
@@ -21856,15 +22280,26 @@
     cardEl.replaceChildren();
 
     const rHead = make("div", null, "ppt-ok-roster-head");
-    rHead.appendChild(
+    const rTitleWrap = make("div", null, "ppt-ok-roster-title-wrap");
+    rTitleWrap.appendChild(
       make(
         "span",
-        `สมาชิกกลุ่มที่ ${st.roomId} · เช็คชื่อแล้ว ${st.joinedCount} / ${st.totalExpected} คน`,
+        `สมาชิกห้อง ${st.roomDef.roomCode} · เข้ากลุ่มแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
         "ppt-ok-roster-count"
       )
     );
+
+    const teamSummaryRow = make("div", null, "ppt-ok-team-summary-pills");
+    [1, 2, 3].forEach((tid) => {
+      const cnt = (st.teamCounts && st.teamCounts[tid]) || 0;
+      const tp = make("span", `กลุ่ม ${tid}: ${cnt}/${maxPerTeam}`, `ppt-ok-team-pill is-team-${tid}`);
+      teamSummaryRow.appendChild(tp);
+    });
+    rTitleWrap.appendChild(teamSummaryRow);
+    rHead.appendChild(rTitleWrap);
+
     if (isInteractive && typeof openHsdKahootLobbyModal === "function") {
-      const fullLobbyBtn = make("button", "ขยายจอรายชื่อ ↗", "btn sm");
+      const fullLobbyBtn = make("button", "ผัง 3 กลุ่ม ↗", "btn sm");
       fullLobbyBtn.type = "button";
       fullLobbyBtn.addEventListener("click", () => openHsdKahootLobbyModal());
       rHead.appendChild(fullLobbyBtn);
@@ -21874,26 +22309,46 @@
     const grid = make("div", null, "ppt-ok-roster-grid");
     (st.assigned || []).forEach((s) => {
       const sid = String(s.id || "");
-      const joined = joinedSet.has(sid) || Boolean(ROLE === "student" && state.hsdSessionJoined && state.myStudent && String(state.myStudent.id) === sid);
+      const joined =
+        joinedSet.has(sid) ||
+        Boolean(ROLE === "student" && state.hsdSessionJoined && state.myStudent && String(state.myStudent.id) === sid);
+      const assignedTeam =
+        (st.teamBySid && st.teamBySid.get(sid)) ||
+        (ROLE === "student" && state.hsdSessionJoined && state.myStudent && String(state.myStudent.id) === sid && LIVE
+          ? LIVE.getTeamId()
+          : 0);
       const shortCode = sid.slice(-3);
       const dispName = s.nickname ? `${s.nickname}` : String(s.name || s.fullName || "").split(" ")[0];
       const tagType = ROLE === "student" && isInteractive && !joined ? "button" : "div";
-      const chip = make(tagType, null, `ppt-ok-stu-chip${joined ? " is-joined" : ""}`);
+      const chip = make(
+        tagType,
+        null,
+        `ppt-ok-stu-chip${joined ? " is-joined" : ""}${assignedTeam ? ` is-team-${assignedTeam}` : ""}`
+      );
       if (tagType === "button") {
         chip.type = "button";
-        chip.title = `คลิกเพื่อกรอกรหัส ${sid} (${s.fullName}) สำหรับเช็คชื่อเข้ากลุ่ม`;
+        chip.title = `คลิกเพื่อกรอกเบอร์ ${shortCode} (${s.fullName}) แล้วเลือกเข้ากลุ่ม 1 / 2 / 3`;
         chip.addEventListener("click", () => {
           const stageRoot = cardEl.closest(".ppt-opening-kahoot-stage");
+          const picker = stageRoot && stageRoot.querySelector("[data-smart-team-picker='1']");
+          if (picker && typeof picker._pickStudentFromRoster === "function") {
+            picker._pickStudentFromRoster(s);
+            return;
+          }
           const inp = stageRoot && stageRoot.querySelector("[data-ppt-ok-sid-input='1']");
           if (inp) {
-            inp.value = sid;
+            inp.value = shortCode;
+            inp.dispatchEvent(new Event("input", { bubbles: true }));
             inp.focus();
           }
         });
       } else {
-        chip.title = `${sid} · ${s.fullName}${joined ? " (เช็คชื่อแล้ว)" : ""}`;
+        chip.title = `${sid} · ${s.fullName}${assignedTeam ? ` (กลุ่ม ${assignedTeam})` : joined ? " (เช็คชื่อแล้ว)" : ""}`;
       }
-      chip.innerHTML = `<span>${joined ? "✓" : "•"}</span><span>${escapeHtml(shortCode)} ${escapeHtml(dispName)}</span>`;
+      const badgeHtml = assignedTeam
+        ? `<span class="ppt-ok-stu-team-tag is-team-${assignedTeam}">ก.${assignedTeam}</span>`
+        : `<span>${joined ? "✓" : "•"}</span>`;
+      chip.innerHTML = `${badgeHtml}<span>${escapeHtml(shortCode)} ${escapeHtml(dispName)}</span>`;
       grid.appendChild(chip);
     });
     cardEl.appendChild(grid);
@@ -21902,6 +22357,17 @@
   function refreshOpeningKahootSlideRosterDOM() {
     document.querySelectorAll("[data-ppt-ok-roster-mount='1']").forEach((el) => {
       populateOpeningKahootRosterCardDOM(el);
+    });
+    document.querySelectorAll("[data-ppt-ok-fac-teams='1']").forEach((el) => {
+      const st = getKahootRoomRosterStatus();
+      const maxPerTeam = Math.ceil(st.totalExpected / 3);
+      el.replaceChildren();
+      [1, 2, 3].forEach((tid) => {
+        const cnt = (st.teamCounts && st.teamCounts[tid]) || 0;
+        const box = make("div", null, `ppt-ok-fac-team-stat is-team-${tid}`);
+        box.innerHTML = `<strong>กลุ่ม ${tid}</strong><span>${cnt} / ${maxPerTeam} คน</span>`;
+        el.appendChild(box);
+      });
     });
   }
 
@@ -21922,7 +22388,7 @@
     const modCell = rot[mod.id] || {};
     const roomCode = modCell.room || rot.room || `1C1-0${roomId + 1}`;
     const instName = modCell.instructor || "อาจารย์ประจำกลุ่มหมุนเวียน";
-    const pinCode = `${mod.code}-G${roomId}`;
+    const pinCode = `${mod.code}-R${roomId}`;
 
     const jumpToFirstQuestion = () => {
       const firstQIdx = slides.findIndex((s) => s.kind === "question" && s.mod.id === mod.id);
@@ -21944,9 +22410,9 @@
 
     const stage = make("div", null, "ppt-opening-kahoot-stage is-16x9-canvas");
 
-    // Left Column: Session Overview + Sub-Question Quick List + Group Check-in Controls
+    // Left Column: Session Overview + Sub-Group 1/2/3 Balanced Check-in
     const leftCol = make("div", null, "ppt-ok-left");
-    const agendaCard = make("div", null, "ppt-ok-card");
+    const agendaCard = make("div", null, "ppt-ok-card is-compact-agenda");
     const schedStr = mod.scheduleDate ? mod.scheduleDate.replace(/^วัน/, "") : "";
     agendaCard.append(
       make(
@@ -21977,7 +22443,7 @@
     });
     agendaCard.appendChild(qListWrap);
 
-    if (!exp && !state.isPptSlideSharePopup) {
+    if (!exp && !state.isPptSlideSharePopup && ROLE === "faculty") {
       const startBtn = make("button", `▶ เริ่มโจทย์ข้อแรกของคาบ ${mod.code} (Slide 2) →`, "ppt-ok-start-btn");
       startBtn.type = "button";
       startBtn.addEventListener("click", jumpToFirstQuestion);
@@ -21985,30 +22451,31 @@
     }
     leftCol.appendChild(agendaCard);
 
-    // Card 2: Interactive Group 1–6 Picker & Check-in
-    const checkinCard = make("div", null, "ppt-ok-card");
-    checkinCard.appendChild(
+    // Card 2: Classroom Selector + Balanced 3-Group Check-in (กลุ่ม 1 / 2 / 3)
+    const checkinCard = make("div", null, "ppt-ok-card is-checkin-card");
+    const checkinHead = make("div", null, "ppt-ok-checkin-head");
+    checkinHead.appendChild(
       make(
-        "div",
+        "span",
         ROLE === "faculty"
-          ? "เลือกกลุ่มย่อย 1–6 เพื่อแสดง PIN และรายชื่อเช็คชื่อบนสไลด์เปิดคาบ"
-          : "เช็คชื่อเข้ากลุ่มย่อย 1–6 (Check-in ในสไลด์เปิดคาบ)",
+          ? "เลือกห้องอภิปราย 1–6 & ติดตามการแบ่งกลุ่มย่อย 1 / 2 / 3"
+          : "เช็คชื่อด้วยเบอร์ 3 หลัก & เลือกเข้า กลุ่ม 1 / 2 / 3 (ตอบร่วมกันในกลุ่ม)",
         "ppt-ok-roster-count"
       )
     );
+    checkinCard.appendChild(checkinHead);
 
-    const roomPills = make("div", null, "ppt-ok-room-pills");
+    // Compact 6-Room Strip (auto-selected when student types their 3-digit number)
+    const roomPills = make("div", null, "ppt-ok-room-pills is-compact-strip");
     const myGrp = state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0;
     [1, 2, 3, 4, 5, 6].forEach((gNum) => {
       const gRot = (SCHED.hsRotation || []).find((r) => r.group === gNum) || {};
       const gCell = gRot[mod.id] || {};
       const gRoom = gCell.room || gRot.room || `1C1-0${gNum + 1}`;
-      const gInst = gCell.instructor || "อ.ประจำกลุ่ม";
       const pill = make("button", null, `ppt-ok-room-pill${roomId === gNum ? " is-active" : ""}`);
       pill.type = "button";
-      pill.innerHTML =
-        `<span>กลุ่มที่ ${gNum}${myGrp === gNum ? " ★" : ""} · ${escapeHtml(gRoom)}</span>` +
-        `<small>${escapeHtml(gInst)}</small>`;
+      pill.title = `ห้องอภิปรายที่ ${gNum} (${gRoom}) · ${gCell.instructor || "อ.ประจำห้อง"}`;
+      pill.innerHTML = `<span>ห้อง ${gNum}${myGrp === gNum ? " ★" : ""} · ${escapeHtml(gRoom)}</span>`;
       pill.addEventListener("click", () => {
         if (LIVE) LIVE.setRoom(gNum, false);
         renderHsLiveClassroomBar();
@@ -22021,90 +22488,57 @@
 
     if (!exp && !state.isPptSlideSharePopup) {
       if (ROLE === "student") {
-        if (state.hsdSessionJoined && state.myStudent) {
+        const myTeam = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+        if (state.hsdSessionJoined && state.myStudent && myTeam >= 1 && myTeam <= 3) {
           const s = state.myStudent;
-          const joinedBanner = make("div", null, "ppt-ok-joined-banner");
-          joinedBanner.appendChild(
-            make(
-              "span",
-              `✓ เช็คชื่อแล้ว: ${s.id} · ${s.fullName}${s.nickname ? ` (${s.nickname})` : ""} — กลุ่มที่ ${roomId}`
-            )
-          );
-          const switchIdBtn = make("button", "สลับรหัส / ออก", "btn sm");
+          const sNo = String(s.id || "").slice(-3);
+          const joinedBanner = make("div", null, `ppt-ok-joined-banner is-team-${myTeam}`);
+          const jText = make("div", null, "ppt-ok-joined-info");
+          jText.innerHTML =
+            `<span class="hsd-tsb-pill is-team-${myTeam}">กลุ่ม ${myTeam}</span>` +
+            `<div><strong>✓ เบอร์ ${escapeHtml(sNo)} · ${escapeHtml(s.nickname ? `${s.nickname} (${s.fullName})` : s.fullName)}</strong>` +
+            `<small>ห้อง ${escapeHtml(roomCode)} · ตอบร่วมกันในใบงานกลางของกลุ่ม ${myTeam}</small></div>`;
+          const jActs = make("div", null, "ppt-ok-joined-actions");
+          const openSheetBtn = make("button", `เปิดใบงานกลุ่ม ${myTeam} →`, "ppt-ok-join-cta");
+          openSheetBtn.type = "button";
+          openSheetBtn.addEventListener("click", jumpToFirstQuestion);
+          const switchIdBtn = make("button", "เปลี่ยนเบอร์/กลุ่ม", "btn sm");
           switchIdBtn.type = "button";
-          switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession(false));
-          joinedBanner.appendChild(switchIdBtn);
+          switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
+          jActs.append(openSheetBtn, switchIdBtn);
+          joinedBanner.append(jText, jActs);
           checkinCard.appendChild(joinedBanner);
         } else {
-          const joinRow = make("div", null, "ppt-ok-join-row");
-          const idIn = document.createElement("input");
-          idIn.type = "search";
-          idIn.className = "ppt-ok-id-input";
-          idIn.setAttribute("data-ppt-ok-sid-input", "1");
-          idIn.autocomplete = "off";
-          idIn.placeholder = "กรอกรหัสนักศึกษา 7 หลัก หรือชื่อเล่น เพื่อเช็คชื่อเข้ากลุ่ม…";
-          const savedSid = (state.myStudent && state.myStudent.id) || localStorage.getItem("racm303_my_sid") || "";
-          if (savedSid) idIn.value = savedSid;
-
-          const joinCta = make("button", "เช็คชื่อเข้ากลุ่ม", "ppt-ok-join-cta");
-          joinCta.type = "button";
-
-          const hintEl = make(
-            "div",
-            "แตะชื่อตัวเองในตารางขวามือหรือพิมพ์รหัส 7 หลักเพื่อเช็คชื่อขึ้นจอ (หรือกดสไลด์ถัดไปเพื่ออ่านโจทย์ได้ทันที)",
-            "ppt-ok-caption"
-          );
-
-          const submitSlideCheckin = () => {
-            const raw = idIn.value.trim();
-            const stu =
-              (ROSTER.students || []).find((s) => String(s.id) === raw) ||
-              (raw ? findStudentByQuery(raw) : null);
-            if (!stu) {
-              hintEl.textContent = "ไม่พบรหัสนักศึกษาหรือชื่อนี้ กรุณากรอกรหัส 7 หลัก เช่น 6702006";
-              hintEl.style.color = "#dc2626";
-              idIn.focus();
-              return;
-            }
-            const targetRoom = Number(stu.disc) >= 1 && Number(stu.disc) <= 6 ? Number(stu.disc) : roomId;
-            state.hsdRoomConfirmed = true;
-            state.hsdSessionJoined = true;
-            state.hsdShowJoinGate = false;
-            try {
-              sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
-              sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
-            } catch (_) {}
-            applyMyStudent(stu, true);
-            if (LIVE) {
-              LIVE.setFollowTeacher(true);
-              if (typeof LIVE.joinSessionWithStudent === "function") {
-                LIVE.joinSessionWithStudent(stu, targetRoom, mod.id);
-              } else {
-                LIVE.setRoom(targetRoom, false);
+          checkinCard.appendChild(
+            buildSmartTeamCheckinWidgetDOM({
+              roomId,
+              modId: mod.id,
+              onRoomChanged: () => {
+                renderHsDiscussionView();
+                broadcastPptPresentationState();
               }
-            }
-            renderHsLiveClassroomBar();
-            renderHsDiscussionView();
-            broadcastPptPresentationState();
-          };
-
-          joinCta.addEventListener("click", submitSlideCheckin);
-          idIn.addEventListener("keydown", (ev) => {
-            if (ev.key === "Enter") {
-              ev.preventDefault();
-              submitSlideCheckin();
-            }
-          });
-          joinRow.append(idIn, joinCta);
-          checkinCard.append(joinRow, hintEl);
+            })
+          );
         }
       } else {
+        const stNow = getKahootRoomRosterStatus(roomId);
+        const maxPerTeam = Math.ceil(stNow.totalExpected / 3);
+        const facTeamsRow = make("div", null, "ppt-ok-fac-teams-row");
+        facTeamsRow.setAttribute("data-ppt-ok-fac-teams", "1");
+        [1, 2, 3].forEach((tid) => {
+          const cnt = (stNow.teamCounts && stNow.teamCounts[tid]) || 0;
+          const box = make("div", null, `ppt-ok-fac-team-stat is-team-${tid}`);
+          box.innerHTML = `<strong>กลุ่ม ${tid}</strong><span>${cnt} / ${maxPerTeam} คน</span>`;
+          facTeamsRow.appendChild(box);
+        });
+        checkinCard.appendChild(facTeamsRow);
+
         const facRow = make("div", null, "ppt-ok-join-row");
-        const lobbyBtn = make("button", "เปิดหน้าต่างรายชื่อเช็คชื่อใหญ่", "btn sm");
+        const lobbyBtn = make("button", "เปิดผังสมาชิก 3 กลุ่ม ↗", "btn sm");
         lobbyBtn.type = "button";
         lobbyBtn.addEventListener("click", () => openHsdKahootLobbyModal());
 
-        const goQ1Btn = make("button", "▶ เริ่มข้อแรกพร้อม Sync นักศึกษา →", "ppt-ok-join-cta");
+        const goQ1Btn = make("button", "▶ เริ่มข้อแรกพร้อม Sync ทั้ง 3 กลุ่ม →", "ppt-ok-join-cta");
         goQ1Btn.type = "button";
         goQ1Btn.addEventListener("click", jumpToFirstQuestion);
 
@@ -22113,7 +22547,7 @@
           facRow,
           make(
             "div",
-            "ฉายสไลด์หน้าแรกนี้ให้นักศึกษาเช็คชื่อเข้ากลุ่มย่อย 1–6 ได้ทันที เมื่อพร้อมแล้วกดสไลด์ถัดไปเพื่อเริ่มกรณีศึกษา",
+            "นักศึกษากรอกเบอร์ 3 หลักแล้วเลือกเข้า กลุ่ม 1 / 2 / 3 (ระบบเกลี่ยจำนวนคนเท่ากันอัตโนมัติ) เพื่อตอบร่วมกัน 3 กลุ่มต่อห้อง",
             "ppt-ok-caption"
           )
         );
@@ -22121,18 +22555,18 @@
     }
     leftCol.appendChild(checkinCard);
 
-    // Right Column: Check-in PIN Hero + Real-Time Group Roster Wall
+    // Right Column: Room PIN Hero + Real-Time 3-Team Badged Roster Wall
     const rightCol = make("div", null, "ppt-ok-right");
     const pinHero = make("div", null, "ppt-ok-pin-hero");
     const pinLeft = make("div");
     pinLeft.append(
-      make("div", `CHECK-IN PIN · กลุ่มย่อยที่ ${roomId}`, "ppt-ok-pin-kicker"),
+      make("div", `ROOM PIN · ห้องอภิปรายที่ ${roomId} (แบ่งกลุ่ม 1 · 2 · 3)`, "ppt-ok-pin-kicker"),
       make("div", pinCode, "ppt-ok-pin-code")
     );
     const pinRight = make("div", null, "ppt-ok-pin-meta");
     pinRight.innerHTML =
       `<strong>ห้อง ${escapeHtml(roomCode)}</strong>` +
-      `<span>อ.ประจำกลุ่ม (${escapeHtml(mod.code)}): ${escapeHtml(instName)}</span>`;
+      `<span>อ.ประจำห้อง (${escapeHtml(mod.code)}): ${escapeHtml(instName)}</span>`;
     pinHero.append(pinLeft, pinRight);
     rightCol.appendChild(pinHero);
 
@@ -30614,6 +31048,19 @@
     return map;
   }
 
+  function formatTeamAuthorTitle(itOrRec, isAnon, fallbackIdx) {
+    const tid = Number(itOrRec && itOrRec.teamId) || 0;
+    if (isAnon) {
+      const anonCode = tid ? String.fromCharCode(64 + tid) : String(fallbackIdx || 1);
+      return `กลุ่มนิรนาม ${anonCode}`;
+    }
+    if (tid >= 1 && tid <= 3) {
+      const ed = itOrRec.editorLabel ? ` · อัปเดตโดย ${itOrRec.editorLabel}` : "";
+      return `กลุ่ม ${tid}${ed}`;
+    }
+    return `${(itOrRec && itOrRec.displayName) || "ผู้เรียน"}${itOrRec && itOrRec.area ? " · พื้นที่ " + itOrRec.area : ""}`;
+  }
+
   function openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel) {
     const modal = $("hsdSpotlightModal");
     const card = $("hsdSpotlightCard");
@@ -30629,10 +31076,10 @@
 
     const top = make("div", null, "hsd-tk-header");
     top.append(
-      make("h4", `คำตอบสดรายช่อง (กลุ่มที่ ${LIVE.getRoomId()}): ${blockTitle}`, "hsd-tk-title"),
+      make("h4", `เทียบคำตอบ 3 กลุ่ม (ห้องที่ ${LIVE.getRoomId()}): ${blockTitle}`, "hsd-tk-title"),
       make(
         "span",
-        `ส่งช่องนี้แล้ว ${subCnt} · กำลังพิมพ์ ${typCnt}`,
+        `ส่งแล้ว ${subCnt}/3 กลุ่ม · กำลังพิมพ์ ${typCnt}`,
         `hsd-resp-status ${subCnt > 0 ? "is-submitted" : "is-typing"}`
       )
     );
@@ -30644,23 +31091,22 @@
     card.appendChild(qInfo);
 
     if (!items.length) {
-      card.appendChild(make("div", "ยังไม่มีคำตอบสดในช่องนี้", "hsd-resp-empty"));
+      card.appendChild(make("div", "ยังไม่มีคำตอบจากกลุ่ม 1–3 ในช่องนี้", "hsd-resp-empty"));
     } else {
       const listWrap = make("div", null, "hsd-live-cell-stream");
       listWrap.style.maxHeight = "56vh";
       listWrap.style.gap = "8px";
       items.forEach((it, idx) => {
+        const tid = Number(it.teamId) || 0;
         const chip = make(
           "div",
           null,
-          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}`
+          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}${tid ? ` is-team-${tid}` : ""}`
         );
-        chip.style.padding = "9px 12px";
+        chip.style.padding = "10px 14px";
         const meta = make("div", null, "hsd-cell-ans-meta");
         const anonNum = anonMap.get(it.participantId) || idx + 1;
-        const author = isAnon
-          ? `ผู้เรียนนิรนาม #${anonNum}`
-          : `${it.displayName || "นักศึกษา"}${it.area ? " · พื้นที่ " + it.area : ""}`;
+        const author = formatTeamAuthorTitle(it, isAnon, anonNum);
         const authorEl = make("span", author, "hsd-cell-ans-author");
         authorEl.style.fontSize = "13.5px";
         const tagEl = make(
@@ -30674,7 +31120,7 @@
         txtEl.style.fontSize = "15px";
         chip.append(meta, txtEl);
         if (it.fullRecord) {
-          chip.title = "คลิกเพื่อดูตารางคำตอบทุกช่องของนักศึกษาคนนี้";
+          chip.title = "คลิกเพื่อดูตารางคำตอบทุกช่องของกลุ่มนี้";
           chip.addEventListener("click", () => {
             openStudentResponseSpotlight(it.fullRecord, qObj, (anonNum || 1) - 1);
           });
@@ -30704,16 +31150,14 @@
     card.replaceChildren();
 
     const isAnon = LIVE && LIVE.getAnonymousWall();
-    const author = isAnon
-      ? `ผู้ร่วมอภิปราย #${idxNum + 1}`
-      : `${rec.displayName || "นักศึกษา"}${rec.area ? " · พื้นที่ " + rec.area : ""}`;
+    const author = formatTeamAuthorTitle(rec, isAnon, idxNum + 1);
 
     const top = make("div", null, "hsd-tk-header");
     top.append(
-      make("h4", `กระดาษคำตอบสดจากห้องกลุ่ม ${LIVE ? LIVE.getRoomId() : 1}: ${author}`, "hsd-tk-title"),
+      make("h4", `ใบงานคำตอบสดจากห้องที่ ${LIVE ? LIVE.getRoomId() : 1}: ${author}`, "hsd-tk-title"),
       make(
         "span",
-        rec.status === "submitted" ? "✓ ส่งช่องคำตอบแล้ว" : "✍ กำลังพิมพ์สด…",
+        rec.status === "submitted" ? "✓ ส่งคำตอบแล้ว" : "✍ กำลังพิมพ์สด…",
         `hsd-resp-status ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
       )
     );
@@ -30755,11 +31199,15 @@
               rec.cellStatuses && rec.cellStatuses[cell.inputId]
                 ? rec.cellStatuses[cell.inputId]
                 : rec.status;
+            const ed =
+              !isAnon && rec.cellEditors && rec.cellEditors[cell.inputId]
+                ? ` · ${rec.cellEditors[cell.inputId]}`
+                : "";
             if (ans) {
               const badgeHtml =
                 cStat === "submitted"
-                  ? `<span class="hsd-cell-ans-tag is-submitted" style="display:inline-block;margin-bottom:3px">✓ ส่งช่องนี้แล้ว</span><br>`
-                  : `<span class="hsd-cell-ans-tag is-typing" style="display:inline-block;margin-bottom:3px">✍ กำลังพิมพ์…</span><br>`;
+                  ? `<span class="hsd-cell-ans-tag is-submitted" style="display:inline-block;margin-bottom:3px">✓ ส่งแล้ว${escapeHtml(ed)}</span><br>`
+                  : `<span class="hsd-cell-ans-tag is-typing" style="display:inline-block;margin-bottom:3px">✍ กำลังพิมพ์${escapeHtml(ed)}</span><br>`;
               td.innerHTML = badgeHtml + escapeHtml(ans).replace(/\n/g, "<br>");
             } else {
               td.innerHTML = `<span style="color:var(--muted)">— (ยังไม่ได้กรอกช่องนี้)</span>`;
@@ -30855,7 +31303,7 @@
       td.replaceChildren();
 
       if (!items.length) {
-        td.appendChild(make("div", "รอคำตอบสดในช่องนี้…", "hsd-live-cell-empty"));
+        td.appendChild(make("div", "รอคำตอบจากกลุ่ม 1 / 2 / 3…", "hsd-live-cell-empty"));
         return;
       }
 
@@ -30865,15 +31313,15 @@
       const cellHead = make("div", null, "hsd-live-cell-head");
       const statText =
         subCnt && typCnt
-          ? `✓ ส่งแล้ว ${subCnt} · ✍ พิมพ์สด ${typCnt}`
+          ? `✓ ส่งแล้ว ${subCnt}/3 กลุ่ม · ✍ พิมพ์สด ${typCnt}`
           : subCnt
-          ? `✓ ส่งแล้ว ${subCnt} คน`
-          : `✍ กำลังพิมพ์ ${typCnt} คน`;
+          ? `✓ ส่งแล้ว ${subCnt}/3 กลุ่ม`
+          : `✍ กำลังพิมพ์ ${typCnt} กลุ่ม`;
       const statEl = make("span", statText, "hsd-live-cell-stat");
 
       const zoomBtn = make("button", "⤢ ขยาย", "hsd-cell-zoom-btn");
       zoomBtn.type = "button";
-      zoomBtn.title = "ขยายคำตอบทั้งหมดในช่องนี้ขึ้นจอโปรเจกเตอร์";
+      zoomBtn.title = "ขยายเทียบคำตอบทั้ง 3 กลุ่มในช่องนี้ขึ้นจอโปรเจกเตอร์";
       zoomBtn.addEventListener("click", (ev) => {
         ev.stopPropagation();
         openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel);
@@ -30882,17 +31330,16 @@
 
       const stream = make("div", null, "hsd-live-cell-stream");
       items.forEach((it, idx) => {
+        const tid = Number(it.teamId) || 0;
         const chip = make(
           "div",
           null,
-          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}`
+          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}${tid ? ` is-team-${tid}` : ""}`
         );
-        chip.title = "คลิกเพื่อขยายคำตอบในช่องนี้ขึ้นจอโปรเจกเตอร์";
+        chip.title = "คลิกเพื่อขยายเทียบคำตอบช่องนี้ขึ้นจอโปรเจกเตอร์";
         const meta = make("div", null, "hsd-cell-ans-meta");
         const anonNum = anonMap.get(it.participantId) || idx + 1;
-        const author = isAnon
-          ? `ผู้เรียนนิรนาม #${anonNum}`
-          : it.displayName || "นักศึกษาในห้อง";
+        const author = formatTeamAuthorTitle(it, isAnon, anonNum);
         meta.append(
           make("span", author, "hsd-cell-ans-author"),
           make(
@@ -30927,6 +31374,7 @@
     });
 
     const list = LIVE.getQuestionResponses(qObj.id);
+    const stRoster = getKahootRoomRosterStatus();
     const roomNum = LIVE.getRoomId();
     let totalSubmittedCells = 0;
     let totalTypingCells = 0;
@@ -30940,11 +31388,11 @@
 
     if (countBadge) {
       countBadge.textContent = list.length
-        ? `กลุ่ม ${roomNum}: ${list.length} คน (ส่งแล้ว ${totalSubmittedCells} ช่อง · พิมพ์สด ${totalTypingCells} ช่อง)`
-        : `กลุ่ม ${roomNum}: รอคำตอบสด…`;
+        ? `ห้อง ${roomNum}: ตอบแล้ว ${list.length}/3 กลุ่ม (ส่งแล้ว ${totalSubmittedCells} ช่อง · พิมพ์สด ${totalTypingCells} ช่อง)`
+        : `ห้อง ${roomNum}: รอคำตอบจาก กลุ่ม 1 · 2 · 3…`;
     }
     if (anonBtn) {
-      anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดงชื่อ นศพ." : "🙈 ซ่อนชื่อ";
+      anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดงชื่อกลุ่ม" : "🙈 ซ่อนชื่อกลุ่ม";
     }
 
     if (sheetHolder) sheetHolder.hidden = mode !== "sheet";
@@ -30965,62 +31413,74 @@
 
     if (mode === "people" && grid) {
       grid.replaceChildren();
-      if (!list.length) {
-        grid.appendChild(
-          make(
-            "div",
-            `เมื่อนักศึกษาในห้องกลุ่มที่ ${roomNum} เริ่มพิมพ์หรือกดส่งรายช่อง ข้อความจะปรากฏขึ้นบนจอนี้แบบ Real-time ทันที`,
-            "hsd-resp-empty"
-          )
-        );
-        return;
-      }
-
+      grid.classList.add("is-three-teams-grid");
       const labelMap = buildInputLabelMap(qObj);
       const isAnon = LIVE.getAnonymousWall();
+      const byTeam = new Map();
+      list.forEach((r) => {
+        if (r.teamId >= 1 && r.teamId <= 3) byTeam.set(Number(r.teamId), r);
+      });
 
-      list.forEach((rec, idx) => {
+      [1, 2, 3].forEach((tid) => {
+        const rec = byTeam.get(tid) || null;
+        const members = (stRoster.teamMembers && stRoster.teamMembers[tid]) || [];
         const card = make(
           "div",
           null,
-          `hsd-resp-card ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
+          `hsd-resp-card is-team-card is-team-${tid} ${
+            rec ? (rec.status === "submitted" ? "is-submitted" : "is-typing") : "is-waiting"
+          }`
         );
-        card.title = "คลิกเพื่อขยายกระดาษคำตอบของนักศึกษาคนนี้ขึ้นจอโปรเจกเตอร์";
 
         const top = make("div", null, "hsd-resp-top");
         const authorLabel = isAnon
-          ? `ผู้เรียนนิรนาม #${idx + 1}`
-          : rec.displayName || "นักศึกษาในห้อง";
+          ? `กลุ่มนิรนาม ${String.fromCharCode(64 + tid)}`
+          : `กลุ่ม ${tid} (${members.length} คน)`;
+        const statusLbl = rec
+          ? rec.status === "submitted"
+            ? "✓ ส่งคำตอบแล้ว"
+            : "✍ กำลังพิมพ์…"
+          : "รอส่งคำตอบ…";
         top.append(
           make("span", authorLabel, "hsd-resp-author"),
-          make(
-            "span",
-            rec.status === "submitted" ? "✓ ส่งช่องแล้ว" : "✍ กำลังพิมพ์…",
-            `hsd-resp-status ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
-          )
+          make("span", statusLbl, `hsd-resp-status ${rec && rec.status === "submitted" ? "is-submitted" : "is-typing"}`)
         );
         card.appendChild(top);
 
-        const cellsWrap = make("div", null, "hsd-resp-cells");
-        const entries = Object.entries(rec.cells || {});
-        entries.slice(0, 6).forEach(([inputId, val]) => {
-          const line = make("div", null, "hsd-resp-line");
-          const lbl = labelMap[inputId] || inputId;
-          const cStat =
-            rec.cellStatuses && rec.cellStatuses[inputId]
-              ? rec.cellStatuses[inputId]
-              : rec.status;
-          const icon = cStat === "submitted" ? "✓" : "✍";
-          line.innerHTML = `<strong>${icon} ${escapeHtml(lbl)}:</strong> ${escapeHtml(val)}`;
-          cellsWrap.appendChild(line);
-        });
-        if (entries.length > 6) {
-          cellsWrap.appendChild(
-            make("div", `…อีก ${entries.length - 6} ช่อง (คลิกเพื่อดูตารางเต็ม)`, "hsd-resp-line")
-          );
+        if (!isAnon && members.length) {
+          const mLine = members
+            .map((m) => `${m.shortNo || String(m.studentId || "").slice(-3)} ${m.nickname || m.fullName}`)
+            .join(", ");
+          card.appendChild(make("div", `สมาชิก: ${mLine}`, "hsd-resp-team-members"));
         }
-        card.appendChild(cellsWrap);
-        card.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, idx));
+
+        if (!rec) {
+          card.appendChild(
+            make("div", `ยังไม่มีคำตอบจากกลุ่ม ${tid} ในข้อนี้`, "hsd-resp-empty is-inline-empty")
+          );
+        } else {
+          card.title = `คลิกเพื่อขยายใบงานคำตอบของกลุ่ม ${tid} ขึ้นจอโปรเจกเตอร์`;
+          const cellsWrap = make("div", null, "hsd-resp-cells");
+          const entries = Object.entries(rec.cells || {});
+          entries.slice(0, 6).forEach(([inputId, val]) => {
+            const line = make("div", null, "hsd-resp-line");
+            const lbl = labelMap[inputId] || inputId;
+            const cStat =
+              rec.cellStatuses && rec.cellStatuses[inputId]
+                ? rec.cellStatuses[inputId]
+                : rec.status;
+            const icon = cStat === "submitted" ? "✓" : "✍";
+            line.innerHTML = `<strong>${icon} ${escapeHtml(lbl)}:</strong> ${escapeHtml(val)}`;
+            cellsWrap.appendChild(line);
+          });
+          if (entries.length > 6) {
+            cellsWrap.appendChild(
+              make("div", `…อีก ${entries.length - 6} ช่อง (คลิกเพื่อดูตารางเต็ม)`, "hsd-resp-line")
+            );
+          }
+          card.appendChild(cellsWrap);
+          card.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, tid - 1));
+        }
         grid.appendChild(card);
       });
     }
@@ -31034,14 +31494,14 @@
     const titleWrap = make("div", null, "hsd-live-wall-title");
     const badge = make("span", "", "hsd-live-count-badge");
     badge.setAttribute("data-live-count", "1");
-    titleWrap.append(make("span", "📡 Live กระดาษคำตอบสด (ตามช่องใบงาน)"), badge);
+    titleWrap.append(make("span", "Live ใบงานคำตอบสดทั้ง 3 กลุ่ม (กลุ่ม 1 · 2 · 3)"), badge);
 
     const acts = make("div", null, "hsd-timer-controls");
 
     const viewSeg = make("div", null, "hsd-live-view-seg");
     [
-      { id: "sheet", label: "▦ ตามช่องกระดาษคำตอบ" },
-      { id: "people", label: "👤 รายคน" },
+      { id: "sheet", label: "▦ เทียบในตารางใบงาน" },
+      { id: "people", label: "👥 แยกการ์ด 3 กลุ่ม (1·2·3)" },
       { id: "demo", label: "📝 ช่องพิมพ์สาธิต" }
     ].forEach((m) => {
       const b = make("button", m.label, "hsd-live-vbtn");
@@ -31070,7 +31530,7 @@
     clrBtn.type = "button";
     clrBtn.addEventListener("click", () => {
       if (!LIVE) return;
-      if (!window.confirm(`ต้องการล้างคำตอบสดบนจอของ "${qObj.label}" ในห้องกลุ่มที่ ${LIVE.getRoomId()} หรือไม่?`)) return;
+      if (!window.confirm(`ต้องการล้างคำตอบสดของทั้ง 3 กลุ่มใน "${qObj.label}" (ห้องที่ ${LIVE.getRoomId()}) หรือไม่?`)) return;
       LIVE.clearQuestionResponses(qObj.id);
     });
 

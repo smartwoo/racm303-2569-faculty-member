@@ -26465,6 +26465,803 @@ html[data-theme="dark"] .ppt-opening-kahoot-stage .ppt-ok-room-btn.is-active {
   border-color: rgba(96, 180, 255, 0.3) !important;
 }
 
+/* ---------- 6. Balanced 3-Group Check-in (กลุ่ม 1 / 2 / 3) & Shared Team Worksheet (Light & Dark) ---------- */
+.ppt-opening-kahoot-stage .ppt-ok-left {
+  gap: 10px !important;
+  min-height: 0 !important;
+}
+
+.ppt-opening-kahoot-stage .ppt-ok-card.is-compact-agenda {
+  flex: 0 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 11px 15px !important;
+  gap: 6px !important;
+}
+
+.ppt-opening-kahoot-stage .ppt-ok-card.is-compact-agenda .ppt-ok-summary {
+  font-size: 13px !important;
+  line-height: 1.38 !important;
+  margin: 0 !important;
+}
+
+.ppt-opening-kahoot-stage .ppt-ok-card.is-compact-agenda .ppt-ok-q-list {
+  gap: 4px !important;
+}
+
+.ppt-opening-kahoot-stage .ppt-ok-card.is-compact-agenda .ppt-ok-q-btn {
+  padding: 6px 10px !important;
+  font-size: 12.3px !important;
+}
+
+.ppt-opening-kahoot-stage .ppt-ok-card.is-checkin-card {
+  flex: 0 0 auto !important;
+  padding: 11px 15px !important;
+  gap: 6px !important;
+}
+
+.ppt-opening-kahoot-stage .hsd-smart-checkin-widget {
+  gap: 5px !important;
+}
+
+.ppt-opening-kahoot-stage .hsd-smart-team-btn {
+  padding: 6px 9px !important;
+  gap: 3px !important;
+}
+
+.ppt-ok-room-pills.is-compact-strip {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+}
+
+.ppt-ok-room-pills.is-compact-strip .ppt-ok-room-pill {
+  padding: 4px 8px !important;
+  min-height: 25px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 11.2px !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme="dark"] .ppt-ok-room-pills.is-compact-strip .ppt-ok-room-pill {
+  background: #1c1f28 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #d1d1d6 !important;
+}
+
+html[data-theme="dark"] .ppt-ok-room-pills.is-compact-strip .ppt-ok-room-pill.is-active {
+  background: rgba(41, 151, 255, 0.2) !important;
+  border-color: #2997ff !important;
+  color: #ffffff !important;
+}
+
+/* Roster Header 3-Team Summary Pills & Team-Colored Student Chips */
+.ppt-ok-roster-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ppt-ok-team-summary-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ppt-ok-team-pill,
+.hsd-tsb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 11.2px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ppt-ok-team-pill.is-team-1,
+.hsd-tsb-pill.is-team-1,
+.ppt-ok-stu-team-tag.is-team-1 {
+  background: rgba(0, 102, 204, 0.12);
+  color: #0055b3;
+  border: 1px solid rgba(0, 102, 204, 0.25);
+}
+
+.ppt-ok-team-pill.is-team-2,
+.hsd-tsb-pill.is-team-2,
+.ppt-ok-stu-team-tag.is-team-2 {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+  border: 1px solid rgba(13, 148, 136, 0.28);
+}
+
+.ppt-ok-team-pill.is-team-3,
+.hsd-tsb-pill.is-team-3,
+.ppt-ok-stu-team-tag.is-team-3 {
+  background: rgba(217, 119, 6, 0.13);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+html[data-theme="dark"] .ppt-ok-team-pill.is-team-1,
+html[data-theme="dark"] .hsd-tsb-pill.is-team-1,
+html[data-theme="dark"] .ppt-ok-stu-team-tag.is-team-1 {
+  background: rgba(41, 151, 255, 0.22);
+  color: #93c5fd;
+  border-color: rgba(96, 180, 255, 0.4);
+}
+
+html[data-theme="dark"] .ppt-ok-team-pill.is-team-2,
+html[data-theme="dark"] .hsd-tsb-pill.is-team-2,
+html[data-theme="dark"] .ppt-ok-stu-team-tag.is-team-2 {
+  background: rgba(45, 212, 191, 0.2);
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.38);
+}
+
+html[data-theme="dark"] .ppt-ok-team-pill.is-team-3,
+html[data-theme="dark"] .hsd-tsb-pill.is-team-3,
+html[data-theme="dark"] .ppt-ok-stu-team-tag.is-team-3 {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.38);
+}
+
+.ppt-ok-stu-team-tag {
+  padding: 1px 5px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.ppt-ok-stu-chip.is-joined.is-team-1 {
+  background: rgba(0, 102, 204, 0.08) !important;
+  border-color: rgba(0, 102, 204, 0.32) !important;
+  color: #004494 !important;
+}
+
+.ppt-ok-stu-chip.is-joined.is-team-2 {
+  background: rgba(13, 148, 136, 0.08) !important;
+  border-color: rgba(13, 148, 136, 0.34) !important;
+  color: #115e59 !important;
+}
+
+.ppt-ok-stu-chip.is-joined.is-team-3 {
+  background: rgba(217, 119, 6, 0.09) !important;
+  border-color: rgba(217, 119, 6, 0.36) !important;
+  color: #92400e !important;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip {
+  background: #1c1f28 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #d1d1d6 !important;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip.is-joined.is-team-1 {
+  background: rgba(41, 151, 255, 0.16) !important;
+  border-color: rgba(96, 180, 255, 0.42) !important;
+  color: #eff6ff !important;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip.is-joined.is-team-2 {
+  background: rgba(45, 212, 191, 0.15) !important;
+  border-color: rgba(45, 212, 191, 0.4) !important;
+  color: #f0fdfa !important;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip.is-joined.is-team-3 {
+  background: rgba(251, 191, 36, 0.15) !important;
+  border-color: rgba(251, 191, 36, 0.4) !important;
+  color: #fffbeb !important;
+}
+
+/* Faculty 3-Team Stat Row on Slide 1 */
+.ppt-ok-fac-teams-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ppt-ok-fac-team-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #f5f5f7;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 12px;
+}
+
+.ppt-ok-fac-team-stat.is-team-1 { border-left: 3px solid #0066cc; }
+.ppt-ok-fac-team-stat.is-team-2 { border-left: 3px solid #0d9488; }
+.ppt-ok-fac-team-stat.is-team-3 { border-left: 3px solid #d97706; }
+
+html[data-theme="dark"] .ppt-ok-fac-team-stat {
+  background: #1c1f28;
+  border-color: rgba(255, 255, 255, 0.09);
+  color: #f5f5f7;
+}
+
+/* Smart 3-Digit Number + 3-Group Balanced Selector Widget */
+.hsd-smart-checkin-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.hsd-smart-checkin-widget.is-compact {
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 102, 204, 0.18);
+  margin-bottom: 8px;
+}
+
+html[data-theme="dark"] .hsd-smart-checkin-widget.is-compact {
+  background: #1b1e27;
+  border-color: rgba(96, 180, 255, 0.28);
+}
+
+.hsd-scw-step-label {
+  font-family: var(--font-display);
+  font-size: 11.4px;
+  font-weight: 700;
+  color: #424245;
+  line-height: 1.3;
+}
+
+html[data-theme="dark"] .hsd-scw-step-label {
+  color: #c7c7cc;
+}
+
+.hsd-scw-num-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.hsd-scw-num-input {
+  flex: 0 1 175px;
+  min-width: 130px;
+  height: 31px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border: 1.5px solid rgba(15, 23, 42, 0.15);
+  background: #ffffff;
+  color: #1d1d1f;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hsd-scw-num-input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.14);
+}
+
+html[data-theme="dark"] .hsd-scw-num-input {
+  background: #12141a;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .hsd-scw-num-input:focus {
+  border-color: #2997ff;
+  box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.22);
+}
+
+.hsd-scw-verified-pill {
+  flex: 1 1 230px;
+  min-width: 0;
+  min-height: 31px;
+  padding: 3px 9px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  gap: 5px;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+.hsd-scw-vname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hsd-scw-verified-pill.is-empty {
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px dashed rgba(15, 23, 42, 0.14);
+  color: #6e6e73;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hsd-scw-verified-pill.is-verified {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.34);
+  color: #065f46;
+}
+
+.hsd-scw-vcheck {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: #047857;
+  flex-shrink: 0;
+}
+
+.hsd-scw-vroom {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.07);
+  font-size: 10.6px;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .hsd-scw-verified-pill.is-empty {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #98989d;
+}
+
+html[data-theme="dark"] .hsd-scw-verified-pill.is-verified {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #d1fae5;
+}
+
+html[data-theme="dark"] .hsd-scw-vcheck {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .hsd-scw-vroom {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+.hsd-scw-disambig-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.hsd-scw-cand-chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 102, 204, 0.26);
+  background: #ffffff;
+  color: #0055b3;
+  font-size: 11.4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hsd-scw-cand-chip.is-active,
+.hsd-scw-cand-chip:hover {
+  background: #0066cc;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .hsd-scw-cand-chip {
+  background: #1c1f28;
+  border-color: rgba(96, 180, 255, 0.35);
+  color: #93c5fd;
+}
+
+/* 3 Balanced Team Cards (กลุ่ม 1 | กลุ่ม 2 | กลุ่ม 3) */
+.hsd-scw-team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.hsd-smart-team-btn {
+  appearance: none;
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(15, 23, 42, 0.11);
+  background: #ffffff;
+  color: #1d1d1f;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.hsd-smart-team-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(0, 102, 204, 0.38);
+}
+
+.hsd-smart-team-btn.is-team-1.is-selected {
+  background: rgba(0, 102, 204, 0.08);
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.16);
+}
+
+.hsd-smart-team-btn.is-team-2.is-selected {
+  background: rgba(13, 148, 136, 0.09);
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.16);
+}
+
+.hsd-smart-team-btn.is-team-3.is-selected {
+  background: rgba(217, 119, 6, 0.09);
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.16);
+}
+
+.hsd-smart-team-btn.is-locked,
+.hsd-smart-team-btn:disabled {
+  opacity: 0.54;
+  cursor: not-allowed;
+  background: #f2f2f5;
+  border-style: dashed;
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn {
+  background: #1c1f28;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-1.is-selected {
+  background: rgba(41, 151, 255, 0.18);
+  border-color: #2997ff;
+  box-shadow: 0 0 0 2px rgba(41, 151, 255, 0.25);
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-2.is-selected {
+  background: rgba(45, 212, 191, 0.16);
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.24);
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-3.is-selected {
+  background: rgba(251, 191, 36, 0.16);
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.24);
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-locked,
+html[data-theme="dark"] .hsd-smart-team-btn:disabled {
+  background: #13151b;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.hsd-stb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.hsd-stb-name {
+  font-family: var(--font-display);
+  font-size: 12.6px;
+  font-weight: 800;
+}
+
+.hsd-smart-team-btn.is-team-1 .hsd-stb-name { color: #0066cc; }
+.hsd-smart-team-btn.is-team-2 .hsd-stb-name { color: #0f766e; }
+.hsd-smart-team-btn.is-team-3 .hsd-stb-name { color: #b45309; }
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-1 .hsd-stb-name { color: #60b4ff; }
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-2 .hsd-stb-name { color: #5eead4; }
+html[data-theme="dark"] .hsd-smart-team-btn.is-team-3 .hsd-stb-name { color: #fcd34d; }
+
+.hsd-stb-badge {
+  font-size: 9.8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #52525b;
+  white-space: nowrap;
+}
+
+.hsd-smart-team-btn.is-recommended .hsd-stb-badge {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+}
+
+.hsd-smart-team-btn.is-locked .hsd-stb-badge {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .hsd-stb-badge {
+  background: rgba(255, 255, 255, 0.09);
+  color: #c7c7cc;
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-recommended .hsd-stb-badge {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .hsd-smart-team-btn.is-locked .hsd-stb-badge {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+}
+
+.hsd-stb-count {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: #6e6e73;
+}
+
+.hsd-stb-count strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1d1d1f;
+}
+
+html[data-theme="dark"] .hsd-stb-count {
+  color: #98989d;
+}
+
+html[data-theme="dark"] .hsd-stb-count strong {
+  color: #f5f5f7;
+}
+
+.hsd-stb-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+html[data-theme="dark"] .hsd-stb-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hsd-stb-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #0066cc;
+}
+
+.hsd-smart-team-btn.is-team-2 .hsd-stb-bar span { background: #0d9488; }
+.hsd-smart-team-btn.is-team-3 .hsd-stb-bar span { background: #d97706; }
+
+.hsd-scw-cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hsd-scw-join-btn {
+  appearance: none;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 0;
+  background: #1d1d1f;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12.6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.16s ease, transform 0.14s ease;
+}
+
+.hsd-scw-join-btn.is-ready {
+  background: #0066cc;
+}
+
+.hsd-scw-join-btn:hover {
+  transform: translateY(-0.5px);
+  filter: brightness(1.06);
+}
+
+html[data-theme="dark"] .hsd-scw-join-btn {
+  background: #2c2f3a;
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .hsd-scw-join-btn.is-ready {
+  background: #2997ff;
+  color: #ffffff;
+}
+
+.hsd-scw-hint {
+  font-size: 11.2px;
+  color: #dc2626;
+  min-height: 0;
+}
+
+html[data-theme="dark"] .hsd-scw-hint {
+  color: #fca5a5;
+}
+
+/* Joined Banner on Slide 1 & Student Shared Team Worksheet Banner */
+.ppt-ok-joined-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 102, 204, 0.24);
+}
+
+.ppt-ok-joined-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.4px;
+}
+
+.ppt-ok-joined-info small {
+  display: block;
+  color: #6e6e73;
+  font-size: 11.2px;
+}
+
+.ppt-ok-joined-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-theme="dark"] .ppt-ok-joined-banner {
+  background: #1c1f28;
+  border-color: rgba(96, 180, 255, 0.34);
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .ppt-ok-joined-info small {
+  color: #98989d;
+}
+
+.hsd-team-sheet-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 11px;
+  margin-bottom: 7px;
+  border-radius: 10px;
+  background: #f5f5f7;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 12px;
+}
+
+.hsd-team-sheet-banner.is-team-1 { border-left: 3.5px solid #0066cc; }
+.hsd-team-sheet-banner.is-team-2 { border-left: 3.5px solid #0d9488; }
+.hsd-team-sheet-banner.is-team-3 { border-left: 3.5px solid #d97706; }
+
+.hsd-tsb-left,
+.hsd-tsb-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hsd-tsb-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.hsd-tsb-editor {
+  font-size: 11.2px;
+  color: #6e6e73;
+}
+
+.hsd-tsb-switch-btn {
+  appearance: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  color: #1d1d1f;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .hsd-team-sheet-banner {
+  background: #1b1e27;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .hsd-tsb-title {
+  color: #f5f5f7;
+}
+
+html[data-theme="dark"] .hsd-tsb-editor {
+  color: #98989d;
+}
+
+html[data-theme="dark"] .hsd-tsb-switch-btn {
+  background: #262a36;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f5f5f7;
+}
+
+/* 3-Column Lobby Modal & 3-Team Live Answer Wall Cards */
+.hsd-km-team-columns,
+.hsd-resp-grid.is-three-teams-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .hsd-km-team-columns,
+  .hsd-resp-grid.is-three-teams-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hsd-km-col.is-team-1,
+.hsd-resp-card.is-team-1,
+.hsd-cell-ans-chip.is-team-1 {
+  border-left: 3.5px solid #0066cc !important;
+}
+
+.hsd-km-col.is-team-2,
+.hsd-resp-card.is-team-2,
+.hsd-cell-ans-chip.is-team-2 {
+  border-left: 3.5px solid #0d9488 !important;
+}
+
+.hsd-km-col.is-team-3,
+.hsd-resp-card.is-team-3,
+.hsd-cell-ans-chip.is-team-3 {
+  border-left: 3.5px solid #d97706 !important;
+}
+
+.hsd-resp-team-members {
+  font-size: 11.4px;
+  color: #6e6e73;
+  margin-bottom: 6px;
+  line-height: 1.38;
+}
+
+html[data-theme="dark"] .hsd-resp-team-members {
+  color: #98989d;
+}
+
+.hsd-resp-card.is-waiting {
+  opacity: 0.78;
+  border-style: dashed;
+}
+
 .ppt-cs-action-btn.is-release-locked {
   border-color: #f59e0b;
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
