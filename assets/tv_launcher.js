@@ -493,8 +493,8 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 5 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 5-Step Flow (ST1 & HS1–6)"),
-              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion & กรอบคาบเรียน", "5-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion"),
+              title: t("ระบบสุขภาพ · 6 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 6-Step Flow (ST1 & HS1–6)"),
+              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture (รอแขวน VDO)", "6-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
               badge: "ST1 · HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -553,8 +553,8 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 5 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 5-Step Flow (ST1 & HS1–6)"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ กรอบคาบเรียน & Case Discussion", "Coherent 5-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion"),
+              title: t("ระบบสุขภาพ · 6 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 6-Step Flow (ST1 & HS1–6)"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture (รอแขวน VDO)", "Coherent 6-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
               badge: t("ST1 · HS1 – HS6", "ST1 · HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -1051,6 +1051,13 @@
         : `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
       : t(`สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Check-in + 16:9 in-class case slides");
 
+    const epVdoInf = api && api.getHsVdoLectureInfo
+      ? api.getHsVdoLectureInfo(mod.code)
+      : { uploaded: false, extBadge: "รอแขวน VDO" };
+    const step6Sub = epVdoInf.uploaded
+      ? t(`วิดีโอบรรยายประจำคาบ ${mod.code} พร้อมรับชม`, `${mod.code} VDO Lecture ready to watch`)
+      : t(`สถานะปัจจุบัน: รอแขวน VDO บรรยายประจำคาบ ${mod.code} (พร้อมเชื่อม Interactive Studio)`, `Status: Awaiting VDO Lecture upload for ${mod.code}`);
+
     const badgeHeaderTxt = isStEp
       ? `${mod.code} · ${mod.scheduleDate.replace(/^วัน/, "")} (${mod.lectureTime || "09.30–12.00 น."}) · ปูรากฐานก่อน HS1–HS6`
       : `${mod.code} · ${mod.scheduleDate.replace(/^วัน/, "")} · สอบ ${mod.examWeight || ""}`;
@@ -1116,10 +1123,22 @@
             </span>
             <span>→</span>
           </button>
+
+          <button type="button" class="tv-ep-action-btn ${epVdoInf.uploaded ? "is-slide-ready-action" : "is-slide-pending-action"}" id="tvEpActVdoLec" data-tv-modal-focus>
+            <span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-6 ${epVdoInf.uploaded ? "is-slide-uploaded" : "is-slide-pending"}">06</span> <span>${esc(
+                epVdoInf.uploaded
+                  ? t(`VDO Lecture ประจำคาบ (${mod.code} · ✓ ${epVdoInf.extBadge})`, `${mod.code} VDO Lecture (✓ ${epVdoInf.extBadge})`)
+                  : t(`VDO Lecture ประจำคาบ (${mod.code} · รอแขวน VDO)`, `${mod.code} VDO Lecture (Awaiting VDO)`)
+              )}</span></span>
+              <span class="tv-ep-action-sub">${esc(step6Sub)}</span>
+            </span>
+            <span>→</span>
+          </button>
         </div>
 
         <div class="tv-ep-secondary-row" style="flex-wrap:wrap;gap:8px">
-          <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 5 ขั้นตอน (${mod.code})`, `Open 5-Step Hub (${mod.code})`))}</button>
+          <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 6 ขั้นตอน (${mod.code})`, `Open 6-Step Hub (${mod.code})`))}</button>
           <a class="tv-hosp-chip" href="exports/pdf/${encodeURIComponent(mod.docId || mod.code)}.pdf" download="RACM303_${esc(mod.docId || mod.code)}_Full.pdf" style="text-decoration:none">⬇ PDF ฉบับเต็ม</a>
           <a class="tv-hosp-chip" href="exports/docx/${encodeURIComponent(mod.docId || mod.code)}.docx" download="RACM303_${esc(mod.docId || mod.code)}_Full.docx" style="text-decoration:none">⬇ Word ฉบับเต็ม</a>
           ${
@@ -1170,6 +1189,11 @@
       } else if (api && api.openHsDiscussion) {
         api.openHsDiscussion(mod.code);
       }
+    });
+
+    $("tvEpActVdoLec").addEventListener("click", () => {
+      backdrop.remove();
+      if (api && api.openHsVdoLecture) api.openHsVdoLecture(mod.code);
     });
 
     $("tvEpActHub").addEventListener("click", () => {
@@ -2096,12 +2120,32 @@
         });
       }
 
-      // Step 06: Faculty Guide (Faculty Portal only)
+      // Step 06: VDO Lecture (รอแขวน VDO)
+      const mVdoInf = api && api.getHsVdoLectureInfo ? api.getHsVdoLectureInfo(m.code) : { uploaded: false, extBadge: "รอแขวน VDO", icoCls: "is-pptx is-muted-pptx" };
+      files.push({
+        id: `hsvdo:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: mVdoInf.uploaded ? `06_${m.code}_VDO_Lecture.mp4` : `06_${m.code}_VDO_Lecture_(รอแขวน_VDO).mp4`,
+        title: `VDO Lecture ประจำคาบ ${m.code}`,
+        sub: mVdoInf.uploaded
+          ? `⑥ STEP 06 · พร้อมรับชมวิดีโอบรรยายประจำคาบ`
+          : `⑥ STEP 06 · สถานะรอแขวน VDO บรรยายประจำคาบ (พร้อมรองรับ Interactive VDO Lecture Studio)`,
+        meta: m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : "",
+        badge: mVdoInf.uploaded ? `⑥ ✓ ${mVdoInf.extBadge}` : "⑥ ⏳ รอแขวน VDO",
+        isPending: !mVdoInf.uploaded,
+        icoCls: mVdoInf.icoCls || "is-pptx is-muted-pptx",
+        icoTxt: "⑥",
+        onOpen: openFileAction(() => {
+          if (api && api.openHsVdoLecture) api.openHsVdoLecture(m.code);
+        })
+      });
+
+      // Step 07: Faculty Guide (Faculty Portal only)
       if (ROLE === "faculty") {
         files.push({
           id: `hsfac:${m.id}`,
           folderPath: ["health-systems", m.id],
-          name: `06_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
+          name: `07_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
           title: `คู่มือผู้สอนและแนวทางนำอภิปรายประจำคาบ ${m.code}`,
           sub: "เฉพาะคณาจารย์ — แผนการสอน แนวคำตอบ และจุดเน้นสำคัญประจำคาบ",
           meta: "Faculty Member Only",
@@ -2212,9 +2256,9 @@
       "health-systems": {
         id: "health-systems",
         code: "02_ระบบสุขภาพ (ST1 · HS1–HS6 & เวทีเชิงระบบ)",
-        title: "โฟลเดอร์บทเรียน ST1 (รากฐานคิดเชิงระบบ) และ HS1–HS6 ตาม Logical Flow 5 ขั้นตอน พร้อมเวทีเสวนา 6 คาบสำคัญ",
+        title: "โฟลเดอร์บทเรียน ST1 (รากฐานคิดเชิงระบบ) และ HS1–HS6 ตาม Logical Flow 6 ขั้นตอน พร้อมเวทีเสวนา 6 คาบสำคัญ",
         meta: "7 โฟลเดอร์บทเรียน (ST1 & HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
-        tags: ["📘 ST1 รากฐาน", "① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case / เวที"],
+        tags: ["📘 ST1 รากฐาน", "① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case / เวที", "⑥ VDO Lecture"],
         subfolders: [
           ...(api && api.getHsModuleMeta
             ? (() => {

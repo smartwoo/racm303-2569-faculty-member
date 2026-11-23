@@ -1,21 +1,23 @@
 /* ==========================================================================
-   RACM 303 — Health Economics (HE00–HE05) Handout ↔ Video Companion Bridge
-   Modeled on EP6 Interactive Lecture Studio (d50475d2-2543-4946-b7a0-05f508ebdda3):
-   - Protected Google Drive View-Only Stream (/preview?t=...s&start=... · Zero MP4 Download)
-   - Pure Clean 16:9 Video Frame (Zero text/CC overlaid on top of video controls)
-   - Dedicated Non-Overlapping Teaching Highlight & Captured HD Slide Companion Panel
-   - 1-Click Compact Picture-in-Picture (PiP) Corner Mode so students read handouts
-     alongside the lecture with zero unwanted page auto-scroll
+   RACM 303 — Health Economics (HE00–HE05) Handout ↔ Video Companion Bridge (v2)
+   - Direct Native HTML5 <video> Streaming (assets/videos/he00..he05.mp4 · +faststart)
+   - Works 100% in LINE In-App Browser (iOS/Android), Safari, Chrome, Incognito & TV
+     (Zero Google 401 Malformed Request / Zero Third-Party Cookie Blocks!)
+   - Real-Time Live Slide & Teaching-Note Sync via native `timeupdate`
+   - Instant Sub-Second Seeking, Speed Control (0.75x–2x), & Seamless PiP Corner Mode
    ========================================================================== */
 (function () {
   "use strict";
 
   const FOLDER_URL =
     "https://drive.google.com/drive/folders/1RqT-o4rvYE7DXf7bFU7HfPgue0vp49LW?usp=sharing";
+  const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
   const VIDEOS = {
     HE00: {
       code: "HE00",
+      videoSrc: "assets/videos/he00.mp4",
+      poster: "assets/images/he_vdo/slides/he00_overview.webp",
       driveId: "1iKcqmZnI1AtNPThuggw03aRdPfUVHlkT",
       durationSec: 278,
       durationLabel: "04:38",
@@ -26,7 +28,7 @@
         {
           id: "he00-overview",
           startSec: 131,
-          endSec: 270,
+          endSec: 278,
           slide: "assets/images/he_vdo/slides/he00_overview.webp",
           ktKey: "HS2:4",
           titleTH: "เกณฑ์แพทยสภาและแผนผังเนื้อหา 5 บทย่อย (HE01–HE05)",
@@ -39,6 +41,8 @@
 
     HE01: {
       code: "HE01",
+      videoSrc: "assets/videos/he01.mp4",
+      poster: "assets/images/he_vdo/slides/he01_three_questions.webp",
       driveId: "1hy8GbsNMmw2rUZOJoxQ7SJuFkfR_ZV7t",
       durationSec: 1413,
       durationLabel: "23:33",
@@ -150,6 +154,8 @@
 
     HE02: {
       code: "HE02",
+      videoSrc: "assets/videos/he02.mp4",
+      poster: "assets/images/he_vdo/slides/he02_forms_matrix.webp",
       driveId: "1n9ypS2_ybWH8s9j2hTc-qevXpO15aLGU",
       durationSec: 1641,
       durationLabel: "27:21",
@@ -239,6 +245,8 @@
 
     HE03: {
       code: "HE03",
+      videoSrc: "assets/videos/he03.mp4",
+      poster: "assets/images/he_vdo/slides/he03_buying_certainty.webp",
       driveId: "18HJhxQx8TvdAI6KsVLPBFxkAixTwYvJU",
       durationSec: 1623,
       durationLabel: "27:03",
@@ -405,6 +413,8 @@
 
     HE04: {
       code: "HE04",
+      videoSrc: "assets/videos/he04.mp4",
+      poster: "assets/images/he_vdo/slides/he04_drgs.webp",
       driveId: "13-SqlVfRC5-zxyTtvl1nDPkFguSI3Yuo",
       durationSec: 2176,
       durationLabel: "36:16",
@@ -549,6 +559,8 @@
 
     HE05: {
       code: "HE05",
+      videoSrc: "assets/videos/he05.mp4",
+      poster: "assets/images/he_vdo/slides/he05_csmbs_op_ffs.webp",
       driveId: "1uqwf0po7RKplyLFyC5tV1WMJWj6-JuXX",
       durationSec: 1338,
       durationLabel: "22:18",
@@ -576,12 +588,12 @@
           titleTH: "กราฟจริง CSMBS ผู้ป่วยนอก (2545–2561): ผลของ Direct Billing แบบ Fee-for-Service",
           titleEN: "Empirical Evidence: CSMBS Outpatient Spending Surge Under FFS",
           noteTH:
-            "หลักฐานเชิงประจักษ์ในไทยเมื่อเปลี่ยนผู้ป่วยนอกข้าราชการเป็นเบิกจ่ายตรงแบบ FFS ทำให้รายจ่ายผู้ป่วยนอก खासค่ายาพุ่งสูงขึ้นอย่างต่อเนื่อง (ภาพประกอบวิดีโอที่ 5.2 ก)",
+            "หลักฐานเชิงประจักษ์ในไทยเมื่อเปลี่ยนผู้ป่วยนอกข้าราชการเป็นเบิกจ่ายตรงแบบ FFS ทำให้รายจ่ายผู้ป่วยนอกโดยเฉพาะค่ายาพุ่งสูงขึ้นอย่างต่อเนื่อง (ภาพประกอบวิดีโอที่ 5.2 ก)",
         },
         {
           id: "he05-csmbs-ip",
           startSec: 899,
-          endSec: 1306,
+          endSec: 1338,
           slide: "assets/images/he_vdo/slides/he05_csmbs_ip_drg.webp",
           ktKey: "HS6:4",
           titleTH: "กราฟจริง CSMBS ผู้ป่วยใน (2545–2561): ผลของการปฏิรูปจ่ายเงินด้วย DRGs ในปี 2550",
@@ -599,11 +611,11 @@
     DRIVE_ID_TO_CODE[v.driveId] = v.code;
   });
 
-  /* Curated Section -> Recommended Video Highlights (for Key Takeaways Modal & Quick Jump) */
+  /* Curated Section -> Recommended Video Highlights */
   const SECTION_RECOMMENDED_CLIPS = {
     "HS2:4": [
       { code: "HE01", sec: 484, labelTH: "HE01 · 08:04 WHO 6 Building Blocks", labelEN: "HE01 · 08:04 WHO 6 Building Blocks" },
-      { code: "HE00", sec: 191, labelTH: "HE00 · 03:11 แผนผัง 5 บท HE01–05", labelEN: "HE00 · 03:11 5-Module Map" },
+      { code: "HE00", sec: 131, labelTH: "HE00 · 02:11 แผนผัง 5 บท HE01–05", labelEN: "HE00 · 02:11 5-Module Map" },
     ],
     "HS3:4": [
       { code: "HE01", sec: 257, labelTH: "HE01 · 04:17 โจทย์ 3 ข้อ & Efficiency", labelEN: "HE01 · 04:17 3 Core Questions" },
@@ -618,7 +630,7 @@
       { code: "HE03", sec: 1432, labelTH: "HE03 · 23:52 ระบบภาษีทั่วไป & UCS ไทย", labelEN: "HE03 · 23:52 Tax Financing & UCS" },
     ],
     "HS6:2": [
-      { code: "HE03", sec: 826, labelTH: "HE03 · 13:46 ผู้รับประกัน & สมการ π = pL + T", labelEN: "HE03 · 13:46 Insurer & π = pL + T" },
+      { code: "HE03", sec: 719, labelTH: "HE03 · 11:59 ผู้รับประกัน & สมการ π = pL + T", labelEN: "HE03 · 11:59 Insurer & π = pL + T" },
       { code: "HE02", sec: 926, labelTH: "HE02 · 15:26 การกำหนดชุดสิทธิประโยชน์", labelEN: "HE02 · 15:26 Benefit Package HTA" },
     ],
     "HS6:3": [
@@ -661,16 +673,8 @@
     return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
   }
 
-  function buildDrivePreviewUrl(driveId, sec, autoPlay) {
-    const clean = Math.max(0, Math.floor(Number(sec) || 0));
-    const qp = [`t=${clean}s`, `start=${clean}`];
-    if (autoPlay) qp.push("autoplay=1");
-    return `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/preview?${qp.join("&")}`;
-  }
-
-  function buildDriveViewUrl(driveId, sec) {
-    const clean = Math.max(0, Math.floor(Number(sec) || 0));
-    return `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/view?t=${clean}s`;
+  function buildDriveViewUrl(driveId) {
+    return `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/view`;
   }
 
   function parseHeDriveLink(href) {
@@ -695,17 +699,8 @@
       const ch = v.chapters[i];
       if (t >= ch.startSec && t < ch.endSec) return ch;
     }
-    // Nearest fallback
-    let best = v.chapters[0];
-    let bestDist = Infinity;
-    v.chapters.forEach((ch) => {
-      const d = Math.abs(ch.startSec - t);
-      if (d < bestDist) {
-        bestDist = d;
-        best = ch;
-      }
-    });
-    return best;
+    if (t < v.chapters[0].startSec) return v.chapters[0];
+    return v.chapters[v.chapters.length - 1];
   }
 
   function openSlideInLightbox(src, caption) {
@@ -728,7 +723,9 @@
     isPip: false,
     activeCode: "HE03",
     currentSec: 41,
-    iframeNonce: 0,
+    activeChapterId: "",
+    playbackRate: 1,
+    mountedCode: "",
   };
 
   let dockEl = null;
@@ -744,34 +741,39 @@
     return dockEl;
   }
 
-  function openPlayer(code, sec, preferPip) {
-    const v = VIDEOS[code] || VIDEOS.HE03;
-    state.activeCode = v.code;
-    state.currentSec = Math.max(0, Math.min(v.durationSec - 2, Math.floor(Number(sec) || 0)));
-    if (typeof preferPip === "boolean") state.isPip = preferPip;
-    state.isOpen = true;
-    state.iframeNonce += 1;
-
-    // If Key Takeaways modal is currently open, switch to PiP or close modal gracefully so user sees the player clearly
-    const ktModal = document.getElementById("ktModalBackdrop");
-    if (ktModal && !ktModal.hidden && window.RACM_SECTION_TAKEAWAYS) {
-      window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal();
-    }
-
-    ensureDockDOM();
-    dockEl.hidden = false;
-    renderDock(true);
+  function getVideoEl() {
+    return dockEl ? dockEl.querySelector("video.he-native-video") : null;
   }
 
-  function closePlayer() {
-    state.isOpen = false;
-    if (dockEl) {
-      dockEl.hidden = true;
-      dockEl.innerHTML = "";
+  function seekAndPlay(sec, autoPlay) {
+    const v = VIDEOS[state.activeCode] || VIDEOS.HE03;
+    const clamped = Math.max(0, Math.min(v.durationSec - 1, Math.floor(Number(sec) || 0)));
+    state.currentSec = clamped;
+    const videoEl = getVideoEl();
+    if (!videoEl) return;
+
+    const applySeek = () => {
+      try {
+        videoEl.playbackRate = state.playbackRate || 1;
+        if (Math.abs((videoEl.currentTime || 0) - clamped) > 0.6) {
+          videoEl.currentTime = clamped;
+        }
+        if (autoPlay) {
+          const p = videoEl.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        }
+      } catch (_) {}
+    };
+
+    if (videoEl.readyState >= 1) {
+      applySeek();
+    } else {
+      videoEl.addEventListener("loadedmetadata", applySeek, { once: true });
     }
+    syncDynamicUI();
   }
 
-  function renderDock(reloadIframe) {
+  function syncDynamicUI() {
     if (!dockEl || !state.isOpen) return;
     const v = VIDEOS[state.activeCode] || VIDEOS.HE03;
     const ch = findChapterForTime(v.code, state.currentSec) || v.chapters[0];
@@ -781,10 +783,90 @@
 
     dockEl.classList.toggle("is-pip", !!state.isPip);
 
-    const existingIframe = dockEl.querySelector("iframe.he-vdo-iframe");
-    const previewUrl = buildDrivePreviewUrl(v.driveId, state.currentSec, true);
+    // 1. Live timestamp badge
+    const livePill = dockEl.querySelector(".he-dock-live-pill");
+    if (livePill) livePill.textContent = `🎥 ${v.code} · ${fmtTime(state.currentSec)}`;
 
-    // Build module selector pills (HE00..HE05)
+    // 2. PiP button text
+    const pipBtn = dockEl.querySelector("[data-he-toggle-pip]");
+    if (pipBtn) {
+      pipBtn.textContent = state.isPip ? "⤢ ขยายสตูดิโอ" : "❐ ย่อเป็นจอร่วมอ่าน (PiP)";
+      pipBtn.title = state.isPip
+        ? "ขยายดูสไลด์ HD และสารบัญรายหัวข้อ"
+        : "ย่อเป็นหน้าต่างเล็กมุมขวาล่างเพื่อเลื่อนอ่านเอกสารคำสอนไปพร้อมกับฟังบรรยาย";
+    }
+
+    // 3. Speed select
+    const speedSel = dockEl.querySelector(".he-speed-select");
+    if (speedSel && String(speedSel.value) !== String(state.playbackRate)) {
+      speedSel.value = String(state.playbackRate);
+    }
+
+    // 4. Only re-render chapter-dependent DOM when chapter actually changes
+    const chId = ch ? ch.id : "";
+    if (chId !== state.activeChapterId) {
+      state.activeChapterId = chId;
+
+      const rangeEl = dockEl.querySelector(".he-dock-note-time");
+      if (rangeEl && ch) {
+        rangeEl.textContent = `📍 ช่วงสไลด์ ${fmtTime(ch.startSec)}–${fmtTime(ch.endSec)}`;
+      }
+      const prevBtn = dockEl.querySelector("[data-he-nav-ch='prev']");
+      if (prevBtn) {
+        prevBtn.disabled = !prevCh;
+        prevBtn.setAttribute("data-he-seek", prevCh ? String(prevCh.startSec) : "0");
+      }
+      const nextBtn = dockEl.querySelector("[data-he-nav-ch='next']");
+      if (nextBtn) {
+        nextBtn.disabled = !nextCh;
+        nextBtn.setAttribute("data-he-seek", nextCh ? String(nextCh.startSec) : String(v.durationSec - 3));
+      }
+
+      const titleEl = dockEl.querySelector(".he-dock-note-title");
+      if (titleEl && ch) titleEl.textContent = ch.titleTH;
+
+      const descEl = dockEl.querySelector(".he-dock-note-desc");
+      if (descEl && ch) descEl.textContent = ch.noteTH;
+
+      // Update synchronized HD slide image & zoom attributes
+      const slideImg = dockEl.querySelector(".he-dock-slide-img-btn img");
+      if (slideImg && ch && ch.slide) {
+        slideImg.src = ch.slide;
+        slideImg.alt = ch.titleTH;
+      }
+      const capLabel = ch ? `${v.code} (${fmtTime(ch.startSec)}–${fmtTime(ch.endSec)}) — ${ch.titleTH}` : "";
+      dockEl.querySelectorAll("[data-he-zoom-slide]").forEach((btn) => {
+        if (ch && ch.slide) {
+          btn.setAttribute("data-he-zoom-slide", ch.slide);
+          btn.setAttribute("data-he-zoom-cap", capLabel);
+        }
+      });
+
+      const ktBtn = dockEl.querySelector("[data-he-open-kt]");
+      if (ktBtn && ch) {
+        if (ch.ktKey) {
+          ktBtn.hidden = false;
+          ktBtn.setAttribute("data-he-open-kt", ch.ktKey);
+          ktBtn.textContent = `✨ Key Takeaways (${ch.ktKey})`;
+        } else {
+          ktBtn.hidden = true;
+        }
+      }
+
+      // Highlight active chapter in list
+      dockEl.querySelectorAll(".he-dock-ch-btn").forEach((b) => {
+        const isCur = b.getAttribute("data-ch-id") === chId;
+        b.classList.toggle("is-active", isCur);
+      });
+    }
+  }
+
+  function renderDockShell(autoPlay) {
+    if (!dockEl || !state.isOpen) return;
+    const v = VIDEOS[state.activeCode] || VIDEOS.HE03;
+    state.mountedCode = v.code;
+    state.activeChapterId = "";
+
     const modTabsHtml = Object.values(VIDEOS)
       .map((mv) => {
         const isAct = mv.code === v.code;
@@ -793,32 +875,21 @@
       })
       .join("");
 
-    // Build chapter timeline pills for active module
     const chaptersHtml = v.chapters
-      .map((item) => {
-        const isCur = ch && item.id === ch.id;
-        return `
-          <button type="button" class="he-dock-ch-btn${isCur ? " is-active" : ""}" data-he-seek="${item.startSec}">
+      .map(
+        (item) => `
+          <button type="button" class="he-dock-ch-btn" data-ch-id="${esc(item.id)}" data-he-seek="${item.startSec}">
             <span class="he-dock-ch-time">${fmtTime(item.startSec)}–${fmtTime(item.endSec)}</span>
             <span class="he-dock-ch-title">${esc(item.titleTH)}</span>
-          </button>`;
-      })
+          </button>`
+      )
       .join("");
 
-    // Preserve existing iframe if only toggling PiP <-> Expanded without seeking!
-    const needFreshIframe = reloadIframe || !existingIframe;
+    const speedOptsHtml = SPEEDS.map(
+      (sp) => `<option value="${sp}"${sp === state.playbackRate ? " selected" : ""}>${sp}x</option>`
+    ).join("");
 
-    if (!needFreshIframe && existingIframe) {
-      // Update dynamic metadata & classes around the live iframe without interrupting video playback!
-      const modeBtn = dockEl.querySelector("[data-he-toggle-pip]");
-      if (modeBtn) {
-        modeBtn.innerHTML = state.isPip ? "⤢ ขยายสตูดิโอคู่สไลด์" : "❐ ย่อเป็นจอร่วมอ่าน (PiP)";
-        modeBtn.title = state.isPip
-          ? "ขยายดูสไลด์ HD และสารบัญรายหัวข้อ"
-          : "ย่อเป็นหน้าต่างเล็กมุมขวาล่างเพื่อเลื่อนอ่านเอกสารคำสอนไปพร้อมกับฟังบรรยาย";
-      }
-      return;
-    }
+    const initCh = findChapterForTime(v.code, state.currentSec) || v.chapters[0];
 
     dockEl.innerHTML = `
       <div class="he-dock-head">
@@ -826,14 +897,14 @@
           <span class="he-dock-live-pill">🎥 ${esc(v.code)} · ${fmtTime(state.currentSec)}</span>
           <div class="he-dock-head-titles">
             <strong class="he-dock-main-title">${esc(v.shortTH)}</strong>
-            <span class="he-dock-sub-speaker">${esc(v.speakers)} · Protected View-Only Stream</span>
+            <span class="he-dock-sub-speaker">${esc(v.speakers)}</span>
           </div>
         </div>
         <div class="he-dock-head-actions">
-          <button type="button" class="he-dock-ctrl-btn is-pip-btn" data-he-toggle-pip="1" title="${state.isPip ? "ขยายดูสไลด์ HD และสารบัญรายหัวข้อ" : "ย่อเป็นหน้าต่างเล็กมุมขวาล่างเพื่อเลื่อนอ่านเอกสารคำสอนไปพร้อมกับฟังบรรยาย"}">
-            ${state.isPip ? "⤢ ขยายสตูดิโอคู่สไลด์" : "❐ ย่อเป็นจอร่วมอ่าน (PiP)"}
+          <button type="button" class="he-dock-ctrl-btn is-pip-btn" data-he-toggle-pip="1">
+            ${state.isPip ? "⤢ ขยายสตูดิโอ" : "❐ ย่อเป็นจอร่วมอ่าน (PiP)"}
           </button>
-          <a class="he-dock-ctrl-btn" href="${esc(buildDriveViewUrl(v.driveId, state.currentSec))}" target="_blank" rel="noopener" title="เปิดในแท็บ Google Drive แยกต่างหาก">↗ Drive</a>
+          <a class="he-dock-ctrl-btn" href="${esc(buildDriveViewUrl(v.driveId))}" target="_blank" rel="noopener" title="เปิดไฟล์ต้นฉบับใน Google Drive">↗ Drive</a>
           <button type="button" class="he-dock-close-btn" data-he-close="1" aria-label="ปิดหน้าต่างวิดีโอ">✕</button>
         </div>
       </div>
@@ -843,60 +914,52 @@
       </div>
 
       <div class="he-dock-stage">
-        <!-- Left: Pure Clean 16:9 Protected Google Drive Video + Dedicated Non-Overlapping Teaching Bar Below -->
+        <!-- Left: Pure Clean 16:9 Native HTML5 Video + Dedicated Non-Overlapping Teaching Bar Below -->
         <div class="he-dock-video-col">
           <div class="he-dock-iframe-wrap">
-            <iframe
-              class="he-vdo-iframe"
-              src="${esc(previewUrl)}"
-              title="${esc(v.code + " — " + v.shortTH)}"
-              allow="autoplay; fullscreen"
-              allowfullscreen
-            ></iframe>
+            <video
+              class="he-native-video"
+              src="${esc(v.videoSrc)}"
+              poster="${esc((initCh && initCh.slide) || v.poster)}"
+              controls
+              playsinline
+              webkit-playsinline
+              preload="metadata"
+              controlsList="nodownload"
+              oncontextmenu="return false;"
+            ></video>
           </div>
 
-          <!-- Dedicated Non-Overlapping Cinema Teaching Note Bar (Never covers video controls!) -->
           <div class="he-dock-note-bar">
             <div class="he-dock-note-top">
-              <span class="he-dock-note-time">📍 ช่วงสไลด์ ${ch ? `${fmtTime(ch.startSec)}–${fmtTime(ch.endSec)}` : fmtTime(state.currentSec)}</span>
+              <span class="he-dock-note-time">📍 ช่วงสไลด์ ${initCh ? `${fmtTime(initCh.startSec)}–${fmtTime(initCh.endSec)}` : fmtTime(state.currentSec)}</span>
               <div class="he-dock-transport">
-                <button type="button" class="he-mini-seek" data-he-seek="${Math.max(0, state.currentSec - 15)}" title="ย้อนกลับ 15 วินาที">↺ -15s</button>
-                <button type="button" class="he-mini-seek" data-he-seek="${prevCh ? prevCh.startSec : 0}" ${prevCh ? "" : "disabled"}>‹ สไลด์ก่อน</button>
-                <button type="button" class="he-mini-seek" data-he-seek="${nextCh ? nextCh.startSec : v.durationSec - 5}" ${nextCh ? "" : "disabled"}>สไลด์ถัดไป ›</button>
-                <button type="button" class="he-mini-seek" data-he-seek="${Math.min(v.durationSec - 3, state.currentSec + 15)}" title="ข้ามไปข้างหน้า 15 วินาที">+15s ↻</button>
+                <button type="button" class="he-mini-seek" data-he-delta="-15" title="ย้อนกลับ 15 วินาที">↺ -15s</button>
+                <button type="button" class="he-mini-seek" data-he-nav-ch="prev" data-he-seek="0">‹ สไลด์ก่อน</button>
+                <button type="button" class="he-mini-seek" data-he-nav-ch="next" data-he-seek="0">สไลด์ถัดไป ›</button>
+                <button type="button" class="he-mini-seek" data-he-delta="15" title="ข้ามไปข้างหน้า 15 วินาที">+15s ↻</button>
+                <select class="he-speed-select" aria-label="ความเร็วการเล่นวิดีโอ" title="ปรับความเร็วเสียงบรรยาย">${speedOptsHtml}</select>
               </div>
             </div>
-            ${
-              ch
-                ? `<div class="he-dock-note-title">${esc(ch.titleTH)}</div>
-                   <p class="he-dock-note-desc">${esc(ch.noteTH)}</p>`
-                : ""
-            }
+            <div class="he-dock-note-title">${esc(initCh ? initCh.titleTH : "")}</div>
+            <p class="he-dock-note-desc">${esc(initCh ? initCh.noteTH : "")}</p>
           </div>
         </div>
 
         <!-- Right: Synchronized Captured HD Slide Preview + Chapter Navigator -->
         <div class="he-dock-side-col">
-          ${
-            ch && ch.slide
-              ? `<div class="he-dock-slide-card">
-                   <div class="he-dock-slide-head">
-                     <span>🖼 สไลด์ประกอบช่วงเวลานี้ (HD Capture)</span>
-                     <div class="he-dock-slide-acts">
-                       ${
-                         ch.ktKey
-                           ? `<button type="button" class="he-slide-act-pill" data-he-open-kt="${esc(ch.ktKey)}" title="เปิด Key Takeaways ของหมวดคำสอนที่ตรงกับสไลด์นี้">✨ Key Takeaways (${esc(ch.ktKey)})</button>`
-                           : ""
-                       }
-                       <button type="button" class="he-slide-act-pill" data-he-zoom-slide="${esc(ch.slide)}" data-he-zoom-cap="${esc(`${v.code} (${fmtTime(ch.startSec)}–${fmtTime(ch.endSec)}) — ${ch.titleTH}`)}">🔍 ขยายภาพ</button>
-                     </div>
-                   </div>
-                   <button type="button" class="he-dock-slide-img-btn" data-he-zoom-slide="${esc(ch.slide)}" data-he-zoom-cap="${esc(`${v.code} (${fmtTime(ch.startSec)}–${fmtTime(ch.endSec)}) — ${ch.titleTH}`)}" title="คลิกเพื่อขยายภาพสไลด์เต็มจอ">
-                     <img src="${esc(ch.slide)}" alt="${esc(ch.titleTH)}" loading="lazy" />
-                   </button>
-                 </div>`
-              : ""
-          }
+          <div class="he-dock-slide-card">
+            <div class="he-dock-slide-head">
+              <span>🖼 สไลด์ประกอบช่วงเวลานี้ (ซิงค์อัตโนมัติตามเวลาคลิป)</span>
+              <div class="he-dock-slide-acts">
+                <button type="button" class="he-slide-act-pill" data-he-open-kt="${esc((initCh && initCh.ktKey) || "HS6:1")}">✨ Key Takeaways</button>
+                <button type="button" class="he-slide-act-pill" data-he-zoom-slide="${esc((initCh && initCh.slide) || v.poster)}" data-he-zoom-cap="">🔍 ขยายภาพ</button>
+              </div>
+            </div>
+            <button type="button" class="he-dock-slide-img-btn" data-he-zoom-slide="${esc((initCh && initCh.slide) || v.poster)}" data-he-zoom-cap="" title="คลิกเพื่อขยายภาพสไลด์เต็มจอ">
+              <img src="${esc((initCh && initCh.slide) || v.poster)}" alt="${esc(initCh ? initCh.titleTH : v.shortTH)}" loading="lazy" />
+            </button>
+          </div>
 
           <div class="he-dock-ch-list-wrap">
             <div class="he-dock-ch-head">
@@ -910,6 +973,64 @@
         </div>
       </div>
     `;
+
+    const videoEl = getVideoEl();
+    if (videoEl) {
+      videoEl.addEventListener("timeupdate", () => {
+        const cur = Math.floor(videoEl.currentTime || 0);
+        if (cur !== state.currentSec) {
+          state.currentSec = cur;
+          syncDynamicUI();
+        }
+      });
+      videoEl.addEventListener("ratechange", () => {
+        if (videoEl.playbackRate) state.playbackRate = videoEl.playbackRate;
+      });
+    }
+
+    syncDynamicUI();
+    seekAndPlay(state.currentSec, autoPlay);
+  }
+
+  function openPlayer(code, sec, preferPip) {
+    const v = VIDEOS[code] || VIDEOS.HE03;
+    const sameVideoAlreadyMounted = state.isOpen && state.mountedCode === v.code && dockEl && !dockEl.hidden && getVideoEl();
+
+    state.activeCode = v.code;
+    state.currentSec = Math.max(0, Math.min(v.durationSec - 1, Math.floor(Number(sec) || 0)));
+    if (typeof preferPip === "boolean") state.isPip = preferPip;
+    state.isOpen = true;
+
+    const ktModal = document.getElementById("ktModalBackdrop");
+    if (ktModal && !ktModal.hidden && window.RACM_SECTION_TAKEAWAYS) {
+      window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal();
+    }
+
+    ensureDockDOM();
+    dockEl.hidden = false;
+
+    if (sameVideoAlreadyMounted) {
+      seekAndPlay(state.currentSec, true);
+    } else {
+      renderDockShell(true);
+    }
+  }
+
+  function closePlayer() {
+    const videoEl = getVideoEl();
+    if (videoEl) {
+      try {
+        videoEl.pause();
+        videoEl.removeAttribute("src");
+        videoEl.load();
+      } catch (_) {}
+    }
+    state.isOpen = false;
+    state.mountedCode = "";
+    if (dockEl) {
+      dockEl.hidden = true;
+      dockEl.innerHTML = "";
+    }
   }
 
   /* ---------- Render Compact Chips Inside Key Takeaways Modal ---------- */
@@ -935,7 +1056,6 @@
   function enhanceProse(proseContainer, explicitDocId) {
     if (!proseContainer || !proseContainer.querySelectorAll) return;
 
-    // 1. Add top-of-document 6-Video Series Companion Banner on HS6 & HS6-CONCISE
     const docH1 = proseContainer.querySelector("h2.doc-h1, .doc-h1");
     const h1Text = (docH1 && docH1.textContent) || "";
     const docIdStr = String(explicitDocId || (proseContainer.dataset && proseContainer.dataset.docId) || "");
@@ -948,7 +1068,7 @@
         <div class="he-series-copy">
           <span class="he-series-kicker">🎬 HEALTH ECONOMICS VIDEO COMPANION (HE00–HE05)</span>
           <strong>เชื่อมเนื้อหาคำสอน HS6 เข้ากับวิดีโอบรรยายและภาพสไลด์สำคัญรายช่วงเวลา</strong>
-          <span>คลิกปุ่มช่วงเวลาในแต่ละหมวดด้านล่างเพื่อเปิดดูวิดีโอควบคู่การอ่าน (รองรับโหมดจอเล็ก PiP มุมขวาล่าง ไม่เลื่อนหน้ากระดาษหนี)</span>
+          <span>คลิกปุ่มช่วงเวลาในแต่ละหมวดด้านล่างเพื่อเปิดดูวิดีโอได้ทันทีทุกอุปกรณ์ (รองรับโหมดจอเล็ก PiP ฟังไปอ่านไป ไม่เลื่อนหน้ากระดาษหนี)</span>
         </div>
         <div class="he-series-btns">
           <button type="button" class="he-series-open-btn is-primary" data-he-play="HE03" data-he-sec="41">▶ เริ่มฟัง HE03 (หลักการประกันสุขภาพ)</button>
@@ -959,15 +1079,14 @@
       let anchor = docH1;
       while (
         anchor.nextElementSibling &&
-        (anchor.nextElementSibling.tagName === "P" &&
-          (anchor.nextElementSibling.textContent || "").trim().length < 130)
+        anchor.nextElementSibling.tagName === "P" &&
+        (anchor.nextElementSibling.textContent || "").trim().length < 130
       ) {
         anchor = anchor.nextElementSibling;
       }
       anchor.insertAdjacentElement("afterend", banner);
     }
 
-    // 2. Enhance blockquote video callouts (in HS6, HS6-CONCISE, HS3, HS3-CONCISE, HS2, HS2-CONCISE)
     const bqs = [...proseContainer.querySelectorAll("blockquote")];
     bqs.forEach((bq) => {
       if (bq.dataset.heEnhanced === "1") return;
@@ -977,7 +1096,6 @@
       bq.classList.add("he-vdo-callout");
       bq.dataset.heEnhanced = "1";
 
-      // Upgrade every HE00-HE05 Drive link inside this callout into a rich interactive trigger
       const links = [...bq.querySelectorAll("a[href*='drive.google.com/file/d/']")];
       let firstParsed = null;
       links.forEach((a) => {
@@ -989,11 +1107,10 @@
         a.setAttribute("data-he-sec", String(parsed.sec));
         a.setAttribute(
           "title",
-          `คลิกเพื่อเปิดดูคลิป ${parsed.code} ที่นาที ${fmtTime(parsed.sec)} ในหน้าต่าง Companion Player ควบคู่การอ่าน (กด Ctrl/Cmd+คลิก เพื่อเปิดแท็บ Google Drive)`
+          `คลิกเพื่อเปิดดูคลิป ${parsed.code} ที่นาที ${fmtTime(parsed.sec)} ในหน้าต่าง Companion Player ควบคู่การอ่าน`
         );
       });
 
-      // Add a compact PiP / Studio quick action button in the callout header paragraph
       const firstP = bq.querySelector("p");
       if (firstP && firstParsed && !firstP.querySelector(".he-callout-pip-btn")) {
         firstP.classList.add("he-callout-head-row");
@@ -1008,7 +1125,6 @@
       }
     });
 
-    // 3. Add a subtle interactive "▶ เปิดดูช่วงคลิปของภาพสไลด์นี้" button inside captured video figure captions!
     const vdoFigs = [...proseContainer.querySelectorAll("figure.is-vdo-capture-fig, figure.editorial-figure")];
     vdoFigs.forEach((fig) => {
       const cap = fig.querySelector("figcaption");
@@ -1018,7 +1134,6 @@
       fig.classList.add("is-vdo-capture-fig");
       cap.dataset.heCapEnhanced = "1";
 
-      // Parse all `HE0X · MM:SS–MM:SS` patterns inside the caption and append clickable timestamp chips!
       const matches = [...capTxt.matchAll(/\b(HE0[0-5])\s*·\s*(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/g)];
       if (matches.length) {
         const chipBar = document.createElement("div");
@@ -1040,12 +1155,11 @@
     });
   }
 
-  /* ---------- Global Delegated Click & Keyboard Listeners ---------- */
+  /* ---------- Global Delegated Event Listeners ---------- */
   document.addEventListener("click", (ev) => {
     const t = ev.target && ev.target.closest ? ev.target : null;
     if (!t) return;
 
-    // Allow Cmd/Ctrl/Middle click on <a class="he-inline-play-link"> to open Google Drive directly in a new tab
     const playEl = t.closest("[data-he-play]");
     if (playEl) {
       if (playEl.tagName === "A" && (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1)) {
@@ -1060,7 +1174,6 @@
       return;
     }
 
-    // Intercept any raw HE00-HE05 Google Drive link inside textbook/discussion prose even if not pre-tagged
     const rawLink = t.closest("a[href*='drive.google.com/file/d/']");
     if (rawLink && !rawLink.closest("#heVdoCompanionDock")) {
       const parsed = parseHeDriveLink(rawLink.getAttribute("href"));
@@ -1082,7 +1195,7 @@
     if (t.closest("[data-he-toggle-pip]")) {
       ev.preventDefault();
       state.isPip = !state.isPip;
-      renderDock(false);
+      syncDynamicUI();
       return;
     }
 
@@ -1095,12 +1208,21 @@
       return;
     }
 
+    const deltaBtn = t.closest("[data-he-delta]");
+    if (deltaBtn) {
+      ev.preventDefault();
+      const d = parseInt(deltaBtn.getAttribute("data-he-delta") || "0", 10) || 0;
+      const videoEl = getVideoEl();
+      const base = videoEl ? Math.floor(videoEl.currentTime || state.currentSec) : state.currentSec;
+      seekAndPlay(base + d, true);
+      return;
+    }
+
     const seekBtn = t.closest("[data-he-seek]");
     if (seekBtn && !seekBtn.disabled) {
       ev.preventDefault();
       const nextSec = parseInt(seekBtn.getAttribute("data-he-seek") || "0", 10) || 0;
-      state.currentSec = Math.max(0, nextSec);
-      renderDock(true);
+      seekAndPlay(nextSec, true);
       return;
     }
 
@@ -1118,11 +1240,19 @@
     if (ktBtn && window.RACM_SECTION_TAKEAWAYS) {
       ev.preventDefault();
       const ktKey = ktBtn.getAttribute("data-he-open-kt");
-      // Automatically switch video dock to compact PiP corner so user can view Key Takeaways modal & keep listening!
       state.isPip = true;
-      renderDock(false);
+      syncDynamicUI();
       window.RACM_SECTION_TAKEAWAYS.openTakeawayModal(ktKey, false);
     }
+  });
+
+  document.addEventListener("change", (ev) => {
+    const sel = ev.target && ev.target.closest ? ev.target.closest(".he-speed-select") : null;
+    if (!sel) return;
+    const rate = parseFloat(sel.value) || 1;
+    state.playbackRate = rate;
+    const videoEl = getVideoEl();
+    if (videoEl) videoEl.playbackRate = rate;
   });
 
   document.addEventListener("keydown", (ev) => {

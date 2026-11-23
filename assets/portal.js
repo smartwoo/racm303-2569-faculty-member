@@ -148,6 +148,9 @@
     lsDriveScope: "folders",
     lsDriveLayout: localStorage.getItem("racm303_ls_drive_layout") || "grid",
     lsDriveSearch: "",
+    vdoDriveScope: "folders",
+    vdoDriveLayout: localStorage.getItem("racm303_vdo_drive_layout") || "grid",
+    vdoDriveSearch: "",
     sfFilter: "all",
     sfSelectedId: "",
     sfDriveSearch: "",
@@ -10084,10 +10087,48 @@
     `<path d="M3 9.2h18v8.3A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5V9.2z" fill="#fbbf24"/>` +
     `</svg>`;
 
+  function getHsVdoLectureInfo(modCode) {
+    const clean = /^(HS[1-6]|ST1)$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const helper = window.RACM_VDO_LECTURE_HELPER;
+    if (helper && typeof helper.getRecord === "function") {
+      const rec = helper.getRecord(clean);
+      return {
+        modCode: clean,
+        record: rec,
+        uploaded: Boolean(rec && rec.uploaded),
+        statusLabel: (rec && rec.statusLabel) || "รอแขวน VDO",
+        extBadge: rec && rec.uploaded ? rec.extBadge || "VDO" : "รอแขวน VDO",
+        icoCls: rec && rec.uploaded ? "is-quiz" : "is-pptx is-muted-pptx",
+        icoTxt: "🎬",
+        companionHeClips: (rec && rec.companionHeClips) || []
+      };
+    }
+    return {
+      modCode: clean,
+      record: null,
+      uploaded: false,
+      statusLabel: "รอแขวน VDO",
+      extBadge: "รอแขวน VDO",
+      icoCls: "is-pptx is-muted-pptx",
+      icoTxt: "🎬",
+      companionHeClips: []
+    };
+  }
+
+  function countUploadedHsVdoLectures() {
+    const helper = window.RACM_VDO_LECTURE_HELPER;
+    if (helper && typeof helper.countUploaded === "function") {
+      return helper.countUploaded();
+    }
+    return { uploaded: 0, total: 7 };
+  }
+
   function switchTextbookModulePreservingFormat(modCode) {
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       if (state.textbookSubMode === "lecture-slides") {
         state.lsDriveScope = "folders";
+      } else if (state.textbookSubMode === "vdo-lecture") {
+        state.vdoDriveScope = "folders";
       } else {
         state.textbookSubMode = "docs-drive";
         state.tbDriveScope = "folders";
@@ -10103,6 +10144,8 @@
       state.activeDocId = resolveDocIdForModuleAndFormat(clean, state.preferredHsFormat || "concise");
     } else if (state.textbookSubMode === "lecture-slides") {
       state.lsDriveScope = "module";
+    } else if (state.textbookSubMode === "vdo-lecture") {
+      state.vdoDriveScope = "module";
     } else {
       state.tbDriveScope = "module";
     }
@@ -10134,6 +10177,20 @@
       state.lsDriveScope = "module";
     } else {
       state.lsDriveScope = "folders";
+    }
+    switchTab("textbooks");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openHsVdoLecture(modCode) {
+    state.textbookSubMode = "vdo-lecture";
+    if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
+      state.vdoDriveScope = "folders";
+    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
+      state.activeHsModule = String(modCode).toUpperCase();
+      state.vdoDriveScope = "module";
+    } else {
+      state.vdoDriveScope = "folders";
     }
     switchTab("textbooks");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -10175,7 +10232,7 @@
   const HS_LOGICAL_FLOW_PROFILES = {
     ST1: {
       thread:
-        "เส้นทางการเรียนรู้ปูรากฐาน 5 ขั้นตอน: แนวคิดเรื่องระบบ บริบท CAS วงจรอุบาทว์ และภูเขาน้ำแข็ง → สกัดแผนภาพและตารางเปรียบเทียบฉบับย่อ → ทดสอบความเข้าใจด้วย Self-Quiz → สไลด์ประกอบการบรรยาย → เชื่อมสู่กรอบคาบเรียนและภาคสนาม",
+        "เส้นทางการเรียนรู้ปูรากฐาน 6 ขั้นตอน: แนวคิดเรื่องระบบ บริบท CAS วงจรอุบาทว์ และภูเขาน้ำแข็ง → สกัดแผนภาพและตารางเปรียบเทียบฉบับย่อ → ทดสอบความเข้าใจด้วย Self-Quiz → สไลด์ประกอบการบรรยาย → เชื่อมสู่กรอบคาบเรียนและภาคสนาม → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูรากฐานแนวคิดเรื่องระบบ (Input–Process–Output, Boundary, Contexts), เปรียบเทียบ Simple/Complicated/Complex Adaptive Systems (CAS), ความซับซ้อนในคลินิกและโรคเรื้อรัง, วงจรอุบาทว์ความแออัดห้องฉุกเฉิน (CLD) และแบบจำลองภูเขาน้ำแข็ง 4 ระดับ ฉบับสมบูรณ์",
       fullBridge: "เข้าใจธรรมชาติของระบบซับซ้อนและการคิดเชิงระบบครบทุกมิติ เพื่อสรุปแก่นสำคัญในขั้นที่ 2",
@@ -10185,11 +10242,11 @@
       quizFocus: "บริบทของระบบ คุณสมบัติ CAS วงจรอุบาทว์ห้องฉุกเฉิน แบบจำลองภูเขาน้ำแข็ง และความต่างของ Systems vs Systematic Thinking",
       quizBridge: "เช็กความเข้าใจก่อนดู Slide อาจารย์ในขั้นที่ 4 และเชื่อมสู่กรอบคาบเรียนและภาคสนามในขั้นที่ 5",
       caseFocus: "เชื่อมโยงกรอบคิดเชิงระบบจากคาบ ST1 สู่บทเรียน HS1–HS6 บันทึกสะท้อนคิด SRN 1–2 เวิร์กชอป CLD (22 ธ.ค.) และการนำเสนอระบบสุขภาพภาคสนาม (ฟอร์ม 3A)",
-      caseBridge: "ดูภาพรวมความเชื่อมโยงของคาบ ST1 กับเส้นทางการเรียนรู้ทั้ง 6 สัปดาห์"
+      caseBridge: "ดูภาพรวมความเชื่อมโยงของคาบ ST1 และต่อยอดทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS1: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพ, ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Primordial–Quaternary) → สกัดแผนภาพเปรียบเทียบ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์กรณีศึกษาคนทำงานโรงงานอุตสาหกรรมในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพ, ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Primordial–Quaternary) → สกัดแผนภาพเปรียบเทียบ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์กรณีศึกษาคนทำงานโรงงานอุตสาหกรรมในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานความต่างของ Disease–Illness–Sickness, นิยามสุขภาพในธรรมนูญสุขภาพแห่งชาติ, ปัจจัยกำหนดสุขภาพหลายระดับ และการป้องกันโรคทุกระดับ (Primordial–Quaternary) พร้อมกรณีตัวอย่างและเอกสารอ้างอิงครบถ้วน",
       fullBridge: "ปูฐานแนวคิดครบทุกมิติ เพื่อต่อยอดสู่การสกัดภาพรวมในขั้นที่ 2",
@@ -10199,11 +10256,11 @@
       quizFocus: "การแยกมิติความป่วย ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค (Primordial–Quaternary)",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และอภิปรายกลุ่มย่อยในขั้นที่ 5",
       caseFocus: "สุขภาวะคนทำงานโรงงานอุตสาหกรรม ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน"
+      caseBridge: "ถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS2: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานกรอบ WHO 6 Building Blocks และรูปแบบการดูแล 6W → สกัดแผนภาพโครงสร้างระบบบริการ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์วิกฤตแพทย์ใช้ทุนและ Models of Care ในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานกรอบ WHO 6 Building Blocks และรูปแบบการดูแล 6W → สกัดแผนภาพโครงสร้างระบบบริการ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์วิกฤตแพทย์ใช้ทุนและ Models of Care ในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานขอบเขตและหน้าที่ระบบสุขภาพตามกรอบ WHO 6 Building Blocks, เป้าหมายระบบสุขภาพ 5 ประการ, โครงสร้างหน่วยบริการไทย และการออกแบบรูปแบบการดูแล (Models of Care) ตามกรอบ 6W ฉบับสมบูรณ์",
       fullBridge: "เข้าใจโครงสร้างและหน้าที่เชิงระบบ เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
@@ -10213,11 +10270,11 @@
       quizFocus: "ขอบเขตระบบสุขภาพ WHO 6 Building Blocks และเกณฑ์เลือกรูปแบบการดูแล 6W",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และสวมบทบาทผู้บริหาร รพช. ในขั้นที่ 5",
       caseFocus: "วิกฤตภาระงานแพทย์ใช้ทุน (Intern) ใน รพช. และการเปรียบเทียบ Models of Care ผู้ป่วย 2 ระยะ",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการคิดเชิงระบบร่วมกับเพื่อนและอาจารย์ในชั้นเรียน"
+      caseBridge: "คิดเชิงระบบร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS3: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานคุณลักษณะระบบบริการ EQESaRR ทั้งองค์ประกอบหลัก–ย่อย → สกัดตารางจำแนกมิติและตัวชี้วัด → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → ประเมินนโยบาย Cancer Anywhere และ Palliative Care ในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานคุณลักษณะระบบบริการ EQESaRR ทั้งองค์ประกอบหลัก–ย่อย → สกัดตารางจำแนกมิติและตัวชี้วัด → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → ประเมินนโยบาย Cancer Anywhere และ Palliative Care ในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานที่มา นิยาม และตัวชี้วัดของคุณลักษณะระบบบริการสุขภาพที่พึงประสงค์ EQESaRR (Equity, Quality, Efficiency, Safety, Responsiveness, Resilience) พร้อมหลักฐานอ้างอิงฉบับสมบูรณ์",
       fullBridge: "เข้าใจนิยามและตัวชี้วัดครบทั้ง 6 คุณลักษณะ เพื่อต่อยอดสู่การสกัดแก่นในขั้นที่ 2",
@@ -10227,11 +10284,11 @@
       quizFocus: "การจำแนกมิติ EQESaRR และความเชื่อมโยงของตัวชี้วัดคุณภาพ–ความเป็นธรรม–ความยืดหยุ่น",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และประเมินนโยบายระดับประเทศในขั้นที่ 5",
       caseFocus: "จุดแข็ง–ช่องว่างของนโยบาย “Cancer Anywhere” และบริการดูแลแบบประคับประคอง (Palliative Care)",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการประเมินนโยบายอย่างมีหลักฐานร่วมกับเพื่อนและอาจารย์"
+      caseBridge: "ประเมินนโยบายอย่างมีหลักฐานร่วมกับเพื่อนและอาจารย์ และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS4: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานพฤติกรรมสุขภาพ–ทฤษฎีพฤติกรรมและ Nudge–วงล้อ COM-B–ความรอบรู้ด้านสุขภาพ–กฎบัตรออตตาวาและสามเสาหลักเซี่ยงไฮ้ → สกัดแผนภาพเชื่อมกลไกพฤติกรรม → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์กรณีศึกษาเกษตรกรไทยในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานพฤติกรรมสุขภาพ–ทฤษฎีพฤติกรรมและ Nudge–วงล้อ COM-B–ความรอบรู้ด้านสุขภาพ–กฎบัตรออตตาวาและสามเสาหลักเซี่ยงไฮ้ → สกัดแผนภาพเชื่อมกลไกพฤติกรรม → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์กรณีศึกษาเกษตรกรไทยในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานพฤติกรรมสุขภาพ 3 ประเภท, ทฤษฎี KAP/HBM/TTM, เศรษฐศาสตร์พฤติกรรมและทฤษฎีผลักดัน (Nudge), วงล้อการปรับเปลี่ยนพฤติกรรม (COM-B / BCW), ความรอบรู้ด้านสุขภาพ และการสร้างเสริมสุขภาพตามกฎบัตรออตตาวาและปฏิญญาเซี่ยงไฮ้ฉบับสมบูรณ์",
       fullBridge: "เข้าใจเหตุปัจจัยที่กำหนดพฤติกรรมตั้งแต่ระดับบุคคลถึงระดับประชากร เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
@@ -10241,11 +10298,11 @@
       quizFocus: "พฤติกรรมสุขภาพ 3 ประเภท, ทฤษฎีพฤติกรรมและ Nudge, วงล้อ COM-B, ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และออกแบบทางออกในขั้นที่ 5",
       caseFocus: "กับดักสารเคมีและทางออกที่ยั่งยืนของเกษตรกรไทยผ่านเลนส์ CDoH, COM-B และ Ottawa Charter",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการออกแบบมาตรการสร้างเสริมสุขภาพร่วมกับเพื่อนและอาจารย์"
+      caseBridge: "ออกแบบมาตรการสร้างเสริมสุขภาพร่วมกับเพื่อนและอาจารย์ และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS5: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานพัฒนาการ PHC (Alma-Ata สู่ Astana 3 เสาหลัก) และ Primary Care 5 คุณลักษณะ → สกัดตารางแยกความต่าง → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์โครงการ “สุขภาวะข้างถนน” ในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานพัฒนาการ PHC (Alma-Ata สู่ Astana 3 เสาหลัก) และ Primary Care 5 คุณลักษณะ → สกัดตารางแยกความต่าง → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์โครงการ “สุขภาวะข้างถนน” ในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานพัฒนาการระบบบริการสุขภาพปฐมภูมิจากอัลมา-อาตา สู่ปฏิญญาแอสทานา (3 เสาหลัก PHC), 5 คุณลักษณะบริการปฐมภูมิ (Primary Care), หน้าที่สาธารณสุขที่จำเป็น (EPHFs) และบทบาทต่อ UHC ฉบับสมบูรณ์",
       fullBridge: "เข้าใจแก่นปรัชญาและโครงสร้างระบบปฐมภูมิ เพื่อต่อยอดสู่การสกัดแผนภาพในขั้นที่ 2",
@@ -10255,11 +10312,11 @@
       quizFocus: "ความต่างของ Primary Care (5 คุณลักษณะ) กับ Primary Health Care (3 เสาหลัก Astana)",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และต่อจิ๊กซอว์ดูแลกลุ่มเปราะบางในขั้นที่ 5",
       caseFocus: "โครงการ “สุขภาวะข้างถนน” ภารกิจต่อจิ๊กซอว์สุขภาพเพื่อคนไร้บ้านด้วยเลนส์ Primary Care & PHC",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการวิเคราะห์ระบบดูแลกลุ่มเปราะบางร่วมกับเพื่อนและอาจารย์"
+      caseBridge: "วิเคราะห์ระบบดูแลกลุ่มเปราะบางร่วมกับเพื่อนและอาจารย์ และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS6: {
       thread:
-        "เส้นทางการเรียนรู้ 5 ขั้นตอน: ปูฐานทฤษฎีประกันสุขภาพ–3 กองทุนไทย–กลไกจ่ายเงิน–Moral Hazard → สกัดตารางเปรียบเทียบแรงจูงใจ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์ UHC โลก ช่องว่างแรงงานนอกระบบ และ FFS/Capitation/P4P ในห้องเรียน",
+        "เส้นทางการเรียนรู้ 6 ขั้นตอน: ปูฐานทฤษฎีประกันสุขภาพ–3 กองทุนไทย–กลไกจ่ายเงิน–Moral Hazard → สกัดตารางเปรียบเทียบแรงจูงใจ → เช็กความแม่นยำด้วย Self-Quiz → ฟังบรรยายต้นคาบจาก Slide อาจารย์ → วิเคราะห์ UHC โลก ช่องว่างแรงงานนอกระบบ และ FFS/Capitation/P4P ในห้องเรียน → VDO Lecture ประจำคาบ (รอแขวน VDO)",
       fullDesc:
         "ปูพื้นฐานหลักการและองค์ประกอบการประกันสุขภาพ, ระบบ 3 กองทุนสุขภาพไทย, รูปแบบการจ่ายค่าบริการผู้ให้บริการ (FFS, Capitation, DRG, Global Budget) และปัญหา Moral Hazard ฉบับสมบูรณ์",
       fullBridge: "เข้าใจหลักการคลังสุขภาพและกลไกการจ่ายเงิน เพื่อต่อยอดสู่การสกัดตารางเปรียบเทียบในขั้นที่ 2",
@@ -10269,7 +10326,7 @@
       quizFocus: "ทฤษฎีการเฉลี่ยความเสี่ยง, 3 กองทุนไทย, แรงจูงใจของ FFS/Capitation และ Moral Hazard",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และวิเคราะห์ข้อมูล UHC โลกในขั้นที่ 5",
       caseFocus: "สถานการณ์ UHC โลก (SDG 3.8), ช่องว่างสิทธิแรงงานนอกระบบ และแรงจูงใจของ FFS vs Capitation & P4P",
-      caseBridge: "ปิดวงจรการเรียนรู้ด้วยการวิเคราะห์นโยบายการคลังสุขภาพร่วมกับเพื่อนและอาจารย์"
+      caseBridge: "วิเคราะห์นโยบายการคลังสุขภาพร่วมกับเพื่อนและอาจารย์ และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     }
   };
 
@@ -10299,6 +10356,7 @@
     const profile = HS_LOGICAL_FLOW_PROFILES[code] || HS_LOGICAL_FLOW_PROFILES.HS1;
     const lecturer = getHsLecturerName(code);
     const slideInfo = getHsSlideInfo(code);
+    const vdoInfo = getHsVdoLectureInfo(code);
     const docs = HS.docs || [];
     const fullDoc = docs.find((d) => d.id === mod.docId) || null;
     const abridgedDoc = docs.find((d) => d.id === mod.conciseDocId) || null;
@@ -10474,7 +10532,38 @@
             bridge: profile.caseBridge,
             primaryLabel: ROLE === "faculty" ? "▶ เปิดสไลด์ + เฉลย (16:9)" : "▶ เปิดสไลด์ในชั้นเรียน (16:9)",
             onPrimary: () => openHsDiscussion(code)
-          }
+          },
+      {
+        num: "06",
+        circle: "⑥",
+        key: "vdo-lecture",
+        stepTag: "STEP 06 · VDO บรรยายประจำคาบ",
+        stepperTitle: "VDO Lecture",
+        stepperSub: vdoInfo.uploaded ? `✓ ${vdoInfo.extBadge}` : "รอแขวน VDO",
+        shortLabel: "VDO Lecture",
+        title: `VDO Lecture ประจำคาบ`,
+        timing: vdoInfo.uploaded
+          ? `✓ พร้อมรับชม · ${vdoInfo.extBadge}`
+          : "⏳ รอแขวน VDO · Interactive Studio",
+        tone: vdoInfo.uploaded ? "tone-indigo" : "tone-grey-pending",
+        icon: "🎬",
+        vdoInfo,
+        isPendingVdo: !vdoInfo.uploaded,
+        desc: vdoInfo.uploaded
+          ? `รับชมวิดีโอบรรยายประจำคาบ ${code} โดย ${(vdoInfo.record && vdoInfo.record.lecturer) || lecturer} พร้อมตัวเชื่อมสไลด์และประเด็นสำคัญได้ทันที`
+          : `วิดีโอบรรยายประจำคาบ ${code} โดย ${(vdoInfo.record && vdoInfo.record.lecturer) || lecturer} — สถานะปัจจุบัน: รอแขวน VDO (เตรียมโครงสร้างพร้อมเชื่อมต่อ Interactive VDO Lecture Studio)`,
+        bridge: vdoInfo.uploaded
+          ? "ทบทวนวิดีโอบรรยายซ้ำตามจังหวะเวลาของตนเองควบคู่กับเอกสารคำสอนและสไลด์"
+          : vdoInfo.companionHeClips && vdoInfo.companionHeClips.length > 0
+          ? `ระหว่างรอแขวน VDO หลักของคาบ ${code} สามารถกดเข้าไปรับชมคลิปบรรยายเสริมชุด Health Economics (${vdoInfo.companionHeClips.length} ตอนที่เกี่ยวข้อง) ได้ทันที`
+          : "เมื่อแขวน VDO บรรยายและเชื่อม Interactive Studio แล้ว ขั้นที่ 6 จะเปลี่ยนเป็นสีม่วงครามให้คลิกรับชมได้ทันที",
+        primaryLabel: vdoInfo.uploaded
+          ? `▶ เปิดรับชม VDO Lecture (${code})`
+          : ROLE === "faculty"
+          ? `🎬 เปิดหน้าแขวน VDO Lecture (${code})`
+          : "⏳ รอแขวน VDO Lecture",
+        onPrimary: () => openHsVdoLecture(code)
+      }
     ];
 
     return {
@@ -10484,6 +10573,7 @@
       lecturer,
       shortDate: formatHsShortDate(mod.scheduleDate),
       slideInfo,
+      vdoInfo,
       fullDoc,
       abridgedDoc,
       wbDoc,
@@ -10922,7 +11012,7 @@
                   "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (Beyond HS1–HS6 · 6 คาบสอนสำคัญ)",
                   "Systems Thinking & Expert Panels (Beyond HS1–HS6 · 6 Key Sessions)"
                 )
-              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 5 ขั้นตอน")
+              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน")
         ),
         make(
           "p",
@@ -10932,7 +11022,7 @@
                   "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
                   "6 high-impact taught sessions beyond the HS1–HS6 written exam (18.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
                 )
-              : `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class`)
+              : `เลือกบทเรียน ST1 & HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (รอแขวน VDO)`)
         )
       );
     } else {
@@ -10955,7 +11045,7 @@
 
     const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
     tabsRow.setAttribute("role", "tablist");
-    tabsRow.setAttribute("aria-label", `สลับขั้นตอนการเรียนรู้ 5 ขั้นและเวทีคิดเชิงระบบของ ${isAllActive || isBeyondActive ? "HS1–HS6" : mod.code}`);
+    tabsRow.setAttribute("aria-label", `สลับขั้นตอนการเรียนรู้ 6 ขั้นและเวทีคิดเชิงระบบของ ${isAllActive || isBeyondActive ? "HS1–HS6" : mod.code}`);
 
     const makeTabBtn = (label, kind, available, onClick, disabledTitle, badgeText, badgeClsOrMeta) => {
       const em = badgeClsOrMeta && typeof badgeClsOrMeta === "object" ? badgeClsOrMeta : {};
@@ -11003,7 +11093,7 @@
     // Hub Overview / Drive Folder
     tabsRow.appendChild(
       makeTabBtn(
-        isDriveUi ? `📁 โฟลเดอร์ (${modTag})` : `🧭 ภาพรวม 5 ขั้น (${modTag})`,
+        isDriveUi ? `📁 โฟลเดอร์ (${modTag})` : `🧭 ภาพรวม 6 ขั้น (${modTag})`,
         "docs",
         true,
         () => {
@@ -11102,6 +11192,32 @@
         )
       );
     }
+
+    // Step 6: VDO Lecture (Grey when pending "รอแขวน VDO", Colored when uploaded)
+    const hsVdoCounts = countUploadedHsVdoLectures();
+    const curVdoInfo = getHsVdoLectureInfo(mod.code);
+    const isVdoUploaded = showAllTag ? hsVdoCounts.uploaded > 0 : curVdoInfo.uploaded;
+    const vdoPillLabel = showAllTag
+      ? hsVdoCounts.uploaded > 0
+        ? `✓ ${hsVdoCounts.uploaded}/${hsVdoCounts.total} คาบ`
+        : "รอแขวน VDO"
+      : curVdoInfo.uploaded
+      ? `✓ ${curVdoInfo.extBadge}`
+      : "รอแขวน VDO";
+
+    tabsRow.appendChild(
+      makeTabBtn(
+        `⑥ VDO Lecture (${modTag})`,
+        "vdo-lecture",
+        true,
+        () => {
+          openHsVdoLecture(showAllTag ? "FOLDERS" : mod.code);
+        },
+        "",
+        vdoPillLabel,
+        { slidePending: !isVdoUploaded, slideUploaded: isVdoUploaded }
+      )
+    );
 
     // Beyond the Exam: Systems Thinking, Expert Panels & Policy Exercise (6 Core Sessions)
     tabsRow.appendChild(
@@ -11439,9 +11555,31 @@
           });
         }
 
-        // 6. Faculty Guide & Teacher Answer Key (Faculty Portal Only)
+        // 6. Step 06 VDO Lecture (รอแขวน VDO)
+        const vdoInf = getHsVdoLectureInfo(m.code);
+        const vdoFileName = vdoInf.uploaded
+          ? `06_${m.code}_VDO_Lecture.mp4`
+          : `06_${m.code}_VDO_Lecture_(รอแขวน_VDO).mp4`;
+        out.push({
+          uid: `vdolec:${m.id}`,
+          entryType: "vdo-lecture",
+          typeGroup: "vdo-lecture",
+          mod: m,
+          vdoInfo: vdoInf,
+          fileName: vdoFileName,
+          kicker: "🎬 ขั้นที่ 6 · VDO Lecture",
+          chipLabel: vdoInf.uploaded ? `ขั้นที่ 6 · ✓ ${vdoInf.extBadge}` : "ขั้นที่ 6 · ⏳ รอแขวน VDO",
+          headCls: "is-quiz",
+          subDesc: (vdoInf.record && vdoInf.record.note) || `VDO บรรยายประจำคาบ ${m.code} (รอแขวน VDO)`,
+          lecturer,
+          shortDate,
+          searchText: `${m.code} ${m.title} ${vdoFileName} vdo lecture video วิดีโอบรรยาย รอแขวน vdo ${lecturer}`.toLocaleLowerCase("th"),
+          onOpen: () => openHsVdoLecture(m.code)
+        });
+
+        // 7. Faculty Guide & Teacher Answer Key (Faculty Portal Only)
         if (ROLE === "faculty") {
-          const facFileName = `06_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`;
+          const facFileName = `07_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`;
           out.push({
             uid: `facguide:${m.id}`,
             entryType: "faculty-guide",
@@ -11900,6 +12038,60 @@
         return card;
       }
 
+      // Type B2: VDO Lecture Card (Grey when pending "รอแขวน VDO", Colored when uploaded)
+      if (item.entryType === "vdo-lecture") {
+        const m = item.mod;
+        const vInf = item.vdoInfo || getHsVdoLectureInfo(m.code);
+        const card = make("div", null, `gdrive-file-card${vInf.uploaded ? "" : " is-pending-upload"}`);
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.dataset.vdoMod = m.id;
+        card.dataset.driveFileType = "vdo-lecture";
+
+        const cHead = make("div", null, "gdrive-card-head");
+        cHead.append(
+          make("span", "🎬", `gdrive-filetype-ico ${vInf.icoCls}`),
+          make("span", item.fileName, "gdrive-card-filename"),
+          make(
+            "span",
+            vInf.uploaded ? `✓ ${vInf.extBadge}` : "⏳ รอแขวน VDO",
+            `gdrive-status-chip ${vInf.uploaded ? "is-open-now" : "is-pending"}`
+          )
+        );
+        card.appendChild(cHead);
+
+        const thumb = make("div", null, "gdrive-pending-thumb");
+        thumb.innerHTML =
+          `<div class="gd-pending-top">` +
+          `<span class="gd-pending-session">VDO Lecture ${escapeHtml(m.code)} · ขั้นที่ 6</span>` +
+          `<span class="gd-pending-weight">สอบ ${escapeHtml(m.examWeight || "")}</span>` +
+          `</div>` +
+          `<div class="gd-pending-center">` +
+          `<div class="gd-pending-cloud-ico">${vInf.uploaded ? "🎬" : "🎞️"}</div>` +
+          `<div class="gd-pending-title">${escapeHtml(m.code)}: ${escapeHtml(m.title)}</div>` +
+          `<div class="gd-pending-lecturer">ผู้บรรยาย: <strong>${escapeHtml((vInf.record && vInf.record.lecturer) || item.lecturer)}</strong></div>` +
+          `<div class="gd-pending-pill">${escapeHtml(
+            vInf.uploaded
+              ? `✓ พร้อมรับชม VDO Lecture`
+              : "⏳ รอแขวน VDO บรรยายประจำคาบ"
+          )}</div>` +
+          `</div>`;
+        card.appendChild(thumb);
+
+        const cFoot = make("div", null, "gdrive-card-foot");
+        cFoot.appendChild(make("span", `📅 ${item.shortDate}`, "gdrive-card-date"));
+        cFoot.appendChild(
+          make(
+            "span",
+            vInf.uploaded ? "▶ เปิดรับชม VDO" : "รอแขวน VDO",
+            `gdrive-status-chip ${vInf.uploaded ? "is-open-now" : "is-pending"}`
+          )
+        );
+        card.appendChild(cFoot);
+        card.addEventListener("click", item.onOpen);
+        return card;
+      }
+
       // Type C: Teaching Docs (.gdoc), Worksheet, Quiz App, Faculty Guide
       const isCur = item.doc && item.doc.id === state.activeDocId;
       const card = make("div", null, `gdrive-file-card${isCur ? " is-current-deck" : ""}`);
@@ -12031,11 +12223,14 @@
         trEl.tabIndex = 0;
 
         const rowSlideInf = item.entryType === "lecture-slide" ? item.slideInfo || getHsSlideInfo(item.mod.code) : null;
+        const rowVdoInf = item.entryType === "vdo-lecture" ? item.vdoInfo || getHsVdoLectureInfo(item.mod.code) : null;
         const icoCls =
           item.entryType === "discussion-pptx"
             ? "is-pptx"
             : item.entryType === "lecture-slide"
             ? rowSlideInf.icoCls
+            : item.entryType === "vdo-lecture"
+            ? rowVdoInf.icoCls
             : item.entryType === "quiz-app"
             ? "is-quiz"
             : item.entryType === "faculty-guide"
@@ -12046,6 +12241,8 @@
             ? "P"
             : item.entryType === "lecture-slide"
             ? rowSlideInf.icoTxt
+            : item.entryType === "vdo-lecture"
+            ? "🎬"
             : item.entryType === "quiz-app"
             ? "🧠"
             : item.entryType === "faculty-guide"
@@ -12071,6 +12268,10 @@
             `gdrive-status-chip${
               item.entryType === "lecture-slide"
                 ? rowSlideInf && rowSlideInf.uploaded
+                  ? " is-open-now"
+                  : " is-pending"
+                : item.entryType === "vdo-lecture"
+                ? rowVdoInf && rowVdoInf.uploaded
                   ? " is-open-now"
                   : " is-pending"
                 : isCur
@@ -12117,6 +12318,26 @@
             actRow.appendChild(upBtn);
           } else {
             actRow.appendChild(make("span", "รออาจารย์ Upload", "gdrive-folder-hint"));
+          }
+        } else if (item.entryType === "vdo-lecture") {
+          if (rowVdoInf && rowVdoInf.uploaded) {
+            const openBtn = make("button", "🎬 เปิดรับชม VDO", "gdrive-row-open-btn");
+            openBtn.type = "button";
+            openBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              item.onOpen();
+            });
+            actRow.appendChild(openBtn);
+          } else if (ROLE === "faculty") {
+            const upBtn = make("button", "🎬 แขวน VDO Lecture", "gdrive-row-sec-btn");
+            upBtn.type = "button";
+            upBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              item.onOpen();
+            });
+            actRow.appendChild(upBtn);
+          } else {
+            actRow.appendChild(make("span", "รอแขวน VDO", "gdrive-folder-hint"));
           }
         } else {
           const openLabel =
@@ -12278,6 +12499,7 @@
           const lecturer = getHsLecturerName(m.code);
           const shortDate = formatHsShortDate(m.scheduleDate);
           const fSlide = getHsSlideInfo(m.code);
+          const fVdo = getHsVdoLectureInfo(m.code);
           const fCard = make("div", null, "gdrive-folder-card");
           fCard.tabIndex = 0;
           fCard.setAttribute("role", "button");
@@ -12295,6 +12517,11 @@
               : `<span class="gdrive-folder-tag is-pending">④ Slide อาจารย์ (รอ Upload)</span>`
           );
           tagParts.push(`<span class="gdrive-folder-tag is-pptx">⑤ Case Discussion</span>`);
+          tagParts.push(
+            fVdo.uploaded
+              ? `<span class="gdrive-folder-tag is-uploaded-slide">⑥ VDO Lecture (✓ ${escapeHtml(fVdo.extBadge)})</span>`
+              : `<span class="gdrive-folder-tag is-pending">⑥ VDO Lecture (รอแขวน VDO)</span>`
+          );
           if (ROLE === "faculty") tagParts.push(`<span class="gdrive-folder-tag is-faculty">📕 คู่มือผู้สอน</span>`);
 
           fCard.innerHTML =
@@ -12375,6 +12602,7 @@
         const lecturer = getHsLecturerName(m.code);
         const shortDate = formatHsShortDate(m.scheduleDate);
         const fSlide = getHsSlideInfo(m.code);
+        const fVdo = getHsVdoLectureInfo(m.code);
         const trEl = document.createElement("tr");
         trEl.className = "gdrive-list-row";
         trEl.tabIndex = 0;
@@ -12386,7 +12614,10 @@
           fSlide.uploaded
             ? `<span class="gdrive-folder-tag is-uploaded-slide">④ Slide อ. (✓ ${escapeHtml(fSlide.extBadge)})</span>`
             : `<span class="gdrive-folder-tag is-pending">④ Slide อ. (รอ)</span>`,
-          `<span class="gdrive-folder-tag is-pptx">⑤ Case</span>`
+          `<span class="gdrive-folder-tag is-pptx">⑤ Case</span>`,
+          fVdo.uploaded
+            ? `<span class="gdrive-folder-tag is-uploaded-slide">⑥ VDO (✓)</span>`
+            : `<span class="gdrive-folder-tag is-pending">⑥ VDO (รอแขวน)</span>`
         ]
           .filter(Boolean)
           .join(" ");
@@ -12666,6 +12897,12 @@
           active: scope !== "folders" && fmtChip === "discussion-pptx",
           label: "💬 ⑤ Case Discussion (.pptx)",
           onClick: makeFilterToggle("discussion-pptx")
+        },
+        {
+          id: "vdo-lecture",
+          active: scope !== "folders" && fmtChip === "vdo-lecture",
+          label: "🎬 ⑥ VDO Lecture",
+          onClick: makeFilterToggle("vdo-lecture")
         }
       ];
       if (ROLE === "faculty") {
@@ -12688,8 +12925,8 @@
         make(
           "span",
           scope === "folders"
-            ? "เลือกโฟลเดอร์ HS1–HS6 เพื่อเปิดดูไฟล์ครบทั้ง 5 ขั้นตอน (① Full · ② Abridged · ③ Self-Quiz · ④ Slide อาจารย์ · ⑤ Case Discussion)"
-            : "ไฟล์เรียงตามลำดับการเรียนรู้ 01 Full → 02 Abridged → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion",
+            ? "เลือกโฟลเดอร์ ST1 & HS1–HS6 เพื่อเปิดดูไฟล์ครบทั้ง 6 ขั้นตอน (① Full · ② Abridged · ③ Self-Quiz · ④ Slide อาจารย์ · ⑤ Case Discussion · ⑥ VDO Lecture)"
+            : "ไฟล์เรียงตามลำดับการเรียนรู้ 01 Full → 02 Abridged → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion → 06 VDO Lecture",
           "gdrive-folder-hint"
         )
       );
@@ -14747,7 +14984,7 @@
 
     const stage = make("div", null, "hs-atv-stage hsd-no-print");
     stage.setAttribute("role", "region");
-    stage.setAttribute("aria-label", "เส้นทางการเรียนรู้ระบบสุขภาพ 5 ขั้นตอน (โหมดเรียน)");
+    stage.setAttribute("aria-label", "เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน (โหมดเรียน)");
 
     if (scope === "folders") {
       const shelf = make("div", null, "tv-shelf");
@@ -14757,7 +14994,7 @@
         make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 7 บท (ST1 รากฐาน & HS1 – HS6)", "tv-shelf-title"),
         make(
           "span",
-          "เริ่มจาก ST1 (ปูรากฐานระบบและการคิดเชิงระบบ) ต่อเนื่องสู่ HS1–HS6 เรียงตาม Logical Flow 5 ขั้นตอน: ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ ประยุกต์ในชั้นเรียน",
+          "เริ่มจาก ST1 (ปูรากฐานระบบและการคิดเชิงระบบ) ต่อเนื่องสู่ HS1–HS6 เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ ประยุกต์ในชั้นเรียน → ⑥ VDO Lecture (รอแขวน VDO)",
           "tv-shelf-sub"
         )
       );
@@ -14770,6 +15007,7 @@
         const lecturer = getHsLecturerName(m.code);
         const shortDate = formatHsShortDate(m.scheduleDate);
         const mSlide = getHsSlideInfo(m.code);
+        const mVdo = getHsVdoLectureInfo(m.code);
         const card = make("div", null, `tv-episode-card hs-atv-ep-card ep-${epNum}`);
         card.tabIndex = 0;
         card.setAttribute("role", "button");
@@ -14850,6 +15088,21 @@
         });
         pills.appendChild(bDisc);
 
+        const bVdo = make(
+          "button",
+          mVdo.uploaded ? `⑥ VDO (✓)` : "⑥ VDO Lecture",
+          `hs-atv-ep-pill ${mVdo.uploaded ? "is-slide-uploaded-pill" : "is-slide-pending-pill"}`
+        );
+        bVdo.type = "button";
+        bVdo.title = mVdo.uploaded
+          ? `ขั้นที่ 6: VDO Lecture (${m.code}) — พร้อมรับชม`
+          : `ขั้นที่ 6: VDO Lecture (${m.code}) — รอแขวน VDO`;
+        bVdo.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openHsVdoLecture(m.code);
+        });
+        pills.appendChild(bVdo);
+
         const openModSpotlight = () => {
           state.activeHsModule = m.id;
           state.tbDriveScope = "module";
@@ -14896,7 +15149,7 @@
       return stage;
     }
 
-    // Focused Episode Spotlight (scope !== "folders") — Coherent 5-Step Logical Flow
+    // Focused Episode Spotlight (scope !== "folders") — Coherent 6-Step Logical Flow
     const flow = getHsLogicalFlowModel(curMod.code);
     const epIdx = getEpNumIndex(curMod.code);
 
@@ -14904,7 +15157,7 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backAllBtn = make("button", "← ดูครบทุกตอน (HS1–HS6)", "hs-atv-back-pill");
+    const backAllBtn = make("button", "← ดูครบทุกตอน (ST1 & HS1–HS6)", "hs-atv-back-pill");
     backAllBtn.type = "button";
     backAllBtn.addEventListener("click", () => {
       state.tbDriveScope = "folders";
@@ -14913,7 +15166,7 @@
     });
     heroTop.append(
       backAllBtn,
-      make("span", `🧭 เส้นทางการเรียนรู้ 5 ขั้นตอน · ${curMod.code} · สอบ ${curMod.examWeight || ""}`, "tv-hero-kicker")
+      make("span", `🧭 เส้นทางการเรียนรู้ 6 ขั้นตอน · ${curMod.code} · สอบ ${curMod.examWeight || ""}`, "tv-hero-kicker")
     );
 
     const heroBody = make("div", null, "tv-hero-body");
@@ -14926,6 +15179,7 @@
     const heroActions = make("div", null, "tv-hero-actions");
     flow.steps.forEach((step, idx) => {
       const isSlideStep = step.key === "lecture-slides";
+      const isVdoStep = step.key === "vdo-lecture";
       const btnLabel =
         step.key === "full"
           ? "① อ่านฉบับเต็ม (Full)"
@@ -14937,11 +15191,21 @@
           ? step.slideInfo && step.slideInfo.uploaded
             ? `④ Slide อาจารย์ (✓ ${step.slideInfo.extBadge})`
             : "④ Slide อาจารย์ (รอ Upload)"
+          : isVdoStep
+          ? step.vdoInfo && step.vdoInfo.uploaded
+            ? `⑥ VDO Lecture (✓ ${step.vdoInfo.extBadge})`
+            : "⑥ VDO Lecture (รอแขวน VDO)"
+          : step.key === "systems-forum"
+          ? "⑤ กรอบคาบเรียน (ST1)"
           : ROLE === "faculty"
           ? "⑤ Case Discussion & เฉลย"
           : "⑤ Case Discussion in Class";
       const extraHeroCls = isSlideStep
         ? step.slideInfo && step.slideInfo.uploaded
+          ? " is-slide-uploaded-hero"
+          : " is-slide-pending-hero"
+        : isVdoStep
+        ? step.vdoInfo && step.vdoInfo.uploaded
           ? " is-slide-uploaded-hero"
           : " is-slide-pending-hero"
         : "";
@@ -14954,13 +15218,17 @@
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
-    // Visual 5-Step Logical Flow Stepper Bar
+    // Visual 6-Step Logical Flow Stepper Bar
     const stepper = make("nav", null, "hs-flow-stepper");
-    stepper.setAttribute("aria-label", `ลำดับการเรียนรู้ 5 ขั้นตอนของ ${curMod.code}`);
+    stepper.setAttribute("aria-label", `ลำดับการเรียนรู้ 6 ขั้นตอนของ ${curMod.code}`);
     flow.steps.forEach((step, idx) => {
       const slideStateCls =
         step.key === "lecture-slides"
           ? step.slideInfo && step.slideInfo.uploaded
+            ? " is-slide-uploaded"
+            : " is-slide-pending"
+          : step.key === "vdo-lecture"
+          ? step.vdoInfo && step.vdoInfo.uploaded
             ? " is-slide-uploaded"
             : " is-slide-pending"
           : "";
@@ -14980,12 +15248,17 @@
     });
     stage.appendChild(stepper);
 
-    // Coherent 5-Step Logical Flow Cards Grid (2 + 2 + 1 balanced across all HS1-HS6)
+    // Coherent 6-Step Logical Flow Cards Grid (2 x 3 balanced across ST1 & HS1-HS6)
     const cardsGrid = make("div", null, "hs-flow-cards-grid");
     flow.steps.forEach((step, idx) => {
       const isSlideStep = step.key === "lecture-slides";
+      const isVdoStep = step.key === "vdo-lecture";
       const slideStateCls = isSlideStep
         ? step.slideInfo && step.slideInfo.uploaded
+          ? " is-slide-uploaded"
+          : " is-slide-pending"
+        : isVdoStep
+        ? step.vdoInfo && step.vdoInfo.uploaded
           ? " is-slide-uploaded"
           : " is-slide-pending"
         : "";
@@ -15194,6 +15467,18 @@
           downloadSingleModulePptx(curMod.id);
         });
         foot.append(scrollBtn, pptBtn);
+      } else if (step.key === "vdo-lecture") {
+        const compClips = (step.vdoInfo && step.vdoInfo.companionHeClips) || [];
+        if (compClips.length > 0 && window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.open === "function") {
+          const firstClip = compClips[0];
+          const compBtn = make("button", `🎥 ดูคลิปเสริม HE (${compClips.length} ตอน)`, "hs-atv-mini-dl");
+          compBtn.type = "button";
+          compBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            window.RACM_HE_VIDEO_BRIDGE.open(firstClip.clipId, firstClip.startSec || 0, firstClip.label || "");
+          });
+          foot.appendChild(compBtn);
+        }
       }
 
       if (step4MidWidget) {
@@ -15361,7 +15646,7 @@
           });
           pills.appendChild(upBtn);
         } else {
-          const docBtn = make("button", "🧭 ดู 5 ขั้นตอนการเรียนรู้ระหว่างรอ →", "hs-atv-ep-pill is-solid");
+          const docBtn = make("button", "🧭 ดู 6 ขั้นตอนการเรียนรู้ระหว่างรอ →", "hs-atv-ep-pill is-solid");
           docBtn.type = "button";
           docBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
@@ -15459,7 +15744,7 @@
           "p",
           ROLE === "faculty"
             ? "ยังไม่ได้อัปโหลดสไลด์ประจำคาบนี้ (แสดงเป็นสีเทาทั้งฝั่งนักศึกษาและอาจารย์) — อัปโหลดไฟล์ .PPTX หรือ .PDF ในช่องด้านล่างเพื่อเปิดสีประจำบทและให้นักศึกษาดาวน์โหลดได้ทันที"
-            : "สไลด์ประกอบการบรรยายของอาจารย์ประจำคาบยังไม่อัปโหลด (เมื่ออัปโหลดแล้วขั้นที่ 4 จะเปลี่ยนจากสีเทาเป็นสีประจำบทและเปิดให้คลิกดูทันที) ในระหว่างรอสามารถเริ่มเรียนรู้ตามลำดับ ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz และเตรียมตัวสำหรับ ⑤ Case Discussion ได้ทันที",
+            : "สไลด์ประกอบการบรรยายของอาจารย์ประจำคาบยังไม่อัปโหลด (เมื่ออัปโหลดแล้วขั้นที่ 4 จะเปลี่ยนจากสีเทาเป็นสีประจำบทและเปิดให้คลิกดูทันที) ในระหว่างรอสามารถเริ่มเรียนรู้ตามลำดับ ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz, เตรียมตัวสำหรับ ⑤ Case Discussion และดู ⑥ VDO Lecture ได้ทันที",
           "hs-atv-hero-note"
         )
       );
@@ -15494,7 +15779,7 @@
 
     const btnDocs = make(
       "button",
-      `🧭 ภาพรวม 5 ขั้นตอน (${curMod.code})`,
+      `🧭 ภาพรวม 6 ขั้นตอน (${curMod.code})`,
       sInfo.uploaded || ROLE === "faculty" ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary"
     );
     btnDocs.type = "button";
@@ -15777,6 +16062,365 @@
     return stage;
   }
 
+  function buildVdoLectureAppleTvDOM(baseMod) {
+    const allModules = getAllHsAndFoundationalModules();
+    const curMod = getHsModuleMeta(baseMod);
+    const scope = state.vdoDriveScope || "folders";
+    const vdoCounts = countUploadedHsVdoLectures();
+
+    // Pluggable Interactive VDO Lecture Studio hook (ready for style override)
+    if (
+      window.RACM_VDO_LECTURE_STUDIO &&
+      typeof window.RACM_VDO_LECTURE_STUDIO.renderCustomStage === "function"
+    ) {
+      const customStage = window.RACM_VDO_LECTURE_STUDIO.renderCustomStage({
+        baseMod: curMod.code,
+        mod: curMod,
+        scope,
+        role: ROLE,
+        vdoInfo: getHsVdoLectureInfo(curMod.code),
+        allModules,
+        openModule: (code) => {
+          state.activeHsModule = code;
+          state.vdoDriveScope = "module";
+          renderTextbookReader();
+        },
+        openAllFolders: () => {
+          state.vdoDriveScope = "folders";
+          renderTextbookReader();
+        },
+        openHub: (code) => openTextbookDriveFolder(code)
+      });
+      if (customStage) return customStage;
+    }
+
+    const stage = make("div", null, "hs-atv-stage hsd-no-print");
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", "STEP 06 · VDO Lecture ประจำคาบ (โหมดเรียน)");
+
+    if (scope === "folders") {
+      const shelf = make("div", null, "tv-shelf");
+      const head = make("div", null, "tv-shelf-head");
+      const headLeft = make("div");
+      headLeft.append(
+        make(
+          "h3",
+          vdoCounts.uploaded > 0
+            ? `⑥ STEP 06 · VDO Lecture ประจำคาบ (ST1 & HS1 – HS6) · แขวนแล้ว ${vdoCounts.uploaded}/${vdoCounts.total} คาบ`
+            : `⑥ STEP 06 · VDO Lecture ประจำคาบ (ST1 & HS1 – HS6) · รอแขวน VDO`,
+          "tv-shelf-title"
+        ),
+        make(
+          "span",
+          "เตรียมโครงสร้างขั้นที่ 6 สำหรับวิดีโอบรรยายครบทั้ง 7 บท (ST1 & HS1–HS6) — คาบที่รอแขวน VDO จะแสดงสถานะสีเทา และจะเปลี่ยนเป็นสีม่วงครามพร้อมเชื่อม Interactive VDO Lecture Studio ทันทีเมื่อแขวนไฟล์",
+          "tv-shelf-sub"
+        )
+      );
+      head.appendChild(headLeft);
+      shelf.appendChild(head);
+
+      const grid = make("div", null, "hs-atv-episodes-grid");
+      allModules.forEach((m, idx) => {
+        const epNum = idx + 1;
+        const lecturer = getHsLecturerName(m.code);
+        const shortDate = formatHsShortDate(m.scheduleDate);
+        const mVdo = getHsVdoLectureInfo(m.code);
+        const card = make(
+          "div",
+          null,
+          `tv-episode-card hs-atv-ep-card ep-${epNum} ${mVdo.uploaded ? "is-slide-uploaded" : "is-slide-pending"}`
+        );
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("data-ep-num", `0${epNum}`);
+
+        const top = make("div", null, "tv-ep-top");
+        top.append(
+          make("span", m.code === "ST1" ? "ST1 · รากฐาน" : m.code, "tv-ep-code"),
+          mVdo.uploaded
+            ? make("span", `✓ ${mVdo.extBadge}`, "hs-atv-ready-badge")
+            : make("span", "⏳ รอแขวน VDO", "hs-atv-pending-badge is-grey")
+        );
+
+        const mid = make("div", null, "tv-ep-bottom");
+        mid.append(
+          make("span", m.title, "tv-ep-title"),
+          make("span", `${shortDate} · ${(mVdo.record && mVdo.record.lecturer) || lecturer}`, "tv-ep-date")
+        );
+
+        const openVdoSpotlight = () => {
+          state.activeHsModule = m.id;
+          state.vdoDriveScope = "module";
+          renderTextbookReader();
+          window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+        };
+
+        const pills = make("div", null, "hs-atv-ep-pills");
+        const mainBtn = make(
+          "button",
+          mVdo.uploaded ? `▶ เปิดรับชม VDO (${m.code})` : `🎬 เปิดดูสถานะ (${m.code} · รอแขวน VDO)`,
+          "hs-atv-ep-pill is-solid"
+        );
+        mainBtn.type = "button";
+        mainBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openVdoSpotlight();
+        });
+        pills.appendChild(mainBtn);
+
+        if (mVdo.companionHeClips && mVdo.companionHeClips.length > 0 && window.RACM_HE_VIDEO_BRIDGE) {
+          const heBtn = make("button", `🎥 คลิปเสริม HE (${mVdo.companionHeClips.length} ตอน)`, "hs-atv-ep-pill");
+          heBtn.type = "button";
+          heBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const first = mVdo.companionHeClips[0];
+            window.RACM_HE_VIDEO_BRIDGE.open(first.clipId, first.startSec || 0, first.label || "");
+          });
+          pills.appendChild(heBtn);
+        }
+
+        card.append(top, mid, pills);
+        card.addEventListener("click", openVdoSpotlight);
+        card.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            openVdoSpotlight();
+          }
+        });
+        grid.appendChild(card);
+      });
+
+      shelf.appendChild(grid);
+      stage.appendChild(shelf);
+      return stage;
+    }
+
+    // Module-level Step 06 VDO Lecture Spotlight
+    const epIdx = getEpNumIndex(curMod.code);
+    const lecturer = getHsLecturerName(curMod.code);
+    const vInfo = getHsVdoLectureInfo(curMod.code);
+    const rec = vInfo.record || {};
+
+    const hero = make(
+      "div",
+      null,
+      `hs-atv-hero ep-${epIdx} ${vInfo.uploaded ? "is-slide-uploaded" : "is-slide-pending"}`
+    );
+    hero.setAttribute("data-ep-num", `0${epIdx}`);
+
+    const heroTop = make("div", null, "hs-atv-hero-top");
+    const backAllBtn = make("button", "← รวมครบทั้ง 7 คาบ (ST1 & HS1–HS6)", "hs-atv-back-pill");
+    backAllBtn.type = "button";
+    backAllBtn.addEventListener("click", () => {
+      state.vdoDriveScope = "folders";
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    });
+    heroTop.append(
+      backAllBtn,
+      make("span", `🎬 STEP 06 · VDO LECTURE (${curMod.code})`, "tv-hero-kicker"),
+      vInfo.uploaded
+        ? make("span", `✓ พร้อมรับชม · ${vInfo.extBadge}`, "hs-atv-ready-badge")
+        : make("span", "⏳ รอแขวน VDO", "hs-atv-pending-badge is-grey")
+    );
+
+    const heroBody = make("div", null, "tv-hero-body");
+    heroBody.append(
+      make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
+      make(
+        "p",
+        `📅 ${curMod.scheduleDate} · อาจารย์ผู้บรรยาย: ${rec.lecturer || lecturer}`,
+        "tv-hero-meta"
+      ),
+      make(
+        "p",
+        vInfo.uploaded
+          ? `วิดีโอบรรยายประจำคาบ ${curMod.code} เปิดให้รับชมแล้ว — สามารถรับชมย้อนหลังควบคู่กับเอกสารคำสอนฉบับเต็ม ฉบับย่อ และสไลด์อาจารย์ได้ทันที`
+          : rec.note ||
+              `ขณะนี้อยู่ระหว่างรอแขวน VDO บรรยายประจำคาบ ${curMod.code} — โครงสร้างหน้านี้เตรียมพร้อมรองรับการนำไฟล์ VDO มาแขวนและการเชื่อมรูปแบบ Interactive VDO Lecture Studio ทันที`,
+        "hs-atv-hero-note"
+      )
+    );
+
+    const heroActions = make("div", null, "tv-hero-actions");
+    const btnHub = make("button", `🧭 ภาพรวม 6 ขั้นตอน (${curMod.code})`, "tv-hero-btn is-primary");
+    btnHub.type = "button";
+    btnHub.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
+
+    const btnFull = make("button", `① อ่านฉบับเต็ม (${curMod.code})`, "tv-hero-btn is-glass");
+    btnFull.type = "button";
+    btnFull.addEventListener("click", () => openTextbookDoc(curMod.docId || curMod.code));
+
+    const btnSlide = make("button", `④ Slide อาจารย์ (${curMod.code})`, "tv-hero-btn is-glass");
+    btnSlide.type = "button";
+    btnSlide.addEventListener("click", () => openHsLectureSlides(curMod.code));
+
+    const isStVdoMod = curMod.code === "ST1";
+    const btnStep5 = make(
+      "button",
+      isStVdoMod ? `⑤ กรอบคาบเรียน (ST1)` : `⑤ Case Discussion (${curMod.code})`,
+      "tv-hero-btn is-glass"
+    );
+    btnStep5.type = "button";
+    btnStep5.addEventListener("click", () =>
+      isStVdoMod ? openSystemsForum("w1-d1-st") : openHsDiscussion(curMod.code)
+    );
+
+    heroActions.append(btnHub, btnFull, btnSlide, btnStep5);
+    hero.append(heroTop, heroBody, heroActions);
+    stage.appendChild(hero);
+
+    // 16:9 VDO Player or Clean Pending Standby Frame
+    const playerShell = make(
+      "section",
+      null,
+      `hs-vdo-stage-card ${vInfo.uploaded ? "is-vdo-ready" : "is-vdo-pending"}`
+    );
+    if (vInfo.uploaded && (rec.videoUrl || rec.externalUrl)) {
+      const srcUrl = String(rec.videoUrl || rec.externalUrl || "").trim();
+      const headBar = make("div", null, "hs-vdo-stage-head");
+      headBar.append(
+        make("strong", `🎬 VDO Lecture ประจำคาบ ${curMod.code}: ${curMod.title}`),
+        make("span", rec.lecturer || lecturer, "hs-flow-timing-pill")
+      );
+      playerShell.appendChild(headBar);
+
+      if (/\.mp4(\?|$)/i.test(srcUrl) || srcUrl.startsWith("assets/videos/")) {
+        const vidWrap = make("div", null, "he-vdo-iframe-wrap");
+        const vid = document.createElement("video");
+        vid.className = "he-native-video";
+        vid.controls = true;
+        vid.playsInline = true;
+        vid.preload = "metadata";
+        vid.src = srcUrl;
+        vidWrap.appendChild(vid);
+        playerShell.appendChild(vidWrap);
+      } else {
+        const extBox = make("div", null, "hs-vdo-standby-inner");
+        extBox.append(
+          make("div", "🎬", "hs-vdo-standby-ico"),
+          make("h4", `ลิงก์ VDO Lecture ประจำคาบ ${curMod.code} พร้อมเปิดรับชม`),
+          make("p", srcUrl)
+        );
+        const extLink = document.createElement("a");
+        extLink.className = "btn primary";
+        extLink.href = srcUrl;
+        extLink.target = "_blank";
+        extLink.rel = "noopener";
+        extLink.textContent = "▶ เปิดรับชม VDO Lecture ในแท็บใหม่ ↗";
+        extBox.appendChild(extLink);
+        playerShell.appendChild(extBox);
+      }
+    } else {
+      const standby = make("div", null, "hs-vdo-standby-inner");
+      standby.append(
+        make("div", "🎞️", "hs-vdo-standby-ico"),
+        make("span", `STEP 06 · VDO LECTURE STUDIO (${curMod.code})`, "hs-vdo-standby-kicker"),
+        make("h4", `⏳ รอแขวน VDO บรรยายประจำคาบ ${curMod.code}`),
+        make(
+          "p",
+          `พื้นที่สำหรับแขวนวิดีโอบรรยายประจำคาบ ${curMod.code} (${rec.lecturer || lecturer}) — รองรับไฟล์ MP4 ความคมชัดสูงและการซิงค์สไลด์แบบ Interactive VDO Lecture Studio ทันทีที่นำไฟล์มาแขวน`
+        )
+      );
+      playerShell.appendChild(standby);
+    }
+    stage.appendChild(playerShell);
+
+    // Faculty Quick-Attach VDO URL Corner (Faculty Portal Only)
+    if (ROLE === "faculty" && window.RACM_VDO_LECTURE_HELPER) {
+      const facCard = make("section", null, `hs-inline-upload-card ${vInfo.uploaded ? "is-uploaded" : "is-pending"}`);
+      const facHead = make("div", null, "hs-inline-upload-head");
+      const tw = make("div", null, "hs-inline-upload-title-wrap");
+      tw.append(
+        make("h4", `🎬 มุมคณาจารย์: แขวนลิงก์ / ไฟล์ VDO Lecture ประจำคาบ ${curMod.code}`),
+        make(
+          "p",
+          "วางลิงก์ไฟล์ .mp4 หรือ URL วิดีโอบรรยายเพื่อเปิดสถานะขั้นที่ 6 ทันที (หรือเว้นว่างเพื่อคงสถานะ 'รอแขวน VDO')"
+        )
+      );
+      facHead.appendChild(tw);
+      facCard.appendChild(facHead);
+
+      const urlRow = make("div", null, "hs-inline-url-row");
+      const urlIn = document.createElement("input");
+      urlIn.type = "text";
+      urlIn.placeholder = "เช่น assets/videos/hs6_lecture.mp4 หรือ https://...";
+      urlIn.value = String(rec.videoUrl || rec.externalUrl || "");
+      const saveBtn = make("button", "💾 บันทึกแขวน VDO", "btn sm primary");
+      saveBtn.type = "button";
+      saveBtn.addEventListener("click", () => {
+        const val = (urlIn.value || "").trim();
+        if (!val) {
+          window.RACM_VDO_LECTURE_HELPER.clearOverride(curMod.code);
+        } else {
+          window.RACM_VDO_LECTURE_HELPER.saveOverride(curMod.code, {
+            uploaded: true,
+            videoUrl: val,
+            readyLabel: "พร้อมรับชม"
+          });
+        }
+        renderTextbookReader();
+      });
+      urlRow.append(urlIn, saveBtn);
+      if (vInfo.uploaded) {
+        const clearBtn = make("button", "↺ คืนค่าเป็น รอแขวน VDO", "btn sm");
+        clearBtn.type = "button";
+        clearBtn.addEventListener("click", () => {
+          window.RACM_VDO_LECTURE_HELPER.clearOverride(curMod.code);
+          renderTextbookReader();
+        });
+        urlRow.appendChild(clearBtn);
+      }
+      facCard.appendChild(urlRow);
+      stage.appendChild(facCard);
+    }
+
+    // Companion Health Economics Video Clips Strip (Available immediately for HS6, HS3, HS2!)
+    if (
+      vInfo.companionHeClips &&
+      vInfo.companionHeClips.length > 0 &&
+      window.RACM_HE_VIDEO_BRIDGE &&
+      typeof window.RACM_HE_VIDEO_BRIDGE.open === "function"
+    ) {
+      const compBox = make("section", null, "hs-vdo-companion-card");
+      const compHead = make("div", null, "hs-vdo-companion-head");
+      compHead.append(
+        make("span", "🎥 คลิปบรรยายเสริมที่รับชมได้ทันทีระหว่างรอแขวน VDO หลัก", "hs-flow-step-pill is-step-6 is-slide-uploaded"),
+        make(
+          "h4",
+          `ชุดวิดีโอบรรยายเศรษฐศาสตร์สาธารณสุข (Health Economics Series) ที่เชื่อมตรงกับเนื้อหาบท ${curMod.code}`
+        ),
+        make(
+          "p",
+          "กดเลือกตอนด้านล่างเพื่อเปิดดูวิดีโอพร้อมสไลด์จับเวลาอัตโนมัติ (เล่นได้ทันทีบนมือถือ iPad คอมพิวเตอร์ และ LINE Browser)"
+        )
+      );
+      compBox.appendChild(compHead);
+
+      const clipGrid = make("div", null, "hs-vdo-companion-grid");
+      vInfo.companionHeClips.forEach((cl) => {
+        const b = make("button", null, "hs-vdo-companion-btn");
+        b.type = "button";
+        b.innerHTML =
+          `<span class="hs-vdo-comp-play">▶</span>` +
+          `<span class="hs-vdo-comp-txt">${escapeHtml(cl.label)}</span>`;
+        b.addEventListener("click", () => {
+          window.RACM_HE_VIDEO_BRIDGE.open(cl.clipId, cl.startSec || 0, cl.label || "");
+        });
+        clipGrid.appendChild(b);
+      });
+      compBox.appendChild(clipGrid);
+      stage.appendChild(compBox);
+    }
+
+    return stage;
+  }
+
+  function buildVdoLectureDriveExplorerDOM(baseMod) {
+    // Cleanly reuse the responsive VDO Lecture stage in Drive mode as well
+    return buildVdoLectureAppleTvDOM(baseMod);
+  }
+
   function buildHsDiscussionAppleTvDOM(activeMod) {
     const allModules =
       HSD_DATA.modules && HSD_DATA.modules.length
@@ -15798,7 +16442,7 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backFlowBtn = make("button", `← ภาพรวม 5 ขั้นตอน (${curMod.code})`, "hs-atv-back-pill");
+    const backFlowBtn = make("button", `← ภาพรวม 6 ขั้นตอน (${curMod.code})`, "hs-atv-back-pill");
     backFlowBtn.type = "button";
     backFlowBtn.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
     heroTop.append(
@@ -15858,11 +16502,21 @@
     backSlideBtn.type = "button";
     backSlideBtn.addEventListener("click", () => openHsLectureSlides(curMod.code));
 
+    const nextVdoBtn = make(
+      "button",
+      flow.vdoInfo && flow.vdoInfo.uploaded
+        ? `🎬 ⑥ VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
+        : `🎬 ⑥ VDO Lecture (รอแขวน VDO)`,
+      `tv-hero-btn is-glass ${flow.vdoInfo && flow.vdoInfo.uploaded ? "is-slide-uploaded-hero" : "is-slide-pending-hero"}`
+    );
+    nextVdoBtn.type = "button";
+    nextVdoBtn.addEventListener("click", () => openHsVdoLecture(curMod.code));
+
     const backQuizBtn = make("button", `🧠 ทบทวน ③ Self-Quiz (${curMod.code})`, "tv-hero-btn is-glass");
     backQuizBtn.type = "button";
     backQuizBtn.addEventListener("click", () => openSelfQuizForModule(curMod.code, "qa"));
 
-    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn, backSlideBtn, backQuizBtn);
+    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn, backSlideBtn, nextVdoBtn, backQuizBtn);
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
@@ -16006,10 +16660,13 @@
     const subMode = state.textbookSubMode || "docs-drive";
     const isDocsFoldersRoot = subMode === "docs-drive" && (state.tbDriveScope || "folders") === "folders";
     const isSlidesFoldersRoot = subMode === "lecture-slides" && (state.lsDriveScope || "folders") === "folders";
-    const isFoldersRoot = isDocsFoldersRoot || isSlidesFoldersRoot;
+    const isVdoFoldersRoot = subMode === "vdo-lecture" && (state.vdoDriveScope || "folders") === "folders";
+    const isFoldersRoot = isDocsFoldersRoot || isSlidesFoldersRoot || isVdoFoldersRoot;
     const bannerActiveFmt =
       subMode === "lecture-slides"
         ? "lecture-slides"
+        : subMode === "vdo-lecture"
+        ? "vdo-lecture"
         : subMode === "doc-reader"
         ? parsed.format === "concise"
           ? "concise"
@@ -16036,15 +16693,24 @@
                       ? `ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (อัปโหลดแล้ว ${sc.uploaded}/${sc.total} คาบ)`
                       : "ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (รออาจารย์ Upload)";
                   })()
+              : subMode === "vdo-lecture"
+              ? (() => {
+                  const vc = countUploadedHsVdoLectures();
+                  return vc.uploaded > 0
+                    ? `ST1 & HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (แขวนแล้ว ${vc.uploaded}/${vc.total} คาบ)`
+                    : "ST1 & HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (รอแขวน VDO)";
+                })()
               : isDriveUi
-              ? "Google Drive · ระบบสุขภาพ (ST1 & HS1–HS6) — เรียงตาม Logical Flow 5 ขั้นตอน"
-              : "ST1 & HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 5 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · ประยุกต์ในชั้นเรียน)",
+              ? "Google Drive · ระบบสุขภาพ (ST1 & HS1–HS6) — เรียงตาม Logical Flow 6 ขั้นตอน"
+              : "ST1 & HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · ประยุกต์ในชั้นเรียน · VDO Lecture)",
           allDesc:
             subMode === "lecture-slides"
-              ? "เลือกบทเรียน HS1–HS6 เพื่อดูหรืออัปโหลดสไลด์ประกอบการบรรยายต้นคาบของอาจารย์ผู้สอน (ขั้นที่ 4)"
+              ? "เลือกบทเรียน ST1 & HS1–HS6 เพื่อดูหรืออัปโหลดสไลด์ประกอบการบรรยายต้นคาบของอาจารย์ผู้สอน (ขั้นที่ 4)"
+              : subMode === "vdo-lecture"
+              ? "เลือกบทเรียน ST1 & HS1–HS6 เพื่อเปิดหน้า VDO Lecture ประจำคาบ (ขั้นที่ 6 · สถานะรอแขวน VDO และพร้อมเชื่อม Interactive VDO Lecture Studio)"
               : isDriveUi
-              ? "File Explorer รวมไฟล์ทุกบทเรียน HS1–HS6 เรียงตามลำดับ 01 ฉบับเต็ม (Full) → 02 ฉบับย่อ (Abridged) → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion in Class"
-              : "เลือกบทเรียน HS1–HS6 เพื่อเดินตามเส้นทางการเรียนรู้ 5 ขั้นตอนอย่างต่อเนื่อง ตั้งแต่ปูพื้นฐาน สรุปแก่น ทดสอบตนเอง สไลด์อาจารย์ต้นคาบ จนถึงอภิปรายกรณีศึกษาในชั้นเรียน",
+              ? "File Explorer รวมไฟล์ทุกบทเรียน ST1 & HS1–HS6 เรียงตามลำดับ 01 ฉบับเต็ม (Full) → 02 ฉบับย่อ (Abridged) → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion → 06 VDO Lecture"
+              : "เลือกบทเรียน ST1 & HS1–HS6 เพื่อเดินตามเส้นทางการเรียนรู้ 6 ขั้นตอนอย่างต่อเนื่อง ตั้งแต่ปูพื้นฐาน สรุปแก่น ทดสอบตนเอง สไลด์อาจารย์ อภิปรายกรณีศึกษา จนถึง VDO Lecture ประจำคาบ",
           onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
         })
       );
@@ -16072,6 +16738,17 @@
       return;
     }
 
+    if (subMode === "vdo-lecture") {
+      if (driveMount) {
+        driveMount.hidden = false;
+        driveMount.replaceChildren(
+          isDriveUi ? buildVdoLectureDriveExplorerDOM(baseMod) : buildVdoLectureAppleTvDOM(baseMod)
+        );
+      }
+      if (readerWrap) readerWrap.hidden = true;
+      return;
+    }
+
     // Mode: "doc-reader" — Ensure current doc matches baseMod
     let readerDoc = current;
     if (parseHsDocInfo(readerDoc.id).modCode !== baseMod) {
@@ -16089,20 +16766,20 @@
     }
     if (readerWrap) readerWrap.hidden = false;
 
-    // Populate Top 5-Step Flow Switcher Bar inside Reader
+    // Populate Top 6-Step Flow Switcher Bar inside Reader
     if (readerBar) {
       readerBar.replaceChildren();
       const backGroup = make("div", null, "tb-drive-file-pills");
       const backAllBtn = make(
         "button",
-        isDriveUi ? "📂 โฟลเดอร์ HS1–HS6" : "📚 รวมทุกบท HS1–HS6",
+        isDriveUi ? "📂 โฟลเดอร์ ST1 & HS1–6" : "📚 รวมทุกบท ST1 & HS1–6",
         "btn sm"
       );
       backAllBtn.type = "button";
       backAllBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
       const backDriveBtn = make(
         "button",
-        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `🧭 ← ภาพรวม 5 ขั้น (${baseMod})`,
+        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `🧭 ← ภาพรวม 6 ขั้น (${baseMod})`,
         "btn sm"
       );
       backDriveBtn.type = "button";
@@ -16154,7 +16831,18 @@
               active: false,
               available: true,
               onClick: () => openHsDiscussion(baseMod)
-            }
+            },
+        {
+          label:
+            flow.vdoInfo && flow.vdoInfo.uploaded
+              ? `⑥ VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
+              : "⑥ VDO Lecture (รอแขวน VDO)",
+          extraCls:
+            flow.vdoInfo && flow.vdoInfo.uploaded ? " is-slide-tab-uploaded" : " is-slide-tab-pending",
+          active: false,
+          available: true,
+          onClick: () => openHsVdoLecture(baseMod)
+        }
       ];
       if (modMeta.wbDocId) {
         flowBarItems.push({
@@ -16174,15 +16862,15 @@
       readerBar.appendChild(fileSwitchGroup);
     }
 
-    // Populate Left Sidebar (Coherent 5-Step Logical Flow)
+    // Populate Left Sidebar (Coherent 6-Step Logical Flow)
     if (sidebarLabel) {
-      sidebarLabel.textContent = `เส้นทางการเรียนรู้ 5 ขั้น (${baseMod})`;
+      sidebarLabel.textContent = `เส้นทางการเรียนรู้ 6 ขั้น (${baseMod})`;
     }
     picker.replaceChildren();
     const backRootLi = document.createElement("li");
     const backRootSideBtn = make(
       "button",
-      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ HS1–HS6" : "📚 รวมทุกบท HS1–HS6",
+      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ ST1 & HS1–6" : "📚 รวมทุกบท ST1 & HS1–6",
       "doc-picker-btn"
     );
     backRootSideBtn.type = "button";
@@ -16193,7 +16881,7 @@
     const backLi = document.createElement("li");
     const backSideBtn = make(
       "button",
-      isDriveUi ? `📁 โฟลเดอร์คาบ ${baseMod} (Drive)` : `🧭 ภาพรวม 5 ขั้นตอน (${baseMod})`,
+      isDriveUi ? `📁 โฟลเดอร์คาบ ${baseMod} (Drive)` : `🧭 ภาพรวม 6 ขั้นตอน (${baseMod})`,
       "doc-picker-btn"
     );
     backSideBtn.type = "button";
@@ -16241,7 +16929,16 @@
             active: false,
             available: true,
             onClick: () => openHsDiscussion(baseMod)
-          }
+          },
+      {
+        label:
+          flow.vdoInfo && flow.vdoInfo.uploaded
+            ? `⑥ ${baseMod} · VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
+            : `⑥ ${baseMod} · VDO Lecture (รอแขวน VDO)`,
+        active: false,
+        available: true,
+        onClick: () => openHsVdoLecture(baseMod)
+      }
     ];
     if (modMeta.wbDocId) {
       sidebarSteps.push({
@@ -16307,6 +17004,19 @@
     const nextCopy = make("div", null, "hs-flow-next-copy");
     const nextActs = make("div", null, "hs-flow-next-acts");
 
+    const makeVdoNextBtn = () => {
+      const bVdo = make(
+        "button",
+        flow.vdoInfo && flow.vdoInfo.uploaded
+          ? `⑥ VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
+          : `⑥ VDO Lecture (รอแขวน VDO)`,
+        `btn ${flow.vdoInfo && flow.vdoInfo.uploaded ? "is-slide-tab-uploaded" : "is-slide-tab-pending"}`
+      );
+      bVdo.type = "button";
+      bVdo.addEventListener("click", () => openHsVdoLecture(baseMod));
+      return bVdo;
+    };
+
     if (readerParsed.format === "full") {
       nextCopy.append(
         make("span", `จบขั้นที่ 1 · เอกสารคำสอนฉบับเต็ม (${baseMod})`, "hs-flow-next-kicker"),
@@ -16319,7 +17029,7 @@
       const bSkip = make("button", `ไปขั้นที่ 3: Self-Quiz (${flow.qaCount} ข้อ)`, "btn");
       bSkip.type = "button";
       bSkip.addEventListener("click", () => openSelfQuizForModule(baseMod, "qa"));
-      nextActs.append(bNext, bSkip);
+      nextActs.append(bNext, bSkip, makeVdoNextBtn());
     } else if (readerParsed.format === "concise") {
       nextCopy.append(
         make("span", `จบขั้นที่ 2 · เอกสารคำสอนฉบับย่อ (${baseMod})`, "hs-flow-next-kicker"),
@@ -16344,7 +17054,7 @@
       const bCase = make("button", isStReader ? `⑤ กรอบคาบเรียน ST1` : `⑤ Case Discussion in Class`, "btn");
       bCase.type = "button";
       bCase.addEventListener("click", () => (isStReader ? openSystemsForum("w1-d1-st") : openHsDiscussion(baseMod)));
-      nextActs.append(bPrev, bNext, bSlide, bCase);
+      nextActs.append(bPrev, bNext, bSlide, bCase, makeVdoNextBtn());
     } else {
       nextCopy.append(
         make("span", `จบแบบฝึกหัดเสริม (${baseMod} Workbook)`, "hs-flow-next-kicker"),
@@ -16366,7 +17076,7 @@
       const bNext = make("button", `ไปขั้นที่ 5: Case Discussion in Class →`, "btn primary");
       bNext.type = "button";
       bNext.addEventListener("click", () => openHsDiscussion(baseMod));
-      nextActs.append(bQuiz, bSlide, bNext);
+      nextActs.append(bQuiz, bSlide, bNext, makeVdoNextBtn());
     }
     nextBanner.append(nextCopy, nextActs);
     prose.appendChild(nextBanner);
@@ -16533,6 +17243,17 @@
         bNext.type = "button";
         bNext.addEventListener("click", () => (isStSelected ? openSystemsForum("w1-d1-st") : openHsDiscussion(selectedMod)));
         acts.appendChild(bNext);
+
+        const bVdo = make(
+          "button",
+          flow.vdoInfo && flow.vdoInfo.uploaded
+            ? `⑥ VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
+            : `⑥ VDO Lecture (รอแขวน VDO)`,
+          `btn sm ${flow.vdoInfo && flow.vdoInfo.uploaded ? "is-slide-tab-uploaded" : "is-slide-tab-pending"}`
+        );
+        bVdo.type = "button";
+        bVdo.addEventListener("click", () => openHsVdoLecture(selectedMod));
+        acts.appendChild(bVdo);
       } else {
         const allProg = countModuleSelfQuizProgress("");
         const topLine = make("div", null, "hs-selfquiz-flow-top");
@@ -16550,10 +17271,10 @@
           topLine,
           make(
             "p",
-            "เลือกบทเรียน HS1–HS6 จากแถบด้านบนเพื่อทำ Self-Quiz รายบท พร้อมตรวจคำตอบด้วย AI Mentor ก่อนดู Slide อาจารย์และเข้าห้อง Case Discussion in Class"
+            "เลือกบทเรียน ST1 & HS1–HS6 จากแถบด้านบนเพื่อทำ Self-Quiz รายบท พร้อมตรวจคำตอบด้วย AI Mentor ก่อนดู Slide อาจารย์ อภิปรายในชั้นเรียน และ VDO Lecture"
           )
         );
-        const bHub = make("button", "🧭 ดูภาพรวม 5 ขั้นตอน (HS1–HS6)", "btn sm");
+        const bHub = make("button", "🧭 ดูภาพรวม 6 ขั้นตอน (ST1 & HS1–HS6)", "btn sm");
         bHub.type = "button";
         bHub.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
         acts.appendChild(bHub);
@@ -24521,9 +25242,9 @@
 
       ribbon.append(gDriveGrp.grp, gExport.grp, gClose.grp);
     } else if (activeTab === "ref") {
-      const gDocs = makeGroup(`เส้นทาง 5 ขั้นตอนคาบ ${cur.mod.code}`);
+      const gDocs = makeGroup(`เส้นทาง 6 ขั้นตอนคาบ ${cur.mod.code}`);
       if (cur.mod) {
-        const bFolder = make("button", `🧭 ภาพรวม 5 ขั้น (${cur.mod.code})`, "ppt-rb-cmd is-primary-teal");
+        const bFolder = make("button", `🧭 ภาพรวม 6 ขั้น (${cur.mod.code})`, "ppt-rb-cmd is-primary-teal");
         bFolder.type = "button";
         bFolder.addEventListener("click", () => openTextbookDriveFolder(cur.mod.code));
         gDocs.body.appendChild(bFolder);
@@ -24557,6 +25278,18 @@
         bLecSlides.type = "button";
         bLecSlides.addEventListener("click", () => openHsLectureSlides(cur.mod.code));
         gDocs.body.appendChild(bLecSlides);
+
+        const rbVdo = getHsVdoLectureInfo(cur.mod.code);
+        const bVdoLec = make(
+          "button",
+          rbVdo.uploaded
+            ? `🎬 ⑥ VDO Lecture (${cur.mod.code} · ✓ ${rbVdo.extBadge})`
+            : `🎬 ⑥ VDO Lecture (${cur.mod.code} · รอแขวน VDO)`,
+          `ppt-rb-cmd ${rbVdo.uploaded ? "is-slide-ready-cmd" : "is-slide-pending-cmd"}`
+        );
+        bVdoLec.type = "button";
+        bVdoLec.addEventListener("click", () => openHsVdoLecture(cur.mod.code));
+        gDocs.body.appendChild(bVdoLec);
       }
       ribbon.appendChild(gDocs.grp);
 
@@ -35789,6 +36522,11 @@
       return;
     }
 
+    if (params.get("vdo")) {
+      openHsVdoLecture(params.get("vdo"));
+      return;
+    }
+
     if (params.get("hub")) {
       openTextbookDriveFolder(params.get("hub"));
       return;
@@ -35838,6 +36576,12 @@
     switchTab(hash || "home", false);
   }
 
+  window.addEventListener("racm:vdolecchange", () => {
+    if (state.activeTab === "textbooks") renderTextbookReader();
+    else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
+    else if (state.activeTab === "practice") renderPracticeCurrent();
+  });
+
   window.RACM_PORTAL_API = {
     role: ROLE,
     getState: () => state,
@@ -35856,6 +36600,9 @@
     openHsLectureSlides: (mod) => openHsLectureSlides(mod),
     getHsSlideInfo: (mod) => getHsSlideInfo(mod),
     countUploadedHsSlides: () => countUploadedHsSlides(),
+    openHsVdoLecture: (mod) => openHsVdoLecture(mod),
+    getHsVdoLectureInfo: (mod) => getHsVdoLectureInfo(mod),
+    countUploadedHsVdoLectures: () => countUploadedHsVdoLectures(),
     openSessionSlide: (sid, forceDl) => openSessionSlide(sid, forceDl),
     getSessionSlideRecord: (sid) => getSessionSlideRecord(sid),
     getSlidesRegistry: () => getSlidesRegistry(),
