@@ -4193,11 +4193,13 @@
     });
     fieldBtnWrap.appendChild(jumpFieldBtn);
     if (ROLE === "faculty") {
-      const advPdfBtn = make("a", `📕 แฟ้ม อ.ที่ปรึกษา กลุ่ม ${siteId} (PDF) ↗`, "btn sm pdf-red");
+      const advPdfBtn = make("a", `แฟ้ม อ.ที่ปรึกษา กลุ่ม ${siteId} (PDF)`, "btn sm pdf-red");
       advPdfBtn.href = `exports/pdf/RACM303_2569_Advisor_Packet_S${siteId}.pdf`;
-      advPdfBtn.target = "_blank";
-      advPdfBtn.rel = "noopener";
-      fieldBtnWrap.appendChild(advPdfBtn);
+      advPdfBtn.setAttribute("download", `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${siteId}_RACM303_2569.pdf`);
+      const advDocxBtn = make("a", `Export as .docx`, "btn sm docx-blue");
+      advDocxBtn.href = `exports/docx/RACM303_2569_Advisor_Packet_S${siteId}.docx`;
+      advDocxBtn.setAttribute("download", `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${siteId}_RACM303_2569.docx`);
+      fieldBtnWrap.append(advPdfBtn, advDocxBtn);
     }
     fieldBox.appendChild(fieldBtnWrap);
 
@@ -7643,19 +7645,28 @@
       icsLink.setAttribute("download", `RACM303_2569_group_${curSite.id}_${curSite.slug}.ics`);
       icsLink.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกเข้า Google Cal / iCal (.ics)", "Save to Google Cal / iCal (.ics)"))}`;
 
-      const advBinderLink =
+      const advBinderPdf =
         ROLE === "faculty"
           ? (() => {
-              const a = make("a", `📕 แฟ้ม อ.ที่ปรึกษา กลุ่ม ${curSite.id} (PDF) ↗`, "btn sm primary");
+              const a = make("a", `📕 แฟ้ม อ.ที่ปรึกษา กลุ่ม ${curSite.id} (PDF)`, "btn sm pdf-red");
               a.href = `exports/pdf/RACM303_2569_Advisor_Packet_S${curSite.id}.pdf`;
-              a.target = "_blank";
-              a.rel = "noopener";
-              a.title = `เปิดแฟ้มเอกสารประจำตัว อ.ที่ปรึกษากลุ่ม ${curSite.id} (${curSite.shortName}) พิมพ์ชื่อ นศพ. ลงฟอร์ม 1A & 2A ล่วงหน้าครบทุกคน`;
+              a.setAttribute("download", `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${curSite.id}_${curSite.shortName}_RACM303_2569.pdf`);
+              a.title = `ส่งออกแฟ้มเอกสารประจำตัว อ.ที่ปรึกษากลุ่ม ${curSite.id} (${curSite.shortName}) เป็นไฟล์ PDF (THSarabunPSK)`;
+              return a;
+            })()
+          : null;
+      const advBinderDocx =
+        ROLE === "faculty"
+          ? (() => {
+              const a = make("a", `แฟ้ม อ.ที่ปรึกษา (.docx)`, "btn sm docx-blue");
+              a.href = `exports/docx/RACM303_2569_Advisor_Packet_S${curSite.id}.docx`;
+              a.setAttribute("download", `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${curSite.id}_${curSite.shortName}_RACM303_2569.docx`);
+              a.title = `ส่งออกแฟ้มเอกสารประจำตัว อ.ที่ปรึกษากลุ่ม ${curSite.id} (${curSite.shortName}) เป็นไฟล์ Word (.docx)`;
               return a;
             })()
           : null;
 
-      if (advBinderLink) actRow.append(lockBtn, advBinderLink, pdfSiteLink, printSiteBtn, icsLink);
+      if (advBinderPdf && advBinderDocx) actRow.append(lockBtn, advBinderPdf, advBinderDocx, pdfSiteLink, printSiteBtn, icsLink);
       else actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
 
       const friNote = curSite.hasFri11Dec ? "ศ. 11 ธ.ค. มีกลุ่มย่อย 5–6" : "เดินทาง พฤ. 10 / พ. 9 ธ.ค.";
@@ -36249,13 +36260,24 @@
     const sites = SCHED.fieldworkSites || [];
     const activeTeacher = state.myTeacherKey || "";
 
-    const masterHref = includeManual
+    const pdfIco = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9.5 15.5 2.5 2.5 2.5-2.5"/></svg>`;
+    const docxIco = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13.5" y2="17"/></svg>`;
+
+    const masterPdfHref = includeManual
       ? "exports/pdf/RACM303_2569_Faculty_Complete_Manual.pdf"
       : "exports/pdf/RACM303_2569_Faculty_Documents_Master.pdf";
-    const masterDl = includeManual
-      ? "คู่มืออาจารย์และเอกสาร_RACM303_2569_ฉบับรวมเล่มสมบูรณ์_58หน้า.pdf"
+    const masterPdfDl = includeManual
+      ? "คู่มืออาจารย์และเอกสาร_RACM303_2569_ฉบับรวมเล่มสมบูรณ์_55หน้า.pdf"
       : "เอกสารสำหรับอาจารย์_RACM303_2569_ครบ6หมวด_24หน้า.pdf";
-    const masterPagesBadge = includeManual ? "58 หน้า A4 · รวมคู่มือ 17 บท + 6 หมวด" : "24 หน้า A4 · ชุดเอกสารสำหรับอาจารย์ 6 หมวด";
+    const masterDocxHref = includeManual
+      ? "exports/docx/RACM303_2569_Faculty_Complete_Manual.docx"
+      : "exports/docx/RACM303_2569_Faculty_Documents_Master.docx";
+    const masterDocxDl = includeManual
+      ? "คู่มืออาจารย์และเอกสาร_RACM303_2569_ฉบับรวมเล่มสมบูรณ์.docx"
+      : "เอกสารสำหรับอาจารย์_RACM303_2569_ครบ6หมวด.docx";
+    const masterPagesBadge = includeManual
+      ? "55 หน้า A4 · รวมคู่มือ 17 บท + 6 หมวด (THSarabunPSK)"
+      : "24 หน้า A4 · ชุดเอกสารสำหรับอาจารย์ 6 หมวด (THSarabunPSK)";
 
     const myAdvisorSite = activeTeacher
       ? sites.find((s) => String(s.advisors || "").includes(activeTeacher))
@@ -36265,96 +36287,130 @@
       {
         num: "1.",
         title: "รูปภาพนักศึกษาแพทย์ กลุ่มพื้นที่ (9 กลุ่ม)",
-        desc: "ใบรายชื่อรูปถ่าย A4 เรียงตามกลุ่มพื้นที่ภาคสนาม 1–9 พร้อมรหัส ชื่อเล่น ชื่อ-สกุล เบอร์โทรศัพท์ นศพ. และกลุ่ม Discussion",
+        desc: "ใบรายชื่อรูปถ่าย A4 ฟอนต์ THSarabunPSK เรียงตามกลุ่มพื้นที่ภาคสนาม 1–9 พร้อมรหัส ชื่อเล่น ชื่อ-สกุล เบอร์โทรศัพท์ นศพ. และกลุ่ม Discussion",
         meta: "9 หน้า A4 แนวตั้ง · มีเบอร์โทร นศพ.",
-        openHref: "exports/pdf/RACM303_2569_Fieldwork_All.pdf",
-        dlName: "1_รูปภาพนักศึกษาแพทย์_กลุ่มพื้นที่_9กลุ่ม_RACM303_2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Fieldwork_All.pdf",
+        pdfDl: "1_รูปภาพนักศึกษาแพทย์_กลุ่มพื้นที่_9กลุ่ม_RACM303_2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Fieldwork_Roster.docx",
+        docxDl: "1_รูปภาพนักศึกษาแพทย์_กลุ่มพื้นที่_9กลุ่ม_RACM303_2569.docx",
         extraLinks: [
-          { label: "⬇ Word (.docx)", href: "exports/docx/RACM303_2569_Fieldwork_Roster.docx", dl: "1_รายชื่อ_9พื้นที่ภาคสนาม_สำหรับอาจารย์_2569.docx" },
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Fieldwork_All.pdf", highlight: true },
           ...sites.map((s) => ({
             label: `S${s.id} ${s.shortName}`,
-            href: `exports/pdf/RACM303_2569_Fieldwork_S${s.id}.pdf`,
-            targetBlank: true
+            href: `exports/pdf/RACM303_2569_Fieldwork_S${s.id}.pdf`
           }))
         ]
       },
       {
         num: "2.",
         title: "รูปภาพนักศึกษาแพทย์ Discussion (6 กลุ่ม)",
-        desc: "ใบรายชื่อรูปถ่าย A4 กลุ่มอภิปราย 1–6 (ห้อง 1C1-02 ถึง 1C1-07) พร้อมรายชื่ออาจารย์หมุนเวียน HS1–HS6 และเบอร์โทรศัพท์ นศพ.",
+        desc: "ใบรายชื่อรูปถ่าย A4 ฟอนต์ THSarabunPSK กลุ่มอภิปราย 1–6 (ห้อง 1C1-02 ถึง 1C1-07) พร้อมรายชื่ออาจารย์หมุนเวียน HS1–HS6 และเบอร์โทรศัพท์ นศพ.",
         meta: "6 หน้า A4 แนวตั้ง · มีเบอร์โทร นศพ.",
-        openHref: "exports/pdf/RACM303_2569_Discussion_All.pdf",
-        dlName: "2_รูปภาพนักศึกษาแพทย์_Discussion_6กลุ่ม_RACM303_2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Discussion_All.pdf",
+        pdfDl: "2_รูปภาพนักศึกษาแพทย์_Discussion_6กลุ่ม_RACM303_2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Discussion_Roster.docx",
+        docxDl: "2_รูปภาพนักศึกษาแพทย์_Discussion_6กลุ่ม_RACM303_2569.docx",
         extraLinks: [
-          { label: "⬇ Word (.docx)", href: "exports/docx/RACM303_2569_Discussion_Roster.docx", dl: "2_รายชื่อ_Discussion_6กลุ่ม_สำหรับอาจารย์_2569.docx" },
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Discussion_All.pdf", highlight: true },
           ...[1, 2, 3, 4, 5, 6].map((g) => ({
             label: `กลุ่ม ${g}`,
-            href: `exports/pdf/RACM303_2569_Discussion_G${g}.pdf`,
-            targetBlank: true
+            href: `exports/pdf/RACM303_2569_Discussion_G${g}.pdf`
           }))
         ]
       },
       {
         num: "3.",
         title: "ฟอร์ม 1A Global rating scale (GRS)",
-        desc: "เกณฑ์ในการประเมินผลพฤติกรรมนักศึกษาแพทย์ชั้นปีที่ 3 และแบบประเมิน GRS รายบุคคลสำหรับอาจารย์ที่ปรึกษาประจำกลุ่มพื้นที่",
+        desc: "เกณฑ์ในการประเมินผลพฤติกรรมนักศึกษาแพทย์ชั้นปีที่ 3 และแบบประเมิน GRS รายบุคคลสำหรับอาจารย์ที่ปรึกษาประจำกลุ่มพื้นที่ (จัดหน้าแบบ THSarabunPSK)",
         meta: "2 หน้า A4 (เกณฑ์ + ฟอร์มเปล่า) · หรือฉบับพิมพ์ชื่อครบ 169 คน",
-        openHref: "exports/pdf/RACM303_2569_Form_1A.pdf",
-        dlName: "3_ฟอร์ม_1A_Global_Rating_Scale_RACM303_2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Form_1A.pdf",
+        pdfDl: "3_ฟอร์ม_1A_Global_Rating_Scale_RACM303_2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Form_1A.docx",
+        docxDl: "3_ฟอร์ม_1A_Global_Rating_Scale_RACM303_2569.docx",
         extraLinks: [
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Form_1A.pdf" },
           {
-            label: "🖨️ ฉบับพิมพ์ชื่อ-รูป นศพ. ล่วงหน้าครบ 169 คน (170 หน้า)",
+            label: "⬇ ฉบับพิมพ์ชื่อ-รูปครบ 169 คน (PDF · 170 หน้า)",
             href: "exports/pdf/RACM303_2569_Form_1A_All_Sites.pdf",
-            targetBlank: true,
+            dl: "3_ฟอร์ม_1A_พิมพ์ชื่อล่วงหน้าครบ169คน_RACM303_2569.pdf",
             highlight: true
+          },
+          {
+            label: "⬇ ฉบับพิมพ์ชื่อ-รูปครบ 169 คน (.docx)",
+            href: "exports/docx/RACM303_2569_Form_1A_All_Sites.docx",
+            dl: "3_ฟอร์ม_1A_พิมพ์ชื่อล่วงหน้าครบ169คน_RACM303_2569.docx"
           }
         ]
       },
       {
         num: "4.",
         title: "ฟอร์ม 2A แบบประเมินภาพรวมของเจตคติและพฤติกรรม",
-        desc: "คำชี้แจงเกณฑ์การประเมิน และตารางสรุปผล 1. ภาคพฤติกรรม (O/S/U) · 2. เจตคติ (O/S/U) · 3. ภาพรวมเจตคติและพฤติกรรม (O/S/U)",
+        desc: "คำชี้แจงเกณฑ์การประเมิน และตารางสรุปผล 1. ภาคพฤติกรรม (O/S/U) · 2. เจตคติ (O/S/U) · 3. ภาพรวมเจตคติและพฤติกรรม (O/S/U) (จัดหน้าแบบ THSarabunPSK)",
         meta: "1 หน้า A4 แนวตั้ง · หรือฉบับพิมพ์รายชื่อครบ 9 พื้นที่",
-        openHref: "exports/pdf/RACM303_2569_Form_2A.pdf",
-        dlName: "4_ฟอร์ม_2A_ภาพรวมเจตคติและพฤติกรรม_RACM303_2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Form_2A.pdf",
+        pdfDl: "4_ฟอร์ม_2A_ภาพรวมเจตคติและพฤติกรรม_RACM303_2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Form_2A.docx",
+        docxDl: "4_ฟอร์ม_2A_ภาพรวมเจตคติและพฤติกรรม_RACM303_2569.docx",
         extraLinks: [
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Form_2A.pdf" },
           {
-            label: "🖨️ ฉบับพิมพ์รายชื่อ นศพ. ล่วงหน้าครบ 9 พื้นที่ (9 หน้า)",
+            label: "⬇ ฉบับพิมพ์รายชื่อครบ 9 พื้นที่ (PDF · 9 หน้า)",
             href: "exports/pdf/RACM303_2569_Form_2A_All_Sites.pdf",
-            targetBlank: true,
+            dl: "4_ฟอร์ม_2A_พิมพ์รายชื่อครบ9พื้นที่_RACM303_2569.pdf",
             highlight: true
+          },
+          {
+            label: "⬇ ฉบับพิมพ์รายชื่อครบ 9 พื้นที่ (.docx)",
+            href: "exports/docx/RACM303_2569_Form_2A_All_Sites.docx",
+            dl: "4_ฟอร์ม_2A_พิมพ์รายชื่อครบ9พื้นที่_RACM303_2569.docx"
           }
         ]
       },
       {
         num: "5.",
         title: "ฟอร์ม 3A ประเมินการนำเสนอ Health system",
-        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอประสบการณ์ภาคสนามด้านระบบสุขภาพ (วันอังคารที่ 29 ธันวาคม 2569 · ห้อง 2C2-03)",
+        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอประสบการณ์ภาคสนามด้านระบบสุขภาพ (วันอังคารที่ 29 ธันวาคม 2569 · ห้อง 2C2-03 · แนวนอน THSarabunPSK)",
         meta: "2 หน้า A4 แนวนอน · เต็ม 100 คะแนน",
-        openHref: "exports/pdf/RACM303_2569_Form_3A.pdf",
-        dlName: "5_ฟอร์ม_3A_ประเมินนำเสนอ_Health_System_29ธค2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Form_3A.pdf",
+        pdfDl: "5_ฟอร์ม_3A_ประเมินนำเสนอ_Health_System_29ธค2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Form_3A.docx",
+        docxDl: "5_ฟอร์ม_3A_ประเมินนำเสนอ_Health_System_29ธค2569.docx",
         extraLinks: [
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Form_3A.pdf" },
           {
-            label: "🖨️ ชุดกรรมการวันนำเสนอ ติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (10 หน้าแนวนอน)",
+            label: "⬇ ชุดกรรมการติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (PDF · 10 หน้า)",
             href: "exports/pdf/RACM303_2569_Form_3A_9Groups_Pack.pdf",
-            targetBlank: true,
+            dl: "5_ฟอร์ม_3A_ชุดกรรมการครบ9กลุ่ม_29ธค2569.pdf",
             highlight: true
+          },
+          {
+            label: "⬇ ชุดกรรมการติ๊กชื่อกลุ่ม 1–9 (.docx)",
+            href: "exports/docx/RACM303_2569_Form_3A_9Groups_Pack.docx",
+            dl: "5_ฟอร์ม_3A_ชุดกรรมการครบ9กลุ่ม_29ธค2569.docx"
           }
         ]
       },
       {
         num: "6.",
         title: "ฟอร์ม 4A ประเมินการนำเสนอ Quantitative study",
-        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอรายงานวิจัยเชิงปริมาณทางระบาดวิทยา (วันพุธที่ 30 ธันวาคม 2569 · ห้อง 2C2-03)",
+        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอรายงานวิจัยเชิงปริมาณทางระบาดวิทยา (วันพุธที่ 30 ธันวาคม 2569 · ห้อง 2C2-03 · แนวนอน THSarabunPSK)",
         meta: "2 หน้า A4 แนวนอน · เต็ม 100 คะแนน",
-        openHref: "exports/pdf/RACM303_2569_Form_4A.pdf",
-        dlName: "6_ฟอร์ม_4A_ประเมินนำเสนอ_Quantitative_Study_30ธค2569.pdf",
+        pdfHref: "exports/pdf/RACM303_2569_Form_4A.pdf",
+        pdfDl: "6_ฟอร์ม_4A_ประเมินนำเสนอ_Quantitative_Study_30ธค2569.pdf",
+        docxHref: "exports/docx/RACM303_2569_Form_4A.docx",
+        docxDl: "6_ฟอร์ม_4A_ประเมินนำเสนอ_Quantitative_Study_30ธค2569.docx",
         extraLinks: [
+          { label: "เปิดดู PDF ↗", href: "exports/pdf/RACM303_2569_Form_4A.pdf" },
           {
-            label: "🖨️ ชุดกรรมการวันนำเสนอ ติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (10 หน้าแนวนอน)",
+            label: "⬇ ชุดกรรมการติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (PDF · 10 หน้า)",
             href: "exports/pdf/RACM303_2569_Form_4A_9Groups_Pack.pdf",
-            targetBlank: true,
+            dl: "6_ฟอร์ม_4A_ชุดกรรมการครบ9กลุ่ม_30ธค2569.pdf",
             highlight: true
+          },
+          {
+            label: "⬇ ชุดกรรมการติ๊กชื่อกลุ่ม 1–9 (.docx)",
+            href: "exports/docx/RACM303_2569_Form_4A_9Groups_Pack.docx",
+            dl: "6_ฟอร์ม_4A_ชุดกรรมการครบ9กลุ่ม_30ธค2569.docx"
           }
         ]
       }
@@ -36367,20 +36423,21 @@
             <img class="fac-printout-crest" src="assets/images/mahidol-rama-logo.png" alt="มหาวิทยาลัยมหิดล คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี">
             <div>
               <div class="fac-printout-kicker-row">
-                <span class="fac-printout-kicker">🖨️ PRINT-OUT PDF FOR FACULTY · เฉพาะคณาจารย์ผู้สอน (มีเบอร์โทร นศพ.)</span>
+                <span class="fac-printout-kicker">📄 FACULTY DOCUMENTS (PDF &amp; WORD .DOCX) · เฉพาะคณาจารย์ผู้สอน (มีเบอร์โทร นศพ.)</span>
                 <span class="fac-printout-pages-pill">${escapeHtml(masterPagesBadge)}</span>
+                <a class="fsir-chip is-hl" href="${escapeHtml(masterPdfHref)}" target="_blank" rel="noopener">เปิดดู PDF ในแท็บใหม่ ↗</a>
               </div>
               <h3 class="fac-printout-main-title">เอกสารสำหรับอาจารย์ — รายวิชา RACM 303 ปีการศึกษา 2569</h3>
-              <p class="fac-printout-sub">จัดหน้าพร้อมพิมพ์ลงกระดาษ A4 คมชัด (มี Bookmarks สารบัญคลิกข้ามหมวดได้ทันที) ครบทั้ง 6 รายการหลัก และแฟ้มประจำตัวอาจารย์ที่ปรึกษาแยก 9 พื้นที่</p>
+              <p class="fac-printout-sub">จัดหน้ามาตรฐานฟอนต์ <strong>THSarabunPSK</strong> คมชัดแบบ Microsoft Word ทั้งฉบับ พร้อมส่งออกเป็นไฟล์ <strong>PDF</strong> (มี Bookmarks สารบัญคลิกข้ามหมวดได้ทันที) และไฟล์ <strong>Word (.docx)</strong> แก้ไขต่อได้ครบทุกชุด</p>
               <label class="fac-printout-toggle-lbl">
                 <input type="checkbox" data-fac-master-toggle ${includeManual ? "checked" : ""}>
-                <span>รวมเนื้อหา <strong>คู่มือการจัดการเรียนการสอน (บทที่ 1–17)</strong> ไว้ต้นเล่มด้วย (รวม 58 หน้า · หากไม่ติ๊กจะได้ชุดเอกสารอาจารย์ล้วน 24 หน้า)</span>
+                <span>รวมเนื้อหา <strong>คู่มือการจัดการเรียนการสอน (บทที่ 1–17)</strong> ไว้ต้นเล่มด้วย (รวม 55 หน้า · หากไม่ติ๊กจะได้ชุดเอกสารอาจารย์ล้วน 24 หน้า)</span>
               </label>
             </div>
           </div>
           <div class="fac-printout-hero-actions">
-            <a class="btn primary" href="${escapeHtml(masterHref)}" target="_blank" rel="noopener">🖨️ เปิดดู / สั่งพิมพ์ PDF ↗</a>
-            <a class="btn pdf-red" href="${escapeHtml(masterHref)}" download="${escapeHtml(masterDl)}">⬇ ดาวน์โหลด PDF</a>
+            <a class="btn pdf-red" href="${escapeHtml(masterPdfHref)}" download="${escapeHtml(masterPdfDl)}" title="ส่งออกชุดเอกสารสำหรับอาจารย์เป็นไฟล์ PDF (ฟอนต์ THSarabunPSK)">${pdfIco}Export as PDF</a>
+            <a class="btn docx-blue" href="${escapeHtml(masterDocxHref)}" download="${escapeHtml(masterDocxDl)}" title="ส่งออกชุดเอกสารสำหรับอาจารย์เป็นไฟล์ Microsoft Word (.docx ฟอนต์ TH SarabunPSK)">${docxIco}Export as .docx</a>
             ${
               collapsible
                 ? `<button type="button" class="btn sm" data-fac-hub-collapse>${collapsed ? "แสดงรายการแยกหมวด & 9 แฟ้มพื้นที่ ▾" : "ย่อแผงเอกสารอาจารย์ ▲"}</button>`
@@ -36398,7 +36455,7 @@
             <div class="fac-printout-sec">
               <div class="fac-printout-sec-head">
                 <div>
-                  <h4>📕 แฟ้มประจำตัวอาจารย์ที่ปรึกษาแยกตามกลุ่มพื้นที่ภาคสนาม 9 แห่ง (Pre-filled Advisor Binders)</h4>
+                  <h4>📕 แฟ้มประจำตัวอาจารย์ที่ปรึกษาแยกตามกลุ่มพื้นที่ภาคสนาม 9 แห่ง (Pre-filled Advisor Binders · PDF &amp; .docx)</h4>
                   <p>แต่ละแฟ้มจัดเรียงใบรายชื่อกลุ่มของท่านไว้หน้าแรก + พิมพ์ชื่อ-รหัส-รูปถ่าย นศพ. ในกลุ่มลงใน <strong>ฟอร์ม 1A (รายบุคคลทุกคน)</strong> และ <strong>ฟอร์ม 2A (ตารางสรุปกลุ่ม)</strong> พร้อมฟอร์ม 3A &amp; 4A ครบในไฟล์เดียว${
                     myAdvisorSite ? ` · <strong style="color:var(--crimson)">★ ไฮไลต์กลุ่มที่ปรึกษาของ อ.${escapeHtml(activeTeacher)}: กลุ่มที่ ${myAdvisorSite.id} (${escapeHtml(myAdvisorSite.shortName)})</strong>` : ""
                   }</p>
@@ -36409,19 +36466,21 @@
                   .map((s) => {
                     const isMyAdv = Boolean(activeTeacher && String(s.advisors || "").includes(activeTeacher));
                     const totalPages = 23 + Number(s.count || 18);
-                    const href = `exports/pdf/RACM303_2569_Advisor_Packet_S${s.id}.pdf`;
-                    const dl = `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${s.id}_${s.shortName}_RACM303_2569.pdf`;
+                    const pdfHref = `exports/pdf/RACM303_2569_Advisor_Packet_S${s.id}.pdf`;
+                    const pdfDl = `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${s.id}_${s.shortName}_RACM303_2569.pdf`;
+                    const docxHref = `exports/docx/RACM303_2569_Advisor_Packet_S${s.id}.docx`;
+                    const docxDl = `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${s.id}_${s.shortName}_RACM303_2569.docx`;
                     return `
                       <div class="fac-advisor-packet-card${isMyAdv ? " is-my-advisor-site" : ""}">
                         <div class="fapc-top">
                           <span class="fapc-num">กลุ่ม ${s.id}</span>
-                          <span class="fapc-meta">${s.count} คน · ${totalPages} หน้า</span>
+                          <span class="fapc-meta">${s.count} คน · ${totalPages} หน้า · <a class="fapc-preview-lk" href="${escapeHtml(pdfHref)}" target="_blank" rel="noopener">เปิดดู ↗</a></span>
                         </div>
                         <div class="fapc-title">${escapeHtml(s.hospital)} <span class="fapc-prov">(${escapeHtml(s.province)})</span></div>
                         <div class="fapc-adv">อ.ที่ปรึกษา: ${escapeHtml(s.advisors)}</div>
                         <div class="fapc-actions">
-                          <a class="btn sm primary" href="${escapeHtml(href)}" target="_blank" rel="noopener">🖨️ เปิดพิมพ์ ↗</a>
-                          <a class="btn sm" href="${escapeHtml(href)}" download="${escapeHtml(dl)}">⬇ PDF</a>
+                          <a class="btn sm pdf-red" href="${escapeHtml(pdfHref)}" download="${escapeHtml(pdfDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ PDF">${pdfIco}Export as PDF</a>
+                          <a class="btn sm docx-blue" href="${escapeHtml(docxHref)}" download="${escapeHtml(docxDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ Microsoft Word (.docx)">${docxIco}Export as .docx</a>
                         </div>
                       </div>
                     `;
@@ -36430,12 +36489,12 @@
               </div>
             </div>
 
-            <!-- 6 Individual Items matching image.png -->
+            <!-- 6 Individual Items -->
             <div class="fac-printout-sec">
               <div class="fac-printout-sec-head">
                 <div>
-                  <h4>📋 แยกเปิดดู / ดาวน์โหลดรายหมวด (ครบทั้ง 6 รายการตามสารบัญเอกสารสำหรับอาจารย์)</h4>
-                  <p>เลือกเปิดพิมพ์เฉพาะหมวดที่ต้องการใช้หน้าห้องสอบ ห้องอภิปราย หรือวันนำเสนอภาคสนาม (29–30 ธ.ค. 2569)</p>
+                  <h4>📋 แยกส่งออกรายหมวด (ครบทั้ง 6 รายการตามสารบัญเอกสารสำหรับอาจารย์ · PDF &amp; .docx)</h4>
+                  <p>เลือกดาวน์โหลดไฟล์ PDF หรือ Microsoft Word (.docx ฟอนต์ TH SarabunPSK) เฉพาะหมวดที่ต้องการใช้งานได้ทันที</p>
                 </div>
               </div>
               <div class="fac-six-items-list">
@@ -36457,8 +36516,8 @@
                                 ${it.extraLinks
                                   .map((lk) =>
                                     lk.dl
-                                      ? `<a class="fsir-chip" href="${escapeHtml(lk.href)}" download="${escapeHtml(lk.dl)}">${escapeHtml(lk.label)}</a>`
-                                      : `<a class="fsir-chip${lk.highlight ? " is-hl" : ""}" href="${escapeHtml(lk.href)}" target="_blank" rel="noopener">${escapeHtml(lk.label)} ↗</a>`
+                                      ? `<a class="fsir-chip${lk.highlight ? " is-hl" : ""}" href="${escapeHtml(lk.href)}" download="${escapeHtml(lk.dl)}">${escapeHtml(lk.label)}</a>`
+                                      : `<a class="fsir-chip${lk.highlight ? " is-hl" : ""}" href="${escapeHtml(lk.href)}" target="_blank" rel="noopener">${escapeHtml(lk.label)}</a>`
                                   )
                                   .join("")}
                                </div>`
@@ -36467,8 +36526,8 @@
                       </div>
                     </div>
                     <div class="fsir-actions">
-                      <a class="btn sm primary" href="${escapeHtml(it.openHref)}" target="_blank" rel="noopener">🖨️ เปิดพิมพ์ ↗</a>
-                      <a class="btn sm pdf-red" href="${escapeHtml(it.openHref)}" download="${escapeHtml(it.dlName)}">⬇ PDF</a>
+                      <a class="btn sm pdf-red" href="${escapeHtml(it.pdfHref)}" download="${escapeHtml(it.pdfDl)}">${pdfIco}Export as PDF</a>
+                      <a class="btn sm docx-blue" href="${escapeHtml(it.docxHref)}" download="${escapeHtml(it.docxDl)}">${docxIco}Export as .docx</a>
                     </div>
                   </div>
                 `

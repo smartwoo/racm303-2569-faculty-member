@@ -37471,10 +37471,21 @@ html[data-theme="dark"] .hs-vdo-companion-btn {
   line-height: 1.35;
 }
 
+.fapc-preview-lk {
+  color: #991b1b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fapc-preview-lk:hover {
+  text-decoration: underline;
+}
+
 .fapc-actions {
   margin-top: auto;
   padding-top: 6px;
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
