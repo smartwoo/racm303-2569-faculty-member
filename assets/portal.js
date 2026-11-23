@@ -138,6 +138,7 @@
     activeDocId: "HS1-CONCISE",
     activeHsModule: "HS1",
     preferredHsFormat: "concise",
+    hsUiMode: localStorage.getItem("racm303_hs_ui_mode_v1") || "apple-tv",
     textbookSubMode: "docs-drive",
     tbDriveScope: "folders",
     tbDriveFormatChip: "all",
@@ -10091,9 +10092,16 @@
       return b;
     };
 
+    const isDriveUi = state.hsUiMode === "drive";
     tabsRow.appendChild(
       makeTabBtn(
-        isAllActive ? "📁 Google Drive (HS1–HS6)" : `📁 Google Drive (${mod.code})`,
+        isAllActive
+          ? isDriveUi
+            ? "📁 โฟลเดอร์รวม & เอกสารคำสอน (HS1–HS6)"
+            : "📖 เอกสารคำสอน (HS1–HS6)"
+          : isDriveUi
+          ? `📁 โฟลเดอร์ & เอกสารคำสอน (${mod.code})`
+          : `📖 เอกสารคำสอน (${mod.code})`,
         "docs",
         Boolean(mod.conciseDocId || mod.docId),
         () => {
@@ -10135,7 +10143,11 @@
         true,
         () => {
           state.activeHsModule = mod.code;
-          openHsDiscussion(mod.code);
+          state.hsdModule = mod.code;
+          state.hsdSlideDeckMod = mod.code;
+          openHsGoogleDriveFolder();
+          switchTab("hs-discussion");
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
       )
     );
@@ -12398,6 +12410,569 @@
     }
   }
 
+  function getEpNumIndex(modCode) {
+    const m = String(modCode || "HS1").match(/([1-6])/);
+    return m ? Number(m[1]) : 1;
+  }
+
+  function setHsUiMode(nextMode, opts) {
+    const mode = nextMode === "drive" ? "drive" : "apple-tv";
+    state.hsUiMode = mode;
+    document.body.dataset.hsUiMode = mode;
+    try {
+      localStorage.setItem("racm303_hs_ui_mode_v1", mode);
+    } catch (_) {}
+    const o = opts || {};
+    if (o.returnToHub !== false) {
+      if (state.activeTab === "textbooks" && state.textbookSubMode === "doc-reader") {
+        state.textbookSubMode = "docs-drive";
+      } else if (state.activeTab === "hs-discussion" && (!state.hsdDriveFolderOpen || state.hsdViewMode !== "slide")) {
+        openHsGoogleDriveFolder();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+        return;
+      }
+    }
+    if (state.activeTab === "textbooks") renderTextbookReader();
+    else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
+    else if (state.activeTab === "practice") renderPracticeCurrent();
+    else if (state.activeTab === "manual") renderManualReader();
+    else if (ROLE === "faculty" && state.activeTab === "faculty-docs" && typeof renderFacultyDocsView === "function") {
+      renderFacultyDocsView();
+    }
+    window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+  }
+
+  function buildTextbookAppleTvDOM(baseMod) {
+    const allModules =
+      HSD_DATA.modules && HSD_DATA.modules.length
+        ? HSD_DATA.modules
+        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const curMod = getHsModuleMeta(baseMod);
+    const scope = state.tbDriveScope || "folders";
+
+    const stage = make("div", null, "hs-atv-stage hsd-no-print");
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", "เอกสารคำสอนระบบสุขภาพ (Apple TV Mode)");
+
+    if (scope === "folders") {
+      const shelf = make("div", null, "tv-shelf");
+      const head = make("div", null, "tv-shelf-head");
+      const headLeft = make("div");
+      headLeft.append(
+        make("h3", "เอกสารคำสอนระบบสุขภาพครบทั้ง 6 ตอน (HS1 – HS6)", "tv-shelf-title"),
+        make(
+          "span",
+          "คลิกเลือกตอนเพื่อดูภาพรวมของบทเรียน หรือกดปุ่มลัดบนการ์ดเพื่อเปิดอ่านฉบับย่อ / ฉบับเต็มได้ทันที",
+          "tv-shelf-sub"
+        )
+      );
+      head.appendChild(headLeft);
+      shelf.appendChild(head);
+
+      const grid = make("div", null, "hs-atv-episodes-grid");
+      allModules.forEach((m, idx) => {
+        const epNum = idx + 1;
+        const lecturer = getHsLecturerName(m.code);
+        const shortDate = formatHsShortDate(m.scheduleDate);
+        const card = make("div", null, `tv-episode-card hs-atv-ep-card ep-${epNum}`);
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("data-ep-num", `0${epNum}`);
+        card.setAttribute("aria-label", `${m.code}: ${m.title}`);
+
+        const top = make("div", null, "tv-ep-top");
+        top.append(
+          make("span", m.code, "tv-ep-code"),
+          make("span", `น้ำหนักสอบ ${m.examWeight || ""}`, "tv-ep-weight")
+        );
+
+        const mid = make("div", null, "tv-ep-bottom");
+        mid.append(
+          make("span", m.title, "tv-ep-title"),
+          make("span", `${shortDate} · ${lecturer}`, "tv-ep-date")
+        );
+
+        const pills = make("div", null, "hs-atv-ep-pills");
+        if (m.conciseDocId) {
+          const bCon = make("button", "⚡ อ่านฉบับย่อ", "hs-atv-ep-pill is-solid");
+          bCon.type = "button";
+          bCon.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openTextbookDoc(m.conciseDocId);
+          });
+          pills.appendChild(bCon);
+        }
+        if (m.docId) {
+          const bFull = make("button", "📚 ฉบับเต็ม", "hs-atv-ep-pill");
+          bFull.type = "button";
+          bFull.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openTextbookDoc(m.docId);
+          });
+          pills.appendChild(bFull);
+        }
+        if (m.wbDocId) {
+          const bWb = make("button", "📋 Worksheet", "hs-atv-ep-pill");
+          bWb.type = "button";
+          bWb.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openTextbookDoc(m.wbDocId);
+          });
+          pills.appendChild(bWb);
+        }
+
+        const openModSpotlight = () => {
+          state.activeHsModule = m.id;
+          state.tbDriveScope = "module";
+          renderTextbookReader();
+          window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+        };
+
+        card.append(top, mid, pills);
+        card.addEventListener("click", openModSpotlight);
+        card.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            openModSpotlight();
+          }
+        });
+        grid.appendChild(card);
+      });
+
+      shelf.appendChild(grid);
+      stage.appendChild(shelf);
+      return stage;
+    }
+
+    // Focused Episode Spotlight (scope !== "folders")
+    const epIdx = getEpNumIndex(curMod.code);
+    const lecturer = getHsLecturerName(curMod.code);
+    const entries = getTeachingDocEntriesForModules([curMod], "all", "");
+
+    const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
+    hero.setAttribute("data-ep-num", `0${epIdx}`);
+
+    const heroTop = make("div", null, "hs-atv-hero-top");
+    const backAllBtn = make("button", "← ดูครบทุกตอน (HS1–HS6)", "hs-atv-back-pill");
+    backAllBtn.type = "button";
+    backAllBtn.addEventListener("click", () => {
+      state.tbDriveScope = "folders";
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    });
+    heroTop.append(
+      backAllBtn,
+      make("span", `📖 เอกสารคำสอนประจำคาบ ${curMod.code} · สอบ ${curMod.examWeight || ""}`, "tv-hero-kicker")
+    );
+
+    const heroBody = make("div", null, "tv-hero-body");
+    heroBody.append(
+      make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
+      make("p", `📅 ${curMod.scheduleDate} · อาจารย์ผู้สอน: ${lecturer}`, "tv-hero-meta")
+    );
+
+    const heroActions = make("div", null, "tv-hero-actions");
+    if (curMod.conciseDocId) {
+      const btnCon = make("button", "▶ อ่านฉบับย่อ + แผนภาพ (Concise)", "tv-hero-btn is-primary");
+      btnCon.type = "button";
+      btnCon.addEventListener("click", () => openTextbookDoc(curMod.conciseDocId));
+      heroActions.appendChild(btnCon);
+    }
+    if (curMod.docId) {
+      const btnFull = make("button", "📚 อ่านฉบับเต็ม (Full Textbook)", "tv-hero-btn is-glass");
+      btnFull.type = "button";
+      btnFull.addEventListener("click", () => openTextbookDoc(curMod.docId));
+      heroActions.appendChild(btnFull);
+    }
+    if (curMod.wbDocId) {
+      const btnWb = make("button", "📋 เปิดสมุดใบงาน (Worksheet)", "tv-hero-btn is-glass");
+      btnWb.type = "button";
+      btnWb.addEventListener("click", () => openTextbookDoc(curMod.wbDocId));
+      heroActions.appendChild(btnWb);
+    }
+
+    hero.append(heroTop, heroBody, heroActions);
+    stage.appendChild(hero);
+
+    // Tactile Apple TV Media Cards for the Episode
+    const tilesGrid = make("div", null, "hs-atv-tiles-grid");
+    entries.forEach((en) => {
+      const toneCls = en.kind === "concise" ? "tone-teal" : en.kind === "wb" ? "tone-amber" : "tone-blue";
+      const iconSym = en.kind === "concise" ? "⚡" : en.kind === "wb" ? "📋" : "📚";
+      const tile = make("div", null, "tv-app-tile hs-atv-doc-tile");
+      tile.tabIndex = 0;
+      tile.setAttribute("role", "button");
+
+      const ico = make("span", iconSym, `tv-app-icon ${toneCls} hs-atv-emoji-ico`);
+      const copy = make("div", null, "tv-app-copy");
+      copy.append(
+        make(
+          "span",
+          en.kind === "concise"
+            ? `สรุปฉบับย่อ + แผนภาพ (${en.mod.code})`
+            : en.kind === "wb"
+            ? `สมุดใบงานเตรียมอภิปราย (${en.mod.code})`
+            : `เอกสารคำสอนฉบับเต็ม (${en.mod.code})`,
+          "tv-app-title"
+        ),
+        make("span", en.subDesc, "tv-app-sub")
+      );
+
+      const foot = make("div", null, "hs-atv-dl-row");
+      foot.appendChild(make("span", "▶ เปิดอ่านบนเว็บ", "tv-app-badge"));
+
+      const pdfA = document.createElement("a");
+      pdfA.className = "hs-atv-mini-dl";
+      pdfA.href = en.pdfHref;
+      pdfA.setAttribute("download", `${en.dlStem}.pdf`);
+      pdfA.textContent = "⬇ PDF";
+      pdfA.addEventListener("click", (ev) => ev.stopPropagation());
+
+      const docxA = document.createElement("a");
+      docxA.className = "hs-atv-mini-dl";
+      docxA.href = en.docxHref;
+      docxA.setAttribute("download", `${en.dlStem}.docx`);
+      docxA.textContent = "⬇ Word";
+      docxA.addEventListener("click", (ev) => ev.stopPropagation());
+
+      foot.append(pdfA, docxA);
+      copy.appendChild(foot);
+
+      tile.append(ico, copy);
+      tile.addEventListener("click", () => openTextbookDoc(en.doc.id));
+      tile.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          openTextbookDoc(en.doc.id);
+        }
+      });
+      tilesGrid.appendChild(tile);
+    });
+    stage.appendChild(tilesGrid);
+
+    return stage;
+  }
+
+  function buildLectureSlidesAppleTvDOM(baseMod) {
+    const allModules =
+      HSD_DATA.modules && HSD_DATA.modules.length
+        ? HSD_DATA.modules
+        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const curMod = getHsModuleMeta(baseMod);
+    const scope = state.lsDriveScope || "folders";
+
+    const stage = make("div", null, "hs-atv-stage hsd-no-print");
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", "Slide อาจารย์ประจำคาบ (Apple TV Mode)");
+
+    if (scope === "folders") {
+      const shelf = make("div", null, "tv-shelf");
+      const head = make("div", null, "tv-shelf-head");
+      const headLeft = make("div");
+      headLeft.append(
+        make("h3", "Slide อาจารย์ประจำคาบ (HS1 – HS6)", "tv-shelf-title"),
+        make(
+          "span",
+          "สไลด์ประกอบการบรรยายช่วงต้นคาบของแต่ละบทเรียน — ขณะนี้อยู่ระหว่างรออาจารย์ผู้สอนอัปโหลดไฟล์",
+          "tv-shelf-sub"
+        )
+      );
+      head.appendChild(headLeft);
+      shelf.appendChild(head);
+
+      const grid = make("div", null, "hs-atv-episodes-grid");
+      allModules.forEach((m, idx) => {
+        const epNum = idx + 1;
+        const lecturer = getHsLecturerName(m.code);
+        const shortDate = formatHsShortDate(m.scheduleDate);
+        const card = make("div", null, `tv-episode-card hs-atv-ep-card ep-${epNum}`);
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("data-ep-num", `0${epNum}`);
+
+        const top = make("div", null, "tv-ep-top");
+        top.append(
+          make("span", m.code, "tv-ep-code"),
+          make("span", "⏳ รออาจารย์ Upload", "hs-atv-pending-badge")
+        );
+
+        const mid = make("div", null, "tv-ep-bottom");
+        mid.append(
+          make("span", m.title, "tv-ep-title"),
+          make("span", `${shortDate} (${m.lectureTime || "บรรยาย"}) · ${lecturer}`, "tv-ep-date")
+        );
+
+        const pills = make("div", null, "hs-atv-ep-pills");
+        const docBtn = make("button", "📖 อ่านเอกสารคำสอนระหว่างรอ →", "hs-atv-ep-pill is-solid");
+        docBtn.type = "button";
+        docBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openTextbookDriveFolder(m.id);
+        });
+        pills.appendChild(docBtn);
+
+        const openSlideSpotlight = () => {
+          state.activeHsModule = m.id;
+          state.lsDriveScope = "module";
+          renderTextbookReader();
+          window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+        };
+
+        card.append(top, mid, pills);
+        card.addEventListener("click", openSlideSpotlight);
+        card.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            openSlideSpotlight();
+          }
+        });
+        grid.appendChild(card);
+      });
+
+      shelf.appendChild(grid);
+      stage.appendChild(shelf);
+      return stage;
+    }
+
+    const epIdx = getEpNumIndex(curMod.code);
+    const lecturer = getHsLecturerName(curMod.code);
+    const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
+    hero.setAttribute("data-ep-num", `0${epIdx}`);
+
+    const heroTop = make("div", null, "hs-atv-hero-top");
+    const backAllBtn = make("button", "← รวมครบทั้ง 6 คาบ (HS1–HS6)", "hs-atv-back-pill");
+    backAllBtn.type = "button";
+    backAllBtn.addEventListener("click", () => {
+      state.lsDriveScope = "folders";
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    });
+    heroTop.append(
+      backAllBtn,
+      make("span", "⏳ รออาจารย์ Upload", "hs-atv-pending-badge")
+    );
+
+    const heroBody = make("div", null, "tv-hero-body");
+    heroBody.append(
+      make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
+      make(
+        "p",
+        `📅 ${curMod.scheduleDate} · บรรยาย ${curMod.lectureTime || "1 ชม. แรก"} · อาจารย์ผู้บรรยาย: ${lecturer}`,
+        "tv-hero-meta"
+      ),
+      make(
+        "p",
+        "สไลด์ประกอบการบรรยายของอาจารย์ประจำคาบจะเปิดให้คลิกดูบนหน้านี้ทันทีที่อัปโหลด ในระหว่างรอสามารถเปิดอ่านเอกสารคำสอนหรือโจทย์อภิปรายได้ทันที",
+        "hs-atv-hero-note"
+      )
+    );
+
+    const heroActions = make("div", null, "tv-hero-actions");
+    const btnDocs = make("button", `📖 เปิดเอกสารคำสอน (${curMod.code})`, "tv-hero-btn is-primary");
+    btnDocs.type = "button";
+    btnDocs.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
+
+    const btnDisc = make("button", `💬 เปิดโจทย์อภิปราย (${curMod.code})`, "tv-hero-btn is-glass");
+    btnDisc.type = "button";
+    btnDisc.addEventListener("click", () => {
+      state.activeHsModule = curMod.code;
+      state.hsdSlideDeckMod = curMod.code;
+      openHsGoogleDriveFolder();
+      switchTab("hs-discussion");
+    });
+
+    heroActions.append(btnDocs, btnDisc);
+    hero.append(heroTop, heroBody, heroActions);
+    stage.appendChild(hero);
+    return stage;
+  }
+
+  function buildHsDiscussionAppleTvDOM(activeMod) {
+    const allModules =
+      HSD_DATA.modules && HSD_DATA.modules.length
+        ? HSD_DATA.modules
+        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+    const curMod = getHsModuleMeta(activeMod);
+    const epIdx = getEpNumIndex(curMod.code);
+    const modCases = (HSD_DATA.cases || []).filter((c) => c.module === curMod.id);
+    const qCnt = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+    const prog = countModuleDraftProgress(curMod.id);
+
+    const stage = make("div", null, "hs-atv-stage hsd-no-print");
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", `โจทย์อภิปรายระบบสุขภาพ ${curMod.code} (Apple TV Mode)`);
+
+    // 1. Featured Episode Hero
+    const hero = make("div", null, `hs-atv-hero ep-${epIdx}`);
+    hero.setAttribute("data-ep-num", `0${epIdx}`);
+
+    const heroTop = make("div", null, "hs-atv-hero-top");
+    heroTop.append(
+      make(
+        "span",
+        `💬 อภิปรายกลุ่มย่อย ${curMod.code} · ${curMod.discTime || ""} · สอบ ${curMod.examWeight || ""}`,
+        "tv-hero-kicker"
+      ),
+      make(
+        "span",
+        ROLE === "faculty"
+          ? "★ มีเฉลยอาจารย์ครบ 4 ขั้น"
+          : prog.filled > 0
+          ? `✓ บันทึกคำตอบแล้ว ${prog.filled}/${prog.total}`
+          : `${modCases.length} กรณีศึกษา · ${qCnt} ข้อ`,
+        "tv-hero-kicker"
+      )
+    );
+
+    const heroBody = make("div", null, "tv-hero-body");
+    heroBody.append(
+      make("h3", `${curMod.code}: ${curMod.title}`, "tv-hero-title"),
+      make(
+        "p",
+        `📅 ${curMod.scheduleDate} — เริ่มด้วยสไลด์เปิดคาบเช็คชื่อ Kahoot ตามด้วยโจทย์กรณีศึกษา ${modCases.length} กรณี (${qCnt} ข้อย่อย)`,
+        "tv-hero-meta"
+      )
+    );
+
+    const heroActions = make("div", null, "tv-hero-actions");
+    const playSlidesBtn = make(
+      "button",
+      `▶ เริ่มเปิดสไลด์ 16:9 (${curMod.code})`,
+      "tv-hero-btn is-primary"
+    );
+    playSlidesBtn.type = "button";
+    playSlidesBtn.addEventListener("click", () => selectHsSessionDeck(curMod.id));
+
+    const scrollModeBtn = make("button", "≡ เปิดใบงานเลื่อนอ่านยาว", "tv-hero-btn is-glass");
+    scrollModeBtn.type = "button";
+    scrollModeBtn.addEventListener("click", () => {
+      state.hsdViewMode = "scroll";
+      state.hsdModule = curMod.id;
+      state.hsdDriveFolderOpen = false;
+      try {
+        localStorage.setItem("racm303_hsd_vmode", "scroll");
+      } catch (_) {}
+      if ($("hsdModuleSelect")) $("hsdModuleSelect").value = curMod.id;
+      syncViewModeButtonsUI();
+      renderHsDiscussionView();
+    });
+
+    const dlPptxBtn = make("button", "⬇ ดาวน์โหลดสไลด์ .pptx", "tv-hero-btn is-glass");
+    dlPptxBtn.type = "button";
+    dlPptxBtn.addEventListener("click", () => downloadSingleModulePptx(curMod.id));
+
+    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn);
+    hero.append(heroTop, heroBody, heroActions);
+    stage.appendChild(hero);
+
+    // 2. Tactile Case & Opening Slide Tiles for Active Module
+    const tilesGrid = make("div", null, "hs-atv-tiles-grid");
+    const openTile = make("button", null, "tv-app-tile hs-atv-doc-tile");
+    openTile.type = "button";
+    openTile.append(
+      make("span", "🎯", "tv-app-icon tone-amber hs-atv-emoji-ico"),
+      (() => {
+        const c = make("div", null, "tv-app-copy");
+        c.append(
+          make("span", `สไลด์เปิดคาบ & เช็คชื่อ Kahoot (${curMod.code})`, "tv-app-title"),
+          make("span", "เลือกกลุ่มย่อย 1–6 แสดงรหัส PIN และเช็คชื่อเข้าห้องเรียนก่อนเริ่มอภิปราย", "tv-app-sub"),
+          make("span", "▶ เปิดสไลด์หน้าแรก", "tv-app-badge")
+        );
+        return c;
+      })()
+    );
+    openTile.addEventListener("click", () => selectHsSessionDeck(curMod.id));
+    tilesGrid.appendChild(openTile);
+
+    modCases.forEach((cObj, cIdx) => {
+      const qList = cObj.questions || [];
+      const cTile = make("button", null, "tv-app-tile hs-atv-doc-tile");
+      cTile.type = "button";
+      const tone = cIdx % 2 === 0 ? "tone-blue" : "tone-teal";
+      const cleanCaseTitle = /^กรณี/.test(String(cObj.title || "").trim())
+        ? cObj.title
+        : `กรณีศึกษาที่ ${cObj.caseNumber}: ${cObj.title}`;
+      cTile.append(
+        make("span", `${cObj.caseNumber}`, `tv-app-icon ${tone} hs-atv-emoji-ico`),
+        (() => {
+          const cp = make("div", null, "tv-app-copy");
+          cp.append(
+            make("span", cleanCaseTitle, "tv-app-title"),
+            make("span", `${qList.length} ข้อคำถามย่อยสำหรับอภิปรายในกลุ่ม`, "tv-app-sub"),
+            make("span", "▶ เปิดสไลด์กรณีศึกษานี้", "tv-app-badge")
+          );
+          return cp;
+        })()
+      );
+      cTile.addEventListener("click", () => {
+        selectHsSessionDeck(curMod.id);
+        if (qList[0] && qList[0].id) {
+          selectHsQuestionById(qList[0].id, true, 1);
+        }
+      });
+      tilesGrid.appendChild(cTile);
+    });
+    stage.appendChild(tilesGrid);
+
+    // 3. Episode Poster Grid (HS1 – HS6)
+    const shelf = make("div", null, "tv-shelf");
+    const sHead = make("div", null, "tv-shelf-head");
+    sHead.appendChild(make("h3", "คาบอภิปรายระบบสุขภาพทั้งหมด (HS1 – HS6)", "tv-shelf-title"));
+    shelf.appendChild(sHead);
+
+    const epGrid = make("div", null, "hs-atv-episodes-grid");
+    allModules.forEach((m, idx) => {
+      const n = idx + 1;
+      const isSelected = m.id === curMod.id;
+      const mCases = (HSD_DATA.cases || []).filter((c) => c.module === m.id);
+      const mQCnt = mCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+      const shortDate = formatHsShortDate(m.scheduleDate);
+
+      const card = make(
+        "div",
+        null,
+        `tv-episode-card hs-atv-ep-card ep-${n}${isSelected ? " is-selected-atv-ep" : ""}`
+      );
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("data-ep-num", `0${n}`);
+
+      const top = make("div", null, "tv-ep-top");
+      top.append(
+        make("span", m.code, "tv-ep-code"),
+        make("span", `${mCases.length} กรณี · ${mQCnt} ข้อ`, "tv-ep-weight")
+      );
+
+      const mid = make("div", null, "tv-ep-bottom");
+      mid.append(
+        make("span", m.title, "tv-ep-title"),
+        make("span", `${shortDate} · ${m.discTime || ""}`, "tv-ep-date")
+      );
+
+      const pills = make("div", null, "hs-atv-ep-pills");
+      const playPill = make("button", `▶ เปิดสไลด์ 16:9 (${m.code})`, "hs-atv-ep-pill is-solid");
+      playPill.type = "button";
+      playPill.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        selectHsSessionDeck(m.id);
+      });
+      pills.appendChild(playPill);
+
+      card.append(top, mid, pills);
+      card.addEventListener("click", () => {
+        state.activeHsModule = m.id;
+        state.hsdSlideDeckMod = m.id;
+        renderHsDiscussionView();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      });
+      epGrid.appendChild(card);
+    });
+    shelf.appendChild(epGrid);
+    stage.appendChild(shelf);
+
+    return stage;
+  }
+
   function renderTextbookReader() {
     const picker = $("textbookDocList");
     const toc = $("textbookHeadingToc");
@@ -12425,6 +13000,7 @@
         : parsed.modCode;
     state.activeHsModule = baseMod;
 
+    const isDriveUi = state.hsUiMode === "drive";
     const subMode = state.textbookSubMode || "docs-drive";
     const isDocsFoldersRoot = subMode === "docs-drive" && (state.tbDriveScope || "folders") === "folders";
     const isSlidesFoldersRoot = subMode === "lecture-slides" && (state.lsDriveScope || "folders") === "folders";
@@ -12443,15 +13019,21 @@
           allowAllModules: true,
           isAllActive: isFoldersRoot,
           keepFormatTabActiveWhenAll: true,
-          allModulesLabel: "📁 ทุกโฟลเดอร์ (HS1–HS6)",
+          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📺 รวมทุกตอน (HS1–HS6)",
           allHeading:
             subMode === "lecture-slides"
-              ? "HS1–HS6: โฟลเดอร์ Slide อาจารย์ประจำคาบ (เลือกบทเรียนก่อนเปิดดูไฟล์)"
-              : "Google Drive · ระบบสุขภาพ (HS1–HS6) — เลือกโฟลเดอร์แต่ละบทเพื่อดูไฟล์ทั้งหมด",
+              ? isDriveUi
+                ? "HS1–HS6: โฟลเดอร์ Slide อาจารย์ประจำคาบ (File Explorer)"
+                : "HS1–HS6: สไลด์ประกอบการบรรยายประจำคาบ (รออาจารย์ Upload)"
+              : isDriveUi
+              ? "Google Drive · ระบบสุขภาพ (HS1–HS6) — เลือกโฟลเดอร์แต่ละบทเพื่อดูไฟล์ทั้งหมด"
+              : "HS1–HS6: เอกสารคำสอนระบบสุขภาพ (ฉบับย่อ & ฉบับเต็ม)",
           allDesc:
             subMode === "lecture-slides"
-              ? "เรียงตามบทเรียน HS1–HS6 — คลิกเลือกโฟลเดอร์แต่ละ HS ด้านล่างเพื่อดูไฟล์สไลด์อาจารย์ประจำคาบ"
-              : "File Explorer รวมไฟล์ทุกรูปแบบในโฟลเดอร์ HS1–HS6 (เอกสารคำสอน ฉบับย่อ/เต็ม · สไลด์ Discussion .pptx · Slide อาจารย์ · Worksheet · โจทย์ฝึกหัด · คู่มือวิชา)",
+              ? "เลือกบทเรียน HS1–HS6 เพื่อดูรายละเอียดคาบบรรยายและสถานะการอัปโหลดสไลด์ของอาจารย์ผู้สอน"
+              : isDriveUi
+              ? "File Explorer รวมไฟล์ทุกรูปแบบในโฟลเดอร์ HS1–HS6 (เอกสารคำสอน ฉบับย่อ/เต็ม · สไลด์ Discussion .pptx · Slide อาจารย์ · Worksheet · โจทย์ฝึกหัด · คู่มือวิชา)"
+              : "เลือกบทเรียน HS1–HS6 เพื่อเปิดอ่านสรุปฉบับย่อ (Abridged) ฉบับเต็ม หรือดาวน์โหลดไฟล์ PDF / Word",
           onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
         })
       );
@@ -12460,7 +13042,9 @@
     if (subMode === "docs-drive") {
       if (driveMount) {
         driveMount.hidden = false;
-        driveMount.replaceChildren(buildTextbookDriveExplorerDOM(baseMod));
+        driveMount.replaceChildren(
+          isDriveUi ? buildTextbookDriveExplorerDOM(baseMod) : buildTextbookAppleTvDOM(baseMod)
+        );
       }
       if (readerWrap) readerWrap.hidden = true;
       return;
@@ -12469,7 +13053,9 @@
     if (subMode === "lecture-slides") {
       if (driveMount) {
         driveMount.hidden = false;
-        driveMount.replaceChildren(buildLectureSlidesDriveExplorerDOM(baseMod));
+        driveMount.replaceChildren(
+          isDriveUi ? buildLectureSlidesDriveExplorerDOM(baseMod) : buildLectureSlidesAppleTvDOM(baseMod)
+        );
       }
       if (readerWrap) readerWrap.hidden = true;
       return;
@@ -12482,7 +13068,6 @@
       readerDoc = docs.find((d) => d.id === resolvedId) || current;
       state.activeDocId = readerDoc.id;
     }
-    const readerParsed = parseHsDocInfo(readerDoc.id);
     const modMeta = getHsModuleMeta(baseMod);
 
     if (driveMount) {
@@ -12491,21 +13076,29 @@
     }
     if (readerWrap) readerWrap.hidden = false;
 
-    // Populate Top Drive File Switcher Bar inside Reader
+    // Populate Top File Switcher Bar inside Reader
     if (readerBar) {
       readerBar.replaceChildren();
       const backGroup = make("div", null, "tb-drive-file-pills");
-      const backAllBtn = make("button", "📂 โฟลเดอร์ HS1–HS6", "btn sm");
+      const backAllBtn = make(
+        "button",
+        isDriveUi ? "📂 โฟลเดอร์ HS1–HS6" : "📺 รวมทุกตอน HS1–HS6",
+        "btn sm"
+      );
       backAllBtn.type = "button";
       backAllBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
-      const backDriveBtn = make("button", `📁 ← กลับโฟลเดอร์ ${baseMod}`, "btn sm");
+      const backDriveBtn = make(
+        "button",
+        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `← หน้าบทเรียน ${baseMod}`,
+        "btn sm"
+      );
       backDriveBtn.type = "button";
       backDriveBtn.addEventListener("click", () => openTextbookDriveFolder(baseMod));
       backGroup.append(backAllBtn, backDriveBtn);
       readerBar.appendChild(backGroup);
 
       const fileSwitchGroup = make("div", null, "tb-drive-file-pills");
-      fileSwitchGroup.appendChild(make("span", `ไฟล์ในโฟลเดอร์ ${baseMod}:`, "tb-drive-file-label"));
+      fileSwitchGroup.appendChild(make("span", `เอกสารคาบ ${baseMod}:`, "tb-drive-file-label"));
       [
         { id: modMeta.conciseDocId, fmt: "concise", label: "⚡ ฉบับย่อ (Abridged)" },
         { id: modMeta.docId, fmt: "full", label: "📚 ฉบับเต็ม (Full Textbook)" },
@@ -12521,20 +13114,28 @@
       readerBar.appendChild(fileSwitchGroup);
     }
 
-    // Populate Left Sidebar with Current Folder Files + Module Switcher
+    // Populate Left Sidebar
     if (sidebarLabel) {
-      sidebarLabel.textContent = `ไฟล์ในโฟลเดอร์ ${baseMod} (Google Drive)`;
+      sidebarLabel.textContent = isDriveUi ? `ไฟล์ในโฟลเดอร์ ${baseMod} (Drive)` : `เอกสารคำสอนคาบ ${baseMod}`;
     }
     picker.replaceChildren();
     const backRootLi = document.createElement("li");
-    const backRootSideBtn = make("button", "📂 หน้ารวมโฟลเดอร์ HS1–HS6", "doc-picker-btn");
+    const backRootSideBtn = make(
+      "button",
+      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ HS1–HS6" : "📺 รวมทุกตอน HS1–HS6",
+      "doc-picker-btn"
+    );
     backRootSideBtn.type = "button";
     backRootSideBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
     backRootLi.appendChild(backRootSideBtn);
     picker.appendChild(backRootLi);
 
     const backLi = document.createElement("li");
-    const backSideBtn = make("button", `📁 โฟลเดอร์คาบ ${baseMod} (Drive)`, "doc-picker-btn");
+    const backSideBtn = make(
+      "button",
+      isDriveUi ? `📁 โฟลเดอร์คาบ ${baseMod} (Drive)` : `← หน้าบทเรียน ${baseMod}`,
+      "doc-picker-btn"
+    );
     backSideBtn.type = "button";
     backSideBtn.addEventListener("click", () => openTextbookDriveFolder(baseMod));
     backLi.appendChild(backSideBtn);
@@ -19777,6 +20378,7 @@
         : state.hsdSlideDeckMod && /^HS[1-6]$/i.test(state.hsdSlideDeckMod)
         ? state.hsdSlideDeckMod.toUpperCase()
         : "HS1";
+    const isDriveUi = state.hsUiMode === "drive";
     container.appendChild(
       buildUnifiedHsModuleBanner(activeDriveMod, "discussion", {
         showModuleBar: true,
@@ -19788,10 +20390,15 @@
             localStorage.setItem("racm303_hsd_deck_mod", clean);
           } catch (_) {}
           renderHsDiscussionView();
+          window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
         }
       })
     );
-    container.appendChild(buildGoogleDriveExplorerDOM({ isModal: false }));
+    if (isDriveUi) {
+      container.appendChild(buildGoogleDriveExplorerDOM({ isModal: false }));
+    } else {
+      container.appendChild(buildHsDiscussionAppleTvDOM(activeDriveMod));
+    }
   }
 
   function openHsdGoogleDrivePickerModal() {
@@ -19866,9 +20473,16 @@
     gdriveSwitchBtn.addEventListener("click", () => openHsdGoogleDrivePickerModal());
     menuRight.appendChild(gdriveSwitchBtn);
 
-    const gdriveFolderBtn = make("button", "📁 โฟลเดอร์ไดรฟ์", "ppt-gdrive-folder-btn");
+    const gdriveFolderBtn = make(
+      "button",
+      state.hsUiMode === "drive" ? "📁 โฟลเดอร์ไดรฟ์" : "📺 ← เลือกคาบอื่น",
+      "ppt-gdrive-folder-btn"
+    );
     gdriveFolderBtn.type = "button";
-    gdriveFolderBtn.title = "ปิดสไลด์ปัจจุบันกลับไปหน้าโฟลเดอร์ Google Drive รวมทุกไฟล์ (HS1–HS6)";
+    gdriveFolderBtn.title =
+      state.hsUiMode === "drive"
+        ? "ปิดสไลด์ปัจจุบันกลับไปหน้าโฟลเดอร์ Google Drive รวมทุกไฟล์ (HS1–HS6)"
+        : "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกคาบโหมด Apple TV";
     gdriveFolderBtn.addEventListener("click", () => openHsGoogleDriveFolder());
     menuRight.appendChild(gdriveFolderBtn);
 
@@ -30659,6 +31273,7 @@
     openTextbookDoc: (docId) => openTextbookDoc(docId),
     openTextbookDriveFolder: (mod) => openTextbookDriveFolder(mod),
     openHsLectureSlides: (mod) => openHsLectureSlides(mod),
+    setHsUiMode: (mode, opts) => setHsUiMode(mode, opts),
     openFacultyDoc: (docId) => {
       if (docId) state.activeFacultyDocId = docId;
       state.facultySub = "guides";

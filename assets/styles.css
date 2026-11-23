@@ -25282,3 +25282,224 @@ html[data-theme="dark"] .ppt-cs-action-btn {
 
 
 
+/* ---------- Health Systems Apple TV UI Mode (Default) ---------- */
+.tv-sibling-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tv-sibling-pill svg {
+  flex-shrink: 0;
+}
+
+.hs-atv-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 14px;
+}
+
+.hs-atv-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 30px;
+  border-radius: 26px;
+  color: #ffffff;
+  box-shadow: 0 20px 42px -12px rgba(15, 23, 42, 0.28);
+}
+
+.hs-atv-hero.ep-1 { background: linear-gradient(135deg, #09255c 0%, #1d5ed8 100%); }
+.hs-atv-hero.ep-2 { background: linear-gradient(135deg, #0b4349 0%, #0d9488 100%); }
+.hs-atv-hero.ep-3 { background: linear-gradient(135deg, #6d2e0d 0%, #d97706 100%); }
+.hs-atv-hero.ep-4 { background: linear-gradient(135deg, #064434 0%, #059669 100%); }
+.hs-atv-hero.ep-5 { background: linear-gradient(135deg, #172f4d 0%, #0284c7 100%); }
+.hs-atv-hero.ep-6 { background: linear-gradient(135deg, #6f1818 0%, #e11d48 100%); }
+
+.hs-atv-hero::after {
+  content: attr(data-ep-num);
+  position: absolute;
+  right: 24px;
+  top: 8px;
+  font-family: var(--font-display);
+  font-size: 112px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.11);
+  pointer-events: none;
+}
+
+.hs-atv-hero-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.hs-atv-back-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12.8px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background-color 0.16s ease, transform 0.16s ease;
+}
+
+.hs-atv-back-pill:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(-2px);
+}
+
+.hs-atv-hero-note {
+  margin: 8px 0 0;
+  max-width: 780px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.hs-atv-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.24);
+  border: 1px solid rgba(253, 224, 71, 0.48);
+  color: #fef3c7;
+  font-family: var(--font-display);
+  font-size: 11.8px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.hs-atv-episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.hs-atv-ep-card {
+  flex: unset;
+  width: 100%;
+  min-height: 204px;
+  gap: 12px;
+}
+
+.hs-atv-ep-card.is-selected-atv-ep {
+  box-shadow: 0 22px 40px -10px rgba(0, 0, 0, 0.32), inset 0 0 0 3px #ffffff;
+}
+
+.hs-atv-ep-pills {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.hs-atv-ep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12.2px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.hs-atv-ep-pill.is-solid {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #ffffff;
+}
+
+.hs-atv-ep-pill:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hs-atv-ep-pill.is-solid:hover {
+  background: #f8fafc;
+}
+
+.hs-atv-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.hs-atv-emoji-ico {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.hs-atv-dl-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hs-atv-mini-dl {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-soft, rgba(148, 163, 184, 0.3));
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 11.6px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.hs-atv-mini-dl:hover {
+  background: var(--tv-accent, #0b46a6);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+@media (max-width: 1020px) {
+  .hs-atv-episodes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .hs-atv-episodes-grid,
+  .hs-atv-tiles-grid {
+    grid-template-columns: 1fr;
+  }
+  .hs-atv-hero {
+    padding: 20px 20px;
+  }
+}
+
+
+
