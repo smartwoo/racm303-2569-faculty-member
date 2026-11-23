@@ -1,4 +1,4 @@
-# HS5: ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care)
+# HS5: ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 
 สัมฤทธิ์ ศรีธำรงสวัสดิ์
 

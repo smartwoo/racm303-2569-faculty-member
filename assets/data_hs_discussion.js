@@ -1,5 +1,5 @@
 window.RACM_HS_DISCUSSION_DATA = {
-  "updatedAt": "2026-11-20",
+  "updatedAt": "2026-11-23",
   "totalModules": 6,
   "totalCases": 10,
   "totalSubQuestions": 20,
@@ -7,8 +7,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS1",
       "code": "HS1",
-      "title": "สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค",
-      "enTitle": "Health, Determinants of Health, and Disease Prevention",
+      "title": "สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)",
+      "enTitle": "Health, Determinants of Health, and Level of Disease Prevention",
       "scheduleDate": "วันพฤหัสบดีที่ 26 พฤศจิกายน 2569",
       "lectureTime": "08.30 – 09.30 น.",
       "discTime": "09.40 – 12.00 น.",
@@ -21,8 +21,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS2",
       "code": "HS2",
-      "title": "หน้าที่และโครงสร้างของระบบสุขภาพ & รูปแบบการดูแล (6W)",
-      "enTitle": "Structure and Functions of Health Systems (WHO 6 Building Blocks) & Models of Care (6W)",
+      "title": "หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)",
+      "enTitle": "Structure and Functions of Health Systems and Models of Care",
       "scheduleDate": "วันจันทร์ที่ 30 พฤศจิกายน 2569",
       "lectureTime": "08.30 – 09.30 น.",
       "discTime": "09.40 – 12.00 น.",
@@ -35,8 +35,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS3",
       "code": "HS3",
-      "title": "คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (EQESaRR)",
-      "enTitle": "Desirable Characteristics of Health Services Systems (EQESaRR)",
+      "title": "คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)",
+      "enTitle": "Desirable Characteristics of Health Services Systems",
       "scheduleDate": "วันจันทร์ที่ 30 พฤศจิกายน 2569",
       "lectureTime": "13.30 – 14.30 น.",
       "discTime": "14.40 – 17.00 น.",
@@ -49,8 +49,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS4",
       "code": "HS4",
-      "title": "พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม (COM-B) และการสร้างเสริมสุขภาพ",
-      "enTitle": "Health Behavior, Behavior Change (COM-B), and Health Promotion (Ottawa Charter)",
+      "title": "พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)",
+      "enTitle": "Health Behavior, Behavior Change, and Health Promotion",
       "scheduleDate": "วันอังคารที่ 1 ธันวาคม 2569",
       "lectureTime": "08.30 – 09.30 น.",
       "discTime": "09.40 – 12.00 น.",
@@ -63,8 +63,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS5",
       "code": "HS5",
-      "title": "ระบบบริการสุขภาพปฐมภูมิ (PHC) และบริการปฐมภูมิ (Primary Care)",
-      "enTitle": "Primary Health Care (Astana 3 Pillars) and Primary Care Attributes",
+      "title": "ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)",
+      "enTitle": "Primary Health Care and Primary Care",
       "scheduleDate": "วันอังคารที่ 1 ธันวาคม 2569",
       "lectureTime": "13.30 – 14.30 น.",
       "discTime": "14.40 – 17.00 น.",
@@ -77,8 +77,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS6",
       "code": "HS6",
-      "title": "หลักประกันสุขภาพถ้วนหน้า ทฤษฎีประกันสุขภาพ และกลไกการจ่ายเงิน",
-      "enTitle": "Universal Health Coverage, Health Insurance Theory, and Provider Payment Methods",
+      "title": "การประกันสุขภาพ (Health Insurance) หลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage) และกลไกการจ่ายเงินแก่ผู้ให้บริการ (Provider Payment Methods)",
+      "enTitle": "Health Insurance, Universal Health Coverage, and Provider Payment Methods",
       "scheduleDate": "วันศุกร์ที่ 4 ธันวาคม 2569",
       "lectureTime": "08.30 – 09.30 น.",
       "discTime": "09.40 – 12.00 น.",

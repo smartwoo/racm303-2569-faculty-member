@@ -1,4 +1,4 @@
-# HS2: หน้าที่และโครงสร้างของระบบสุขภาพและระบบบริการสุขภาพ (Structure and Functions of Health Systems and Health Service Systems)
+# HS2: หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)
 
 ณัฐวุฒิ เอี่ยงธนรัตน์
 

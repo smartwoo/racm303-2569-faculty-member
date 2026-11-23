@@ -1,4 +1,4 @@
-# HS4: พฤติกรรมสุขภาพและการปรับเปลี่ยนพฤติกรรม (Health Behavior and Behavior Change)
+# HS4: พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)
 
 สัมฤทธิ์ ศรีธำรงสวัสดิ์
 

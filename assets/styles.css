@@ -24543,7 +24543,7 @@ html[data-theme="dark"][data-role="faculty"] .gdrive-folder-weight {
   color: var(--gd-ink);
   line-height: 1.38;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 2.72em;

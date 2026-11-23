@@ -21,13 +21,13 @@ UID:w1-d2-hs1-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261126T083000
 DTEND;TZID=Asia/Bangkok:20261126T093000
-SUMMARY:[RACM 303] *HS1: สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Guided Learning Synthesis)
+SUMMARY:[RACM 303] *HS1: สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention) (Guided Learning Synthesis)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก (จัด 180 ที่นั่ง)
 DESCRIPTION:วัตถุประสงค์: 1) แยกแยะโรค (Disease) ความเจ็บป่วย (Illness) และภาวะที่สังคมยอมรับว่าป่วย (Sickness) พร้อมเปรียบเทียบนิยามสุขภาพเชิงชีวการแพทย์และองค์รวม | 2) วิเคราะห์อิทธิพลของ SDH สภาพการทำงาน/สิ่งแวดล้อม และ CDH ต่อความไม่เป็นธรรมทางสุขภาพ | 3) จำแนกและเลือกใช้มาตรการป้องกันโรคทั้ง 4 ระดับ (รวม Quaternary Prevention)\nอาจารย์ผู้สอน: อ. พญ.วริษา สุนทรวินิต\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก (จัด 180 ที่นั่ง)\nรูปแบบ: Onsite · ห้องใหญ่ 169 คน (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] *HS1: สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (Guided Learning Synthesis)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] *HS1: สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention) (Guided Learning Synthesis)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -35,13 +35,13 @@ UID:w1-d2-hs1-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261126T094000
 DTEND;TZID=Asia/Bangkok:20261126T120000
-SUMMARY:[RACM 303] Discussion & Case Workbook (HS1): สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค
+SUMMARY:[RACM 303] Discussion & Case Workbook (HS1): สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)
 LOCATION:1C1-06 (Discussion กลุ่มที่ 5 (28 คน))
 DESCRIPTION:วัตถุประสงค์: อภิปรายเปรียบเทียบกรณีศึกษา (Contrasting Cases) รับข้อมูลป้อนกลับ และฝึกดึงความรู้ออกมาใช้ (Retrieval Practice) จากสมุดแบบฝึกหัด HS1 (ทำคำถามนำมาก่อนเข้าชั้นเรียน)\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-06 (Discussion กลุ่มที่ 5 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (28–29 คน/กลุ่ม) (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Workbook (HS1): สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Workbook (HS1): สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -63,13 +63,13 @@ UID:w2-d1-hs2-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261130T094000
 DTEND;TZID=Asia/Bangkok:20261130T120000
-SUMMARY:[RACM 303] Discussion & Case Workbook (HS2): หน้าที่และโครงสร้างของระบบสุขภาพ & รูปแบบการดูแล (6W)
+SUMMARY:[RACM 303] Discussion & Case Workbook (HS2): หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)
 LOCATION:1C1-05 (Discussion กลุ่มที่ 4 (28 คน))
 DESCRIPTION:วัตถุประสงค์: จับคู่เปรียบเทียบคำตอบและอภิปรายกรณีศึกษาจากสมุดแบบฝึกหัด HS2 (ผู้เรียนตอบคำถามนำก่อนเรียนของหัวข้อที่ 1–4 ล่วงหน้าเป็นลายลักษณ์อักษร)\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-05 (Discussion กลุ่มที่ 4 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Workbook (HS2): หน้าที่และโครงสร้างของระบบสุขภาพ & รูปแบบการดูแล (6W)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Workbook (HS2): หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -77,13 +77,13 @@ UID:w2-d1-hs3-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261130T144000
 DTEND;TZID=Asia/Bangkok:20261130T170000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS3): คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (EQESaRR)
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS3): คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)
 LOCATION:1C1-04 (Discussion กลุ่มที่ 3 (28 คน))
 DESCRIPTION:วัตถุประสงค์: ประยุกต์ใช้กรอบ EQESaRR วิเคราะห์กรณีศึกษาและชั่งน้ำหนักแลกเปลี่ยน (Trade-offs) เมื่อประเมินระบบบริการสุขภาพจริง\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-04 (Discussion กลุ่มที่ 3 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS3): คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (EQESaRR)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS3): คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -91,13 +91,13 @@ UID:w2-d2-hs4-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261201T094000
 DTEND;TZID=Asia/Bangkok:20261201T120000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS4): การสร้างเสริมสุขภาพ พฤติกรรมสุขภาพ และตัวแบบ COM-B
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS4): พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)
 LOCATION:1C1-03 (Discussion กลุ่มที่ 2 (28 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์ปัจจัยกำหนดพฤติกรรมด้วยตัวแบบ COM-B / Behaviour Change Wheel และออกแบบมาตรการสร้างเสริมสุขภาพระดับบุคคล องค์กร และนโยบายสาธารณะ\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-03 (Discussion กลุ่มที่ 2 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS4): การสร้างเสริมสุขภาพ พฤติกรรมสุขภาพ และตัวแบบ COM-B
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS4): พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -105,13 +105,13 @@ UID:w2-d2-hs5-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261201T144000
 DTEND;TZID=Asia/Bangkok:20261201T170000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิและบริการปฐมภูมิ
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 LOCATION:1C1-02 (Discussion กลุ่มที่ 1 (29 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์กรณีศึกษาการจัดบริการปฐมภูมิ การทำงานข้ามภาคส่วน การเสริมพลังชุมชน และความท้าทายของระบบสุขภาพปฐมภูมิไทยในปัจจุบัน\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-02 (Discussion กลุ่มที่ 1 (29 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิและบริการปฐมภูมิ
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -119,13 +119,13 @@ UID:w2-d5-hs6-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261204T094000
 DTEND;TZID=Asia/Bangkok:20261204T120000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS6): การประกันสุขภาพและกลไกการจ่ายเงินแก่ผู้ให้บริการ
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS6): การประกันสุขภาพ (Health Insurance) หลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage) และกลไกการจ่ายเงินแก่ผู้ให้บริการ (Provider Payment Methods)
 LOCATION:1C1-07 (Discussion กลุ่มที่ 6 (28 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์กรณีศึกษาเปรียบเทียบกองทุนสุขภาพไทย ผลกระทบของวิธีจ่ายเงินต่อพฤติกรรมโรงพยาบาล และมาตรการควบคุมค่าใช้จ่ายโดยไม่ลดการเข้าถึงของกลุ่มเปราะบาง\nอาจารย์ผู้สอน: อ. พญ.วริษา\nสถานที่/ห้องเรียน: 1C1-07 (Discussion กลุ่มที่ 6 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS6): การประกันสุขภาพและกลไกการจ่ายเงินแก่ผู้ให้บริการ
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS6): การประกันสุขภาพ (Health Insurance) หลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage) และกลไกการจ่ายเงินแก่ผู้ให้บริการ (Provider Payment Methods)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT

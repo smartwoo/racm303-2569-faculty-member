@@ -1,4 +1,4 @@
-# HS1: สุขภาพและปัจจัยกำหนดสุขภาพ (Health and Determinants of Health)
+# HS1: สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)
 
 ณัฐวุฒิ เอี่ยงธนรัตน์ · สัมฤทธิ์ ศรีธำรงสวัสดิ์ · วริษา สุนทรวินิต
 

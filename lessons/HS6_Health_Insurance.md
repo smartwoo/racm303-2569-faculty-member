@@ -1,4 +1,4 @@
-# HS6: ประกันสุขภาพ (Health Insurance)
+# HS6: การประกันสุขภาพ (Health Insurance) หลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage) และกลไกการจ่ายเงินแก่ผู้ให้บริการ (Provider Payment Methods)
 
 นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์
 

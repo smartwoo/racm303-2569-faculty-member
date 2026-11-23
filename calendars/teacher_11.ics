@@ -35,13 +35,13 @@ UID:w2-d2-hs4-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261201T083000
 DTEND;TZID=Asia/Bangkok:20261201T093000
-SUMMARY:[RACM 303] *HS4: พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ (Guided Learning Synthesis)
+SUMMARY:[RACM 303] *HS4: พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion) (Guided Learning Synthesis)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) อธิบายกลยุทธ์ 5 ด้านของกฎบัตรออตตาวา (Ottawa Charter) บทบาทแพทย์ (Advocate\, Mediate\, Enable) และการเปลี่ยนผ่านสู่โรค NCDs | 2) เปรียบเทียบทฤษฎี KAP\, HBM\, Stages of Change กับเศรษฐศาสตร์พฤติกรรมและ Nudge | 3) ประยุกต์ใช้ Behaviour Change Wheel และตัวแบบ COM-B | 4) วิเคราะห์ความรอบรู้ด้านสุขภาพระดับบุคคลและองค์กร\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite · ห้องใหญ่ 169 คน (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] *HS4: พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ (Guided Learning Synthesis)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] *HS4: พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion) (Guided Learning Synthesis)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -49,13 +49,13 @@ UID:w2-d2-hs4-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261201T094000
 DTEND;TZID=Asia/Bangkok:20261201T120000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS4): การสร้างเสริมสุขภาพ พฤติกรรมสุขภาพ และตัวแบบ COM-B
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS4): พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)
 LOCATION:2C2-03 (เฉพาะเช้า 1 ธ.ค.) (Discussion กลุ่มที่ 6 (28 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์ปัจจัยกำหนดพฤติกรรมด้วยตัวแบบ COM-B / Behaviour Change Wheel และออกแบบมาตรการสร้างเสริมสุขภาพระดับบุคคล องค์กร และนโยบายสาธารณะ\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์\nสถานที่/ห้องเรียน: 2C2-03 (เฉพาะเช้า 1 ธ.ค.) (Discussion กลุ่มที่ 6 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS4): การสร้างเสริมสุขภาพ พฤติกรรมสุขภาพ และตัวแบบ COM-B
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS4): พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -63,13 +63,13 @@ UID:w2-d2-hs5-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261119T160000Z
 DTSTART;TZID=Asia/Bangkok:20261201T144000
 DTEND;TZID=Asia/Bangkok:20261201T170000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิและบริการปฐมภูมิ
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 LOCATION:1C1-06 (Discussion กลุ่มที่ 5 (28 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์กรณีศึกษาการจัดบริการปฐมภูมิ การทำงานข้ามภาคส่วน การเสริมพลังชุมชน และความท้าทายของระบบสุขภาพปฐมภูมิไทยในปัจจุบัน\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์\nสถานที่/ห้องเรียน: 1C1-06 (Discussion กลุ่มที่ 5 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิและบริการปฐมภูมิ
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
