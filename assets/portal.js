@@ -147,6 +147,10 @@
     lsDriveScope: "folders",
     lsDriveLayout: localStorage.getItem("racm303_ls_drive_layout") || "grid",
     lsDriveSearch: "",
+    sfFilter: "all",
+    sfSelectedId: "",
+    sfDriveSearch: "",
+    sfDriveLayout: localStorage.getItem("racm303_sf_drive_layout") || "grid",
     activeFacultyDocId: "hs-disc-teacher-key",
     readerFontPx: Number(localStorage.getItem("racm303_font_px")) || 16.5,
     readerViewMode: "scroll", // scroll | deck | sorter
@@ -995,6 +999,7 @@
       return "hs-discussion";
     }
     if (rawTab === "leave-form" || rawTab === "absence") return "leave";
+    if (rawTab === "systems-forum" || rawTab === "beyond-exam" || rawTab === "systems-thinking" || rawTab === "panels") return "systems-forum";
     return rawTab;
   }
 
@@ -1045,6 +1050,7 @@
     fieldwork: "fieldwork",
     manual: "manual",
     textbooks: "knowledge",
+    "systems-forum": "knowledge",
     practice: "knowledge",
     "faculty-docs": "knowledge",
     epidemiology: "epidemiology",
@@ -1166,8 +1172,8 @@
   function switchTab(tabId, pushHash = true) {
     tabId = normalizeTabId(tabId);
     const validTabs = ROLE === "faculty"
-      ? ["home", "schedule", "discussion", "hs-discussion", "fieldwork", "epidemiology", "submissions", "leave", "audit", "faculty-docs", "manual", "textbooks", "practice"]
-      : ["home", "schedule", "discussion", "hs-discussion", "fieldwork", "epidemiology", "submissions", "leave", "manual", "textbooks", "practice"];
+      ? ["home", "schedule", "discussion", "hs-discussion", "fieldwork", "epidemiology", "submissions", "leave", "audit", "faculty-docs", "manual", "textbooks", "systems-forum", "practice"]
+      : ["home", "schedule", "discussion", "hs-discussion", "fieldwork", "epidemiology", "submissions", "leave", "manual", "textbooks", "systems-forum", "practice"];
     if (!validTabs.includes(tabId)) tabId = "home";
 
     state.activeTab = tabId;
@@ -1218,6 +1224,7 @@
     if (tabId === "leave" && typeof renderLeavePortalView === "function") renderLeavePortalView();
     if (tabId === "manual") renderManualReader();
     if (tabId === "textbooks") renderTextbookReader();
+    if (tabId === "systems-forum") renderSystemsForumView();
     if (tabId === "practice") renderPracticeCurrent();
     if (ROLE === "faculty" && tabId === "audit" && typeof renderAuditView === "function") renderAuditView();
     if (ROLE === "faculty" && tabId === "faculty-docs" && typeof renderFacultyDocsView === "function") renderFacultyDocsView();
@@ -3094,6 +3101,16 @@
         switchTab("submissions");
       });
       studyRow.appendChild(bs);
+    }
+    const beyondSess = typeof getSystemsForumSessionById === "function" ? getSystemsForumSessionById(session.id) : null;
+    if (beyondSess) {
+      const bsf = make("button", "🧭 เปิดหน้าเวทีคิดเชิงระบบ & เสวนา (กรอบแนวคิด · คำถามชวนคิด)", "btn sm teal");
+      bsf.type = "button";
+      bsf.addEventListener("click", () => {
+        closeEventModal();
+        openSystemsForum(beyondSess.id);
+      });
+      studyRow.appendChild(bsf);
     }
     if (studyRow.childElementCount > 0) card.appendChild(studyRow);
 
@@ -10266,11 +10283,340 @@
     };
   }
 
+  /* ---------- Beyond the Exam: Systems Thinking, Expert Panels & Policy Exercise (6 Core Sessions) ---------- */
+  const HS_BEYOND_SESSIONS = [
+    {
+      id: "w1-d1-st",
+      order: 1,
+      tone: "sf-1",
+      code: "ST1",
+      driveFileName: "01_ST1_Systems_Thinking.md",
+      kind: "systems",
+      kindLabel: "Systems Thinking · ปูรากฐาน",
+      kindLabelEn: "Systems Thinking · Foundation",
+      phase: 1,
+      phaseLabel: "ระยะที่ 1 · เปิดเลนส์เชิงระบบ (ก่อนเข้าสู่ HS1–HS6)",
+      phaseLabelEn: "Phase 1 · Systems Lens (Before HS1–HS6)",
+      weekLabel: "สัปดาห์ที่ 1",
+      dateTH: "วันพุธที่ 25 พฤศจิกายน 2569",
+      shortDate: "พ. 25 พ.ย. 69",
+      timeLabel: "09.30 – 12.00 น.",
+      hours: "2.5 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Systems & Systems Thinking",
+      titleThSub: "ระบบที่ซับซ้อนและปรับตัวได้ (CAS) & แบบจำลองภูเขาน้ำแข็ง (Iceberg Model)",
+      speakers: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ (ประธานรายวิชา RACM 303)",
+      kickoffNote: "ต่อเนื่องจากปฐมนิเทศรายวิชา (Orientation 09.00–09.30 น. · คณาจารย์ 12 ท่าน)",
+      examBadge: "นอกข้อสอบ HS1–HS6 · รากฐานทุกบท",
+      whyImportant:
+        "เป็นกรอบคิดตั้งต้น (Foundational Mental Model) ก่อนเรียน HS1–HS6 ช่วยให้มองเห็นโครงสร้าง ความเชื่อมโยง และแรงย้อนกลับที่ซ่อนอยู่ใต้ปัญหาสุขภาพ ไม่แยกส่วนแก้เฉพาะอาการปลายเหตุ",
+      objectives: [
+        "อธิบายแนวคิดระบบที่ซับซ้อนและปรับตัวได้ (Complex Adaptive Systems: CAS) และคุณสมบัติการเกิดพฤติกรรมใหม่ของระบบ (Emergence)",
+        "วิเคราะห์ปัญหาสุขภาพแบบองค์รวมผ่านแบบจำลองภูเขาน้ำแข็ง (Iceberg Model: Events → Patterns → Structures → Mental Models) และความเชื่อมโยงของเหตุปัจจัยในระบบสุขภาพ"
+      ],
+      frameworks: [
+        "Complex Adaptive Systems (CAS)",
+        "Iceberg Model (4 ระดับ)",
+        "Feedback Loops & Unintended Consequences",
+        "Systems-Based Practice"
+      ],
+      relatedHs: ["HS1", "HS2", "HS3"],
+      assessmentLinks: [
+        "ปูพื้นฐานแนวคิด CAS และ Six Building Blocks ใน HS2",
+        "เป็นฐานสำคัญสำหรับ Workshop CLD & Archetypes (22 ธ.ค.)",
+        "ใช้เป็นกรอบวิเคราะห์ใน Self-Reflection Note ครั้งที่ 1 (SRN 1) และภาคสนาม"
+      ],
+      guidingQuestions: [
+        "ปัญหาสุขภาพที่เราเห็น 'เหนือผิวน้ำ' (เช่น ผู้ป่วยคุมเบาหวานไม่ได้หรือห้องฉุกเฉินแออัด) มีโครงสร้างระบบและกรอบความคิด (Mental Models) ใดซ่อนอยู่ใต้ภูเขาน้ำแข็ง?",
+        "เหตุใดการแก้ปัญหาแบบเส้นตรง (Linear Fix) ในโรงพยาบาลหรือชุมชนจึงมักสร้างผลข้างเคียงที่ไม่ตั้งใจ (Unintended Consequences)?"
+      ],
+      facultyNote:
+        "เชื่อมโยงต่อเนื่องจาก Orientation (09.00–09.30 น.) เพื่อปรับกรอบคิดนักศึกษาจากระดับชีวการแพทย์รายบุคคลสู่ภาพรวมระบบสุขภาพก่อนเริ่ม HS1 ในวันรุ่งขึ้น",
+      searchKeywords:
+        "systems thinking cas complex adaptive iceberg model mental models feedback loops orientation ณัฐวุฒิ ปฐมนิเทศ คิดเชิงระบบ ภูเขาน้ำแข็ง"
+    },
+    {
+      id: "w1-d1-global",
+      order: 2,
+      tone: "sf-2",
+      code: "GLOBAL",
+      driveFileName: "02_GLOBAL_Planetary_HPSR.md",
+      kind: "panel",
+      kindLabel: "Panel Discussion · วิทยากรรับเชิญ",
+      kindLabelEn: "Expert Panel · Global & HPSR",
+      phase: 1,
+      phaseLabel: "ระยะที่ 1 · เปิดเลนส์เชิงระบบ (ก่อนเข้าสู่ HS1–HS6)",
+      phaseLabelEn: "Phase 1 · Systems Lens (Before HS1–HS6)",
+      weekLabel: "สัปดาห์ที่ 1",
+      dateTH: "วันพุธที่ 25 พฤศจิกายน 2569",
+      shortDate: "พ. 25 พ.ย. 69",
+      timeLabel: "13.00 – 16.00 น.",
+      hours: "3 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Bedside to Systems-Based Practice: Global/Planetary Health & HPSR",
+      titleThSub: "เชื่อมผู้ป่วยข้างเตียงสู่สุขภาพโลก สุขภาพดาวเคราะห์ และการวิจัยนโยบายและระบบสุขภาพ",
+      speakers: "วิทยากร: นพ.ทักษพล ธรรมรังสี, นพ.วิรุฬ ลิ้มสวาท | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      examBadge: "นอกข้อสอบ HS1–HS6 · วัตถุประสงค์รายวิชา",
+      whyImportant:
+        "ขยายขอบฟ้าจากข้างเตียงผู้ป่วย (Bedside) สู่พลวัตสุขภาพโลก สุขภาพดาวเคราะห์ และเป้าหมาย SDGs พร้อมฉายภาพบทบาทของ HPSR ในการเปลี่ยนปัญหาหน้างานให้เกิดการปฏิรูประดับนโยบาย",
+      objectives: [
+        "เชื่อมโยงปัญหาผู้ป่วยข้างเตียงสู่บริบทระบบสุขภาพ สุขภาพโลก และสุขภาพดาวเคราะห์ (Global & Planetary Health) รวมถึงเป้าหมายการพัฒนาที่ยั่งยืน (SDGs)",
+        "อธิบายบทบาทของการวิจัยนโยบายและระบบสุขภาพ (Health Policy and Systems Research: HPSR) ในการขับเคลื่อนการเปลี่ยนแปลงเชิงระบบ"
+      ],
+      frameworks: [
+        "Bedside to Systems-Based Practice",
+        "Global & Planetary Health",
+        "Sustainable Development Goals (SDGs)",
+        "Health Policy & Systems Research (HPSR)"
+      ],
+      relatedHs: ["HS1", "HS2", "HS5"],
+      assessmentLinks: [
+        "ตอบวัตถุประสงค์รายวิชาด้านสุขภาพไร้พรมแดน สุขภาพโลก และสุขภาพดาวเคราะห์",
+        "ขยายมุมมอง SDH / CDH / สิ่งแวดล้อม (HS1) และ UHC / SDGs (HS5)",
+        "เสริมมิติบทบาทแพทย์ Change Agent สำหรับ SRN 1 และเกณฑ์ฟอร์ม 3A ข้อ 3"
+      ],
+      guidingQuestions: [
+        "เมื่อดูแลผู้ป่วย 1 คนข้างเตียง ปัจจัยระดับโลกและสิ่งแวดล้อม (เช่น ภาวะโลกร้อน ฝุ่น PM2.5 ระบบอาหาร การค้าข้ามพรมแดน) ส่งผลต่อผู้ป่วยคนนั้นอย่างไร?",
+        "แพทย์คลินิกจะตั้งคำถามวิจัยเชิงระบบ (HPSR) เพื่อเปลี่ยนปัญหาที่พบซ้ำ ๆ ในโรงพยาบาลให้กลายเป็นข้อเสนอเชิงนโยบายได้อย่างไร?"
+      ],
+      facultyNote:
+        "เวทีเสวนาบ่ายวันแรกที่ช่วยให้นักศึกษาเห็นภาพจริงของแพทย์นักพัฒนาระบบและนักวิจัย HPSR ก่อนเข้าสู่เนื้อหาภาคทฤษฎี HS1–HS6",
+      searchKeywords:
+        "bedside systems-based practice global planetary health hpsr sdgs ทักษพล ธรรมรังสี วิรุฬ ลิ้มสวาท สุขภาพโลก สุขภาพดาวเคราะห์ วิจัยระบบสุขภาพ"
+    },
+    {
+      id: "w3-d3-dhs-panel",
+      order: 3,
+      tone: "sf-3",
+      code: "PANEL-DHS",
+      driveFileName: "03_DHS_6BB_Plus_One.md",
+      kind: "panel",
+      kindLabel: "Panel Discussion · เตรียมลงภาคสนาม",
+      kindLabelEn: "Expert Panel · Pre-Fieldwork DHS",
+      phase: 2,
+      phaseLabel: "ระยะที่ 2 · เชื่อมทฤษฎีสู่ชุมชนจริง (ก่อนออกภาคสนาม)",
+      phaseLabelEn: "Phase 2 · Connecting Theory to Community (Pre-Fieldwork)",
+      weekLabel: "สัปดาห์ที่ 3",
+      dateTH: "วันพุธที่ 9 ธันวาคม 2569",
+      shortDate: "พ. 9 ธ.ค. 69",
+      timeLabel: "09.00 – 12.00 น.",
+      hours: "3 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Panel Discussion: District Health Systems – Six Building Blocks Plus One & Learning How to Learn in Community",
+      titleThSub: "ระบบสุขภาพอำเภอ (DHS) และท่าทีการเรียนรู้ร่วมกับชุมชนก่อนลงพื้นที่ภาคสนาม",
+      speakers: "วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ",
+      examBadge: "นอกข้อสอบ HS1–HS6 · เข็มทิศภาคสนาม",
+      whyImportant:
+        "จัดขึ้นในเช้าวันสุดท้ายก่อนกลุ่มแรก (อุ้มผาง) ออกเดินทางภาคสนาม เพื่อเชื่อมกรอบ Six Building Blocks เข้ากับ 'Plus One' (ชุมชนและภาคีเครือข่าย) พร้อมวางท่าทีการเรียนรู้ร่วมกับชาวบ้านอย่างอ่อนน้อมและเคารพศักดิ์ศรี",
+      objectives: [
+        "วิเคราะห์การบูรณาการระบบสุขภาพอำเภอ (District Health Systems: DHS) ที่เชื่อมโยงหน่วยบริการเข้ากับชุมชนและภาคีเครือข่าย (Six Building Blocks Plus One)",
+        "เตรียมทักษะและท่าทีการเรียนรู้ร่วมกับชุมชนและพื้นที่จริง (Learning How to Learn in Community) ก่อนออกฝึกภาคสนามทั้ง 9 โรงพยาบาลชุมชน"
+      ],
+      frameworks: [
+        "District Health Systems (DHS)",
+        "Six Building Blocks Plus One (+Community)",
+        "Community Potential & Social Capital",
+        "Learning How to Learn in Community"
+      ],
+      relatedHs: ["HS2", "HS3", "HS5"],
+      assessmentLinks: [
+        "เข็มทิศตรงสู่วัตถุประสงค์ภาคสนามทั้ง 5 ข้อ ณ โรงพยาบาลชุมชน 9 แห่ง",
+        "เชื่อมโยงพฤติกรรมและเจตคติการลงพื้นที่ตามฟอร์ม 1A (การสื่อสาร ความอ่อนน้อม เคารพชุมชน)",
+        "วันเดียวกันกับกำหนดส่ง SRN 1 (ภายใน 17.00 น.) และคืนแรกของการเดินทางกลุ่มอุ้มผาง"
+      ],
+      guidingQuestions: [
+        "องค์ประกอบ 'Plus One' ในระบบสุขภาพอำเภอ (DHS) เติมเต็มช่องว่างใดของกรอบ Six Building Blocks ที่เรียนใน HS2?",
+        "ท่าที 'ไปเรียนรู้ร่วมกับชุมชน' แตกต่างจากท่าที 'ไปเก็บข้อมูลจากชุมชน' อย่างไรตลอด 8–10 วันในพื้นที่ภาคสนาม?"
+      ],
+      facultyNote:
+        "จัดช่วงเช้าก่อนกิจกรรมกลุ่มย่อยครั้งที่ 4 (สรุปเครื่องมือก่อนลงพื้นที่) — อาจารย์ที่ปรึกษาทั้ง 9 กลุ่มสามารถต่อยอดประเด็น DHS และท่าทีการเรียนรู้ร่วมกับชุมชนในช่วงบ่ายได้ทันที",
+      searchKeywords:
+        "district health systems dhs six building blocks plus one learning how to learn community สุรเกียรติ อาชานานุภาพ ระบบสุขภาพอำเภอ ภาคสนาม ชุมชน"
+    },
+    {
+      id: "w5-d2-cld-ws",
+      order: 4,
+      tone: "sf-4",
+      code: "WORKSHOP",
+      driveFileName: "04_WORKSHOP_CLD_Archetypes.md",
+      kind: "systems",
+      kindLabel: "Systems Thinking Workshop · สังเคราะห์ภาคสนาม",
+      kindLabelEn: "Systems Workshop · CLD & Archetypes",
+      phase: 3,
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      weekLabel: "สัปดาห์ที่ 5",
+      dateTH: "วันอังคารที่ 22 ธันวาคม 2569",
+      shortDate: "อ. 22 ธ.ค. 69",
+      timeLabel: "13.00 – 16.30 น.",
+      hours: "3.5 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก (มีห้องกลุ่มย่อย 9 ห้องสำรองช่วงบ่าย)",
+      title: "Workshop: Systems Thinking in Action – Causal Loop Diagram (CLD) & System Archetypes",
+      titleThSub: "เวิร์กชอปสังเคราะห์ข้อมูลภาคสนามด้วยแผนผังวงจรเหตุปัจจัย แม่แบบเชิงระบบ และจุดคานงัด",
+      speakers: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      examBadge: "หลังสอบ HS1–HS6 · หัวใจนำเสนอฟอร์ม 3A",
+      whyImportant:
+        "จัดขึ้นทันทีในช่วงบ่ายหลังสอบ Open Note ระบบสุขภาพ เพื่อเปลี่ยนข้อมูลดิบและประสบการณ์จาก 9 พื้นที่ภาคสนามให้เป็นแผนผังเหตุปัจจัย (CLD) และข้อเสนอระดับจุดคานงัด (Leverage Points) ที่เฉียบคมสำหรับการนำเสนอฟอร์ม 3A",
+      objectives: [
+        "สังเคราะห์ข้อมูลและปัญหาซับซ้อนที่พบจากภาคสนามด้วยแผนผังวงจรเหตุปัจจัย (Causal Loop Diagram: CLD) และแม่แบบเชิงระบบ (System Archetypes)",
+        "ระบุจุดคานงัด (Leverage Points) ในการออกแบบข้อเสนอเพื่อพัฒนาระบบสุขภาพและชุมชนอย่างยั่งยืน"
+      ],
+      frameworks: [
+        "Causal Loop Diagram (Reinforcing R / Balancing B)",
+        "Time Delays & Polarity (+ / −)",
+        "System Archetypes (Fixes that Fail, Shifting the Burden)",
+        "Leverage Points (Donella Meadows)"
+      ],
+      relatedHs: ["HS2", "HS3", "HS4", "HS5", "HS6"],
+      assessmentLinks: [
+        "เครื่องมือหลักสำหรับกลุ่มย่อยครั้งที่ 7–12 ในการสังเคราะห์รายงาน 9 พื้นที่",
+        "ตรงตามเกณฑ์ฟอร์ม 3A ข้อ 2 (คิดวิเคราะห์และสังเคราะห์ 20 คะแนน) และข้อ 3 (ปรับเปลี่ยนกระบวนทัศน์: Paradigm 20 คะแนน)",
+        "ต่อยอดแนวคิดจาก ST1 (25 พ.ย.) สู่การปฏิบัติจริง (Synthesis & Wrap-up)"
+      ],
+      guidingQuestions: [
+        "ปัญหาหลักที่กลุ่มพบในอำเภอภาคสนามมีวงจรเสริมแรง (Reinforcing Loop) หรือวงจรต้านกลับ (Balancing Loop) ใดที่ทำให้ปัญหายังคงอยู่ซ้ำซาก?",
+        "จุดคานงัด (Leverage Point) ใดที่สามารถปรับโครงสร้างหรือกติกาของระบบได้จริง โดยไม่เป็นเพียงการแก้ปลายเหตุชั่วคราว (Fixes that Fail)?"
+      ],
+      facultyNote:
+        "มีห้องกลุ่มย่อย 9 ห้องจองสำรองไว้ช่วงบ่ายเพื่อให้แต่ละกลุ่มทดลองวาด CLD จากข้อมูลพื้นที่จริงก่อนเข้าสู่การถอดบทเรียนกลุ่มย่อยครั้งที่ 7 ในวันถัดไป",
+      searchKeywords:
+        "workshop systems thinking in action causal loop diagram cld system archetypes leverage points synthesis wrap-up ณัฐวุฒิ ฟอร์ม 3A สังเคราะห์ภาคสนาม วงจรเหตุปัจจัย จุดคานงัด"
+    },
+    {
+      id: "w5-d3-panel-homeless",
+      order: 5,
+      tone: "sf-5",
+      code: "PANEL-6BB",
+      driveFileName: "05_PANEL_Homeless_Health.md",
+      kind: "panel",
+      kindLabel: "Panel Discussion · กรณีศึกษาโลกจริง",
+      kindLabelEn: "Expert Panel · Real-World Case",
+      phase: 3,
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      weekLabel: "สัปดาห์ที่ 5",
+      dateTH: "วันพุธที่ 23 ธันวาคม 2569",
+      shortDate: "พ. 23 ธ.ค. 69",
+      timeLabel: "09.00 – 12.00 น.",
+      hours: "3 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Panel Discussion: Interconnected Six Building Blocks & Health Promotion in Action — บทเรียน “สุขภาวะข้างถนน”",
+      titleThSub: "เมื่อระบบสุขภาพไม่ได้แยกส่วน: ออกแบบระบบใหม่เพื่อสังคมที่เป็นธรรมผ่านชุมชนคนไร้บ้าน",
+      speakers: "วิทยากร: นพ.อานนท์ กุลธรรมานุสรณ์, อ.อนรรฆ พิทักษ์ธานิน, รศ. ภญ. ดร.ยุพดี ศิริสินสุข",
+      examBadge: "นอกข้อสอบ HS1–HS6 · บูรณาการครบ 6 บท",
+      whyImportant:
+        "แสดงให้เห็นชีวิตจริงเมื่อองค์ประกอบทั้ง 6 ของระบบสุขภาพเชื่อมโยงกัน (Interconnected 6BB) ผ่านบทเรียนการเสริมสร้างพลังชุมชนคนไร้บ้านโดย 'สุขภาวะข้างถนน' ซึ่งสะท้อนมิติความเป็นธรรม ปฐมภูมิเชิงรุก และสิทธิสุขภาพอย่างเป็นรูปธรรม",
+      objectives: [
+        "วิเคราะห์ความเชื่อมโยงระหว่าง 6 องค์ประกอบของระบบสุขภาพ (Six Building Blocks), ปัจจัยกำหนดสุขภาพทางสังคม (SDH) และการสร้างเสริมสุขภาพในโลกความจริง",
+        "ถอดบทเรียนการทำงานข้ามภาคส่วนและการจัดบริการสุขภาพปฐมภูมิเชิงรุกเพื่อลดความเหลื่อมล้ำในกลุ่มเปราะบาง (ชุมชนคนไร้บ้าน)"
+      ],
+      frameworks: [
+        "Interconnected Six Building Blocks",
+        "Health Equity & Vulnerable Populations",
+        "Health Promotion & Community Co-creation",
+        "Intersectoral Collaboration & Proactive PHC"
+      ],
+      relatedHs: ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"],
+      assessmentLinks: [
+        "บูรณาการครบทั้ง 6 บท (HS1 SDH · HS2 6BB · HS3 Equity · HS4 Promotion · HS5 PHC · HS6 สิทธิการเงิน)",
+        "แรงบันดาลใจตรงต่อการคิดนอกกรอบเดิม (Paradigm Shift) ในนำเสนอฟอร์ม 3A (29 ธ.ค.)",
+        "วัตถุดิบเชิงคุณค่าและเจตคติความเป็นธรรมสำหรับบันทึกสะท้อนคิด SRN 2"
+      ],
+      guidingQuestions: [
+        "สำหรับชุมชนคนไร้บ้าน อุปสรรคด้านสิทธิ บัตรประชาชน ที่อยู่อาศัย และอคติทางสังคม ทำให้ 6 องค์ประกอบของระบบสุขภาพขาดการเชื่อมต่อกันตรงจุดใด?",
+        "การทำงานร่วมกับชุมชนคนไร้บ้านโดย 'สุขภาวะข้างถนน' ช่วยให้เราเห็นแนวทางออกแบบระบบบริการปฐมภูมิเชิงรุกเพื่อลดความเหลื่อมล้ำได้อย่างไร?"
+      ],
+      facultyNote:
+        "กรณีศึกษาจริงที่รวมทั้งแพทย์ นักวิชาการด้านสังคม/คนไร้บ้าน และผู้ขับเคลื่อนระบบหลักประกันสุขภาพ เหมาะใช้กระตุ้นการเชื่อมโยงประเด็นกลุ่มเปราะบางในพื้นที่ภาคสนามทั้ง 9 แห่ง",
+      searchKeywords:
+        "interconnected six building blocks health promotion in action สุขภาวะข้างถนน คนไร้บ้าน homeless equity อานนท์ กุลธรรมานุสรณ์ อนรรฆ พิทักษ์ธานิน ยุพดี ศิริสินสุข กลุ่มเปราะบาง"
+    },
+    {
+      id: "w5-d4-policy",
+      order: 6,
+      tone: "sf-6",
+      code: "POLICY",
+      driveFileName: "06_POLICY_Political_Economy.md",
+      kind: "panel",
+      kindLabel: "Panel Discussion & Policy Exercise",
+      kindLabelEn: "Panel & Policy Exercise",
+      phase: 3,
+      phaseLabel: "ระยะที่ 3 · สังเคราะห์ภาคสนาม & ขับเคลื่อนนโยบาย (หลังกลับจากพื้นที่)",
+      phaseLabelEn: "Phase 3 · Fieldwork Synthesis & Policy Action (Post-Fieldwork)",
+      weekLabel: "สัปดาห์ที่ 5",
+      dateTH: "วันพฤหัสบดีที่ 24 ธันวาคม 2569",
+      shortDate: "พฤ. 24 ธ.ค. 69",
+      timeLabel: "13.00 – 16.30 น.",
+      hours: "3.5 ชม.",
+      room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
+      title: "Panel Discussion & Policy Exercise: การขับเคลื่อนข้อเสนอเชิงนโยบายภายใต้บริบทเศรษฐศาสตร์การเมือง",
+      titleThSub: "Young-Gen Systems-based Practitioner · การวิเคราะห์ผู้มีส่วนได้ส่วนเสีย & Earmarked Tax",
+      speakers: "คณาจารย์และวิทยากรผู้ทรงคุณวุฒิด้านนโยบายสุขภาพ",
+      examBadge: "นอกข้อสอบ HS1–HS6 · ทักษะนโยบายจริง",
+      whyImportant:
+        "เติมเต็มมิติสุดท้ายที่ตำราทฤษฎีเพียงอย่างเดียวสอนไม่ได้ — คือ 'เศรษฐศาสตร์การเมืองของนโยบายสุขภาพ' (Political Economy) การวิเคราะห์ผู้มีส่วนได้ส่วนเสีย และบทบาทของแพทย์รุ่นใหม่ในการผลักดันข้อเสนอเชิงนโยบายให้เกิดขึ้นจริง",
+      objectives: [
+        "วิเคราะห์กระบวนการขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพภายใต้บริบทเศรษฐศาสตร์การเมือง (Political Economy of Health) และพลวัตอำนาจของผู้มีส่วนได้ส่วนเสีย",
+        "ฝึกการวิเคราะห์ผู้มีส่วนได้ส่วนเสีย (Stakeholder Analysis) และบทบาทของแพทย์รุ่นใหม่ในการเปลี่ยนแปลงเชิงระบบ (Young-Gen Systems-based Practitioner)"
+      ],
+      frameworks: [
+        "Political Economy of Health",
+        "Stakeholder Analysis (Power vs Interest)",
+        "Health in All Policies (HiAP)",
+        "Fiscal Policy & Earmarked Tax Advocacy"
+      ],
+      relatedHs: ["HS1", "HS3", "HS4", "HS6"],
+      assessmentLinks: [
+        "เชื่อมโยง CDH (HS1) · Governance & Accountability (HS3) · Build Healthy Public Policy (HS4) · Financing (HS6)",
+        "ยกระดับข้อเสนอเชิงนโยบายในนำเสนอภาคสนามระบบสุขภาพ ฟอร์ม 3A (29 ธ.ค.)",
+        "หล่อหลอมอัตลักษณ์แพทย์ในฐานะ Change Agent สำหรับบันทึกสะท้อนคิด SRN 2"
+      ],
+      guidingQuestions: [
+        "เหตุใดข้อเสนอเชิงนโยบายสุขภาพที่มีหลักฐานทางวิชาการชัดเจนจึงมักไม่ถูกนำไปปฏิบัติทันที และแรงต้านทางเศรษฐศาสตร์การเมืองใดอยู่เบื้องหลัง?",
+        "ในฐานะแพทย์รุ่นใหม่ (Young-Gen Practitioner) เราจะออกแบบกลยุทธ์สื่อสารและสร้างแนวร่วมกับ Stakeholders อย่างไรให้ข้อเสนอเกิดผลจริง?"
+      ],
+      facultyNote:
+        "ตามเอกสารตารางสอนปี 2569 มี 2 แนวทางที่อยู่ระหว่างยืนยันรูปแบบขั้นสุดท้าย: (1) Young-Gen Systems-based Practitioner ภายใต้บริบทเศรษฐศาสตร์การเมือง หรือ (2) Earmarked Tax Case Exercise (ทีม รศ. พญ.เริงฤดี และวิทยากร ศจย.)",
+      searchKeywords:
+        "policy exercise political economy stakeholder analysis young-gen systems-based practitioner earmarked tax เศรษฐศาสตร์การเมือง นโยบายสาธารณะ ผู้มีส่วนได้ส่วนเสีย ภาษีบาป ศจย เริงฤดี"
+    }
+  ];
+
+  const HS_SHORT_LABELS = {
+    HS1: "HS1: สุขภาพ & ปัจจัยกำหนด",
+    HS2: "HS2: โครงสร้างระบบสุขภาพ (6W)",
+    HS3: "HS3: บริการสุขภาพ (EQESaRR)",
+    HS4: "HS4: พฤติกรรม & สร้างเสริมสุขภาพ",
+    HS5: "HS5: ระบบบริการปฐมภูมิ (PHC)",
+    HS6: "HS6: หลักประกันสุขภาพถ้วนหน้า"
+  };
+
+  function getSystemsForumSessionById(sessionId) {
+    if (!sessionId) return null;
+    return HS_BEYOND_SESSIONS.find((s) => s.id === sessionId || s.code === sessionId) || null;
+  }
+
+  function openSystemsForum(sessionIdOrFilter) {
+    if (sessionIdOrFilter === "systems" || sessionIdOrFilter === "panel" || sessionIdOrFilter === "all") {
+      state.sfFilter = sessionIdOrFilter;
+      state.sfSelectedId = "";
+    } else if (sessionIdOrFilter) {
+      const found = getSystemsForumSessionById(sessionIdOrFilter);
+      state.sfSelectedId = found ? found.id : "";
+      if (found) state.sfFilter = "all";
+    } else {
+      state.sfSelectedId = "";
+    }
+    switchTab("systems-forum");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function buildUnifiedHsModuleBanner(modCode, activeFormat, opts) {
     const options = opts || {};
     const isAllActive = Boolean(options.isAllActive);
     const mod = getHsModuleMeta(modCode || state.activeHsModule || "HS1");
     const effectiveFormat = activeFormat === "wb" ? "practice" : activeFormat;
+    const isBeyondActive = effectiveFormat === "systems-forum";
 
     const banner = make(
       "div",
@@ -10281,13 +10627,13 @@
     if (options.showModuleBar !== false) {
       const strip = make("div", null, "hs-unified-mod-strip");
       strip.setAttribute("role", "group");
-      strip.setAttribute("aria-label", "เลือกบทเรียน HS1–HS6");
-      strip.appendChild(make("span", "เลือกบทเรียน:", "hs-unified-mod-label"));
+      strip.setAttribute("aria-label", tr("เลือกบทเรียน HS1–HS6 หรือเวทีคิดเชิงระบบ & เสวนา", "Select HS1–HS6 module or Systems Thinking & Panels"));
+      strip.appendChild(make("span", tr("เลือกบทเรียน:", "Module:"), "hs-unified-mod-label"));
 
       if (options.allowAllModules) {
         const allPill = make("button", options.allModulesLabel || "ครบทุกบท (HS1–HS6)", "hs-unified-mod-pill");
         allPill.type = "button";
-        allPill.setAttribute("aria-pressed", isAllActive ? "true" : "false");
+        allPill.setAttribute("aria-pressed", !isBeyondActive && isAllActive ? "true" : "false");
         allPill.addEventListener("click", () => {
           if (typeof options.onSelectModule === "function") options.onSelectModule("");
         });
@@ -10298,7 +10644,7 @@
         const pBtn = make("button", m.code, "hs-unified-mod-pill");
         pBtn.type = "button";
         pBtn.title = `${m.code}: ${m.title}`;
-        pBtn.setAttribute("aria-pressed", !isAllActive && m.id === mod.code ? "true" : "false");
+        pBtn.setAttribute("aria-pressed", !isBeyondActive && !isAllActive && m.id === mod.code ? "true" : "false");
         pBtn.addEventListener("click", () => {
           state.activeHsModule = m.id;
           if (typeof options.onSelectModule === "function") {
@@ -10310,17 +10656,46 @@
         strip.appendChild(pBtn);
       });
 
+      strip.appendChild(make("span", null, "hs-unified-mod-divider"));
+      const beyondPill = make(
+        "button",
+        tr("🧭 คิดเชิงระบบ & เสวนา (6 คาบ)", "🧭 Systems & Panels (6)"),
+        "hs-unified-mod-pill is-beyond-pill"
+      );
+      beyondPill.type = "button";
+      beyondPill.title = tr(
+        "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 — Systems Thinking, CLD Workshop, Panel Discussions & Policy Exercise",
+        "6 key taught sessions beyond the HS1–HS6 written exam — Systems Thinking, CLD Workshop & Expert Panels"
+      );
+      beyondPill.setAttribute("aria-pressed", isBeyondActive ? "true" : "false");
+      beyondPill.addEventListener("click", () => openSystemsForum(""));
+      strip.appendChild(beyondPill);
+
       banner.appendChild(strip);
     }
 
     const infoWrap = make("div", null, "hsd-banner-info");
-    if (isAllActive) {
+    if (isAllActive || isBeyondActive) {
       infoWrap.append(
-        make("h3", options.allHeading || "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 4 ขั้นตอน"),
+        make(
+          "h3",
+          options.allHeading ||
+            (isBeyondActive
+              ? tr(
+                  "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (Beyond HS1–HS6 · 6 คาบสอนสำคัญ)",
+                  "Systems Thinking & Expert Panels (Beyond HS1–HS6 · 6 Key Sessions)"
+                )
+              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 4 ขั้นตอน")
+        ),
         make(
           "p",
           options.allDesc ||
-            `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class`
+            (isBeyondActive
+              ? tr(
+                  "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
+                  "6 high-impact taught sessions beyond the HS1–HS6 written exam (18.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
+                )
+              : `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class`)
         )
       );
     } else {
@@ -10343,9 +10718,9 @@
 
     const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
     tabsRow.setAttribute("role", "tablist");
-    tabsRow.setAttribute("aria-label", `สลับขั้นตอนการเรียนรู้ 4 ขั้นของ ${isAllActive ? "HS1–HS6" : mod.code}`);
+    tabsRow.setAttribute("aria-label", `สลับขั้นตอนการเรียนรู้ 4 ขั้นและเวทีคิดเชิงระบบของ ${isAllActive || isBeyondActive ? "HS1–HS6" : mod.code}`);
 
-    const makeTabBtn = (label, kind, available, onClick, disabledTitle, badgeText) => {
+    const makeTabBtn = (label, kind, available, onClick, disabledTitle, badgeText, badgeCls) => {
       const isAct = (!isAllActive || Boolean(options.keepFormatTabActiveWhenAll)) && available && effectiveFormat === kind;
       const cls = !available
         ? "btn sm is-disabled-hs-tab"
@@ -10356,7 +10731,7 @@
       b.type = "button";
       b.appendChild(make("span", label));
       if (badgeText) {
-        b.appendChild(make("span", badgeText, "hs-tab-pending-pill"));
+        b.appendChild(make("span", badgeText, badgeCls || "hs-tab-pending-pill"));
       }
       if (!available) {
         b.disabled = true;
@@ -10371,7 +10746,8 @@
     };
 
     const isDriveUi = state.hsUiMode === "drive";
-    const modTag = isAllActive ? "HS1–HS6" : mod.code;
+    const showAllTag = isAllActive || isBeyondActive;
+    const modTag = showAllTag ? "HS1–HS6" : mod.code;
 
     // Hub Overview / Drive Folder
     tabsRow.appendChild(
@@ -10380,7 +10756,7 @@
         "docs",
         true,
         () => {
-          openTextbookDriveFolder(isAllActive ? "FOLDERS" : mod.code);
+          openTextbookDriveFolder(showAllTag ? "FOLDERS" : mod.code);
         }
       )
     );
@@ -10412,11 +10788,11 @@
     // Step 3: Self-Quiz
     tabsRow.appendChild(
       makeTabBtn(
-        `③ Self-Quiz (${isAllActive ? "HS1–HS6" : mod.code})`,
+        `③ Self-Quiz (${showAllTag ? "HS1–HS6" : mod.code})`,
         "practice",
         true,
         () => {
-          openSelfQuizForModule(isAllActive ? "" : mod.code, "qa");
+          openSelfQuizForModule(showAllTag ? "" : mod.code, "qa");
         }
       )
     );
@@ -10438,14 +10814,27 @@
       )
     );
 
-    // Supporting Resources: Instructor Slides, Faculty Guide, Course Manual
+    // Beyond the Exam: Systems Thinking, Expert Panels & Policy Exercise (6 Core Sessions)
+    tabsRow.appendChild(
+      makeTabBtn(
+        tr("🧭 เวทีคิดเชิงระบบ & เสวนา", "🧭 Systems Thinking & Panels"),
+        "systems-forum",
+        true,
+        () => openSystemsForum(""),
+        "",
+        tr("6 คาบสำคัญ", "6 Key Sessions"),
+        "hs-tab-beyond-pill"
+      )
+    );
+
+    // Supporting Resources: Instructor Slides, Faculty Guide
     tabsRow.appendChild(
       makeTabBtn(
         `🖥️ Slide อาจารย์ (${modTag})`,
         "lecture-slides",
         true,
         () => {
-          openHsLectureSlides(isAllActive ? "FOLDERS" : mod.code);
+          openHsLectureSlides(showAllTag ? "FOLDERS" : mod.code);
         },
         "",
         "รออาจารย์ Upload"
@@ -12712,6 +13101,8 @@
     if (o.returnToHub !== false) {
       if (state.activeTab === "textbooks" && state.textbookSubMode === "doc-reader") {
         state.textbookSubMode = "docs-drive";
+      } else if (state.activeTab === "systems-forum" && state.sfSelectedId) {
+        state.sfSelectedId = "";
       } else if (state.activeTab === "hs-discussion" && (!state.hsdDriveFolderOpen || state.hsdViewMode !== "slide")) {
         openHsGoogleDriveFolder();
         window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
@@ -12719,12 +13110,831 @@
       }
     }
     if (state.activeTab === "textbooks") renderTextbookReader();
+    else if (state.activeTab === "systems-forum") renderSystemsForumView();
     else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
     else if (state.activeTab === "practice") renderPracticeCurrent();
     else if (ROLE === "faculty" && state.activeTab === "faculty-docs" && typeof renderFacultyDocsView === "function") {
       renderFacultyDocsView();
     }
     window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+  }
+
+  /* ---------- Beyond the Exam View: Systems Thinking, Expert Panels & Policy Exercise ---------- */
+  function openSystemsForumScheduleModal(sessionId) {
+    const schedSess = (SCHED.sessions || []).find((s) => s.id === sessionId);
+    if (schedSess && typeof openEventModal === "function") {
+      openEventModal(schedSess);
+    } else {
+      switchTab("schedule");
+    }
+  }
+
+  function buildSystemsForumSessionSpotlightDOM(sess) {
+    const slideRec = typeof getSessionSlideRecord === "function" ? getSessionSlideRecord(sess.id) : null;
+    const idx = HS_BEYOND_SESSIONS.findIndex((x) => x.id === sess.id);
+    const prevSess = idx > 0 ? HS_BEYOND_SESSIONS[idx - 1] : null;
+    const nextSess = idx >= 0 && idx < HS_BEYOND_SESSIONS.length - 1 ? HS_BEYOND_SESSIONS[idx + 1] : null;
+
+    const wrap = make("div", null, "sf-spotlight-shell");
+
+    // 1. Cinematic Session Hero
+    const hero = make("div", null, `hs-atv-hero ${sess.tone}`);
+    hero.setAttribute("data-ep-num", `0${sess.order}`);
+
+    const heroTop = make("div", null, "hs-atv-hero-top");
+    const backBtn = make("button", tr("← กลับหน้ารวม 6 คาบสำคัญ", "← All 6 Key Sessions"), "hs-atv-back-pill");
+    backBtn.type = "button";
+    backBtn.addEventListener("click", () => {
+      state.sfSelectedId = "";
+      renderSystemsForumView();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    heroTop.append(
+      backBtn,
+      make("span", `${sess.code} · ${tr(sess.kindLabel, sess.kindLabelEn)}`, "tv-hero-kicker"),
+      make("span", `${sess.weekLabel} · ${sess.hours} · เช็คชื่อ Onsite`, "tv-hero-kicker")
+    );
+
+    const heroBody = make("div", null, "tv-hero-body");
+    heroBody.append(
+      make("h3", sess.title, "tv-hero-title"),
+      make("p", sess.titleThSub, "hs-atv-hero-note"),
+      make(
+        "p",
+        `📅 ${sess.dateTH} (${sess.timeLabel})  ·  📍 ห้อง ${sess.room}  ·  👨‍⚕️ ${sess.speakers}`,
+        "tv-hero-meta"
+      )
+    );
+
+    const heroActions = make("div", null, "tv-hero-actions");
+    if (slideRec) {
+      const openSlBtn = make("button", `📊 เปิด Slide ประจำคาบ (${slideRec.fileName || sess.code})`, "tv-hero-btn is-primary");
+      openSlBtn.type = "button";
+      openSlBtn.addEventListener("click", () => openSessionSlide(sess.id));
+      heroActions.appendChild(openSlBtn);
+    } else if (ROLE === "faculty") {
+      const upSlBtn = make("button", `⬆ อัปโหลด Slide คาบนี้ (${sess.code})`, "tv-hero-btn is-primary");
+      upSlBtn.type = "button";
+      upSlBtn.addEventListener("click", () => openFacultySlideStudioForSession(sess.id));
+      heroActions.appendChild(upSlBtn);
+    } else {
+      heroActions.appendChild(make("span", "⏳ Slide ประกอบคาบ: รออาจารย์ / วิทยากร Upload", "hs-atv-pending-badge"));
+    }
+
+    const schedBtn = make("button", "📅 ดูในตารางเรียน & บันทึก .ics", "tv-hero-btn is-glass");
+    schedBtn.type = "button";
+    schedBtn.addEventListener("click", () => openSystemsForumScheduleModal(sess.id));
+    heroActions.appendChild(schedBtn);
+
+    if (ROLE === "faculty" && slideRec) {
+      const reUpBtn = make("button", "🔄 อัปเดต Slide คาบนี้", "tv-hero-btn is-glass");
+      reUpBtn.type = "button";
+      reUpBtn.addEventListener("click", () => openFacultySlideStudioForSession(sess.id));
+      heroActions.appendChild(reUpBtn);
+    }
+
+    hero.append(heroTop, heroBody, heroActions);
+    wrap.appendChild(hero);
+
+    // 2. Two-Column Pedagogical Detail Cards
+    const detailGrid = make("div", null, "sf-detail-grid");
+
+    // Left Column: Why Important + Objectives + Frameworks
+    const leftCol = make("div", null, "sf-detail-col");
+
+    const whyCard = make("div", null, "sf-detail-card is-accent-card");
+    whyCard.append(
+      make("div", `✨ ทำไมคาบนี้จึงสำคัญ (${sess.examBadge})`, "sf-detail-kicker"),
+      make("p", sess.whyImportant, "sf-detail-lead")
+    );
+    if (sess.kickoffNote) {
+      whyCard.appendChild(make("div", `📌 ${sess.kickoffNote}`, "sf-detail-subnote"));
+    }
+    if (ROLE === "faculty" && sess.facultyNote) {
+      const facBox = make("div", null, "sf-faculty-callout");
+      facBox.append(
+        make("strong", "🔴 บันทึกสำหรับคณาจารย์ผู้สอน:"),
+        make("span", ` ${sess.facultyNote}`)
+      );
+      whyCard.appendChild(facBox);
+    }
+    leftCol.appendChild(whyCard);
+
+    const objCard = make("div", null, "sf-detail-card");
+    objCard.appendChild(make("h4", "🎯 วัตถุประสงค์การเรียนรู้ประจำคาบ", "sf-detail-heading"));
+    const objUl = document.createElement("ul");
+    objUl.className = "sf-detail-list";
+    sess.objectives.forEach((o) => objUl.appendChild(make("li", o)));
+    objCard.appendChild(objUl);
+
+    objCard.appendChild(make("h4", "🧩 กรอบแนวคิดและเครื่องมือสำคัญ (Key Frameworks)", "sf-detail-heading is-spaced"));
+    const fwWrap = make("div", null, "sf-framework-chips");
+    sess.frameworks.forEach((fw) => fwWrap.appendChild(make("span", fw, "sf-fw-chip")));
+    objCard.appendChild(fwWrap);
+    leftCol.appendChild(objCard);
+
+    // Right Column: Course/Assessment Links + Guiding Questions + Linked HS Modules
+    const rightCol = make("div", null, "sf-detail-col");
+
+    const linkCard = make("div", null, "sf-detail-card");
+    linkCard.appendChild(make("h4", "🔗 เชื่อมโยงภาคสนาม · การประเมิน (ฟอร์ม 3A · SRN 1–2)", "sf-detail-heading"));
+    const linkUl = document.createElement("ul");
+    linkUl.className = "sf-detail-list is-check";
+    sess.assessmentLinks.forEach((lk) => linkUl.appendChild(make("li", lk)));
+    linkCard.appendChild(linkUl);
+
+    if (sess.relatedHs && sess.relatedHs.length) {
+      linkCard.appendChild(make("h4", "📚 บทเรียน HS1–HS6 ที่ต่อยอดร่วมกัน", "sf-detail-heading is-spaced"));
+      const hsRow = make("div", null, "sf-linked-hs-row");
+      sess.relatedHs.forEach((hsCode) => {
+        const meta = getHsModuleMeta(hsCode);
+        const label = HS_SHORT_LABELS[hsCode] || (meta ? `${hsCode}: ${meta.title}` : hsCode);
+        const b = make("button", label, "sf-linked-hs-btn");
+        b.type = "button";
+        b.title = meta ? `เปิดบทเรียน ${meta.code}: ${meta.title}` : hsCode;
+        b.addEventListener("click", () => openTextbookDriveFolder(hsCode));
+        hsRow.appendChild(b);
+      });
+      linkCard.appendChild(hsRow);
+    }
+    rightCol.appendChild(linkCard);
+
+    const promptCard = make("div", null, "sf-detail-card");
+    promptCard.appendChild(make("h4", "💭 คำถามชวนคิดก่อน & ระหว่างเข้าคาบ (Guiding Reflection Prompts)", "sf-detail-heading"));
+    const pList = make("div", null, "sf-prompts-stack");
+    sess.guidingQuestions.forEach((qTxt, qIdx) => {
+      const pItem = make("div", null, "sf-prompt-item");
+      pItem.append(make("span", `Q${qIdx + 1}`, "sf-prompt-num"), make("p", qTxt));
+      pList.appendChild(pItem);
+    });
+    promptCard.appendChild(pList);
+    rightCol.appendChild(promptCard);
+
+    detailGrid.append(leftCol, rightCol);
+    wrap.appendChild(detailGrid);
+
+    // 3. Bottom Session Switcher Bar
+    const navBar = make("div", null, "sf-spotlight-nav");
+    const prevBtn = make("button", prevSess ? `← ${prevSess.code}: ${prevSess.shortDate}` : "← กลับหน้ารวม 6 คาบ", "btn sm");
+    prevBtn.type = "button";
+    prevBtn.addEventListener("click", () => {
+      state.sfSelectedId = prevSess ? prevSess.id : "";
+      renderSystemsForumView();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    const pillsMid = make("div", null, "sf-spotlight-dots");
+    HS_BEYOND_SESSIONS.forEach((item) => {
+      const dp = make("button", `${item.order}. ${item.code}`, `sf-mini-pill${item.id === sess.id ? " is-active" : ""}`);
+      dp.type = "button";
+      dp.title = item.title;
+      dp.addEventListener("click", () => {
+        state.sfSelectedId = item.id;
+        renderSystemsForumView();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      pillsMid.appendChild(dp);
+    });
+
+    const nextBtn = make("button", nextSess ? `${nextSess.code}: ${nextSess.shortDate} →` : "ดูครบทั้ง 6 คาบ →", "btn sm");
+    nextBtn.type = "button";
+    nextBtn.addEventListener("click", () => {
+      state.sfSelectedId = nextSess ? nextSess.id : "";
+      renderSystemsForumView();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    navBar.append(prevBtn, pillsMid, nextBtn);
+    wrap.appendChild(navBar);
+
+    return wrap;
+  }
+
+  function buildSystemsForumAppleTvDOM() {
+    const stage = make("div", null, "hs-atv-stage sf-stage hsd-no-print");
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", tr("เวทีคิดเชิงระบบและเสวนาผู้เชี่ยวชาญ (Apple TV Mode)", "Systems Thinking & Expert Panels (Apple TV Mode)"));
+
+    if (state.sfSelectedId) {
+      const sel = getSystemsForumSessionById(state.sfSelectedId);
+      if (sel) {
+        stage.appendChild(buildSystemsForumSessionSpotlightDOM(sel));
+        return stage;
+      }
+      state.sfSelectedId = "";
+    }
+
+    // 1. Pedagogical "Why Beyond the Exam Matters" Framing Banner
+    const whyBanner = make("div", null, "sf-why-banner");
+    whyBanner.innerHTML =
+      `<div class="sf-why-head">` +
+      `<div class="sf-why-kicker">🧭 BEYOND THE WRITTEN EXAM · 6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6</div>` +
+      `<h3 class="sf-why-title">${escapeHtml(
+        tr(
+          "ทำไม 6 คาบนี้จึงสำคัญมาก แม้ไม่ได้ออกสอบข้อเขียน HS1–HS6?",
+          "Why These 6 Sessions Matter Deeply Beyond the HS1–HS6 Written Exam"
+        )
+      )}</h3>` +
+      `<p class="sf-why-sub">${escapeHtml(
+        ROLE === "faculty"
+          ? "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ประเมินเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 18.5 ชม. นี้คือโครงสร้างที่เชื่อมทฤษฎีสู่ภาคสนาม การให้คำปรึกษากลุ่มย่อย ฟอร์ม 3A และ SRN 1–2"
+          : "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ออกเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 18.5 ชม. นี้ (เช็คชื่อ Onsite ห้อง 2C2-03) คือเลนส์คิดเชิงระบบและประสบการณ์ตรงจากโลกจริงที่ส่งผลต่อภาคสนาม ฟอร์ม 3A และ SRN 1–2"
+      )}</p>` +
+      `</div>` +
+      `<div class="sf-why-pillars">` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🧠</span><div><strong>Systems Thinking &amp; CLD (2 คาบ · 6 ชม.)</strong><span>ปูรากฐาน CAS &amp; Iceberg Model ก่อนเรียน HS1–HS6 และสังเคราะห์ภาคสนามด้วย CLD, System Archetypes &amp; Leverage Points</span></div></div>` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🎙️</span><div><strong>Panel Discussion &amp; Policy (4 คาบ · 12.5 ชม.)</strong><span>เสวนาสดกับวิทยากรตัวจริงด้าน Global/Planetary Health, HPSR, DHS 6BB+1, สุขภาวะข้างถนน และเศรษฐศาสตร์การเมืองของนโยบาย</span></div></div>` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🎯</span><div><strong>หัวใจภาคสนาม · ฟอร์ม 3A · SRN 1–2</strong><span>ต่อยอดตรงสู่การลงพื้นที่ 9 โรงพยาบาลชุมชน เกณฑ์นำเสนอฟอร์ม 3A (วิเคราะห์สังเคราะห์ + ปรับกระบวนทัศน์) และการสะท้อนคิด</span></div></div>` +
+      `</div>`;
+    stage.appendChild(whyBanner);
+
+    // 2. Category Filter Bar
+    const filterBar = make("div", null, "sf-filter-bar");
+    const filterDefs = [
+      { id: "all", label: tr("ทั้งหมด (6 คาบ · 18.5 ชม.)", "All (6 Sessions · 18.5 hrs)") },
+      { id: "systems", label: tr("🧠 Systems Thinking & Workshop (2 คาบ)", "🧠 Systems Thinking & Workshop (2)") },
+      { id: "panel", label: tr("🎙️ Panel Discussion & Policy (4 คาบ)", "🎙️ Panel Discussion & Policy (4)") }
+    ];
+    const curFilter = state.sfFilter || "all";
+    filterDefs.forEach((fd) => {
+      const fb = make("button", fd.label, `sf-filter-pill${curFilter === fd.id ? " is-active" : ""}`);
+      fb.type = "button";
+      fb.setAttribute("aria-pressed", curFilter === fd.id ? "true" : "false");
+      fb.addEventListener("click", () => {
+        state.sfFilter = fd.id;
+        renderSystemsForumView();
+      });
+      filterBar.appendChild(fb);
+    });
+    stage.appendChild(filterBar);
+
+    const buildSessionPosterCard = (s) => {
+      const slideRec = typeof getSessionSlideRecord === "function" ? getSessionSlideRecord(s.id) : null;
+      const card = make("div", null, `tv-episode-card hs-atv-ep-card ${s.tone}`);
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("data-ep-num", `0${s.order}`);
+      card.setAttribute("aria-label", `${s.code}: ${s.title}`);
+
+      const top = make("div", null, "tv-ep-top");
+      top.append(
+        make("span", `${s.code} · ${s.weekLabel}`, "tv-ep-code"),
+        make(
+          "span",
+          slideRec ? "📊 มี Slide แล้ว" : `${s.hours} · เช็คชื่อ`,
+          slideRec ? "tv-ep-weight" : "tv-ep-weight"
+        )
+      );
+
+      const mid = make("div", null, "tv-ep-bottom");
+      mid.append(
+        make("span", s.title, "tv-ep-title"),
+        make("span", s.titleThSub, "sf-ep-subline"),
+        make("span", `📅 ${s.shortDate} (${s.timeLabel}) · ${s.speakers}`, "tv-ep-date")
+      );
+
+      const pills = make("div", null, "hs-atv-ep-pills");
+      const openBtn = make("button", "🧭 ดูกรอบแนวคิด & คำถามชวนคิด", "hs-atv-ep-pill is-solid");
+      openBtn.type = "button";
+      openBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        state.sfSelectedId = s.id;
+        renderSystemsForumView();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      pills.appendChild(openBtn);
+
+      if (slideRec) {
+        const sBtn = make("button", "📊 เปิด Slide", "hs-atv-ep-pill");
+        sBtn.type = "button";
+        sBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSessionSlide(s.id);
+        });
+        pills.appendChild(sBtn);
+      } else if (ROLE === "faculty") {
+        const upBtn = make("button", "⬆ อัปโหลด Slide", "hs-atv-ep-pill");
+        upBtn.type = "button";
+        upBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openFacultySlideStudioForSession(s.id);
+        });
+        pills.appendChild(upBtn);
+      } else {
+        const calBtn = make("button", "📅 ตารางเรียน", "hs-atv-ep-pill");
+        calBtn.type = "button";
+        calBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          openSystemsForumScheduleModal(s.id);
+        });
+        pills.appendChild(calBtn);
+      }
+
+      const openSpotlight = () => {
+        state.sfSelectedId = s.id;
+        renderSystemsForumView();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      card.append(top, mid, pills);
+      card.addEventListener("click", openSpotlight);
+      card.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          openSpotlight();
+        }
+      });
+      return card;
+    };
+
+    const filtered = HS_BEYOND_SESSIONS.filter((s) => curFilter === "all" || s.kind === curFilter);
+
+    if (curFilter === "all") {
+      // Group cleanly by the 3 pedagogical phases of the 6-week course
+      const phaseGroups = [
+        {
+          phase: 1,
+          badge: "สัปดาห์ที่ 1 · พ. 25 พ.ย. 69",
+          title: "ระยะที่ 1: เปิดเลนส์คิดเชิงระบบ & สุขภาพโลก (ก่อนเข้าสู่ HS1–HS6)",
+          sub: "ปรับกระบวนทัศน์จากผู้ป่วยข้างเตียงสู่ระบบสุขภาพที่ซับซ้อน สุขภาพดาวเคราะห์ และ HPSR"
+        },
+        {
+          phase: 2,
+          badge: "สัปดาห์ที่ 3 · พ. 9 ธ.ค. 69",
+          title: "ระยะที่ 2: เชื่อมทฤษฎีสู่ระบบสุขภาพอำเภอ & ชุมชน (ก่อนออกภาคสนาม)",
+          sub: "เติมมิติ Plus One (ชุมชนและภาคีเครือข่าย) และท่าทีการเรียนรู้ร่วมกับพื้นที่จริงก่อนลง 9 โรงพยาบาล"
+        },
+        {
+          phase: 3,
+          badge: "สัปดาห์ที่ 5 · 22 – 24 ธ.ค. 69 (หลังสอบ HS)",
+          title: "ระยะที่ 3: สังเคราะห์ภาคสนามด้วย CLD · กรณีศึกษาจริง · ขับเคลื่อนนโยบาย",
+          sub: "สังเคราะห์ข้อมูลภาคสนามด้วย CLD/Archetypes ถอดบทเรียนสุขภาวะข้างถนน และฝึกเศรษฐศาสตร์การเมืองของนโยบาย"
+        }
+      ];
+
+      phaseGroups.forEach((pg) => {
+        const items = filtered.filter((s) => s.phase === pg.phase);
+        if (!items.length) return;
+        const sec = make("div", null, "tv-shelf sf-phase-section");
+        const sHead = make("div", null, "tv-shelf-head sf-phase-head");
+        const left = make("div");
+        left.append(
+          make("span", pg.badge, "sf-phase-kicker"),
+          make("h3", pg.title, "tv-shelf-title"),
+          make("span", pg.sub, "tv-shelf-sub")
+        );
+        sHead.appendChild(left);
+        sec.appendChild(sHead);
+
+        const useBridge = pg.phase === 2 && items.length === 1;
+        const grid = make(
+          "div",
+          null,
+          `hs-atv-episodes-grid${useBridge || items.length === 2 ? " is-two-col" : items.length === 1 ? " is-single-wide" : ""}`
+        );
+        items.forEach((s) => grid.appendChild(buildSessionPosterCard(s)));
+        if (useBridge) {
+          const bridge = make("div", null, "sf-fieldwork-bridge-card");
+          bridge.innerHTML =
+            `<div class="sf-bridge-top">` +
+            `<span class="sf-bridge-kicker">🗺️ จุดเชื่อมสู่ภาคสนาม · พฤ. 10 – ส. 19 ธ.ค. 69</span>` +
+            `<span class="sf-bridge-badge">9 พื้นที่ · 164 นศพ.</span>` +
+            `</div>` +
+            `<div class="sf-bridge-body">` +
+            `<h4 class="sf-bridge-title">${escapeHtml(
+              tr("ฝึกปฏิบัติภาคสนาม 9 โรงพยาบาลชุมชน", "Community Fieldwork across 9 District Hospitals")
+            )}</h4>` +
+            `<p class="sf-bridge-desc">${escapeHtml(
+              tr(
+                "นำเลนส์คิดเชิงระบบ (ST1), สุขภาพโลก/HPSR และระบบสุขภาพอำเภอ 6BB+1 ไปเรียนรู้จริงร่วมกับโรงพยาบาลและชุมชน ก่อนนำข้อมูลกลับมาสังเคราะห์ในระยะที่ 3 ด้วย CLD Workshop และนำเสนอฟอร์ม 3A",
+                "Apply Systems Thinking (ST1), Global/HPSR & DHS 6BB+1 during 8–10 days of community fieldwork, then return for Phase 3 CLD synthesis & Form 3A presentation."
+              )
+            )}</p>` +
+            `<div class="sf-bridge-chips">` +
+            `<span class="sf-bridge-chip">ฟอร์ม 1A · เจตคติพื้นที่</span>` +
+            `<span class="sf-bridge-chip">ฟอร์ม 3A · นำเสนอระบบสุขภาพ</span>` +
+            `<span class="sf-bridge-chip">SRN 1–2</span>` +
+            `</div>` +
+            `</div>` +
+            `<div class="sf-bridge-actions">` +
+            `<button type="button" class="btn sm teal" data-open-fieldwork-bridge="1">🗺️ ${escapeHtml(
+              tr("ดู 9 พื้นที่ภาคสนาม & อ.ประจำกลุ่ม →", "Explore 9 Fieldwork Sites →")
+            )}</button>` +
+            `</div>`;
+          const fwBtn = bridge.querySelector("[data-open-fieldwork-bridge='1']");
+          if (fwBtn) {
+            fwBtn.addEventListener("click", () => {
+              switchTab("fieldwork");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+          }
+          grid.appendChild(bridge);
+        }
+        sec.appendChild(grid);
+        stage.appendChild(sec);
+      });
+    } else {
+      const sec = make("div", null, "tv-shelf");
+      const grid = make("div", null, `hs-atv-episodes-grid${filtered.length === 2 ? " is-two-col" : ""}`);
+      filtered.forEach((s) => grid.appendChild(buildSessionPosterCard(s)));
+      sec.appendChild(grid);
+      stage.appendChild(sec);
+    }
+
+    // 3. Course Bookends Companion Strip (Orientation & Closing Reflection)
+    const bookends = make("div", null, "sf-bookends-strip");
+    bookends.appendChild(
+      make("span", "📌 กิจกรรมเปิด–ปิดเส้นทางการเรียนรู้ตลอดรายวิชา:", "sf-bookends-label")
+    );
+    const bkBtns = make("div", null, "sf-bookends-pills");
+    [
+      {
+        id: "w1-d1-orient",
+        label: "🟢 ปฐมนิเทศรายวิชา (Orientation) · พ. 25 พ.ย. 09.00–09.30 น."
+      },
+      {
+        id: "w6-d3-wrapup",
+        label: "🎓 ปัจฉิมนิเทศ & สรุปบทเรียนข้ามพื้นที่ · พ. 30 ธ.ค. 12.45–13.30 น."
+      }
+    ].forEach((bk) => {
+      const b = make("button", bk.label, "sf-bookend-pill");
+      b.type = "button";
+      b.addEventListener("click", () => openSystemsForumScheduleModal(bk.id));
+      bkBtns.appendChild(b);
+    });
+    bookends.appendChild(bkBtns);
+    stage.appendChild(bookends);
+
+    return stage;
+  }
+
+  function buildSystemsForumDriveExplorerDOM() {
+    if (state.sfSelectedId) {
+      const sel = getSystemsForumSessionById(state.sfSelectedId);
+      if (sel) {
+        const wrap = make("div", null, "hs-atv-stage sf-stage hsd-no-print");
+        wrap.appendChild(buildSystemsForumSessionSpotlightDOM(sel));
+        return wrap;
+      }
+      state.sfSelectedId = "";
+    }
+
+    const shell = make("div", null, "gdrive-explorer-shell hsd-no-print");
+    shell.setAttribute("role", "region");
+    shell.setAttribute("aria-label", "Google Drive เวทีคิดเชิงระบบและเสวนา (Beyond HS1–HS6)");
+
+    // Topbar
+    const topBar = make("div", null, "gdrive-topbar");
+    const brand = make("div", null, "gdrive-brand");
+    brand.innerHTML =
+      GDRIVE_TRIANGLE_SVG +
+      `<span class="gdrive-brand-title">${tr("Google Drive · เวทีคิดเชิงระบบ & เสวนา (Beyond HS1–HS6)", "Google Drive · Systems Thinking & Panels")}</span>`;
+
+    const searchPill = make("div", null, "gdrive-search-pill");
+    searchPill.innerHTML = `<svg class="gdrive-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+    const searchIn = document.createElement("input");
+    searchIn.type = "search";
+    searchIn.className = "gdrive-search-input";
+    searchIn.placeholder = "ค้นหาคาบ Systems Thinking, CLD, Global Health, DHS, สุขภาวะข้างถนน, นโยบาย, ชื่อวิทยากร…";
+    searchIn.value = state.sfDriveSearch || "";
+    const clearSearchBtn = make("button", "✕", "gdrive-search-clear");
+    clearSearchBtn.type = "button";
+    clearSearchBtn.hidden = !searchIn.value.trim();
+    searchPill.append(searchIn, clearSearchBtn);
+
+    const topActions = make("div", null, "gdrive-top-actions");
+    const goHsBtn = make("button", "📁 โฟลเดอร์ HS1–HS6", "gdrive-top-action-btn");
+    goHsBtn.type = "button";
+    goHsBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+    topActions.appendChild(goHsBtn);
+
+    topBar.append(brand, searchPill, topActions);
+    shell.appendChild(topBar);
+
+    const body = make("div", null, "gdrive-body");
+    const sidebar = make("aside", null, "gdrive-sidebar");
+    sidebar.setAttribute("aria-label", "ตัวกรองเวทีคิดเชิงระบบและเสวนา");
+
+    const fab = make("button", null, "gdrive-fab-btn");
+    fab.type = "button";
+    fab.innerHTML =
+      `<span class="gdrive-fab-plus"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v8" stroke="#ea4335" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12h8" stroke="#4285f4" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12v8" stroke="#34a853" stroke-width="2.8" stroke-linecap="round"/><path d="M4 12h8" stroke="#fbbc05" stroke-width="2.8" stroke-linecap="round"/></svg></span>` +
+      `<span>← โฟลเดอร์ HS1–HS6</span>`;
+    fab.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+    sidebar.appendChild(fab);
+
+    const navList = make("div", null, "gdrive-nav-list");
+    const canvas = make("div", null, "gdrive-canvas");
+
+    const sideDefs = [
+      { id: "all", label: "ครบทั้ง 6 คาบสำคัญ", count: "6", icon: "🧭" },
+      { id: "systems", label: "Systems Thinking & CLD", count: "2", icon: "🧠" },
+      { id: "panel", label: "Panel Discussion & Policy", count: "4", icon: "🎙️" }
+    ];
+
+    const uploadedCount = HS_BEYOND_SESSIONS.filter(
+      (s) => typeof getSessionSlideRecord === "function" && Boolean(getSessionSlideRecord(s.id))
+    ).length;
+
+    function renderSide() {
+      navList.replaceChildren();
+      const curF = state.sfFilter || "all";
+      sideDefs.forEach((sd) => {
+        const isAct = curF === sd.id;
+        const nb = make("button", null, `gdrive-nav-item${isAct ? " is-active" : ""}`);
+        nb.type = "button";
+        nb.innerHTML =
+          `<span class="gdrive-nav-left"><span>${sd.icon}</span><span>${escapeHtml(sd.label)}</span></span>` +
+          `<span class="gdrive-nav-count">${escapeHtml(sd.count)}</span>`;
+        nb.addEventListener("click", () => {
+          state.sfFilter = sd.id;
+          renderSide();
+          renderCanvas();
+        });
+        navList.appendChild(nb);
+      });
+    }
+    sidebar.appendChild(navList);
+
+    const storageBox = make("div", null, "gdrive-storage-box");
+    storageBox.innerHTML =
+      `<div class="gdrive-storage-head">🧭 <span>สถานะคาบ Beyond HS1–HS6</span></div>` +
+      `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:${Math.max(12, Math.round((uploadedCount / 6) * 100))}%"></div></div>` +
+      `<div class="gdrive-storage-caption"><strong>6 คาบสอนสำคัญ (18.5 ชม.)</strong> · Slide อัปโหลดแล้ว <strong>${uploadedCount} / 6</strong> คาบ — เช็คชื่อ Onsite ห้อง 2C2-03</div>`;
+    sidebar.appendChild(storageBox);
+
+    function renderCanvas() {
+      canvas.replaceChildren();
+      const curF = state.sfFilter || "all";
+      const isGrid = (state.sfDriveLayout || "grid") !== "list";
+      const q = (state.sfDriveSearch || "").trim().toLocaleLowerCase("th");
+
+      const crumbBar = make("div", null, "gdrive-breadcrumb-bar");
+      const crumbs = make("div", null, "gdrive-breadcrumbs");
+      const rootBtn = make("button", "ไดรฟ์ที่แชร์", "gdrive-crumb");
+      rootBtn.type = "button";
+      rootBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+      const hsBtn = make("button", "ระบบสุขภาพ (RACM 303)", "gdrive-crumb");
+      hsBtn.type = "button";
+      hsBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+      const curSpan = make("span", null, "gdrive-crumb-current");
+      curSpan.innerHTML =
+        `<svg width="18" height="18" viewBox="0 0 24 24" fill="#0d9488" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
+        `<span>07_เวทีคิดเชิงระบบและเสวนา (Beyond HS1–HS6)</span>`;
+      crumbs.append(rootBtn, make("span", "›", "gdrive-crumb-sep"), hsBtn, make("span", "›", "gdrive-crumb-sep"), curSpan);
+
+      const tbRight = make("div", null, "gdrive-toolbar-right");
+      const viewToggle = make("div", null, "gdrive-view-toggle");
+      const listBtn = make("button", `${!isGrid ? "✓ " : ""}☰ รายการ`, `gdrive-vmode-btn${!isGrid ? " is-active" : ""}`);
+      listBtn.type = "button";
+      listBtn.addEventListener("click", () => {
+        state.sfDriveLayout = "list";
+        try { localStorage.setItem("racm303_sf_drive_layout", "list"); } catch (_) {}
+        renderCanvas();
+      });
+      const gridBtn = make("button", `${isGrid ? "✓ " : ""}⊞ ตารางการ์ด`, `gdrive-vmode-btn${isGrid ? " is-active" : ""}`);
+      gridBtn.type = "button";
+      gridBtn.addEventListener("click", () => {
+        state.sfDriveLayout = "grid";
+        try { localStorage.setItem("racm303_sf_drive_layout", "grid"); } catch (_) {}
+        renderCanvas();
+      });
+      viewToggle.append(listBtn, gridBtn);
+      tbRight.appendChild(viewToggle);
+      crumbBar.append(crumbs, tbRight);
+      canvas.appendChild(crumbBar);
+
+      // Pedagogical context callout inside Drive mode
+      const infoStrip = make("div", null, "sf-drive-callout");
+      infoStrip.innerHTML =
+        `<strong>🧭 คาบสอนสำคัญที่ไม่ได้ออกข้อสอบทฤษฎี HS1–HS6 (6 คาบ · 18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03)</strong>` +
+        `<span>ปูกรอบคิด Systems Thinking (CAS / Iceberg / CLD) และเสวนาผู้เชี่ยวชาญจากโลกจริง เชื่อมตรงสู่ภาคสนาม 9 พื้นที่ การนำเสนอระบบสุขภาพ (ฟอร์ม 3A) และบันทึกสะท้อนคิด SRN 1–2</span>`;
+      canvas.appendChild(infoStrip);
+
+      const matched = HS_BEYOND_SESSIONS.filter((s) => {
+        if (curF !== "all" && s.kind !== curF) return false;
+        if (!q) return true;
+        const hay = `${s.code} ${s.title} ${s.titleThSub} ${s.speakers} ${s.dateTH} ${s.frameworks.join(" ")} ${s.searchKeywords}`.toLocaleLowerCase("th");
+        return hay.includes(q);
+      });
+
+      if (!matched.length) {
+        canvas.appendChild(make("div", "ไม่พบคาบเรียนในเวทีคิดเชิงระบบและเสวนาที่ตรงกับคำค้นหา", "empty-state"));
+        return;
+      }
+
+      const secHead = make("div", null, "gdrive-section-head");
+      secHead.appendChild(
+        make(
+          "span",
+          `ไฟล์สรุปกรอบแนวคิด & สถานะสไลด์ในโฟลเดอร์ 07_เวทีคิดเชิงระบบและเสวนา (${matched.length} คาบ)`,
+          "gdrive-section-label"
+        )
+      );
+      canvas.appendChild(secHead);
+
+      if (isGrid) {
+        const grid = make("div", null, "gdrive-files-grid");
+        matched.forEach((s) => {
+          const slideRec = typeof getSessionSlideRecord === "function" ? getSessionSlideRecord(s.id) : null;
+          const fileName = s.driveFileName || `0${s.order}_${s.code}.md`;
+          const card = make("div", null, "gdrive-file-card");
+          card.tabIndex = 0;
+          card.setAttribute("role", "button");
+          card.setAttribute("aria-label", `เปิดรายละเอียด ${s.code}: ${s.title}`);
+
+          const cHead = make("div", null, "gdrive-card-head");
+          cHead.append(
+            make("span", s.kind === "systems" ? "🧠" : "🎙️", `gdrive-filetype-ico ${s.kind === "systems" ? "is-quiz" : "is-manual"}`),
+            make("span", fileName, "gdrive-card-filename"),
+            make(
+              "span",
+              slideRec ? "📊 มี Slide" : s.examBadge.split("·")[1] ? s.examBadge.split("·")[1].trim() : "สำคัญ",
+              `gdrive-status-chip ${slideRec ? "is-open-now" : "is-pending"}`
+            )
+          );
+          card.appendChild(cHead);
+
+          const thumb = make("div", null, "gdrive-doc-thumb");
+          thumb.innerHTML =
+            `<div class="gd-doc-head ${s.kind === "systems" ? "is-quiz" : "is-manual"}">` +
+            `<span class="gd-doc-badge">${escapeHtml(s.weekLabel)} · ${escapeHtml(s.shortDate)} (${escapeHtml(s.timeLabel)})</span>` +
+            `</div>` +
+            `<div class="gd-doc-page">` +
+            `<div class="gd-doc-title">${escapeHtml(s.title)}</div>` +
+            `<div class="gd-doc-sub">${escapeHtml(s.titleThSub)}</div>` +
+            `<div class="gd-doc-sub" style="margin-top:4px;font-weight:600">👨‍⚕️ ${escapeHtml(s.speakers)}</div>` +
+            `</div>` +
+            `<span class="gd-mini-open-pill">🧭 คลิกดูกรอบแนวคิด &amp; คำถามชวนคิด</span>`;
+          card.appendChild(thumb);
+
+          const cFoot = make("div", null, "gdrive-card-foot");
+          cFoot.appendChild(make("span", `📍 ${s.room.split(" ")[0]} · ${s.hours}`, "gdrive-card-date"));
+          const footAct = make("div", null, "gdrive-pending-card-actions");
+          if (slideRec) {
+            const sb = make("button", "📊 Slide", "gdrive-row-sec-btn");
+            sb.type = "button";
+            sb.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              openSessionSlide(s.id);
+            });
+            footAct.appendChild(sb);
+          } else if (ROLE === "faculty") {
+            const ub = make("button", "⬆ Upload", "gdrive-row-sec-btn");
+            ub.type = "button";
+            ub.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              openFacultySlideStudioForSession(s.id);
+            });
+            footAct.appendChild(ub);
+          }
+          const ob = make("button", "เปิดดู →", "gdrive-row-open-btn");
+          ob.type = "button";
+          ob.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            state.sfSelectedId = s.id;
+            renderSystemsForumView();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          footAct.appendChild(ob);
+          cFoot.appendChild(footAct);
+          card.appendChild(cFoot);
+
+          card.addEventListener("click", () => {
+            state.sfSelectedId = s.id;
+            renderSystemsForumView();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          card.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              state.sfSelectedId = s.id;
+              renderSystemsForumView();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          });
+          grid.appendChild(card);
+        });
+        canvas.appendChild(grid);
+      } else {
+        const listWrap = make("div", null, "gdrive-list-wrap");
+        const tbl = document.createElement("table");
+        tbl.className = "gdrive-list-table";
+        tbl.innerHTML =
+          `<thead><tr>` +
+          `<th>คาบเรียน &amp; หัวข้อ</th>` +
+          `<th>วัน–เวลา &amp; วิทยากร</th>` +
+          `<th>กรอบแนวคิดหลัก</th>` +
+          `<th>การดำเนินการ</th>` +
+          `</tr></thead>`;
+        const tb = document.createElement("tbody");
+        matched.forEach((s) => {
+          const slideRec = typeof getSessionSlideRecord === "function" ? getSessionSlideRecord(s.id) : null;
+          const trEl = document.createElement("tr");
+          trEl.className = "gdrive-list-row";
+          trEl.tabIndex = 0;
+          trEl.innerHTML =
+            `<td><div class="gdrive-list-name-cell"><span class="gdrive-filetype-ico ${s.kind === "systems" ? "is-quiz" : "is-manual"}">${s.kind === "systems" ? "🧠" : "🎙️"}</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">[${escapeHtml(s.code)}] ${escapeHtml(s.title)}</span><span class="gdrive-list-fsub">${escapeHtml(s.titleThSub)}</span></div></div></td>` +
+            `<td><div style="font-weight:600">${escapeHtml(s.shortDate)} (${escapeHtml(s.timeLabel)})</div><div style="font-size:11.6px;color:var(--gd-muted)">${escapeHtml(s.speakers)}</div></td>` +
+            `<td><div class="gdrive-folder-tags">${s.frameworks.slice(0, 2).map((fw) => `<span class="gdrive-folder-tag">${escapeHtml(fw)}</span>`).join("")}</div></td>`;
+          const tdAct = document.createElement("td");
+          const actRow = make("div", null, "gdrive-list-actions");
+          const openBtn = make("button", "🧭 ดูรายละเอียด →", "gdrive-row-open-btn");
+          openBtn.type = "button";
+          openBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            state.sfSelectedId = s.id;
+            renderSystemsForumView();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          actRow.appendChild(openBtn);
+          if (slideRec) {
+            const sb = make("button", "📊 Slide", "gdrive-row-sec-btn");
+            sb.type = "button";
+            sb.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              openSessionSlide(s.id);
+            });
+            actRow.appendChild(sb);
+          } else if (ROLE === "faculty") {
+            const ub = make("button", "⬆ Upload", "gdrive-row-sec-btn");
+            ub.type = "button";
+            ub.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              openFacultySlideStudioForSession(s.id);
+            });
+            actRow.appendChild(ub);
+          }
+          tdAct.appendChild(actRow);
+          trEl.appendChild(tdAct);
+          trEl.addEventListener("click", () => {
+            state.sfSelectedId = s.id;
+            renderSystemsForumView();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          tb.appendChild(trEl);
+        });
+        tbl.appendChild(tb);
+        listWrap.appendChild(tbl);
+        canvas.appendChild(listWrap);
+      }
+    }
+
+    searchIn.addEventListener("input", () => {
+      state.sfDriveSearch = searchIn.value;
+      clearSearchBtn.hidden = !searchIn.value.trim();
+      renderCanvas();
+    });
+    clearSearchBtn.addEventListener("click", () => {
+      state.sfDriveSearch = "";
+      searchIn.value = "";
+      clearSearchBtn.hidden = true;
+      renderCanvas();
+      searchIn.focus();
+    });
+
+    renderSide();
+    renderCanvas();
+
+    body.append(sidebar, canvas);
+    shell.appendChild(body);
+    return shell;
+  }
+
+  function renderSystemsForumView() {
+    const bannerWrap = $("systemsForumUnifiedBannerWrap");
+    const mount = $("systemsForumMount");
+    if (!mount) return;
+
+    const isDriveUi = state.hsUiMode === "drive";
+    const sel = state.sfSelectedId ? getSystemsForumSessionById(state.sfSelectedId) : null;
+
+    if (bannerWrap) {
+      bannerWrap.replaceChildren(
+        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "systems-forum", {
+          showModuleBar: true,
+          allowAllModules: true,
+          isAllActive: false,
+          keepFormatTabActiveWhenAll: true,
+          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
+          allHeading: sel
+            ? `${sel.code}: ${sel.title}`
+            : tr(
+                "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (Beyond HS1–HS6 · 6 คาบสอนสำคัญ)",
+                "Systems Thinking & Expert Panels (Beyond HS1–HS6 · 6 Key Sessions)"
+              ),
+          allDesc: sel
+            ? `${sel.dateTH} (${sel.timeLabel}) · ${sel.speakers} — ${sel.examBadge}`
+            : tr(
+                "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (18.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
+                "6 high-impact taught sessions beyond the HS1–HS6 written exam (18.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
+              ),
+          onSelectModule: (m) => openTextbookDriveFolder(m || "FOLDERS")
+        })
+      );
+    }
+
+    mount.replaceChildren(isDriveUi ? buildSystemsForumDriveExplorerDOM() : buildSystemsForumAppleTvDOM());
   }
 
   function buildTextbookAppleTvDOM(baseMod) {
@@ -12836,6 +14046,21 @@
 
       shelf.appendChild(grid);
       stage.appendChild(shelf);
+
+      // Companion Banner highlighting the 6 taught sessions beyond the HS1–HS6 written exam
+      const beyondBanner = make("div", null, "sf-companion-banner");
+      const bCopy = make("div", null, "sf-companion-copy");
+      bCopy.append(
+        make("div", "🧭 BEYOND THE WRITTEN EXAM · นอกกรอบสอบทฤษฎี HS1–HS6 แต่มีการสอนสด & สำคัญมาก", "sf-why-kicker"),
+        make("h4", "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (6 คาบสำคัญ · 18.5 ชม.)"),
+        make("p", "รวมคาบ Systems Thinking, Global/Planetary Health & HPSR, Panel DHS 6BB+1, Workshop CLD & Archetypes, บทเรียนสุขภาวะข้างถนน และ Policy Exercise — หัวใจภาคสนาม ฟอร์ม 3A และ SRN 1–2")
+      );
+      const bBtn = make("button", "🧭 เปิดดูครบ 6 คาบสำคัญ →", "btn teal");
+      bBtn.type = "button";
+      bBtn.addEventListener("click", () => openSystemsForum(""));
+      beyondBanner.append(bCopy, bBtn);
+      stage.appendChild(beyondBanner);
+
       return stage;
     }
 
@@ -25053,6 +26278,18 @@
       matRow.appendChild(hsdJumpBtn);
     }
 
+    const hoverBeyond = !isHol && typeof getSystemsForumSessionById === "function" ? getSystemsForumSessionById(session.id) : null;
+    if (hoverBeyond) {
+      const sfJumpBtn = make("button", "🧭 เวทีคิดเชิงระบบ & เสวนา (กรอบแนวคิด · คำถาม) →", "cal-mat-btn is-hsd-jump");
+      sfJumpBtn.type = "button";
+      sfJumpBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        hideCalendarHoverPopover();
+        openSystemsForum(hoverBeyond.id);
+      });
+      matRow.appendChild(sfJumpBtn);
+    }
+
     if (docInfo && !isHol) {
       const docBtn = make("button", docInfo.shortLabel, "cal-mat-btn is-doc-ready");
       docBtn.type = "button";
@@ -25658,6 +26895,20 @@
             switchTab("schedule");
             openEventModal(s);
           }
+        });
+      }
+    }
+
+    // 5B. Beyond-Exam Health Systems Sessions (Systems Thinking, Expert Panels & Policy Exercise)
+    for (const sf of HS_BEYOND_SESSIONS) {
+      const sfHay = `${sf.code} ${sf.title} ${sf.titleThSub} ${sf.speakers} ${sf.frameworks.join(" ")} ${sf.searchKeywords}`.toLocaleLowerCase("th");
+      if (sfHay.includes(q)) {
+        results.push({
+          cat: "เวทีคิดเชิงระบบ & เสวนา (Beyond HS1–HS6)",
+          icon: sf.kind === "systems" ? "🧠" : "🎙️",
+          title: `[${sf.code}] ${sf.title}`,
+          sub: `${sf.shortDate} (${sf.timeLabel}) · ${sf.examBadge}`,
+          run: () => openSystemsForum(sf.id)
         });
       }
     }
@@ -31009,6 +32260,7 @@
       "faculty-docs": `Instructor Guide & Sources`,
       manual: `Course Manual <span class="tab-count">17 Ch</span>`,
       textbooks: `Health Systems Study <span class="tab-count">HS1–HS6</span>`,
+      "systems-forum": `Systems Thinking & Panels <span class="tab-count">6 Key</span>`,
       practice: `Flashcards & Practice <span class="tab-count">60 Qs</span>`
     };
     Object.keys(tabMap).forEach((tKey) => {
@@ -31165,6 +32417,8 @@
         else if (state.activeTab === "fieldwork") renderFieldworkView();
         else if (state.activeTab === "discussion") renderDiscussionView();
         else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
+        else if (state.activeTab === "textbooks") renderTextbookReader();
+        else if (state.activeTab === "systems-forum") renderSystemsForumView();
         if (typeof renderRoleConcierge === "function") renderRoleConcierge();
       });
     }
@@ -31808,6 +33062,11 @@
       return;
     }
 
+    if (params.get("page") === "systems-forum" || params.get("page") === "beyond-exam") {
+      openSystemsForum(params.get("session") || "");
+      return;
+    }
+
     if (params.get("page") === "students") {
       const t = params.get("type");
       const g = params.get("group") || "";
@@ -31847,6 +33106,8 @@
     setEpidemiologySection,
     openTextbookDoc: (docId) => openTextbookDoc(docId),
     openTextbookDriveFolder: (mod) => openTextbookDriveFolder(mod),
+    openSystemsForum: (idOrFilter) => openSystemsForum(idOrFilter),
+    getSystemsForumSessions: () => HS_BEYOND_SESSIONS,
     openHsLectureSlides: (mod) => openHsLectureSlides(mod),
     getHsLogicalFlowModel: (mod) => getHsLogicalFlowModel(mod),
     openSelfQuizForModule: (mod, sub) => openSelfQuizForModule(mod, sub),

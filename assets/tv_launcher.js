@@ -85,6 +85,7 @@
     discussion: "groups",
     "hs-discussion": "health-systems",
     textbooks: "health-systems",
+    "systems-forum": "health-systems",
     practice: "health-systems",
     manual: "manual",
     "faculty-docs": "health-systems",
@@ -560,6 +561,7 @@
           ];
 
     const modules = HSD.modules || [];
+    const beyondSessions = (api && api.getSystemsForumSessions ? api.getSystemsForumSessions() : []) || [];
     const sites = SCHED.fieldworkSites || [];
 
     panel.innerHTML = `
@@ -631,7 +633,7 @@
         <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ HS1 ถึง HS6">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6", "Health Systems Episodes (HS1–HS6)"))}</h2>
+              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6 (เนื้อหาสอบภาคทฤษฎี)", "Health Systems Episodes (HS1–HS6 · Written Exam)"))}</h2>
             </div>
             <div class="tv-shelf-controls">
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpisodesTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
@@ -657,6 +659,45 @@
               .join("")}
           </div>
         </div>
+
+        <!-- SHELF 2B: BEYOND THE EXAM — SYSTEMS THINKING & EXPERT PANELS (6 KEY SESSIONS) -->
+        ${
+          beyondSessions.length
+            ? `
+        <div class="tv-shelf" aria-label="เวทีคิดเชิงระบบและเสวนา 6 คาบสำคัญนอกกรอบสอบ">
+          <div class="tv-shelf-head">
+            <div>
+              <h2 class="tv-shelf-title">${esc(t("🧭 เวทีคิดเชิงระบบ & เสวนา (6 คาบสำคัญนอกกรอบสอบ HS1–HS6)", "🧭 Systems Thinking & Panels (6 Key Sessions Beyond HS1–HS6)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("ไม่ได้ออกข้อสอบทฤษฎี แต่มีการสอนสด (18.5 ชม.) และเป็นหัวใจของภาคสนาม ฟอร์ม 3A และ SRN 1–2", "Not on the written exam, yet essential onsite sessions (18.5 hrs) powering Fieldwork, Form 3A & SRN 1–2"))}</span>
+            </div>
+            <div class="tv-shelf-controls">
+              <button type="button" class="tv-pill-action-btn" id="tvOpenAllSystemsForumBtn">${esc(t("ดูครบ 6 คาบ →", "View All 6 →"))}</button>
+              <button type="button" class="tv-paddle-btn" data-scroll-target="tvBeyondTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
+              <button type="button" class="tv-paddle-btn" data-scroll-target="tvBeyondTrack" data-scroll-dir="1" aria-label="เลื่อนขวา">›</button>
+            </div>
+          </div>
+          <div class="tv-shelf-track is-episodes" id="tvBeyondTrack">
+            ${beyondSessions
+              .map(
+                (s) => `
+              <button type="button" class="tv-episode-card ${esc(s.tone)}" id="tvSfCard-${esc(s.id)}" data-sf-id="${esc(s.id)}" data-ep-num="0${s.order}" data-tv-focus data-tv-row="3">
+                <span class="tv-ep-top">
+                  <span class="tv-ep-code">${esc(s.code)}</span>
+                  <span class="tv-ep-weight">${esc(s.kind === "systems" ? "Systems Thinking" : "Panel / Policy")}</span>
+                </span>
+                <span class="tv-ep-bottom">
+                  <span class="tv-ep-title">${esc(s.title)}</span>
+                  <span class="tv-ep-date">${esc(s.shortDate)} (${esc(s.timeLabel)}) · ${esc(s.hours)}</span>
+                </span>
+              </button>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
 
         <!-- SHELF 3: 9 FIELDWORK HOSPITALS -->
         <div class="tv-shelf" aria-label="พื้นที่ฝึกภาคสนาม 9 โรงพยาบาล">
@@ -763,6 +804,23 @@
       card.addEventListener("click", () => {
         lastHomeTileFocusSelector = `#${card.id}`;
         openEpisodeModal(card.dataset.epCode);
+      });
+    });
+
+    const openAllSfBtn = $("tvOpenAllSystemsForumBtn");
+    if (openAllSfBtn) {
+      openAllSfBtn.addEventListener("click", () => {
+        lastHomeTileFocusSelector = "#tvOpenAllSystemsForumBtn";
+        if (api && api.openSystemsForum) api.openSystemsForum("");
+        else navigateTvTab("systems-forum");
+      });
+    }
+
+    panel.querySelectorAll("[data-sf-id]").forEach((card) => {
+      card.addEventListener("click", () => {
+        lastHomeTileFocusSelector = `#${card.id}`;
+        if (api && api.openSystemsForum) api.openSystemsForum(card.dataset.sfId);
+        else navigateTvTab("systems-forum");
       });
     });
 
@@ -1910,18 +1968,44 @@
       },
       "health-systems": {
         id: "health-systems",
-        code: "02_ระบบสุขภาพ (HS1–HS6)",
-        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 4 ขั้นตอน: ① Full → ② Abridged → ③ Self-Quiz → ④ Case Discussion",
-        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + เอกสารรวม",
-        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Case Discussion"],
-        subfolders: modules.map((m) => ({
-          id: m.id,
-          code: m.code,
-          title: m.title,
-          examWeight: m.examWeight || "",
-          meta: `${m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : ""} · สอบ ${m.examWeight || ""}`,
-          files: buildHsModuleFiles(m)
-        })),
+        code: "02_ระบบสุขภาพ (HS1–HS6 & เวทีเชิงระบบ)",
+        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 4 ขั้นตอน และเวทีคิดเชิงระบบ & เสวนา 6 คาบสำคัญ",
+        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
+        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Case Discussion", "🧭 เวทีคิดเชิงระบบ (6 คาบ)"],
+        subfolders: [
+          ...modules.map((m) => ({
+            id: m.id,
+            code: m.code,
+            title: m.title,
+            examWeight: m.examWeight || "",
+            meta: `${m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : ""} · สอบ ${m.examWeight || ""}`,
+            files: buildHsModuleFiles(m)
+          })),
+          {
+            id: "systems-forum",
+            code: "07_เวทีคิดเชิงระบบและเสวนา",
+            title: "Beyond HS1–HS6: Systems Thinking, CLD Workshop, Panel Discussions & Policy Exercise",
+            examWeight: "",
+            customPill: "6 คาบสำคัญ",
+            customTags: ["🧠 Systems Thinking (2)", "🎙️ Panel & Policy (4)", "📋 ฟอร์ม 3A · SRN"],
+            meta: "สัปดาห์ที่ 1, 3, 5 · 18.5 ชม. (นอกกรอบสอบ HS1–HS6 · เช็คชื่อ Onsite)",
+            files: ((api && api.getSystemsForumSessions ? api.getSystemsForumSessions() : []) || []).map((s) => ({
+              id: `sf:${s.id}`,
+              folderPath: ["health-systems", "systems-forum"],
+              name: s.driveFileName || `0${s.order}_${s.code}.md`,
+              title: `[${s.code}] ${s.title}`,
+              sub: `${s.titleThSub} · ${s.speakers}`,
+              meta: `${s.shortDate} (${s.timeLabel}) · ${s.hours}`,
+              badge: "🧭 เปิดกรอบแนวคิด",
+              icoCls: s.kind === "systems" ? "is-quiz" : "is-manual",
+              icoTxt: s.kind === "systems" ? "🧠" : "🎙️",
+              onOpen: openFileAction(() => {
+                if (api && api.openSystemsForum) api.openSystemsForum(s.id);
+                else navigateTvTab("systems-forum");
+              })
+            }))
+          }
+        ],
         files: [
           {
             id: "hs:all-scroll",
