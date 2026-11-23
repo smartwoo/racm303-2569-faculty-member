@@ -84,7 +84,7 @@ html[data-role="faculty"] header.masthead.faculty-masthead.tv-masthead {
 
 /* ---------- Floating Apple TV / Google TV Top Capsule Bar ---------- */
 .tv-header-dock {
-  max-width: 1320px;
+  max-width: 1380px;
   margin: 0 auto;
   pointer-events: auto;
   position: relative;
@@ -94,7 +94,7 @@ html[data-role="faculty"] header.masthead.faculty-masthead.tv-masthead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   padding: 7px 10px;
   border-radius: 999px;
   background: var(--tv-capsule-bg);
@@ -109,7 +109,7 @@ html[data-role="faculty"] header.masthead.faculty-masthead.tv-masthead {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 5px 12px 5px 6px;
+  padding: 5px 10px 5px 6px;
   border-radius: 999px;
   border: none;
   background: transparent;
@@ -170,11 +170,12 @@ html[data-theme="dark"] .tv-brand-role {
 .tv-pill-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 2px;
+  min-width: 0;
 }
 
 .tv-pill-nav::-webkit-scrollbar {
@@ -186,13 +187,13 @@ html[data-theme="dark"] .tv-brand-role {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 11.5px;
   border-radius: 999px;
   border: none;
   background: transparent;
   color: var(--tv-ink-muted);
   font-family: var(--font-display);
-  font-size: 14.2px;
+  font-size: 13.6px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -1778,6 +1779,74 @@ html[data-role="faculty"] .tv-view-seg-btn.is-active {
   color: #ffffff;
   border-color: transparent;
   transform: translateY(-1px);
+}
+
+@media (max-width: 1340px) {
+  .tv-nav-capsule {
+    gap: 5px;
+    padding: 6px 8px;
+  }
+  .tv-brand-pill {
+    gap: 6px;
+    padding: 4px 5px 4px 4px;
+  }
+  .tv-brand-badge {
+    width: 30px;
+    height: 30px;
+  }
+  .tv-brand-title {
+    font-size: 13.4px;
+  }
+  .tv-nav-pill {
+    padding: 7px 9.5px;
+    font-size: 12.9px;
+  }
+  .tv-utility-cluster {
+    gap: 4px;
+  }
+  .tv-view-mode-switch {
+    height: 34px;
+  }
+  .tv-view-seg-btn {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 11.4px;
+    gap: 4px;
+  }
+  .tv-icon-pill {
+    width: 34px;
+    height: 34px;
+  }
+  .tv-profile-pill {
+    height: 34px;
+    padding: 0 10px 0 5px;
+    font-size: 12.5px;
+    max-width: 145px;
+  }
+  .tv-profile-avatar {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 1120px) {
+  .tv-nav-capsule {
+    flex-wrap: wrap;
+    border-radius: 24px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .tv-pill-nav {
+    order: 3;
+    width: 100%;
+    padding-top: 6px;
+    border-top: 1px solid var(--tv-card-border);
+    justify-content: flex-start;
+  }
+  .tv-nav-pill {
+    padding: 7px 13px;
+    font-size: 13.5px;
+  }
 }
 
 @media (max-width: 820px) {

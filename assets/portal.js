@@ -1043,7 +1043,7 @@
     discussion: "schedule-classroom",
     "hs-discussion": "knowledge",
     fieldwork: "fieldwork",
-    manual: "knowledge",
+    manual: "manual",
     textbooks: "knowledge",
     practice: "knowledge",
     "faculty-docs": "knowledge",
@@ -1125,7 +1125,7 @@
     document.querySelectorAll(".nav-tab").forEach((btn) => {
       const active = btn.dataset.tab === tabId;
       const inCat = (btn.dataset.navCat || TAB_TO_NAV_CATEGORY[btn.dataset.tab]) === activeCat;
-      const showBtn = activeCat !== "fieldwork" && activeCat !== "epidemiology" && activeCat !== "home" && inCat;
+      const showBtn = activeCat !== "fieldwork" && activeCat !== "epidemiology" && activeCat !== "manual" && activeCat !== "home" && inCat;
       btn.hidden = !showBtn;
       if (showBtn) visibleSubCount += 1;
       btn.setAttribute("aria-selected", active ? "true" : "false");
@@ -1144,12 +1144,14 @@
         "schedule-classroom": ROLE === "faculty" ? "ตารางสอนและห้องเรียน:" : "ตารางเรียนและห้องเรียน:",
         knowledge: "ระบบสุขภาพ (HS1–HS6):",
         epidemiology: "ระบาดวิทยา (EP1–EP9):",
+        manual: "คู่มือรายวิชา (17 บท):",
         admin: ROLE === "faculty" ? "บริหารและธุรการ:" : "ส่งงานและธุรการ:"
       };
       const kickerMapEn = {
         "schedule-classroom": "Schedule & Classrooms:",
         knowledge: "Health Systems (HS1–HS6):",
         epidemiology: "Epidemiology (EP1–EP9):",
+        manual: "Course Manual (17 Ch):",
         admin: "Course Admin:"
       };
       subKicker.textContent =
@@ -9757,15 +9759,7 @@
   function renderManualReader() {
     const manualBannerWrap = $("manualUnifiedBannerWrap");
     if (manualBannerWrap) {
-      manualBannerWrap.replaceChildren(
-        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "manual", {
-          showModuleBar: true,
-          onSelectModule: (m) => {
-            state.activeHsModule = m || "HS1";
-            renderManualReader();
-          }
-        })
-      );
+      manualBannerWrap.replaceChildren();
     }
 
     const picker = $("manualChapterList");
@@ -10173,14 +10167,6 @@
         })
       );
     }
-
-    tabsRow.appendChild(
-      makeTabBtn("คู่มือรายวิชา", "manual", true, () => {
-        state.activeHsModule = mod.code;
-        switchTab("manual");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      })
-    );
 
     banner.appendChild(tabsRow);
     return banner;
@@ -12435,7 +12421,6 @@
     if (state.activeTab === "textbooks") renderTextbookReader();
     else if (state.activeTab === "hs-discussion") renderHsDiscussionView();
     else if (state.activeTab === "practice") renderPracticeCurrent();
-    else if (state.activeTab === "manual") renderManualReader();
     else if (ROLE === "faculty" && state.activeTab === "faculty-docs" && typeof renderFacultyDocsView === "function") {
       renderFacultyDocsView();
     }
@@ -30405,12 +30390,17 @@
         sub: ROLE === "faculty" ? "Fieldwork Hospitals · Advisors · 3D Map" : "9 Fieldwork Hospitals · 3D Map"
       },
       knowledge: {
-        title: "Knowledge Content",
-        pill: ROLE === "faculty" ? "5 Sections" : "4 Sections",
+        title: "Health Systems",
+        pill: "HS1–HS6",
         sub:
           ROLE === "faculty"
-            ? "Manual · HS1–6 · Case Studio & Key · Practice · Guide"
-            : "Course Manual · HS1–6 Study · Case Studio · 82 Practice Qs"
+            ? "HS1–6 Study · Case Studio & Key · Practice · Guide"
+            : "HS1–6 Study · Case Studio (.pptx) · 60 Practice Qs"
+      },
+      manual: {
+        title: "Course Manual",
+        pill: "17 Ch",
+        sub: "Official Syllabus · Rules · Forms 1A–4A"
       },
       admin: {
         title: "Course Admin",
@@ -31138,6 +31128,7 @@
       fieldwork: "fieldwork",
       knowledge: "hs-discussion",
       epidemiology: "epidemiology",
+      manual: "manual",
       admin: "submissions"
     };
     document.querySelectorAll(".nav-group-btn").forEach((gBtn) => {
@@ -31230,6 +31221,11 @@
 
     if (params.get("page") === "epidemiology" || params.get("page") === "ep") {
       switchTab("epidemiology", false);
+      return;
+    }
+
+    if (params.get("page") === "manual") {
+      switchTab("manual", false);
       return;
     }
 

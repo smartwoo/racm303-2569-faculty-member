@@ -86,7 +86,7 @@
     "hs-discussion": "health-systems",
     textbooks: "health-systems",
     practice: "health-systems",
-    manual: "health-systems",
+    manual: "manual",
     "faculty-docs": "health-systems",
     epidemiology: "epidemiology",
     submissions: "admin",
@@ -153,6 +153,7 @@
           <button type="button" class="tv-nav-pill" data-tv-nav="groups" data-tv-focus data-tv-row="0">กลุ่ม &amp; พื้นที่</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="health-systems" data-tv-focus data-tv-row="0">ระบบสุขภาพ</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="epidemiology" data-tv-focus data-tv-row="0">ระบาดวิทยา</button>
+          <button type="button" class="tv-nav-pill" data-tv-nav="manual" data-tv-focus data-tv-row="0">คู่มือรายวิชา</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="admin" data-tv-focus data-tv-row="0">
             <span>${ROLE === "faculty" ? "ตรวจงาน & ใบลา" : "ส่งงาน & ใบลา"}</span>
             <span class="tv-pill-dot" id="tvAdminNotifDot" hidden>0</span>
@@ -225,12 +226,13 @@
             groups: ["fieldwork"],
             "health-systems": ["health-systems"],
             epidemiology: ["epidemiology"],
+            manual: ["manuals"],
             admin: ["admin"]
           };
           openCourseDriveAtPath(mapToPath[navKey] || []);
           return;
         }
-        if (navKey === "home" || navKey === "schedule" || navKey === "epidemiology") {
+        if (navKey === "home" || navKey === "schedule" || navKey === "epidemiology" || navKey === "manual") {
           navigateTvTab(navKey);
         } else if (navKey === "health-systems") {
           const api = getApi();
@@ -320,6 +322,7 @@
       groups: t("กลุ่ม & พื้นที่", "Groups & Sites"),
       "health-systems": t("ระบบสุขภาพ", "Health Systems"),
       epidemiology: t("ระบาดวิทยา", "Epidemiology"),
+      manual: t("คู่มือรายวิชา", "Manual"),
       admin: ROLE === "faculty" ? t("ตรวจงาน & ใบลา", "Admin & Leave") : t("ส่งงาน & ใบลา", "Submit & Leave")
     };
     document.querySelectorAll("[data-tv-nav]").forEach((btn) => {
@@ -497,7 +500,7 @@
               tone: "tone-amber",
               icon: ICONS.book,
               title: t("คู่มือผู้สอน & โจทย์อภิปราย", "Facilitator Guides & Key"),
-              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ 60 ข้อ และคู่มือรายวิชา", "Facilitator guides, Teacher Key, 60 practice items & course manual"),
+              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ 60 ข้อ และเอกสารต้นฉบับ HS1–HS6", "Facilitator guides, Teacher Key, 60 practice items & HS1–HS6 references"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
             },
@@ -1436,7 +1439,13 @@
 
     $("tvSubBackHomeBtn").addEventListener("click", () => {
       if (portalViewMode === "drive") {
-        openCourseDriveAtPath(drivePath);
+        const fallbackDriveMap = {
+          schedule: ["schedule"],
+          groups: ["fieldwork"],
+          manual: ["manuals"],
+          admin: ["admin"]
+        };
+        openCourseDriveAtPath(drivePath.length ? drivePath : fallbackDriveMap[groupKey] || []);
       } else {
         navigateTvTab("home");
         restoreHomeFocus();
@@ -1687,7 +1696,7 @@
       "health-systems": "health-systems",
       epidemiology: "epidemiology",
       fieldwork: "groups",
-      manuals: "health-systems",
+      manuals: "manual",
       admin: "admin"
     };
     const activeNav = navMap[first] || "home";
@@ -2689,6 +2698,7 @@
     ensureHomePanelExists();
     ensureDrivePanelExists();
     mountTvTopCapsule();
+    syncTopBarLabels();
     mountSubpageEnhancements();
     renderHomeLauncher();
     syncViewModeSwitchUI();
