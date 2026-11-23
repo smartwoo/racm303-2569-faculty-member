@@ -9,8 +9,9 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const PPTX_HREF = "exports/pptx/RACM303_2569_Orientation_Slides.pptx";
-  const PDF_HREF = "exports/pdf/RACM303_2569_Orientation_Slides.pdf";
+  const ASSET_VER = "20261123or12";
+  const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
+  const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
 
   const state = {
@@ -52,7 +53,7 @@
     return `
       <figure class="or-fig-plate${extraCls ? " " + extraCls : ""}" style="margin:0">
         <div class="or-fig-img-wrap">
-          <img class="or-fig-img" src="${IMG_DIR}/${esc(fileName)}" alt="${esc(altText)}" loading="eager" decoding="async" />
+          <img class="or-fig-img" src="${IMG_DIR}/${esc(fileName)}?v=${ASSET_VER}" alt="${esc(altText)}" loading="eager" decoding="async" />
         </div>
         ${captionText ? `<figcaption class="or-fig-cap">${captionText}</figcaption>` : ""}
       </figure>
@@ -119,7 +120,7 @@
               <ul class="or-list" style="gap:0.2cqw">
                 <li><strong>Basic Science:</strong> เข้าใจกลไกพยาธิสรีรวิทยาของโรคระดับเซลล์และอวัยวะ</li>
                 <li><strong>Clinical Science:</strong> ซักประวัติ ตรวจร่างกาย วินิจฉัย และรักษาผู้ป่วยรายบุคคล</li>
-                <li><strong>Health Systems Science:</strong> เข้าใจระบบบริการ การทำงานเป็นทีม คุณภาพ/ความปลอดภัย การเงินการคลัง และปัจจัยกำหนดสุขภาพ</li>
+                <li><strong>Health Systems Science:</strong> เข้าใจระบบบริการ การทำงานเป็นทีม คุณภาพ การคลัง และปัจจัยกำหนดสุขภาพ โดยมี <strong>Systems Thinking เป็นแกนเชื่อมโยง (Linking Domain)</strong></li>
               </ul>
             </div>
 
@@ -154,7 +155,7 @@
           ${figPlate(
             "orient_s03_beyond_bedside.png",
             "เชื่อมโยงการดูแลข้างเตียง ปัจจัยกำหนดสุขภาพในชุมชน และระบบสุขภาพ สู่บทบาท Change Agent",
-            "จากอาการเจ็บป่วยที่ปลายเหตุในโรงพยาบาล สู่ปัจจัยกำหนดสุขภาพ (SDH/CDH) และโครงสร้างระบบสุขภาพที่กำหนดชีวิตจริงของประชาชน"
+            "จากอาการเจ็บป่วยที่ปลายเหตุในโรงพยาบาล สู่ปัจจัยกำหนดสุขภาพ (SDH, CDoH) และโครงสร้างระบบสุขภาพที่กำหนดชีวิตจริงของประชาชน"
           )}
 
           <div style="display:flex;flex-direction:column;gap:0.55cqw;min-height:0">
@@ -212,7 +213,7 @@
               <h3 class="or-card-title">อธิบายและประยุกต์ใช้วิทยาระบบสุขภาพ &amp; ระบาดวิทยา</h3>
               <ul class="or-list" style="gap:0.16cqw;font-size:clamp(9px,0.92cqw,13.2px)">
                 <li>ระบาดวิทยาพื้นฐาน &amp; เวชศาสตร์เชิงประจักษ์ (<code>EP1–EP9</code>)</li>
-                <li>สุขภาพ ปัจจัยกำหนดสุขภาพ SDH/CDH &amp; การป้องกัน 4 ระดับ (<code>HS1</code>)</li>
+                <li>สุขภาพ ปัจจัยกำหนดสุขภาพ SDH, CDoH &amp; การป้องกัน 4 ระดับ (<code>HS1</code>)</li>
                 <li>โครงสร้างระบบสุขภาพ 6BB, 6W (<code>HS2</code>) &amp; คุณลักษณะ <code>EQESaRR</code> (<code>HS3</code>)</li>
                 <li>สร้างเสริมสุขภาพ <code>COM-B</code> (<code>HS4</code>) · ปฐมภูมิ (<code>HS5</code>) · การคลัง UHC (<code>HS6</code>)</li>
               </ul>
@@ -261,52 +262,52 @@
       section: "objectives",
       sectionLabel: "Act I · Start with Why",
       actClass: "",
-      actLabel: "ACT I · 5 HSS OBJECTIVES",
+      actLabel: "ACT I · 5 HSS × LINKING DOMAIN",
       timeWindow: "09.08 – 09.10 น. (2 นาที)",
-      kicker: "01 · FIVE CORE OBJECTIVES OF HEALTH SYSTEMS (TABLE OF SPECIFICATIONS · 100%)",
-      title: "5 วัตถุประสงค์หลักของ Health Systems: เข็มทิศเชื่อมบทเรียน โรงพยาบาลแหล่งฝึก และการวัดผล",
-      lead: "กรอบแม่บทที่ร้อยเรียงตั้งแต่คาบเรียน ST1 & HS1–HS6 การเรียนรู้ภาคสนาม 9 แห่ง สู่ Health Systems Exam และ Presentation ร่วมกันเป็นทีม",
+      kicker: "01 · FIVE HEALTH SYSTEMS OBJECTIVES × SYSTEMS THINKING AS LINKING DOMAIN",
+      title: "5 วัตถุประสงค์ของ Health Systems: เชื่อมโยงด้วย Systems Thinking (Connecting the Dots)",
+      lead: "ไม่ได้เรียนรู้แบบแยกส่วนทีละหัวข้อ — แต่มุ่งพัฒนาสมรรถนะ Systems Thinking (Linking Domain) เพื่อร้อยเรียงทั้ง 5 มิติสู่ Presentation (Health Systems)",
       notes:
-        "สื่อสาร 5 วัตถุประสงค์หลักของระบบสุขภาพและน้ำหนักคะแนนรวม 100%: (1) สุขภาพและปัจจัยกำหนดสุขภาพ 20%, (2) ระบบสุขภาพและระบบบริการสุขภาพ 25%, (3) ศักยภาพชุมชนในการพัฒนาสุขภาพ 20%, (4) การสร้างเสริมสุขภาพ 20%, (5) บทบาทแพทย์ในระบบสุขภาพ 15% ซึ่งใช้ทั้งในการเรียนภาคทฤษฎี การศึกษาที่โรงพยาบาลแหล่งฝึก Health Systems Exam และ Presentation (Health Systems) ฟอร์ม 3A",
+        "ย้ำหัวใจสำคัญที่สุดของการบูรณาการหมวดระบบสุขภาพ: ทั้ง 5 วัตถุประสงค์ไม่ได้มีไว้ให้นักศึกษาแบ่งงานกันเรียนรู้หรือนำเสนอแบบแยกส่วน (Siloed) แต่ต้องใช้สมรรถนะ Systems Thinking ในฐานะ Linking Domain มาเชื่อมจุด (Connecting the Dots) ให้เห็นความสัมพันธ์เชิงระบบของพื้นที่จริง โดยเฉพาะในเวที Presentation (Health Systems) ฟอร์ม 3A",
       render: () => `
         <div class="or-infog-split is-fig-left">
           ${figPlate(
             "orient_s05_district_lenses.png",
-            "5 Core Objectives of Health Systems in RACM 303",
-            "5 วัตถุประสงค์หลักของระบบสุขภาพ (น้ำหนักรวม 100%) เชื่อมโยงชุมชน โรงพยาบาลแหล่งฝึก และทีมสุขภาพ"
+            "Systems Thinking as Linking Domain Connecting the 5 Core Objectives of Health Systems",
+            "Systems Thinking เป็น Linking Domain เชื่อมโยงทั้ง 5 วัตถุประสงค์ระบบสุขภาพ (Connecting the Dots · ไม่แยกส่วน)"
           )}
 
           <div style="display:flex;flex-direction:column;gap:0.34cqw;justify-content:space-between;min-height:0">
             <div class="or-card is-white" style="padding:0.42cqw 0.75cqw;gap:0.08cqw">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker">1 · สุขภาพและปัจจัยกำหนดสุขภาพ (Health &amp; Determinants of Health)</span><span class="or-mini-chip">น้ำหนัก 20% · HS1</span></div>
-              <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>1.1</strong> สุขภาพแบบองค์รวม · <strong>1.2</strong> ความสัมพันธ์ระหว่างสุขภาพและปัจจัยกำหนดสุขภาพ (SDH/CDH) · <strong>1.3</strong> การป้องกันโรค 4 ระดับ</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker">1 · Health, Determinants of Health (SDH, CDoH) &amp; Disease Prevention</span><span class="or-mini-chip">HS1 · บริบทชุมชน</span></div>
+              <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>1.1</strong> สุขภาพแบบองค์รวม · <strong>1.2</strong> ความสัมพันธ์ระหว่างสุขภาพและปัจจัยกำหนดสุขภาพ (<strong>SDH, CDoH</strong>) · <strong>1.3</strong> ระดับการป้องกันโรค (Level of Disease Prevention)</p>
             </div>
 
             <div class="or-card is-navy-tint" style="padding:0.42cqw 0.75cqw;gap:0.08cqw">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker">2 · ระบบสุขภาพและระบบบริการสุขภาพ (Health Systems &amp; Services)</span><span class="or-mini-chip">น้ำหนัก 25% · ST1, HS2–3, 5–6</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker">2 · ระบบสุขภาพและระบบบริการสุขภาพ (Health Systems &amp; Health Service Systems)</span><span class="or-mini-chip" style="flex-shrink:0;white-space:nowrap">ST1 · HS2–3, 5–6</span></div>
               <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>2.1</strong> ระบบซับซ้อนและการคิดเชิงระบบ · <strong>2.2</strong> ระบบสุขภาพและระบบบริการสุขภาพ (6BB/6W/PHC/UHC) · <strong>2.3</strong> คุณสมบัติที่พึงประสงค์ (<code>EQESaRR</code>) · <strong>2.4</strong> ประยุกต์ระเบียบวิธีวิจัยพัฒนาระบบสุขภาพ</p>
             </div>
 
             <div class="or-card is-amber-tint" style="padding:0.42cqw 0.75cqw;gap:0.08cqw">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#b45309">3 · ศักยภาพชุมชนในการพัฒนาสุขภาพ (Community Potential)</span><span class="or-mini-chip">น้ำหนัก 20% · HS1, HS5, ชุมชน</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#b45309">3 · ศักยภาพชุมชนในการพัฒนาสุขภาพ (Community Potential)</span><span class="or-mini-chip">HS1 · HS5 · ทุนทางสังคม</span></div>
               <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>3.1</strong> ความหมายและคุณสมบัติของชุมชน · <strong>3.2</strong> ความสัมพันธ์ระหว่างศักยภาพชุมชน (ทุนทางสังคม/อสม./องค์กรท้องถิ่น) กับสุขภาพ</p>
             </div>
 
             <div class="or-card is-teal-tint" style="padding:0.42cqw 0.75cqw;gap:0.08cqw">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#0f766e">4 · การสร้างเสริมสุขภาพ (Health Promotion)</span><span class="or-mini-chip">น้ำหนัก 20% · HS4</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#0f766e">4 · การสร้างเสริมสุขภาพ (Health Promotion)</span><span class="or-mini-chip">HS4 · Ottawa · COM-B</span></div>
               <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>4.1</strong> แนวคิดการสร้างเสริมสุขภาพ · <strong>4.2</strong> หลักการและกลยุทธ์สร้างเสริมสุขภาพ (Ottawa Charter, HiAP, <code>COM-B</code>) · <strong>4.3</strong> ความสัมพันธ์ระหว่างการสร้างเสริมสุขภาพและระบบบริการสุขภาพ</p>
             </div>
 
             <div class="or-card is-white" style="padding:0.42cqw 0.75cqw;gap:0.08cqw">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#1e3a8a">5 · บทบาทแพทย์ในระบบสุขภาพ (Physician's Roles in Health Systems)</span><span class="or-mini-chip">น้ำหนัก 15% · บูรณาการ</span></div>
-              <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>5.1</strong> ภาพรวมของบทบาทแพทย์ในระบบสุขภาพ · <strong>5.2</strong> บูรณาการบทบาทแพทย์ต่อผู้ป่วย ครอบครัว และชุมชน (ทั้งในโรงพยาบาลแหล่งฝึกและทีมสหวิชาชีพ)</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.4cqw"><span class="or-card-kicker" style="color:#1e3a8a">5 · บทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems)</span><span class="or-mini-chip">Applying HSS Competencies</span></div>
+              <p class="or-card-text" style="font-size:clamp(8.3px,0.86cqw,12.4px)"><strong>5.1</strong> ภาพรวมของบทบาทแพทย์ในระบบสุขภาพ · <strong>5.2</strong> บูรณาการบทบาทแพทย์ต่อผู้ป่วย ครอบครัว และชุมชน (ประยุกต์ใช้สมรรถนะ HSS ในทีมสุขภาพและแหล่งฝึก)</p>
             </div>
           </div>
         </div>
 
         <div class="or-story-ribbon">
-          <span class="or-story-q">End-to-End Alignment</span>
-          <span class="or-story-a">ทั้ง <strong>5 วัตถุประสงค์ของ Health Systems</strong> เป็นแกนเดียวกันตั้งแต่ห้องเรียน &rarr; โรงพยาบาลแหล่งฝึก &rarr; <strong>Health Systems Exam</strong> &rarr; <strong>Presentation (Health Systems)</strong> ร่วมกันเป็นทีม</span>
+          <span class="or-story-q">Connecting the Dots</span>
+          <span class="or-story-a"><strong>Presentation (Health Systems · ฟอร์ม 3A)</strong> เน้นสมรรถนะ <strong>Systems Thinking (Linking Domain)</strong> เชื่อมจุดทั้ง 5 วัตถุประสงค์เข้าด้วยกัน — <strong>ไม่ได้เรียนรู้หรือนำเสนอแบบแยกส่วนรายข้อ</strong></span>
         </div>
       `
     },
@@ -363,7 +364,7 @@
               <h3 class="or-card-title" style="font-size:clamp(9.4px,0.98cqw,14px)">โรงพยาบาลแหล่งฝึก 9 แห่ง</h3>
               <ul class="or-list" style="padding-left:1cqw;gap:0.14cqw;font-size:clamp(8.1px,0.83cqw,11.8px)">
                 <li>ฝังตัวเรียนรู้จริง <strong>7–9 คืน</strong></li>
-                <li>ศึกษา 5 วัตถุประสงค์ระบบฯ</li>
+                <li>เชื่อมโยง 5 วัตถุประสงค์ระบบฯ</li>
                 <li>เก็บ Survey · รับ Feedback SRN1</li>
               </ul>
             </div>
@@ -383,7 +384,7 @@
               <h3 class="or-card-title" style="font-size:clamp(9.4px,0.98cqw,14px)">Presentation (as a Team)</h3>
               <ul class="or-list" style="padding-left:1cqw;gap:0.14cqw;font-size:clamp(8.1px,0.83cqw,11.8px)">
                 <li><strong>28 ธ.ค.:</strong> SG #11–12 ซ้อมทีม</li>
-                <li><strong>29 ธ.ค.:</strong> <strong>Presentation (HS · 3A)</strong></li>
+                <li><strong>29 ธ.ค.:</strong> <strong>HS: Connect 5 Dots</strong></li>
                 <li><strong>30 ธ.ค.:</strong> <strong>Presentation (Epi · 4A)</strong></li>
               </ul>
             </div>
@@ -392,7 +393,7 @@
 
         <div class="or-story-ribbon">
           <span class="or-story-q">Design Logic</span>
-          <span class="or-story-a">สอบ <strong>Epi Exam</strong> ก่อนลงพื้นที่ทำ Survey สอบ <strong>Health Systems Exam</strong> หลังเห็นระบบจริง และทำ <strong>Presentation (Health Systems, Epi)</strong> เพื่อแสดงการบรรลุ LO ร่วมกันเป็นทีม</span>
+          <span class="or-story-a">สอบ <strong>Epi Exam</strong> ก่อนทำ Survey สอบ <strong>Health Systems Exam</strong> หลังเห็นระบบจริง และใช้ <strong>Systems Thinking เชื่อม 5 วัตถุประสงค์</strong> สู่ <strong>Presentation (Health Systems, Epi)</strong> ร่วมกันเป็นทีม</span>
         </div>
       `
     },
@@ -408,7 +409,7 @@
       title: "สถาปัตยกรรมการเรียนหมวดระบบสุขภาพ: Guided Learning 5 ขั้นตอน ควบคู่ 6 เวทีคิดเชิงระบบ",
       lead: "เปลี่ยนจากการฟังบรรยายทางเดียว สู่การอ่านคิดล่วงหน้า ฝึกดึงความรู้ สังเคราะห์ห้องใหญ่ และอภิปรายกรณีศึกษา 6 กลุ่มย่อย",
       notes:
-        "อธิบายเส้นทาง 5 ขั้นตอนของ ST1 และ HS1–HS6: ① ฉบับเต็ม → ② ฉบับย่อ → ③ โจทย์ 66 ข้อ & คำศัพท์ 125 คำ พร้อม AI Mentor → ④ Slide อาจารย์ห้องใหญ่ 1 ชม. → ⑤ Case Discussion 6 กลุ่มย่อย (1C1-02..07 · 2 ชม. 20 นาที) ควบคู่กับ 6 เวทีคิดเชิงระบบนอกกรอบข้อสอบทฤษฎี (18.5 ชม.)",
+        "อธิบายเส้นทาง 5 ขั้นตอนของ ST1 และ HS1–HS6 ควบคู่กับ 6 เวทีคิดเชิงระบบ (18.5 ชม.) ซึ่งทำหน้าที่สร้างสมรรถนะ Systems Thinking (Linking Domain) เพื่อให้ทีมสามารถ Connecting the Dots ทั้ง 5 วัตถุประสงค์ใน Presentation (Health Systems) ฟอร์ม 3A",
       render: () => `
         <div class="or-top-fig-stack">
           ${figPlate("orient_s07_guided_flow.png", "5-Step Guided Learning Flow and Systems Thinking & Policy Panels", "")}
@@ -424,8 +425,8 @@
             </div>
 
             <div class="or-card is-amber-tint" style="padding:0.65cqw 0.9cqw;gap:0.22cqw">
-              <span class="or-card-kicker">BEYOND HS1–HS6 · 6 เวทีคิดเชิงระบบและเสวนา (18.5 ชม.)</span>
-              <p class="or-card-text" style="font-size:clamp(8.6px,0.88cqw,12.6px);font-weight:700;color:#92400e">ไม่ได้นำมาออกข้อสอบข้อเขียน — แต่เป็นเครื่องมือหลักของภาคสนาม Presentation (ฟอร์ม 3A) และ SRN:</p>
+              <span class="or-card-kicker">BEYOND HS1–HS6 · 6 เวทีสร้าง SYSTEMS THINKING LINKING DOMAIN (18.5 ชม.)</span>
+              <p class="or-card-text" style="font-size:clamp(8.5px,0.87cqw,12.4px);font-weight:700;color:#92400e">ไม่ได้นำมาออกข้อสอบข้อเขียน — แต่เป็นเครื่องมือ Connecting the Dots ทั้ง 5 วัตถุประสงค์ใน Presentation (3A) &amp; SRN:</p>
               <div class="or-chip-row" style="gap:0.28cqw">
                 <span class="or-mini-chip">1. ST1 Systems &amp; CAS Thinking (25 พ.ย.)</span>
                 <span class="or-mini-chip">2. Global/Planetary Health &amp; HPSR (25 พ.ย.)</span>
@@ -439,8 +440,8 @@
         </div>
 
         <div class="or-story-ribbon">
-          <span class="or-story-q">Health Systems Exam Prep</span>
-          <span class="or-story-a">การผ่านครบทั้ง 5 ขั้นตอนช่วยให้ <strong>สังเคราะห์ทั้ง 5 วัตถุประสงค์ของระบบสุขภาพลงกระดาษ A4 ลายมือตนเอง 1 แผ่น</strong> สำหรับ Health Systems Exam ได้อย่างแม่นยำ</span>
+          <span class="or-story-q">Linking Domain Mastery</span>
+          <span class="or-story-a">ทั้ง 5 ขั้นตอนและ 6 เวทีคิดเชิงระบบ ช่วยให้ <strong>สรุปโน้ต A4 เชื่อม 5 วัตถุประสงค์สำหรับ Health Systems Exam</strong> และต่อยอดสู่ <strong>Presentation แบบ Connecting the Dots</strong></span>
         </div>
       `
     },
@@ -597,8 +598,8 @@
               <tr>
                 <td style="padding:0.36cqw 0.78cqw"><strong>3. Community skills, population health &amp; health system</strong></td>
                 <td style="padding:0.36cqw 0.78cqw">
-                  <div><span class="or-tag-inline is-formative">Formative</span> การโค้ชระหว่างศึกษา 5 วัตถุประสงค์ระบบสุขภาพ ณ โรงพยาบาลแหล่งฝึก และทำ Health Survey</div>
-                  <div style="margin-top:0.12cqw"><span class="or-tag-inline is-summative">Summative</span> <strong>Presentation (Health Systems, Epi)</strong> เพื่อแสดงการบรรลุ LO ร่วมกันเป็นทีม (<code>3A</code> 29 ธ.ค. &amp; <code>4A</code> 30 ธ.ค.) · <code>1A</code></div>
+                  <div><span class="or-tag-inline is-formative">Formative</span> การโค้ชเชื่อมโยง 5 วัตถุประสงค์ระบบสุขภาพด้วย Systems Thinking ณ โรงพยาบาลแหล่งฝึก และทำ Health Survey</div>
+                  <div style="margin-top:0.12cqw"><span class="or-tag-inline is-summative">Summative</span> <strong>Presentation (HS · 3A)</strong> เน้น <strong>Systems Thinking (Linking Domain)</strong> เชื่อม 5 วัตถุประสงค์แบบ <strong>Connecting the Dots</strong> (ไม่แยกส่วน) &amp; <strong>Epi (4A)</strong> · <code>1A</code></div>
                 </td>
                 <td style="padding:0.36cqw 0.78cqw">คณาจารย์ประจำวิชา · เพื่อน · อ.ที่ปรึกษากลุ่ม</td>
                 <td style="padding:0.36cqw 0.78cqw"><strong>O / S / M / U</strong><br><span style="font-size:0.86em;color:#64748b">(3A, 4A รายทีม · 1A บุคคล)</span></td>
@@ -671,11 +672,11 @@
               <h3 class="or-card-title" style="font-size:clamp(10.2px,1.12cqw,16px)">Health Systems Exam (Open Note A4)</h3>
               <p class="or-card-text" style="font-size:clamp(8.2px,0.84cqw,12px);color:#0369a1">ห้อง <code>2C2-01..03</code> · <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> (A4 ลายมือตนเอง 1 แผ่น)</p>
               <div class="or-stat-bar-list" style="gap:0.22cqw">
-                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>1.</strong> สุขภาพ &amp; ปัจจัยกำหนด · ป้องกัน 4 ระดับ (<code>HS1</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>2.</strong> ระบบสุขภาพ &amp; บริการ · <code>EQESaRR</code> (<code>HS2–3, 5–6</code>)</span><span>25%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:94%"></div></div></div>
+                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>1.</strong> Health, SDH/CDoH &amp; Disease Prevention (<code>HS1</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
+                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>2.</strong> Health Service Systems &amp; <code>EQESaRR</code> (<code>HS2–3, 5–6</code>)</span><span>25%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:94%"></div></div></div>
                 <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>3.</strong> ศักยภาพชุมชนในการพัฒนาสุขภาพ (<code>HS1, 5</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
                 <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>4.</strong> การสร้างเสริมสุขภาพ (<code>HS4</code> · Ottawa/<code>COM-B</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>5.</strong> บทบาทแพทย์ต่อผู้ป่วย ครอบครัว &amp; ชุมชน</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:58%"></div></div></div>
+                <div class="or-stat-bar-row" style="padding:0.1cqw 0;cursor:default"><div class="or-stat-bar-head"><span><strong>5.</strong> Physician Roles in Health Systems (Applying HSS)</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:58%"></div></div></div>
               </div>
             </div>
           </div>
@@ -695,14 +696,14 @@
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
       timeWindow: "09.25 – 09.27 น. (2 นาที)",
-      kicker: "03 · COMPETENCIES 2–5 DEEP DIVE · TEAM PRESENTATION, REFLECTION & PROFESSIONALISM",
+      kicker: "03 · COMPETENCIES 2–5 DEEP DIVE · SYSTEMS THINKING PRESENTATION, REFLECTION & INTEGRITY",
       title: "เจาะลึกการประเมินภาคปฏิบัติ: Presentation (Health Systems, Epi) ร่วมกันเป็นทีม สะท้อนคิด และเจตคติ",
-      lead: "พิสูจน์การบรรลุ Learning Objectives ร่วมกันเป็นทีม (ฟอร์ม 3A และ 4A) ควบคู่กับการเติบโตและจริยธรรมรายบุคคล",
+      lead: "Presentation (Health Systems) เน้นสมรรถนะ Systems Thinking (Linking Domain) เชื่อมโยงทั้ง 5 วัตถุประสงค์แบบ Connecting the Dots ร่วมกันเป็นทีม",
       notes:
-        "อธิบายชิ้นงานหลักของสมรรถนะที่ 2–5: (1) SRN 1 ส่ง 9 ธ.ค. เพื่อรับ Feedback ช่วงภาคสนาม ก่อนส่ง SRN 2 วันที่ 30 ธ.ค., (2) Presentation ทั้ง Health Systems (ฟอร์ม 3A · 10+20 นาที) และ Epi (ฟอร์ม 4A · 7+18 นาที) เพื่อแสดงการบรรลุวัตถุประสงค์การเรียนรู้ร่วมกันเป็นทีม ห้ามใช้ VDO อัดล่วงหน้า, (3) ฟอร์ม 1A/2A เน้นความรับผิดชอบและความซื่อสัตย์วิชาชีพ",
+        "ย้ำความคาดหวังของเวที Presentation (Health Systems · ฟอร์ม 3A · 10+20 นาที): ไม่ใช่การแบ่งหัวข้อเล่าแยกส่วนทีละวัตถุประสงค์ แต่เน้นสมรรถนะ Systems Thinking เป็น Linking Domain ที่ร้อยเรียงทั้ง 5 วัตถุประสงค์ให้เห็นพลวัตของระบบสุขภาพในพื้นที่จริง ควบคู่กับ Presentation (Epi · ฟอร์ม 4A · 7+18 นาที), SRN 1–2 และฟอร์ม 1A/2A",
       render: () => `
         <div class="or-top-fig-stack">
-          ${figPlate("orient_s12_authentic_rubrics.png", "Reflective Growth, Presentation (Health Systems, Epi) to Demonstrate LOs as a Team, and Professional Integrity", "")}
+          ${figPlate("orient_s12_authentic_rubrics.png", "Reflective Growth, Presentation (Health Systems: Systems Thinking Connecting 5 Dots & Epi) as a Team, and Professional Integrity", "")}
 
           <div class="or-grid-3">
             <div class="or-card is-teal-tint" style="padding:0.55cqw 0.78cqw;gap:0.16cqw">
@@ -716,10 +717,9 @@
 
             <div class="or-card is-navy-tint" style="padding:0.55cqw 0.78cqw;gap:0.16cqw">
               <span class="or-card-kicker">2 · PRESENTATION (HEALTH SYSTEMS, EPI) · AS A TEAM</span>
-              <ul class="or-list" style="gap:0.14cqw;font-size:clamp(8.3px,0.86cqw,12.4px)">
-                <li><strong>เป้าหมาย:</strong> <strong>แสดงการบรรลุ Learning Objectives ร่วมกันเป็นทีม</strong> (ห้ามใช้ VDO บันทึกล่วงหน้า)</li>
-                <li><strong>Health Systems (3A · 29 ธ.ค.):</strong> ครบ 5 วัตถุประสงค์ · พูด <strong>&le;10 น.</strong> + อภิปราย <strong>&le;20 น.</strong></li>
-                <li><strong>Epi (4A · 30 ธ.ค.):</strong> วิจัยเชิงปริมาณ 1 เรื่อง · พูด <strong>&le;7 น.</strong> + อภิปราย <strong>&le;18 น.</strong></li>
+              <ul class="or-list" style="gap:0.13cqw;font-size:clamp(8.2px,0.85cqw,12.2px)">
+                <li><strong>Health Systems (3A · 29 ธ.ค. · 10+20 น.):</strong> เน้นสมรรถนะ <strong>Systems Thinking (Linking Domain)</strong> เชื่อม 5 วัตถุประสงค์แบบ <strong>Connecting the Dots (ไม่เล่าแยกส่วนรายข้อ)</strong></li>
+                <li><strong>Epi (4A · 30 ธ.ค. · 7+18 น.):</strong> วิจัยเชิงปริมาณ 1 เรื่อง (ห้ามใช้ VDO อัดล่วงหน้าทั้ง 2 เวที)</li>
               </ul>
             </div>
 
@@ -734,8 +734,8 @@
         </div>
 
         <div class="or-story-ribbon">
-          <span class="or-story-q">Team LO Achievement</span>
-          <span class="or-story-a">เวที <strong>Presentation (Health Systems, Epi)</strong> ออกแบบให้สมาชิกทุกคนในกลุ่มร่วมกันสังเคราะห์และแลกเปลี่ยน เพื่อพิสูจน์ <strong>การบรรลุวัตถุประสงค์การเรียนรู้ในฐานะทีมเดียวกัน</strong></span>
+          <span class="or-story-q">Not Siloed · Connect 5 Dots</span>
+          <span class="or-story-a">หัวใจของ <strong>Presentation (Health Systems)</strong> ไม่ใช่การแบ่งหัวข้อเล่าแยกส่วนทีละข้อ แต่คือการที่ทั้งทีมใช้ <strong>Systems Thinking เชื่อมจุดทั้ง 5 วัตถุประสงค์</strong> จนเห็นกลไกระบบจริง</span>
         </div>
       `
     },
