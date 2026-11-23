@@ -1245,18 +1245,24 @@
           </div>
         `;
       } else if (inTb && tbMode === "lecture-slides") {
+        const curLsScope = st.lsDriveScope || "folders";
         rightControlsHtml = `
           <div class="tv-sibling-pills" role="group" aria-label="มุมมองโฟลเดอร์ Slide อาจารย์">
-            <button type="button" class="tv-sibling-pill ${st.lsDriveScope !== "all" ? "is-active" : ""}" id="tvLsScopeModBtn">${esc(t(`🖥️ เฉพาะคาบ ${activeModLabel}`, `🖥️ ${activeModLabel} Only`))}</button>
-            <button type="button" class="tv-sibling-pill ${st.lsDriveScope === "all" ? "is-active" : ""}" id="tvLsScopeAllBtn">${esc(t("📂 รวมครบทั้ง 6 คาบ (รอ Upload)", "📂 All 6 Sessions (Pending)"))}</button>
+            <button type="button" class="tv-sibling-pill ${curLsScope === "folders" ? "is-active" : ""}" id="tvLsScopeFoldersBtn">${esc(t("📂 โฟลเดอร์ HS1–HS6", "📂 HS1–HS6 Folders"))}</button>
+            <button type="button" class="tv-sibling-pill ${curLsScope === "module" ? "is-active" : ""}" id="tvLsScopeModBtn">${esc(t(`🖥️ คาบ ${activeModLabel}`, `🖥️ ${activeModLabel} Folder`))}</button>
+            <button type="button" class="tv-sibling-pill ${curLsScope === "all" ? "is-active" : ""}" id="tvLsScopeAllBtn">${esc(t("📋 รวมครบทั้ง 6 คาบ", "📋 All 6 Sessions"))}</button>
           </div>
         `;
       } else if (inTb) {
+        const curTbScope = st.tbDriveScope || "folders";
+        const isFoldersView = tbMode === "docs-drive" && curTbScope === "folders";
+        const isModuleDrive = tbMode === "docs-drive" && !isFoldersView;
         const isConciseOpen = tbMode === "doc-reader" && /-CONCISE$/i.test(String(st.activeDocId || ""));
         const isFullOpen = tbMode === "doc-reader" && !/-CONCISE$|-WB$/i.test(String(st.activeDocId || ""));
         rightControlsHtml = `
           <div class="tv-sibling-pills" role="group" aria-label="มุมมองโฟลเดอร์เอกสารคำสอน Google Drive">
-            <button type="button" class="tv-sibling-pill ${tbMode === "docs-drive" ? "is-active" : ""}" id="tvTbDriveFolderBtn">${esc(t(`📁 โฟลเดอร์เอกสารคำสอน (${activeModLabel})`, `📁 Docs Folder (${activeModLabel})`))}</button>
+            <button type="button" class="tv-sibling-pill ${isFoldersView ? "is-active" : ""}" id="tvTbDriveRootBtn">${esc(t("📂 โฟลเดอร์ HS1–HS6", "📂 HS1–HS6 Folders"))}</button>
+            <button type="button" class="tv-sibling-pill ${isModuleDrive ? "is-active" : ""}" id="tvTbDriveFolderBtn">${esc(t(`📁 โฟลเดอร์ ${activeModLabel}`, `📁 ${activeModLabel} Folder`))}</button>
             <button type="button" class="tv-sibling-pill ${isConciseOpen ? "is-active" : ""}" id="tvTbOpenConciseBtn">${esc(t(`⚡ ฉบับย่อ (${activeModLabel})`, `⚡ Concise (${activeModLabel})`))}</button>
             <button type="button" class="tv-sibling-pill ${isFullOpen ? "is-active" : ""}" id="tvTbOpenFullBtn">${esc(t(`📚 ฉบับเต็ม (${activeModLabel})`, `📚 Full (${activeModLabel})`))}</button>
           </div>
@@ -1319,6 +1325,12 @@
           syncSubpageBar();
         });
       }
+      if ($("tvTbDriveRootBtn")) {
+        $("tvTbDriveRootBtn").addEventListener("click", () => {
+          if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder("FOLDERS");
+          syncSubpageBar();
+        });
+      }
       if ($("tvTbDriveFolderBtn")) {
         $("tvTbDriveFolderBtn").addEventListener("click", () => {
           if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder(activeModLabel);
@@ -1334,6 +1346,12 @@
       if ($("tvTbOpenFullBtn")) {
         $("tvTbOpenFullBtn").addEventListener("click", () => {
           if (api && api.openTextbookDoc) api.openTextbookDoc(activeModLabel);
+          syncSubpageBar();
+        });
+      }
+      if ($("tvLsScopeFoldersBtn")) {
+        $("tvLsScopeFoldersBtn").addEventListener("click", () => {
+          if (api && api.openHsLectureSlides) api.openHsLectureSlides("FOLDERS");
           syncSubpageBar();
         });
       }

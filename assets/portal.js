@@ -139,11 +139,11 @@
     activeHsModule: "HS1",
     preferredHsFormat: "concise",
     textbookSubMode: "docs-drive",
-    tbDriveScope: "module",
+    tbDriveScope: "folders",
     tbDriveFormatChip: "all",
     tbDriveLayout: localStorage.getItem("racm303_tb_drive_layout") || "grid",
     tbDriveSearch: "",
-    lsDriveScope: "module",
+    lsDriveScope: "folders",
     lsDriveLayout: localStorage.getItem("racm303_ls_drive_layout") || "grid",
     lsDriveSearch: "",
     activeFacultyDocId: "hs-disc-teacher-key",
@@ -9923,11 +9923,33 @@
     `<path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>` +
     `</svg>`;
 
+  const GDRIVE_FOLDER_SVG =
+    `<svg class="gdrive-folder-svg" viewBox="0 0 24 24" aria-hidden="true">` +
+    `<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h3.9c.7 0 1.36.3 1.82.82l1.16 1.36c.3.35.74.55 1.2.55H18.5A2.5 2.5 0 0 1 21 9.23v8.27A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11z" fill="#f59e0b"/>` +
+    `<path d="M3 9.2h18v8.3A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5V9.2z" fill="#fbbf24"/>` +
+    `</svg>`;
+
   function switchTextbookModulePreservingFormat(modCode) {
+    if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
+      if (state.textbookSubMode === "lecture-slides") {
+        state.lsDriveScope = "folders";
+      } else {
+        state.textbookSubMode = "docs-drive";
+        state.tbDriveScope = "folders";
+      }
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
     state.activeHsModule = clean;
     if (state.textbookSubMode === "doc-reader") {
       state.activeDocId = resolveDocIdForModuleAndFormat(clean, state.preferredHsFormat || "concise");
+    } else if (state.textbookSubMode === "lecture-slides") {
+      state.lsDriveScope = "module";
+    } else {
+      state.tbDriveScope = "module";
     }
     renderTextbookReader();
     window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
@@ -9935,25 +9957,29 @@
   }
 
   function openTextbookDriveFolder(modCode) {
-    if (modCode && /^HS[1-6]$/i.test(String(modCode))) {
-      state.activeHsModule = String(modCode).toUpperCase();
-    } else if (!state.activeHsModule || !/^HS[1-6]$/i.test(state.activeHsModule)) {
-      state.activeHsModule = "HS1";
-    }
     state.textbookSubMode = "docs-drive";
-    state.tbDriveScope = "module";
+    if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
+      state.tbDriveScope = "folders";
+    } else if (/^HS[1-6]$/i.test(String(modCode))) {
+      state.activeHsModule = String(modCode).toUpperCase();
+      state.tbDriveScope = "module";
+    } else {
+      state.tbDriveScope = "folders";
+    }
     switchTab("textbooks");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openHsLectureSlides(modCode) {
-    if (modCode && /^HS[1-6]$/i.test(String(modCode))) {
-      state.activeHsModule = String(modCode).toUpperCase();
-    } else if (!state.activeHsModule || !/^HS[1-6]$/i.test(state.activeHsModule)) {
-      state.activeHsModule = "HS1";
-    }
     state.textbookSubMode = "lecture-slides";
-    state.lsDriveScope = "module";
+    if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
+      state.lsDriveScope = "folders";
+    } else if (/^HS[1-6]$/i.test(String(modCode))) {
+      state.activeHsModule = String(modCode).toUpperCase();
+      state.lsDriveScope = "module";
+    } else {
+      state.lsDriveScope = "folders";
+    }
     switchTab("textbooks");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -9980,7 +10006,7 @@
       strip.appendChild(make("span", "เลือกบทเรียน:", "hs-unified-mod-label"));
 
       if (options.allowAllModules) {
-        const allPill = make("button", "ครบทุกบท (HS1–HS6)", "hs-unified-mod-pill");
+        const allPill = make("button", options.allModulesLabel || "ครบทุกบท (HS1–HS6)", "hs-unified-mod-pill");
         allPill.type = "button";
         allPill.setAttribute("aria-pressed", isAllActive ? "true" : "false");
         allPill.addEventListener("click", () => {
@@ -10011,10 +10037,11 @@
     const infoWrap = make("div", null, "hsd-banner-info");
     if (isAllActive) {
       infoWrap.append(
-        make("h3", "HS1–HS6: คลังทบทวนรวมครบทุกบทเรียนระบบสุขภาพ"),
+        make("h3", options.allHeading || "HS1–HS6: คลังทบทวนรวมครบทุกบทเรียนระบบสุขภาพ"),
         make(
           "p",
-          `กำลังแสดงรวมครบทุกบท — เลือกปุ่ม HS1–HS6 ด้านบนเพื่อเจาะจงรายบท หรือสลับไปยังรูปแบบสื่อการเรียนรู้ของ ${mod.code} ด้านล่างได้ทันที`
+          options.allDesc ||
+            `กำลังแสดงรวมครบทุกบท — เลือกปุ่ม HS1–HS6 ด้านบนเพื่อเจาะจงรายบท หรือสลับไปยังรูปแบบสื่อการเรียนรู้ของ ${mod.code} ด้านล่างได้ทันที`
         )
       );
     } else {
@@ -10037,10 +10064,10 @@
 
     const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
     tabsRow.setAttribute("role", "tablist");
-    tabsRow.setAttribute("aria-label", `สลับรูปแบบเอกสารและกิจกรรมของ ${mod.code}`);
+    tabsRow.setAttribute("aria-label", `สลับรูปแบบเอกสารและกิจกรรมของ ${isAllActive ? "HS1–HS6" : mod.code}`);
 
     const makeTabBtn = (label, kind, available, onClick, disabledTitle, badgeText) => {
-      const isAct = !isAllActive && available && effectiveFormat === kind;
+      const isAct = (!isAllActive || Boolean(options.keepFormatTabActiveWhenAll)) && available && effectiveFormat === kind;
       const cls = !available
         ? "btn sm is-disabled-hs-tab"
         : isAct
@@ -10066,22 +10093,22 @@
 
     tabsRow.appendChild(
       makeTabBtn(
-        `📁 เอกสารคำสอน (${mod.code})`,
+        isAllActive ? "📁 เอกสารคำสอน (HS1–HS6)" : `📁 เอกสารคำสอน (${mod.code})`,
         "docs",
         Boolean(mod.conciseDocId || mod.docId),
         () => {
-          openTextbookDriveFolder(mod.code);
+          openTextbookDriveFolder(isAllActive ? "FOLDERS" : mod.code);
         }
       )
     );
 
     tabsRow.appendChild(
       makeTabBtn(
-        `🖥️ Slide อาจารย์ (${mod.code})`,
+        isAllActive ? "🖥️ Slide อาจารย์ (HS1–HS6)" : `🖥️ Slide อาจารย์ (${mod.code})`,
         "lecture-slides",
         true,
         () => {
-          openHsLectureSlides(mod.code);
+          openHsLectureSlides(isAllActive ? "FOLDERS" : mod.code);
         },
         "",
         "รออาจารย์ Upload"
@@ -10248,9 +10275,36 @@
         : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
     const curMod = getHsModuleMeta(baseMod);
 
+    const openFolderForModule = (modId) => {
+      state.activeHsModule = modId;
+      state.tbDriveScope = "module";
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    };
+
+    const setDriveScopeAndSync = (nextScope) => {
+      const wasRoot = (state.tbDriveScope || "folders") === "folders";
+      const isRoot = nextScope === "folders";
+      state.tbDriveScope = nextScope;
+      if (wasRoot !== isRoot) {
+        renderTextbookReader();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      } else {
+        syncFabLabel();
+        renderSidebarNav();
+        renderCanvas();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      }
+    };
+
     const shell = make("div", null, "gdrive-explorer-shell hsd-no-print");
     shell.setAttribute("role", "region");
-    shell.setAttribute("aria-label", `Google Drive เอกสารคำสอน ${curMod.code}`);
+    shell.setAttribute(
+      "aria-label",
+      (state.tbDriveScope || "folders") === "folders"
+        ? "Google Drive โฟลเดอร์เอกสารคำสอน HS1–HS6"
+        : `Google Drive เอกสารคำสอน ${curMod.code}`
+    );
 
     // 1. Top Search & Brand Bar
     const topBar = make("div", null, "gdrive-topbar");
@@ -10265,8 +10319,8 @@
     searchIn.type = "search";
     searchIn.className = "gdrive-search-input";
     searchIn.placeholder = tr(
-      `ค้นหาไฟล์เอกสารคำสอน ฉบับย่อ ฉบับเต็ม หรือหัวข้อใน ${curMod.code} / HS1–HS6…`,
-      "Search concise/full teaching documents in Google Drive…"
+      "ค้นหาโฟลเดอร์ HS1–HS6 ไฟล์เอกสารคำสอน ฉบับย่อ ฉบับเต็ม หรือหัวข้อ…",
+      "Search HS1–HS6 folders or concise/full teaching documents…"
     );
     searchIn.value = state.tbDriveSearch || "";
 
@@ -10276,9 +10330,16 @@
     searchPill.append(searchIn, clearSearchBtn);
 
     const topActions = make("div", null, "gdrive-top-actions");
-    const openSlidesBtn = make("button", `🖥️ Slide อาจารย์ (${curMod.code})`, "gdrive-top-action-btn");
+    const curScopeInit = state.tbDriveScope || "folders";
+    const openSlidesBtn = make(
+      "button",
+      curScopeInit === "folders" ? "🖥️ Slide อาจารย์ (HS1–HS6)" : `🖥️ Slide อาจารย์ (${curMod.code})`,
+      "gdrive-top-action-btn"
+    );
     openSlidesBtn.type = "button";
-    openSlidesBtn.addEventListener("click", () => openHsLectureSlides(curMod.code));
+    openSlidesBtn.addEventListener("click", () =>
+      openHsLectureSlides((state.tbDriveScope || "folders") === "folders" ? "FOLDERS" : curMod.code)
+    );
     topActions.appendChild(openSlidesBtn);
 
     topBar.append(brand, searchPill, topActions);
@@ -10292,17 +10353,15 @@
     const fabToggleAllBtn = make("button", null, "gdrive-fab-btn");
     fabToggleAllBtn.type = "button";
     const syncFabLabel = () => {
-      const isAll = state.tbDriveScope === "all";
+      const sc = state.tbDriveScope || "folders";
       fabToggleAllBtn.innerHTML =
         `<span class="gdrive-fab-plus"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v8" stroke="#ea4335" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12h8" stroke="#4285f4" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12v8" stroke="#34a853" stroke-width="2.8" stroke-linecap="round"/><path d="M4 12h8" stroke="#fbbc05" stroke-width="2.8" stroke-linecap="round"/></svg></span>` +
-        `<span>${isAll ? `โฟลเดอร์คาบ ${curMod.code}` : "ดูรวมทุกบท (HS1–HS6)"}</span>`;
+        `<span>${sc === "folders" ? "ดูไฟล์รวมทุกบท (HS1–HS6)" : "← รวมโฟลเดอร์ HS1–HS6"}</span>`;
     };
     syncFabLabel();
     fabToggleAllBtn.addEventListener("click", () => {
-      state.tbDriveScope = state.tbDriveScope === "all" ? "module" : "all";
-      syncFabLabel();
-      renderSidebarNav();
-      renderCanvas();
+      const sc = state.tbDriveScope || "folders";
+      setDriveScopeAndSync(sc === "folders" ? "all" : "folders");
     });
     sidebar.appendChild(fabToggleAllBtn);
 
@@ -10312,14 +10371,20 @@
 
     const navDefs = [
       {
-        id: "module",
-        label: `โฟลเดอร์คาบ ${curMod.code}`,
-        count: curModCount,
+        id: "folders",
+        label: "โฟลเดอร์แยกตามบท (HS1–HS6)",
+        count: allModules.length,
         svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`
       },
       {
+        id: "module",
+        label: `โฟลเดอร์คาบ ${curMod.code}`,
+        count: curModCount,
+        svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v1"/><path d="M3 11h18l-2 8H5l-2-8z"/></svg>`
+      },
+      {
         id: "all",
-        label: "รวมเอกสารคำสอน (HS1–HS6)",
+        label: "รวมไฟล์ทุกบท (HS1–HS6)",
         count: allDocsCount,
         svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>`
       },
@@ -10336,17 +10401,14 @@
     function renderSidebarNav() {
       navList.replaceChildren();
       navDefs.forEach((nd) => {
-        const isAct = (state.tbDriveScope || "module") === nd.id;
+        const isAct = (state.tbDriveScope || "folders") === nd.id;
         const nb = make("button", null, `gdrive-nav-item${isAct ? " is-active" : ""}`);
         nb.type = "button";
         nb.innerHTML =
           `<span class="gdrive-nav-left">${nd.svg}<span>${escapeHtml(nd.label)}</span></span>` +
           `<span class="gdrive-nav-count">${nd.count}</span>`;
         nb.addEventListener("click", () => {
-          state.tbDriveScope = nd.id;
-          syncFabLabel();
-          renderSidebarNav();
-          renderCanvas();
+          setDriveScopeAndSync(nd.id);
         });
         navList.appendChild(nb);
       });
@@ -10357,198 +10419,13 @@
     storageBox.innerHTML =
       `<div class="gdrive-storage-head">☁️ <span>คลังเอกสารคำสอนพร้อมอ่าน</span></div>` +
       `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:100%"></div></div>` +
-      `<div class="gdrive-storage-caption">รวมทั้ง <strong>ฉบับย่อ (Abridged)</strong> และ <strong>ฉบับเต็ม (Full)</strong> ครบ HS1–HS6 พร้อมดาวน์โหลด PDF / Word สำหรับเตรียมสอบ Open Note</div>`;
+      `<div class="gdrive-storage-caption">จัดเรียงเป็นโฟลเดอร์ <strong>HS1–HS6</strong> — คลิกเลือกบทเรียนเพื่อดูไฟล์ <strong>ฉบับย่อ</strong>, <strong>ฉบับเต็ม</strong> และดาวน์โหลด PDF / Word</div>`;
     sidebar.appendChild(storageBox);
 
-    function renderCanvas() {
-      canvas.replaceChildren();
-      const scope = state.tbDriveScope || "module";
-      const isGrid = (state.tbDriveLayout || "grid") !== "list";
-      const fmtChip = state.tbDriveFormatChip || "all";
-
-      // Breadcrumbs + List/Grid Switcher
-      const crumbBar = make("div", null, "gdrive-breadcrumb-bar");
-      const crumbs = make("div", null, "gdrive-breadcrumbs");
-      const rootCrumb = make("button", "ไดรฟ์ที่แชร์", "gdrive-crumb");
-      rootCrumb.type = "button";
-      rootCrumb.addEventListener("click", () => {
-        state.tbDriveScope = "all";
-        syncFabLabel();
-        renderSidebarNav();
-        renderCanvas();
-      });
-      const folderCrumb = make("button", "01_เอกสารคำสอน_ระบบสุขภาพ", "gdrive-crumb");
-      folderCrumb.type = "button";
-      folderCrumb.addEventListener("click", () => {
-        state.tbDriveScope = "all";
-        syncFabLabel();
-        renderSidebarNav();
-        renderCanvas();
-      });
-
-      const curFolderLabel =
-        scope === "all"
-          ? "รวมครบทุกบทเรียน (HS1–HS6)"
-          : scope === "exports"
-          ? `ไฟล์ PDF & Word (${curMod.code})`
-          : `คาบ ${curMod.code}: ${curMod.title}`;
-
-      const curCrumb = make("span", null, "gdrive-crumb-current");
-      curCrumb.innerHTML =
-        `<svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
-        `<span>${escapeHtml(curFolderLabel)}</span>`;
-
-      crumbs.append(
-        rootCrumb,
-        make("span", "›", "gdrive-crumb-sep"),
-        folderCrumb,
-        make("span", "›", "gdrive-crumb-sep"),
-        curCrumb
-      );
-
-      const tbRight = make("div", null, "gdrive-toolbar-right");
-      if (scope !== "exports") {
-        const viewToggle = make("div", null, "gdrive-view-toggle");
-        const listBtn = make("button", `${!isGrid ? "✓ " : ""}☰ รายการ`, `gdrive-vmode-btn${!isGrid ? " is-active" : ""}`);
-        listBtn.type = "button";
-        listBtn.addEventListener("click", () => {
-          state.tbDriveLayout = "list";
-          try {
-            localStorage.setItem("racm303_tb_drive_layout", "list");
-          } catch (_) {}
-          renderCanvas();
-        });
-        const gridBtn = make("button", `${isGrid ? "✓ " : ""}⊞ ตารางการ์ด`, `gdrive-vmode-btn${isGrid ? " is-active" : ""}`);
-        gridBtn.type = "button";
-        gridBtn.addEventListener("click", () => {
-          state.tbDriveLayout = "grid";
-          try {
-            localStorage.setItem("racm303_tb_drive_layout", "grid");
-          } catch (_) {}
-          renderCanvas();
-        });
-        viewToggle.append(listBtn, gridBtn);
-        tbRight.appendChild(viewToggle);
-      }
-      crumbBar.append(crumbs, tbRight);
-      canvas.appendChild(crumbBar);
-
-      if (scope === "exports") {
-        const expEntries = getTeachingDocEntriesForModules([curMod], "all", state.tbDriveSearch);
-        canvas.appendChild(
-          make(
-            "div",
-            `ดาวน์โหลดไฟล์ PDF หรือ Microsoft Word (.docx) ของเอกสารคำสอนคาบ ${curMod.code} สำหรับใช้อ่านบน iPad หรือพิมพ์เตรียมสอบ Open Note`,
-            "gdrive-folder-hint"
-          )
-        );
-        const expGrid = make("div", null, "gdrive-files-grid");
-        expEntries.forEach((en) => {
-          [
-            { ext: "pdf", icoCls: "is-pdf", icoTxt: "PDF", href: en.pdfHref, dl: `${en.dlStem}.pdf`, label: "ไฟล์ PDF พร้อมพิมพ์ / จดบน iPad" },
-            { ext: "docx", icoCls: "is-docx", icoTxt: "W", href: en.docxHref, dl: `${en.dlStem}.docx`, label: "ไฟล์ Microsoft Word (.docx) แก้ไขย่อสรุปได้" }
-          ].forEach((f) => {
-            const linkCard = document.createElement("a");
-            linkCard.className = "gdrive-file-card";
-            linkCard.href = f.href;
-            linkCard.setAttribute("download", f.dl);
-            linkCard.style.textDecoration = "none";
-            linkCard.innerHTML =
-              `<div class="gdrive-card-head">` +
-              `<span class="gdrive-filetype-ico ${f.icoCls}">${f.icoTxt}</span>` +
-              `<span class="gdrive-card-filename">${escapeHtml(en.fileName.replace(/\.gdoc$/, `.${f.ext}`))}</span>` +
-              `</div>` +
-              `<div class="gd-mini-pane" style="min-height:74px;justify-content:center">` +
-              `<div class="gd-mini-pane-kicker">${escapeHtml(en.kicker)}</div>` +
-              `<div class="gd-mini-scen-text">${escapeHtml(f.label)}</div>` +
-              `</div>` +
-              `<div class="gdrive-card-foot"><span class="gdrive-card-date">📅 ${escapeHtml(en.shortDate)}</span><span class="gdrive-status-chip is-open-now">⬇ ดาวน์โหลด .${f.ext}</span></div>`;
-            expGrid.appendChild(linkCard);
-          });
-        });
-        canvas.appendChild(expGrid);
-        return;
-      }
-
-      // Filter Chips Row
-      const chipsRow = make("div", null, "gdrive-chips-row");
-      const filterChips = make("div", null, "gdrive-filter-chips");
-      [
-        {
-          id: "scope-mod",
-          active: scope === "module",
-          label: `📁 เฉพาะคาบ ${curMod.code}`,
-          onClick: () => {
-            state.tbDriveScope = "module";
-            syncFabLabel();
-            renderSidebarNav();
-            renderCanvas();
-          }
-        },
-        {
-          id: "scope-all",
-          active: scope === "all",
-          label: "📂 รวมทุกบท (HS1–HS6)",
-          onClick: () => {
-            state.tbDriveScope = "all";
-            syncFabLabel();
-            renderSidebarNav();
-            renderCanvas();
-          }
-        },
-        {
-          id: "fmt-concise",
-          active: fmtChip === "concise",
-          label: "⚡ เฉพาะฉบับย่อ (Abridged)",
-          onClick: () => {
-            state.tbDriveFormatChip = fmtChip === "concise" ? "all" : "concise";
-            renderCanvas();
-          }
-        },
-        {
-          id: "fmt-full",
-          active: fmtChip === "full",
-          label: "📚 เฉพาะฉบับเต็ม (Full)",
-          onClick: () => {
-            state.tbDriveFormatChip = fmtChip === "full" ? "all" : "full";
-            renderCanvas();
-          }
-        }
-      ].forEach((cd) => {
-        const cb = make("button", `${cd.active ? "✓ " : ""}${cd.label}`, `gdrive-chip${cd.active ? " is-active" : ""}`);
-        cb.type = "button";
-        cb.addEventListener("click", cd.onClick);
-        filterChips.appendChild(cb);
-      });
-      chipsRow.append(
-        filterChips,
-        make("span", "คลิกที่ไฟล์เอกสารเพื่อเปิดอ่านบนเว็บทันที หรือกด PDF / W เพื่อดาวน์โหลด", "gdrive-folder-hint")
-      );
-      canvas.appendChild(chipsRow);
-
-      const targetMods = scope === "all" ? allModules : [curMod];
-      const matchedEntries = getTeachingDocEntriesForModules(targetMods, fmtChip, state.tbDriveSearch);
-
-      const secHead = make("div", null, "gdrive-section-head");
-      secHead.appendChild(
-        make(
-          "span",
-          scope === "all"
-            ? `ไฟล์เอกสารคำสอนระบบสุขภาพครบทุกบท (${matchedEntries.length} ไฟล์)`
-            : `ไฟล์เอกสารคำสอนในโฟลเดอร์คาบ ${curMod.code} (${matchedEntries.length} ไฟล์)`,
-          "gdrive-section-label"
-        )
-      );
-      canvas.appendChild(secHead);
-
-      if (!matchedEntries.length) {
-        canvas.appendChild(make("div", "ไม่พบไฟล์เอกสารคำสอนที่ตรงกับคำค้นหาหรือตัวกรอง", "empty-state"));
-        return;
-      }
-
+    function renderFileEntries(entries, isGrid) {
       if (isGrid) {
         const grid = make("div", null, "gdrive-files-grid");
-        matchedEntries.forEach((en) => {
+        entries.forEach((en) => {
           const isCur = en.doc.id === state.activeDocId;
           const card = make("div", null, `gdrive-file-card${isCur ? " is-current-deck" : ""}`);
           card.tabIndex = 0;
@@ -10640,7 +10517,7 @@
           `<th>การดำเนินการ</th>` +
           `</tr></thead>`;
         const tb = document.createElement("tbody");
-        matchedEntries.forEach((en) => {
+        entries.forEach((en) => {
           const isCur = en.doc.id === state.activeDocId;
           const trEl = document.createElement("tr");
           trEl.className = `gdrive-list-row${isCur ? " is-current-deck" : ""}`;
@@ -10701,36 +10578,431 @@
         listWrap.appendChild(tbl);
         canvas.appendChild(listWrap);
       }
+    }
 
-      // Quick Sibling Folders Strip at Bottom
-      if (scope === "module") {
-        const compStrip = make("div", null, "gdrive-companion-strip");
-        compStrip.appendChild(make("span", "สลับไปยังโฟลเดอร์เอกสารคำสอนคาบอื่น:", "gdrive-folder-hint"));
-        const compPills = make("div", null, "gdrive-companion-pills");
-        allModules.forEach((m) => {
-          const fPill = make("button", null, `gdrive-doc-pill${m.id === curMod.code ? " is-active-folder-pill" : ""}`);
-          fPill.type = "button";
-          fPill.innerHTML = `<span>📁</span> <span>${escapeHtml(m.code)}</span>`;
-          fPill.addEventListener("click", () => {
-            state.activeHsModule = m.id;
-            renderTextbookReader();
-            window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    function renderFolderEntries(modList, isGrid) {
+      if (isGrid) {
+        const grid = make("div", null, "gdrive-folders-grid");
+        modList.forEach((m) => {
+          const modFiles = getTeachingDocEntriesForModules([m], "all", "");
+          const lecturer = getHsLecturerName(m.code);
+          const shortDate = formatHsShortDate(m.scheduleDate);
+          const fCard = make("div", null, "gdrive-folder-card");
+          fCard.tabIndex = 0;
+          fCard.setAttribute("role", "button");
+          fCard.setAttribute("data-tv-focus", "");
+          fCard.dataset.hsFolder = m.id;
+          fCard.setAttribute("aria-label", `เปิดโฟลเดอร์ ${m.code}: ${m.title} (${modFiles.length} ไฟล์)`);
+
+          const tagsHtml = modFiles
+            .map((en) => {
+              const lbl =
+                en.kind === "concise"
+                  ? "⚡ ฉบับย่อ"
+                  : en.kind === "full"
+                  ? "📚 ฉบับเต็ม"
+                  : "📋 Worksheet";
+              return `<span class="gdrive-folder-tag ${en.headCls}">${lbl}</span>`;
+            })
+            .join("");
+
+          fCard.innerHTML =
+            `<div class="gdrive-folder-head">` +
+            `<div class="gdrive-folder-head-left">${GDRIVE_FOLDER_SVG}<span class="gdrive-folder-code">${escapeHtml(m.code)}</span></div>` +
+            `<span class="gdrive-folder-weight">สอบ ${escapeHtml(m.examWeight || "")}</span>` +
+            `</div>` +
+            `<div class="gdrive-folder-title">${escapeHtml(m.title)}</div>` +
+            `<div class="gdrive-folder-meta">📅 ${escapeHtml(shortDate)} · ${escapeHtml(lecturer)}</div>` +
+            `<div class="gdrive-folder-tags">${tagsHtml}</div>` +
+            `<div class="gdrive-folder-foot">` +
+            `<span>${modFiles.length} ไฟล์เอกสารคำสอน</span>` +
+            `<span class="gdrive-folder-open-cta">📂 เปิดโฟลเดอร์ →</span>` +
+            `</div>`;
+
+          fCard.addEventListener("click", () => openFolderForModule(m.id));
+          fCard.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              openFolderForModule(m.id);
+            }
           });
-          compPills.appendChild(fPill);
+          grid.appendChild(fCard);
         });
-        const allFolderPill = make("button", null, "gdrive-doc-pill");
-        allFolderPill.type = "button";
-        allFolderPill.innerHTML = `<span>📂</span> <span>เปิดดูรวมทุกบท (HS1–HS6)</span>`;
-        allFolderPill.addEventListener("click", () => {
-          state.tbDriveScope = "all";
-          syncFabLabel();
-          renderSidebarNav();
+        canvas.appendChild(grid);
+      } else {
+        const listWrap = make("div", null, "gdrive-list-wrap");
+        const tbl = document.createElement("table");
+        tbl.className = "gdrive-list-table";
+        tbl.innerHTML =
+          `<thead><tr>` +
+          `<th>ชื่อโฟลเดอร์ (Folder Name)</th>` +
+          `<th>ไฟล์ภายในโฟลเดอร์</th>` +
+          `<th>อาจารย์ / กำหนดการ</th>` +
+          `<th>การดำเนินการ</th>` +
+          `</tr></thead>`;
+        const tb = document.createElement("tbody");
+        modList.forEach((m) => {
+          const modFiles = getTeachingDocEntriesForModules([m], "all", "");
+          const lecturer = getHsLecturerName(m.code);
+          const shortDate = formatHsShortDate(m.scheduleDate);
+          const trEl = document.createElement("tr");
+          trEl.className = "gdrive-list-row";
+          trEl.tabIndex = 0;
+
+          const tagsHtml = modFiles
+            .map((en) => {
+              const lbl =
+                en.kind === "concise"
+                  ? "⚡ ฉบับย่อ"
+                  : en.kind === "full"
+                  ? "📚 ฉบับเต็ม"
+                  : "📋 Worksheet";
+              return `<span class="gdrive-folder-tag ${en.headCls}">${lbl}</span>`;
+            })
+            .join(" ");
+
+          const tdName = document.createElement("td");
+          tdName.innerHTML =
+            `<div class="gdrive-list-name-cell">` +
+            `<span style="display:inline-flex;align-items:center;flex-shrink:0">${GDRIVE_FOLDER_SVG}</span>` +
+            `<div class="gdrive-list-name-copy">` +
+            `<span class="gdrive-list-fname">โฟลเดอร์คาบ ${escapeHtml(m.code)} · ${escapeHtml(m.title)}</span>` +
+            `<span class="gdrive-list-fsub">${modFiles.length} ไฟล์ · น้ำหนักสอบ ${escapeHtml(m.examWeight || "")}</span>` +
+            `</div></div>`;
+
+          const tdFiles = document.createElement("td");
+          tdFiles.innerHTML = `<div class="gdrive-folder-tags">${tagsHtml}</div>`;
+
+          const tdMeta = make("td", `${shortDate} · ${lecturer}`);
+
+          const tdActs = document.createElement("td");
+          const openBtn = make("button", "📂 เปิดโฟลเดอร์ →", "gdrive-row-open-btn");
+          openBtn.type = "button";
+          openBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openFolderForModule(m.id);
+          });
+          tdActs.appendChild(openBtn);
+
+          trEl.append(tdName, tdFiles, tdMeta, tdActs);
+          trEl.addEventListener("click", () => openFolderForModule(m.id));
+          trEl.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              openFolderForModule(m.id);
+            }
+          });
+          tb.appendChild(trEl);
+        });
+        tbl.appendChild(tb);
+        listWrap.appendChild(tbl);
+        canvas.appendChild(listWrap);
+      }
+    }
+
+    function renderCanvas() {
+      canvas.replaceChildren();
+      const scope = state.tbDriveScope || "folders";
+      const isGrid = (state.tbDriveLayout || "grid") !== "list";
+      const fmtChip = state.tbDriveFormatChip || "all";
+      const q = (state.tbDriveSearch || "").trim().toLocaleLowerCase("th");
+
+      // Breadcrumbs + List/Grid Switcher
+      const crumbBar = make("div", null, "gdrive-breadcrumb-bar");
+      const crumbs = make("div", null, "gdrive-breadcrumbs");
+      const rootCrumb = make("button", "ไดรฟ์ที่แชร์", "gdrive-crumb");
+      rootCrumb.type = "button";
+      rootCrumb.addEventListener("click", () => setDriveScopeAndSync("folders"));
+
+      if (scope === "folders") {
+        const curCrumb = make("span", null, "gdrive-crumb-current");
+        curCrumb.innerHTML =
+          `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
+          `<span>01_เอกสารคำสอน_ระบบสุขภาพ (HS1–HS6)</span>`;
+        crumbs.append(rootCrumb, make("span", "›", "gdrive-crumb-sep"), curCrumb);
+      } else {
+        const folderCrumb = make("button", "01_เอกสารคำสอน_ระบบสุขภาพ", "gdrive-crumb");
+        folderCrumb.type = "button";
+        folderCrumb.addEventListener("click", () => setDriveScopeAndSync("folders"));
+
+        const curFolderLabel =
+          scope === "all"
+            ? "รวมไฟล์ครบทุกบทเรียน (HS1–HS6)"
+            : scope === "exports"
+            ? `ไฟล์ PDF & Word (${curMod.code})`
+            : `คาบ ${curMod.code}: ${curMod.title}`;
+
+        const curCrumb = make("span", null, "gdrive-crumb-current");
+        curCrumb.innerHTML =
+          `<svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
+          `<span>${escapeHtml(curFolderLabel)}</span>`;
+
+        crumbs.append(
+          rootCrumb,
+          make("span", "›", "gdrive-crumb-sep"),
+          folderCrumb,
+          make("span", "›", "gdrive-crumb-sep"),
+          curCrumb
+        );
+      }
+
+      const tbRight = make("div", null, "gdrive-toolbar-right");
+      if (scope !== "exports") {
+        const viewToggle = make("div", null, "gdrive-view-toggle");
+        const listBtn = make("button", `${!isGrid ? "✓ " : ""}☰ รายการ`, `gdrive-vmode-btn${!isGrid ? " is-active" : ""}`);
+        listBtn.type = "button";
+        listBtn.addEventListener("click", () => {
+          state.tbDriveLayout = "list";
+          try {
+            localStorage.setItem("racm303_tb_drive_layout", "list");
+          } catch (_) {}
           renderCanvas();
         });
-        compPills.appendChild(allFolderPill);
-        compStrip.appendChild(compPills);
-        canvas.appendChild(compStrip);
+        const gridBtn = make("button", `${isGrid ? "✓ " : ""}⊞ ตารางการ์ด`, `gdrive-vmode-btn${isGrid ? " is-active" : ""}`);
+        gridBtn.type = "button";
+        gridBtn.addEventListener("click", () => {
+          state.tbDriveLayout = "grid";
+          try {
+            localStorage.setItem("racm303_tb_drive_layout", "grid");
+          } catch (_) {}
+          renderCanvas();
+        });
+        viewToggle.append(listBtn, gridBtn);
+        tbRight.appendChild(viewToggle);
       }
+      crumbBar.append(crumbs, tbRight);
+      canvas.appendChild(crumbBar);
+
+      if (scope === "exports") {
+        const backRow = make("div", null, "gdrive-section-head");
+        const backLeft = make("div", null, "gdrive-section-head-left");
+        const backBtn = make("button", "← กลับหน้ารวมโฟลเดอร์ (HS1–HS6)", "gdrive-back-folders-btn");
+        backBtn.type = "button";
+        backBtn.addEventListener("click", () => setDriveScopeAndSync("folders"));
+        backLeft.append(
+          backBtn,
+          make(
+            "span",
+            `ดาวน์โหลดไฟล์ PDF / Microsoft Word (.docx) คาบ ${curMod.code}`,
+            "gdrive-section-label"
+          )
+        );
+        backRow.appendChild(backLeft);
+        canvas.appendChild(backRow);
+
+        const expEntries = getTeachingDocEntriesForModules([curMod], "all", state.tbDriveSearch);
+        canvas.appendChild(
+          make(
+            "div",
+            `ดาวน์โหลดไฟล์ PDF หรือ Microsoft Word (.docx) ของเอกสารคำสอนคาบ ${curMod.code} สำหรับใช้อ่านบน iPad หรือพิมพ์เตรียมสอบ Open Note`,
+            "gdrive-folder-hint"
+          )
+        );
+        const expGrid = make("div", null, "gdrive-files-grid");
+        expEntries.forEach((en) => {
+          [
+            { ext: "pdf", icoCls: "is-pdf", icoTxt: "PDF", href: en.pdfHref, dl: `${en.dlStem}.pdf`, label: "ไฟล์ PDF พร้อมพิมพ์ / จดบน iPad" },
+            { ext: "docx", icoCls: "is-docx", icoTxt: "W", href: en.docxHref, dl: `${en.dlStem}.docx`, label: "ไฟล์ Microsoft Word (.docx) แก้ไขย่อสรุปได้" }
+          ].forEach((f) => {
+            const linkCard = document.createElement("a");
+            linkCard.className = "gdrive-file-card";
+            linkCard.href = f.href;
+            linkCard.setAttribute("download", f.dl);
+            linkCard.style.textDecoration = "none";
+            linkCard.innerHTML =
+              `<div class="gdrive-card-head">` +
+              `<span class="gdrive-filetype-ico ${f.icoCls}">${f.icoTxt}</span>` +
+              `<span class="gdrive-card-filename">${escapeHtml(en.fileName.replace(/\.gdoc$/, `.${f.ext}`))}</span>` +
+              `</div>` +
+              `<div class="gd-mini-pane" style="min-height:74px;justify-content:center">` +
+              `<div class="gd-mini-pane-kicker">${escapeHtml(en.kicker)}</div>` +
+              `<div class="gd-mini-scen-text">${escapeHtml(f.label)}</div>` +
+              `</div>` +
+              `<div class="gdrive-card-foot"><span class="gdrive-card-date">📅 ${escapeHtml(en.shortDate)}</span><span class="gdrive-status-chip is-open-now">⬇ ดาวน์โหลด .${f.ext}</span></div>`;
+            expGrid.appendChild(linkCard);
+          });
+        });
+        canvas.appendChild(expGrid);
+        return;
+      }
+
+      // Filter Chips Row
+      const chipsRow = make("div", null, "gdrive-chips-row");
+      const filterChips = make("div", null, "gdrive-filter-chips");
+      const chipList = [
+        {
+          id: "scope-folders",
+          active: scope === "folders",
+          label: "📁 โฟลเดอร์ตามบท (HS1–HS6)",
+          onClick: () => {
+            state.tbDriveFormatChip = "all";
+            setDriveScopeAndSync("folders");
+          }
+        }
+      ];
+      if (scope === "module") {
+        chipList.push({
+          id: "scope-mod",
+          active: true,
+          label: `📂 ไฟล์ในโฟลเดอร์ ${curMod.code}`,
+          onClick: () => setDriveScopeAndSync("module")
+        });
+      }
+      chipList.push(
+        {
+          id: "scope-all",
+          active: scope === "all",
+          label: "📑 เปิดดูรวมทุกบท (HS1–HS6)",
+          onClick: () => setDriveScopeAndSync("all")
+        },
+        {
+          id: "fmt-concise",
+          active: scope !== "folders" && fmtChip === "concise",
+          label: "⚡ เฉพาะฉบับย่อ (Abridged)",
+          onClick: () => {
+            if (scope === "folders") {
+              state.tbDriveFormatChip = "concise";
+              setDriveScopeAndSync("all");
+            } else {
+              state.tbDriveFormatChip = fmtChip === "concise" ? "all" : "concise";
+              renderCanvas();
+            }
+          }
+        },
+        {
+          id: "fmt-full",
+          active: scope !== "folders" && fmtChip === "full",
+          label: "📚 เฉพาะฉบับเต็ม (Full)",
+          onClick: () => {
+            if (scope === "folders") {
+              state.tbDriveFormatChip = "full";
+              setDriveScopeAndSync("all");
+            } else {
+              state.tbDriveFormatChip = fmtChip === "full" ? "all" : "full";
+              renderCanvas();
+            }
+          }
+        }
+      );
+
+      chipList.forEach((cd) => {
+        const cb = make("button", `${cd.active ? "✓ " : ""}${cd.label}`, `gdrive-chip${cd.active ? " is-active" : ""}`);
+        cb.type = "button";
+        cb.addEventListener("click", cd.onClick);
+        filterChips.appendChild(cb);
+      });
+      chipsRow.append(
+        filterChips,
+        make(
+          "span",
+          scope === "folders"
+            ? "คลิกเลือกโฟลเดอร์แต่ละบทเรียน (HS1–HS6) เพื่อเปิดดูไฟล์ด้านใน"
+            : "คลิกที่ไฟล์เอกสารเพื่อเปิดอ่านบนเว็บทันที หรือกด PDF / W เพื่อดาวน์โหลด",
+          "gdrive-folder-hint"
+        )
+      );
+      canvas.appendChild(chipsRow);
+
+      // VIEW 1: HS1–HS6 Folders Root (Default on first entry!)
+      if (scope === "folders") {
+        if (q) {
+          const matchedFolders = allModules.filter((m) => {
+            const hay = `${m.code} ${m.title} ${m.enTitle || ""} ${m.scheduleDate || ""} ${getHsLecturerName(m.code)}`.toLocaleLowerCase("th");
+            return hay.includes(q);
+          });
+          const matchedFiles = getTeachingDocEntriesForModules(allModules, "all", q);
+          if (!matchedFolders.length && !matchedFiles.length) {
+            canvas.appendChild(make("div", "ไม่พบโฟลเดอร์หรือไฟล์เอกสารคำสอนที่ตรงกับคำค้นหา", "empty-state"));
+            return;
+          }
+          if (matchedFolders.length) {
+            const fHead = make("div", null, "gdrive-section-head");
+            fHead.appendChild(make("span", `โฟลเดอร์บทเรียนที่ตรงกับคำค้นหา (${matchedFolders.length} โฟลเดอร์)`, "gdrive-section-label"));
+            canvas.appendChild(fHead);
+            renderFolderEntries(matchedFolders, isGrid);
+          }
+          if (matchedFiles.length) {
+            const dHead = make("div", null, "gdrive-section-head");
+            if (matchedFolders.length) dHead.style.marginTop = "16px";
+            dHead.appendChild(make("span", `ไฟล์เอกสารคำสอนที่ตรงกับคำค้นหา (${matchedFiles.length} ไฟล์)`, "gdrive-section-label"));
+            canvas.appendChild(dHead);
+            renderFileEntries(matchedFiles, isGrid);
+          }
+          return;
+        }
+
+        const secHead = make("div", null, "gdrive-section-head");
+        secHead.appendChild(
+          make(
+            "span",
+            `โฟลเดอร์เอกสารคำสอนเรียงตามบทเรียน HS1–HS6 (${allModules.length} โฟลเดอร์)`,
+            "gdrive-section-label"
+          )
+        );
+        canvas.appendChild(secHead);
+        renderFolderEntries(allModules, isGrid);
+        return;
+      }
+
+      // VIEW 2 & 3: Inside an HS Folder ("module") or All Files ("all")
+      const targetMods = scope === "all" ? allModules : [curMod];
+      const matchedEntries = getTeachingDocEntriesForModules(targetMods, fmtChip, state.tbDriveSearch);
+
+      const secHead = make("div", null, "gdrive-section-head");
+      const secLeft = make("div", null, "gdrive-section-head-left");
+      const backBtn = make("button", "← กลับหน้ารวมโฟลเดอร์ (HS1–HS6)", "gdrive-back-folders-btn");
+      backBtn.type = "button";
+      backBtn.addEventListener("click", () => {
+        state.tbDriveFormatChip = "all";
+        setDriveScopeAndSync("folders");
+      });
+      secLeft.append(
+        backBtn,
+        make(
+          "span",
+          scope === "all"
+            ? `ไฟล์เอกสารคำสอนระบบสุขภาพครบทุกบท (${matchedEntries.length} ไฟล์)`
+            : `ไฟล์ในโฟลเดอร์คาบ ${curMod.code}: ${curMod.title} (${matchedEntries.length} ไฟล์)`,
+          "gdrive-section-label"
+        )
+      );
+      secHead.appendChild(secLeft);
+      canvas.appendChild(secHead);
+
+      if (!matchedEntries.length) {
+        canvas.appendChild(make("div", "ไม่พบไฟล์เอกสารคำสอนที่ตรงกับคำค้นหาหรือตัวกรอง", "empty-state"));
+      } else {
+        renderFileEntries(matchedEntries, isGrid);
+      }
+
+      // Quick Sibling Folders Strip at Bottom
+      const compStrip = make("div", null, "gdrive-companion-strip");
+      compStrip.appendChild(make("span", "สลับไปยังโฟลเดอร์เอกสารคำสอนคาบอื่น:", "gdrive-folder-hint"));
+      const compPills = make("div", null, "gdrive-companion-pills");
+
+      const rootPill = make("button", null, "gdrive-doc-pill");
+      rootPill.type = "button";
+      rootPill.innerHTML = `<span>←</span> <span>หน้ารวมโฟลเดอร์ HS1–HS6</span>`;
+      rootPill.addEventListener("click", () => {
+        state.tbDriveFormatChip = "all";
+        setDriveScopeAndSync("folders");
+      });
+      compPills.appendChild(rootPill);
+
+      allModules.forEach((m) => {
+        const fPill = make("button", null, `gdrive-doc-pill${scope === "module" && m.id === curMod.code ? " is-active-folder-pill" : ""}`);
+        fPill.type = "button";
+        fPill.innerHTML = `<span>📁</span> <span>${escapeHtml(m.code)}</span>`;
+        fPill.addEventListener("click", () => openFolderForModule(m.id));
+        compPills.appendChild(fPill);
+      });
+      const allFolderPill = make("button", null, `gdrive-doc-pill${scope === "all" ? " is-active-folder-pill" : ""}`);
+      allFolderPill.type = "button";
+      allFolderPill.innerHTML = `<span>📂</span> <span>เปิดดูรวมทุกบท (HS1–HS6)</span>`;
+      allFolderPill.addEventListener("click", () => setDriveScopeAndSync("all"));
+      compPills.appendChild(allFolderPill);
+      compStrip.appendChild(compPills);
+      canvas.appendChild(compStrip);
     }
 
     searchIn.addEventListener("input", () => {
@@ -10762,9 +11034,36 @@
     const curMod = getHsModuleMeta(baseMod);
     const curLecturer = getHsLecturerName(curMod.code);
 
+    const openSlideFolderForModule = (modId) => {
+      state.activeHsModule = modId;
+      state.lsDriveScope = "module";
+      renderTextbookReader();
+      window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+    };
+
+    const setSlideScopeAndSync = (nextScope) => {
+      const wasRoot = (state.lsDriveScope || "folders") === "folders";
+      const isRoot = nextScope === "folders";
+      state.lsDriveScope = nextScope;
+      if (wasRoot !== isRoot) {
+        renderTextbookReader();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      } else {
+        syncFab();
+        renderSide();
+        renderCanvas();
+        window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
+      }
+    };
+
     const shell = make("div", null, "gdrive-explorer-shell hsd-no-print");
     shell.setAttribute("role", "region");
-    shell.setAttribute("aria-label", `Google Drive Slide อาจารย์ประจำคาบ ${curMod.code}`);
+    shell.setAttribute(
+      "aria-label",
+      (state.lsDriveScope || "folders") === "folders"
+        ? "Google Drive โฟลเดอร์ Slide อาจารย์ประจำคาบ HS1–HS6"
+        : `Google Drive Slide อาจารย์ประจำคาบ ${curMod.code}`
+    );
 
     const topBar = make("div", null, "gdrive-topbar");
     const brand = make("div", null, "gdrive-brand");
@@ -10777,7 +11076,7 @@
     const searchIn = document.createElement("input");
     searchIn.type = "search";
     searchIn.className = "gdrive-search-input";
-    searchIn.placeholder = "ค้นหาคาบบรรยาย ชื่ออาจารย์ผู้สอน หรือหัวข้อใน HS1–HS6…";
+    searchIn.placeholder = "ค้นหาโฟลเดอร์คาบบรรยาย ชื่ออาจารย์ผู้สอน หรือหัวข้อใน HS1–HS6…";
     searchIn.value = state.lsDriveSearch || "";
     const clearSearchBtn = make("button", "✕", "gdrive-search-clear");
     clearSearchBtn.type = "button";
@@ -10785,9 +11084,16 @@
     searchPill.append(searchIn, clearSearchBtn);
 
     const topActions = make("div", null, "gdrive-top-actions");
-    const goDocsBtn = make("button", `📁 เอกสารคำสอน (${curMod.code})`, "gdrive-top-action-btn");
+    const curLsInit = state.lsDriveScope || "folders";
+    const goDocsBtn = make(
+      "button",
+      curLsInit === "folders" ? "📁 เอกสารคำสอน (HS1–HS6)" : `📁 เอกสารคำสอน (${curMod.code})`,
+      "gdrive-top-action-btn"
+    );
     goDocsBtn.type = "button";
-    goDocsBtn.addEventListener("click", () => openTextbookDriveFolder(curMod.code));
+    goDocsBtn.addEventListener("click", () =>
+      openTextbookDriveFolder((state.lsDriveScope || "folders") === "folders" ? "FOLDERS" : curMod.code)
+    );
     topActions.appendChild(goDocsBtn);
 
     topBar.append(brand, searchPill, topActions);
@@ -10800,22 +11106,26 @@
     const fabBtn = make("button", null, "gdrive-fab-btn");
     fabBtn.type = "button";
     const syncFab = () => {
-      const isAll = state.lsDriveScope === "all";
+      const sc = state.lsDriveScope || "folders";
       fabBtn.innerHTML =
         `<span class="gdrive-fab-plus"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v8" stroke="#ea4335" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12h8" stroke="#4285f4" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12v8" stroke="#34a853" stroke-width="2.8" stroke-linecap="round"/><path d="M4 12h8" stroke="#fbbc05" stroke-width="2.8" stroke-linecap="round"/></svg></span>` +
-        `<span>${isAll ? `เฉพาะคาบ ${curMod.code}` : "ดูครบทั้ง 6 คาบ (HS1–HS6)"}</span>`;
+        `<span>${sc === "folders" ? "ดูครบทั้ง 6 คาบ (HS1–HS6)" : "← รวมโฟลเดอร์ HS1–HS6"}</span>`;
     };
     syncFab();
     fabBtn.addEventListener("click", () => {
-      state.lsDriveScope = state.lsDriveScope === "all" ? "module" : "all";
-      syncFab();
-      renderSide();
-      renderCanvas();
+      const sc = state.lsDriveScope || "folders";
+      setSlideScopeAndSync(sc === "folders" ? "all" : "folders");
     });
     sidebar.appendChild(fabBtn);
 
     const navList = make("div", null, "gdrive-nav-list");
     const navDefs = [
+      {
+        id: "folders",
+        label: "โฟลเดอร์แยกตามคาบ (HS1–HS6)",
+        count: String(allModules.length),
+        svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`
+      },
       {
         id: "module",
         label: `สไลด์อาจารย์คาบ ${curMod.code}`,
@@ -10826,7 +11136,7 @@
         id: "all",
         label: "รวมทุกคาบ (HS1–HS6)",
         count: "0 / 6",
-        svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`
+        svg: `<svg class="gdrive-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
       }
     ];
 
@@ -10835,18 +11145,13 @@
     function renderSide() {
       navList.replaceChildren();
       navDefs.forEach((nd) => {
-        const isAct = (state.lsDriveScope || "module") === nd.id;
+        const isAct = (state.lsDriveScope || "folders") === nd.id;
         const nb = make("button", null, `gdrive-nav-item${isAct ? " is-active" : ""}`);
         nb.type = "button";
         nb.innerHTML =
           `<span class="gdrive-nav-left">${nd.svg}<span>${escapeHtml(nd.label)}</span></span>` +
           `<span class="gdrive-nav-count">${escapeHtml(nd.count)}</span>`;
-        nb.addEventListener("click", () => {
-          state.lsDriveScope = nd.id;
-          syncFab();
-          renderSide();
-          renderCanvas();
-        });
+        nb.addEventListener("click", () => setSlideScopeAndSync(nd.id));
         navList.appendChild(nb);
       });
     }
@@ -10856,7 +11161,7 @@
     storageBox.innerHTML =
       `<div class="gdrive-storage-head">⏳ <span>สถานะไฟล์ Slide อาจารย์</span></div>` +
       `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:6%;background:#f59e0b"></div></div>` +
-      `<div class="gdrive-storage-caption">อัปโหลดแล้ว <strong>0 / 6</strong> คาบ — รออาจารย์ผู้สอนประจำคาบอัปโหลดไฟล์สไลด์บรรยาย (.pptx / .pdf)</div>`;
+      `<div class="gdrive-storage-caption">อัปโหลดแล้ว <strong>0 / 6</strong> คาบ — จัดเรียงโฟลเดอร์ตามบท <strong>HS1–HS6</strong> รออาจารย์ประจำคาบอัปโหลดไฟล์ (.pptx / .pdf)</div>`;
     sidebar.appendChild(storageBox);
 
     function buildPendingSlideCard(m, isFeatured) {
@@ -10917,9 +11222,101 @@
       return card;
     }
 
+    function renderSlideFolderEntries(modList, isGrid) {
+      if (isGrid) {
+        const grid = make("div", null, "gdrive-folders-grid");
+        modList.forEach((m) => {
+          const lecName = getHsLecturerName(m.code);
+          const shortDate = formatHsShortDate(m.scheduleDate);
+          const lecTime = m.lectureTime || "08.30 – 09.30 น.";
+          const fCard = make("div", null, "gdrive-folder-card");
+          fCard.tabIndex = 0;
+          fCard.setAttribute("role", "button");
+          fCard.setAttribute("data-tv-focus", "");
+          fCard.dataset.hsSlideFolder = m.id;
+          fCard.setAttribute("aria-label", `เปิดโฟลเดอร์ Slide อาจารย์ ${m.code}: ${m.title}`);
+
+          fCard.innerHTML =
+            `<div class="gdrive-folder-head">` +
+            `<div class="gdrive-folder-head-left">${GDRIVE_FOLDER_SVG}<span class="gdrive-folder-code">${escapeHtml(m.code)}</span></div>` +
+            `<span class="gdrive-folder-weight">สอบ ${escapeHtml(m.examWeight || "")}</span>` +
+            `</div>` +
+            `<div class="gdrive-folder-title">${escapeHtml(m.title)}</div>` +
+            `<div class="gdrive-folder-meta">📅 ${escapeHtml(shortDate)} (${escapeHtml(lecTime)}) · ${escapeHtml(lecName)}</div>` +
+            `<div class="gdrive-folder-tags"><span class="gdrive-folder-tag is-pending">⏳ รออาจารย์ Upload (.pptx / .pdf)</span></div>` +
+            `<div class="gdrive-folder-foot">` +
+            `<span>โฟลเดอร์สไลด์บรรยาย ${escapeHtml(m.code)}</span>` +
+            `<span class="gdrive-folder-open-cta">📂 เปิดโฟลเดอร์ →</span>` +
+            `</div>`;
+
+          fCard.addEventListener("click", () => openSlideFolderForModule(m.id));
+          fCard.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              openSlideFolderForModule(m.id);
+            }
+          });
+          grid.appendChild(fCard);
+        });
+        canvas.appendChild(grid);
+      } else {
+        const listWrap = make("div", null, "gdrive-list-wrap");
+        const tbl = document.createElement("table");
+        tbl.className = "gdrive-list-table";
+        tbl.innerHTML =
+          `<thead><tr>` +
+          `<th>ชื่อโฟลเดอร์ Slide อาจารย์ (Folder Name)</th>` +
+          `<th>อาจารย์ผู้บรรยาย</th>` +
+          `<th>กำหนดการบรรยาย</th>` +
+          `<th>สถานะ</th>` +
+          `<th>การดำเนินการ</th>` +
+          `</tr></thead>`;
+        const tb = document.createElement("tbody");
+        modList.forEach((m) => {
+          const trEl = document.createElement("tr");
+          trEl.className = "gdrive-list-row";
+          trEl.tabIndex = 0;
+
+          const tdName = document.createElement("td");
+          tdName.innerHTML =
+            `<div class="gdrive-list-name-cell">` +
+            `<span style="display:inline-flex;align-items:center;flex-shrink:0">${GDRIVE_FOLDER_SVG}</span>` +
+            `<div class="gdrive-list-name-copy">` +
+            `<span class="gdrive-list-fname">โฟลเดอร์คาบ ${escapeHtml(m.code)} · ${escapeHtml(m.title)}</span>` +
+            `<span class="gdrive-list-fsub">RACM303_คาบ_${escapeHtml(m.code)}_Slide_อาจารย์บรรยาย.pptx</span>` +
+            `</div></div>`;
+          const tdLec = make("td", getHsLecturerName(m.code));
+          const tdDate = make("td", `${formatHsShortDate(m.scheduleDate)} (${m.lectureTime || ""})`);
+          const tdStat = document.createElement("td");
+          tdStat.appendChild(make("span", "⏳ รออาจารย์ Upload", "gdrive-status-chip is-pending"));
+          const tdAct = document.createElement("td");
+          const openBtn = make("button", "📂 เปิดโฟลเดอร์ →", "gdrive-row-open-btn");
+          openBtn.type = "button";
+          openBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openSlideFolderForModule(m.id);
+          });
+          tdAct.appendChild(openBtn);
+
+          trEl.append(tdName, tdLec, tdDate, tdStat, tdAct);
+          trEl.addEventListener("click", () => openSlideFolderForModule(m.id));
+          trEl.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              openSlideFolderForModule(m.id);
+            }
+          });
+          tb.appendChild(trEl);
+        });
+        tbl.appendChild(tb);
+        listWrap.appendChild(tbl);
+        canvas.appendChild(listWrap);
+      }
+    }
+
     function renderCanvas() {
       canvas.replaceChildren();
-      const scope = state.lsDriveScope || "module";
+      const scope = state.lsDriveScope || "folders";
       const isGrid = (state.lsDriveLayout || "grid") !== "list";
       const q = (state.lsDriveSearch || "").trim().toLocaleLowerCase("th");
 
@@ -10927,33 +11324,32 @@
       const crumbs = make("div", null, "gdrive-breadcrumbs");
       const rootCrumb = make("button", "ไดรฟ์ที่แชร์", "gdrive-crumb");
       rootCrumb.type = "button";
-      rootCrumb.addEventListener("click", () => {
-        state.lsDriveScope = "all";
-        syncFab();
-        renderSide();
-        renderCanvas();
-      });
-      const folderCrumb = make("button", "00_Slide_อาจารย์ประจำคาบ", "gdrive-crumb");
-      folderCrumb.type = "button";
-      folderCrumb.addEventListener("click", () => {
-        state.lsDriveScope = "all";
-        syncFab();
-        renderSide();
-        renderCanvas();
-      });
+      rootCrumb.addEventListener("click", () => setSlideScopeAndSync("folders"));
 
-      const curCrumb = make("span", null, "gdrive-crumb-current");
-      curCrumb.innerHTML =
-        `<svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
-        `<span>${escapeHtml(scope === "all" ? "รวมครบทั้ง 6 คาบ (HS1–HS6)" : `คาบ ${curMod.code}: ${curMod.title}`)}</span>`;
+      if (scope === "folders") {
+        const curCrumb = make("span", null, "gdrive-crumb-current");
+        curCrumb.innerHTML =
+          `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
+          `<span>00_Slide_อาจารย์ประจำคาบ (HS1–HS6)</span>`;
+        crumbs.append(rootCrumb, make("span", "›", "gdrive-crumb-sep"), curCrumb);
+      } else {
+        const folderCrumb = make("button", "00_Slide_อาจารย์ประจำคาบ", "gdrive-crumb");
+        folderCrumb.type = "button";
+        folderCrumb.addEventListener("click", () => setSlideScopeAndSync("folders"));
 
-      crumbs.append(
-        rootCrumb,
-        make("span", "›", "gdrive-crumb-sep"),
-        folderCrumb,
-        make("span", "›", "gdrive-crumb-sep"),
-        curCrumb
-      );
+        const curCrumb = make("span", null, "gdrive-crumb-current");
+        curCrumb.innerHTML =
+          `<svg width="18" height="18" viewBox="0 0 24 24" fill="#5f6368" aria-hidden="true"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>` +
+          `<span>${escapeHtml(scope === "all" ? "รวมครบทั้ง 6 คาบ (HS1–HS6)" : `คาบ ${curMod.code}: ${curMod.title}`)}</span>`;
+
+        crumbs.append(
+          rootCrumb,
+          make("span", "›", "gdrive-crumb-sep"),
+          folderCrumb,
+          make("span", "›", "gdrive-crumb-sep"),
+          curCrumb
+        );
+      }
 
       const tbRight = make("div", null, "gdrive-toolbar-right");
       const viewToggle = make("div", null, "gdrive-view-toggle");
@@ -10984,42 +11380,92 @@
       // Filter Chips
       const chipsRow = make("div", null, "gdrive-chips-row");
       const filterChips = make("div", null, "gdrive-filter-chips");
-      [
+      const lsChipList = [
         {
-          active: scope === "module",
-          label: `🖥️ เฉพาะคาบ ${curMod.code}`,
-          onClick: () => {
-            state.lsDriveScope = "module";
-            syncFab();
-            renderSide();
-            renderCanvas();
-          }
-        },
-        {
-          active: scope === "all",
-          label: "📂 รวมครบทั้ง 6 คาบ (HS1–HS6)",
-          onClick: () => {
-            state.lsDriveScope = "all";
-            syncFab();
-            renderSide();
-            renderCanvas();
-          }
+          active: scope === "folders",
+          label: "📁 โฟลเดอร์ตามคาบ (HS1–HS6)",
+          onClick: () => setSlideScopeAndSync("folders")
         }
-      ].forEach((cd) => {
+      ];
+      if (scope === "module") {
+        lsChipList.push({
+          active: true,
+          label: `🖥️ ไฟล์ในคาบ ${curMod.code}`,
+          onClick: () => setSlideScopeAndSync("module")
+        });
+      }
+      lsChipList.push({
+        active: scope === "all",
+        label: "📂 รวมครบทั้ง 6 คาบ (HS1–HS6)",
+        onClick: () => setSlideScopeAndSync("all")
+      });
+      lsChipList.forEach((cd) => {
         const cb = make("button", `${cd.active ? "✓ " : ""}${cd.label}`, `gdrive-chip${cd.active ? " is-active" : ""}`);
         cb.type = "button";
         cb.addEventListener("click", cd.onClick);
         filterChips.appendChild(cb);
       });
-      chipsRow.appendChild(filterChips);
+      chipsRow.append(
+        filterChips,
+        make(
+          "span",
+          scope === "folders"
+            ? "คลิกเลือกโฟลเดอร์แต่ละคาบ (HS1–HS6) เพื่อดูสถานะไฟล์สไลด์อาจารย์"
+            : "คลิกปุ่มด้านล่างเพื่อกลับหน้ารวมโฟลเดอร์หรือเปิดเอกสารคำสอน",
+          "gdrive-folder-hint"
+        )
+      );
       canvas.appendChild(chipsRow);
+
+      // VIEW 1: HS1–HS6 Folders Root
+      if (scope === "folders") {
+        const matchedFolders = allModules.filter((m) => {
+          if (!q) return true;
+          const hay = `${m.code} ${m.title} ${m.enTitle || ""} ${m.scheduleDate || ""} ${getHsLecturerName(m.code)}`.toLocaleLowerCase("th");
+          return hay.includes(q);
+        });
+        if (!matchedFolders.length) {
+          canvas.appendChild(make("div", "ไม่พบโฟลเดอร์คาบบรรยายที่ตรงกับคำค้นหา", "empty-state"));
+          return;
+        }
+        const secHead = make("div", null, "gdrive-section-head");
+        secHead.appendChild(
+          make(
+            "span",
+            `โฟลเดอร์ Slide อาจารย์เรียงตามบทเรียน HS1–HS6 (${matchedFolders.length} โฟลเดอร์ · รออาจารย์ Upload)`,
+            "gdrive-section-label"
+          )
+        );
+        canvas.appendChild(secHead);
+        renderSlideFolderEntries(matchedFolders, isGrid);
+        return;
+      }
+
+      // VIEW 2 & 3: Inside an HS Folder or All
+      const secHead = make("div", null, "gdrive-section-head");
+      const secLeft = make("div", null, "gdrive-section-head-left");
+      const backBtn = make("button", "← กลับหน้ารวมโฟลเดอร์ (HS1–HS6)", "gdrive-back-folders-btn");
+      backBtn.type = "button";
+      backBtn.addEventListener("click", () => setSlideScopeAndSync("folders"));
+      secLeft.append(
+        backBtn,
+        make(
+          "span",
+          scope === "all"
+            ? "ไฟล์สไลด์บรรยายอาจารย์ครบทั้ง 6 คาบ (HS1–HS6)"
+            : `ไฟล์ในโฟลเดอร์ Slide อาจารย์คาบ ${curMod.code}: ${curMod.title}`,
+          "gdrive-section-label"
+        )
+      );
+      secHead.appendChild(secLeft);
+      canvas.appendChild(secHead);
 
       // Pending Upload Notice Callout
       const notice = make("div", null, "gdrive-pending-notice");
       notice.innerHTML =
         `<span class="gdrive-pending-notice-ico">⏳</span>` +
         `<div class="gdrive-pending-notice-copy">` +
-        `<strong>โฟลเดอร์ Slide อาจารย์ประจำคาบ ${escapeHtml(curMod.code)} (รออาจารย์ Upload)</strong>` +
+        `<strong>โฟลเดอร์ Slide อาจารย์ประจำคาบ ${escapeHtml(scope === "all" ? "HS1–HS6" : curMod.code)} (รออาจารย์ Upload)</strong>` +
         `<span>${
           ROLE === "faculty"
             ? `สำหรับวางไฟล์สไลด์ประกอบการบรรยายช่วงต้นคาบ (${escapeHtml(curMod.lectureTime || "1 ชม. แรก")}) โดย ${escapeHtml(curLecturer)} — เมื่อได้รับไฟล์ .pptx หรือ .pdf แล้วจะอัปเดตให้ดาวน์โหลดในโฟลเดอร์นี้ทันที`
@@ -11046,47 +11492,6 @@
           grid.appendChild(buildPendingSlideCard(m, scope === "module" && m.id === curMod.code));
         });
         canvas.appendChild(grid);
-
-        if (scope === "module" && !q) {
-          const otherMods = allModules.filter((m) => m.id !== curMod.code);
-          const otherHead = make("div", null, "gdrive-section-head");
-          otherHead.style.marginTop = "18px";
-          otherHead.appendChild(
-            make("span", "กำหนดการ Slide อาจารย์คาบอื่น ๆ ในหมวดระบบสุขภาพ (รออาจารย์ Upload)", "gdrive-section-label")
-          );
-          canvas.appendChild(otherHead);
-
-          const otherListWrap = make("div", null, "gdrive-list-wrap");
-          const tbl = document.createElement("table");
-          tbl.className = "gdrive-list-table";
-          tbl.innerHTML =
-            `<thead><tr>` +
-            `<th>คาบบรรยาย & ชื่อไฟล์</th>` +
-            `<th>อาจารย์ผู้บรรยาย</th>` +
-            `<th>วัน-เวลาบรรยาย</th>` +
-            `<th>สถานะไฟล์</th>` +
-            `</tr></thead>`;
-          const tb = document.createElement("tbody");
-          otherMods.forEach((om) => {
-            const trEl = document.createElement("tr");
-            trEl.className = "gdrive-list-row";
-            trEl.tabIndex = 0;
-            trEl.innerHTML =
-              `<td><div class="gdrive-list-name-cell"><span class="gdrive-filetype-ico is-pptx is-muted-pptx">P</span><div class="gdrive-list-name-copy"><span class="gdrive-list-fname">RACM303_คาบ_${escapeHtml(om.code)}_Slide_อาจารย์บรรยาย.pptx</span><span class="gdrive-list-fsub">${escapeHtml(om.code)}: ${escapeHtml(om.title)}</span></div></div></td>` +
-              `<td>${escapeHtml(getHsLecturerName(om.code))}</td>` +
-              `<td>${escapeHtml(formatHsShortDate(om.scheduleDate))} (${escapeHtml(om.lectureTime || "")})</td>` +
-              `<td><span class="gdrive-status-chip is-pending">⏳ รออาจารย์ Upload</span></td>`;
-            trEl.addEventListener("click", () => {
-              state.activeHsModule = om.id;
-              renderTextbookReader();
-              window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
-            });
-            tb.appendChild(trEl);
-          });
-          tbl.appendChild(tb);
-          otherListWrap.appendChild(tbl);
-          canvas.appendChild(otherListWrap);
-        }
       } else {
         const listWrap = make("div", null, "gdrive-list-wrap");
         const tbl = document.createElement("table");
@@ -11100,7 +11505,7 @@
           `<th>ทางลัดเตรียมเรียน</th>` +
           `</tr></thead>`;
         const tb = document.createElement("tbody");
-        const rowsPool = scope === "module" && !q ? allModules : matched;
+        const rowsPool = scope === "module" && !q ? [curMod] : matched;
         rowsPool.forEach((m) => {
           const isCur = m.id === curMod.code;
           const trEl = document.createElement("tr");
@@ -11134,6 +11539,30 @@
         listWrap.appendChild(tbl);
         canvas.appendChild(listWrap);
       }
+
+      // Quick Sibling Folders Strip at Bottom
+      const compStrip = make("div", null, "gdrive-companion-strip");
+      compStrip.appendChild(make("span", "สลับไปยังโฟลเดอร์ Slide อาจารย์คาบอื่น:", "gdrive-folder-hint"));
+      const compPills = make("div", null, "gdrive-companion-pills");
+      const rootPill = make("button", null, "gdrive-doc-pill");
+      rootPill.type = "button";
+      rootPill.innerHTML = `<span>←</span> <span>หน้ารวมโฟลเดอร์ HS1–HS6</span>`;
+      rootPill.addEventListener("click", () => setSlideScopeAndSync("folders"));
+      compPills.appendChild(rootPill);
+      allModules.forEach((m) => {
+        const fPill = make("button", null, `gdrive-doc-pill${scope === "module" && m.id === curMod.code ? " is-active-folder-pill" : ""}`);
+        fPill.type = "button";
+        fPill.innerHTML = `<span>📁</span> <span>${escapeHtml(m.code)}</span>`;
+        fPill.addEventListener("click", () => openSlideFolderForModule(m.id));
+        compPills.appendChild(fPill);
+      });
+      const allPill = make("button", null, `gdrive-doc-pill${scope === "all" ? " is-active-folder-pill" : ""}`);
+      allPill.type = "button";
+      allPill.innerHTML = `<span>📂</span> <span>เปิดดูรวมทุกบท (HS1–HS6)</span>`;
+      allPill.addEventListener("click", () => setSlideScopeAndSync("all"));
+      compPills.appendChild(allPill);
+      compStrip.appendChild(compPills);
+      canvas.appendChild(compStrip);
     }
 
     searchIn.addEventListener("input", () => {
@@ -11216,6 +11645,9 @@
     state.activeHsModule = baseMod;
 
     const subMode = state.textbookSubMode || "docs-drive";
+    const isDocsFoldersRoot = subMode === "docs-drive" && (state.tbDriveScope || "folders") === "folders";
+    const isSlidesFoldersRoot = subMode === "lecture-slides" && (state.lsDriveScope || "folders") === "folders";
+    const isFoldersRoot = isDocsFoldersRoot || isSlidesFoldersRoot;
     const bannerActiveFmt =
       subMode === "lecture-slides"
         ? "lecture-slides"
@@ -11227,6 +11659,18 @@
       bannerWrap.replaceChildren(
         buildUnifiedHsModuleBanner(baseMod, bannerActiveFmt, {
           showModuleBar: true,
+          allowAllModules: true,
+          isAllActive: isFoldersRoot,
+          keepFormatTabActiveWhenAll: true,
+          allModulesLabel: "📁 ทุกโฟลเดอร์ (HS1–HS6)",
+          allHeading:
+            subMode === "lecture-slides"
+              ? "HS1–HS6: โฟลเดอร์ Slide อาจารย์ประจำคาบ (เลือกบทเรียนก่อนเปิดดูไฟล์)"
+              : "HS1–HS6: โฟลเดอร์เอกสารคำสอนระบบสุขภาพ (เลือกบทเรียนก่อนเปิดดูไฟล์)",
+          allDesc:
+            subMode === "lecture-slides"
+              ? "เรียงตามบทเรียน HS1–HS6 — คลิกเลือกโฟลเดอร์แต่ละ HS ด้านล่างเพื่อดูไฟล์สไลด์อาจารย์ประจำคาบ"
+              : "เรียงตามบทเรียน HS1–HS6 — คลิกเลือกโฟลเดอร์แต่ละ HS ด้านล่างเพื่อดูไฟล์เอกสารคำสอน ฉบับย่อ ฉบับเต็ม และดาวน์โหลด PDF / Word",
           onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
         })
       );
@@ -11269,10 +11713,15 @@
     // Populate Top Drive File Switcher Bar inside Reader
     if (readerBar) {
       readerBar.replaceChildren();
-      const backDriveBtn = make("button", `📁 ← กลับโฟลเดอร์เอกสารคำสอน (${baseMod})`, "btn sm");
+      const backGroup = make("div", null, "tb-drive-file-pills");
+      const backAllBtn = make("button", "📂 โฟลเดอร์ HS1–HS6", "btn sm");
+      backAllBtn.type = "button";
+      backAllBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+      const backDriveBtn = make("button", `📁 ← กลับโฟลเดอร์ ${baseMod}`, "btn sm");
       backDriveBtn.type = "button";
       backDriveBtn.addEventListener("click", () => openTextbookDriveFolder(baseMod));
-      readerBar.appendChild(backDriveBtn);
+      backGroup.append(backAllBtn, backDriveBtn);
+      readerBar.appendChild(backGroup);
 
       const fileSwitchGroup = make("div", null, "tb-drive-file-pills");
       fileSwitchGroup.appendChild(make("span", `ไฟล์ในโฟลเดอร์ ${baseMod}:`, "tb-drive-file-label"));
@@ -11296,8 +11745,15 @@
       sidebarLabel.textContent = `ไฟล์ในโฟลเดอร์ ${baseMod} (Google Drive)`;
     }
     picker.replaceChildren();
+    const backRootLi = document.createElement("li");
+    const backRootSideBtn = make("button", "📂 หน้ารวมโฟลเดอร์ HS1–HS6", "doc-picker-btn");
+    backRootSideBtn.type = "button";
+    backRootSideBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+    backRootLi.appendChild(backRootSideBtn);
+    picker.appendChild(backRootLi);
+
     const backLi = document.createElement("li");
-    const backSideBtn = make("button", `📁 เปิดโฟลเดอร์รวม ${baseMod} (Drive)`, "doc-picker-btn");
+    const backSideBtn = make("button", `📁 โฟลเดอร์คาบ ${baseMod} (Drive)`, "doc-picker-btn");
     backSideBtn.type = "button";
     backSideBtn.addEventListener("click", () => openTextbookDriveFolder(baseMod));
     backLi.appendChild(backSideBtn);
