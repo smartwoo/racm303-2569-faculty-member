@@ -3,6 +3,79 @@
 
   const STORAGE_KEY = "racm303_iq_answers_v1";
   const GEMINI_KEY_STORAGE = "racm303_gemini_api_key_v1";
+  const GEMINI_PROFILE_STORAGE = "racm303_gemini_profile_v1";
+
+  /* ---------- Gemini 4 Model Profiles (Nov 2026 Official API Spec) ---------- */
+  const GEMINI_PROFILES = {
+    neon_xhigh: {
+      id: "neon_xhigh",
+      model: "gemini-4-neon",
+      thinkingLevel: "XHIGH",
+      maxOutputTokens: 16384,
+      timeoutMs: 55000,
+      badge: "Gemini 4 Neon · Extra High",
+      desc: "ฉลาดสูงสุด (xhigh · Paid Key / สลับเป็น Hydrogen อัตโนมัติหากเป็น Free Key)",
+      isGemini4: true,
+    },
+    neon_high: {
+      id: "neon_high",
+      model: "gemini-4-neon",
+      thinkingLevel: "HIGH",
+      maxOutputTokens: 10240,
+      timeoutMs: 35000,
+      badge: "Gemini 4 Neon · High",
+      desc: "ฉลาดระดับแนวหน้าและตอบเร็วขึ้น (Paid Key)",
+      isGemini4: true,
+    },
+    hydrogen_xhigh: {
+      id: "hydrogen_xhigh",
+      model: "gemini-4-hydrogen",
+      thinkingLevel: "XHIGH",
+      maxOutputTokens: 16384,
+      timeoutMs: 45000,
+      badge: "Gemini 4 Hydrogen · Extra High",
+      desc: "ฉลาดมาก (xhigh · รองรับทั้ง Free และ Paid Key)",
+      isGemini4: true,
+    },
+    hydrogen_high: {
+      id: "hydrogen_high",
+      model: "gemini-4-hydrogen",
+      thinkingLevel: "HIGH",
+      maxOutputTokens: 10240,
+      timeoutMs: 30000,
+      badge: "Gemini 4 Hydrogen · High",
+      desc: "เร็ว ประหยัด แม่นยำ (รองรับทั้ง Free และ Paid Key)",
+      isGemini4: true,
+    },
+    carbon_high: {
+      id: "carbon_high",
+      model: "gemini-4-carbon",
+      thinkingLevel: "HIGH",
+      maxOutputTokens: 12288,
+      timeoutMs: 55000,
+      badge: "Gemini 4 Carbon · High",
+      desc: "วิเคราะห์เชิงลึกสูงสุด (Paid Key)",
+      isGemini4: true,
+    },
+  };
+
+  const FALLBACK_CHAIN = {
+    neon_xhigh: ["neon_xhigh", "neon_high", "hydrogen_xhigh", "hydrogen_high", "flash_38"],
+    neon_high: ["neon_high", "hydrogen_high", "flash_38"],
+    hydrogen_xhigh: ["hydrogen_xhigh", "hydrogen_high", "flash_38"],
+    hydrogen_high: ["hydrogen_high", "flash_38"],
+    carbon_high: ["carbon_high", "neon_high", "hydrogen_high", "flash_38"],
+  };
+
+  const LEGACY_FALLBACK_PROFILE = {
+    id: "flash_38",
+    model: "gemini-3.8-flash",
+    thinkingLevel: "MEDIUM",
+    maxOutputTokens: 6144,
+    timeoutMs: 25000,
+    badge: "Gemini 3.8 Flash",
+    isGemini4: false,
+  };
 
   function loadStore() {
     try {
@@ -40,8 +113,29 @@
     }
   }
 
+  function getGeminiProfileId() {
+    try {
+      const p = (localStorage.getItem(GEMINI_PROFILE_STORAGE) || "").trim();
+      return GEMINI_PROFILES[p] ? p : "neon_xhigh";
+    } catch (_) {
+      return "neon_xhigh";
+    }
+  }
+
+  function setGeminiProfileId(id) {
+    try {
+      if (GEMINI_PROFILES[id]) localStorage.setItem(GEMINI_PROFILE_STORAGE, id);
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
   function getRubrics() {
     return (window.RACM_HS_DATA && window.RACM_HS_DATA.interactiveRubrics) || {};
+  }
+
+  function getDocs() {
+    return (window.RACM_HS_DATA && window.RACM_HS_DATA.docs) || [];
   }
 
   function escapeHtml(s) {
@@ -52,14 +146,756 @@
       .replace(/"/g, "&quot;");
   }
 
+  /** Safely render plain text with lightweight **bold**, *italic*, and `code` markdown while escaping HTML. */
+  function formatSafeRichText(s) {
+    let out = escapeHtml(s);
+    out = out.replace(/\*\*([^*\n]{1,180})\*\*/g, "<strong>$1</strong>");
+    out = out.replace(/`([^`\n]{1,120})`/g, "<code>$1</code>");
+    out = out.replace(/(^|[\s(])\*([^*\n]{2,120})\*(?=[\s).,;:]|$)/g, "$1<em>$2</em>");
+    return out;
+  }
+
   function stripTags(html) {
     return String(html || "")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  /* ---------- Normalization & Domain Concept Extraction for Diagnostic Rubric Feedback ---------- */
+  function clipText(s, maxLen) {
+    const clean = String(s || "").replace(/\s+/g, " ").trim();
+    if (clean.length <= maxLen) return clean;
+    return clean.slice(0, maxLen).replace(/\s+\S*$/, "") + "…";
+  }
+
+  /* ==========================================================================
+   * LAYER 1: TEACHING-MATERIAL GROUNDING ENGINE (ยึดโยงเนื้อหาประกอบคำสอน HS1–HS6)
+   * ========================================================================== */
+  const docSectionsCache = new Map();
+
+  function parseDocSections(doc) {
+    if (!doc || !doc.html) return [];
+    if (docSectionsCache.has(doc.id)) return docSectionsCache.get(doc.id);
+
+    const html = doc.html;
+    const headingRe = /<h([1-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+    const heads = [];
+    let m;
+    while ((m = headingRe.exec(html)) !== null) {
+      heads.push({
+        level: Number(m[1]),
+        title: stripTags(m[2]),
+        start: m.index,
+        bodyStart: m.index + m[0].length,
+      });
+    }
+
+    const sections = [];
+    for (let i = 0; i < heads.length; i++) {
+      const h = heads[i];
+      const end = i + 1 < heads.length ? heads[i + 1].start : html.length;
+      const bodyHtml = html.slice(h.bodyStart, end);
+      // Skip archive/bulk answer sections when searching teaching prose
+      if (/เฉลยท้ายเล่ม|แนวคำตอบ|เอกสารอ้างอิง/.test(h.title)) continue;
+      // Extract clean instructional prose (strip interactive question widgets/tables if huge)
+      const prosePlain = stripTags(bodyHtml);
+      const numMatch = h.title.match(/^(\d+(?:\.\d+)*)\b/);
+      sections.push({
+        level: h.level,
+        num: numMatch ? numMatch[1] : "",
+        title: h.title,
+        start: h.start,
+        end,
+        plain: prosePlain,
+      });
+    }
+
+    docSectionsCache.set(doc.id, sections);
+    return sections;
+  }
+
+  function getCompanionTextbookDoc(docId) {
+    const docs = getDocs();
+    const baseMatch = String(docId || "").match(/^(HS[1-6])/i);
+    if (!baseMatch) return null;
+    const baseId = baseMatch[1].toUpperCase();
+    return docs.find((d) => d.id === baseId) || null;
+  }
+
+  function scoreOverlap(queryText, candidateText) {
+    if (!queryText || !candidateText) return 0;
+    const qLow = queryText.toLowerCase();
+    const cLow = candidateText.toLowerCase();
+    let score = 0;
+
+    // English words (length >= 3)
+    const enWords = [...new Set((qLow.match(/[a-z][a-z0-9\-]{2,}/g) || []))];
+    for (const w of enWords) {
+      if (cLow.includes(w)) score += 3;
+    }
+
+    // Thai 4-char shingles from meaningful Thai runs
+    const thRuns = qLow.match(/[ก-๙]{4,}/g) || [];
+    const seen = new Set();
+    for (const run of thRuns) {
+      const step = run.length > 10 ? 3 : 2;
+      for (let i = 0; i <= run.length - 4; i += step) {
+        const g = run.slice(i, i + 4);
+        if (seen.has(g)) continue;
+        seen.add(g);
+        if (cLow.includes(g)) score += 1;
+      }
+    }
+    return score;
+  }
+
+  const rubricContextCache = new Map();
+
+  function extractTeachingContext(rubric) {
+    if (rubric && rubric.id && rubricContextCache.has(rubric.id)) {
+      return rubricContextCache.get(rubric.id);
+    }
+    const docs = getDocs();
+    const docId = (rubric && rubric.docId) || "";
+    const moduleMatch = String(docId).match(/^(HS[1-6])/i);
+    const moduleCode = moduleMatch ? moduleMatch[1].toUpperCase() : "";
+    const curDoc = docs.find((d) => d.id === docId) || getCompanionTextbookDoc(docId);
+    const companionDoc = getCompanionTextbookDoc(docId);
+
+    let headingPath = (rubric && rubric.sectionTitle) || "";
+    let caseVignette = "";
+    let followingProse = "";
+    let companionHeading = "";
+    let companionExcerpt = "";
+
+    // 1. Locate exact element position inside curDoc.html
+    if (curDoc && curDoc.html && rubric && rubric.id) {
+      const html = curDoc.html;
+      let pos = html.indexOf(`"${rubric.id}"`);
+      if (pos < 0 && rubric.prompt) {
+        const probe = rubric.prompt.trim().slice(0, 36);
+        if (probe.length >= 12) pos = html.indexOf(probe);
+      }
+
+      if (pos >= 0) {
+        // Find nearest preceding headings (h2, h3, h4)
+        const beforeHtml = html.slice(Math.max(0, pos - 9000), pos);
+        const hRe = /<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+        const foundHeads = [];
+        let hm;
+        while ((hm = hRe.exec(beforeHtml)) !== null) {
+          foundHeads.push({ level: Number(hm[1]), title: stripTags(hm[2]), relEnd: hm.index + hm[0].length });
+        }
+
+        if (foundHeads.length > 0) {
+          const stack = [];
+          for (const fh of foundHeads) {
+            while (stack.length && stack[stack.length - 1].level >= fh.level) stack.pop();
+            stack.push(fh);
+          }
+          const builtPath = stack.map((x) => x.title).filter(Boolean).join(" › ");
+          if (builtPath && (!headingPath || headingPath.length < 18)) {
+            headingPath = builtPath;
+          }
+          const lastHead = foundHeads[foundHeads.length - 1];
+          const prevSectionHead = foundHeads.length >= 2 ? foundHeads[foundHeads.length - 2] : lastHead;
+          const sliceStart = Math.max(0, prevSectionHead.relEnd);
+          const rawBefore = beforeHtml.slice(sliceStart);
+          const cleanBefore = stripTags(rawBefore.replace(/<ol\b[^>]*>[\s\S]*?<\/ol>/gi, " "));
+          if (cleanBefore.length >= 25) {
+            caseVignette = clipText(cleanBefore, 1400);
+          }
+        }
+
+        // Following teaching prose
+        const afterHtml = html.slice(pos, Math.min(html.length, pos + 3600));
+        const tagEnd = afterHtml.search(/<\/(?:blockquote|li|p|table|ul)>/i);
+        if (tagEnd > 0) {
+          let afterSlice = afterHtml.slice(tagEnd);
+          const nextMajorHead = afterSlice.search(/<h[1-3]\b/i);
+          if (nextMajorHead > 80) afterSlice = afterSlice.slice(0, nextMajorHead);
+          const proseOnly = afterSlice
+            .replace(/<blockquote[^>]*data-qa-id=[\s\S]*?<\/blockquote>/gi, " ")
+            .replace(/<details\b[\s\S]*?<\/details>/gi, " ");
+          const plainAfter = stripTags(proseOnly);
+          if (plainAfter.length >= 40) {
+            followingProse = clipText(plainAfter, 1100);
+          }
+        }
+      }
+    }
+
+    // 2. Locate exact matching section inside companion full textbook (HS1..HS6)
+    if (companionDoc) {
+      const sections = parseDocSections(companionDoc);
+      const searchHint = `${(rubric && rubric.prompt) || ""} ${headingPath} ${stripTags((rubric && rubric.answerHtml) || "")}`;
+      const secNumMatches = [...searchHint.matchAll(/หัวข้อ(?:ย่อย)?(?:ที่)?\s*(\d+(?:\.\d+)*)/g)].map((x) => x[1]);
+      let bestSec = null;
+
+      for (const targetNum of secNumMatches) {
+        bestSec = sections.find((s) => s.num === targetNum);
+        if (bestSec) break;
+      }
+      if (!bestSec && secNumMatches.length > 0) {
+        const prefix = secNumMatches[0] + ".";
+        bestSec = sections.find((s) => s.num && s.num.startsWith(prefix));
+      }
+
+      if (!bestSec && sections.length > 0) {
+        const query = `${(rubric && rubric.prompt) || ""} ${stripTags((rubric && rubric.answerHtml) || "")} ${headingPath}`;
+        let topScore = 0;
+        for (const s of sections) {
+          if (s.plain.length < 80) continue;
+          const sc = scoreOverlap(query, `${s.title} ${s.plain.slice(0, 1400)}`);
+          if (sc > topScore) {
+            topScore = sc;
+            bestSec = s;
+          }
+        }
+        if (topScore < 4) bestSec = null;
+      }
+
+      if (bestSec) {
+        companionHeading = bestSec.title;
+        companionExcerpt = clipText(bestSec.plain, 1500);
+      }
+    }
+
+    // Clean crisp grounding label without nested clipped parentheses
+    const cleanHeading = headingPath.replace(/\s*\([^)]*เชื่อมโยง[^)]*\)\s*$/g, "").trim();
+    const shortCompanion = companionHeading
+      ? clipText(companionHeading.replace(/\s*\([^)]+\)\s*$/, ""), 82)
+      : "";
+    const shortHeading = cleanHeading ? clipText(cleanHeading, 78) : "";
+
+    let groundingLabel = "";
+    if (docId && docId.includes("-WB")) {
+      groundingLabel = shortCompanion
+        ? `${docId}${shortHeading ? ` · ${shortHeading}` : ""} — อ้างอิง ${moduleCode} หัวข้อ ${shortCompanion}`
+        : `${docId}${shortHeading ? ` · ${shortHeading}` : ""}`;
+    } else if (shortCompanion) {
+      groundingLabel = `${moduleCode || docId} · ${shortCompanion}`;
+    } else if (shortHeading) {
+      groundingLabel = `${docId || moduleCode} · ${shortHeading}`;
+    } else {
+      groundingLabel = `${docId || "RACM 303"} · เอกสารประกอบการสอนระบบสุขภาพ`;
+    }
+
+    const teachingExcerptParts = [];
+    if (caseVignette) teachingExcerptParts.push(`[สถานการณ์/บริบทหน้าโจทย์] ${caseVignette}`);
+    if (companionExcerpt) teachingExcerptParts.push(`[เนื้อหาประกอบคำสอน ${moduleCode} ${companionHeading}] ${companionExcerpt}`);
+    else if (followingProse) teachingExcerptParts.push(`[เนื้อหาประกอบคำสอนในบท] ${followingProse}`);
+
+    const result = {
+      moduleCode,
+      docId,
+      headingPath,
+      caseVignette,
+      followingProse,
+      companionHeading,
+      companionExcerpt,
+      teachingExcerpt: teachingExcerptParts.join("\n\n"),
+      groundingLabel,
+    };
+    if (rubric && rubric.id) rubricContextCache.set(rubric.id, result);
+    return result;
+  }
+
+  /* ==========================================================================
+   * LAYER 2: INPUT QUALITY, GIBBERISH, KEYBOARD-MASH & OFF-TOPIC DETECTOR
+   * ========================================================================== */
+
+  // Valid medical / health-systems English acronyms & short words that must NEVER trigger gibberish
+  const VALID_MEDICAL_EN_WORDS = new Set([
+    "who", "phc", "pc", "uhc", "ucs", "sss", "csmbs", "drg", "drgs", "adjrw", "ffs", "sid",
+    "che", "oop", "imc", "ltc", "ccm", "iccc", "acp", "ods", "cas", "step", "comb", "com-b",
+    "bcw", "hta", "eqesarr", "4cs", "6w", "sdh", "sdhs", "sdoh", "daly", "qaly", "ncd", "ncds",
+    "opd", "ipd", "er", "ems", "kpi", "nhso", "moph", "pcu", "rph", "psa", "bp", "dm", "ht",
+    "copd", "cva", "mi", "tb", "hiv", "bmi", "hba1c", "gfr", "egfr", "ldl", "hdl", "cbc", "lft",
+    "ecg", "ekg", "ct", "mri", "xray", "x-ray", "csdh", "wonca", "mindspace", "nudge", "ottawa",
+    "starfield", "bircher", "huber", "eisenberg", "boorse", "nordenfelt", "donabedian", "bishai",
+    "diderichsen", "tudor", "hart", "kahneman", "thaler", "green", "leonardi", "solar", "irwin",
+    "disease", "illness", "sickness", "health", "wellness", "well-being", "wellbeing", "healthy",
+    "primary", "secondary", "tertiary", "quaternary", "primordial", "prevention", "equity",
+    "equality", "quality", "safety", "efficiency", "effectiveness", "governance", "resilience",
+    "accountability", "relevance", "stewardship", "continuity", "comprehensiveness", "coordination",
+    "contact", "first", "acute", "chronic", "palliative", "hospice", "ambulatory", "emergency",
+    "triage", "reablement", "step-down", "step-up", "barthel", "telemedicine", "prepayment",
+    "pooling", "capitation", "budget", "global", "upcoding", "treadmill", "moral", "hazard",
+    "adverse", "selection", "cream", "skimming", "gatekeeping", "co-payment", "copayment",
+    "system", "policy", "intent", "value-free", "value-laden", "holistic", "biomedical",
+    "adapt", "self-manage", "potential", "demands", "ageing", "aging", "intrinsic", "capacity",
+    "functional", "ability", "structural", "intermediary", "determinants", "inequity", "inequality",
+    "false", "positive", "negative", "overdiagnosis", "overmedicalization", "shared", "decision",
+    "decision-making", "screening", "vaccine", "smoking", "literacy", "teach-back", "capability",
+    "opportunity", "motivation", "behaviour", "behavior", "upstream", "downstream", "yes", "no",
+    "true", "false", "high", "low", "not", "for", "profit", "public", "private", "patient",
+    "doctor", "physician", "care", "medical", "clinical", "community", "hospital", "clinic",
+    "social", "mental", "physical", "spiritual", "complete", "absence", "risk", "factor", "factors",
+    "input", "process", "output", "outcome", "impact", "feedback", "context", "building", "blocks",
+    "triple", "quadruple", "quintuple", "aim", "burnout", "inverse", "law", "swiss", "cheese",
+    "near", "miss", "catastrophic", "impoverishment", "opportunity", "cost", "technical",
+    "productive", "allocative", "absorptive", "adaptive", "transformative", "alma-ata", "astana",
+    "mandatory", "voluntary", "insurance", "coverage", "effective", "need", "use",
+    "the", "and", "but", "with", "from", "that", "this", "because", "therefore", "however",
+    "different", "same", "group", "person", "people", "work", "working", "child", "mother",
+    "elderly", "family", "income", "education", "environment", "water", "sanitation", "rural",
+    "urban", "access", "cost", "time", "wait", "distance", "home", "life", "good", "bad", "more",
+    "less", "only", "both", "all", "none", "can", "cannot", "may", "should", "must", "need",
+  ]);
+
+  // Common Thai words & morphemes to verify genuine Thai language vs keyboard mash / random consonants
+  const COMMON_THAI_MORPHEMES = [
+    "การ", "ความ", "ไม่", "มี", "เป็น", "ของ", "ที่", "ใน", "จาก", "และ", "หรือ", "แต่",
+    "เพราะ", "จึง", "ได้", "ต้อง", "ให้", "ผู้", "คน", "โรค", "ป่วย", "แพทย์", "หมอ",
+    "ระบบ", "สุขภาพ", "บริการ", "บุคคล", "ใช่", "ข้อ", "ระดับ", "ปัจจัย", "นโยบาย",
+    "สังคม", "ร่างกาย", "รู้สึก", "ตรวจ", "รักษา", "ป้องกัน", "ดูแล", "จ่าย", "เงิน",
+    "สิทธิ", "ชุมชน", "งาน", "ชีวิต", "ดี", "แย่", "มาก", "น้อย", "สูง", "ต่ำ", "ต่าง",
+    "เหมือน", "กลุ่ม", "เดียว", "กัน", "กันหรือ", "แยก", "มิติ", "นิยาม", "สมบูรณ์",
+    "ปรับตัว", "จัดการ", "ศักยภาพ", "ท้าทาย", "ไม้เท้า", "ต้นน้ำ", "ปลายน้ำ", "โครงสร้าง",
+    "ความเหลื่อมล้ำ", "เป็นธรรม", "เท่าเทียม", "คุณภาพ", "ปลอดภัย", "ประสิทธิผล",
+    "ประสิทธิภาพ", "ธรรมาภิบาล", "พฤติกรรม", "สุขภาวะ", "จิตใจ", "อารมณ์", "กังวล",
+    "เครียด", "นอน", "หลับ", "อ่อนเพลีย", "ปวด", "ร้อน", "วูบวาบ", "ไข้", "หวัด",
+    "เบาหวาน", "ความดัน", "มะเร็ง", "หลอดเลือด", "สมอง", "หัวใจ", "ฟื้นฟู", "พิการ",
+    "ฉุกเฉิน", "เฉียบพลัน", "ระยะกลาง", "เรื้อรัง", "ระยะยาว", "ประคับประคอง", "ผู้สูงอายุ",
+    "เด็ก", "มารดา", "แม่", "ลูก", "ครอบครัว", "แรงงาน", "น้ำ", "สะอาด", "สุขาภิบาล",
+    "วัคซีน", "บุหรี่", "คัดกรอง", "ใบรับรอง", "วินิจฉัย", "อาการ", "ผลเลือด", "ปกติ",
+    "ผิดปกติ", "รับฟัง", "อธิบาย", "ตัดสินใจ", "ร่วมกัน", "เจตนา", "หลัก", "องค์กร",
+    "รัฐ", "เอกชน", "มูลนิธิ", "โรงพยาบาล", "คลินิก", "ปฐมภูมิ", "ทุติยภูมิ", "ตติยภูมิ",
+    "จตุรภูมิ", "บัตรทอง", "ประกัน", "กองทุน", "งบ", "ค่าใช้จ่าย", "คุ้มครอง", "ยากจน",
+    "เสี่ยง", "เฉลี่ย", "รวม", "ล่วงหน้า", "สมัครใจ", "บังคับ", "เหมา", "รายหัว",
+    "ต่อ", "ตาม", "เช่น", "คือ", "ว่า", "กับ", "โดย", "เพื่อ", "เมื่อ", "หาก", "ถ้า",
+    "จะ", "อาจ", "ควร", "ยัง", "แล้ว", "อยู่", "ไป", "มา", "ทำ", "ใช้", "ช่วย", "ลด",
+    "เพิ่ม", "เกิด", "ส่งผล", "ทำให", "เนื่องจาก", "ดังนั้น", "กล่าวคือ", "ขณะ", "ส่วน",
+    "แรก", "สอง", "สาม", "สี่", "ห้า", "หก", "ครึ่ง", "ร้อยละ", "ประเทศ", "จังหวัด",
+    "อำเภอ", "ตำบล", "บ้าน", "เรียน", "สอบ", "ลา", "ถาม", "ตอบ", "เหตุผล", "ตัวอย่าง",
+    "กรณี", "สถานการณ์", "ข้อมูล", "หลักฐาน", "วิจัย", "เปลี่ยน", "พัฒนา", "สร้าง",
+    "เสริม", "แก้", "ปัญหา", "โอกาส", "เข้าถึง", "เวลา", "ระยะทาง", "เดินทาง", "รอ",
+    "ยา", "เตียง", "ทีม", "ผู้ดูแล", "ญาติ", "เพื่อน", "วัฒนธรรม", "ความเชื่อ", "มอง",
+    "คิด", "เห็น", "เข้าใจ", "ประเมิน", "วัด", "เกณฑ์", "ขอบเขต", "เป้าหมาย", "หน้าที่",
+    "ผลผลิต", "ผลลัพธ์", "ผลกระทบ", "สะท้อน", "ซับซ้อน", "ยืดหยุ่น", "วิกฤต", "ด่านแรก",
+    "ต่อเนื่อง", "ครอบคลุม", "ประสาน", "ส่งต่อ", "คลัง", "กำลังคน", "สารสนเทศ", "อภิบาล",
+    "ตรวจสอบ", "ชี้แจง", "บริบท", "คล้าย", "ตรงข้าม", "สัมพันธ์", "เชื่อมโยง", "กระทบ",
+    "เสียชีวิต", "ตาย", "รอด", "หาย", "เกิน", "จำเป็น", "ลวง", "บวก", "ลบ", "พลาด",
+    "ถูกต้อง", "คลาดเคลื่อน", "ผิด", "จริง", "เท็จ", "ไม่จริง", "ไม่ใช่", "ไม่มี", "ไม่ได้",
+  ];
+
+  // Comprehensive Health Systems & Medical domain lexicon for off-topic check (avoiding 2-char Thai substrings that collide with everyday words like ยา/อยาก, งบ/สงบ, เดิน/เดินทางเที่ยว)
+  const DOMAIN_LEXICON_TOKENS = [
+    "สุขภาพ", "โรค", "ป่วย", "เจ็บป่วย", "อาการ", "แพทย์", "หมอ", "พยาบาล", "คนไข้", "ผู้ป่วย",
+    "ผู้รับบริการ", "รักษา", "ตรวจ", "ป้องกัน", "รับประทานยา", "ใช้ยา", "กินยา", "จ่ายยา", "สั่งยา", "ขาดยา", "บัญชียา", "คลังยา",
+    "โรงพยาบาล", "คลินิก", "รพ.", "รพ.สต.",
+    "ปฐมภูมิ", "ทุติยภูมิ", "ตติยภูมิ", "จตุรภูมิ", "ระบบ", "บริการ", "นโยบาย", "สังคม", "ชุมชน",
+    "สิ่งแวดล้อม", "เศรษฐกิจ", "รายได้", "ฐานะ", "เหลื่อมล้ำ", "เป็นธรรม", "เท่าเทียม", "สิทธิ",
+    "ประกัน", "บัตรทอง", "กองทุน", "จ่ายเงิน", "งบประมาณ", "งบปลาย", "ค่าใช้จ่าย", "ค่ารักษา", "คุ้มครอง", "คุณภาพ",
+    "ปลอดภัย", "ประสิทธิผล", "ประสิทธิภาพ", "ธรรมาภิบาล", "พฤติกรรม", "สุขภาวะ", "ชีวิต",
+    "ร่างกาย", "จิตใจ", "มิติทางจิต", "ปัญญา", "กังวล", "นอนไม่หลับ", "อ่อนเพลีย", "ร้อนวูบวาบ", "ไข้หวัด", "เป็นไข้",
+    "เบาหวาน", "ความดัน", "มะเร็ง", "หลอดเลือด", "สมอง", "หัวใจ", "ฟื้นฟู", "พิการ", "ฉุกเฉิน",
+    "เฉียบพลัน", "ระยะกลาง", "เรื้อรัง", "ระยะยาว", "ประคับประคอง", "ผู้สูงอายุ", "เด็กเล็ก", "มารดา", "แม่และเด็ก",
+    "ครอบครัว", "แรงงาน", "สภาพการทำงาน", "น้ำสะอาด", "น้ำประปา", "สุขาภิบาล", "วัคซีน", "บุหรี่",
+    "คัดกรอง", "ใบรับรอง", "วินิจฉัย", "บุคคล", "กลุ่มเดียวกัน", "ต่างกลุ่ม", "คนละกลุ่ม",
+    "แยกจากกัน", "มิติ", "นิยาม", "สมบูรณ์", "ปรับตัว", "จัดการตนเอง", "ศักยภาพ", "ความท้าทาย",
+    "ไม้เท้า", "ต้นน้ำ", "ปลายน้ำ", "ปัจจัย", "เจตนา", "พ.ร.บ.", "องค์กร", "อสม.", "สาธารณสุข",
+    "กระทรวง", "ท้องถิ่น", "อนามัย", "คลอด", "โภชนาการ", "สูบบุหรี่", "เลิกบุหรี่", "สุรา", "ออกกำลัง", "น้ำหนัก",
+    "ผลตรวจ", "ผลเลือด", "ไขมัน", "พอกตับ", "ขาดสอบ", "ลาป่วย", "หมดประจำเดือน", "วัฒนธรรม",
+    "ผลบวกลวง", "ผลลบลวง", "เกินจำเป็น", "ตัดสินใจ", "รับฟัง", "ทางไกล", "ส่งต่อ", "ด่านแรก",
+    "ต่อเนื่อง", "ครอบคลุม", "ประสาน", "เหมาจ่าย", "รายหัว", "ตามรายการ", "ร่วมจ่าย", "ความเสี่ยง", "กลุ่มเสี่ยง",
+    "เฉลี่ย", "รวมกองทุน", "ล่วงหน้า", "สมัครใจ", "ภาคบังคับ", "ข้าราชการ", "มอร์ฟีน", "บาร์เธล",
+    "1669", "คัดแยก", "หมดไฟ", "ค่าเสียโอกาส", "เนยแข็ง", "รูรั่ว", "เกือบพลาด", "ยืดหยุ่น",
+    "ออตตาวา", "สะกิด", "อัตโนมัติ", "ไตร่ตรอง", "รอบรู้", "ความสามารถ", "แรงจูงใจ",
+    "อัลมา", "อัสตานา", "ข้อเข่า", "อาสาสมัคร", "ดูแล", "ผู้ดูแล", "พึ่งพิง", "เตียง",
+    "คลาดเคลื่อน", "ไม่ถูกต้อง",
+    "health", "disease", "illness", "sickness", "medical", "doctor", "patient", "care", "system",
+    "policy", "equity", "equality", "quality", "safety", "primary", "secondary", "tertiary",
+    "quaternary", "primordial", "prevention", "insurance", "finance", "behavior", "behaviour",
+    "community", "hospital", "clinic", "who", "phc", "pc", "uhc", "ucs", "sss", "csmbs",
+    "drg", "ffs", "capitation", "nudge", "comb", "com-b", "bcw", "ottawa", "starfield", "4cs",
+    "6w", "step", "eqesarr", "imc", "ltc", "ccm", "iccc", "acp", "ods", "cas", "che", "oop",
+    "sid", "psa", "bircher", "huber", "bishai", "diderichsen", "donabedian", "csdh", "wellness",
+    "well-being", "false positive", "false negative", "overdiagnosis", "shared decision",
+    "telemedicine", "barthel", "triage", "palliative", "hospice", "resilience", "governance",
+    "accountability", "relevance", "efficiency", "effectiveness", "hta", "gatekeeping",
+  ];
+
+  // Placeholder / test / give-up exact phrases (pure digits handled separately as numeric_noise gibberish)
+  const PLACEHOLDER_TEST_EXACT = new Set([
+    "test", "testing", "test1", "test123", "tes", "tset", "asdf", "asdfg", "asdfgh", "qwer",
+    "qwerty", "zxcv", "zxcvb", "abc", "abcd", "abcdef", "xyz", "aaa", "aaaa", "xxx", "xxxx",
+    "haha", "hahaha", "lol", "lmao", "ok", "okay", "k", "hi", "hello", "hey", "yo",
+    "none", "na", "n/a", "null", "nil", "blank", "empty", "skip", "pass", "next", "blah",
+    "ทดสอบ", "ทดลอง", "ลองส่ง", "ลองดู", "ลองตอบ", "ลองพิมพ์", "เทส", "เทสต์", "โอเค",
+    "ครับ", "ค่ะ", "คะ", "จ้า", "จ๊ะ", "น้า", "เย้", "อิอิ", "หึหึ", "ฮ่าๆ", "ฮ่าๆๆ", "555+",
+    "ข้าม", "ผ่าน", "ไม่มีอะไร", "ว่าง", "สวัสดี", "หวัดดี", "ดีครับ", "ดีค่ะ",
+  ]);
+
+  const HONEST_UNSURE_EXACT = new Set([
+    "ไม่รู้", "ไม่รู้ครับ", "ไม่รู้ค่ะ", "ไม่รู้เลย", "ไม่ทราบ", "ไม่ทราบครับ", "ไม่ทราบค่ะ",
+    "ไม่แน่ใจ", "ไม่แน่ใจครับ", "ไม่แน่ใจค่ะ", "ตอบไม่ได้", "คิดไม่ออก", "นึกไม่ออก",
+    "จำไม่ได้", "งง", "งงมาก", "ไม่เข้าใจ", "ยังไม่เข้าใจ", "ยังตอบไม่ได้", "ขอคิดก่อน",
+    "idk", "dunno", "no idea", "i don't know", "i dont know", "not sure", "unsure", "confused",
+  ]);
+
+  // Standard Thai Kedmanee EN -> TH keyboard map for detecting accidental wrong-language typing
+  const EN_TO_TH_KEDMANEE = {
+    "`": "_", "1": "ๅ", "2": "/", "3": "-", "4": "ภ", "5": "ถ", "6": "ุ", "7": "ึ", "8": "ค", "9": "ต", "0": "จ", "-": "ข", "=": "ช",
+    "q": "ๆ", "w": "ไ", "e": "ำ", "r": "พ", "t": "ะ", "y": "ั", "u": "ี", "i": "ร", "o": "น", "p": "ย", "[": "บ", "]": "ล", "\\": "ฃ",
+    "a": "ฟ", "s": "ห", "d": "ก", "f": "ด", "g": "เ", "h": "้", "j": "่", "k": "า", "l": "ส", ";": "ว", "'": "ง",
+    "z": "ผ", "x": "ป", "c": "แ", "v": "อ", "b": "ิ", "n": "ื", "m": "ท", ",": "ม", ".": "ใ", "/": "ฝ",
+    "Q": "๐", "W": "\"", "E": "ฎ", "R": "ฑ", "T": "ธ", "Y": "ํ", "U": "๊", "I": "ณ", "O": "ฯ", "P": "ญ", "{": "ฐ", "}": ",",
+    "A": "ฤ", "S": "ฆ", "D": "ฏ", "F": "โ", "G": "ฌ", "H": "็", "J": "๋", "K": "ษ", "L": "ศ", ":": "ซ", "\"": ".",
+    "Z": "(", "X": ")", "C": "ฉ", "V": "ฮ", "B": "ฺ", "N": "์", "M": "?", "<": "ฒ", ">": "ฬ", "?": "ฦ",
+  };
+
+  function decodeEnToThaiKedmanee(str) {
+    let out = "";
+    for (const ch of str) {
+      out += EN_TO_TH_KEDMANEE[ch] || ch;
+    }
+    return out;
+  }
+
+  function hasValidThaiWord(str) {
+    if (!str) return false;
+    // Reject impossible leading combining marks or stacked tone marks
+    if (/(?:^|\s)[ัิีึืุู็่้๊๋์]/.test(str)) return false;
+    if (/[่้๊๋]{2,}/.test(str)) return false;
+    for (const w of COMMON_THAI_MORPHEMES) {
+      if (w.length >= 2 && str.includes(w)) return true;
+    }
+    return false;
+  }
+
+  function hasThaiKeyboardMash(str) {
+    const clean = str.replace(/\s+/g, "");
+    if (clean.length < 4) return false;
+    const thaiRows = [
+      "ฟหกด่าสว",
+      "วสา่ดกหฟ",
+      "ๆไำพะัีรนยบล",
+      "ลบยนรีัะพำไๆ",
+      "ผปแอิืทมใฝ",
+      "ฝใมทืิแอปผ",
+      "กขคงจฉชซฌญฎฏ",
+    ];
+    let mashHits = 0;
+    for (let i = 0; i <= clean.length - 3; i++) {
+      const tri = clean.slice(i, i + 3);
+      if (thaiRows.some((r) => r.includes(tri))) {
+        mashHits++;
+      }
+    }
+    // High proportion of adjacent Kedmanee triples OR explicit classic home-row mash
+    if (/ฟหกด|หกด่|กด่า|ด่าส|่าสว|ดฟหก|กหฟด|กขคง|ผปแอ|ไำพะ/.test(clean)) return true;
+    if (clean.length >= 5 && mashHits >= 2 && mashHits / Math.max(1, clean.length - 2) >= 0.45) return true;
+    return false;
+  }
+
+  function isLatinTokenGibberish(rawToken, contextWordsSet) {
+    const tok = rawToken.trim();
+    if (!tok) return false;
+    const low = tok.toLowerCase();
+    const stripped = low.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
+    if (!stripped) return true;
+
+    // Whitelisted medical/English word or appears in question/answer/teaching text
+    if (VALID_MEDICAL_EN_WORDS.has(stripped) || (contextWordsSet && contextWordsSet.has(stripped))) {
+      return false;
+    }
+    // Allow valid codes like HS1, HS2, 6W, 4Cs, PM2.5, HbA1c, COVID-19
+    if (/^(?:hs[1-6]|6w|4cs?|pm2\.?5|hba1c|covid-?19|com-?b|step|iccc|eqesarr)$/i.test(stripped)) {
+      return false;
+    }
+
+    // Internal or leading stray keyboard punctuation glued to letters/digits (e.g. ";ldfgk", "l604k;fu", "dfg;l", "s,v")
+    if (/^[;,'/\\[\]]+[a-z0-9]{2,}|[a-z0-9][;\\[\],][a-z0-9]/i.test(low)) {
+      return true;
+    }
+
+    // Mixed digits interleaved inside Latin letters (e.g. "l604k", "s4d2f") that isn't a whitelisted medical code
+    if (/[a-z]\d+[a-z]|\d[a-z]+\d/i.test(stripped)) {
+      return true;
+    }
+
+    // Only examine alphabetic portion
+    const alpha = stripped.replace(/[^a-z]/g, "");
+    if (alpha.length < 3) {
+      // 1-2 random Latin chars that aren't whitelisted (like "fg", "lk", "zz", "xq")
+      if (alpha.length >= 2 && !VALID_MEDICAL_EN_WORDS.has(alpha) && !/^(?:in|on|at|to|of|is|be|or|as|by|we|he|it|if|do|so|up|us|my|go|er|dm|ht|mi|tb|bp|ct|pc)$/i.test(alpha)) {
+        return true;
+      }
+      return false;
+    }
+
+    // Repeated char >= 3 (e.g. "aaaa", "ssss", "zzzz")
+    if (/(.)\1{2,}/.test(alpha)) return true;
+
+    // Repeated 2-4 char chunk (e.g. "dfgdfg", "asdasd", "fgfg")
+    if (/^([a-z]{2,4})\1+$/.test(alpha)) return true;
+
+    // Zero vowels in length >= 4 (e.g. "dfgdfg", "ldfgk", "zxcvb", "bcdfg")
+    const vowels = (alpha.match(/[aeiouy]/g) || []).length;
+    if (alpha.length >= 4 && vowels === 0) return true;
+
+    // 5+ consecutive consonants (almost impossible in normal English/medical terms except rare whitelisted ones)
+    if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(alpha)) return true;
+
+    // Very low vowel ratio in long Latin token
+    if (alpha.length >= 7 && vowels / alpha.length < 0.14) return true;
+
+    // QWERTY keyboard-row walk detection
+    const qwertyRows = [
+      "qwertyuiop[]",
+      "poiuytrewq",
+      "asdfghjkl;'",
+      "';lkjhgfdsa",
+      "zxcvbnm,./",
+      "/.,mnbvcxz",
+    ];
+    let walkHits = 0;
+    for (let i = 0; i <= low.length - 3; i++) {
+      const tri = low.slice(i, i + 3);
+      if (qwertyRows.some((r) => r.includes(tri))) walkHits++;
+    }
+    if (walkHits >= 1 && (vowels === 0 || low.length >= 5)) {
+      // Guard real English words that happen to contain a 3-letter row walk (like "were", "type", "power", "assert", "asked", "flash", "sad")
+      if (!/^(?:were|where|type|power|assert|asked|flash|sad|fast|last|past|gas|has|was|ask|desk|try|true|tree|free|three|write|power|lower|point|joint|minor|prior|equity|require|quality|query|quote|quiet|quite|system|study|story|short|sport|score|sector|server|service|control|country|support|report|import|export|effort|effect|affect|better|letter|matter|water|later|after|other|mother|father|rather|either|neither|public|policy|social|health|mental|normal|formal|global|local|rural|urban|human|woman|women|child|elder|older|under|order|offer|differ|suffer|refer|prefer|severe|review|prevent|primary|present|problem|process|program|provide|patient|payment|percent|person|people|period|place|plan|play|plus|poor|post|part|care|case|cost|cure|data|date|days|dead|deal|death|deep|diet|does|done|down|drug|duty|each|early|earn|ease|east|easy|else|even|ever|evil|exam|face|fact|fail|fair|fall|farm|fear|feel|felt|fill|find|fine|fire|firm|five|flow|food|foot|form|four|full|fund|gain|game|gave|girl|give|goal|goes|gold|gone|good|grow|half|hand|hard|harm|have|head|hear|heat|held|help|here|high|hold|home|hope|hour|huge|hurt|idea|into|item|join|just|keep|kept|kind|knew|know|lack|lady|land|late|lead|left|less|life|like|line|link|list|live|load|loan|long|look|lose|loss|lost|love|made|main|make|male|many|mark|mass|mean|meet|mild|mind|miss|mode|more|most|move|much|must|name|near|neck|need|news|next|nice|nine|none|note|once|only|onto|open|over|page|paid|pain|pair|pale|park|pass|path|pick|pill|plan|play|plot|plus|poll|pool|poor|port|post|pull|pure|push|race|rain|rank|rare|rate|read|real|rear|rely|rent|rest|rich|ride|ring|rise|risk|road|role|roll|room|root|rose|rule|rush|safe|said|sake|sale|salt|same|save|seat|seed|seek|seem|seen|self|sell|send|sent|sept|ship|shop|shot|show|shut|sick|side|sign|site|size|skin|slip|slow|snow|soft|soil|sold|sole|some|song|soon|sort|soul|spot|star|stay|step|stop|such|suit|sure|take|tale|talk|tall|tank|tape|task|team|tear|tell|tend|term|text|than|that|them|then|they|thin|this|thus|till|time|tiny|told|toll|tone|took|tool|tour|town|tree|trip|true|tube|turn|twin|unit|upon|used|user|vary|vast|very|vice|view|vote|wage|wait|wake|walk|wall|want|ward|warm|warn|wash|wave|ways|weak|wear|week|well|went|were|west|what|when|whom|wide|wife|wild|will|wind|wine|wing|wire|wise|wish|with|wood|word|wore|work|yard|yeah|year|your|zero|zone)$/.test(alpha)) {
+        if (walkHits >= 2 || (walkHits >= 1 && (alpha.length >= 6 && vowels / alpha.length < 0.3))) {
+          return true;
+        }
+        // Single home-row mash like "dfg", "sdf", "fgh", "ghj", "hjk", "jkl", "zxc", "xcv", "cvb", "qwe", "rty"
+        if (/dfg|sdf|fgh|ghj|hjk|jkl|lkj|kjh|jhg|hgf|gfd|fds|zxc|xcv|cvb|qwe|rty/.test(low)) {
+          return true;
+        }
+      }
+    }
+
+    // All characters from a single home-row keyboard line (e.g. "dfgkl;as")
+    if (alpha.length >= 5 && /^[asdfghjkl;']+$/.test(low) && !/^(?:shall|flask|glass|salad|falls|halls|flags|slash|flash|dash|half|hall|fall|flag|glad|lass|asks|adds|dads|lads)$/.test(alpha)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function buildContextWordsSet(rubric, teachingCtx) {
+    const blob = `${(rubric && rubric.prompt) || ""} ${stripTags((rubric && rubric.answerHtml) || "")} ${(teachingCtx && teachingCtx.teachingExcerpt) || ""}`;
+    const set = new Set();
+    const enMatches = blob.toLowerCase().match(/[a-z][a-z0-9\-]{1,}/g) || [];
+    for (const w of enMatches) set.add(w);
+    return set;
+  }
+
+  function computeCharNgramContainment(a, b, n) {
+    const cleanA = String(a || "").toLowerCase().replace(/[\s"“”'‘’.,;:!?()[\]{}\-–—/]/g, "");
+    const cleanB = String(b || "").toLowerCase().replace(/[\s"“”'‘’.,;:!?()[\]{}\-–—/]/g, "");
+    if (cleanA.length < n || cleanB.length < n) return 0;
+    const setB = new Set();
+    for (let i = 0; i <= cleanB.length - n; i++) setB.add(cleanB.slice(i, i + n));
+    let hit = 0;
+    const total = cleanA.length - n + 1;
+    for (let i = 0; i <= cleanA.length - n; i++) {
+      if (setB.has(cleanA.slice(i, i + n))) hit++;
+    }
+    return hit / total;
+  }
+
+  /**
+   * Comprehensive input quality & gibberish detector.
+   * Returns { status: "valid" | "empty" | "gibberish" | "keyboard_layout_typo" | "non_answer" | "prompt_copy" | "off_topic",
+   *           subReason, decodedThai?, detail }
+   */
+  function analyzeSubmissionQuality(rawText, rubric, teachingCtx, opts) {
+    const options = opts || {};
+    const text = String(rawText || "").trim();
+    if (!text) return { status: "empty", subReason: "empty" };
+
+    // 1. Punctuation / symbols / emoji only
+    const alphaNumThai = text.replace(/[^ก-๙a-zA-Z0-9]/g, "");
+    if (!alphaNumThai) {
+      return { status: "gibberish", subReason: "punctuation_only", detail: "มีเพียงเครื่องหมายวรรคตอนหรือสัญลักษณ์โดยไม่มีข้อความคำตอบ" };
+    }
+
+    const low = text.toLowerCase();
+    const normCompact = low.replace(/[\s"“”'‘’.,;:!?()[\]{}\-–—/]+/g, "");
+
+    // Allow valid short categorical table answers like "ยังไม่ทราบ", "ใช่", "ไม่ใช่"
+    if (options.isCategoricalCell) {
+      const catAllowed = ["ใช่", "ไม่ใช่", "ยังไม่ทราบ", "อยู่", "ไม่อยู่", "อยู่ที่ขอบ", "บกพร่อง", "ไม่บกพร่อง"];
+      if (catAllowed.some((c) => text.includes(c))) return { status: "valid" };
+    }
+
+    // 2. Honest unsure vs test/placeholder (only when NOT a numeric cloze blank)
+    if (!options.allowBareNumbers) {
+      if (HONEST_UNSURE_EXACT.has(low) || HONEST_UNSURE_EXACT.has(normCompact)) {
+        return { status: "non_answer", subReason: "honest_unsure", detail: "ผู้เรียนระบุว่ายังไม่แน่ใจ/ยังไม่ทราบ" };
+      }
+      if (PLACEHOLDER_TEST_EXACT.has(low) || PLACEHOLDER_TEST_EXACT.has(normCompact)) {
+        return { status: "non_answer", subReason: "placeholder_test", detail: "เป็นข้อความทดสอบหรือคำสั้นที่ยังไม่ได้ตอบคำถาม" };
+      }
+    }
+
+    // 3. Repeated single character or tiny repeated pattern across whole input (e.g. "กกกกก", "555555", "dfgdfg", "ababab")
+    const noSpace = low.replace(/\s+/g, "");
+    if (noSpace.length >= 4 && /^(.)\1+$/.test(noSpace)) {
+      return { status: "gibberish", subReason: "repeated_chars", detail: "พิมพ์ตัวอักษรซ้ำตัวเดิมต่อเนื่อง" };
+    }
+    if (noSpace.length >= 6 && /^(.{2,4})\1{2,}$/.test(noSpace) && !/^[0-9.%]+$/.test(noSpace)) {
+      return { status: "gibberish", subReason: "repeated_pattern", detail: "พิมพ์ชุดตัวอักษรซ้ำวนโดยไม่มีความหมาย" };
+    }
+
+    // 4. Pure digits / numeric noise on non-numeric open-ended questions
+    const promptPlain = (rubric && rubric.prompt) || "";
+    const answerPlain = stripTags((rubric && rubric.answerHtml) || "");
+    const expectsNumeric =
+      options.allowBareNumbers ||
+      /กี่|เท่าใด|ร้อยละ|สัดส่วน|ประมาณ|จำนวน|ตัวเลข|1669|146|1,000|ค\.ศ\.|พ\.ศ\.|คะแนน|บาร์เธล|barthel|6w|4c/i.test(
+        `${promptPlain} ${answerPlain}`
+      );
+    if (/^[\d\s.,%+\-–—/]+$/.test(text)) {
+      if (!expectsNumeric) {
+        return { status: "gibberish", subReason: "numeric_noise", detail: "พิมพ์เฉพาะตัวเลขซึ่งไม่สอดคล้องกับโจทย์เชิงอธิบายข้อนี้" };
+      }
+      return { status: "valid" };
+    }
+
+    // Quick pass if student explicitly mentioned any key case entity or rubric keyword (e.g., "บุคคล ก", "ข้อ ค", "โรค")
+    const hasExplicitCaseEntity = /(?:บุคคล\s*[กขคงจ]|ผู้รับบริการ(?:รายที่)?\s*[1-4]|ผู้ป่วย(?:รายที่)?\s*[1-4]|เด็กคนที่[ห12]|ข้อ\s*[กขคงจ]|ระดับ(?:ที่)?\s*[1-4หนึ่งสองสามสี่]|ช่อง(?:ที่)?\s*[1-4]|เส้น\s*[A-E]|(?:ไม่)?ใช่(?:กลุ่ม)?เดียวกัน|ต่างกลุ่ม|คนละกลุ่ม)/i.test(
+      text
+    );
+
+    const contextWordsSet = buildContextWordsSet(rubric, teachingCtx);
+
+    // 5. Inspect Thai & Latin portions separately
+    const thaiChars = (text.match(/[ก-๙]/g) || []).length;
+    const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+    const totalLetters = thaiChars + latinChars;
+
+    // 5a. Predominantly Latin / ASCII input (like "dfgdfg ;ldfgk" or "asdfghjkl" or "l604k;")
+    if (latinChars > 0 && thaiChars === 0 && !hasExplicitCaseEntity) {
+      const tokens = text.split(/\s+/).filter(Boolean);
+      let gibTokens = 0;
+      for (const t of tokens) {
+        if (isLatinTokenGibberish(t, contextWordsSet)) gibTokens++;
+      }
+      if (tokens.length > 0 && gibTokens / tokens.length >= 0.5) {
+        // Check whether user accidentally forgot to switch EN -> TH Kedmanee keyboard!
+        if (text.length >= 4 && text.length <= 160) {
+          const decoded = decodeEnToThaiKedmanee(text);
+          if (hasValidThaiWord(decoded) && !hasThaiKeyboardMash(decoded)) {
+            return {
+              status: "keyboard_layout_typo",
+              subReason: "forgot_switch_en_to_th",
+              decodedThai: decoded,
+              detail: `ดูเหมือนแป้นพิมพ์อาจค้างอยู่ภาษาอังกฤษ (เทียบแป้นไทยใกล้เคียง “${decoded}”)`,
+            };
+          }
+        }
+        return {
+          status: "gibberish",
+          subReason: "latin_keyboard_mash",
+          detail: "ตรวจพบกลุ่มตัวอักษรภาษาอังกฤษแบบสุ่ม/เรียงตามแป้นพิมพ์ที่ไม่เป็นคำที่มีความหมาย",
+        };
+      }
+      // Single ultra-short non-whitelisted Latin noise (1-2 chars like "a", "x", "fg")
+      if (latinChars <= 2 && !VALID_MEDICAL_EN_WORDS.has(normCompact) && !contextWordsSet.has(normCompact)) {
+        return { status: "gibberish", subReason: "too_short_noise", detail: "ข้อความสั้นเกินไปและไม่ใช่คำย่อหรือคำตอบที่มีความหมาย" };
+      }
+    }
+
+    // 5b. Thai input checks (keyboard mash, impossible Thai orthography, random Thai consonants)
+    if (thaiChars > 0 && !hasExplicitCaseEntity) {
+      // Impossible leading combining vowels/tone marks or stacked tone marks
+      if (/(?:^|\s)[ัิีึืุู็่้๊๋์]/.test(text) || /[่้๊๋]{2,}/.test(text)) {
+        return { status: "gibberish", subReason: "invalid_thai_orthography", detail: "ตรวจพบการพิมพ์วรรณยุกต์หรือสระซ้อนผิดหลักภาษาไทยคล้ายการพิมพ์สุ่ม" };
+      }
+
+      // Thai Kedmanee keyboard row mashing (e.g. "ฟหกด่าสว", "ผปแอิืทม", "กขคงจฉ")
+      if (hasThaiKeyboardMash(text)) {
+        return { status: "gibberish", subReason: "thai_keyboard_mash", detail: "ตรวจพบการกดแป้นพิมพ์ภาษาไทยเรียงแถว (เช่น ฟหกด่าสว / กขคง) ซึ่งไม่ใช่คำตอบที่มีความหมาย" };
+      }
+
+      // Long Thai run with zero recognizable Thai morphemes + abnormal consonant clustering
+      const thaiOnly = text.replace(/[^ก-๙]/g, "");
+      if (thaiOnly.length >= 6) {
+        const recognized = hasValidThaiWord(text);
+        const thaiVowels = (thaiOnly.match(/[ะัาำิีึืุูเแโใไฤฦ]/g) || []).length;
+        const longConsonantRun = /[ก-ฮ]{8,}/.test(thaiOnly);
+        const rareConsonants = (thaiOnly.match(/[ฅฆฌฎฏฐฑฒณฬฮฃ]/g) || []).length;
+        if (!recognized && (thaiVowels === 0 || longConsonantRun || rareConsonants / thaiOnly.length >= 0.35)) {
+          return { status: "gibberish", subReason: "nonsense_thai", detail: "ตรวจพบลำดับอักษรภาษาไทยที่ไม่ประกอบเป็นคำที่มีความหมาย" };
+        }
+        // Even with scattered vowels, if >= 9 Thai chars and ZERO recognized Thai morphemes AND zero overlap with prompt/answer/domain
+        if (!recognized && thaiOnly.length >= 9) {
+          const overlapPromptAns = computeCharNgramContainment(text, `${promptPlain} ${answerPlain}`, 3);
+          if (overlapPromptAns < 0.08) {
+            return { status: "gibberish", subReason: "unrecognizable_thai", detail: "ข้อความภาษาไทยที่พิมพ์ไม่สามารถอ่านเป็นประโยคหรือคำที่มีความหมายได้" };
+          }
+        }
+      }
+
+      // Ultra-short 1-2 Thai chars that aren't valid answers (like "ก", "หก", "ฟห", excluding "ใช่" / "ดี" / "มี" / "ยา" / "โรค")
+      if (thaiOnly.length <= 2 && latinChars === 0 && !/^(?:ใช่|ดี|มี|ยา|โรค|ก\.|ข\.|ค\.|ง\.|จ\.)$/.test(text.trim())) {
+        return { status: "gibberish", subReason: "too_short_noise", detail: "พิมพ์ตัวอักษรสั้นเพียง 1–2 ตัว ซึ่งยังไม่เป็นคำตอบที่ประเมินได้" };
+      }
+    }
+
+    // 5c. Mixed Thai + Latin gibberish (e.g. "กกก dfgdfg ;ldfgk")
+    if (thaiChars > 0 && latinChars > 0) {
+      const latinTokens = (text.match(/[a-zA-Z;,'/\\[\]]{3,}/g) || []);
+      const badLatin = latinTokens.filter((t) => isLatinTokenGibberish(t, contextWordsSet));
+      if (latinTokens.length > 0 && badLatin.length === latinTokens.length && !hasValidThaiWord(text)) {
+        return { status: "gibberish", subReason: "mixed_gibberish", detail: "ตรวจพบข้อความปนอักษรสุ่มที่ไม่เป็นคำที่มีความหมาย" };
+      }
+    }
+
+    // 5d. Random alphanumeric smash like "a1b2c3d4" or "1a2s3d4f"
+    if (totalLetters >= 3 && /\d/.test(text) && /(?:[a-z]\d){3,}|(?:\d[a-z]){3,}/i.test(noSpace)) {
+      return { status: "gibberish", subReason: "alphanumeric_smash", detail: "ตรวจพบการพิมพ์ตัวอักษรสลับตัวเลขแบบสุ่ม" };
+    }
+
+    // 6. Prompt-copy detection (skip for short table cells)
+    if (!options.skipPromptCopy && promptPlain.length >= 24 && text.length >= 20) {
+      const cleanU = low.replace(/[\s"“”'‘’.,;:!?()[\]{}\-–—/]/g, "");
+      const cleanP = promptPlain.toLowerCase().replace(/[\s"“”'‘’.,;:!?()[\]{}\-–—/]/g, "");
+      const containment = computeCharNgramContainment(text, promptPlain, 4);
+      const extraChars = Math.max(0, cleanU.length - Math.round(cleanU.length * containment));
+      if ((cleanP.includes(cleanU) && cleanU.length >= 18) || (containment >= 0.78 && extraChars < 18)) {
+        return { status: "prompt_copy", subReason: "copied_prompt", detail: "คำตอบเกือบทั้งหมดคัดลอกมาจากข้อความโจทย์โดยตรง ยังไม่ได้เพิ่มข้อสรุปหรือเหตุผลของตนเอง" };
+      }
+    }
+
+    // 7. Off-topic detection (real readable language, but 0% connection to rubric, case, teaching text, or health systems)
+    if (!options.skipOffTopic && text.length >= 12 && !hasExplicitCaseEntity) {
+      const hasDomainHit = DOMAIN_LEXICON_TOKENS.some((tok) => low.includes(tok));
+      const refBlob = `${promptPlain} ${answerPlain} ${(teachingCtx && teachingCtx.caseVignette) || ""} ${(teachingCtx && teachingCtx.companionHeading) || ""}`;
+      const refOverlap = computeCharNgramContainment(text, refBlob, 4);
+      // Also check English words in refBlob
+      const uEnWords = (low.match(/[a-z]{3,}/g) || []);
+      const enRefHit = uEnWords.some((w) => !["the", "and", "for", "are", "but", "not", "you", "all", "can", "was", "one", "our", "out", "very", "much", "like", "love", "good", "have", "this", "that", "with"].includes(w) && contextWordsSet.has(w));
+
+      if (!hasDomainHit && !enRefHit && refOverlap < 0.08) {
+        return {
+          status: "off_topic",
+          subReason: "unrelated_content",
+          detail: "ข้อความที่พิมพ์เป็นประโยคที่อ่านเข้าใจได้ แต่ยังไม่เชื่อมโยงกับโจทย์และเนื้อหาวิทยาศาสตร์ระบบสุขภาพ (RACM 303) ในข้อนี้",
+        };
+      }
+    }
+
+    return { status: "valid" };
+  }
+
+  /* ==========================================================================
+   * LAYER 3: NORMALIZATION, 100+ CONCEPT BANK, CASE & MISCONCEPTION ANALYZER
+   * ========================================================================== */
   const SYNONYM_GROUPS = [
     ["ใช่", "มี", "พบ", "ผิดปกติ", "yes", "true"],
     ["ไม่ใช่", "ไม่มี", "ไม่พบ", "ปกติ", "ไม่ได้", "no", "false"],
@@ -95,21 +931,30 @@
     return clean;
   }
 
-  function matchCellValue(userVal, expectedVal) {
+  function matchCellValue(userVal, expectedVal, rubric, teachingCtx) {
     const uRaw = String(userVal || "").trim();
     const eRaw = String(expectedVal || "").trim();
     if (!uRaw) return { status: "empty" };
+
+    const isCat = eRaw.length > 0 && eRaw.length <= 24;
+    const qual = analyzeSubmissionQuality(uRaw, rubric, teachingCtx, {
+      isCategoricalCell: isCat,
+      skipPromptCopy: true,
+      skipOffTopic: true,
+    });
+    if (qual.status === "gibberish" || qual.status === "keyboard_layout_typo" || (qual.status === "non_answer" && qual.subReason === "placeholder_test")) {
+      return { status: "gibberish", qual };
+    }
+
     if (!eRaw || eRaw === "—" || eRaw === "-") return { status: "open_ok" };
 
     const uNorm = normalizeShortToken(uRaw);
     const eNorm = normalizeShortToken(eRaw);
     if (uNorm && uNorm === eNorm) return { status: "exact" };
 
-    // If expected cell is a short categorical label (<= 22 chars), check substring or synonym containment
-    if (eRaw.length <= 24) {
+    if (isCat) {
       const uLow = uRaw.toLowerCase();
       const eLow = eRaw.toLowerCase();
-      // Guard against "ใช่" matching inside "ไม่ใช่" or "อยู่" matching inside "ไม่อยู่"!
       if (
         (eLow === "ใช่" && uLow.includes("ไม่ใช่")) ||
         (eLow === "ไม่ใช่" && uLow === "ใช่") ||
@@ -145,6 +990,8 @@
     "แนวคำตอบหนึ่งที่สมเหตุสมผล",
     "แนวคำตอบหนึ่งที่สมเหตุสมผลคือ",
     "แนวคำตอบต่อไปนี้เป็นแนวคำตอบหนึ่งที่สมเหตุสมผล",
+    "แนวคำตอบหนึ่งที่สมเหตุสมผล (เทียบกรณีบุคคล ก–ง และ HS1 หัวข้อ 1.1)",
+    "แนวคิดหลักจากเนื้อหาส่วนนี้",
     "คำตอบหนึ่งที่สมเหตุสมผลคือ",
     "ตัวอย่างหนึ่งคือ",
     "ตัวอย่างเช่น",
@@ -160,6 +1007,79 @@
     "เพราะเหตุใด",
   ]);
 
+  // Expanded HS1–HS6 Domain Concept Bank with rich Thai colloquial + standard English student synonyms
+  const DOMAIN_TERMS = [
+    // HS1: Disease / Illness / Sickness & Health Definitions & Determinants & Prevention
+    ["โรค (disease)", ["เป็นโรค", "มีโรค", "ความผิดปกติในร่างกาย", "ความผิดปกติของโครงสร้าง", "ตรวจพบความผิดปกติ", "ไขมันพอกตับ", "ไขมันในเลือดสูง", "ตรวจวัดได้", "disease"]],
+    ["การเจ็บป่วย (illness)", ["การเจ็บป่วย", "รู้สึกไม่สบาย", "รู้สึกป่วย", "ความทุกข์ไม่สบาย", "อ่อนเพลีย", "นอนไม่หลับ", "ร้อนวูบวาบ", "ประสบการณ์ความรู้สึก", "illness"]],
+    ["ภาวะที่สังคมยอมรับว่าป่วย (sickness)", ["สังคมยอมรับว่าป่วย", "สังคมยอมรับ", "ใบรับรองแพทย์", "รับรองการป่วย", "ลาป่วย", "เลื่อนสอบ", "บทบาทผู้ป่วย", "สถานะผู้ป่วย", "sickness"]],
+    ["สามมิติแยกจากกัน (ไม่ใช่บุคคลกลุ่มเดียวกัน)", ["ไม่ใช่บุคคลกลุ่มเดียวกัน", "ไม่ใช่กลุ่มเดียวกัน", "คนละกลุ่ม", "ต่างกลุ่ม", "แยกจากกัน", "ไม่จำเป็นต้องเกิดพร้อมกัน", "ไม่จำเป็นต้องเกิดขึ้นพร้อมกัน"]],
+    ["อิทธิพลของวัฒนธรรมและความเชื่อต่อการเจ็บป่วย", ["วัฒนธรรม", "ความเชื่อ", "บรรทัดฐาน", "เรื่องปกติของวัย", "การเปลี่ยนแปลงตามวัย"]],
+    ["การสอบถามกรอบความเข้าใจของผู้ป่วย", ["กรอบความเข้าใจ", "คิดว่าตนเป็นอะไร", "คิดว่าเกิดจากสาเหตุใด", "ส่งผลต่อชีวิต", "กังวลใดมากที่สุด", "คาดหวังให้แพทย์"]],
+    ["แนวทางข้อเท็จจริงที่ตรวจวัดได้ vs การประเมินสภาพโดยรวม (value-free vs value-laden)", ["value-free", "value-laden", "ข้อเท็จจริงที่ตรวจวัดได้", "ประเมินสภาพโดยรวม", "ชีวการแพทย์", "องค์รวม"]],
+    ["นิยามสุขภาพ WHO ค.ศ. 1946 และข้อวิพากษ์คำว่า 'สมบูรณ์'", ["สมบูรณ์", "complete", "1946", "กาย จิตใจ และสังคม", "กาย จิต สังคม", "พึ่งพาการแพทย์", "overmedicalization"]],
+    ["พ.ร.บ. สุขภาพแห่งชาติ พ.ศ. 2550 (เพิ่มมิติทางปัญญา)", ["มิติทางปัญญา", "ทางปัญญา", "สี่มิติ", "4 มิติ", "2550", "spiritual"]],
+    ["ความสามารถในการปรับตัวและจัดการตนเอง (Huber)", ["ปรับตัว", "จัดการตนเอง", "รับมือกับความท้าทาย", "adapt", "self-manage", "huber", "leonardi"]],
+    ["ศักยภาพทางสุขภาพเทียบความท้าทายของชีวิต (Bircher)", ["ศักยภาพ", "ความท้าทาย", "ทุนทางชีวภาพ", "ทุนที่สะสม", "ตาชั่ง", "bircher", "potential", "demands of life"]],
+    ["การสูงวัยอย่างมีสุขภาพดี (Healthy Ageing)", ["สูงวัยอย่างมีสุขภาพดี", "healthy ageing", "สิ่งที่ตนเห็นคุณค่า", "สมรรถภาพภายใน", "สิ่งแวดล้อมที่เอื้อ", "ไม้เท้า"]],
+    ["สุขภาวะ (well-being) vs ความเป็นอยู่ที่ดี (wellness)", ["สุขภาวะ", "well-being", "อยู่ดีมีสุข", "ความเป็นอยู่ที่ดี", "wellness", "พัฒนาสุขภาพของตน"]],
+    ["ปัจจัยกำหนดสุขภาพ 3 กลุ่ม (ตัวบุคคล–สิ่งแวดล้อม–บริการสุขภาพ)", ["ตัวเด็กและครอบครัว", "สิ่งแวดล้อม", "บริการสุขภาพ", "สามกลุ่ม", "3 กลุ่ม"]],
+    ["ปัจจัยต้นน้ำเชิงโครงสร้าง vs ปัจจัยปลายน้ำ (CSDH)", ["ต้นน้ำ", "เชิงโครงสร้าง", "ปลายน้ำ", "นโยบาย", "การเมือง", "ฐานะทางสังคม", "แรงงาน", "สภาพความเป็นอยู่", "ที่อยู่อาศัย", "น้ำสะอาด", "น้ำประปา", "สุขาภิบาล", "structural", "intermediary", "csdh"]],
+    ["ห้าช่องทางลดความเหลื่อมล้ำ (Diderichsen)", ["ห้าช่องทาง", "5 ช่องทาง", "ลดความเหลื่อมล้ำทางฐานะ", "ลดการสัมผัส", "ลดความเปราะบาง", "ลดผลกระทบหลัง", "ความผูกพันในสังคม", "diderichsen"]],
+    ["หลักฐาน 146 ประเทศ (Bishai) — ภาคสุขภาพและนอกภาคสุขภาพราวครึ่งต่อครึ่ง + ข้อควรระวัง", ["ครึ่งต่อครึ่ง", "146 ประเทศ", "ร้อยละ 89", "43", "40", "ในภาคสุขภาพ", "นอกภาคสุขภาพ", "แบบจำลองระดับประเทศ", "รายบุคคล", "bishai"]],
+    ["สภาพการทำงานและสุขภาพ", ["สภาพการทำงาน", "แรงงาน", "ความเครียดในงาน", "งานไม่มั่นคง", "อาชีพ"]],
+    ["การป้องกันก่อนเกิดปัจจัยเสี่ยง (primordial prevention)", ["ก่อนเกิดปัจจัยเสี่ยง", "primordial"]],
+    ["การป้องกันระดับที่หนึ่ง (primary prevention)", ["ระดับที่หนึ่ง", "ระดับ 1", "วัคซีน", "เลิกบุหรี่", "ลดปัจจัยเสี่ยง", "ส่งเสริมสุขภาพ", "primary prevention", "primary"]],
+    ["การป้องกันระดับที่สอง (secondary prevention) และผลลบลวง", ["ระดับที่สอง", "ระดับ 2", "คัดกรอง", "ระยะเริ่มแรก", "ก่อนมีอาการ", "รักษาทันท่วงที", "ผลลบลวง", "false negative", "secondary"]],
+    ["การป้องกันระดับที่สาม (tertiary prevention)", ["ระดับที่สาม", "ระดับ 3", "ฟื้นฟู", "ภาวะแทรกซ้อน", "ความพิการ", "กลับไปทำงาน", "tertiary"]],
+    ["การป้องกันระดับที่สี่ (quaternary prevention) และผลบวกลวง", ["ระดับที่สี่", "ระดับ 4", "เกินจำเป็น", "ผลบวกลวง", "false positive", "วินิจฉัยเกินจริง", "overdiagnosis", "overmedicalization", "quaternary"]],
+    ["การตัดสินใจร่วมกันและการสื่อสารความไม่แน่นอน (shared decision-making / PSA)", ["ตัดสินใจร่วมกัน", "รับฟังความกังวล", "ประโยชน์และผลเสีย", "shared decision", "psa", "2012", "2018", "สื่อสารอย่างตรงไปตรงมา", "ความไม่แน่นอน"]],
+
+    // HS2: Structure, Functions, CAS, 6W, Continuum of Care
+    ["เจตนาหลัก (primary intent) ตามนิยาม WHO", ["เจตนาหลัก", "primary intent", "เป้าหมายแรกเพื่อสุขภาพ", "เป้าหมายหลักเพื่อสุขภาพ"]],
+    ["ระบบความสัมพันธ์ทั้งมวล (พ.ร.บ. สุขภาพแห่งชาติ พ.ศ. 2550)", ["ความสัมพันธ์ทั้งมวล", "พ.ร.บ. สุขภาพ", "พระราชบัญญัติสุขภาพแห่งชาติ"]],
+    ["หกองค์ประกอบหลักของระบบสุขภาพ (6 building blocks)", ["องค์ประกอบหลัก", "กำลังคน", "การคลัง", "สารสนเทศ", "ยาและเทคโนโลยี", "การอภิบาล", "การจัดบริการ", "building blocks", "6 องค์ประกอบ"]],
+    ["ระบบที่ซับซ้อนและปรับตัวได้ (CAS) และวงจรผลสะท้อนกลับ", ["ซับซ้อนและปรับตัวได้", "ผลสะท้อนกลับ", "บริบท", "ไม่เป็นเส้นตรง", "feedback", "adaptive", "cas"]],
+    ["ห่วงโซ่ผลลัพธ์ (ปัจจัยนำเข้า–กระบวนการ–ผลผลิต–ผลลัพธ์–ผลกระทบ)", ["ปัจจัยนำเข้า", "กระบวนการ", "ผลผลิต", "ผลลัพธ์", "ผลกระทบ", "results chain", "input", "output", "outcome", "impact"]],
+    ["เป้าหมายห้าประการ (Quintuple Aim)", ["ห้าประการ", "หมดไฟ", "คนทำงาน", "ความเหลื่อมล้ำ", "quintuple", "quadruple", "triple aim"]],
+    ["กรอบ 6W (WHO, WHY, WHEN, WHAT, WHICH, WHERE)", ["6w", "who", "why", "when", "what", "which", "where", "มิติเวลา", "ผู้ให้บริการ"]],
+    ["การดูแลฉุกเฉิน (1669 / คัดแยกอาการ)", ["1669", "ฉุกเฉิน", "คัดแยก", "triage", "จุดเกิดเหตุ", "ชั่วโมงแรก"]],
+    ["การดูแลระยะเฉียบพลัน (ทำให้ภาวะคงที่)", ["เฉียบพลัน", "คงที่", "พ้นวิกฤต", "หอผู้ป่วย", "acute"]],
+    ["การดูแลระยะกลาง (IMC / Barthel / 6 เดือน / step-down)", ["ระยะกลาง", "imc", "บาร์เธล", "barthel", "reablement", "6 เดือน", "หกเดือน", "ระยะเวลาทอง", "ลดระดับ", "step-down", "step-up"]],
+    ["การดูแลผู้ป่วยนอกและระบบทางไกล (Ambulatory / ODS / Telemedicine)", ["ผู้ป่วยนอก", "ไม่ค้างคืน", "วันเดียวกลับ", "ใกล้บ้าน", "ทางไกล", "telemedicine", "ambulatory", "ods", "27 เท่า", "217"]],
+    ["การดูแลภาวะเรื้อรัง (CCM / ICCC / ผู้ป่วยเป็นนักบิน)", ["เรื้อรัง", "จัดการตนเอง", "เชิงรุก", "ไตรภาคี", "นักบิน", "ccm", "iccc"]],
+    ["การดูแลระยะยาว (LTC / สมรรถภาพ / ผู้ดูแล)", ["ระยะยาว", "ltc", "ดำเนินชีวิต", "พึ่งพิง", "ผู้ดูแล", "functional ability", "intrinsic capacity"]],
+    ["การดูแลแบบประคับประคอง (Palliative Care / 4 มิติ / ACP / มาตรา 12)", ["ประคับประคอง", "palliative", "บรรเทาทุกข์", "วางแผนการดูแลล่วงหน้า", "acp", "มาตรา 12", "มอร์ฟีน", "โฮสปิซ", "hospice"]],
+
+    // HS3: Desirable Characteristics (EQESaRR)
+    ["คุณลักษณะที่พึงประสงค์ 6 ประการ (EQESaRR) และกรอบ Donabedian", ["eqesarr", "donabedian", "โครงสร้าง-กระบวนการ-ผลลัพธ์", "สัญญาณเตือนล่วงหน้า"]],
+    ["ความเป็นธรรม vs ความเท่าเทียม (equity vs equality)", ["ความเป็นธรรม", "ความเท่าเทียม", "ตามความจำเป็น", "equity", "equality"]],
+    ["กฎการดูแลสวนทางความจำเป็น (Inverse Care Law)", ["ต้องการการดูแลมาก", "สวนทางกับความจำเป็น", "inverse care", "ทิวดอร์ ฮาร์ต", "tudor hart"]],
+    ["การคุ้มครองทางการเงินและค่าใช้จ่ายวิกฤต (CHE / OOP / Impoverishment)", ["คุ้มครองทางการเงิน", "หนักเกินกำลัง", "ยากจนลง", "ร้อยละ 40", "catastrophic", "che", "จ่ายเงินสด", "oop"]],
+    ["กรอบคุณภาพ STEP และแบบจำลองแผ่นเนยแข็งสวิส (Swiss Cheese)", ["ความปลอดภัย", "ทันเวลา", "ประสิทธิผล", "ผู้ป่วยเป็นศูนย์กลาง", "เนยแข็งสวิส", "รูรั่ว", "เกือบพลาด", "near miss", "swiss cheese", "step"]],
+    ["ความครอบคลุมอย่างมีประสิทธิผล (Effective Coverage: Need–Use–Quality)", ["ความครอบคลุมอย่างมีประสิทธิผล", "effective coverage", "need", "quality", "ควบคุมโรคได้จริง"]],
+    ["ต้นทุนค่าเสียโอกาสและประสิทธิภาพ 3 ระดับ + HTA", ["ค่าเสียโอกาส", "opportunity cost", "เชิงเทคนิค", "เชิงการผลิต", "การจัดสรรทรัพยากร", "allocative", "technical", "hta"]],
+    ["ธรรมาภิบาล ภาระรับผิดชอบต่อสังคม และความสอดคล้องกับบริบท", ["ธรรมาภิบาล", "ภาระรับผิดชอบต่อสังคม", "ชี้แจง", "ตรวจสอบ", "รู้ข้อมูลไม่เท่ากัน", "ผู้มอบหมาย", "principal-agent", "บริบท", "accountability", "stewardship", "relevance"]],
+    ["ความยืดหยุ่นของระบบ 3 ระดับ (Absorptive–Adaptive–Transformative)", ["รองรับวิกฤต", "รองรับเบื้องต้น", "ปรับวิธีทำงาน", "ปฏิรูปโครงสร้าง", "absorptive", "adaptive", "transformative", "resilience", "ความยืดหยุ่น"]],
+
+    // HS4: Health Behaviour & Health Promotion
+    ["กฎบัตรออตตาวา 5 กลยุทธ์ (Ottawa Charter)", ["ออตตาวา", "นโยบายสาธารณะ", "สิ่งแวดล้อมที่เอื้อ", "ชุมชนเข้มแข็ง", "ทักษะส่วนบุคคล", "ปรับระบบบริการ", "ottawa"]],
+    ["ระบบคิดแบบอัตโนมัติ vs ไตร่ตรอง (System 1 & 2) และ Nudge", ["อัตโนมัติ", "ไตร่ตรอง", "system 1", "system 2", "สะกิด", "nudge", "ตีกรอบ", "ค่าเริ่มต้น", "สถาปัตยกรรมทางเลือก", "mindspace", "kahneman"]],
+    ["ตัวแบบ COM-B และวงล้อการปรับเปลี่ยนพฤติกรรม (BCW)", ["ความสามารถ", "โอกาส", "แรงจูงใจ", "com-b", "capability", "opportunity", "motivation", "bcw", "วงล้อ"]],
+    ["ความรอบรู้ด้านสุขภาพระดับบุคคลและองค์กร + Teach-back", ["ความรอบรู้ด้านสุขภาพ", "health literacy", "ระดับองค์กร", "teach-back", "ทวนความเข้าใจ"]],
+
+    // HS5: Primary Health Care & Primary Care
+    ["ระบบบริการสุขภาพปฐมภูมิ (PHC) vs บริการปฐมภูมิ (PC)", ["ระบบบริการสุขภาพปฐมภูมิ", "บริการปฐมภูมิ", "ข้ามภาคส่วน", "มีส่วนร่วมของชุมชน", "อัลมา-อตา", "อัสตานา", "phc", "primary care", "alma-ata", "astana"]],
+    ["คุณลักษณะบริการปฐมภูมิ 4 ประการ (Starfield 4Cs)", ["ด่านแรก", "ต่อเนื่อง", "ครอบคลุม", "ประสานงาน", "4cs", "starfield", "first contact", "continuity", "comprehensiveness", "coordination"]],
+
+    // HS6: Health Insurance & Provider Payment
+    ["การจ่ายล่วงหน้า การรวมกองทุน และการเฉลี่ยความเสี่ยง/เกลี่ยรายได้", ["จ่ายเงินล่วงหน้า", "จ่ายล่วงหน้า", "รวมกองทุน", "เฉลี่ยความเสี่ยง", "เกลี่ยรายได้", "กฎของจำนวนมาก", "prepayment", "pooling", "risk sharing"]],
+    ["ตลาดประกันสมัครใจ vs ภาคบังคับ (Adverse Selection & Cream Skimming)", ["ภาคบังคับ", "สมัครใจ", "ความเสี่ยงสูงเข้าซื้อ", "คัดกรองความเสี่ยง", "เลือกคนแข็งแรง", "วงจรขาลง", "adverse selection", "cream skimming", "risk selection", "death spiral"]],
+    ["สามกองทุนหลักของไทย (บัตรทอง ประกันสังคม สวัสดิการข้าราชการ)", ["บัตรทอง", "หลักประกันสุขภาพแห่งชาติ", "ประกันสังคม", "สวัสดิการข้าราชการ", "ucs", "sss", "csmbs"]],
+    ["กลไกจ่ายเงินผู้ให้บริการ (FFS, Capitation, DRGs, Global Budget)", ["จ่ายตามรายการ", "เหมาจ่ายรายหัว", "กลุ่มวินิจฉัยโรคร่วม", "งบประมาณยอดรวม", "งบปลายปิด", "งบปลายเปิด", "เร่งทำแต้ม", "ให้รหัสสูงเกินจริง", "ลดบริการ", "ffs", "capitation", "drg", "adjrw", "global budget", "upcoding", "treadmill"]],
+    ["Moral Hazard และ Supplier-Induced Demand (SID) + Gatekeeping", ["ผู้จ่ายแทน", "สั่งการตรวจรักษาเกิน", "สั่งบริการเกิน", "ร่วมจ่าย", "ด่านหน้า", "moral hazard", "sid", "gatekeeping", "co-payment"]],
+  ];
+
   function extractKeyConceptsFromText(plainText, rawHtml) {
     const concepts = [];
     const seen = new Set();
@@ -169,14 +1089,16 @@
         .replace(/^[\d.)\s•\-–:]+/, "")
         .replace(/[\s.,;:]+$/, "")
         .trim();
-      if (!cleanLabel || cleanLabel.length < 3 || cleanLabel.length > 75) return;
+      if (!cleanLabel || cleanLabel.length < 3 || cleanLabel.length > 78) return;
       if (STOP_PHRASES.has(cleanLabel)) return;
       const key = cleanLabel.toLowerCase();
       if (seen.has(key)) return;
       seen.add(key);
 
-      const tokens = [key, ...altTokens.map((t) => String(t || "").toLowerCase().trim()).filter((t) => t.length >= 2)];
-      // Also split "Thai (English)" into either Thai or English match
+      const tokens = [
+        key,
+        ...altTokens.map((t) => String(t || "").toLowerCase().trim()).filter((t) => t.length >= 2),
+      ];
       const parenM = cleanLabel.match(/^(.+?)\s*\(([^)]+)\)$/);
       if (parenM) {
         const p1 = parenM[1].trim().toLowerCase();
@@ -187,95 +1109,259 @@
       concepts.push({ label: cleanLabel, tokens: [...new Set(tokens)] });
     };
 
-    // 1. Extract <strong>...</strong> anchors from HTML
-    if (rawHtml) {
-      const strongRe = /<(?:strong|b|em)\b[^>]*>(.*?)<\/(?:strong|b|em)>/gi;
-      let m;
-      while ((m = strongRe.exec(rawHtml)) !== null) {
-        const st = stripTags(m[1]);
-        if (st && !STOP_PHRASES.has(st)) addConcept(st);
-      }
-    }
-
-    // 2. Extract "Thai phrase (English term)" pairs from plainText
-    const pairRe = /([ก-๙][ก-๙\s\-–/]{2,42}?)\s*\(([A-Za-z][A-Za-z0-9\s\-–/&:.]{1,45})\)/g;
-    let pm;
-    while ((pm = pairRe.exec(plainText)) !== null) {
-      const th = pm[1].trim().split(/\s+/).slice(-3).join(" ");
-      const en = pm[2].trim();
-      if (!/^\d{4}$/.test(en) && !en.toLowerCase().includes("et al")) {
-        addConcept(`${th} (${en})`, [th, en]);
-      }
-    }
-
-    // 3. Extract salient domain keywords & numbers present in the model answer
-    const DOMAIN_TERMS = [
-      ["โรค (disease)", ["เป็นโรค", "มีโรค", "ความผิดปกติในร่างกาย", "disease"]],
-      ["การเจ็บป่วย (illness)", ["การเจ็บป่วย", "รู้สึกไม่สบาย", "รู้สึกป่วย", "ความกังวล", "illness"]],
-      ["ภาวะที่สังคมยอมรับว่าป่วย (sickness)", ["สังคมยอมรับว่าป่วย", "ใบรับรองแพทย์", "ลาป่วย", "บทบาทผู้ป่วย", "sickness"]],
-      ["สุขภาวะ (well-being)", ["สุขภาวะ", "well-being", "อยู่ดีมีสุข"]],
-      ["ความเป็นอยู่ที่ดี (wellness)", ["ความเป็นอยู่ที่ดี", "wellness", "พัฒนาสุขภาพของตน"]],
-      ["ความสามารถในการปรับตัว", ["ปรับตัว", "จัดการตนเอง", "adapt", "self-manage", "huber"]],
-      ["ศักยภาพทางสุขภาพกับความท้าทายของชีวิต", ["ศักยภาพ", "ความท้าทาย", "bircher"]],
-      ["ปัจจัยต้นน้ำเชิงโครงสร้าง", ["ต้นน้ำ", "เชิงโครงสร้าง", "นโยบาย", "การเมือง", "ฐานะทางสังคม", "structural"]],
-      ["ปัจจัยปลายน้ำในชีวิตประจำวัน", ["ปลายน้ำ", "สภาพความเป็นอยู่", "ที่อยู่อาศัย", "น้ำสะอาด", "สุขาภิบาล", "intermediary"]],
-      ["การป้องกันก่อนเกิดปัจจัยเสี่ยง (primordial)", ["ก่อนเกิดปัจจัยเสี่ยง", "primordial"]],
-      ["การป้องกันระดับที่หนึ่ง (primary)", ["ระดับที่หนึ่ง", "ระดับ 1", "วัคซีน", "เลิกบุหรี่", "ลดปัจจัยเสี่ยง", "primary prevention"]],
-      ["การป้องกันระดับที่สอง (secondary)", ["ระดับที่สอง", "ระดับ 2", "คัดกรอง", "ระยะเริ่มแรก", "ผลลบลวง", "false negative", "secondary"]],
-      ["การป้องกันระดับที่สาม (tertiary)", ["ระดับที่สาม", "ระดับ 3", "ฟื้นฟู", "ภาวะแทรกซ้อน", "ความพิการ", "tertiary"]],
-      ["การป้องกันระดับที่สี่ (quaternary)", ["ระดับที่สี่", "ระดับ 4", "เกินจำเป็น", "ผลบวกลวง", "false positive", "quaternary"]],
-      ["การตัดสินใจร่วมกัน (shared decision-making)", ["ตัดสินใจร่วมกัน", "รับฟังความกังวล", "ประโยชน์และผลเสีย", "shared decision"]],
-      ["เจตนาหลัก (primary intent)", ["เจตนาหลัก", "primary intent", "เป้าหมายหลักเพื่อสุขภาพ"]],
-      ["ระบบความสัมพันธ์ทั้งมวล (พ.ร.บ. สุขภาพแห่งชาติ)", ["ความสัมพันธ์ทั้งมวล", "พ.ร.บ. สุขภาพ", "พระราชบัญญัติสุขภาพแห่งชาติ"]],
-      ["หกองค์ประกอบหลักของระบบสุขภาพ (6 building blocks)", ["องค์ประกอบหลัก", "กำลังคน", "การคลัง", "สารสนเทศ", "ยาและเทคโนโลยี", "การอภิบาล", "การจัดบริการ", "building blocks"]],
-      ["ระบบที่ซับซ้อนและปรับตัวได้ (CAS) และวงจรผลสะท้อนกลับ", ["ซับซ้อนและปรับตัวได้", "ผลสะท้อนกลับ", "บริบท", "feedback", "adaptive"]],
-      ["ห่วงโซ่ผลลัพธ์ (ปัจจัยนำเข้า–กระบวนการ–ผลผลิต–ผลลัพธ์–ผลกระทบ)", ["ปัจจัยนำเข้า", "กระบวนการ", "ผลผลิต", "ผลลัพธ์", "ผลกระทบ", "results chain"]],
-      ["เป้าหมายห้าประการ (Quintuple Aim)", ["ห้าประการ", "หมดไฟ", "คนทำงาน", "ความเหลื่อมล้ำ", "quintuple", "quadruple", "triple aim"]],
-      ["กรอบ 6W (WHO, WHY, WHEN, WHAT, WHICH, WHERE)", ["who", "why", "when", "what", "which", "where", "6w"]],
-      ["การดูแลฉุกเฉิน (1669 / คัดแยก)", ["1669", "ฉุกเฉิน", "คัดแยก", "triage", "จุดเกิดเหตุ"]],
-      ["การดูแลระยะเฉียบพลัน (ทำให้ภาวะคงที่)", ["เฉียบพลัน", "คงที่", "พ้นวิกฤต", "acute"]],
-      ["การดูแลระยะกลาง (IMC / Barthel / reablement)", ["ระยะกลาง", "imc", "บาร์เธล", "barthel", "reablement", "6 เดือน", "หกเดือน", "step-down", "step-up"]],
-      ["การดูแลผู้ป่วยนอก (ไม่ค้างคืน / ODS)", ["ผู้ป่วยนอก", "ไม่ค้างคืน", "วันเดียวกลับ", "ambulatory", "ods"]],
-      ["การดูแลภาวะเรื้อรัง (CCM / ผู้ป่วยเป็นนักบิน / ไตรภาคี)", ["เรื้อรัง", "จัดการตนเอง", "เชิงรุก", "ไตรภาคี", "ccm", "iccc"]],
-      ["การดูแลระยะยาว (LTC / ศักยภาพทางกายและใจ / ความสามารถในการดำเนินชีวิต)", ["ระยะยาว", "ltc", "ดำเนินชีวิต", "พึ่งพิง", "ผู้ดูแล", "functional ability", "intrinsic capacity"]],
-      ["การดูแลแบบประคับประคอง (บรรเทาทุกข์ 4 มิติ / ACP)", ["ประคับประคอง", "palliative", "วางแผนการดูแลล่วงหน้า", "acp", "มาตรา 12", "มอร์ฟีน", "โฮสปิซ"]],
-      ["ความเป็นธรรม vs ความเท่าเทียม (equity vs equality)", ["ความเป็นธรรม", "ความเท่าเทียม", "ตามความจำเป็น", "equity", "equality"]],
-      ["ภาวะที่คนยิ่งต้องการการดูแลมากกลับเข้าถึงบริการได้น้อย (inverse care law)", ["ต้องการการดูแลมาก", "สวนทางกับความจำเป็น", "inverse care", "ทิวดอร์ ฮาร์ต"]],
-      ["การคุ้มครองทางการเงินและภาระค่ารักษาเกินกำลัง (CHE)", ["คุ้มครอง", "หนักเกินกำลัง", "ยากจนลง", "ร้อยละ 40", "catastrophic", "che", "จ่ายเงินสด", "oop"]],
-      ["กรอบคุณภาพ STEP และแบบจำลองแผ่นเนยแข็งสวิส", ["ความปลอดภัย", "ทันเวลา", "ประสิทธิผล", "ผู้ป่วยเป็นศูนย์กลาง", "เนยแข็งสวิส", "รูรั่ว", "เกือบพลาด", "near miss", "swiss cheese", "step"]],
-      ["ความครอบคลุมอย่างมีประสิทธิผล (Need–Use–Quality)", ["ความครอบคลุมอย่างมีประสิทธิผล", "effective coverage", "คุณภาพ", "ควบคุมโรคได้จริง"]],
-      ["ต้นทุนค่าเสียโอกาสและประสิทธิภาพ 3 ระดับ", ["ค่าเสียโอกาส", "opportunity cost", "เชิงเทคนิค", "เชิงการผลิต", "การจัดสรรทรัพยากร", "hta"]],
-      ["ธรรมาภิบาล ภาระรับผิดชอบต่อสังคม และความสอดคล้องกับบริบท", ["ธรรมาภิบาล", "ภาระรับผิดชอบต่อสังคม", "ชี้แจง", "ตรวจสอบ", "รู้ข้อมูลไม่เท่ากัน", "บริบท", "accountability", "stewardship", "relevance"]],
-      ["ความยืดหยุ่นของระบบ 3 ระดับ (รองรับเบื้องต้น ปรับวิธีทำงาน ปฏิรูปโครงสร้าง)", ["รองรับวิกฤต", "ปรับวิธีทำงาน", "ปฏิรูปโครงสร้าง", "absorptive", "adaptive", "transformative", "resilience"]],
-      ["กฎบัตรออตตาวา 5 กลยุทธ์ (Ottawa Charter)", ["ออตตาวา", "นโยบายสาธารณะ", "สิ่งแวดล้อมที่เอื้อ", "ชุมชนเข้มแข็ง", "ทักษะส่วนบุคคล", "ปรับระบบบริการ", "ottawa"]],
-      ["ระบบคิดแบบอัตโนมัติและแบบไตร่ตรอง (System 1 & 2) และ Nudge", ["อัตโนมัติ", "ไตร่ตรอง", "system 1", "system 2", "สะกิด", "nudge", "ตีกรอบ", "ค่าเริ่มต้น", "mindspace"]],
-      ["ตัวแบบ COM-B และวงล้อการปรับเปลี่ยนพฤติกรรม (BCW)", ["ความสามารถ", "โอกาส", "แรงจูงใจ", "com-b", "capability", "opportunity", "motivation", "bcw"]],
-      ["ความรอบรู้ด้านสุขภาพระดับบุคคลและระดับองค์กร", ["ความรอบรู้ด้านสุขภาพ", "health literacy", "ระดับองค์กร", "teach-back"]],
-      ["ระบบบริการสุขภาพปฐมภูมิ (PHC) vs บริการปฐมภูมิ (PC)", ["ระบบบริการสุขภาพปฐมภูมิ", "บริการปฐมภูมิ", "ข้ามภาคส่วน", "มีส่วนร่วมของชุมชน", "อัลมา-อตา", "อัสตานา", "phc", "primary care"]],
-      ["คุณลักษณะบริการปฐมภูมิ 4 ประการ (4Cs ของ Starfield)", ["ด่านแรก", "ต่อเนื่อง", "ครอบคลุม", "ประสานงาน", "starfield", "first contact", "continuity", "comprehensiveness", "coordination"]],
-      ["การจ่ายเงินล่วงหน้า การรวมกองทุน และการเฉลี่ยความเสี่ยง/เกลี่ยรายได้", ["จ่ายเงินล่วงหน้า", "รวมกองทุน", "เฉลี่ยความเสี่ยง", "เกลี่ยรายได้", "กฎของจำนวนมาก", "prepayment", "pooling"]],
-      ["ตลาดประกันสมัครใจ vs ภาคบังคับ (adverse & risk selection)", ["ภาคบังคับ", "สมัครใจ", "ความเสี่ยงสูงเข้าซื้อ", "คัดกรองความเสี่ยง", "วงจรขาลง", "adverse selection", "cream skimming", "risk selection"]],
-      ["สามกองทุนหลักของไทย (บัตรทอง ประกันสังคม สวัสดิการข้าราชการ)", ["บัตรทอง", "หลักประกันสุขภาพแห่งชาติ", "ประกันสังคม", "สวัสดิการข้าราชการ", "ucs", "sss", "csmbs"]],
-      ["กลไกจ่ายเงินผู้ให้บริการ (FFS, Capitation, DRGs, Global Budget)", ["จ่ายตามรายการ", "เหมาจ่ายรายหัว", "กลุ่มวินิจฉัยโรคร่วม", "งบประมาณยอดรวม", "เร่งทำแต้ม", "ให้รหัสสูงเกินจริง", "ffs", "capitation", "drg", "adjrw", "global budget", "upcoding", "treadmill"]],
-      ["การใช้บริการเพิ่มขึ้นเมื่อมีผู้จ่ายแทนและการสั่งบริการเกินจำเป็น (moral hazard & SID)", ["ผู้จ่ายแทน", "สั่งการตรวจรักษาเกิน", "สั่งบริการเกิน", "ร่วมจ่าย", "ด่านหน้า", "moral hazard", "sid", "gatekeeping", "co-payment"]],
-    ];
-
-    const pLow = plainText.toLowerCase();
+    // 1. First prioritize canonical DOMAIN_TERMS that ACTUALLY appear in this specific answer!
+    const pLow = String(plainText || "").toLowerCase();
     for (const [label, toks] of DOMAIN_TERMS) {
       if (toks.some((t) => pLow.includes(t.toLowerCase()))) {
         addConcept(label, toks);
       }
     }
 
-    return concepts.slice(0, 8);
+    // 2. Extract "Thai phrase (English term)" pairs from this answer
+    const pairRe = /([ก-๙][ก-๙\s\-–/]{2,40}?)\s*\(([A-Za-z][A-Za-z0-9\s\-–/&:.]{1,42})\)/g;
+    let pm;
+    while ((pm = pairRe.exec(plainText)) !== null) {
+      const th = pm[1].trim().split(/\s+/).slice(-3).join(" ");
+      const en = pm[2].trim();
+      if (!/^\d{4}$/.test(en) && !en.toLowerCase().includes("et al")) {
+        // Avoid duplicating an already-added domain concept sharing the same English term
+        const enLow = en.toLowerCase();
+        if (!concepts.some((c) => c.tokens.includes(enLow))) {
+          addConcept(`${th} (${en})`, [th, en]);
+        }
+      }
+    }
+
+    // 3. Extract <strong>...</strong> anchors from HTML only if not redundant
+    if (rawHtml && concepts.length < 6) {
+      const strongRe = /<(?:strong|b)\b[^>]*>(.*?)<\/(?:strong|b)>/gi;
+      let m;
+      while ((m = strongRe.exec(rawHtml)) !== null) {
+        const st = stripTags(m[1]);
+        if (!st || STOP_PHRASES.has(st) || st.length < 4 || st.length > 60) continue;
+        if (/^(?:แนวคำตอบ|คำตอบ|ตัวอย่าง|ส่วนที่|ข้อที่|ประเด็น)/.test(st)) continue;
+        const stLow = st.toLowerCase();
+        if (!concepts.some((c) => c.tokens.some((t) => stLow.includes(t) || t.includes(stLow)))) {
+          addConcept(st);
+        }
+      }
+    }
+
+    return concepts.slice(0, 7);
   }
 
-  /* ---------- Built-In Diagnostic Evaluation (Zero-Setup, Instant, Grounded on Official Answer Key) ---------- */
-  function evaluateLocally(rubric, submission) {
+  // Case characters / named entities to track coverage specifically
+  const CASE_ENTITY_PATTERNS = [
+    { label: "บุคคล ก", re: /บุคคล\s*ก(?!\S)/ },
+    { label: "บุคคล ข", re: /บุคคล\s*ข(?!\S)/ },
+    { label: "บุคคล ค", re: /บุคคล\s*ค(?!\S)/ },
+    { label: "บุคคล ง", re: /บุคคล\s*ง(?!\S)/ },
+    { label: "บุคคล จ", re: /บุคคล\s*จ(?!\S)/ },
+    { label: "เด็กคนที่หนึ่ง", re: /เด็กคนที่(?:หนึ่ง|1)/ },
+    { label: "เด็กคนที่สอง", re: /เด็กคนที่(?:สอง|2)/ },
+    { label: "ผู้รับบริการรายที่ 1", re: /ผู้รับบริการ(?:รายที่)?\s*1/ },
+    { label: "ผู้รับบริการรายที่ 2", re: /ผู้รับบริการ(?:รายที่)?\s*2/ },
+    { label: "ผู้รับบริการรายที่ 3", re: /ผู้รับบริการ(?:รายที่)?\s*3/ },
+    { label: "ผู้รับบริการรายที่ 4", re: /ผู้รับบริการ(?:รายที่)?\s*4/ },
+    { label: "ผู้ป่วยรายที่ 3", re: /ผู้ป่วย(?:รายที่)?\s*3/ },
+    { label: "WHO (องค์การอนามัยโลก)", re: /องค์การอนามัยโลก|\bwho\b/i },
+    { label: "พ.ร.บ. สุขภาพแห่งชาติ พ.ศ. 2550", re: /พ\.?ร\.?บ\.?\s*สุขภาพ|พระราชบัญญัติสุขภาพ|2550/ },
+    { label: "Bircher", re: /bircher|เบอร์เชอร์/i },
+    { label: "Huber", re: /huber|ฮูเบอร์/i },
+    { label: "Starfield (4Cs)", re: /starfield|4cs?|ด่านแรก.*ต่อเนื่อง/i },
+    { label: "Ottawa Charter", re: /ottawa|ออตตาวา/i },
+    { label: "COM-B", re: /com-?b|ความสามารถ.*โอกาส.*แรงจูงใจ/i },
+  ];
+
+  function detectCaseEntityCoverage(studentText, answerPlain, promptPlain) {
+    const expected = [];
+    const matched = [];
+    const missed = [];
+    const combinedRef = `${promptPlain} ${answerPlain}`;
+    for (const ent of CASE_ENTITY_PATTERNS) {
+      if (ent.re.test(answerPlain) && (ent.re.test(combinedRef))) {
+        expected.push(ent.label);
+        if (ent.re.test(studentText)) matched.push(ent.label);
+        else missed.push(ent.label);
+      }
+    }
+    return { expected, matched, missed };
+  }
+
+  /** Detect targeted conceptual misconceptions & polarity contradictions grounded in HS1–HS6 */
+  function detectMisconceptions(studentText, rubric) {
+    const issues = [];
+    const u = String(studentText || "").toLowerCase();
+    const p = String((rubric && rubric.prompt) || "").toLowerCase();
+    const a = stripTags((rubric && rubric.answerHtml) || "").toLowerCase();
+
+    // 1. Error-correction statements (HS1-WB กิจกรรมบูรณาการที่ 1: hs1_wb_q_21..26) where prompt is a FALSE claim
+    const isFalseStatementPrompt =
+      /^hs1_wb_q_(21|22|23|24|25|26)$/.test((rubric && rubric.id) || "") ||
+      ((a.includes("มิใช่") || a.includes("ไม่ได้หมายความว่า")) && !/[?]|อย่างไร|เหตุใด|หรือไม่|คืออะไร|ยกตัวอย่าง|อธิบาย|พิจารณา/.test(p));
+
+    if (isFalseStatementPrompt) {
+      const agrees = /^(?:ใช่|ถูก|ถูกต้อง|จริง|เห็นด้วย|yes|true)(?:[\s.,]|$)/.test(u.trim());
+      const refutes = /ไม่จริง|ไม่ใช่|ไม่ถูกต้อง|คลาดเคลื่อน|ผิด|ไม่ได้หมายความว่า|มิใช่|ไม่เสมอไป|แต่(?:เป็น|หมายถึง|มุ่ง)/.test(u);
+      if (agrees && !refutes) {
+        issues.push(
+          "ข้อความในโจทย์เป็น **ข้อความที่คลาดเคลื่อน (false statement)** — ลองทบทวนใหม่ว่าจุดใดในประโยคที่ขัดแย้งกับหลักการในเนื้อหาประกอบคำสอน"
+        );
+      }
+    }
+
+    // 2. Claiming disease/illness/sickness are the SAME group when answer explicitly says NOT the same group
+    if (a.includes("ไม่ใช่บุคคลกลุ่มเดียวกัน") || a.includes("แยกจากกัน")) {
+      const saysSame = /(?:เป็น(?:บุคคล)?กลุ่มเดียวกัน|คนเดียวกัน|กลุ่มเดียวกันหมด)/.test(u);
+      const saysNotSame = /(?:ไม่(?:ใช่|ได้เป็น)(?:บุคคล)?กลุ่มเดียวกัน|ต่างกลุ่ม|คนละกลุ่ม|แยกจากกัน|ไม่เหมือนกัน)/.test(u);
+      if (saysSame && !saysNotSame) {
+        issues.push(
+          "จุดสำคัญที่ยังคลาดเคลื่อน: คำตอบทั้งสามข้อ **ไม่ใช่บุคคลกลุ่มเดียวกัน** เพราะความผิดปกติที่ตรวจพบ (**โรค / disease**), ความรู้สึกไม่สบาย (**การเจ็บป่วย / illness**), และความต้องการการรับรองจากสังคม (**sickness**) เกิดขึ้นแยกจากกันได้ (เช่น บุคคล ก มีโรคแต่ไม่รู้สึกป่วย ส่วนบุคคล ข รู้สึกป่วยแต่ผลเลือดปกติ)"
+        );
+      }
+    }
+
+    // 3. Conflating "no disease" with "no illness"
+    if (a.includes("ไม่ได้หมายความว่าไม่มีการเจ็บป่วย") && /ไม่มีโรค.{0,18}(?:จึง|เลย|ก็).{0,12}ไม่(?:ป่วย|มีการเจ็บป่วย)/.test(u) && !/ไม่ได้หมายความว่า|แต่|ไม่จริง|คลาดเคลื่อน/.test(u)) {
+      issues.push(
+        "จุดที่ยังคลาดเคลื่อน: การตรวจไม่พบ **โรค (disease)** ไม่ได้แปลว่าไม่มี **การเจ็บป่วย (illness)** เพราะบุคคล ข ยังรู้สึกอ่อนเพลียและนอนไม่หลับจริง แม้ผลตรวจเลือดปกติ"
+      );
+    }
+
+    // 4. Swapping false negative vs false positive between Secondary and Quaternary prevention
+    if ((a.includes("ผลลบลวง") || a.includes("ผลบวกลวง")) && (p.includes("ระดับที่สอง") || p.includes("ระดับที่สี่"))) {
+      const swappedSec = /ระดับ(?:ที่)?(?:สอง|2).{0,24}(?:ลด|ระวัง|ป้องกัน).{0,14}(?:ผลบวกลวง|false positive)/.test(u);
+      const swappedQuat = /ระดับ(?:ที่)?(?:สี่|4).{0,24}(?:ลด|ระวัง|ป้องกัน).{0,14}(?:ผลลบลวง|false negative)/.test(u);
+      if (swappedSec || swappedQuat) {
+        issues.push(
+          "ระวังสลับชนิดความคลาดเคลื่อนของผลตรวจ: **การป้องกันระดับที่สอง (secondary)** มุ่งลด **ผลลบลวง (false negative)** เพื่อไม่ให้พลาดคนป่วยจริง ส่วน **การป้องกันระดับที่สี่ (quaternary)** มุ่งลด **ผลบวกลวง (false positive)** เพื่อไม่ให้คนปกติถูกวินิจฉัยหรือรักษาเกินจำเป็น"
+        );
+      }
+    }
+
+    // 5. Misinterpreting Quaternary prevention as "never test anyone"
+    if (a.includes("มิใช่การปฏิเสธการตรวจทั้งหมด") && /ไม่ตรวจ(?:เลย|ใด\s*ๆ|ทั้งหมด)/.test(u) && !/มิใช่|ไม่ใช่|ไม่ได้แปลว่า|หลีกเลี่ยง.{0,18}เกินจำเป็น/.test(u)) {
+      issues.push(
+        "ข้อควรระวัง: **การป้องกันระดับที่สี่ (quaternary prevention)** มิใช่การปฏิเสธการตรวจทั้งหมด แต่คือการหลีกเลี่ยงการตรวจ/รักษาที่**เกินจำเป็น** โดยรับฟังความกังวล อธิบายประโยชน์-ผลเสีย และตัดสินใจร่วมกัน (shared decision-making)"
+      );
+    }
+
+    // 6. Conflating Equity with Equality
+    if (a.includes("ความเป็นธรรม") && a.includes("ความเท่าเทียม")) {
+      if (/ความเป็นธรรม.{0,16}(?:คือ|หมายถึง).{0,18}(?:ให้ทุกคนเท่ากัน|เท่ากันหมด)/.test(u) && !/ความจำเป็น|ต่างกัน|ไม่เท่ากัน/.test(u)) {
+        issues.push(
+          "ระวังสับสนระหว่าง **ความเป็นธรรม (equity)** กับ **ความเท่าเทียม (equality)**: ความเท่าเทียมคือให้ทุกคนเท่ากันหมด แต่ความเป็นธรรมคือการจัดสรร**ตามความจำเป็นทางสุขภาพ** เพื่อให้กลุ่มเปราะบางเข้าถึงโอกาสทางสุขภาพได้ทัดเทียมกัน"
+        );
+      }
+    }
+
+    // 7. Saying Bishai study found health services had NO role
+    if (a.includes("ราวครึ่งหนึ่ง") && /แทบไม่มีบทบาท|ไม่มีผล|ไม่สำคัญ/.test(u) && !/ไม่ใช่|มิใช่|คลาดเคลื่อน|ครึ่ง/.test(u)) {
+      issues.push(
+        "ข้อควรตรวจสอบจากงานวิจัย Bishai และคณะ (146 ประเทศ): ราวครึ่งหนึ่งของการลดการเสียชีวิตมารดาและเด็กมาจาก**การพัฒนาในภาคสุขภาพ** และอีกราวครึ่งหนึ่งมาจากนอกภาคสุขภาพ ระบบบริการสุขภาพจึงมีบทบาทสำคัญมาก แต่มิใช่ปัจจัยเดียว"
+      );
+    }
+
+    return issues;
+  }
+
+  function buildStarterScaffold(rubric, teachingCtx) {
+    const p = (rubric && rubric.prompt) || "";
+    const aPlain = stripTags((rubric && rubric.answerHtml) || "");
+    const concepts = extractKeyConceptsFromText(aPlain, rubric && rubric.answerHtml);
+    const entCov = detectCaseEntityCoverage("", aPlain, p);
+
+    // Special tailored starter frame for multi-question vignette prompts like hs1_wb_bq_6
+    if (p.includes("สามคำถาม") && p.includes("บุคคลกลุ่มเดียวกันหรือไม่")) {
+      return (
+        "ลองอ่านกรณี **บุคคล ก–ง** ด้านบนอีกครั้ง แล้วเริ่มเขียนสั้น ๆ ตามโครงนี้ได้เลย: " +
+        "“1) ตรวจพบความผิดปกติ: บุคคล … / 2) รู้สึกไม่สบาย: บุคคล … / 3) ต้องการใบรับรองแพทย์: บุคคล … สรุปว่าทั้งสามข้อเป็น/ไม่ใช่กลุ่มเดียวกัน เพราะ…”"
+      );
+    }
+    if (entCov.expected.length >= 2) {
+      return (
+        `ลองตั้งต้นจากกรณีศึกษาในหัวข้อนี้ โดยระบุทีละกรณี (${entCov.expected.slice(0, 4).join(", ")}) ` +
+        `พร้อมเชื่อมโยงกับประเด็นสำคัญในเนื้อหาคำสอน (${concepts.slice(0, 2).map((c) => `**${c.label}**`).join(" และ ") || teachingCtx.groundingLabel})`
+      );
+    }
+    if (/ต่างกันอย่างไร|เปรียบเทียบ/.test(p)) {
+      return (
+        "ลองเริ่มเขียนแบบเทียบสองฝั่งสั้น ๆ ด้วยโครงประโยค: " +
+        `“ฝั่งแรกมุ่งเน้นเรื่อง… ขณะที่ฝั่งที่สองมุ่งเน้นเรื่อง… ซึ่งแตกต่างกันตรงที่…”` +
+        (concepts.length ? ` (คำสำคัญตั้งต้นจากเนื้อหา: ${concepts.slice(0, 2).map((c) => `**${c.label}**`).join(", ")})` : "")
+      );
+    }
+    if (/^hs1_wb_q_(21|22|23|24|25|26)$/.test((rubric && rubric.id) || "")) {
+      return (
+        "ข้อนี้เป็นโจทย์จับผิดข้อความที่คลาดเคลื่อน ลองเริ่มเขียนว่า: " +
+        "“ข้อความนี้คลาดเคลื่อนตรงที่… ที่ถูกต้องตามเนื้อหาคำสอนคือ…”"
+      );
+    }
+    if (concepts.length > 0) {
+      return (
+        `ลองเริ่มพิมพ์คำตอบสั้น ๆ 2–3 ประโยคด้วยภาษาของตนเอง โดยชวนคิดเชื่อมโยงกับแนวคิด ` +
+        `${concepts.slice(0, 2).map((c) => `**${c.label}**`).join(" และ ")} ใน ${teachingCtx.groundingLabel}`
+      );
+    }
+    return `ลองสรุปความคิดเห็นของตนเองสั้น ๆ 2–3 ประโยคเทียบกับเนื้อหาใน ${teachingCtx.groundingLabel} แล้วกดส่งอีกครั้งเพื่อรับคำแนะนำเฉพาะบุคคล`;
+  }
+
+  function buildSocraticFollowUp(rubric, teachingCtx, verdict, matchedConcepts, missedConcepts) {
+    const mod = teachingCtx.moduleCode;
+    if (verdict === "gibberish" || verdict === "keyboard_layout_typo" || verdict === "non_answer" || verdict === "empty" || verdict === "prompt_copy") {
+      if (mod === "HS1") {
+        return "หากคุณเป็นแพทย์เวรที่พบผู้ป่วยซึ่งผลตรวจปกติแต่ยืนยันว่านอนไม่หลับมา 1 เดือน คุณจะเริ่มต้นถามคำถามแรกกับเขาว่าอย่างไร?";
+      }
+      if (mod === "HS2") {
+        return "ลองนึกถึงผู้ป่วย 1 รายที่คุณเคยพบในโรงพยาบาล — มีองค์ประกอบใดนอกเหนือจากแพทย์และยาที่กำหนดว่าผู้ป่วยรายนั้นจะหายดีหรือไม่?";
+      }
+      if (mod === "HS3") {
+        return "ในมุมมองของประชาชน ระบบบริการที่ “รักษาเก่ง” แต่ทำให้ครอบครัวผู้ป่วยล้มละลายจากค่ารักษา ถือเป็นระบบสุขภาพที่ดีพอหรือยัง?";
+      }
+      if (mod === "HS4") {
+        return "เหตุใดการให้ความรู้ด้านสุขภาพเพียงอย่างเดียวจึงมักไม่พอที่จะทำให้คนเปลี่ยนพฤติกรรมระยะยาวได้จริง?";
+      }
+      if (mod === "HS5") {
+        return "หากแพทย์ประจำคลินิกปฐมภูมิรู้จักผู้ป่วยและครอบครัวต่อเนื่องหลายปี การดูแลจะต่างจากการเจอแพทย์เวรแบบครั้งเดียวจบอย่างไร?";
+      }
+      if (mod === "HS6") {
+        return "หากโรงพยาบาลถูกจ่ายเงินแบบเหมาจ่ายรายหัวเทียบกับจ่ายตามรายการ แรงจูงใจต่อการสั่งตรวจรักษาจะเปลี่ยนไปในทิศทางใด?";
+      }
+      return "ลองตั้งต้นจากประสบการณ์จริง 1 เหตุการณ์ที่เชื่อมโยงกับโจทย์ข้อนี้ แล้วเขียนเหตุผลสั้น ๆ ด้วยภาษาของตนเอง";
+    }
+
+    if (missedConcepts && missedConcepts.length > 0) {
+      return `หากนำแนวคิด <strong>${escapeHtml(missedConcepts[0].label)}</strong> เข้ามาพิจารณาร่วมกับคำตอบเดิมของคุณ ข้อสรุปหรือแนวทางปฏิบัติของแพทย์จะรอบด้านขึ้นอย่างไร?`;
+    }
+    if (mod === "HS1") {
+      return "หากผู้เรียนต้องอธิบายประเด็นนี้ให้ผู้ป่วยหรือครอบครัวเข้าใจในห้องตรวจจริงภายใน 1 นาที จะเลือกใช้คำพูดแบบใดให้เข้าใจง่ายและไม่ทำให้ผู้ป่วยรู้สึกถูกตัดสิน?";
+    }
+    if (mod === "HS2") {
+      return "หากเกิดการเปลี่ยนแปลงในหนึ่งองค์ประกอบของระบบสุขภาพตามกรณีนี้ คุณคาดว่าจะเกิดผลสะท้อนกลับ (feedback) ไปยังส่วนอื่นของระบบอย่างไร?";
+    }
+    if (mod === "HS3") {
+      return "ในฐานะแพทย์ที่ทำงานในโรงพยาบาลชุมชน คุณจะสังเกต “สัญญาณเตือนล่วงหน้า” ใดที่บ่งชี้ว่าคุณลักษณะข้อนี้กำลังบกพร่องก่อนที่จะเกิดผลเสียหายต่อผู้ป่วย?";
+    }
+    if (mod === "HS4") {
+      return "หากต้องออกแบบมาตรการในชุมชนจริง คุณจะผสมผสานการปรับสิ่งแวดล้อม (Opportunity) กับแรงจูงใจ (Motivation) อย่างไรโดยไม่พึ่งการให้ความรู้เพียงอย่างเดียว?";
+    }
+    if (mod === "HS5") {
+      return "บทบาทของแพทย์และทีมสหวิชาชีพปฐมภูมิควรเชื่อมโยงกับชุมชนและภาคส่วนนอกสาธารณสุขอย่างไรเพื่อให้เกิดผลลัพธ์ด้านสุขภาพที่ยั่งยืน?";
+    }
+    if (mod === "HS6") {
+      return "หากต้องออกแบบกลไกการจ่ายเงินเพื่อลดทั้งการใช้บริการเกินจำเป็นและการปฏิเสธผู้ป่วยอาการหนัก ควรผสมผสานกลไกใดร่วมกันและมีระบบกำกับอย่างไร?";
+    }
+    return "ลองเชื่อมโยงคำตอบนี้กับบริบทการทำงานของแพทย์ในระบบสุขภาพไทย — อะไรคือความท้าทายสำคัญที่สุดเมื่อนำไปปฏิบัติจริง?";
+  }
+
+  /* ---------- Built-In Zero-Setup Deep Grounded Evaluator ---------- */
+  function evaluateLocally(rubric, submission, precomputedCtx) {
+    const teachingCtx = precomputedCtx || extractTeachingContext(rubric);
     const didWell = [];
     const needsAttention = [];
     const canImprove = [];
 
+    /* --- 1. Fillable Table Evaluation --- */
     if (rubric.kind === "table") {
       const cells = (submission && submission.cells) || {};
       const headers = rubric.headers || [];
@@ -284,8 +1370,10 @@
 
       let totalFillable = 0;
       let filledCount = 0;
+      let gibberishCount = 0;
       const cellFeedbackMap = {};
       const correctRowLabels = [];
+      const gibberishDetails = [];
       const mismatchDetails = [];
       const partialDetails = [];
       const emptyRowLabels = [];
@@ -311,11 +1399,18 @@
           }
           filledCount++;
 
-          if (aRows && aRows[rIdx] && aRows[rIdx][cIdx] !== undefined) {
+          const expVal = aRows && aRows[rIdx] && aRows[rIdx][cIdx] !== undefined ? aRows[rIdx][cIdx] : "";
+          const res = matchCellValue(uVal, expVal, rubric, teachingCtx);
+          cellFeedbackMap[key] = res.status;
+
+          if (res.status === "gibberish") {
+            rowAllGood = false;
+            gibberishCount++;
+            gibberishDetails.push(
+              `<strong>${escapeHtml(rowLabel)} (${escapeHtml(colName)})</strong>: ข้อความ <code>${escapeHtml(uVal)}</code> ดูเหมือนพิมพ์สุ่ม/ไม่เป็นคำที่มีความหมาย กรุณาพิมพ์คำตอบจริง`
+            );
+          } else if (expVal) {
             rowCheckedAny = true;
-            const expVal = aRows[rIdx][cIdx];
-            const res = matchCellValue(uVal, expVal);
-            cellFeedbackMap[key] = res.status;
             if (res.status === "mismatch") {
               rowAllGood = false;
               mismatchDetails.push(
@@ -327,9 +1422,9 @@
                 `<strong>${escapeHtml(rowLabel)} (${escapeHtml(colName)})</strong>: ลองเชื่อมประเด็น <em>“${escapeHtml(expVal)}”</em> เพิ่มเติม`
               );
             }
-          } else {
-            cellFeedbackMap[key] = uVal.length >= 4 ? "open_ok" : "brief";
-            if (uVal.length < 4) rowAllGood = false;
+          } else if (uVal.length < 4) {
+            cellFeedbackMap[key] = "brief";
+            rowAllGood = false;
           }
         });
 
@@ -340,39 +1435,54 @@
       if (filledCount === 0) {
         return {
           emptySubmission: true,
+          verdict: "empty",
+          verdictLabel: "📝 ยังไม่ได้กรอกคำตอบในตาราง",
+          groundingRef: teachingCtx.groundingLabel,
           cellFeedbackMap,
-          whatDidWell: ["คุณเปิดตารางฝึกวิเคราะห์พร้อมทำแล้ว — ลองเลือกหรือพิมพ์คำตอบในช่องว่างอย่างน้อยบางแถวก่อนกดส่ง เพื่อรับคำแนะนำรายช่องได้ทันที"],
-          whatNeedsAttention: [`ยังไม่ได้กรอกข้อมูลในตาราง (มีช่องให้เติมทั้งหมด ${totalFillable} ช่อง)`],
-          whatCanImprove: ["เริ่มจากแถวที่มั่นใจที่สุดก่อน แล้วสังเกตความแตกต่างระหว่างแต่ละแถวตามเกณฑ์ในหัวตาราง"],
+          whatDidWell: ["คุณเปิดตารางฝึกวิเคราะห์พร้อมเริ่มทำแล้ว — ลองเลือกหรือพิมพ์คำตอบอย่างน้อยบางแถวก่อนกดส่ง เพื่อรับคำแนะนำรายช่องได้ทันที"],
+          whatNeedsAttention: [`ยังไม่ได้กรอกข้อมูลในตาราง (มีช่องว่างทั้งหมด ${totalFillable} ช่อง)`],
+          whatCanImprove: ["เริ่มจากแถวที่มั่นใจที่สุดก่อน แล้วเทียบความแตกต่างระหว่างแต่ละแถวตามเกณฑ์ในหัวตาราง"],
+          socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "empty"),
+        };
+      }
+
+      if (gibberishCount > 0 && gibberishCount === filledCount) {
+        return {
+          verdict: "gibberish",
+          verdictLabel: "⚠️ ตรวจพบข้อความพิมพ์มั่วในช่องตาราง",
+          groundingRef: teachingCtx.groundingLabel,
+          cellFeedbackMap,
+          whatDidWell: ["ยังไม่สามารถประเมินจุดแข็งได้ เนื่องจากทุกช่องที่กรอกเป็นข้อความพิมพ์สุ่ม/ไม่เป็นคำที่มีความหมาย — ลองกรอกคำตอบตามความเข้าใจจริงแล้วส่งใหม่อีกครั้งนะครับ"],
+          whatNeedsAttention: gibberishDetails.slice(0, 5),
+          whatCanImprove: [
+            "สำหรับช่องจำแนก (เช่น ใช่/ไม่ใช่/ยังไม่ทราบ) สามารถคลิกเลือกจากปุ่มตัวเลือกด้านบนในแต่ละช่องได้ทันที",
+            formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          ],
+          socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "gibberish"),
         };
       }
 
       if (correctRowLabels.length > 0) {
-        didWell.push(
-          `วิเคราะห์และเติมข้อมูลในแถว <strong>${escapeHtml(correctRowLabels.join(", "))}</strong> ได้สอดคล้องกับแนวคำตอบอย่างแม่นยำ`
-        );
-      } else if (filledCount > 0) {
-        didWell.push(`ตั้งต้นกรอกข้อมูลแล้ว ${filledCount} จาก ${totalFillable} ช่อง ช่วยให้เห็นวิธีคิดเบื้องต้นสำหรับเทียบกับแนวคำตอบได้ชัดเจน`);
+        didWell.push(`วิเคราะห์และเติมข้อมูลในแถว <strong>${escapeHtml(correctRowLabels.join(", "))}</strong> ได้สอดคล้องกับแนวคำตอบอย่างแม่นยำ`);
+      } else if (filledCount - gibberishCount > 0) {
+        didWell.push(`ตั้งต้นกรอกข้อมูลที่เป็นคำตอบจริงแล้ว ${filledCount - gibberishCount} จาก ${totalFillable} ช่อง ช่วยให้ตรวจสอบจุดที่ควรปรับได้รายช่อง`);
+      } else {
+        didWell.push("ยังไม่มีช่องที่กรอกคำตอบจริงได้ตรงเกณฑ์ — ลองแก้ไขช่องที่ระบบแจ้งเตือนแล้วส่งตรวจอีกครั้ง");
       }
 
-      // Check concept coverage across all typed table text vs answerHtml
       const allTyped = Object.values(cells).join(" ");
       const ansConcepts = extractKeyConceptsFromText(stripTags(rubric.answerHtml), rubric.answerHtml);
       const matchedConcepts = ansConcepts.filter((c) => c.tokens.some((t) => allTyped.toLowerCase().includes(t)));
       if (matchedConcepts.length > 0) {
         didWell.push(
-          `เชื่อมโยงแนวคิดสำคัญได้ดี ได้แก่ ${matchedConcepts
-            .slice(0, 3)
-            .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
-            .join(", ")}`
+          `เชื่อมโยงแนวคิดสำคัญในเนื้อหาได้ดี ได้แก่ ${matchedConcepts.slice(0, 3).map((c) => `<strong>${escapeHtml(c.label)}</strong>`).join(", ")}`
         );
       }
 
+      gibberishDetails.slice(0, 4).forEach((msg) => needsAttention.push(msg));
       mismatchDetails.slice(0, 5).forEach((msg) => needsAttention.push(msg));
       if (emptyRowLabels.length > 0) {
-        needsAttention.push(
-          `ยังมีช่องว่างที่ยังไม่ได้กรอกในแถว <strong>${escapeHtml(emptyRowLabels.join(", "))}</strong> (${totalFillable - filledCount} ช่อง)`
-        );
+        needsAttention.push(`ยังมีช่องว่างที่ยังไม่ได้กรอกในแถว <strong>${escapeHtml(emptyRowLabels.join(", "))}</strong> (${totalFillable - filledCount} ช่อง)`);
       }
       if (!needsAttention.length && partialDetails.length > 0) {
         partialDetails.slice(0, 3).forEach((msg) => needsAttention.push(msg));
@@ -381,24 +1491,44 @@
         needsAttention.push("ไม่พบจุดคลาดเคลื่อนในช่องจำแนกหลัก — คำตอบในตารางมีความถูกต้องครบถ้วนดีมาก");
       }
 
-      if (partialDetails.length > 0) {
-        canImprove.push(...partialDetails.slice(0, 3));
-      }
+      if (partialDetails.length > 0) canImprove.push(...partialDetails.slice(0, 3));
       const missingConcepts = ansConcepts.filter((c) => !matchedConcepts.includes(c));
       if (missingConcepts.length > 0) {
         canImprove.push(
-          `ในช่องสรุปประเด็น/เหตุผล อาจระบุคำสำคัญให้คมชัดขึ้น เช่น ${missingConcepts
-            .slice(0, 3)
-            .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
-            .join(", ")}`
+          `ในช่องสรุปประเด็น/เหตุผล อาจระบุแนวคิดให้คมชัดขึ้น เช่น ${missingConcepts.slice(0, 3).map((c) => `<strong>${escapeHtml(c.label)}</strong>`).join(", ")}`
         );
       } else {
-        canImprove.push("ลองเปรียบเทียบถ้อยคำในช่องสรุปของตนเองกับตารางแนวคำตอบด้านล่าง เพื่อฝึกเขียนเหตุผลให้กระชับและนำไปอภิปรายในกลุ่มย่อยได้ทันที");
+        canImprove.push("ลองเปรียบเทียบถ้อยคำในช่องสรุปกับตารางแนวคำตอบด้านล่าง เพื่อฝึกเขียนเหตุผลให้กระชับสำหรับใช้อภิปรายในกลุ่มย่อย");
       }
 
-      return { cellFeedbackMap, whatDidWell: didWell, whatNeedsAttention: needsAttention, whatCanImprove: canImprove };
+      const verdict =
+        gibberishCount > 0
+          ? "misconception"
+          : mismatchDetails.length === 0 && emptyRowLabels.length === 0 && partialDetails.length === 0
+          ? "exemplary"
+          : mismatchDetails.length === 0 && emptyRowLabels.length <= 1
+          ? "proficient"
+          : "developing";
+      const verdictMap = {
+        misconception: "🔍 พบช่องที่พิมพ์ไม่เป็นคำหรือคลาดเคลื่อน",
+        developing: "🌱 กำลังพัฒนา · มีจุดที่ควรเติมและตรวจสอบเพิ่ม",
+        proficient: "✅ ดีมาก · จำแนกส่วนใหญ่ตรงแนวคำตอบ",
+        exemplary: "🌟 ยอดเยี่ยม · วิเคราะห์ตารางครบถ้วนแม่นยำ",
+      };
+
+      return {
+        verdict,
+        verdictLabel: verdictMap[verdict],
+        groundingRef: teachingCtx.groundingLabel,
+        cellFeedbackMap,
+        whatDidWell: didWell,
+        whatNeedsAttention: needsAttention,
+        whatCanImprove: canImprove,
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, verdict, matchedConcepts, missingConcepts),
+      };
     }
 
+    /* --- 2. Cloze Paragraph Evaluation --- */
     if (rubric.kind === "cloze") {
       const blanks = (submission && submission.blanks) || {};
       const cMap = rubric.clozeMap || {};
@@ -406,6 +1536,7 @@
       const blankStatus = {};
       const rightNums = [];
       const wrongItems = [];
+      const gibItems = [];
       const emptyNums = [];
 
       keys.forEach((k) => {
@@ -414,6 +1545,12 @@
         if (!u) {
           blankStatus[k] = "empty";
           emptyNums.push(`(${k})`);
+          return;
+        }
+        const q = analyzeSubmissionQuality(u, rubric, teachingCtx, { allowBareNumbers: true, skipPromptCopy: true, skipOffTopic: true });
+        if (q.status === "gibberish" || q.status === "keyboard_layout_typo") {
+          blankStatus[k] = "mismatch";
+          gibItems.push(`ช่อง <strong>(${k})</strong> กรอก <code>${escapeHtml(u)}</code> ดูเหมือนพิมพ์สุ่ม/ไม่เป็นคำ — แนวคำตอบคือ <strong>${escapeHtml(exp)}</strong>`);
           return;
         }
         const uClean = u.replace(/ร้อยละ|%/g, "").trim().toLowerCase();
@@ -427,9 +1564,12 @@
         }
       });
 
-      if (rightNums.length === 0 && emptyNums.length === keys.length) {
+      if (emptyNums.length === keys.length) {
         return {
           emptySubmission: true,
+          verdict: "empty",
+          verdictLabel: "📝 ยังไม่ได้เติมช่องว่าง",
+          groundingRef: teachingCtx.groundingLabel,
           blankStatus,
           whatDidWell: ["พร้อมเริ่มฝึกอ่านข้อมูลจากตารางแล้ว — ลองเติมตัวเลขและคำสำคัญในช่อง (1)–(7) ก่อนกดส่งคำตอบ"],
           whatNeedsAttention: ["ยังไม่ได้กรอกช่องว่าง (1)–(7)"],
@@ -437,40 +1577,83 @@
         };
       }
 
+      if (gibItems.length > 0 && rightNums.length === 0 && wrongItems.length === 0) {
+        return {
+          verdict: "gibberish",
+          verdictLabel: "⚠️ ตรวจพบข้อความพิมพ์มั่วในช่องว่าง",
+          groundingRef: teachingCtx.groundingLabel,
+          blankStatus,
+          whatDidWell: ["ยังไม่สามารถประเมินจุดแข็งได้ เนื่องจากข้อความที่เติมเป็นอักษรสุ่ม — ลองดึงตัวเลขและคำจากตารางด้านบนมาเติมใหม่อีกครั้ง"],
+          whatNeedsAttention: gibItems,
+          whatCanImprove: ["สังเกตตัวเลขในตาราง Bishai และคณะ (146 ประเทศ) แล้วเติมตัวเลขและคำสำคัญลงในช่อง (1)–(7) ทีละช่อง"],
+        };
+      }
+
       if (rightNums.length > 0) {
         didWell.push(`ดึงข้อมูลจากตารางมาเติมได้ถูกต้อง ${rightNums.length}/${keys.length} ช่อง ได้แก่ <strong>${escapeHtml(rightNums.join(", "))}</strong>`);
       } else {
-        didWell.push("ได้ทดลองเติมข้อมูลในย่อหน้าแล้ว ช่วยให้ตรวจสอบจุดที่ตีความคลาดเคลื่อนจากตารางได้ทันที");
+        didWell.push("ได้ทดลองเติมข้อมูลจากตารางแล้ว ทำให้เห็นทันทีว่าช่องใดควรกลับไปเทียบกับตัวเลขต้นทางใหม่");
       }
 
+      gibItems.forEach((g) => needsAttention.push(g));
       wrongItems.forEach((w) => needsAttention.push(w));
       if (emptyNums.length > 0) needsAttention.push(`ยังไม่ได้เติมช่อง <strong>${emptyNums.join(", ")}</strong>`);
       if (!needsAttention.length) needsAttention.push("เติมข้อมูลครบทุกช่องและถูกต้องตรงตามตารางทั้งหมด");
 
       canImprove.push(
-        "เมื่อเติมตัวเลขครบแล้ว สังเกตข้อคิดสำคัญว่าแม้ค่าเฉลี่ยรวมจะมาจากในภาคสุขภาพและนอกภาคสุขภาพราวครึ่งต่อครึ่ง แต่สัดส่วนจริงแตกต่างกันไปตามบริบทของแต่ละประเทศ จึงไม่ควรนำค่าเฉลี่ยระดับโลกไปใช้แบบเหมารวมโดยไม่ดูข้อมูลพื้นที่"
+        "เมื่อเติมตัวเลขครบแล้ว สังเกตข้อคิดสำคัญตามเนื้อหา HS1 ว่าแม้ค่าเฉลี่ยรวมจะมาจากในภาคสุขภาพและนอกภาคสุขภาพราวครึ่งต่อครึ่ง แต่สัดส่วนจริงแตกต่างกันมากตามบริบทของแต่ละประเทศ จึงไม่ควรนำค่าเฉลี่ยระดับโลกไปใช้ตัดสินรายพื้นที่โดยไม่ดูข้อมูลท้องถิ่น"
       );
-      return { blankStatus, whatDidWell: didWell, whatNeedsAttention: needsAttention, whatCanImprove: canImprove };
+      const verdict = rightNums.length === keys.length ? "exemplary" : rightNums.length >= Math.ceil(keys.length * 0.6) ? "proficient" : "developing";
+      return {
+        verdict,
+        verdictLabel: verdict === "exemplary" ? "🌟 ยอดเยี่ยม · เติมข้อมูลถูกต้องครบทุกช่อง" : verdict === "proficient" ? "✅ ดีมาก · ถูกต้องเป็นส่วนใหญ่" : "🌱 กำลังพัฒนา · ลองตรวจทานตัวเลขจากตารางอีกครั้ง",
+        groundingRef: teachingCtx.groundingLabel,
+        blankStatus,
+        whatDidWell: didWell,
+        whatNeedsAttention: needsAttention,
+        whatCanImprove: canImprove,
+      };
     }
 
+    /* --- 3. Checklist Evaluation (HS2-WB กิจกรรมขอบเขตระบบสุขภาพ) --- */
     if (rubric.kind === "checklist") {
       const checked = (submission && submission.checked) || [];
       const notes = ((submission && submission.notes) || "").trim();
       if (!checked.length && !notes) {
         return {
           emptySubmission: true,
+          verdict: "empty",
+          verdictLabel: "📝 ยังไม่ได้เลือกรายการหรือระบุเกณฑ์",
+          groundingRef: teachingCtx.groundingLabel,
           whatDidWell: ["ลองคลิกทำเครื่องหมายหน้ากิจกรรม ก.–จ. ที่คิดว่าเป็นส่วนหนึ่งของระบบสุขภาพ พร้อมเขียนเกณฑ์ที่ใช้ตัดสินสั้น ๆ ก่อนกดส่ง"],
           whatNeedsAttention: ["ยังไม่ได้เลือกรายการหรือระบุเกณฑ์การตัดสิน"],
           whatCanImprove: ["ลองถามตนเองว่าแต่ละกิจกรรมมี 'เจตนาหลัก (primary intent)' เพื่อสุขภาพโดยตรง หรือเป็นผลพลอยได้"],
         };
       }
+
+      const noteQual = notes ? analyzeSubmissionQuality(notes, rubric, teachingCtx) : { status: "empty" };
+      if (!checked.length && (noteQual.status === "gibberish" || noteQual.status === "keyboard_layout_typo" || noteQual.status === "non_answer")) {
+        return {
+          verdict: noteQual.status === "keyboard_layout_typo" ? "keyboard_layout_typo" : noteQual.status,
+          verdictLabel: "⚠️ ตรวจพบข้อความที่ยังไม่ใช่คำตอบ",
+          groundingRef: teachingCtx.groundingLabel,
+          whatDidWell: ["ยังไม่สามารถประเมินจุดแข็งได้ เนื่องจากยังไม่ได้เลือกกิจกรรม ก.–จ. และข้อความเหตุผลยังไม่ใช่คำตอบที่มีความหมาย"],
+          whatNeedsAttention: [formatSafeRichText(`ช่องเหตุผล <code>${notes}</code>: ${noteQual.detail}`)],
+          whatCanImprove: ["ลองติ๊กเลือกกิจกรรม ก.–จ. ที่มีเป้าหมายหลักเพื่อสุขภาพ แล้วเขียนเกณฑ์ที่ใช้ตัดสินสั้น ๆ 1–2 ประโยค"],
+        };
+      }
+
       const coreHits = ["ก.", "ค.", "ง."].filter((x) => checked.includes(x));
       if (coreHits.length > 0) {
-        didWell.push(`เลือกรายการ <strong>${coreHits.join(", ")}</strong> ซึ่งสอดคล้องกับกิจกรรมที่มีเจตนาหลักเพื่อส่งเสริมหรือคงไว้ซึ่งสุขภาพตามกรอบองค์การอนามัยโลก`);
+        didWell.push(`เลือกรายการ <strong>${coreHits.join(", ")}</strong> ซึ่งสอดคล้องกับกิจกรรมที่มี<strong>เจตนาหลัก (primary intent)</strong> เพื่อส่งเสริมหรือคงไว้ซึ่งสุขภาพตามกรอบองค์การอนามัยโลก`);
       }
       if (checked.includes("ข.")) {
-        didWell.push("สังเกตเห็นความเชื่อมโยงด้านสุขภาพของข้อ ข. (ร้านอาหารลดความเค็มเพื่อลูกค้า) ซึ่งเป็นตัวอย่างสำคัญของการเปรียบเทียบขอบเขตนิยาม WHO กับ พ.ร.บ. สุขภาพแห่งชาติ");
+        didWell.push("สังเกตเห็นความเชื่อมโยงด้านสุขภาพของข้อ ข. (ร้านอาหารลดความเค็มเพื่อลูกค้า) ซึ่งเป็นกรณีรอยต่อสำคัญสำหรับเทียบนิยาม WHO กับ พ.ร.บ. สุขภาพแห่งชาติ");
       }
+      if (!didWell.length) {
+        didWell.push("ได้เริ่มต้นทดลองจำแนกกิจกรรมแล้ว — ลองตรวจสอบเกณฑ์ที่ใช้ตัดสินเทียบกับกรอบ WHO และ พ.ร.บ. สุขภาพแห่งชาติ");
+      }
+
       const missedCore = ["ก.", "ค.", "ง."].filter((x) => !checked.includes(x));
       if (missedCore.length > 0) {
         needsAttention.push(
@@ -482,27 +1665,157 @@
       }
       if (!notes) {
         needsAttention.push("ยังไม่ได้ระบุ 'เกณฑ์' และเหตุผลที่ใช้ตัดสินในช่องข้อความด้านล่าง");
+      } else if (noteQual.status === "gibberish" || noteQual.status === "keyboard_layout_typo") {
+        needsAttention.push(`ช่องเหตุผลที่พิมพ์ (<code>${escapeHtml(notes)}</code>) ดูเหมือนพิมพ์สุ่ม/ไม่เป็นคำที่มีความหมาย — ลองเขียนเกณฑ์ที่ใช้ตัดสินด้วยคำของตนเอง`);
       } else if (!needsAttention.length) {
         needsAttention.push("การจำแนกกิจกรรมสอดคล้องกับหลักคิดเรื่องขอบเขตของระบบสุขภาพเป็นอย่างดี");
       }
-      canImprove.push(
-        "ลองสรุปเกณฑ์เปรียบเทียบให้ชัดทั้ง 2 กรอบ คือ (1) เกณฑ์ 'เจตนาหลัก (primary intent)' ของ WHO และ (2) เกณฑ์ 'ระบบความสัมพันธ์ทั้งมวลที่เกี่ยวข้องกับสุขภาพ' ตาม พ.ร.บ. สุขภาพแห่งชาติ พ.ศ. 2550"
-      );
-      return { whatDidWell: didWell, whatNeedsAttention: needsAttention, whatCanImprove: canImprove };
-    }
 
-    // Open-ended Question / Reflection
-    const text = String((submission && submission.text) || "").trim();
-    if (!text) {
+      canImprove.push(
+        "ลองสรุปเกณฑ์เปรียบเทียบให้ชัดทั้ง 2 กรอบตามเนื้อหา HS2 หัวข้อ 1 คือ (1) เกณฑ์ <strong>เจตนาหลัก (primary intent)</strong> ของ WHO และ (2) เกณฑ์ <strong>ระบบความสัมพันธ์ทั้งมวลที่เกี่ยวข้องกับสุขภาพ</strong> ตาม พ.ร.บ. สุขภาพแห่งชาติ พ.ศ. 2550"
+      );
+      const verdict = missedCore.length === 0 && notes && noteQual.status === "valid" ? "proficient" : "developing";
       return {
-        emptySubmission: true,
-        whatDidWell: ["พร้อมเริ่มฝึกคิดวิเคราะห์ (Active Recall) — ลองพิมพ์คำตอบด้วยภาษาของตนเองสั้น ๆ 2–4 ประโยคก่อนกดส่งคำตอบ"],
-        whatNeedsAttention: ["ยังไม่ได้พิมพ์คำตอบในกล่องข้อความ"],
-        whatCanImprove: ["ไม่ต้องกังวลว่าจะต้องเขียนสมบูรณ์แบบในครั้งแรก การลองดึงความรู้ด้วยตนเองก่อนเห็นเฉลยช่วยให้จำแม่นและเข้าใจลึกกว่าการอ่านเฉลยทันที"],
+        verdict,
+        verdictLabel: verdict === "proficient" ? "✅ ดีมาก · จำแนกขอบเขตระบบสุขภาพได้ตรงหลัก" : "🌱 กำลังพัฒนา · ลองทบทวนเกณฑ์เจตนาหลักเพิ่มเติม",
+        groundingRef: teachingCtx.groundingLabel,
+        whatDidWell: didWell,
+        whatNeedsAttention: needsAttention,
+        whatCanImprove: canImprove,
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, verdict),
       };
     }
 
+    /* --- 4. Open-ended Question / Reflection Evaluation --- */
+    const text = String((submission && submission.text) || "").trim();
+    const quality = analyzeSubmissionQuality(text, rubric, teachingCtx);
+
+    if (quality.status === "empty") {
+      return {
+        emptySubmission: true,
+        verdict: "empty",
+        verdictLabel: "📝 ยังไม่ได้พิมพ์คำตอบ",
+        groundingRef: teachingCtx.groundingLabel,
+        whatDidWell: ["พร้อมเริ่มฝึกดึงความรู้ (Active Recall) — ลองพิมพ์คำตอบด้วยภาษาของตนเองสั้น ๆ 2–4 ประโยคก่อนกดส่งคำตอบ"],
+        whatNeedsAttention: ["ยังไม่ได้พิมพ์คำตอบในกล่องข้อความ"],
+        whatCanImprove: [
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          "ไม่ต้องกังวลว่าจะต้องเขียนสมบูรณ์แบบในครั้งแรก การลองคิดด้วยตนเองก่อนเห็นเฉลยช่วยให้จำแม่นและเข้าใจลึกกว่าการเปิดเฉลยทันที",
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "empty"),
+      };
+    }
+
+    // Immediate, honest, ZERO-FAKE-PRAISE handling for gibberish / keyboard mash / wrong keyboard layout / non-answer / prompt copy / off-topic!
+    if (quality.status === "gibberish") {
+      return {
+        verdict: "gibberish",
+        verdictLabel: "⚠️ ตรวจพบข้อความพิมพ์มั่ว / ไม่ใช่คำตอบ",
+        groundingRef: teachingCtx.groundingLabel,
+        hideKeyByDefault: true,
+        whatDidWell: [
+          "ยังไม่สามารถประเมินจุดแข็งของคำตอบได้ เนื่องจากข้อความที่ส่งมายังไม่ใช่คำตอบที่มีความหมาย — ยินดีที่คุณเปิดกล่องฝึกคิดไว้แล้ว ลองพิมพ์แนวคิดของตนเองสั้น ๆ แล้วส่งใหม่อีกครั้งได้เลย",
+        ],
+        whatNeedsAttention: [
+          `ตรวจพบว่าข้อความ <code>${escapeHtml(clipText(text, 80))}</code> เป็นการพิมพ์มั่ว/ตัวอักษรแบบสุ่ม (${escapeHtml(quality.detail)}) จึงไม่สามารถวิเคราะห์ความเข้าใจเทียบกับเกณฑ์แนวคำตอบได้`,
+          `โจทย์ข้อนี้ยึดโยงกับ <strong>${escapeHtml(teachingCtx.groundingLabel)}</strong> — จำเป็นต้องระบุข้อสรุปหรือเหตุผลตามบริบทของโจทย์จริง`,
+        ],
+        whatCanImprove: [
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          "ลองพิมพ์คำตอบจริงอย่างน้อย 1–3 ประโยคด้วยภาษาของตนเอง แล้วกดส่งอีกครั้ง เพื่อให้ระบบวิเคราะห์จุดที่เข้าใจแม่นยำและจุดที่ควรเสริมได้ตรงจุด",
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "gibberish"),
+      };
+    }
+
+    if (quality.status === "keyboard_layout_typo") {
+      return {
+        verdict: "keyboard_layout_typo",
+        verdictLabel: "⌨️ อาจลืมเปลี่ยนภาษาแป้นพิมพ์ (EN → TH)",
+        groundingRef: teachingCtx.groundingLabel,
+        hideKeyByDefault: true,
+        whatDidWell: [
+          "ยังไม่สามารถตรวจคำตอบได้ทันที เนื่องจากข้อความที่ส่งมาเป็นตัวอักษรภาษาอังกฤษที่เรียงคล้ายการลืมเปลี่ยนภาษาแป้นพิมพ์",
+        ],
+        whatNeedsAttention: [
+          `ข้อความ <code>${escapeHtml(clipText(text, 80))}</code> มีรูปแบบเหมือนพิมพ์ภาษาไทยขณะแป้นพิมพ์ค้างภาษาอังกฤษ (ระบบเทียบแป้นพิมพ์ไทยได้ใกล้เคียง: <strong>“${escapeHtml(clipText(quality.decodedThai || "", 80))}”</strong>)`,
+        ],
+        whatCanImprove: [
+          "ลองสลับแป้นพิมพ์เป็นภาษาไทย พิมพ์คำตอบใหม่อีกครั้ง แล้วกดส่งเพื่อรับคำแนะนำเชิงลึกที่ยึดโยงกับเนื้อหาคำสอน",
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "keyboard_layout_typo"),
+      };
+    }
+
+    if (quality.status === "non_answer") {
+      const isHonestUnsure = quality.subReason === "honest_unsure";
+      return {
+        verdict: "non_answer",
+        verdictLabel: isHonestUnsure ? "🌱 ยังไม่มั่นใจ · เริ่มต้นจากคำใบ้ก่อนได้" : "⚠️ ข้อความทดสอบ · ยังไม่ใช่คำตอบ",
+        groundingRef: teachingCtx.groundingLabel,
+        hideKeyByDefault: true,
+        whatDidWell: [
+          isHonestUnsure
+            ? "ชื่นชมความตรงไปตรงมาที่บอกว่ายังไม่มั่นใจ — การรู้ว่าเรายังไม่เข้าใจจุดไหนคือก้าวแรกของการเรียนรู้ที่สำคัญ (metacognition)"
+            : "ยังไม่สามารถประเมินจุดแข็งของคำตอบได้ เนื่องจากข้อความที่ส่งมาเป็นเพียงคำทดสอบ/ข้อความสั้นที่ยังไม่ได้ตอบประเด็นของโจทย์",
+        ],
+        whatNeedsAttention: [
+          isHonestUnsure
+            ? `ยังไม่ได้ลองร่างแนวคิดเบื้องต้นสำหรับโจทย์ใน <strong>${escapeHtml(teachingCtx.groundingLabel)}</strong>`
+            : `ข้อความ <code>${escapeHtml(clipText(text, 60))}</code> เป็นข้อความทดสอบ/คำทั่วไป (${escapeHtml(quality.detail)}) จึงยังไม่สามารถตรวจเทียบเกณฑ์แนวคำตอบได้`,
+        ],
+        whatCanImprove: [
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          "ลองเดาอย่างมีเหตุผลสั้น ๆ 1–2 ประโยคก่อนเปิดดูเฉลย เพื่อฝึกเชื่อมโยงความรู้ด้วยตนเอง",
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "non_answer"),
+      };
+    }
+
+    if (quality.status === "prompt_copy") {
+      return {
+        verdict: "prompt_copy",
+        verdictLabel: "📋 คัดลอกข้อความจากโจทย์โดยตรง",
+        groundingRef: teachingCtx.groundingLabel,
+        hideKeyByDefault: true,
+        whatDidWell: [
+          "คุณจับข้อความโจทย์ขึ้นมาตั้งต้นได้ครบถ้วนแล้ว — ขั้นต่อไปคือการเติมคำตอบและเหตุผลด้วยภาษาของตนเองต่อท้าย",
+        ],
+        whatNeedsAttention: [
+          "ระบบตรวจพบว่าคำตอบเกือบทั้งหมดเป็นการคัดลอกข้อความโจทย์คำถามมาวางโดยตรง ยังไม่มีข้อสรุปหรือคำอธิบายที่ตอบโจทย์",
+        ],
+        whatCanImprove: [
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          "ลองลบข้อความโจทย์ออกหรือตอบสั้น ๆ ทีละประเด็นที่โจทย์ถามด้วยคำพูดของคุณเอง แล้วกดส่งตรวจใหม่อีกครั้ง",
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "prompt_copy"),
+      };
+    }
+
+    if (quality.status === "off_topic") {
+      return {
+        verdict: "off_topic",
+        verdictLabel: "🧭 เนื้อหายังไม่ตรงประเด็นของโจทย์",
+        groundingRef: teachingCtx.groundingLabel,
+        hideKeyByDefault: true,
+        whatDidWell: [
+          "เขียนเป็นประโยคที่อ่านเข้าใจได้ชัดเจน แต่เนื้อหายังไม่ได้เชื่อมโยงเข้าสู่คำถามและกรอบแนวคิดของรายวิชา RACM 303 ในหัวข้อนี้",
+        ],
+        whatNeedsAttention: [
+          `ข้อความที่ส่งมาไม่พบความเชื่อมโยงกับตัวละคร/กรณีศึกษา คำสำคัญ หรือเนื้อหาใน <strong>${escapeHtml(teachingCtx.groundingLabel)}</strong>`,
+        ],
+        whatCanImprove: [
+          formatSafeRichText(buildStarterScaffold(rubric, teachingCtx)),
+          "ลองกลับไปอ่านโจทย์และกรณีศึกษาด้านบนอีกครั้ง แล้วเขียนคำตอบที่ตอบตรงประเด็นของบทเรียน",
+        ],
+        socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, "off_topic"),
+      };
+    }
+
+    /* --- Valid substantive student attempt: Perform deep grounded diagnostic evaluation --- */
     const ansPlain = stripTags(rubric.answerHtml);
+    const promptPlain = rubric.prompt || "";
     const concepts = extractKeyConceptsFromText(ansPlain, rubric.answerHtml);
     const tLow = text.toLowerCase();
 
@@ -513,74 +1826,238 @@
       else missed.push(c);
     });
 
-    const hasReasoning = /เพราะ|เนื่องจาก|ส่งผล|ทำให้|จึง|ดังนั้น|กล่าวคือ|แตกต่าง|ต่างจาก|ขณะที่|ส่วน/.test(text);
-    const hasExample = /เช่น|ตัวอย่าง|กรณี|ได้แก่|โรงพยาบาล|ผู้ป่วย|ชุมชน/.test(text);
+    const entCov = detectCaseEntityCoverage(text, ansPlain, promptPlain);
+    const misconceptions = detectMisconceptions(text, rubric);
 
+    const hasReasoning = /เพราะ|เนื่องจาก|ส่งผล|ทำให้|จึง|ดังนั้น|กล่าวคือ|แตกต่าง|ต่างจาก|ขณะที่|ส่วน|โดยอาศัย|ช่วย(?:ให้|ลด|ป้องกัน)|เพื่อ(?:ให้|มิให้|ป้องกัน)/.test(text);
+    const hasExample = /เช่น|ตัวอย่าง|กรณี|ได้แก่|โรงพยาบาล|ผู้ป่วย|ชุมชน|บุคคล\s*[ก-จ]|ผู้รับบริการ|เด็กคนที่/.test(text);
+    const isComparePrompt = /ต่างกันอย่างไร|เปรียบเทียบ|แตกต่างจาก/.test(promptPlain);
+    const hasContrastCue = /ต่าง|แต่|ขณะที่|ส่วน|ในทางกลับกัน|เทียบกับ|มิใช่|ไม่ใช่/.test(text);
+
+    // 1. What you did well (strictly earned, concrete, grounded)
     if (matched.length > 0) {
       didWell.push(
-        `จับประเด็นและแนวคิดสำคัญของข้อนี้ได้ตรงจุด ได้แก่ ${matched
+        `จับแนวคิดสำคัญที่สอดคล้องกับเนื้อหาประกอบคำสอนได้ตรงจุด ได้แก่ ${matched
           .slice(0, 4)
           .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
           .join(", ")}`
       );
     }
-    if (hasReasoning) {
-      didWell.push("มีการเชื่อมโยงเหตุและผลหรือเปรียบเทียบความแตกต่าง ทำให้คำตอบมีลำดับความคิดเชิงวิเคราะห์ที่ชัดเจน");
+    if (entCov.matched.length > 0) {
+      didWell.push(
+        `วิเคราะห์เชื่อมโยงกับกรณีศึกษา/ตัวแบบในโจทย์ได้ชัดเจน ได้แก่ <strong>${escapeHtml(entCov.matched.slice(0, 4).join(", "))}</strong>`
+      );
     }
-    if (hasExample) {
-      didWell.push("ยกตัวอย่างสถานการณ์คลินิก/ระบบบริการหรือกรณีรูปธรรมมาประกอบได้ดี");
+    if (hasReasoning && (matched.length > 0 || entCov.matched.length > 0)) {
+      didWell.push("มีการอธิบายกลไกเชิงเหตุผลหรือเชื่อมโยงความแตกต่างอย่างเป็นระบบ ไม่ใช่เพียงระบุคำตอบลอย ๆ");
+    } else if (hasExample && matched.length > 0) {
+      didWell.push("หยิบยกกรณีรูปธรรมหรือบริบทระบบบริการสุขภาพมาประกอบคำอธิบายได้ดี");
     }
     if (!didWell.length) {
-      didWell.push("เริ่มต้นเรียบเรียงคำตอบด้วยภาษาของตนเองแล้ว ซึ่งเป็นก้าวสำคัญของการฝึกดึงความรู้ (retrieval practice)");
+      didWell.push(
+        `มีความพยายามเรียบเรียงคำตอบที่เกี่ยวข้องกับหัวข้อ <strong>${escapeHtml(teachingCtx.groundingLabel)}</strong> ด้วยภาษาของตนเอง ซึ่งเป็นจุดตั้งต้นที่ดีสำหรับการเทียบปรับกับแนวคิดหลักในบทเรียน`
+      );
     }
 
-    // Check specific contrast/trap cues in model answer ("มิใช่...", "ไม่ใช่เพียง...")
-    const contrastMatch = ansPlain.match(/(?:มิใช่เพียง|มิใช่|ไม่ใช่เพียง|ต่างจาก)([^.,;]{4,55})/);
-    if (text.length < 28) {
-      needsAttention.push("คำตอบยังค่อนข้างสั้น อาจยังอธิบายกลไกหรือเหตุผลประกอบได้ไม่ครบทุกแง่มุมของคำถาม");
+    // 2. What needs attention (specific misconceptions, missed entities, missed concepts, incomplete multi-part)
+    misconceptions.forEach((m) => needsAttention.push(formatSafeRichText(m)));
+
+    const multiEntityExpected = entCov.expected.length >= 2;
+    if (multiEntityExpected && entCov.missed.length > 0) {
+      needsAttention.push(
+        `ยังมีกรณีศึกษา/ประเด็นหลักที่โจทย์กล่าวถึงแต่ยังไม่ปรากฏในคำตอบ ได้แก่ <strong>${escapeHtml(entCov.missed.slice(0, 4).join(", "))}</strong>`
+      );
     }
     if (missed.length > 0) {
       needsAttention.push(
-        `ประเด็นสำคัญในแนวคำตอบที่ยังไม่ได้กล่าวถึงหรืออาจขยายความเพิ่ม ได้แก่ ${missed
+        `แนวคิดสำคัญตามเนื้อหาคำสอน (${escapeHtml(teachingCtx.moduleCode || "บทนี้")}) ที่ยังตกหล่นหรือควรขยายความเพิ่ม ได้แก่ ${missed
           .slice(0, 4)
           .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
           .join(", ")}`
       );
     }
-    if (contrastMatch && missed.length > 0) {
-      needsAttention.push(`ข้อควรระวังของข้อนี้คือการแยกความแตกต่างให้ชัดว่า <em>“มิใช่${escapeHtml(contrastMatch[1].trim())}”</em>`);
+    if (isComparePrompt && !hasContrastCue) {
+      needsAttention.push("โจทย์ถามเชิงเปรียบเทียบความแตกต่าง — คำตอบยังไม่ได้ชี้จุดต่างระหว่างสองแนวคิด/สองฝั่งให้เห็นชัดเจน");
+    }
+    if (text.length < 28 && missed.length > 0) {
+      needsAttention.push("คำตอบยังค่อนข้างสั้น จึงยังไม่ครอบคลุมกลไกหรือเหตุผลประกอบครบทุกประเด็นย่อยของคำถาม");
     }
     if (!needsAttention.length) {
-      needsAttention.push("ครอบคลุมประเด็นหลักของแนวคำตอบได้ครบถ้วน ไม่พบจุดคลาดเคลื่อนสำคัญ");
+      needsAttention.push("ครอบคลุมประเด็นสำคัญและกรณีศึกษาของข้อนี้ได้ครบถ้วน ไม่พบจุดคลาดเคลื่อนสำคัญ");
     }
 
-    if (!hasReasoning) {
-      canImprove.push("ลองเพิ่มคำเชื่อมเชิงเหตุผล (เช่น “เพราะ… จึงส่งผลให้…” หรือ “แตกต่างกันตรงที่…”) เพื่อแสดงกลไกเชื่อมโยงให้ชัดเจนยิ่งขึ้น");
-    }
-    if (!hasExample && ansPlain.length > 140) {
-      canImprove.push("ลองยกตัวอย่างรูปธรรมสั้น ๆ 1 ตัวอย่าง (เช่น กรณีผู้ป่วย หน่วยบริการปฐมภูมิ หรือมาตรการระดับพื้นที่) เพื่อทำให้คำตอบมีน้ำหนักในการอภิปรายกลุ่ม");
+    // 3. What can be improved (actionable, question-specific, grounded!)
+    if (misconceptions.length > 0) {
+      canImprove.push(
+        `ลองทบทวนจุดที่ยังคลาดเคลื่อนด้านบนเทียบกับ <strong>${escapeHtml(teachingCtx.groundingLabel)}</strong> แล้วปรับถ้อยคำในประโยคข้อสรุปของคุณให้แม่นยำขึ้น`
+      );
     }
     if (missed.length > 0) {
       canImprove.push(
-        `ลองนำประเด็น ${missed
-          .slice(0, 2)
-          .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
-          .join(" และ ")} จากแนวคำตอบด้านล่างมาผสานต่อท้ายคำตอบเดิมของคุณเพื่อให้สมบูรณ์ครบทุกมิติ`
+        `ลองเติมประเด็น ${missed.slice(0, 2).map((c) => `<strong>${escapeHtml(c.label)}</strong>`).join(" และ ")}` +
+          (multiEntityExpected && entCov.missed.length > 0 ? ` โดยเชื่อมโยงเข้ากับ <strong>${escapeHtml(entCov.missed.slice(0, 2).join(", "))}</strong>` : "") +
+          " ต่อท้ายคำตอบเดิมของคุณเพื่อให้ครบทุกมิติของโจทย์"
       );
-    } else if (!canImprove.length) {
-      canImprove.push("คำตอบมีความสมบูรณ์ดีมาก ลองเทียบเคียงสำนวนและรายละเอียดปลีกย่อยกับแนวคำตอบด้านล่างเพื่อทบทวนความแม่นยำอีกครั้ง");
+    }
+    if (!hasReasoning) {
+      canImprove.push("เสริมประโยคเชื่อมเหตุและผล (เช่น “เพราะ… จึงส่งผลให้…” หรือ “แยกจากกันตรงที่…”) เพื่อแสดงให้เห็นกลไกความเข้าใจเชิงลึก");
+    } else if (isComparePrompt && !hasContrastCue) {
+      canImprove.push("ลองระบุทั้งสองฝั่งคู่กันด้วยโครงสร้าง “แนวคิด ก เน้น… ขณะที่แนวคิด ข เน้น… ดังนั้นจึงต่างกันตรงที่…”");
+    } else if (!hasExample && ansPlain.length > 160 && entCov.expected.length === 0) {
+      canImprove.push("ลองเพิ่มตัวอย่างทางคลินิกหรือสถานการณ์ในระบบบริการสุขภาพไทยสั้น ๆ 1 ตัวอย่าง เพื่อใช้ต่อยอดในการอภิปรายกลุ่มย่อย");
+    }
+    if (!canImprove.length) {
+      canImprove.push(
+        `คำตอบมีคุณภาพและแม่นยำดีมาก ลองเทียบรายละเอียดปลีกย่อยและคำศัพท์มาตรฐานภาษาอังกฤษในแนวคำตอบด้านล่าง (${escapeHtml(teachingCtx.groundingLabel)}) เพื่อเสริมความคมชัดในการสอบและการอภิปราย`
+      );
     }
 
-    return { whatDidWell: didWell, whatNeedsAttention: needsAttention, whatCanImprove: canImprove };
+    // Determine verdict tier (only require explicit entity naming when question compares 2+ case entities)
+    const coverageRatio = concepts.length > 0 ? matched.length / concepts.length : text.length >= 45 ? 0.65 : 0.35;
+    const entityRatio = multiEntityExpected ? entCov.matched.length / entCov.expected.length : 1;
+
+    let verdict = "developing";
+    let verdictLabel = "🌱 กำลังพัฒนา · จับประเด็นได้บางส่วน";
+    if (misconceptions.length > 0) {
+      verdict = "misconception";
+      verdictLabel = "🔍 พบจุดเข้าใจคลาดเคลื่อนสำคัญ";
+    } else if (coverageRatio >= 0.72 && entityRatio >= 0.75 && hasReasoning && text.length >= 45) {
+      verdict = "exemplary";
+      verdictLabel = "🌟 ยอดเยี่ยม · ครบถ้วนและเชื่อมโยงลึกซึ้ง";
+    } else if ((coverageRatio >= 0.48 && entityRatio >= 0.5) || (matched.length >= 2 && entityRatio >= 0.6)) {
+      verdict = "proficient";
+      verdictLabel = "✅ ดีมาก · ตรงประเด็นสำคัญ";
+    }
+
+    return {
+      verdict,
+      verdictLabel,
+      groundingRef: teachingCtx.groundingLabel,
+      whatDidWell: didWell,
+      whatNeedsAttention: needsAttention,
+      whatCanImprove: canImprove,
+      socraticFollowUp: buildSocraticFollowUp(rubric, teachingCtx, verdict, matched, missed),
+    };
   }
 
-  /* ---------- Optional Live Gemini API Upgrade ---------- */
-  async function evaluateWithOptionalGemini(rubric, submission, localFallback) {
+  /* ==========================================================================
+   * LAYER 4: LIVE GEMINI 4 NEON EXTRA / HYDROGEN API ENGINE (GROUNDED)
+   * ========================================================================== */
+  const GEMINI_RESPONSE_SCHEMA = {
+    type: "OBJECT",
+    properties: {
+      verdict: {
+        type: "STRING",
+        enum: [
+          "gibberish",
+          "keyboard_layout_typo",
+          "non_answer",
+          "prompt_copy",
+          "off_topic",
+          "misconception",
+          "developing",
+          "proficient",
+          "exemplary",
+        ],
+      },
+      verdictLabel: { type: "STRING" },
+      groundingRef: { type: "STRING" },
+      whatDidWell: { type: "ARRAY", items: { type: "STRING" } },
+      whatNeedsAttention: { type: "ARRAY", items: { type: "STRING" } },
+      whatCanImprove: { type: "ARRAY", items: { type: "STRING" } },
+      socraticFollowUp: { type: "STRING" },
+    },
+    required: ["verdict", "verdictLabel", "groundingRef", "whatDidWell", "whatNeedsAttention", "whatCanImprove"],
+  };
+
+  function getProfileById(id) {
+    if (id === "flash_38") return LEGACY_FALLBACK_PROFILE;
+    return GEMINI_PROFILES[id] || GEMINI_PROFILES.neon_xhigh;
+  }
+
+  function extractTextFromGeminiJson(json) {
+    const cand = json && json.candidates && json.candidates[0];
+    const parts = cand && cand.content && Array.isArray(cand.content.parts) ? cand.content.parts : [];
+    // CRITICAL for Gemini 4 / thinking models: skip thought parts (p.thought === true) and grab final response text
+    const answerParts = parts.filter((p) => !p.thought && typeof p.text === "string");
+    const raw = (answerParts.length ? answerParts : parts.filter((p) => typeof p.text === "string"))
+      .map((p) => p.text)
+      .join("")
+      .trim();
+    return raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  }
+
+  async function callGeminiModelOnce(apiKey, profile, sysPrompt, userPrompt) {
+    const generationConfig = {
+      responseMimeType: "application/json",
+      responseSchema: GEMINI_RESPONSE_SCHEMA,
+      maxOutputTokens: profile.maxOutputTokens || 10240,
+      thinkingConfig: {
+        thinkingLevel: profile.thinkingLevel || "HIGH",
+      },
+    };
+    // Per official Gemini 4 API guide: do NOT send temperature/topP/topK on Gemini 4 models!
+    if (!profile.isGemini4) {
+      generationConfig.temperature = 0.25;
+    }
+
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), profile.timeoutMs || 45000) : null;
+
+    try {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(profile.model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller ? controller.signal : undefined,
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: sysPrompt }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig,
+          }),
+        }
+      );
+
+      if (!resp.ok) {
+        let errDetail = `HTTP ${resp.status}`;
+        try {
+          const errJson = await resp.json();
+          if (errJson && errJson.error && errJson.error.message) {
+            errDetail = `${resp.status}: ${errJson.error.message}`;
+          }
+        } catch (_) {
+          /* ignore */
+        }
+        const err = new Error(errDetail);
+        err.httpStatus = resp.status;
+        throw err;
+      }
+
+      const json = await resp.json();
+      const rawTxt = extractTextFromGeminiJson(json);
+      if (!rawTxt) throw new Error("Empty model output");
+      const parsed = JSON.parse(rawTxt);
+      if (
+        !Array.isArray(parsed.whatDidWell) ||
+        !Array.isArray(parsed.whatNeedsAttention) ||
+        !Array.isArray(parsed.whatCanImprove)
+      ) {
+        throw new Error("Invalid JSON schema in model response");
+      }
+      return parsed;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function evaluateWithOptionalGemini(rubric, submission, localFallback, teachingCtx) {
     const apiKey = getGeminiKey();
     if (!apiKey || localFallback.emptySubmission) {
       return { ...localFallback, source: "rubric" };
     }
 
+    const ctx = teachingCtx || extractTeachingContext(rubric);
     let userSummary = "";
     if (rubric.kind === "table") {
       const qRows = rubric.rows || [];
@@ -604,101 +2081,208 @@
       userSummary = (submission && submission.text) || "";
     }
 
-    const sysPrompt =
-      "คุณคืออาจารย์แพทย์เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (RACM 303 คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล) " +
-      "ประเมินคำตอบของนักศึกษาแพทย์ชั้นปีที่ 3 เทียบกับแนวคำตอบอ้างอิงอย่างกัลยาณมิตร สุภาพ เข้าใจง่าย กระชับ และตรงประเด็น " +
-      "ตอบเป็น JSON เท่านั้นตามโครงสร้าง {\"whatDidWell\": [\"...\"], \"whatNeedsAttention\": [\"...\"], \"whatCanImprove\": [\"...\"]} " +
-      "โดยแต่ละหัวข้อมี 1-3 ข้อสั้นๆ ชัดเจน";
+    const sysPrompt = [
+      "คุณคืออาจารย์แพทย์เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (รายวิชา RACM 303 คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล) ที่ใช้หลักการสอนแบบ Gemini Guided Learning",
+      "ภารกิจ: ประเมินคำตอบของนักศึกษาแพทย์ชั้นปีที่ 3 และเขียน Constructive Feedback ที่เฉียบคม กัลยาณมิตร อบอุ่น ซื่อสัตย์ทางวิชาการ และยึดโยง 100% กับเนื้อหาประกอบคำสอนและแนวคำตอบที่ให้ไว้เท่านั้น",
+      "",
+      "กฎเหล็กที่ต้องปฏิบัติอย่างเคร่งครัด:",
+      "1. ซื่อสัตย์และห้ามชมแบบเท็จ (Anti-Sycophancy & Gibberish Detection):",
+      "   - หากคำตอบของผู้เรียนเป็นการพิมพ์มั่ว/ตัวอักษรสุ่ม/กดแป้นเรียงแถว (เช่น 'dfgdfg ;ldfgk', 'asdf', 'ฟหกด่าสว', 'กขคง', ตัวเลขลอยๆ) ให้ตั้ง verdict = 'gibberish' และระบุตรงๆ อย่างสุภาพว่าข้อความดังกล่าวเป็นการพิมพ์มั่ว/ไม่เป็นคำที่มีความหมาย ห้ามกล่าวชมว่าผู้เรียนเริ่มเรียบเรียงคำตอบหรือฝึก retrieval practice เด็ดขาด ใน whatDidWell ให้เขียนเพียงว่ายังไม่สามารถประเมินจุดแข็งได้เพราะยังไม่ใช่คำตอบจริง พร้อมชวนให้ลองพิมพ์ความคิดสั้นๆ ใหม่",
+      "   - หากดูเหมือนลืมเปลี่ยนภาษาแป้นพิมพ์ EN↔TH ให้ตั้ง verdict = 'keyboard_layout_typo' และแจ้งอย่างสุภาพ",
+      "   - หากเป็นคำทดสอบ ('test', 'ทดสอบ', '5555') หรือยอมแพ้ ('ไม่รู้', 'คิดไม่ออก') ให้ตั้ง verdict = 'non_answer' ห้ามชมแบบปลอม แต่ให้กำลังใจอย่างเข้าใจพร้อมให้คำใบ้ตั้งต้นจากเนื้อหาคำสอน",
+      "   - หากคัดลอกข้อความโจทย์มาวางเฉยๆ ให้ตั้ง verdict = 'prompt_copy'",
+      "   - หากเขียนประโยคจริงแต่ไม่เกี่ยวข้องกับโจทย์และเนื้อหา RACM 303 เลย ให้ตั้ง verdict = 'off_topic'",
+      "2. ยึดโยงเนื้อหาประกอบคำสอนอย่างเคร่งครัด (Strict Teaching-Material Grounding):",
+      "   - อ้างอิงเฉพาะกรณีศึกษา ตัวละคร (เช่น บุคคล ก–ง, ผู้รับบริการรายที่ 1–4, เด็กคนที่ 1–2), ตัวแบบ และคำศัพท์มาตรฐานไทย-อังกฤษ ที่ปรากฏในเนื้อหาประกอบคำสอนและแนวคำตอบของข้อนี้เท่านั้น ห้ามดึงประเด็นจากหัวข้ออื่นที่ไม่เกี่ยวมาปน",
+      "   - ตรวจเช็กให้ครบทุกคำถามย่อยในโจทย์ และชี้ให้เห็นความเข้าใจคลาดเคลื่อนเฉพาะจุด (misconception) หากมี เช่น สลับผลบวกลวง/ผลลบลวง, เข้าใจว่าโรคกับความเจ็บป่วยคือสิ่งเดียวกัน, สับสน equity vs equality",
+      "3. เขียน Constructive Feedback คุณภาพสูงสุด:",
+      "   - ใช้สรรพนามเรียกผู้เรียนว่า 'ผู้เรียน' และใช้ **ตัวหนา** เน้นคำสำคัญสั้นๆ ให้อ่านง่าย",
+      "   - whatDidWell (1–3 ข้อ): อ้างถึงจุดแข็งหรือคำอธิบายที่ผู้เรียนทำได้จริงอย่างจำเพาะ (หรือแจ้งตรงๆ หากยังไม่สามารถประเมินได้)",
+      "   - whatNeedsAttention (1–3 ข้อ): ระบุจุดที่คลาดเคลื่อน ตกหล่น หรือคำถามย่อยที่ยังไม่ได้ตอบ พร้อมอธิบายเหตุผลเชิงคลินิก/ระบบสุขภาพสั้นๆ",
+      "   - whatCanImprove (1–3 ข้อ): แนะนำวิธีปรับปรุงที่เป็นรูปธรรม ทำตามได้ทันที (เช่น โครงประโยคตั้งต้น หรือการเติมประเด็นเฉพาะจากเนื้อหาคำสอน)",
+      "   - socraticFollowUp (1 ประโยคสั้น): คำถามชวนคิดต่อ 1 ข้อเพื่อกระตุ้นการคิดวิเคราะห์ทางคลินิก/ระบบสุขภาพ",
+      "   - groundingRef: ระบุชื่อเอกสารและหัวข้อประกอบคำสอนที่ใช้อ้างอิงสั้นๆ",
+      "   - verdictLabel: ป้ายสถานะภาษาไทยสั้นๆ พร้อมอิโมจิ 1 ตัว (เช่น '⚠️ ตรวจพบข้อความพิมพ์มั่ว', '🌱 กำลังพัฒนา · จับประเด็นได้บางส่วน', '✅ ดีมาก · ตรงประเด็นสำคัญ', '🌟 ยอดเยี่ยม · ครบถ้วนและลึกซึ้ง')",
+    ].join("\n");
 
-    const userPrompt =
-      `คำถาม/โจทย์: ${rubric.prompt || rubric.sectionTitle || ""}\n\n` +
-      `แนวคำตอบอ้างอิง: ${stripTags(rubric.answerHtml)}\n\n` +
-      `คำตอบของนักศึกษา:\n${userSummary}`;
+    const userPrompt = [
+      `=== เอกสารและหัวข้อประกอบคำสอน ===`,
+      `${ctx.groundingLabel}`,
+      "",
+      ctx.caseVignette ? `=== สถานการณ์ / กรณีศึกษาประกอบโจทย์ ===\n${ctx.caseVignette}\n` : "",
+      ctx.companionExcerpt
+        ? `=== เนื้อหาประกอบคำสอนที่เกี่ยวข้อง (${ctx.moduleCode} ${ctx.companionHeading}) ===\n${ctx.companionExcerpt}\n`
+        : ctx.followingProse
+        ? `=== เนื้อหาประกอบคำสอนในหัวข้อนี้ ===\n${ctx.followingProse}\n`
+        : "",
+      `=== โจทย์คำถาม ===`,
+      `${rubric.prompt || rubric.sectionTitle || ""}`,
+      "",
+      `=== แนวคำตอบอ้างอิงของอาจารย์ (Model Answer) ===`,
+      `${stripTags(rubric.answerHtml)}`,
+      "",
+      `=== สัญญาณตรวจเบื้องต้นจากระบบในตัว ===`,
+      `verdict เบื้องต้น: ${localFallback.verdict || "valid"} (${localFallback.verdictLabel || ""})`,
+      "",
+      `=== คำตอบของผู้เรียน ===`,
+      `${userSummary}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-    try {
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: sysPrompt }] },
-            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig: {
-              temperature: 0.25,
-              responseMimeType: "application/json",
-            },
-          }),
-        }
-      );
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json = await resp.json();
-      const rawTxt =
-        json &&
-        json.candidates &&
-        json.candidates[0] &&
-        json.candidates[0].content &&
-        json.candidates[0].content.parts &&
-        json.candidates[0].content.parts[0] &&
-        json.candidates[0].content.parts[0].text;
-      const parsed = JSON.parse(rawTxt);
-      if (Array.isArray(parsed.whatDidWell) && Array.isArray(parsed.whatNeedsAttention) && Array.isArray(parsed.whatCanImprove)) {
+    const preferredId = getGeminiProfileId();
+    const chain = FALLBACK_CHAIN[preferredId] || ["neon_xhigh", "hydrogen_xhigh", "hydrogen_high", "flash_38"];
+    let lastErrMsg = "";
+
+    for (let i = 0; i < chain.length; i++) {
+      const pid = chain[i];
+      const prof = getProfileById(pid);
+      try {
+        const parsed = await callGeminiModelOnce(apiKey, prof, sysPrompt, userPrompt);
+        const hideKeyByDefault = ["gibberish", "keyboard_layout_typo", "non_answer", "prompt_copy", "off_topic"].includes(
+          parsed.verdict
+        );
         return {
           ...localFallback,
-          whatDidWell: parsed.whatDidWell.map((x) => escapeHtml(x)),
-          whatNeedsAttention: parsed.whatNeedsAttention.map((x) => escapeHtml(x)),
-          whatCanImprove: parsed.whatCanImprove.map((x) => escapeHtml(x)),
+          verdict: parsed.verdict || localFallback.verdict,
+          verdictLabel: parsed.verdictLabel || localFallback.verdictLabel,
+          groundingRef: parsed.groundingRef || ctx.groundingLabel,
+          whatDidWell: parsed.whatDidWell.map((x) => formatSafeRichText(x)),
+          whatNeedsAttention: parsed.whatNeedsAttention.map((x) => formatSafeRichText(x)),
+          whatCanImprove: parsed.whatCanImprove.map((x) => formatSafeRichText(x)),
+          socraticFollowUp: parsed.socraticFollowUp ? formatSafeRichText(parsed.socraticFollowUp) : localFallback.socraticFollowUp,
+          hideKeyByDefault,
           source: "gemini",
+          modelBadge: prof.badge,
+          fallbackNote: i > 0 ? `สลับจาก ${getProfileById(preferredId).badge} มาใช้ ${prof.badge} อัตโนมัติ` : "",
         };
+      } catch (err) {
+        lastErrMsg = (err && err.message) || "API error";
+        // Stop immediately on 401/400 invalid API key errors — no point retrying other models with a broken key
+        if (err && (err.httpStatus === 401 || /API key not valid|INVALID_ARGUMENT.*key/i.test(lastErrMsg))) {
+          break;
+        }
       }
-    } catch (_) {
-      /* gracefully fall back to built-in rubric evaluator */
     }
-    return { ...localFallback, source: "rubric" };
+
+    return {
+      ...localFallback,
+      source: "rubric",
+      apiErrorNote: lastErrMsg
+        ? `เชื่อมต่อ Gemini API ไม่สำเร็จ (${clipText(lastErrMsg, 110)}) — แสดงผลจากระบบวิเคราะห์เชิงลึกในตัวแทน`
+        : "",
+    };
   }
 
-  /* ---------- Rendering AI Feedback + Model Answer HTML ---------- */
+  /* ==========================================================================
+   * LAYER 5: RENDERING CONSTRUCTIVE FEEDBACK PANEL + MODEL ANSWER + MODAL
+   * ========================================================================== */
+  function getVerdictStyleClass(verdict) {
+    if (verdict === "gibberish" || verdict === "keyboard_layout_typo") return "is-verdict-danger";
+    if (verdict === "non_answer" || verdict === "prompt_copy" || verdict === "off_topic" || verdict === "empty") return "is-verdict-warn";
+    if (verdict === "misconception") return "is-verdict-alert";
+    if (verdict === "exemplary") return "is-verdict-star";
+    if (verdict === "proficient") return "is-verdict-good";
+    return "is-verdict-dev";
+  }
+
   function buildFeedbackHtml(rubric, evalResult, mode) {
-    // mode: "ai_and_key" | "key_only"
     const parts = [];
     if (mode === "ai_and_key" && evalResult) {
-      const srcBadge =
-        evalResult.source === "gemini"
-          ? `<span class="iq-ai-badge is-live">✨ Gemini AI Feedback</span>`
-          : `<span class="iq-ai-badge">✨ AI Suggestion · วิเคราะห์เทียบเกณฑ์แนวคำตอบ</span>`;
+      const isLive = evalResult.source === "gemini";
+      const badgeLabel = isLive
+        ? `✨ ${escapeHtml(evalResult.modelBadge || "Gemini 4 Neon · Extra High")}`
+        : `✨ AI Mentor · วิเคราะห์เชิงลึกยึดโยงเนื้อหาคำสอน`;
+      const srcBadge = `<span class="iq-ai-badge${isLive ? " is-live" : ""}">${badgeLabel}</span>`;
+      const vClass = getVerdictStyleClass(evalResult.verdict);
+      const verdictPill = evalResult.verdictLabel
+        ? `<span class="iq-verdict-pill ${vClass}">${escapeHtml(evalResult.verdictLabel)}</span>`
+        : "";
+      const isNonSubstantive = ["gibberish", "keyboard_layout_typo", "non_answer", "prompt_copy", "off_topic", "empty"].includes(
+        evalResult.verdict
+      );
+      const isDangerMiss = evalResult.verdict === "gibberish" || evalResult.verdict === "misconception";
+
+      const col1Title = isNonSubstantive
+        ? "ℹ️ Status · สถานะการตรวจคำตอบ"
+        : "✓ What you did well · สิ่งที่ทำได้ดี";
+      const col1Class = isNonSubstantive ? "iq-ai-col is-neutral" : "iq-ai-col is-well";
+      const col2Class = isDangerMiss ? "iq-ai-col is-miss is-critical" : "iq-ai-col is-miss";
+
+      const groundingBar = evalResult.groundingRef
+        ? `<div class="iq-grounding-bar">📚 <strong>ยึดโยงเนื้อหาประกอบคำสอน:</strong> ${escapeHtml(evalResult.groundingRef)}</div>`
+        : "";
+
+      const statusNotes = [];
+      if (evalResult.fallbackNote) {
+        statusNotes.push(`<div class="iq-api-note is-info">ℹ️ ${escapeHtml(evalResult.fallbackNote)}</div>`);
+      }
+      if (evalResult.apiErrorNote) {
+        statusNotes.push(`<div class="iq-api-note is-warn">⚠️ ${escapeHtml(evalResult.apiErrorNote)}</div>`);
+      }
+
+      const socraticHtml = evalResult.socraticFollowUp
+        ? `<div class="iq-socratic-box"><span class="iq-socratic-label">🤔 ชวนคิดต่อ (Guided Learning):</span> ${evalResult.socraticFollowUp}</div>`
+        : "";
+
       parts.push(`
-        <div class="iq-ai-panel">
+        <div class="iq-ai-panel ${vClass}">
           <div class="iq-ai-panel-head">
-            ${srcBadge}
-            <button type="button" class="iq-key-gear-btn" data-iq-open-settings title="ตั้งค่าเชื่อมต่อ Gemini API Key เพิ่มเติม (ทางเลือกเสริม)">⚙️ ตั้งค่า AI</button>
-          </div>
-          <div class="iq-ai-grid">
-            <div class="iq-ai-col is-well">
-              <div class="iq-ai-col-title">✓ What you did well · สิ่งที่ทำได้ดี</div>
-              <ul>${evalResult.whatDidWell.map((x) => `<li>${x}</li>`).join("")}</ul>
+            <div class="iq-ai-head-left">
+              ${srcBadge}
+              ${verdictPill}
             </div>
-            <div class="iq-ai-col is-miss">
+            <button type="button" class="iq-key-gear-btn" data-iq-open-settings title="ตั้งค่า Gemini 4 Neon Extra / API Key">⚙️ ตั้งค่า AI</button>
+          </div>
+          ${groundingBar}
+          ${statusNotes.join("")}
+          <div class="iq-ai-grid">
+            <div class="${col1Class}">
+              <div class="iq-ai-col-title">${col1Title}</div>
+              <ul>${(evalResult.whatDidWell || []).map((x) => `<li>${x}</li>`).join("")}</ul>
+            </div>
+            <div class="${col2Class}">
               <div class="iq-ai-col-title">△ What needs attention · จุดที่ยังคลาดเคลื่อน/ตกหล่น</div>
-              <ul>${evalResult.whatNeedsAttention.map((x) => `<li>${x}</li>`).join("")}</ul>
+              <ul>${(evalResult.whatNeedsAttention || []).map((x) => `<li>${x}</li>`).join("")}</ul>
             </div>
             <div class="iq-ai-col is-improve">
               <div class="iq-ai-col-title">💡 What can be improved · แนวทางพัฒนาต่อ</div>
-              <ul>${evalResult.whatCanImprove.map((x) => `<li>${x}</li>`).join("")}</ul>
+              <ul>${(evalResult.whatCanImprove || []).map((x) => `<li>${x}</li>`).join("")}</ul>
             </div>
           </div>
+          ${socraticHtml}
         </div>
       `);
     }
 
     if (rubric && rubric.answerHtml) {
-      parts.push(`
-        <div class="iq-model-key-box">
-          <div class="iq-model-key-head">📖 เฉลยและแนวคำตอบ (Model Answer)</div>
-          <div class="iq-model-key-body">${rubric.answerHtml}</div>
-        </div>
-      `);
+      const shouldCollapse = Boolean(mode === "ai_and_key" && evalResult && (evalResult.hideKeyByDefault || evalResult.emptySubmission));
+      if (shouldCollapse) {
+        parts.push(`
+          <details class="iq-model-key-box is-collapsed-key">
+            <summary class="iq-model-key-head is-clickable">📖 เฉลยและแนวคำตอบ (แนะนำให้ลองพิมพ์คำตอบของตนเองก่อน · คลิกเพื่อเปิดดูหากต้องการ)</summary>
+            <div class="iq-model-key-body">${rubric.answerHtml}</div>
+          </details>
+        `);
+      } else {
+        parts.push(`
+          <div class="iq-model-key-box">
+            <div class="iq-model-key-head">📖 เฉลยและแนวคำตอบ (Model Answer)</div>
+            <div class="iq-model-key-body">${rubric.answerHtml}</div>
+          </div>
+        `);
+      }
     }
     return parts.join("");
+  }
+
+  function getLoadingMessage() {
+    const apiKey = getGeminiKey();
+    if (!apiKey) {
+      return "กำลังวิเคราะห์คำตอบเทียบเนื้อหาประกอบคำสอนและเกณฑ์แนวคำตอบ…";
+    }
+    const prof = getProfileById(getGeminiProfileId());
+    return `✨ ${prof.badge} กำลังคิดวิเคราะห์และเขียน Constructive Feedback ยึดโยงเนื้อหาประกอบคำสอน…`;
   }
 
   /* ---------- Floating Pop-up Modal (For Side-by-Side / Slide Deck Viewing & AI Settings) ---------- */
@@ -739,7 +2323,7 @@
     const bd = ensureModal();
     const titleEl = bd.querySelector("#iqModalTitle");
     const bodyEl = bd.querySelector("#iqModalBody");
-    titleEl.textContent = titleText || "ฝึกตอบคำถาม · AI Suggestion & แนวคำตอบ";
+    titleEl.textContent = titleText || "ฝึกตอบคำถาม · AI Mentor & แนวคำตอบ";
 
     const curSub = getSubmissionFn ? getSubmissionFn() : {};
     const isSimpleQ = rubric.kind === "question" || rubric.kind === "reflection";
@@ -770,9 +2354,10 @@
         resBox.innerHTML = buildFeedbackHtml(rubric, null, "key_only");
         return;
       }
-      resBox.innerHTML = `<div class="iq-loading">กำลังวิเคราะห์คำตอบเทียบกับเกณฑ์แนวคำตอบ…</div>`;
-      const localRes = evaluateLocally(rubric, latestSub);
-      const finalRes = await evaluateWithOptionalGemini(rubric, latestSub, localRes);
+      resBox.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+      const teachingCtx = extractTeachingContext(rubric);
+      const localRes = evaluateLocally(rubric, latestSub, teachingCtx);
+      const finalRes = await evaluateWithOptionalGemini(rubric, latestSub, localRes, teachingCtx);
       resBox.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
     };
 
@@ -784,7 +2369,6 @@
     if (subBtn) subBtn.addEventListener("click", () => runEvalInPopup("ai_and_key"));
     if (keyBtn) keyBtn.addEventListener("click", () => runEvalInPopup("key_only"));
 
-    // Auto-show AI evaluation if user already typed something, otherwise show ready prompt or key
     const hasContent =
       (curSub.text && curSub.text.trim()) ||
       (curSub.cells && Object.values(curSub.cells).some((v) => v && v.trim())) ||
@@ -801,36 +2385,86 @@
     const bd = ensureModal();
     const titleEl = bd.querySelector("#iqModalTitle");
     const bodyEl = bd.querySelector("#iqModalBody");
-    titleEl.textContent = "⚙️ ตั้งค่าผู้ช่วยวิเคราะห์คำตอบ (AI Suggestion)";
+    titleEl.textContent = "⚙️ ตั้งค่าผู้ช่วยวิเคราะห์คำตอบ (AI Mentor & Gemini 4 Neon Extra)";
     const curKey = getGeminiKey();
+    const curProfile = getGeminiProfileId();
+
+    const profileOptions = Object.values(GEMINI_PROFILES)
+      .map(
+        (p) =>
+          `<option value="${escapeHtml(p.id)}"${p.id === curProfile ? " selected" : ""}>${escapeHtml(p.badge)} — ${escapeHtml(p.desc)}</option>`
+      )
+      .join("");
+
     bodyEl.innerHTML = `
       <div class="iq-settings-box">
-        <p style="margin:0 0 10px;line-height:1.6">
-          <strong>โหมดมาตรฐาน (ทำงานทันทีโดยไม่ต้องตั้งค่า):</strong> ระบบตรวจวิเคราะห์คำตอบรายช่องและรายประเด็นเทียบกับแนวคำตอบของคณาจารย์ผู้สอน HS1–HS6 โดยอัตโนมัติบนเบราว์เซอร์ของคุณ
+        <p style="margin:0 0 10px;line-height:1.62">
+          <strong>1. โหมด AI Mentor ในตัว (ทำงานทันที ไม่ต้องใช้ API Key):</strong> วิเคราะห์คำตอบเชิงลึกยึดโยงกับเอกสารประกอบคำสอน HS1–HS6 และแนวคำตอบของอาจารย์ พร้อมตรวจจับการพิมพ์มั่ว/ลืมเปลี่ยนภาษา/คัดลอกโจทย์/ตอบไม่ตรงประเด็น และความเข้าใจคลาดเคลื่อนโดยอัตโนมัติบนเบราว์เซอร์ของคุณ
         </p>
-        <p style="margin:0 0 10px;line-height:1.6">
-          <strong>โหมดเชื่อมต่อ Gemini API (ทางเลือกเสริม):</strong> หากต้องการให้โมเดล <code>gemini-2.5-flash</code> ช่วยเขียนคำแนะนำเพิ่มเติมแบบละเอียด สามารถวาง Gemini API Key ส่วนตัวด้านล่าง (บันทึกเฉพาะในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ส่งขึ้นเซิร์ฟเวอร์อื่น)
+        <p style="margin:0 0 10px;line-height:1.62">
+          <strong>2. โหมดเชื่อมต่อ Gemini 4 Neon Extra (Live API เสริม):</strong> หากต้องการให้โมเดล <code>gemini-4-neon</code> (ระดับคิด <code>xhigh</code>) หรือ <code>gemini-4-hydrogen</code> อ่านเนื้อหาประกอบคำสอนและเขียน Constructive Feedback เฉพาะบุคคล สามารถวาง Gemini API Key ด้านล่าง (เก็บเฉพาะในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ส่งไปเซิร์ฟเวอร์อื่น)
         </p>
-        <input type="password" class="iq-api-input" id="iqGeminiKeyInput" placeholder="AIzaSy... (เว้นว่างเพื่อใช้ระบบวิเคราะห์ในตัว)" value="${escapeHtml(curKey)}">
+        <label style="display:block;font-weight:700;font-size:13px;margin:10px 0 5px">เลือกรุ่นโมเดลและระดับการคิด (Model &amp; Thinking Level):</label>
+        <select class="iq-api-select" id="iqGeminiProfileSelect">${profileOptions}</select>
+        <label style="display:block;font-weight:700;font-size:13px;margin:12px 0 5px">Gemini API Key (จาก Google AI Studio):</label>
+        <input type="password" class="iq-api-input" id="iqGeminiKeyInput" placeholder="AIzaSy... (เว้นว่างเพื่อใช้โหมด AI Mentor ในตัว)" value="${escapeHtml(curKey)}">
         <div class="iq-btn-row" style="margin-top:12px">
           <button type="button" class="iq-btn is-ai" id="iqSaveKeyBtn">บันทึกการตั้งค่า</button>
-          <button type="button" class="iq-btn" id="iqClearKeyBtn">ล้างค่า API Key</button>
+          <button type="button" class="iq-btn is-key" id="iqTestKeyBtn">🔌 ทดสอบการเชื่อมต่อ API</button>
+          <button type="button" class="iq-btn is-ghost" id="iqClearKeyBtn">ล้างค่า API Key</button>
         </div>
-        <div id="iqKeyStatusMsg" style="margin-top:8px;font-size:13px;color:var(--teal-deep);font-weight:600"></div>
+        <div id="iqKeyStatusMsg" style="margin-top:10px;font-size:13.2px;line-height:1.5;color:var(--teal-deep);font-weight:600"></div>
       </div>
     `;
     const inp = bodyEl.querySelector("#iqGeminiKeyInput");
+    const sel = bodyEl.querySelector("#iqGeminiProfileSelect");
     const msg = bodyEl.querySelector("#iqKeyStatusMsg");
+
     bodyEl.querySelector("#iqSaveKeyBtn").addEventListener("click", () => {
       setGeminiKey(inp.value);
+      setGeminiProfileId(sel.value);
+      const prof = getProfileById(sel.value);
       msg.textContent = inp.value.trim()
-        ? "✓ บันทึก Gemini API Key เรียบร้อยแล้ว"
-        : "✓ ใช้โหมดวิเคราะห์เทียบเกณฑ์แนวคำตอบมาตรฐานในตัว";
+        ? `✓ บันทึกเรียบร้อยแล้ว — พร้อมใช้งาน ${prof.badge}`
+        : "✓ ใช้โหมด AI Mentor วิเคราะห์เชิงลึกในตัว (ยึดโยงเนื้อหาคำสอน HS1–HS6)";
     });
+
+    bodyEl.querySelector("#iqTestKeyBtn").addEventListener("click", async () => {
+      const k = inp.value.trim();
+      if (!k) {
+        msg.textContent = "⚠️ กรุณาวาง Gemini API Key ก่อนกดทดสอบการเชื่อมต่อ";
+        return;
+      }
+      setGeminiKey(k);
+      setGeminiProfileId(sel.value);
+      const prof = getProfileById(sel.value);
+      msg.textContent = `กำลังทดสอบเชื่อมต่อ ${prof.badge}…`;
+      try {
+        const res = await evaluateWithOptionalGemini(
+          {
+            id: "api_test",
+            docId: "HS1",
+            kind: "question",
+            prompt: "โรค (disease) กับการเจ็บป่วย (illness) ต่างกันอย่างไร",
+            answerHtml: "<p>โรคคือความผิดปกติในร่างกายที่ตรวจพบได้ ส่วนการเจ็บป่วยคือประสบการณ์ความรู้สึกไม่สบายของผู้ป่วย</p>",
+          },
+          { text: "โรคคือความผิดปกติที่แพทย์ตรวจพบ ส่วนการเจ็บป่วยคือความรู้สึกไม่สบายของผู้ป่วย" },
+          { verdict: "proficient", verdictLabel: "ดีมาก", whatDidWell: [], whatNeedsAttention: [], whatCanImprove: [] }
+        );
+        if (res.source === "gemini") {
+          msg.textContent = `✓ เชื่อมต่อสำเร็จ! โมเดลที่ตอบกลับ: ${res.modelBadge}${res.fallbackNote ? ` (${res.fallbackNote})` : ""}`;
+        } else {
+          msg.textContent = `⚠️ ${res.apiErrorNote || "ไม่สามารถเชื่อมต่อ Gemini API ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์ Paid/Free tier"}`;
+        }
+      } catch (e) {
+        msg.textContent = `⚠️ ทดสอบไม่สำเร็จ: ${(e && e.message) || "เกิดข้อผิดพลาด"}`;
+      }
+    });
+
     bodyEl.querySelector("#iqClearKeyBtn").addEventListener("click", () => {
       inp.value = "";
       setGeminiKey("");
-      msg.textContent = "✓ ล้างค่า API Key และกลับสู่โหมดมาตรฐานเรียบร้อยแล้ว";
+      msg.textContent = "✓ ล้างค่า API Key และกลับสู่โหมด AI Mentor ในตัวเรียบร้อยแล้ว";
     });
     bd.hidden = false;
   }
@@ -851,7 +2485,7 @@
         if (cIdx === 0) return;
         const already = td.querySelector(".wb-cell-editor");
         const rawText = td.textContent.replace(/\s+/g, "");
-        if (!already && rawText !== "") return; // Pre-filled cell — leave intact
+        if (!already && rawText !== "") return;
 
         const cellKey = `${rIdx}_${cIdx}`;
         const choices = colChoices[String(cIdx)];
@@ -894,7 +2528,6 @@
           td.replaceChildren(wrap);
         }
 
-        // Hydrate & bind events (works both on initial prose and cloned Slide Deck slides)
         const curVal = savedCells[cellKey] || "";
         const inp = td.querySelector(".wb-cell-short-input, .wb-cell-textarea");
         const chipBtns = [...td.querySelectorAll(".wb-choice-chip")];
@@ -937,7 +2570,6 @@
       });
     });
 
-    // Attach Table Action Bar + Feedback Drawer right below the table (or its .table-scroll wrapper)
     const anchorEl = tbl.closest(".table-scroll") || tbl;
     let panel = anchorEl.nextElementSibling;
     if (!panel || !panel.classList.contains("iq-table-dock") || panel.dataset.dockFor !== tblId) {
@@ -976,6 +2608,10 @@
           td.classList.add("is-cell-exact");
           badge.textContent = "✓ ตรงแนวคำตอบ";
           badge.hidden = false;
+        } else if (st === "gibberish") {
+          td.classList.add("is-cell-mismatch");
+          badge.textContent = "⚠️ พิมพ์ไม่เป็นคำ";
+          badge.hidden = false;
         } else if (st === "mismatch") {
           td.classList.add("is-cell-mismatch");
           badge.textContent = "△ ตรวจสอบกับเฉลย";
@@ -994,10 +2630,12 @@
       subBtn._iqBound = "1";
       subBtn.addEventListener("click", async () => {
         drawer.hidden = false;
-        drawer.innerHTML = `<div class="iq-loading">กำลังตรวจวิเคราะห์ตารางเทียบกับแนวคำตอบ…</div>`;
-        const localRes = evaluateLocally(rubric, getSub());
+        drawer.dataset.mode = "ai_and_key";
+        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        const teachingCtx = extractTeachingContext(rubric);
+        const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
         applyCellStatuses(localRes.cellFeedbackMap);
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes);
+        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
         drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
         bindDrawerSettingsBtn(drawer);
       });
@@ -1094,13 +2732,16 @@
       subBtn._iqBound = "1";
       subBtn.addEventListener("click", async () => {
         drawer.hidden = false;
-        const localRes = evaluateLocally(rubric, getSub());
+        drawer.dataset.mode = "ai_and_key";
+        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        const teachingCtx = extractTeachingContext(rubric);
+        const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
         pEl.querySelectorAll(".iq-cloze-input").forEach((inp) => {
           const st = localRes.blankStatus && localRes.blankStatus[inp.dataset.blankNum];
           inp.classList.toggle("is-exact", st === "exact");
           inp.classList.toggle("is-mismatch", st === "mismatch");
         });
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes);
+        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
         drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
         bindDrawerSettingsBtn(drawer);
       });
@@ -1205,8 +2846,11 @@
       subBtn._iqBound = "1";
       subBtn.addEventListener("click", async () => {
         drawer.hidden = false;
-        const localRes = evaluateLocally(rubric, getSub());
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes);
+        drawer.dataset.mode = "ai_and_key";
+        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        const teachingCtx = extractTeachingContext(rubric);
+        const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
+        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
         drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
         bindDrawerSettingsBtn(drawer);
       });
@@ -1231,7 +2875,7 @@
   /* ---------- 4. Enhance Individual Questions & Prompts ([data-qa-id]) ---------- */
   function enhanceQuestionNode(el, rubrics) {
     const qaId = el.getAttribute("data-qa-id");
-    const mode = el.getAttribute("data-qa-mode") || "open"; // "open" | "compact"
+    const mode = el.getAttribute("data-qa-mode") || "open";
     const rubric = rubrics[qaId];
     if (!rubric) return;
 
@@ -1239,7 +2883,6 @@
 
     let widget = el.querySelector(":scope > .iq-inline-widget");
     if (!widget) {
-      // Also inject quick side-by-side pill triggers right at the end of the question prompt
       let sidePills = el.querySelector(":scope > .iq-side-pills");
       if (!sidePills) {
         sidePills = document.createElement("span");
@@ -1249,7 +2892,6 @@
           <button type="button" class="iq-mini-pill is-ans" data-iq-quick-key title="แสดง/ซ่อนแนวคำตอบใต้ข้อนี้ทันที">👁 เฉลย</button>
           <button type="button" class="iq-mini-pill is-pop" data-iq-quick-pop title="เปิดหน้าต่าง Pop-up ตอบและเทียบเฉลย">⤢ Pop-up</button>
         `;
-        // If el is blockquote with <p> inside, append inside last <p> or directly
         const lastP = el.tagName === "BLOCKQUOTE" ? el.querySelector("p:last-of-type") : null;
         if (lastP) lastP.appendChild(sidePills);
         else el.appendChild(sidePills);
@@ -1300,10 +2942,11 @@
       if (editorShell && editorShell.hidden) editorShell.hidden = false;
       drawer.hidden = false;
       drawer.dataset.mode = "ai_and_key";
-      drawer.innerHTML = `<div class="iq-loading">กำลังวิเคราะห์คำตอบเทียบกับแนวคำตอบ…</div>`;
+      drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
       const sub = { text: (ta && ta.value) || "" };
-      const localRes = evaluateLocally(rubric, sub);
-      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes);
+      const teachingCtx = extractTeachingContext(rubric);
+      const localRes = evaluateLocally(rubric, sub, teachingCtx);
+      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes, teachingCtx);
       drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
       bindDrawerSettingsBtn(drawer);
     };
@@ -1435,10 +3078,11 @@
     ui.querySelector("[data-sc-submit]").addEventListener("click", async () => {
       drawer.hidden = false;
       drawer.dataset.mode = "ai_and_key";
-      drawer.innerHTML = `<div class="iq-loading">กำลังวิเคราะห์คำตอบเทียบกับแนวคำตอบ…</div>`;
+      drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
       const sub = { text: ta.value };
-      const localRes = evaluateLocally(rubric, sub);
-      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes);
+      const teachingCtx = extractTeachingContext(rubric);
+      const localRes = evaluateLocally(rubric, sub, teachingCtx);
+      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes, teachingCtx);
       drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
       bindDrawerSettingsBtn(drawer);
     });
@@ -1503,5 +3147,10 @@
     enhancePracticeCard,
     toggleAllInlineAnswers,
     openAiSettingsModal,
+    // Diagnostic / test hooks
+    analyzeSubmissionQuality,
+    extractTeachingContext,
+    evaluateLocally,
+    GEMINI_PROFILES,
   };
 })();
