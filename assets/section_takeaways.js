@@ -1928,7 +1928,7 @@
     const [modCode, secId] = String(ktKey || "").split(":");
     const docs = (window.RACM_HS_DATA && window.RACM_HS_DATA.docs) || [];
     const targetDoc =
-      docs.find((d) => d.id === `${modCode}-CONCISE`) || docs.find((d) => d.id === modCode);
+      docs.find((d) => d.id === modCode) || docs.find((d) => d.id === `${modCode}-CONCISE`);
     if (!targetDoc || !targetDoc.html) return "";
 
     const tmp = document.createElement("div");
