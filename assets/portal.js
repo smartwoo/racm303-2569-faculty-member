@@ -2819,7 +2819,10 @@
       if (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(s.id)) {
         const slBtn = make("button", "📊 Slide", "btn sm teal");
         slBtn.type = "button";
-        slBtn.addEventListener("click", () => openEventModal(s));
+        slBtn.addEventListener("click", () => {
+          if (s.id === "w1-d1-orient") openSessionSlide(s.id);
+          else openEventModal(s);
+        });
         actStack.appendChild(slBtn);
       }
       const rowIcsBtn = make("button", "📅 Google Cal / iCal", "btn sm cal-ics-btn");
@@ -26784,6 +26787,22 @@
       });
     });
 
+    pushIfMatch({
+      cat: "docs",
+      icon: "📊",
+      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 14 สไลด์ 16:9)",
+      sub: "Objectives, Learning Experience & ตารางการวัดผลสัมฤทธิ์ตามสมรรถนะ 5 ด้าน (Formative & Summative)",
+      badge: "16:9 · .pptx / PDF",
+      defaultShow: true,
+      searchHay:
+        "orientation slide ปฐมนิเทศ สไลด์ปฐมนิเทศ objectives learning experience evaluation competency การวัดผลสัมฤทธิ์ formative summative racm303".toLocaleLowerCase(
+          "th"
+        ),
+      run: () => {
+        if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+      }
+    });
+
     if (ROLE === "faculty" && typeof FACULTY !== "undefined" && FACULTY) {
       (FACULTY.docs || []).forEach((fd) => {
         pushIfMatch({
@@ -27214,6 +27233,17 @@
     if (!sessionId) return null;
     const reg = getSlidesRegistry();
     if (reg[sessionId]) return reg[sessionId];
+    if (sessionId === "w1-d1-orient") {
+      return {
+        sessionId,
+        isBuiltInOrientation: true,
+        fileName: "Slide ปฐมนิเทศรายวิชา (14 สไลด์ · 16:9)",
+        pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
+        pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
+        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+        uploadedAt: "ประจำรายวิชา 2569"
+      };
+    }
     const s = (SCHED.sessions || []).find((x) => x.id === sessionId);
     if (s && s.slideUrl) {
       return {
@@ -27554,8 +27584,23 @@
     if (slideRec) {
       const bSlide = make("button", `📊 เปิด Slide · ${slideRec.fileName || "ดาวน์โหลด"}`, "btn sm slide-ready-btn");
       bSlide.type = "button";
-      bSlide.addEventListener("click", () => openSessionSlide(session.id));
+      bSlide.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openSessionSlide(session.id);
+      });
       container.appendChild(bSlide);
+      if (slideRec.pptxHref) {
+        const aPptx = make("a", "⬇ .pptx", "btn sm");
+        aPptx.href = slideRec.pptxHref;
+        aPptx.download = "RACM303_2569_Orientation_Slides.pptx";
+        container.appendChild(aPptx);
+      }
+      if (slideRec.pdfHref) {
+        const aPdf = make("a", "⬇ PDF", "btn sm");
+        aPdf.href = slideRec.pdfHref;
+        aPdf.download = "RACM303_2569_Orientation_Slides.pdf";
+        container.appendChild(aPdf);
+      }
     } else if (session.id === "w2-d4-ep678") {
       const bPdf = make("a", "📥 ดาวน์โหลด Slide EP6 (.PDF)", "btn sm slide-ready-btn");
       bPdf.href = "downloads/EP6_Measures_of_Morbidity_and_Mortality_Slides.pdf";
@@ -34531,6 +34576,7 @@
     role: ROLE,
     getState: () => state,
     switchTab,
+    openOrientationDeck: (idx, opts) => window.RACM_ORIENTATION_DECK && window.RACM_ORIENTATION_DECK.open(idx, opts),
     openHsDiscussion,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),

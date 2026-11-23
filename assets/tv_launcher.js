@@ -582,13 +582,22 @@
             ${
               zoomUrl
                 ? `<a class="tv-hero-btn is-primary" href="${esc(zoomUrl)}" target="_blank" rel="noopener" data-tv-focus data-tv-row="1">${ICONS.video} <span>${esc(t("เข้าห้องเรียน Zoom", "Join Zoom Room"))}</span></a>`
-                : `<button type="button" class="tv-hero-btn is-primary" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(
-                    nextSess && nextSess.hsModule
-                      ? t(`เปิดสไลด์ ${nextSess.hsModule}`, `Open ${nextSess.hsModule} Slides`)
-                      : ROLE === "faculty"
+                : nextSess && (nextSess.id === "w1-d1-orient" || nextSess.code === "ORIENT")
+                  ? `<button type="button" class="tv-hero-btn is-primary" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(
+                      t("เปิดสไลด์ปฐมนิเทศ (Orientation)", "Open Orientation Slides")
+                    )}</span></button>
+                     <button type="button" class="tv-hero-btn is-glass" id="tvHeroScheduleBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(
+                      ROLE === "faculty"
                         ? t("เปิดดูตารางสอน", "Open Schedule")
                         : t("เปิดดูตารางเรียน", "Open Schedule")
-                  )}</span></button>`
+                    )}</span></button>`
+                  : `<button type="button" class="tv-hero-btn is-primary" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(
+                      nextSess && nextSess.hsModule
+                        ? t(`เปิดสไลด์ ${nextSess.hsModule}`, `Open ${nextSess.hsModule} Slides`)
+                        : ROLE === "faculty"
+                          ? t("เปิดดูตารางสอน", "Open Schedule")
+                          : t("เปิดดูตารางเรียน", "Open Schedule")
+                    )}</span></button>`
             }
             ${
               hasProfile
@@ -775,11 +784,24 @@
     const heroPrimary = $("tvHeroPrimaryBtn");
     if (heroPrimary) {
       heroPrimary.addEventListener("click", () => {
-        if (nextSess && nextSess.hsModule && api && api.openHsDiscussion) {
+        if (
+          nextSess &&
+          (nextSess.id === "w1-d1-orient" || nextSess.code === "ORIENT") &&
+          window.RACM_ORIENTATION_DECK
+        ) {
+          window.RACM_ORIENTATION_DECK.open(0);
+        } else if (nextSess && nextSess.hsModule && api && api.openHsDiscussion) {
           api.openHsDiscussion(nextSess.hsModule);
         } else {
           navigateTvTab("schedule");
         }
+      });
+    }
+
+    const heroSchedBtn = $("tvHeroScheduleBtn");
+    if (heroSchedBtn) {
+      heroSchedBtn.addEventListener("click", () => {
+        navigateTvTab("schedule");
       });
     }
 
@@ -1933,6 +1955,21 @@
         tags: ["📅 ปฏิทิน 6 สัปดาห์", "📲 ซิงค์ .ics", "🎥 Zoom 3 ห้อง"],
         files: [
           {
+            id: "sched:orient-slides",
+            folderPath: ["schedule"],
+            name: "00_RACM303_2569_Orientation_Slides_(ปฐมนิเทศรายวิชา_16x9).pptx",
+            title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Objectives, Learning Experience & 5-Competency Evaluation)",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (09.00–09.30 น. · ห้อง 2C2-03) — 14 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
+            meta: "14 สไลด์ · 16:9",
+            badge: "▶ เปิดสไลด์ปฐมนิเทศ",
+            icoCls: "is-pptx",
+            icoTxt: "P",
+            pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
+            onOpen: () => {
+              if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+            }
+          },
+          {
             id: "sched:cal",
             folderPath: ["schedule"],
             name: ROLE === "faculty" ? "RACM303_ปฏิทินภาระงานสอน_6_สัปดาห์.app" : "RACM303_ตารางเรียนรวม_6_สัปดาห์.app",
@@ -2201,6 +2238,21 @@
         meta: ROLE === "faculty" ? "คู่มือวิชา 17 บท + คู่มือผู้สอน" : "คู่มือรายวิชา 17 บท",
         tags: ["📘 คู่มือ 17 บท", "⬇ PDF / Word", ...(ROLE === "faculty" ? ["📕 คู่มือผู้สอน"] : [])],
         files: [
+          {
+            id: "man:orient-slides",
+            folderPath: ["manuals"],
+            name: "00_RACM303_2569_Orientation_Slides_(ปฐมนิเทศรายวิชา_16x9).pptx",
+            title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Objectives, Learning Experience & 5-Competency Evaluation)",
+            sub: "สไลด์ปฐมนิเทศ 14 หน้า (16:9) พร้อมตารางการวัดผลสัมฤทธิ์ 5 สมรรถนะ (Formative & Summative)",
+            meta: "14 สไลด์ · 16:9",
+            badge: "▶ เปิดสไลด์ปฐมนิเทศ",
+            icoCls: "is-pptx",
+            icoTxt: "P",
+            pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
+            onOpen: () => {
+              if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+            }
+          },
           {
             id: "man:course",
             folderPath: ["manuals"],
