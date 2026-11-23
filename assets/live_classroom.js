@@ -1,6 +1,6 @@
 /* ==========================================================================
    RACM 303 (2569) — Live Case Discussion Classroom Engine (Rooms 1–6)
-   Kahoot / Mentimeter Style Real-Time Student Responses & Shared Countdown Timer
+   Live Classroom Check-in, Real-Time Student Responses & Shared Countdown Timer
    Transports: MQTT over WSS (443/8084) + PeerJS WebRTC + BroadcastChannel
    Strict Confidentiality: Transmits ONLY room/timer/question IDs & student inputs
    ========================================================================== */

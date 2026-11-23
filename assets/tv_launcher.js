@@ -879,9 +879,9 @@
       : t("ทดสอบความเข้าใจ Active Recall พร้อมคำศัพท์และตารางทบทวนเร็ว", "Active recall Self-Quiz & flashcards");
     const step4Sub = flow
       ? ROLE === "faculty"
-        ? `สไลด์เปิดคาบ Kahoot + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) & เฉลย 4 ขั้น · ${mod.discTime || ""}`
-        : `สไลด์เปิดคาบ Kahoot + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
-      : t(`สไลด์เปิดคาบ Kahoot + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Kahoot + 16:9 in-class case slides");
+        ? `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) & เฉลย 4 ขั้น · ${mod.discTime || ""}`
+        : `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
+      : t(`สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Check-in + 16:9 in-class case slides");
 
     backdrop.innerHTML = `
       <div class="tv-modal-sheet is-compact">
@@ -1841,8 +1841,8 @@
         sub:
           (flow && flow.steps[3].desc) ||
           (ROLE === "faculty"
-            ? `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
-            : `สไลด์เปิดคาบ Kahoot + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
+            ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+            : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
         meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
         badge: ROLE === "faculty" ? `④ Case + เฉลย` : `④ Case 16:9`,
         icoCls: "is-pptx",

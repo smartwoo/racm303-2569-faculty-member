@@ -10256,8 +10256,8 @@
         discProg,
         desc:
           ROLE === "faculty"
-            ? `สไลด์อภิปรายกลุ่มย่อย 16:9 พร้อมเฉลย Teacher Key ครบ 4 ขั้น (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อ Kahoot`
-            : `นำกรอบคิดที่ฝึกไว้มาวิเคราะห์จริงในห้องกลุ่มย่อย (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อ Kahoot และสไลด์ 16:9`,
+            ? `สไลด์อภิปรายกลุ่มย่อย 16:9 พร้อมเฉลย Teacher Key ครบ 4 ขั้น (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อย`
+            : `นำกรอบคิดที่ฝึกไว้มาวิเคราะห์จริงในห้องกลุ่มย่อย (${modCases.length} กรณีศึกษา · ${subQCnt} ข้อย่อย): ${profile.caseFocus} — เริ่มด้วยเช็คชื่อกลุ่มย่อยและสไลด์ 16:9`,
         bridge: profile.caseBridge,
         primaryLabel: ROLE === "faculty" ? "▶ เปิดสไลด์ + เฉลย (16:9)" : "▶ เปิดสไลด์ในชั้นเรียน (16:9)",
         onPrimary: () => openHsDiscussion(code)
@@ -11115,7 +11115,7 @@
           prog,
           lecturer,
           shortDate,
-          searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} case discussion in class pptx สไลด์อภิปราย kahoot กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
+          searchText: `${m.code} ${m.title} ${m.enTitle || ""} ${pptFileName} case discussion in class pptx สไลด์อภิปราย check-in เช็คชื่อ กรณีศึกษา ${lecturer} ${firstScenText} ${qList.map((x) => x.title || x.label || "").join(" ")}`.toLocaleLowerCase("th"),
           onOpen: () => openDiscussionSlideForModule(m.id)
         });
 
@@ -11493,7 +11493,7 @@
         card.appendChild(cHead);
 
         const thumb = make("div", null, "gdrive-slide-thumb");
-        const openingRowHtml = `<div class="gd-mini-q-row"><span class="gd-mini-q-num">เปิดคาบ</span><span>🎯 เช็คชื่อกลุ่มย่อย Kahoot (${escapeHtml(m.code)})</span></div>`;
+        const openingRowHtml = `<div class="gd-mini-q-row"><span class="gd-mini-q-num">เปิดคาบ</span><span>เช็คชื่อกลุ่มย่อย (${escapeHtml(m.code)})</span></div>`;
         const qPreviewHtml = item.qList
           .slice(0, 2)
           .map((qObj, idx) => {
@@ -14465,11 +14465,11 @@
     const openTile = make("button", null, "tv-app-tile hs-atv-doc-tile");
     openTile.type = "button";
     openTile.append(
-      make("span", "🎯", "tv-app-icon tone-amber hs-atv-emoji-ico"),
+      make("span", "S1", "tv-app-icon tone-amber hs-atv-emoji-ico"),
       (() => {
         const c = make("div", null, "tv-app-copy");
         c.append(
-          make("span", `สไลด์เปิดคาบ & เช็คชื่อ Kahoot (${curMod.code})`, "tv-app-title"),
+          make("span", `สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${curMod.code})`, "tv-app-title"),
           make("span", "เลือกกลุ่มย่อย 1–6 แสดงรหัส PIN และเช็คชื่อเข้าห้องเรียนก่อนเริ่มอภิปราย", "tv-app-sub"),
           make("span", "▶ เปิดสไลด์หน้าแรก", "tv-app-badge")
         );
@@ -15886,12 +15886,12 @@
     const st = getKahootRoomRosterStatus();
     const btn = make(
       "button",
-      `👥 Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`,
+      `Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`,
       clsName || "hsd-kahoot-lobby-btn"
     );
     btn.type = "button";
     btn.setAttribute("data-kahoot-lobby-btn", "1");
-    btn.title = "คลิกเพื่อดูรายชื่อนักศึกษาที่ Login รหัสนักศึกษา Join เข้าคาบเรียนสดแล้ว (Kahoot / Mentimeter Live Lobby)";
+    btn.title = "คลิกเพื่อดูรายชื่อนักศึกษาที่ Login รหัสนักศึกษาเข้าคาบเรียนสดแล้ว (Live Check-in Lobby)";
     btn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       openHsdKahootLobbyModal();
@@ -15943,13 +15943,13 @@
 
     const dialog = make("div", null, "hsd-kahoot-modal-card");
 
-    // 1. Kahoot / Mentimeter Live Lobby Header
+    // 1. Live Check-in Lobby Header
     const head = make("div", null, "hsd-km-head");
     const hLeft = make("div", null, "hsd-km-head-left");
-    const pinBadge = make("div", `🎯 PIN ห้องสด: ${activeMod}-G${st.roomId} · ห้อง ${roomCode}`, "hsd-km-pin-badge");
+    const pinBadge = make("div", `CHECK-IN PIN: ${activeMod}-G${st.roomId} · ห้อง ${roomCode}`, "hsd-km-pin-badge");
     const hTitle = make(
       "h3",
-      `เช็คชื่อสด Kahoot / Mentimeter — กลุ่ม Discussion ที่ ${st.roomId} (${st.joinedCount}/${st.totalExpected} คน)`,
+      `เช็คชื่อสดเข้ากลุ่ม — กลุ่ม Discussion ที่ ${st.roomId} (${st.joinedCount}/${st.totalExpected} คน)`,
       "hsd-km-title"
     );
     const hSub = make(
@@ -15961,18 +15961,18 @@
 
     const hRight = make("div", null, "hsd-km-head-actions");
     if (ROLE === "faculty") {
-      const syncAllBtn = make("button", "📡 ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที", "btn sm primary");
+      const syncAllBtn = make("button", "ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที", "btn sm primary");
       syncAllBtn.type = "button";
       syncAllBtn.addEventListener("click", () => {
         broadcastActiveFacultySlideToStudents(true);
         syncAllBtn.textContent = "✓ ส่งสัญญาณ Sync ทุกจอแล้ว!";
         setTimeout(() => {
-          syncAllBtn.textContent = "📡 ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที";
+          syncAllBtn.textContent = "ดึงหน้าจอ นศ. ทุกคนมาสไลด์ข้อนี้ทันที";
         }, 1600);
       });
       hRight.appendChild(syncAllBtn);
     } else {
-      const syncMeBtn = make("button", "📡 ซิงค์ตามสไลด์อาจารย์ตอนนี้", "btn sm teal");
+      const syncMeBtn = make("button", "ซิงค์ตามสไลด์อาจารย์ตอนนี้", "btn sm teal");
       syncMeBtn.type = "button";
       syncMeBtn.addEventListener("click", () => {
         if (LIVE) {
@@ -15982,7 +15982,7 @@
         }
         closeHsdKahootLobbyModal();
       });
-      const switchIdBtn = make("button", "🚪 สลับรหัส นศ. / ห้อง", "btn sm");
+      const switchIdBtn = make("button", "สลับรหัส นศ. / ห้อง", "btn sm");
       switchIdBtn.type = "button";
       switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
       hRight.append(syncMeBtn, switchIdBtn);
@@ -16013,7 +16013,7 @@
     const progWrap = make("div", null, "hsd-km-progress-wrap");
     progWrap.innerHTML =
       `<div class="hsd-km-prog-labels">` +
-      `<strong>🟢 Login รหัสเข้าคาบเรียนแล้ว ${st.joinedCount} / ${st.totalExpected} คน (${pct}%)</strong>` +
+      `<strong>Login รหัสเข้าคาบเรียนแล้ว ${st.joinedCount} / ${st.totalExpected} คน (${pct}%)</strong>` +
       `<span>รอเข้าห้องอีก ${st.waitingList.length} คน</span>` +
       `</div>` +
       `<div class="hsd-km-prog-track"><div class="hsd-km-prog-fill" style="width:${pct}%"></div></div>`;
@@ -16025,7 +16025,7 @@
 
     const joinedCol = make("div", null, "hsd-km-col is-joined-col");
     joinedCol.appendChild(
-      make("h4", `🟢 เข้าห้องเรียนแล้ว (${st.joinedCount} คน)`, "hsd-km-col-title")
+      make("h4", `เข้าห้องเรียนแล้ว (${st.joinedCount} คน)`, "hsd-km-col-title")
     );
     if (!st.joinedList.length) {
       joinedCol.appendChild(
@@ -16062,10 +16062,10 @@
 
     const waitCol = make("div", null, "hsd-km-col is-waiting-col");
     waitCol.appendChild(
-      make("h4", `⏳ ยังไม่ได้ Login เข้าห้อง (${st.waitingList.length} คน)`, "hsd-km-col-title")
+      make("h4", `ยังไม่ได้ Login เข้าห้อง (${st.waitingList.length} คน)`, "hsd-km-col-title")
     );
     if (!st.waitingList.length) {
-      waitCol.appendChild(make("div", "🎉 นักศึกษากลุ่มนี้ Login เข้าห้องครบทุกคนแล้ว!", "hsd-km-empty is-all-in"));
+      waitCol.appendChild(make("div", "นักศึกษากลุ่มนี้ Login เข้าห้องครบทุกคนแล้ว", "hsd-km-empty is-all-in"));
     } else {
       const wGrid = make("div", null, "hsd-km-wait-grid");
       st.waitingList.forEach((s) => {
@@ -16090,14 +16090,14 @@
     const ptr = st.activePtr;
     const ptrText =
       ptr && ptr.questionId
-        ? `🟢 อาจารย์เปิดสไลด์อยู่ที่: ${findQuestionLabelByQId(ptr.questionId)}`
+        ? `อาจารย์เปิดสไลด์อยู่ที่: ${findQuestionLabelByQId(ptr.questionId)}`
         : st.teacherOnline
-        ? "🟢 อาจารย์เปิดห้องรออยู่แล้ว"
-        : "⏳ รออาจารย์เปิดสไลด์นำอภิปราย";
+        ? "อาจารย์เปิดห้องรออยู่แล้ว"
+        : "รออาจารย์เปิดสไลด์นำอภิปราย";
     box.replaceChildren();
     const top = make("div", null, "hsd-gate-live-top");
     top.innerHTML =
-      `<strong>👥 เพื่อนในกลุ่มที่ ${st.roomId} ที่ Join เข้ามาแล้ว: ${st.joinedCount} / ${st.totalExpected} คน</strong>` +
+      `<strong>เพื่อนในกลุ่มที่ ${st.roomId} ที่เช็คชื่อแล้ว: ${st.joinedCount} / ${st.totalExpected} คน</strong>` +
       `<span class="hsd-gate-live-ptr">${escapeHtml(ptrText)}</span>`;
     box.appendChild(top);
 
@@ -16106,7 +16106,7 @@
       pills.appendChild(make("span", "เป็นคนแรกของกลุ่มที่ Login เข้าห้องคาบนี้ได้เลย!", "hsd-gate-joined-empty"));
     } else {
       st.joinedList.forEach((p) => {
-        const lbl = p.nickname ? `🟢 ${p.nickname} (${p.studentId})` : `🟢 ${p.studentId || p.fullName}`;
+        const lbl = p.nickname ? `${p.nickname} (${p.studentId})` : `${p.studentId || p.fullName}`;
         pills.appendChild(make("span", lbl, "hsd-gate-joined-pill"));
       });
     }
@@ -16129,7 +16129,7 @@
       pill.title = conn.label;
     }
     document.querySelectorAll("[data-kahoot-lobby-btn='1']").forEach((btn) => {
-      btn.textContent = `👥 Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`;
+      btn.textContent = `Join แล้ว ${st.joinedCount}/${st.totalExpected} คน`;
       btn.classList.toggle("has-joined-students", st.joinedCount > 0);
     });
     refreshGateLiveJoinedPreviewDOM();
@@ -16177,11 +16177,11 @@
     });
     left.appendChild(roomPills);
 
-    // Kahoot / Mentimeter Live Who-Joined Roster Button (Both Faculty & Student)
+    // Live Check-in Who-Joined Roster Button (Both Faculty & Student)
     left.appendChild(buildKahootLobbyTriggerBtnDOM("hsd-kahoot-lobby-btn"));
 
     if (ROLE === "faculty") {
-      const syncStudentsBtn = make("button", "📡 Sync สไลด์ นศ.", "hsd-tbtn primary");
+      const syncStudentsBtn = make("button", "Sync สไลด์ นศ.", "hsd-tbtn primary");
       syncStudentsBtn.type = "button";
       syncStudentsBtn.title = "ดึงหน้าจอนักศึกษาทุกคนในห้องกลุ่มนี้ให้ซิงค์มาที่สไลด์ข้อปัจจุบันทันที";
       syncStudentsBtn.addEventListener("click", () => {
@@ -16200,13 +16200,13 @@
         const s = state.myStudent;
         const myBadge = make(
           "span",
-          `👤 ${s.nickname ? `${s.nickname} · ${s.id}` : s.id}`,
+          `${s.nickname ? `${s.nickname} · ${s.id}` : s.id}`,
           "hsd-presence-pill is-student-id-pill"
         );
         myBadge.title = `${s.fullName} · กลุ่ม Discussion ที่ ${s.disc}`;
         left.appendChild(myBadge);
 
-        const switchRoomGateBtn = make("button", tr("🚪 สลับรหัส/ห้อง", "🚪 Switch ID / Room"), "hsd-tbtn");
+        const switchRoomGateBtn = make("button", tr("สลับรหัส/ห้อง", "Switch ID / Room"), "hsd-tbtn");
         switchRoomGateBtn.type = "button";
         switchRoomGateBtn.title = tr("กลับไปหน้า Login รหัสนักศึกษา / เลือกห้องกลุ่มย่อยใหม่", "Return to Student ID Login & Room Lobby");
         switchRoomGateBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
@@ -17018,7 +17018,7 @@
       if (modInfo && modMeta) {
         left.innerHTML = `<strong>ห้องกลุ่มที่ ${roomNum} (${escapeHtml(modInfo.room || (rot && rot.room) || "")}) · คาบ ${escapeHtml(activeMod)}</strong> · อาจารย์ผู้นำอภิปราย: <strong>${escapeHtml(modInfo.instructor || "-")}</strong> · ดูคำตอบสดของ นศพ. และกด <em>“สไลด์ถัดไป →”</em> เพื่อเปิดเฉลย`;
       } else {
-        left.innerHTML = `<strong>กำลังเปิดห้องกลุ่มอภิปรายที่ ${roomNum} (ห้อง ${escapeHtml(rot ? rot.room : "1C1-02")})</strong> · เลือกบท HS1–HS6 เพื่อดูชื่ออาจารย์ประจำกลุ่ม จับเวลาร่วมกับ นศพ. และตรวจคำตอบสดแบบ Mentimeter`;
+        left.innerHTML = `<strong>กำลังเปิดห้องกลุ่มอภิปรายที่ ${roomNum} (ห้อง ${escapeHtml(rot ? rot.room : "1C1-02")})</strong> · เลือกบท HS1–HS6 เพื่อดูชื่ออาจารย์ประจำกลุ่ม จับเวลาร่วมกับ นศพ. และตรวจคำตอบสดแบบเรียลไทม์`;
       }
       const rosterBtn = make("button", `ใบรูปถ่ายกลุ่ม ${roomNum} →`, "btn sm");
       rosterBtn.type = "button";
@@ -17773,7 +17773,7 @@
           kind: "opening-kahoot",
           pedStage: 0,
           pedKey: "opening-kahoot",
-          pedBadge: "สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (Kahoot)",
+          pedBadge: "สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย",
           pedShort: "เปิดคาบ",
           mod,
           modCases,
@@ -18557,12 +18557,12 @@
 
     const getPinCode = () => `${selectedMod}-G${selectedRoom}`;
 
-    // 1. Kahoot / Mentimeter Lobby Hero Header
+    // 1. Live Check-in Lobby Hero Header
     const head = make("div", null, "hsd-room-gate-head");
     const badgeRow = make("div", null, "hsd-kahoot-gate-badges");
-    const livePinEl = make("span", `🎯 PIN ห้องสด: ${getPinCode()}`, "hsd-km-pin-badge");
+    const livePinEl = make("span", `CHECK-IN PIN: ${getPinCode()}`, "hsd-km-pin-badge");
     badgeRow.append(
-      make("span", "🎓 LIVE CLASSROOM · KAHOOT / MENTIMETER MODE", "hsd-rg-badge"),
+      make("span", "LIVE CLASSROOM · CHECK-IN MODE", "hsd-rg-badge"),
       livePinEl
     );
     head.append(
@@ -18599,7 +18599,7 @@
         if ($("hsdModuleSelect")) $("hsdModuleSelect").value = mc.id;
         modPills.querySelectorAll(".hsd-gate-mod-pill").forEach((el) => el.classList.remove("is-active"));
         mb.classList.add("is-active");
-        livePinEl.textContent = `🎯 PIN ห้องสด: ${getPinCode()}`;
+        livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
         rebuildRoomsGrid();
       });
       modPills.appendChild(mb);
@@ -18658,7 +18658,7 @@
       } else {
         verifiedCard.className = "hsd-kahoot-verified-card is-pending";
         verifiedCard.innerHTML =
-          `<span>🔑 ยังไม่ได้เลือกรหัสนักศึกษา — พิมพ์รหัส 7 หลักด้านบนเพื่อแสดงชื่อและกลุ่ม Discussion ของคุณอัตโนมัติ</span>`;
+          `<span>ยังไม่ได้เลือกรหัสนักศึกษา — พิมพ์รหัส 7 หลักด้านบนเพื่อแสดงชื่อและกลุ่ม Discussion ของคุณอัตโนมัติ</span>`;
       }
       updateJoinButtonLabel();
     };
@@ -18670,7 +18670,7 @@
       if (stu && stu.disc >= 1 && stu.disc <= 6) {
         selectedRoom = Number(stu.disc);
         if (LIVE) LIVE.setRoom(selectedRoom, true);
-        livePinEl.textContent = `🎯 PIN ห้องสด: ${getPinCode()}`;
+        livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
         rebuildRoomsGrid();
         refreshGateLiveJoinedPreviewDOM();
       }
@@ -18782,13 +18782,13 @@
           `<span class="hsd-rg-num">กลุ่มที่ ${rm.id}</span>` +
           `${isMine ? `<span class="hsd-rg-mine-pill">★ กลุ่มของคุณ</span>` : `<span class="hsd-rg-code">ห้อง ${escapeHtml(roomName)}</span>`}` +
           `</div>` +
-          `<strong class="hsd-rg-room">📍 ห้อง ${escapeHtml(roomName)}</strong>` +
+          `<strong class="hsd-rg-room">ห้อง ${escapeHtml(roomName)}</strong>` +
           `<span class="hsd-rg-inst">อ.ประจำกลุ่ม (${escapeHtml(modKey)}): ${escapeHtml(instName)}</span>`;
 
         btn.addEventListener("click", () => {
           selectedRoom = rm.id;
           if (LIVE) LIVE.setRoom(rm.id, false);
-          livePinEl.textContent = `🎯 PIN ห้องสด: ${getPinCode()}`;
+          livePinEl.textContent = `CHECK-IN PIN: ${getPinCode()}`;
           rebuildRoomsGrid();
           refreshGateLiveJoinedPreviewDOM();
           updateJoinButtonLabel();
@@ -18800,7 +18800,7 @@
     roomSection.appendChild(roomsGrid);
     gate.appendChild(roomSection);
 
-    // 5. Big Kahoot Join CTA Bar
+    // 5. Big Check-in Join CTA Bar
     const ctaWrap = make("div", null, "hsd-kahoot-join-cta-row");
     const joinBtn = make("button", "", "hsd-kahoot-join-btn");
     joinBtn.type = "button";
@@ -18809,10 +18809,10 @@
     function updateJoinButtonLabel() {
       if (candidateStu) {
         const nick = candidateStu.nickname ? ` (${candidateStu.nickname})` : "";
-        joinBtn.textContent = `🚀 Join เข้าคาบ ${selectedMod} · กลุ่มที่ ${selectedRoom} ในชื่อ ${candidateStu.id}${nick} & Sync สไลด์สด →`;
+        joinBtn.textContent = `Join เข้าคาบ ${selectedMod} · กลุ่มที่ ${selectedRoom} ในชื่อ ${candidateStu.id}${nick} & Sync สไลด์สด →`;
         joinBtn.classList.add("is-ready");
       } else {
-        joinBtn.textContent = `🔒 กรอกรหัสนักศึกษา 7 หลักด้านบนก่อนกด Join เข้ากลุ่มที่ ${selectedRoom}`;
+        joinBtn.textContent = `กรอกรหัสนักศึกษา 7 หลักด้านบนก่อนกด Join เข้ากลุ่มที่ ${selectedRoom}`;
         joinBtn.classList.remove("is-ready");
       }
     }
@@ -18823,7 +18823,7 @@
         if (found) candidateStu = found;
       }
       if (!candidateStu) {
-        warnMsg.textContent = "⚠️ กรุณากรอกรหัสนักศึกษา 7 หลักที่ถูกต้อง (เช่น 6702006) หรือเลือกชื่อของคุณจากรายการก่อนเข้าห้องเรียนสด";
+        warnMsg.textContent = "กรุณากรอกรหัสนักศึกษา 7 หลักที่ถูกต้อง (เช่น 6702006) หรือเลือกชื่อของคุณจากรายการก่อนเข้าห้องเรียนสด";
         warnMsg.hidden = false;
         idIn.focus();
         return;
@@ -19058,7 +19058,7 @@
     slides.forEach((s, idx) => {
       let optLabel = "";
       if (s.kind === "opening-kahoot") {
-        optLabel = `🎯 Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย Kahoot (${s.mod.code})`;
+        optLabel = `Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${s.mod.code})`;
       } else if (s.kind === "concept-summary") {
         const csTitle = (s.conceptSummary && s.conceptSummary.title) || "Key Takeaway";
         optLabel = `[${s.pedShort || "Key Takeaway #1"}] ข้อ ${s.shortNum}: ${csTitle}`;
@@ -20224,7 +20224,7 @@
     rHead.appendChild(
       make(
         "span",
-        `👥 สมาชิกกลุ่มที่ ${st.roomId} · เช็คชื่อแล้ว ${st.joinedCount} / ${st.totalExpected} คน`,
+        `สมาชิกกลุ่มที่ ${st.roomId} · เช็คชื่อแล้ว ${st.joinedCount} / ${st.totalExpected} คน`,
         "ppt-ok-roster-count"
       )
     );
@@ -20316,7 +20316,7 @@
     agendaCard.append(
       make(
         "span",
-        `📊 สไลด์เปิดคาบ ${mod.code}${schedStr ? ` · ${schedStr}` : ""}${mod.discTime ? ` (${mod.discTime})` : ""}${mod.examWeight ? ` · สอบ ${mod.examWeight}` : ""}`,
+        `สไลด์เปิดคาบ ${mod.code}${schedStr ? ` · ${schedStr}` : ""}${mod.discTime ? ` (${mod.discTime})` : ""}${mod.examWeight ? ` · สอบ ${mod.examWeight}` : ""}`,
         "ppt-ok-kicker"
       ),
       make("p", mod.summaryFocus || mod.title || "", "ppt-ok-summary")
@@ -20356,8 +20356,8 @@
       make(
         "div",
         ROLE === "faculty"
-          ? "🎛 เลือกกลุ่มย่อย 1–6 เพื่อแสดง PIN และรายชื่อเช็คชื่อ Kahoot บนสไลด์เปิดคาบ"
-          : "🎯 เช็คชื่อเข้ากลุ่มย่อย 1–6 (Kahoot Check-in ในสไลด์เปิดคาบ)",
+          ? "เลือกกลุ่มย่อย 1–6 เพื่อแสดง PIN และรายชื่อเช็คชื่อบนสไลด์เปิดคาบ"
+          : "เช็คชื่อเข้ากลุ่มย่อย 1–6 (Check-in ในสไลด์เปิดคาบ)",
         "ppt-ok-roster-count"
       )
     );
@@ -20407,16 +20407,16 @@
           idIn.className = "ppt-ok-id-input";
           idIn.setAttribute("data-ppt-ok-sid-input", "1");
           idIn.autocomplete = "off";
-          idIn.placeholder = "กรอกรหัสนักศึกษา 7 หลัก หรือชื่อเล่น เพื่อเช็คชื่อ Kahoot…";
+          idIn.placeholder = "กรอกรหัสนักศึกษา 7 หลัก หรือชื่อเล่น เพื่อเช็คชื่อเข้ากลุ่ม…";
           const savedSid = (state.myStudent && state.myStudent.id) || localStorage.getItem("racm303_my_sid") || "";
           if (savedSid) idIn.value = savedSid;
 
-          const joinCta = make("button", "🎯 เช็คชื่อเข้ากลุ่ม", "ppt-ok-join-cta");
+          const joinCta = make("button", "เช็คชื่อเข้ากลุ่ม", "ppt-ok-join-cta");
           joinCta.type = "button";
 
           const hintEl = make(
             "div",
-            "💡 แตะชื่อตัวเองในตารางขวามือหรือพิมพ์รหัส 7 หลักเพื่อเช็คชื่อขึ้นจอ (หรือกดสไลด์ถัดไปเพื่ออ่านโจทย์ได้ทันที)",
+            "แตะชื่อตัวเองในตารางขวามือหรือพิมพ์รหัส 7 หลักเพื่อเช็คชื่อขึ้นจอ (หรือกดสไลด์ถัดไปเพื่ออ่านโจทย์ได้ทันที)",
             "ppt-ok-caption"
           );
 
@@ -20426,7 +20426,7 @@
               (ROSTER.students || []).find((s) => String(s.id) === raw) ||
               (raw ? findStudentByQuery(raw) : null);
             if (!stu) {
-              hintEl.textContent = "⚠️ ไม่พบรหัสนักศึกษาหรือชื่อนี้ กรุณากรอกรหัส 7 หลัก เช่น 6702006";
+              hintEl.textContent = "ไม่พบรหัสนักศึกษาหรือชื่อนี้ กรุณากรอกรหัส 7 หลัก เช่น 6702006";
               hintEl.style.color = "#dc2626";
               idIn.focus();
               return;
@@ -20465,7 +20465,7 @@
         }
       } else {
         const facRow = make("div", null, "ppt-ok-join-row");
-        const lobbyBtn = make("button", "👥 เปิดหน้าต่าง Kahoot Lobby ใหญ่", "btn sm");
+        const lobbyBtn = make("button", "เปิดหน้าต่างรายชื่อเช็คชื่อใหญ่", "btn sm");
         lobbyBtn.type = "button";
         lobbyBtn.addEventListener("click", () => openHsdKahootLobbyModal());
 
@@ -20486,17 +20486,17 @@
     }
     leftCol.appendChild(checkinCard);
 
-    // Right Column: Kahoot PIN Hero + Real-Time Group Roster Wall
+    // Right Column: Check-in PIN Hero + Real-Time Group Roster Wall
     const rightCol = make("div", null, "ppt-ok-right");
     const pinHero = make("div", null, "ppt-ok-pin-hero");
     const pinLeft = make("div");
     pinLeft.append(
-      make("div", `🎯 KAHOOT CHECK-IN PIN · กลุ่มย่อยที่ ${roomId}`, "ppt-ok-pin-kicker"),
+      make("div", `CHECK-IN PIN · กลุ่มย่อยที่ ${roomId}`, "ppt-ok-pin-kicker"),
       make("div", pinCode, "ppt-ok-pin-code")
     );
     const pinRight = make("div", null, "ppt-ok-pin-meta");
     pinRight.innerHTML =
-      `<strong>📍 ห้อง ${escapeHtml(roomCode)}</strong>` +
+      `<strong>ห้อง ${escapeHtml(roomCode)}</strong>` +
       `<span>อ.ประจำกลุ่ม (${escapeHtml(mod.code)}): ${escapeHtml(instName)}</span>`;
     pinHero.append(pinLeft, pinRight);
     rightCol.appendChild(pinHero);
@@ -20642,7 +20642,7 @@
       const slidePosIdx = exp && typeof exp.slideNumber === "number" ? exp.slideNumber : state.hsdSlideIdx + 1;
       mFoot.append(
         make("span", "RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี"),
-        make("span", `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (Kahoot)  |  Slide ${slidePosIdx} / ${slides.length}`)
+        make("span", `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย  |  Slide ${slidePosIdx} / ${slides.length}`)
       );
       const progLine = make("div", null, "ppt-slide-progress-line");
       progLine.style.width = `${(slidePosIdx / Math.max(1, slides.length)) * 100}%`;
@@ -21205,8 +21205,8 @@
       if (s.kind === "opening-kahoot") {
         card.innerHTML =
           `<div class="ppt-thumb-top">` +
-          `<span class="ppt-thumb-mod">🎯 ${escapeHtml(s.mod.code)} · สไลด์เปิดคาบ</span>` +
-          `<span class="ppt-thumb-flag is-key">Kahoot</span>` +
+          `<span class="ppt-thumb-mod">${escapeHtml(s.mod.code)} · สไลด์เปิดคาบ</span>` +
+          `<span class="ppt-thumb-flag is-key">Check-in</span>` +
           `</div>` +
           `<div>` +
           `<div style="font-size:11px;color:var(--muted);margin-bottom:3px">เช็คชื่อกลุ่มย่อย 1–6 & ภาพรวมคาบ</div>` +
@@ -21301,7 +21301,7 @@
     if (state.isPptSlideSharePopup) {
       document.title =
         cur.kind === "opening-kahoot"
-          ? `📊 [Slide Share 16:9] คาบ ${cur.mod.code}.pptx — สไลด์เปิดคาบ & Kahoot — RACM 303`
+          ? `[Slide Share 16:9] คาบ ${cur.mod.code}.pptx — สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย — RACM 303`
           : cur.kind === "concept-summary"
           ? `[Slide Share 16:9] คาบ ${cur.mod.code}.pptx — ${(cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"} — RACM 303`
           : `📊 [Slide Share 16:9] คาบ ${cur.mod.code}.pptx — กรณีที่ ${cur.caseObj.caseNumber} (${cur.shortNum}) — RACM 303`;
@@ -21932,7 +21932,7 @@
           card.appendChild(cHead);
 
           const thumb = make("div", null, "gdrive-slide-thumb");
-          const openingRowHtml = `<div class="gd-mini-q-row"><span class="gd-mini-q-num">เปิดคาบ</span><span>🎯 เช็คชื่อกลุ่มย่อย Kahoot (${escapeHtml(m.code)})</span></div>`;
+          const openingRowHtml = `<div class="gd-mini-q-row"><span class="gd-mini-q-num">เปิดคาบ</span><span>เช็คชื่อกลุ่มย่อย (${escapeHtml(m.code)})</span></div>`;
           const qPreviewHtml = qList
             .slice(0, 2)
             .map((qObj, idx) => {
@@ -22601,7 +22601,7 @@
         if (s.kind === "opening-kahoot") {
           picker.add(
             new Option(
-              `🎯 สไลด์เปิดคาบ & Kahoot (${s.mod.code})`,
+              `สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${s.mod.code})`,
               String(idx),
               false,
               idx === state.hsdSlideIdx
@@ -23583,11 +23583,11 @@
       const tCard = make("div", null, "ppt-thumb-card");
 
       if (s.kind === "opening-kahoot") {
-        item.title = `Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย Kahoot (${s.mod.code})`;
+        item.title = `Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${s.mod.code})`;
         tCard.innerHTML =
           `<div class="ppt-thumb-top">` +
-          `<span class="ppt-thumb-mod">🎯 เปิดคาบ ${escapeHtml(s.mod.code)}</span>` +
-          `<span class="ppt-thumb-flag is-key">Kahoot</span>` +
+          `<span class="ppt-thumb-mod">เปิดคาบ ${escapeHtml(s.mod.code)}</span>` +
+          `<span class="ppt-thumb-flag is-key">Check-in</span>` +
           `</div>` +
           `<div class="ppt-thumb-title">สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
@@ -23689,7 +23689,7 @@
         nHead.append(
           make(
             "span",
-            `📝 บันทึกการนำอภิปรายสไลด์เปิดคาบ (${cur.mod.code}: ${cur.mod.title})`
+            `บันทึกการนำอภิปรายสไลด์เปิดคาบ (${cur.mod.code}: ${cur.mod.title})`
           )
         );
         const nTa = document.createElement("textarea");
@@ -23738,9 +23738,9 @@
     const statusBar = make("div", null, "ppt-statusbar is-authentic-ppt-bar hsd-no-print");
     const stLeft = make("div", null, "ppt-status-left");
     const roomId = LIVE ? LIVE.getRoomId() : 1;
-    const liveStatusBtn = make("button", `🟢 กลุ่มที่ ${roomId}`, "ppt-status-room-btn");
+    const liveStatusBtn = make("button", `กลุ่มที่ ${roomId}`, "ppt-status-room-btn");
     liveStatusBtn.type = "button";
-    liveStatusBtn.title = "คลิกดูรายชื่อนักศึกษาที่ Join เข้ากลุ่มย่อย (Kahoot Lobby)";
+    liveStatusBtn.title = "คลิกดูรายชื่อนักศึกษาที่เช็คชื่อเข้ากลุ่มย่อย (Live Lobby)";
     liveStatusBtn.addEventListener("click", () => {
       if (typeof openHsdKahootLobbyModal === "function") openHsdKahootLobbyModal();
     });
@@ -23751,7 +23751,7 @@
       make(
         "span",
         cur.kind === "opening-kahoot"
-          ? `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (Kahoot)`
+          ? `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย`
           : cur.kind === "concept-summary"
           ? `คาบ ${cur.mod.code} · ${(cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"}`
           : `คาบ ${cur.mod.code} · กรณีที่ ${cur.caseObj.caseNumber} (ข้อ ${cur.shortNum})`
