@@ -27445,8 +27445,8 @@
     pushIfMatch({
       cat: "docs",
       icon: "📊",
-      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 14 สไลด์ 16:9)",
-      sub: "Objectives, Learning Experience & ตารางการวัดผลสัมฤทธิ์ตามสมรรถนะ 5 ด้าน (Formative & Summative)",
+      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 15 สไลด์ 16:9)",
+      sub: "Start with Why, 5 วัตถุประสงค์ระบบสุขภาพ, 6-Week Journey & การวัดผลสัมฤทธิ์ 5 สมรรถนะ",
       badge: "16:9 · .pptx / PDF",
       defaultShow: true,
       searchHay:
@@ -27901,7 +27901,7 @@
       return {
         sessionId,
         isBuiltInOrientation: true,
-        fileName: "Slide ปฐมนิเทศรายวิชา (14 สไลด์ · 16:9)",
+        fileName: "Slide ปฐมนิเทศรายวิชา (15 สไลด์ · 16:9)",
         pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",

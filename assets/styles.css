@@ -32777,6 +32777,78 @@ html[data-theme="dark"] .or-check-item.is-checked {
   border-color: #009e73;
 }
 
+/* Nano Banana Publication Figure Plates (Pure #FFFFFF High-Contrast Plate) */
+.or-infog-split.is-fig-left {
+  grid-template-columns: 0.94fr 1.06fr;
+}
+
+.or-infog-split.is-fig-left-compact {
+  grid-template-columns: 0.76fr 1.24fr;
+}
+
+.or-infog-split.is-fig-right {
+  grid-template-columns: 0.92fr 1.08fr;
+}
+
+.or-top-fig-stack {
+  display: grid;
+  grid-template-rows: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 0.68cqw;
+  flex: 1;
+  min-height: 0;
+}
+
+.or-fig-plate {
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 11px;
+  padding: 0.55cqw 0.72cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3cqw;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.or-fig-plate.is-cover-hero {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+  padding: 0.5cqw;
+}
+
+.or-fig-img-wrap {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.or-fig-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 7px;
+}
+
+.or-fig-cap {
+  flex-shrink: 0;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(8px, 0.82cqw, 11.6px);
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.28;
+}
+
 /* Mobile Graceful Unlocked Height */
 @media (max-width: 820px) {
   .or-deck-backdrop {
@@ -32805,6 +32877,9 @@ html[data-theme="dark"] .or-check-item.is-checked {
     gap: 12px;
     overflow: visible;
   }
+  .or-top-fig-stack {
+    grid-template-rows: auto auto;
+  }
   .or-cover-split,
   .or-cover-kpi-row,
   .or-cover-pillars,
@@ -32812,6 +32887,9 @@ html[data-theme="dark"] .or-check-item.is-checked {
   .or-infog-split.is-even,
   .or-infog-split.is-wide-left,
   .or-infog-split.is-map-left,
+  .or-infog-split.is-fig-left,
+  .or-infog-split.is-fig-left-compact,
+  .or-infog-split.is-fig-right,
   .or-grid-2,
   .or-grid-2-asym,
   .or-grid-3,
