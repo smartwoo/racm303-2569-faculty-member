@@ -2195,8 +2195,22 @@ a:hover {
   border-right: 1px solid var(--line-soft);
 }
 
+.cal-dow-cell.is-weekend {
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
+}
+
 .cal-dow-cell:last-child {
   border-right: 0;
+}
+
+.cal-dow-cell.is-saturday,
+.cal-day-cell.is-saturday,
+.cal-week-head-cell.is-saturday,
+.cal-allday-cell.is-saturday,
+.cal-day-col.is-saturday {
+  border-left: 1.5px solid #cbd5e1;
 }
 
 .cal-month-row {
@@ -2245,12 +2259,35 @@ a:hover {
 }
 
 .cal-day-cell.is-weekend {
-  background: #fafafa;
+  background-color: #eaf0f6;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(148, 163, 184, 0.06) 0px,
+    rgba(148, 163, 184, 0.06) 6px,
+    transparent 6px,
+    transparent 12px
+  );
 }
 
 .cal-day-cell.is-outside {
   background: #f5f5f7;
   opacity: 0.65;
+}
+
+.cal-day-cell.is-weekend.is-outside {
+  background-color: #e1e8f0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(148, 163, 184, 0.075) 0px,
+    rgba(148, 163, 184, 0.075) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.78;
+}
+
+.cal-day-cell.is-weekend .cal-day-num:not(.is-month-start) {
+  color: #475569;
 }
 
 .cal-day-head {
@@ -2367,6 +2404,10 @@ a:hover {
   border-right: 1px solid var(--line-soft);
 }
 
+.cal-week-head-cell.is-weekend {
+  background: #e2e8f0;
+}
+
 .cal-week-head-cell:last-child {
   border-right: 0;
 }
@@ -2378,6 +2419,11 @@ a:hover {
   color: var(--muted);
 }
 
+.cal-week-head-cell.is-weekend .wd-name {
+  color: #334155;
+  font-weight: 700;
+}
+
 .cal-week-head-cell .wd-num {
   display: inline-block;
   margin-top: 2px;
@@ -2385,6 +2431,14 @@ a:hover {
   font-size: 16px;
   font-weight: 700;
   color: var(--ink);
+}
+
+.cal-week-head-cell .wd-num.is-course-anchor {
+  background: #ff3b30;
+  color: #ffffff;
+  padding: 1.5px 9px;
+  border-radius: 999px;
+  font-size: 13.5px;
 }
 
 .cal-allday-row {
@@ -2410,6 +2464,10 @@ a:hover {
   flex-direction: column;
   gap: 4px;
   min-height: 36px;
+}
+
+.cal-allday-cell.is-weekend {
+  background: #eaf0f6;
 }
 
 .cal-allday-cell:last-child {
@@ -2455,7 +2513,7 @@ a:hover {
 }
 
 .cal-day-col.is-weekend {
-  background-color: #fafafa;
+  background-color: #eaf0f6;
 }
 
 .cal-timed-event {
@@ -13342,9 +13400,36 @@ html[data-theme="dark"] .cal-allday-cell {
   color: #e2e8f0;
 }
 
+html[data-theme="dark"] .cal-dow-cell.is-weekend,
+html[data-theme="dark"] .cal-week-head-cell.is-weekend {
+  background: #0b1424 !important;
+  color: #94a3b8 !important;
+}
+
 html[data-theme="dark"] .cal-day-cell.is-weekend,
+html[data-theme="dark"] .cal-allday-cell.is-weekend,
 html[data-theme="dark"] .cal-day-col.is-weekend {
-  background: #0d1626 !important;
+  background-color: #09111f !important;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(148, 163, 184, 0.045) 0px,
+    rgba(148, 163, 184, 0.045) 6px,
+    transparent 6px,
+    transparent 12px
+  ) !important;
+}
+
+html[data-theme="dark"] .cal-day-cell.is-weekend.is-outside {
+  background-color: #070d18 !important;
+  opacity: 0.72;
+}
+
+html[data-theme="dark"] .cal-dow-cell.is-saturday,
+html[data-theme="dark"] .cal-day-cell.is-saturday,
+html[data-theme="dark"] .cal-week-head-cell.is-saturday,
+html[data-theme="dark"] .cal-allday-cell.is-saturday,
+html[data-theme="dark"] .cal-day-col.is-saturday {
+  border-left-color: rgba(148, 163, 184, 0.30) !important;
 }
 
 html[data-theme="dark"] .cal-day-cell.is-outside {
@@ -21472,7 +21557,9 @@ html[data-role="faculty"][data-theme="dark"] body {
 
 @media print {
   .portal-role-ribbon,
-  .is-unified-hs-banner {
+  .is-unified-hs-banner,
+  .gdrive-shell,
+  .gdrive-picker-backdrop {
     display: none !important;
   }
 }
@@ -21611,5 +21698,2160 @@ html[data-theme="dark"] .hs-unified-format-tabs .btn.sm.is-disabled-hs-tab {
   color: #94a3b8 !important;
 }
 
+/* ==========================================================================
+   GOOGLE DRIVE FILE EXPLORER & FILE PICKER FOR HS DISCUSSION DECKS (.PPTX)
+   ========================================================================== */
 
+#panel-hs-discussion.is-drive-folder-mode > .section-header,
+#panel-hs-discussion.is-drive-folder-mode > #hsdContextBar,
+#panel-hs-discussion.is-drive-folder-mode > .hsd-live-bar,
+#panel-hs-discussion.is-drive-folder-mode > #hsdModuleGrid,
+#panel-hs-discussion.is-drive-folder-mode > #hsdFacultyModeBar,
+#panel-hs-discussion.is-drive-folder-mode > .hsd-view-toolbar {
+  display: none !important;
+}
 
+body:has(#panel-hs-discussion:not([hidden]).is-drive-folder-mode) .global-quicknav-fab {
+  display: none !important;
+}
+
+.gdrive-shell {
+  --gd-shell-bg: #f8fafd;
+  --gd-canvas-bg: #ffffff;
+  --gd-card-bg: #f0f4f9;
+  --gd-card-hover: #e1e8f0;
+  --gd-selected-bg: #e8f0fe;
+  --gd-selected-border: #7cacf8;
+  --gd-pill-active: #c2e7ff;
+  --gd-pill-active-ink: #001d35;
+  --gd-search-bg: #e9eef6;
+  --gd-ink: #1f1f1f;
+  --gd-ink-soft: #444746;
+  --gd-muted: #5f6368;
+  --gd-border: #dde3ea;
+  --gd-row-border: #edf1f5;
+  --gd-blue: #0b57d0;
+  --gd-blue-hover: #0842a0;
+
+  background: var(--gd-shell-bg);
+  border: 1px solid var(--gd-border);
+  border-radius: 20px;
+  padding: 12px 14px 14px;
+  color: var(--gd-ink);
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+html[data-theme="dark"] .gdrive-shell {
+  --gd-shell-bg: #131314;
+  --gd-canvas-bg: #1e1f20;
+  --gd-card-bg: #282a2c;
+  --gd-card-hover: #333639;
+  --gd-selected-bg: #1a334d;
+  --gd-selected-border: #5ab3f0;
+  --gd-pill-active: #004a77;
+  --gd-pill-active-ink: #c2e7ff;
+  --gd-search-bg: #282a2c;
+  --gd-ink: #e3e3e3;
+  --gd-ink-soft: #c4c7c5;
+  --gd-muted: #9aa0a6;
+  --gd-border: #333537;
+  --gd-row-border: #2c2e30;
+  --gd-blue: #a8c7fa;
+  --gd-blue-hover: #d3e3fd;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.42);
+}
+
+/* Top Google Drive App Bar */
+.gdrive-topbar {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 560px) 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 2px 4px;
+}
+
+.gdrive-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+}
+
+.gdrive-logo-svg {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.gdrive-brand-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.gdrive-brand-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gd-ink);
+  letter-spacing: -0.01em;
+}
+
+.gdrive-brand-sub {
+  font-size: 11.4px;
+  font-weight: 600;
+  color: var(--gd-muted);
+}
+
+.gdrive-search-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--gd-search-bg);
+  border: 1px solid transparent;
+  transition: background 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.gdrive-search-pill:focus-within {
+  background: var(--gd-canvas-bg);
+  border-color: rgba(11, 87, 208, 0.34);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(11, 87, 208, 0.09);
+}
+
+.gdrive-search-ico {
+  width: 18px;
+  height: 18px;
+  color: var(--gd-ink-soft);
+  flex-shrink: 0;
+}
+
+.gdrive-search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--gd-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.gdrive-search-input::placeholder {
+  color: var(--gd-muted);
+}
+
+.gdrive-search-clear {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--gd-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.gdrive-search-clear:hover {
+  background: rgba(128, 134, 139, 0.16);
+  color: var(--gd-ink);
+}
+
+.gdrive-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gdrive-resume-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(210, 71, 38, 0.34);
+  background: rgba(210, 71, 38, 0.08);
+  color: #b7371a;
+  font-family: var(--font-display);
+  font-size: 12.6px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.14s ease;
+}
+
+html[data-theme="dark"] .gdrive-resume-btn {
+  background: rgba(234, 88, 12, 0.16);
+  border-color: rgba(251, 146, 60, 0.4);
+  color: #fdba74;
+}
+
+.gdrive-resume-btn:hover,
+.gdrive-resume-btn:focus-visible {
+  background: rgba(210, 71, 38, 0.15);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.gdrive-modal-util-btn {
+  height: 36px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid var(--gd-border);
+  background: var(--gd-canvas-bg);
+  color: var(--gd-ink-soft);
+  font-family: var(--font-display);
+  font-size: 12.6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.gdrive-modal-util-btn:hover {
+  background: var(--gd-card-bg);
+  color: var(--gd-ink);
+}
+
+.gdrive-modal-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--gd-border);
+  background: var(--gd-canvas-bg);
+  color: var(--gd-ink-soft);
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gdrive-modal-close-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+/* 2-Column Google Drive Workspace Layout */
+.gdrive-body {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.gdrive-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 2px;
+}
+
+/* Iconic Google Drive "+ New / Export" Elevated Pill */
+.gdrive-fab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  min-height: 50px;
+  padding: 0 18px 0 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(60, 64, 67, 0.08);
+  background: var(--gd-canvas-bg);
+  color: var(--gd-ink);
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.26), 0 4px 8px 3px rgba(60, 64, 67, 0.11);
+  transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.14s ease;
+}
+
+.gdrive-fab-btn:hover,
+.gdrive-fab-btn:focus-visible {
+  background: var(--gd-card-bg);
+  box-shadow: 0 2px 6px 0 rgba(60, 64, 67, 0.30), 0 6px 14px 4px rgba(60, 64, 67, 0.14);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.gdrive-fab-plus {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gdrive-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gdrive-nav-item {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gd-ink-soft);
+  font-family: var(--font-display);
+  font-size: 13.1px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.gdrive-nav-item:hover:not(.is-active) {
+  background: rgba(68, 71, 70, 0.08);
+  color: var(--gd-ink);
+}
+
+html[data-theme="dark"] .gdrive-nav-item:hover:not(.is-active) {
+  background: rgba(227, 227, 227, 0.08);
+}
+
+.gdrive-nav-item.is-active {
+  background: var(--gd-pill-active);
+  color: var(--gd-pill-active-ink);
+  font-weight: 700;
+}
+
+.gdrive-nav-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gdrive-nav-ico {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.gdrive-nav-count {
+  font-size: 11.2px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+html[data-theme="dark"] .gdrive-nav-count {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.gdrive-storage-box {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(11, 87, 208, 0.05);
+  border: 1px solid var(--gd-border);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gdrive-storage-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 12.1px;
+  font-weight: 700;
+  color: var(--gd-ink);
+}
+
+.gdrive-storage-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(128, 134, 139, 0.24);
+  overflow: hidden;
+}
+
+.gdrive-storage-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--gd-blue);
+  transition: width 0.25s ease;
+}
+
+.gdrive-storage-caption {
+  font-size: 11.5px;
+  color: var(--gd-muted);
+  line-height: 1.4;
+}
+
+/* Main White Rounded Google Drive Canvas */
+.gdrive-canvas {
+  background: var(--gd-canvas-bg);
+  border: 1px solid var(--gd-border);
+  border-radius: 16px;
+  padding: 16px 18px 20px;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.gdrive-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gdrive-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-family: var(--font-display);
+}
+
+.gdrive-crumb {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gd-muted);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+}
+
+button.gdrive-crumb {
+  cursor: pointer;
+}
+
+button.gdrive-crumb:hover {
+  background: var(--gd-card-bg);
+  color: var(--gd-ink);
+}
+
+.gdrive-crumb-sep {
+  color: var(--gd-muted);
+  font-size: 14px;
+  user-select: none;
+}
+
+.gdrive-crumb-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--gd-ink);
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+/* Segmented List / Grid Switcher (Exact Google Drive Style) */
+.gdrive-toolbar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gdrive-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #747775;
+  border-radius: 999px;
+  overflow: hidden;
+  height: 32px;
+}
+
+html[data-theme="dark"] .gdrive-view-toggle {
+  border-color: #8e918f;
+}
+
+.gdrive-vmode-btn {
+  height: 100%;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--gd-ink-soft);
+  font-family: var(--font-display);
+  font-size: 12.2px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.gdrive-vmode-btn + .gdrive-vmode-btn {
+  border-left: 1px solid #747775;
+}
+
+.gdrive-vmode-btn:hover:not(.is-active) {
+  background: var(--gd-card-bg);
+}
+
+.gdrive-vmode-btn.is-active {
+  background: var(--gd-pill-active);
+  color: var(--gd-pill-active-ink);
+  font-weight: 700;
+}
+
+/* Google Drive Filter Chips */
+.gdrive-chips-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gdrive-filter-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gdrive-chip {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gd-border);
+  background: var(--gd-canvas-bg);
+  color: var(--gd-ink-soft);
+  font-family: var(--font-display);
+  font-size: 12.2px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.gdrive-chip:hover:not(.is-active) {
+  background: var(--gd-card-bg);
+  color: var(--gd-ink);
+}
+
+.gdrive-chip.is-active {
+  background: var(--gd-pill-active);
+  border-color: transparent;
+  color: var(--gd-pill-active-ink);
+  font-weight: 700;
+}
+
+.gdrive-folder-hint {
+  font-size: 12px;
+  color: var(--gd-muted);
+}
+
+.gdrive-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.gdrive-section-label {
+  font-family: var(--font-display);
+  font-size: 13.2px;
+  font-weight: 700;
+  color: var(--gd-ink-soft);
+}
+
+/* Google Drive Grid View Cards */
+.gdrive-files-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gdrive-file-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 12px 11px;
+  border-radius: 12px;
+  background: var(--gd-card-bg);
+  border: 1.5px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gdrive-file-card:hover,
+.gdrive-file-card:focus-visible {
+  background: var(--gd-card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.09);
+  outline: none;
+}
+
+.gdrive-file-card:focus-visible {
+  border-color: var(--gd-blue);
+  box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.22), 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.gdrive-file-card.is-current-deck {
+  background: var(--gd-selected-bg);
+  border-color: var(--gd-selected-border);
+}
+
+.gdrive-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.gdrive-filetype-ico {
+  width: 21px;
+  height: 21px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.gdrive-filetype-ico.is-pptx {
+  background: linear-gradient(135deg, #d24726 0%, #b73518 100%);
+  box-shadow: 0 1px 3px rgba(183, 53, 24, 0.32);
+}
+
+.gdrive-filetype-ico.is-gdoc {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.gdrive-filetype-ico.is-pdf {
+  background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
+}
+
+.gdrive-filetype-ico.is-docx {
+  background: linear-gradient(135deg, #2b579a 0%, #1e3f73 100%);
+}
+
+.gdrive-card-filename {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 13.1px;
+  font-weight: 700;
+  color: var(--gd-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gdrive-card-quick-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.gdrive-icon-act-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--gd-ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.gdrive-icon-act-btn:hover {
+  background: rgba(15, 23, 42, 0.10);
+  color: var(--gd-ink);
+}
+
+html[data-theme="dark"] .gdrive-icon-act-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Realistic 16:9 Slide Thumbnail Inside Each Google Drive File Card */
+.gdrive-slide-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+html[data-theme="dark"] .gdrive-slide-thumb {
+  background: #141821;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.gd-mini-head {
+  background: linear-gradient(90deg, #002d72 0%, #0b46a6 100%);
+  color: #ffffff;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-bottom: 2px solid #f59e0b;
+}
+
+html[data-role="faculty"] .gd-mini-head {
+  background: linear-gradient(90deg, #7f1d1d 0%, #b91c1c 100%);
+}
+
+.gd-mini-mod-pill {
+  background: #fbbf24;
+  color: #1e293b;
+  font-family: var(--font-display);
+  font-size: 9.8px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.gd-mini-head-title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 10.4px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gd-mini-weight {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.gd-mini-body {
+  flex: 1;
+  min-height: 0;
+  padding: 7px 8px;
+  display: grid;
+  grid-template-columns: 45% 55%;
+  gap: 6px;
+  background: #f8fafc;
+}
+
+html[data-theme="dark"] .gd-mini-body {
+  background: #181c26;
+}
+
+.gd-mini-pane {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  padding: 5px 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+html[data-theme="dark"] .gd-mini-pane {
+  background: #1f2430;
+  border-color: #2f3747;
+}
+
+.gd-mini-pane-kicker {
+  font-family: var(--font-display);
+  font-size: 8.8px;
+  font-weight: 800;
+  color: #0f4c81;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-theme="dark"] .gd-mini-pane-kicker {
+  color: #93c5fd;
+}
+
+.gd-mini-scen-text {
+  font-size: 9.2px;
+  line-height: 1.32;
+  color: #475569;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+html[data-theme="dark"] .gd-mini-scen-text {
+  color: #cbd5e1;
+}
+
+.gd-mini-q-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.gd-mini-q-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #f1f5f9;
+  font-size: 8.8px;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-theme="dark"] .gd-mini-q-row {
+  background: #283040;
+  color: #e2e8f0;
+}
+
+.gd-mini-q-num {
+  font-weight: 800;
+  color: #0b57d0;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .gd-mini-q-num {
+  color: #93c5fd;
+}
+
+.gd-mini-open-pill {
+  position: absolute;
+  right: 7px;
+  bottom: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(11, 87, 208, 0.92);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 10.2px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  box-shadow: 0 3px 10px rgba(11, 87, 208, 0.35);
+}
+
+.gdrive-file-card:hover .gd-mini-open-pill,
+.gdrive-file-card:focus-visible .gd-mini-open-pill {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gdrive-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11.4px;
+  color: var(--gd-muted);
+}
+
+.gdrive-card-date {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gdrive-status-chip {
+  font-family: var(--font-display);
+  font-size: 10.6px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--gd-ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .gdrive-status-chip {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.gdrive-status-chip.is-done {
+  background: rgba(5, 150, 105, 0.14);
+  color: #047857;
+}
+
+html[data-theme="dark"] .gdrive-status-chip.is-done {
+  color: #6ee7b7;
+}
+
+.gdrive-status-chip.is-open-now {
+  background: rgba(11, 87, 208, 0.14);
+  color: var(--gd-blue);
+}
+
+/* Google Drive List View Table */
+.gdrive-list-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.gdrive-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.gdrive-list-table th {
+  text-align: left;
+  padding: 9px 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gd-muted);
+  border-bottom: 1px solid var(--gd-border);
+  white-space: nowrap;
+}
+
+.gdrive-list-row {
+  border-bottom: 1px solid var(--gd-row-border);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.gdrive-list-row:hover,
+.gdrive-list-row:focus-visible {
+  background: var(--gd-card-bg);
+  outline: none;
+}
+
+.gdrive-list-row.is-current-deck {
+  background: var(--gd-selected-bg);
+}
+
+.gdrive-list-row td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  color: var(--gd-ink-soft);
+}
+
+.gdrive-list-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+}
+
+.gdrive-list-name-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.gdrive-list-fname {
+  font-family: var(--font-display);
+  font-size: 13.3px;
+  font-weight: 700;
+  color: var(--gd-ink);
+}
+
+.gdrive-list-fsub {
+  font-size: 11.7px;
+  color: var(--gd-muted);
+}
+
+.gdrive-list-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.gdrive-row-open-btn {
+  height: 29px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(11, 87, 208, 0.30);
+  background: rgba(11, 87, 208, 0.08);
+  color: var(--gd-blue);
+  font-family: var(--font-display);
+  font-size: 11.8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gdrive-row-open-btn:hover {
+  background: var(--gd-blue);
+  color: #ffffff;
+}
+
+.gdrive-row-sec-btn {
+  height: 29px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--gd-border);
+  background: var(--gd-canvas-bg);
+  color: var(--gd-ink-soft);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gdrive-row-sec-btn:hover {
+  background: var(--gd-card-hover);
+  color: var(--gd-ink);
+}
+
+/* Companion Course Files Strip at Bottom of Folder */
+.gdrive-companion-strip {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gd-row-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gdrive-companion-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gdrive-doc-pill {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gd-border);
+  background: var(--gd-card-bg);
+  color: var(--gd-ink);
+  font-family: var(--font-display);
+  font-size: 12.1px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  transition: background 0.13s ease, transform 0.13s ease;
+}
+
+.gdrive-doc-pill:hover {
+  background: var(--gd-card-hover);
+  transform: translateY(-1px);
+}
+
+/* Google Drive Picker Modal Overlay (When Switching Files Inside PowerPoint / Fullscreen) */
+.gdrive-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100500;
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.gdrive-picker-backdrop[hidden] {
+  display: none !important;
+}
+
+.gdrive-picker-dialog {
+  width: min(1220px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 22px;
+}
+
+/* Clean Google Drive File Switcher Inside PowerPoint Menubar & Titlebar (No Stuffed .pptx Tabs!) */
+.ppt-gdrive-switch-btn {
+  height: 26px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid #c7d7fe;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f5ff 100%);
+  color: #0b57d0;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(11, 87, 208, 0.10);
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.12s ease;
+}
+
+.ppt-gdrive-switch-btn:hover {
+  background: #e8f0fe;
+  border-color: #7cacf8;
+  transform: translateY(-0.5px);
+}
+
+.ppt-gdrive-folder-btn {
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid #d2d0ce;
+  background: #f8fafc;
+  color: #334155;
+  font-family: var(--font-display);
+  font-size: 11.2px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.ppt-gdrive-folder-btn:hover {
+  background: #eef2f6;
+  color: #0f172a;
+}
+
+.ppt-title-drive-chip {
+  height: 22px;
+  padding: 0 9px;
+  margin-left: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: background 0.14s ease;
+}
+
+.ppt-title-drive-chip:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ppt-rb-cmd.is-gdrive-cmd {
+  background: #f0f5ff;
+  border-color: #93c5fd;
+  color: #0b57d0;
+}
+
+.ppt-rb-cmd.is-gdrive-cmd:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #60a5fa;
+}
+
+/* Responsive Breakpoints for Google Drive Explorer */
+@media (max-width: 1120px) {
+  .gdrive-files-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .gdrive-topbar {
+    grid-template-columns: 1fr auto;
+  }
+  .gdrive-search-pill {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+  .gdrive-body {
+    grid-template-columns: 1fr;
+  }
+  .gdrive-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .gdrive-nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .gdrive-nav-item {
+    width: auto;
+  }
+  .gdrive-storage-box {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .gdrive-shell {
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .gdrive-canvas {
+    padding: 12px;
+  }
+  .gdrive-files-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   SLIDE 1 OF EACH .PPTX DECK: OPENING COVER & KAHOOT GROUP CHECK-IN SLIDE
+   ========================================================================== */
+
+.ppt-opening-kahoot-stage {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 15px 10px;
+  display: grid;
+  grid-template-columns: 48.5% 51.5%;
+  gap: 12px;
+  background: linear-gradient(180deg, #f8fafd 0%, #f1f5f9 100%);
+  overflow: hidden;
+}
+
+html[data-theme="dark"] .ppt-opening-kahoot-stage {
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+}
+
+.ppt-ok-left,
+.ppt-ok-right {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.ppt-ok-card {
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 13px;
+  padding: 10px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+html[data-theme="dark"] .ppt-ok-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.ppt-ok-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+html[data-role="faculty"] .ppt-ok-kicker {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .ppt-ok-kicker {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.ppt-ok-summary {
+  margin: 0;
+  font-size: 12.2px;
+  line-height: 1.42;
+  color: #334155;
+}
+
+html[data-theme="dark"] .ppt-ok-summary {
+  color: #cbd5e1;
+}
+
+.ppt-ok-q-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ppt-ok-q-btn {
+  width: 100%;
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-display);
+  font-size: 11.6px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: background 0.13s ease, border-color 0.13s ease, transform 0.12s ease;
+}
+
+.ppt-ok-q-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateX(2px);
+}
+
+html[data-theme="dark"] .ppt-ok-q-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.ppt-ok-start-btn {
+  height: 31px;
+  padding: 0 13px;
+  border-radius: 9px;
+  border: 0;
+  background: linear-gradient(135deg, #002d72 0%, #0b57d0 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12.2px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: flex-start;
+  box-shadow: 0 3px 10px rgba(11, 87, 208, 0.20);
+}
+
+html[data-role="faculty"] .ppt-ok-start-btn {
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+  box-shadow: 0 3px 10px rgba(185, 28, 28, 0.20);
+}
+
+.ppt-ok-start-btn:hover {
+  filter: brightness(1.06);
+}
+
+.ppt-ok-room-pills {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.ppt-ok-room-pill {
+  padding: 4px 7px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.ppt-ok-room-pill small {
+  font-weight: 500;
+  font-size: 9.8px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ppt-ok-room-pill:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.ppt-ok-room-pill.is-active {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1e3a8a;
+}
+
+html[data-role="faculty"] .ppt-ok-room-pill.is-active {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #7f1d1d;
+}
+
+html[data-theme="dark"] .ppt-ok-room-pill {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .ppt-ok-room-pill.is-active {
+  background: rgba(37, 99, 235, 0.28);
+  border-color: #60a5fa;
+  color: #bfdbfe;
+}
+
+.ppt-ok-join-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ppt-ok-id-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  font-size: 12.4px;
+}
+
+html[data-theme="dark"] .ppt-ok-id-input {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.ppt-ok-join-cta {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 0;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ppt-ok-join-cta:hover {
+  filter: brightness(1.06);
+}
+
+.ppt-ok-joined-banner {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12.4px;
+  font-weight: 700;
+}
+
+html[data-theme="dark"] .ppt-ok-joined-banner {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+}
+
+.ppt-ok-caption {
+  font-size: 11.4px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Right Column: Kahoot PIN Hero + Real-Time Group Roster Wall */
+.ppt-ok-pin-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #1d4ed8 100%);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 6px 18px rgba(30, 27, 75, 0.20);
+}
+
+html[data-role="faculty"] .ppt-ok-pin-hero {
+  background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 55%, #b91c1c 100%);
+}
+
+.ppt-ok-pin-kicker {
+  font-family: var(--font-display);
+  font-size: 10.6px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.ppt-ok-pin-code {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: #fde047;
+  line-height: 1.1;
+}
+
+.ppt-ok-pin-meta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ppt-ok-roster-card {
+  flex: 1;
+  min-height: 0;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html[data-theme="dark"] .ppt-ok-roster-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.ppt-ok-roster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ppt-ok-roster-count {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] .ppt-ok-roster-count {
+  color: #f8fafc;
+}
+
+.ppt-ok-roster-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  align-content: start;
+}
+
+.ppt-ok-stu-chip {
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  font-family: var(--font-display);
+  font-size: 11.1px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+button.ppt-ok-stu-chip {
+  cursor: pointer;
+}
+
+button.ppt-ok-stu-chip:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #0f172a;
+}
+
+.ppt-ok-stu-chip.is-joined {
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #14532d;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip {
+  background: #0f172a;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .ppt-ok-stu-chip.is-joined {
+  background: rgba(22, 163, 74, 0.24);
+  border-color: #4ade80;
+  color: #86efac;
+}
+
+/* ==========================================================================
+   Clinical & Community Epidemiology Hub (#panel-epidemiology)
+   ========================================================================== */
+.ep-hub-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ep-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ep-kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line-soft, #dbe4f0);
+  background: var(--surface, #ffffff);
+  color: var(--ink, #0f172a);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.ep-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand, #0b57d0);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ep-kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ep-kpi-title {
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+}
+
+.ep-kpi-meta {
+  font-size: 12.6px;
+  color: var(--muted, #64748b);
+  line-height: 1.4;
+}
+
+.ep-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--line-soft, #dbe4f0);
+  align-self: flex-start;
+}
+
+body:has(#tvSubpageBar:not([hidden])) .ep-filter-bar {
+  display: none;
+}
+
+.ep-filter-pill {
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: var(--muted, #475569);
+  font-family: var(--font-display);
+  font-size: 13.4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ep-filter-pill:hover {
+  color: var(--ink, #0f172a);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.ep-filter-pill.is-active {
+  background: var(--brand, #0b57d0);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ep-section-block,
+.ep-panel-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--line-soft, #dbe4f0);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.ep-sec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ep-sec-title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 17.5px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+}
+
+.ep-sec-sub {
+  margin: 0;
+  font-size: 13.4px;
+  color: var(--muted, #64748b);
+  line-height: 1.45;
+}
+
+.ep-zoom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ep-zoom-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  background: linear-gradient(155deg, rgba(239, 246, 255, 0.72) 0%, #ffffff 100%);
+}
+
+.ep-zoom-card.is-spss {
+  border-color: rgba(13, 148, 136, 0.28);
+  background: linear-gradient(155deg, rgba(240, 253, 250, 0.8) 0%, #ffffff 100%);
+}
+
+.ep-zoom-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ep-zoom-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-family: var(--font-display);
+  font-size: 11.6px;
+  font-weight: 700;
+}
+
+.ep-zoom-tag.is-spss-tag {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.ep-zoom-time {
+  font-size: 12.4px;
+  font-weight: 600;
+  color: var(--muted, #64748b);
+}
+
+.ep-zoom-label {
+  font-family: var(--font-display);
+  font-size: 14.8px;
+  font-weight: 700;
+  line-height: 1.38;
+  color: var(--ink, #0f172a);
+}
+
+.ep-zoom-creds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 12.8px;
+  color: var(--muted, #475569);
+}
+
+.ep-zoom-creds code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--ink, #0f172a);
+  font-weight: 700;
+}
+
+.ep-zoom-actions,
+.ep-sess-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.ep-days-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ep-day-block {
+  border-radius: 14px;
+  border: 1px solid var(--line-soft, #e2e8f0);
+  background: rgba(248, 250, 252, 0.65);
+  padding: 14px 15px;
+}
+
+.ep-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft, #e2e8f0);
+}
+
+.ep-day-date {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+}
+
+.ep-day-count {
+  font-size: 12.2px;
+  font-weight: 600;
+  color: var(--muted, #64748b);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.ep-sess-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.ep-sess-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 15px;
+  border-radius: 13px;
+  border: 1px solid var(--line-soft, #dbe4f0);
+  border-left: 4px solid #0d9488;
+  background: #ffffff;
+}
+
+.ep-sess-card.is-exam {
+  border-left-color: #dc2626;
+  background: linear-gradient(160deg, #fff5f5 0%, #ffffff 65%);
+}
+
+.ep-sess-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ep-sess-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ep-sess-code.is-exam {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ep-sess-time {
+  font-size: 12.6px;
+  font-weight: 700;
+  color: var(--muted, #475569);
+}
+
+.ep-sess-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14.8px;
+  font-weight: 700;
+  line-height: 1.42;
+  color: var(--ink, #0f172a);
+}
+
+.ep-sess-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.8px;
+  color: var(--muted, #475569);
+  line-height: 1.42;
+}
+
+.ep-spec-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.ep-spec-table-wrap {
+  overflow-x: auto;
+}
+
+.ep-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.ep-spec-table th,
+.ep-spec-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--line-soft, #e2e8f0);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ep-spec-table th {
+  font-family: var(--font-display);
+  font-size: 12.4px;
+  font-weight: 700;
+  color: var(--muted, #64748b);
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.ep-code-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ep-td-muted {
+  color: var(--muted, #64748b);
+  white-space: nowrap;
+  font-size: 12.6px;
+}
+
+.ep-weight-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ep-weight-track {
+  width: 64px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  overflow: hidden;
+}
+
+.ep-weight-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0d9488 0%, #0284c7 100%);
+}
+
+.ep-manual-prose {
+  max-height: 540px;
+  overflow-y: auto;
+  padding-right: 6px;
+  font-size: 14px;
+}
+
+.ep-manual-prose h2.section-h2 {
+  display: none;
+}
+
+/* Dark Mode Support for Epidemiology Hub */
+html[data-theme="dark"] .ep-kpi-card,
+html[data-theme="dark"] .ep-filter-bar,
+html[data-theme="dark"] .ep-section-block,
+html[data-theme="dark"] .ep-panel-card {
+  background: #141b26;
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .ep-kpi-badge,
+html[data-theme="dark"] .ep-code-pill,
+html[data-theme="dark"] .ep-sess-code {
+  background: rgba(20, 184, 166, 0.18);
+  color: #5eead4;
+}
+
+html[data-theme="dark"] .ep-zoom-card {
+  background: linear-gradient(155deg, rgba(30, 58, 138, 0.26) 0%, #162032 100%);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+html[data-theme="dark"] .ep-zoom-card.is-spss {
+  background: linear-gradient(155deg, rgba(19, 78, 74, 0.32) 0%, #162032 100%);
+  border-color: rgba(45, 212, 191, 0.28);
+}
+
+html[data-theme="dark"] .ep-zoom-tag {
+  background: rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] .ep-zoom-tag.is-spss-tag {
+  background: rgba(20, 184, 166, 0.22);
+  color: #5eead4;
+}
+
+html[data-theme="dark"] .ep-zoom-creds code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .ep-day-block {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+html[data-theme="dark"] .ep-sess-card {
+  background: #182234;
+  border-color: rgba(148, 163, 184, 0.18);
+  border-left-color: #2dd4bf;
+}
+
+html[data-theme="dark"] .ep-sess-card.is-exam {
+  background: linear-gradient(160deg, rgba(127, 29, 29, 0.28) 0%, #182234 70%);
+  border-left-color: #f87171;
+}
+
+html[data-theme="dark"] .ep-sess-code.is-exam {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .ep-spec-table th {
+  background: rgba(15, 23, 42, 0.7);
+  color: #94a3b8;
+}
+
+@media (max-width: 1024px) {
+  .ep-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ep-zoom-grid,
+  .ep-spec-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ep-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .ep-filter-bar {
+    border-radius: 16px;
+  }
+}

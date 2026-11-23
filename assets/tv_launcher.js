@@ -74,26 +74,28 @@
     search: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
     sun: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
     moon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
     dots: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
   const NAV_GROUP_MAP = {
     home: "home",
     schedule: "schedule",
-    "hs-discussion": "hs-discussion",
-    textbooks: "knowledge",
-    practice: "knowledge",
-    manual: "knowledge",
-    "faculty-docs": "knowledge",
     fieldwork: "groups",
     discussion: "groups",
+    "hs-discussion": "health-systems",
+    textbooks: "health-systems",
+    practice: "health-systems",
+    manual: "health-systems",
+    "faculty-docs": "health-systems",
+    epidemiology: "epidemiology",
     submissions: "admin",
     leave: "admin",
     audit: "admin"
   };
 
   const rememberedSubTab = {
-    knowledge: ROLE === "faculty" ? "faculty-docs" : "textbooks",
+    "health-systems": "hs-discussion",
     groups: "fieldwork",
     admin: "submissions"
   };
@@ -126,9 +128,9 @@
         <div class="tv-pill-nav" id="tvPillNavList">
           <button type="button" class="tv-nav-pill" data-tv-nav="home" data-tv-focus data-tv-row="0" aria-current="page">หน้าหลัก</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="schedule" data-tv-focus data-tv-row="0">${ROLE === "faculty" ? "ตารางสอน" : "ตารางเรียน"}</button>
-          <button type="button" class="tv-nav-pill" data-tv-nav="hs-discussion" data-tv-focus data-tv-row="0">อภิปรายสด</button>
-          <button type="button" class="tv-nav-pill" data-tv-nav="knowledge" data-tv-focus data-tv-row="0">บทเรียน</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="groups" data-tv-focus data-tv-row="0">กลุ่ม &amp; พื้นที่</button>
+          <button type="button" class="tv-nav-pill" data-tv-nav="health-systems" data-tv-focus data-tv-row="0">ระบบสุขภาพ</button>
+          <button type="button" class="tv-nav-pill" data-tv-nav="epidemiology" data-tv-focus data-tv-row="0">ระบาดวิทยา</button>
           <button type="button" class="tv-nav-pill" data-tv-nav="admin" data-tv-focus data-tv-row="0">
             <span>${ROLE === "faculty" ? "ตรวจงาน & ใบลา" : "ส่งงาน & ใบลา"}</span>
             <span class="tv-pill-dot" id="tvAdminNotifDot" hidden>0</span>
@@ -175,10 +177,10 @@
     dock.querySelectorAll("[data-tv-nav]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const navKey = btn.dataset.tvNav;
-        if (navKey === "home" || navKey === "schedule" || navKey === "hs-discussion") {
+        if (navKey === "home" || navKey === "schedule" || navKey === "epidemiology") {
           navigateTvTab(navKey);
-        } else if (navKey === "knowledge") {
-          navigateTvTab(rememberedSubTab.knowledge || "textbooks");
+        } else if (navKey === "health-systems") {
+          navigateTvTab(rememberedSubTab["health-systems"] || "hs-discussion");
         } else if (navKey === "groups") {
           navigateTvTab(rememberedSubTab.groups || "fieldwork");
         } else if (navKey === "admin") {
@@ -256,9 +258,9 @@
     const labels = {
       home: t("หน้าหลัก", "Home"),
       schedule: ROLE === "faculty" ? t("ตารางสอน", "Schedule") : t("ตารางเรียน", "Schedule"),
-      "hs-discussion": t("อภิปรายสด", "Live Cases"),
-      knowledge: t("บทเรียน", "Library"),
       groups: t("กลุ่ม & พื้นที่", "Groups & Sites"),
+      "health-systems": t("ระบบสุขภาพ", "Health Systems"),
+      epidemiology: t("ระบาดวิทยา", "Epidemiology"),
       admin: ROLE === "faculty" ? t("ตรวจงาน & ใบลา", "Admin & Leave") : t("ส่งงาน & ใบลา", "Submit & Leave")
     };
     document.querySelectorAll("[data-tv-nav]").forEach((btn) => {
@@ -400,15 +402,6 @@
       ROLE === "faculty"
         ? [
             {
-              id: "app-hsd",
-              tone: "tone-crimson",
-              icon: ICONS.slides,
-              title: t("สไลด์สอน & เฉลย HS1–6", "Live Slides & Answer Key"),
-              sub: t("ฉายสไลด์ 16:9 ดูคำตอบสด และเปิด Teacher Key", "16:9 classroom deck, live responses & key"),
-              badge: "HS1 – HS6",
-              action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
-            },
-            {
               id: "app-sched",
               tone: "tone-blue",
               icon: ICONS.calendar,
@@ -421,28 +414,37 @@
               id: "app-sites",
               tone: "tone-emerald",
               icon: ICONS.map,
-              title: t("9 พื้นที่ภาคสนาม", "9 Fieldwork Hospitals"),
-              sub: t("โรงพยาบาลชุมชน อาจารย์ที่ปรึกษา และใบรูปถ่าย A4", "Community hospitals, advisors & photo sheets"),
-              badge: t("9 โรงพยาบาล", "9 Sites"),
+              title: t("กลุ่ม & 9 พื้นที่ภาคสนาม", "Groups & 9 Fieldwork Sites"),
+              sub: t("โรงพยาบาลชุมชน 9 แห่ง ผังห้อง Discussion 1–6 และใบรูปถ่าย A4", "9 community hospitals, 6 discussion rooms & photo sheets"),
+              badge: t("9 แห่ง · 6 กลุ่ม", "9 Sites · 6 Groups"),
               action: () => navigateFromTile("app-sites", () => navigateTvTab("fieldwork"))
             },
             {
-              id: "app-disc",
-              tone: "tone-teal",
-              icon: ICONS.users,
-              title: t("กลุ่ม Discussion 1–6", "6 Discussion Groups"),
-              sub: t("ผังห้องเรียน 1C1-02..07 และตารางหมุนเวียนอาจารย์", "Rooms 1C1-02..07 & instructor rotation"),
-              badge: t("169 คน", "169 Students"),
-              action: () => navigateFromTile("app-disc", () => navigateTvTab("discussion"))
+              id: "app-hsd",
+              tone: "tone-crimson",
+              icon: ICONS.slides,
+              title: t("ระบบสุขภาพ · Discussion", "Health Systems · Discussion"),
+              sub: t("เลือกไฟล์สไลด์ .pptx จาก Google Drive พร้อมสไลด์เปิดคาบ Kahoot & เฉลย", "Google Drive .pptx decks with opening Kahoot & Teacher Key"),
+              badge: "HS1 – HS6",
+              action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
             },
             {
               id: "app-guides",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("คู่มือผู้สอน & บทเรียน", "Teacher Guides & Textbooks"),
-              sub: t("แนวทางนำอภิปราย บทเรียน HS1–6 และลิงก์ต้นฉบับ", "Facilitator guides, HS1–6 & Drive links"),
-              badge: "Teacher Key",
+              title: t("บทเรียนระบบสุขภาพ & คู่มือ", "HS Textbooks & Guides"),
+              sub: t("บทเรียน HS1–6 แนวทางนำอภิปราย โจทย์ 60 ข้อ และคู่มือวิชา", "HS1–6 textbooks, facilitator guides & 60 practice items"),
+              badge: "HS1 – HS6",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
+            },
+            {
+              id: "app-epi",
+              tone: "tone-teal",
+              icon: ICONS.chart,
+              title: t("ระบาดวิทยา (EP1–EP9)", "Epidemiology (EP1–EP9)"),
+              sub: t("อัปโหลด Slide คาบ EP1–EP9 & Ex 1–6 ห้องเรียน Zoom · SPSS และฟอร์ม 4A", "Slide upload, EP1–EP9 & Ex 1–6, Zoom rooms, SPSS & Form 4A"),
+              badge: "EP1 – EP9",
+              action: () => navigateFromTile("app-epi", () => navigateTvTab("epidemiology"))
             },
             {
               id: "app-admin",
@@ -465,31 +467,40 @@
               action: () => navigateFromTile("app-sched", () => navigateTvTab("schedule"))
             },
             {
+              id: "app-sites",
+              tone: "tone-emerald",
+              icon: ICONS.map,
+              title: t("กลุ่ม & 9 พื้นที่ภาคสนาม", "Groups & 9 Fieldwork Sites"),
+              sub: t("แผนที่โรงพยาบาลชุมชน วันเดินทาง กลุ่ม Discussion และเพื่อนในกลุ่ม", "Hospital sites, travel dates & group roster"),
+              badge: t("9 แห่ง · 6 กลุ่ม", "9 Sites · 6 Groups"),
+              action: () => navigateFromTile("app-sites", () => navigateTvTab("fieldwork"))
+            },
+            {
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("อภิปรายสด HS1–HS6", "Slide Case Discussion"),
-              sub: t("ดูสไลด์ล่วงหน้าได้โดยไม่ต้องใช้รหัส และเช็คชื่อ Interactive ในคาบเรียน", "Preview 16:9 case slides ID-free & join live room in class"),
-              badge: t("อ่านล่วงหน้า / Live", "Preview & Live"),
+              title: t("ระบบสุขภาพ · Discussion", "Health Systems · Discussion"),
+              sub: t("เลือกเปิดไฟล์สไลด์ .pptx จาก Google Drive รายคาบ พร้อมสไลด์เปิดคาบเช็คชื่อ Kahoot", "Open HS1–HS6 .pptx decks from Google Drive with opening Kahoot slide"),
+              badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => navigateTvTab("hs-discussion"))
             },
             {
               id: "app-books",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("บทเรียน HS1–HS6", "Health Systems Textbooks"),
-              sub: t("อ่านฉบับสรุปกระชับพร้อมแผนภาพ และฉบับเต็ม", "Concise visual summaries, full texts & workbooks"),
-              badge: t("เตรียมสอบ Open Note", "Open Note"),
+              title: t("บทเรียนระบบสุขภาพ & โจทย์", "HS Textbooks & Quiz"),
+              sub: t("อ่านฉบับย่อพร้อมแผนภาพ ฉบับเต็ม HS1–HS6 คำศัพท์ 111 คำ และโจทย์ 60 ข้อ", "Abridged visual texts, full HS1–HS6 chapters & 60 practice questions"),
+              badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-books", () => navigateTvTab("textbooks"))
             },
             {
-              id: "app-sites",
-              tone: "tone-emerald",
-              icon: ICONS.map,
-              title: t("9 พื้นที่ภาคสนาม", "9 Fieldwork Hospitals"),
-              sub: t("แผนที่โรงพยาบาลชุมชน วันเดินทาง และเพื่อนในกลุ่ม", "Hospital sites, travel dates & group roster"),
-              badge: t("9 แห่ง", "9 Sites"),
-              action: () => navigateFromTile("app-sites", () => navigateTvTab("fieldwork"))
+              id: "app-epi",
+              tone: "tone-slate",
+              icon: ICONS.chart,
+              title: t("ระบาดวิทยา (EP1–EP9)", "Epidemiology (EP1–EP9)"),
+              sub: t("คาบเรียน EP1–EP9 & Exercise 1–6 ห้องเรียน Zoom · SPSS สัดส่วนสอบ & ฟอร์ม 4A", "EP1–EP9 lectures, Exercises 1–6, Zoom rooms, SPSS & Form 4A"),
+              badge: t("EP1 – EP9", "EP1 – EP9"),
+              action: () => navigateFromTile("app-epi", () => navigateTvTab("epidemiology"))
             },
             {
               id: "app-submit",
@@ -499,15 +510,6 @@
               sub: t("ส่ง SRN 1–2 เช็กหน้า PDF และเขียนใบลาออนไลน์", "Submit SRN, check PDF pages & e-sign leave"),
               badge: t("4 ชิ้นงาน", "4 Tasks"),
               action: () => navigateFromTile("app-submit", () => navigateTvTab("submissions"))
-            },
-            {
-              id: "app-quiz",
-              tone: "tone-slate",
-              icon: ICONS.quiz,
-              title: t("คำศัพท์ · โจทย์ · คู่มือ", "Flashcards, Quiz & Manual"),
-              sub: t("ทบทวนบัตรคำศัพท์ 111 คำ โจทย์ 60 ข้อ และคู่มือวิชา", "111 flashcards, 60 practice questions & manual"),
-              badge: t("60 ข้อฝึกหัด", "60 Qs"),
-              action: () => navigateFromTile("app-quiz", () => navigateTvTab("practice"))
             }
           ];
 
@@ -777,31 +779,17 @@
             <span>
               <span class="tv-ep-action-title-row">▶ <span>${esc(
                 ROLE === "faculty"
-                  ? t(`เปิดสไลด์สอน & เฉลย ${mod.code}`, `Open ${mod.code} Slides & Teacher Key`)
-                  : t(`เปิดดูสไลด์ Case Discussion ${mod.code} (ไม่ต้องใช้รหัส)`, `Preview ${mod.code} Case Slides (No ID Required)`)
+                  ? t(`เปิดไฟล์สไลด์ Discussion ระบบสุขภาพ (${mod.code}.pptx) & เฉลย`, `Open ${mod.code}.pptx Discussion Slides & Key`)
+                  : t(`เปิดไฟล์สไลด์ Discussion ระบบสุขภาพ (${mod.code}.pptx)`, `Open ${mod.code}.pptx Discussion Slides`)
               )}</span></span>
               <span class="tv-ep-action-sub">${esc(
                 ROLE === "faculty"
-                  ? t(`มุมมองสไลด์ 16:9 คาบ ${mod.discTime}`, `16:9 Slide Deck · ${mod.discTime}`)
-                  : t(`อ่านโจทย์ล่วงหน้าได้ทันที มุมมองสไลด์ 16:9 · คาบ ${mod.discTime}`, `Read ahead anytime in 16:9 Slide Deck · ${mod.discTime}`)
+                  ? t(`เริ่มด้วยสไลด์เปิดคาบเช็คชื่อ Kahoot + โจทย์ 16:9 และเฉลย · คาบ ${mod.discTime}`, `Starts with Opening Kahoot slide + 16:9 Case Slides & Key · ${mod.discTime}`)
+                  : t(`สไลด์หน้าแรกเช็คชื่อกลุ่มย่อย Kahoot + โจทย์สไลด์ 16:9 · คาบ ${mod.discTime}`, `Slide 1 Opening Kahoot check-in + 16:9 Case Slides · ${mod.discTime}`)
               )}</span>
             </span>
             <span>→</span>
           </button>
-
-          ${
-            ROLE === "student"
-              ? `
-          <button type="button" class="tv-ep-action-btn is-live-green" id="tvEpActLiveJoin" data-tv-modal-focus>
-            <span>
-              <span class="tv-ep-action-title-row">🟢 <span>${esc(t(`เข้าห้องเรียนสด ${mod.code} (Interactive ในคาบเรียน)`, `Join ${mod.code} Live Interactive Class`))}</span></span>
-              <span class="tv-ep-action-sub">${esc(t("กรอกรหัสนักศึกษาเช็คชื่อเข้ากลุ่มย่อย 1–6 ซิงค์สไลด์ & ส่งคำตอบขึ้นจอ", "Enter Student ID to join Group 1–6 & submit live answers"))}</span>
-            </span>
-            <span>→</span>
-          </button>
-          `
-              : ""
-          }
 
           <button type="button" class="tv-ep-action-btn" id="tvEpActConcise" data-tv-modal-focus>
             <span>
@@ -846,18 +834,6 @@
       backdrop.remove();
       if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
     });
-
-    const liveJoinBtn = $("tvEpActLiveJoin");
-    if (liveJoinBtn) {
-      liveJoinBtn.addEventListener("click", () => {
-        backdrop.remove();
-        if (api && api.openHsLiveJoinGate) {
-          api.openHsLiveJoinGate(mod.code);
-        } else if (api && api.openHsDiscussion) {
-          api.openHsDiscussion(mod.code);
-        }
-      });
-    }
 
     $("tvEpActConcise").addEventListener("click", () => {
       backdrop.remove();
@@ -1216,7 +1192,7 @@
     const activeTab = st.activeTab || "home";
     const groupKey = NAV_GROUP_MAP[activeTab] || "home";
 
-    if (groupKey === "knowledge" || groupKey === "groups" || groupKey === "admin") {
+    if (groupKey === "health-systems" || groupKey === "groups" || groupKey === "admin") {
       rememberedSubTab[groupKey] = activeTab;
     }
 
@@ -1240,56 +1216,53 @@
 
     bar.hidden = false;
 
-    // Special clean mode switcher when inside Live Case Discussion (#panel-hs-discussion)
+    const hsSiblings = [
+      { id: "hs-discussion", label: t("Discussion ระบบสุขภาพ", "HS Discussion") },
+      { id: "textbooks", label: t("บทเรียน HS1–HS6", "HS1–HS6 Textbooks") },
+      { id: "practice", label: t("คำศัพท์ & โจทย์ (60 ข้อ)", "Flashcards & Quiz") }
+    ];
+    if (ROLE === "faculty") {
+      hsSiblings.push({ id: "faculty-docs", label: t("คู่มือผู้สอน & ข้อสอบ", "Teacher Guides") });
+    }
+    hsSiblings.push({ id: "manual", label: t("คู่มือรายวิชา", "Course Manual") });
+
+    // Clean unified bar inside Discussion ระบบสุขภาพ (#panel-hs-discussion)
     if (activeTab === "hs-discussion") {
       const curMode = st.hsdViewMode || "slide";
-      const isGateOpen = Boolean(
-        ROLE === "student" && st.hsdShowJoinGate && (!st.hsdSessionJoined || !st.myStudent)
-      );
       const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
-
-      if (isGateOpen) {
-        bar.innerHTML = `
-          <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
-          </button>
-          <div class="tv-hsd-bar-right">
-            <button type="button" class="tv-pill-action-btn is-primary" id="tvHsdSkipGateBtn">
-              📖 <span>${esc(t("ดูสไลด์ล่วงหน้าโดยไม่ใช้รหัส →", "Preview Slides Without ID →"))}</span>
-            </button>
-          </div>
-        `;
-        $("tvSubBackHomeBtn").addEventListener("click", () => {
-          navigateTvTab("home");
-          restoreHomeFocus();
-        });
-        $("tvHsdSkipGateBtn").addEventListener("click", () => {
-          if (api && api.openHsDiscussion) {
-            api.openHsDiscussion(st.hsdModule || "HS1");
-          }
-          syncSubpageBar();
-        });
-        return;
-      }
+      const isDriveOpen = Boolean(curMode === "slide" && st.hsdDriveFolderOpen);
+      const activeModLabel =
+        st.hsdModule && /^HS[1-6]$/i.test(st.hsdModule)
+          ? st.hsdModule.toUpperCase()
+          : st.hsdSlideDeckMod || "HS1";
 
       bar.innerHTML = `
-        <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-          <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
-        </button>
+        <div class="tv-subpage-left-group">
+          <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn" data-tv-focus>
+            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+          </button>
+          <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบบสุขภาพ">
+            ${hsSiblings
+              .map(
+                (s) => `
+              <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}">${esc(s.label)}</button>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
         <div class="tv-hsd-bar-right">
           ${
-            ROLE === "student"
-              ? isLiveJoined
-                ? `<span class="tv-live-active-pill">
-                     <span>🟢 ${esc(t(`ห้องสด กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `Live G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
-                     <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกโหมดสด", "Exit Live"))}</button>
-                   </span>`
-                : `<span class="tv-preview-mode-tag">📖 ${esc(t("โหมดอ่านล่วงหน้า (ไม่ต้องใช้รหัส)", "Preview Mode (No ID)"))}</span>
-                   <button type="button" class="tv-live-join-pill" id="tvHsdEnterLiveBtn">🟢 ${esc(t("เข้าห้องเรียนสด (Interactive)", "Join Live Class"))}</button>`
+            isLiveJoined
+              ? `<span class="tv-live-active-pill">
+                   <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
+                   <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
+                 </span>`
               : ""
           }
-          <div class="tv-sibling-pills" role="group" aria-label="รูปแบบการแสดงผลอภิปราย">
-            <button type="button" class="tv-sibling-pill ${curMode === "slide" ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t("สไลด์ 16:9", "16:9 Slides"))}</button>
+          <div class="tv-sibling-pills" role="group" aria-label="รูปแบบการแสดงผล Discussion ระบบสุขภาพ">
+            <button type="button" class="tv-sibling-pill ${isDriveOpen ? "is-active" : ""}" id="tvHsdModeDriveBtn">${esc(t("📁 Google Drive", "📁 Google Drive"))}</button>
+            <button type="button" class="tv-sibling-pill ${curMode === "slide" && !isDriveOpen ? "is-active" : ""}" id="tvHsdModeSlideBtn">${esc(t(`สไลด์ 16:9 (${activeModLabel})`, `16:9 (${activeModLabel})`))}</button>
             <button type="button" class="tv-sibling-pill ${curMode === "scroll" ? "is-active" : ""}" id="tvHsdModeScrollBtn">${esc(t("เลื่อนอ่านยาว", "Full Scroll"))}</button>
           </div>
         </div>
@@ -1298,13 +1271,9 @@
         navigateTvTab("home");
         restoreHomeFocus();
       });
-      const enterLiveBtn = $("tvHsdEnterLiveBtn");
-      if (enterLiveBtn) {
-        enterLiveBtn.addEventListener("click", () => {
-          if (api && api.openHsLiveJoinGate) api.openHsLiveJoinGate(st.hsdModule);
-          syncSubpageBar();
-        });
-      }
+      bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
+        btn.addEventListener("click", () => navigateTvTab(btn.dataset.tvSib));
+      });
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
         exitLiveBtn.addEventListener("click", () => {
@@ -1312,27 +1281,67 @@
           syncSubpageBar();
         });
       }
+      $("tvHsdModeDriveBtn").addEventListener("click", () => {
+        if (api && api.openHsDriveFolder) api.openHsDriveFolder();
+        syncSubpageBar();
+      });
       $("tvHsdModeSlideBtn").addEventListener("click", () => {
-        if ($("hsdViewSlideBtn")) $("hsdViewSlideBtn").click();
+        if (api && api.selectHsSessionDeck) {
+          api.selectHsSessionDeck(activeModLabel);
+        } else if ($("hsdViewSlideBtn")) {
+          $("hsdViewSlideBtn").click();
+        }
         syncSubpageBar();
       });
       $("tvHsdModeScrollBtn").addEventListener("click", () => {
+        if (st) st.hsdDriveFolderOpen = false;
         if ($("hsdViewScrollBtn")) $("hsdViewScrollBtn").click();
         syncSubpageBar();
       });
       return;
     }
 
-    let siblings = [];
-    if (groupKey === "knowledge") {
-      siblings = [
-        { id: "textbooks", label: t("บทเรียน HS1–HS6", "HS1–HS6 Textbooks") },
-        { id: "practice", label: t("คำศัพท์ & โจทย์ (60 ข้อ)", "Flashcards & Quiz") },
-        { id: "manual", label: t("คู่มือรายวิชา", "Course Manual") }
+    // Epidemiology section filter bar (#panel-epidemiology)
+    if (groupKey === "epidemiology") {
+      const curEpSec = st.epSection || "all";
+      const epPills = [
+        { id: "all", label: t("ภาพรวมทั้งหมด", "All Sections") },
+        { id: "sessions", label: t("คาบเรียน EP1–EP9 & Ex 1–6", "EP1–EP9 & Ex 1–6") },
+        { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
+        { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
       ];
-      if (ROLE === "faculty") {
-        siblings.unshift({ id: "faculty-docs", label: t("คู่มือผู้สอน & ข้อสอบ", "Teacher Guides") });
-      }
+      bar.innerHTML = `
+        <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
+          <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
+        </button>
+        <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
+          ${epPills
+            .map(
+              (p) => `
+            <button type="button" class="tv-sibling-pill ${p.id === curEpSec ? "is-active" : ""}" data-tv-ep-sec="${p.id}">${esc(p.label)}</button>
+          `
+            )
+            .join("")}
+        </div>
+      `;
+      $("tvSubBackHomeBtn").addEventListener("click", () => {
+        navigateTvTab("home");
+        restoreHomeFocus();
+      });
+      bar.querySelectorAll("[data-tv-ep-sec]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (api && api.setEpidemiologySection) {
+            api.setEpidemiologySection(btn.dataset.tvEpSec);
+          }
+          syncSubpageBar();
+        });
+      });
+      return;
+    }
+
+    let siblings = [];
+    if (groupKey === "health-systems") {
+      siblings = hsSiblings;
     } else if (groupKey === "groups") {
       siblings = [
         { id: "fieldwork", label: t("9 พื้นที่ภาคสนาม", "9 Fieldwork Sites") },
@@ -1469,13 +1478,41 @@
           ev.target.blur();
           return;
         }
+        const drivePickerEl = $("hsdGoogleDrivePickerModal");
+        const pptExportEl = $("hsdPptExportStudioModal");
+        if (pptExportEl && !pptExportEl.hidden) {
+          ev.preventDefault();
+          pptExportEl.hidden = true;
+          return;
+        }
         const otherDialogsOpen =
+          (drivePickerEl && !drivePickerEl.hidden) ||
           ($("imageLightbox") && !$("imageLightbox").hidden) ||
           ($("calendarEventModal") && !$("calendarEventModal").hidden) ||
           ($("globalSpotlightModal") && !$("globalSpotlightModal").hidden) ||
           document.fullscreenElement;
         const api = getApi();
-        const curTab = api && api.getState ? api.getState().activeTab : "home";
+        const st = api && api.getState ? api.getState() : null;
+        const curTab = st ? st.activeTab : "home";
+        if (!otherDialogsOpen && st && st.hsdLobbyOpen) {
+          return;
+        }
+        if (
+          !otherDialogsOpen &&
+          curTab === "hs-discussion" &&
+          st &&
+          st.hsdViewMode === "slide" &&
+          !st.hsdDriveFolderOpen &&
+          !st.hsdShowJoinGate &&
+          !st.hsdTheater &&
+          !st.hsdPptWindowMax &&
+          api &&
+          api.openHsDriveFolder
+        ) {
+          ev.preventDefault();
+          api.openHsDriveFolder();
+          return;
+        }
         if (!otherDialogsOpen && curTab !== "home") {
           ev.preventDefault();
           navigateTvTab("home");
@@ -1514,9 +1551,11 @@
       }
 
       const api = getApi();
-      const activeTab = api && api.getState ? api.getState().activeTab : "home";
+      const st = api && api.getState ? api.getState() : null;
+      const activeTab = st ? st.activeTab : "home";
       const inTopBar = $("tvHeaderDock") && $("tvHeaderDock").contains(document.activeElement);
-      if (activeTab !== "home" && !inTopBar) return;
+      const inDriveFolder = Boolean(activeTab === "hs-discussion" && st && st.hsdDriveFolderOpen && st.hsdViewMode === "slide");
+      if (activeTab !== "home" && !inDriveFolder && !inTopBar) return;
 
       const candidates = [...document.querySelectorAll("[data-tv-focus]")].filter(isVisible);
       if (!candidates.length) return;
@@ -1556,6 +1595,10 @@
     window.addEventListener("racm:hsdstatechange", () => {
       syncSubpageBar();
       syncProfilePill();
+    });
+
+    window.addEventListener("racm:epstatechange", () => {
+      syncSubpageBar();
     });
 
     window.addEventListener("racm:profilechange", () => {

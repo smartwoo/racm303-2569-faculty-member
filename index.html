@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>(function(){try{var t=localStorage.getItem("racm303_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");var l=localStorage.getItem("racm303_lang");if(l==="en"){document.documentElement.lang="en";document.documentElement.setAttribute("data-lang","en");}}catch(_){}})();</script>
-  <link rel="stylesheet" href="assets/styles.css?v=20261122tv2">
-  <link rel="stylesheet" href="assets/tv_ui.css?v=20261122tv2">
+  <link rel="stylesheet" href="assets/styles.css?v=20261122tv5">
+  <link rel="stylesheet" href="assets/tv_ui.css?v=20261122tv5">
 </head>
 <body class="role-faculty">
   <header class="masthead faculty-masthead tv-masthead">
@@ -77,8 +77,12 @@
               <span class="ngb-sub">โรงพยาบาลภาคสนาม · ที่ปรึกษา · แผนที่ 3D</span>
             </button>
             <button class="nav-group-btn" type="button" data-nav-cat="knowledge" aria-expanded="false">
-              <span class="ngb-top"><span class="ngb-ico">📚</span><span class="ngb-title">คลังความรู้และบทเรียน</span><span class="ngb-pill">5 หมวด</span></span>
-              <span class="ngb-sub">คู่มือวิชา · HS1–6 · อภิปราย &amp; เฉลย · โจทย์ · คู่มือผู้สอน</span>
+              <span class="ngb-top"><span class="ngb-ico">🏥</span><span class="ngb-title">ระบบสุขภาพ</span><span class="ngb-pill">HS1–HS6</span></span>
+              <span class="ngb-sub">Discussion ระบบสุขภาพ (.pptx) · บทเรียน HS1–6 · โจทย์ · คู่มือผู้สอน · คู่มือวิชา</span>
+            </button>
+            <button class="nav-group-btn" type="button" data-nav-cat="epidemiology" aria-expanded="false">
+              <span class="ngb-top"><span class="ngb-ico">📊</span><span class="ngb-title">ระบาดวิทยา</span><span class="ngb-pill">EP1–EP9</span></span>
+              <span class="ngb-sub">อัปโหลด Slide · คาบสอน EP1–EP9 &amp; Ex 1–6 · Zoom · SPSS · ฟอร์ม 4A</span>
             </button>
             <button class="nav-group-btn" type="button" data-nav-cat="admin" aria-expanded="false">
               <span class="ngb-top"><span class="ngb-ico">🗂️</span><span class="ngb-title">บริหารและธุรการ</span><span class="ngb-pill" id="adminGroupCatPill">3 หมวด</span></span>
@@ -96,11 +100,12 @@
               <button class="nav-tab" id="fTabSchedule" role="tab" data-tab="schedule" data-nav-cat="schedule-classroom" aria-selected="true" type="button">ปฏิทินสอนและสไลด์</button>
               <button class="nav-tab" id="fTabDiscussion" role="tab" data-tab="discussion" data-nav-cat="schedule-classroom" aria-selected="false" type="button">ผังกลุ่มและห้องเรียน <span class="tab-count">6 กลุ่ม</span></button>
               <button class="nav-tab" id="fTabFieldwork" role="tab" data-tab="fieldwork" data-nav-cat="fieldwork" aria-selected="false" type="button" hidden>กลุ่มพื้นที่ภาคสนาม <span class="tab-count">9 แห่ง</span></button>
-              <button class="nav-tab" id="fTabManual" role="tab" data-tab="manual" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คู่มือรายวิชา 2569 <span class="tab-count">17 บท</span></button>
+              <button class="nav-tab" id="fTabHsDiscussion" role="tab" data-tab="hs-discussion" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>Discussion ระบบสุขภาพ <span class="tab-count">HS1–HS6 · Key</span></button>
               <button class="nav-tab" id="fTabTextbooks" role="tab" data-tab="textbooks" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>บทเรียนระบบสุขภาพ <span class="tab-count">HS1–HS6</span></button>
-              <button class="nav-tab" id="fTabHsDiscussion" role="tab" data-tab="hs-discussion" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>อภิปรายกรณีศึกษาและเฉลย <span class="tab-count">HS1–HS6 · Key</span></button>
               <button class="nav-tab" id="fTabPractice" role="tab" data-tab="practice" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คำศัพท์และโจทย์ฝึกหัด <span class="tab-count">60 ข้อ</span></button>
               <button class="nav-tab" id="fTabFacultyDocs" role="tab" data-tab="faculty-docs" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คู่มือผู้สอนและต้นฉบับ</button>
+              <button class="nav-tab" id="fTabManual" role="tab" data-tab="manual" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คู่มือรายวิชา 2569 <span class="tab-count">17 บท</span></button>
+              <button class="nav-tab" id="fTabEpidemiology" role="tab" data-tab="epidemiology" data-nav-cat="epidemiology" aria-selected="false" type="button" hidden>ระบาดวิทยา <span class="tab-count">EP1–EP9</span></button>
               <button class="nav-tab" id="fTabSubmissions" role="tab" data-tab="submissions" data-nav-cat="admin" aria-selected="false" type="button" hidden>ระบบรับงานและ E-learning</button>
               <button class="nav-tab" id="fTabLeave" role="tab" data-tab="leave" data-nav-cat="admin" aria-selected="false" type="button" hidden>ใบลานักศึกษาและแจ้งเตือน <span class="tab-count" id="leaveNavCountBadge">0 รายการ</span></button>
               <button class="nav-tab" id="fTabAudit" role="tab" data-tab="audit" data-nav-cat="admin" aria-selected="false" type="button" hidden>ตรวจตารางและซิงค์ข้อมูล <span class="tab-count">6 จุด</span></button>
@@ -338,8 +343,8 @@
     <section class="tab-panel" id="panel-hs-discussion" aria-labelledby="fTabHsDiscussion" hidden>
       <div class="section-header" style="margin-bottom:10px">
         <div>
-          <h2>ห้องเรียนอภิปรายสด &amp; เฉลยสำหรับอาจารย์ (Discussion HS1–HS6 · Live Response &amp; Teacher Key)</h2>
-          <p>เลือกห้องกลุ่ม 1–6 เพื่อจับเวลาพร้อมนักศึกษาและดู <strong>Live Response ขณะเด็กพิมพ์แบบสด</strong> · โหมดสไลด์วางคำถามคู่ช่องตอบหน้าเดียวกัน และกด <strong>สไลด์ถัดไป → เพื่อเปิด Teacher Answer Key</strong> ทันที</p>
+          <h2>Discussion ระบบสุขภาพ &amp; เฉลยสำหรับอาจารย์ (Health Systems Discussion · HS1–HS6)</h2>
+          <p>เลือกเปิดไฟล์สไลด์ .pptx แยกคาบจาก Google Drive พร้อมสไลด์เปิดคาบเช็คชื่อกลุ่มย่อย (Kahoot) ในหน้าแรกของแต่ละคาบ และแนวคำตอบ <strong>Teacher Answer Key</strong></p>
         </div>
         <div class="header-actions hsd-no-print">
           <a class="btn sm" id="hsdSourceDocBtn" href="https://docs.google.com/document/d/1ZQER6Q9efFfxYtXx_X1WUeze1wmVxJRE/edit?usp=sharing" target="_blank" rel="noopener">ต้นฉบับ 231268 ↗</a>
@@ -788,6 +793,21 @@
     <section class="tab-panel" id="panel-leave" aria-labelledby="fTabLeave" hidden>
       <div id="leavePortalMount"></div>
     </section>
+
+    <!-- TAB: CLINICAL & COMMUNITY EPIDEMIOLOGY FOR FACULTY (EP1–EP9 · SLIDE UPLOAD · ZOOM · SPSS · FORM 4A) -->
+    <section class="tab-panel" id="panel-epidemiology" aria-labelledby="fTabEpidemiology" hidden>
+      <div class="section-header">
+        <div>
+          <h2>ระบาดวิทยาคลินิกและชุมชน &amp; สไลด์ประกอบการสอน (Epidemiology · EP1–EP9)</h2>
+          <p>จัดการและอัปโหลด Slide ประจำคาบสอน <strong>EP1–EP9, Exercise 1–6 และ SPSS</strong> · ลิงก์ห้องเรียน Zoom ทั้ง 3 วัน · โครงสร้างข้อสอบ และเกณฑ์การประเมินนำเสนอระบาดวิทยาภาคสนาม (ฟอร์ม 4A)</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn sm primary" id="epQuickUploadSlideBtn" type="button">📊 อัปโหลด Slide คาบระบาดวิทยา</button>
+          <a class="btn sm" href="https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398" target="_blank" rel="noopener">ห้องเรียน E-learning ↗</a>
+        </div>
+      </div>
+      <div id="epidemiologyMount"></div>
+    </section>
   </main>
 
   <!-- Calendar Event Detail Popover Modal (Google Calendar / Apple iCal Style) -->
@@ -811,19 +831,19 @@
   </div>
 
   <script>window.PORTAL_ROLE = "faculty";</script>
-  <script src="assets/vendor/mqtt.min.js?v=20261122tv2"></script>
-  <script src="assets/vendor/peerjs.min.js?v=20261122tv2"></script>
-  <script src="assets/live_classroom.js?v=20261122tv2"></script>
-  <script src="assets/data_schedule.js?v=20261122tv2"></script>
-  <script src="assets/data_roster.js?v=20261122tv2"></script>
-  <script src="assets/data_manual.js?v=20261122tv2"></script>
-  <script src="assets/data_hs_docs.js?v=20261122tv2"></script>
-  <script src="assets/data_hs_discussion.js?v=20261122tv2"></script>
-  <script src="assets/data_hs_discussion_key.js?v=20261122tv2"></script>
-  <script src="assets/data_faculty.js?v=20261122tv2"></script>
-  <script src="assets/interactive_qa.js?v=20261122tv2"></script>
-  <script src="assets/pptx_exporter.js?v=20261122tv2"></script>
-  <script src="assets/portal.js?v=20261122tv2"></script>
-  <script src="assets/tv_launcher.js?v=20261122tv2"></script>
+  <script src="assets/vendor/mqtt.min.js?v=20261122tv5"></script>
+  <script src="assets/vendor/peerjs.min.js?v=20261122tv5"></script>
+  <script src="assets/live_classroom.js?v=20261122tv5"></script>
+  <script src="assets/data_schedule.js?v=20261122tv5"></script>
+  <script src="assets/data_roster.js?v=20261122tv5"></script>
+  <script src="assets/data_manual.js?v=20261122tv5"></script>
+  <script src="assets/data_hs_docs.js?v=20261122tv5"></script>
+  <script src="assets/data_hs_discussion.js?v=20261122tv5"></script>
+  <script src="assets/data_hs_discussion_key.js?v=20261122tv5"></script>
+  <script src="assets/data_faculty.js?v=20261122tv5"></script>
+  <script src="assets/interactive_qa.js?v=20261122tv5"></script>
+  <script src="assets/pptx_exporter.js?v=20261122tv5"></script>
+  <script src="assets/portal.js?v=20261122tv5"></script>
+  <script src="assets/tv_launcher.js?v=20261122tv5"></script>
 </body>
 </html>
