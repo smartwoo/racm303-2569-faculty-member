@@ -28774,8 +28774,8 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
 
 
 /* ==========================================================================
-   EP6: Measures of Morbidity & Mortality — Protected Drive Player, Non-Overlapping
-   Cinema CC Bar, 4-Layout Workspace, Hide/Unhide Controls & Auto Floating PiP (v3)
+   EP6: Measures of Morbidity & Mortality — Original Unmuted YouTube Player,
+   Seamless Floating PiP, 4-Layout Workspace & Hide/Unhide Controls (v6)
    ========================================================================== */
 .ep6-studio-root {
   display: flex;
@@ -29232,7 +29232,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   align-items: stretch;
 }
 
-/* Video Slot & Protected Google Drive Dock + Floating Picture-in-Picture (PiP) */
+/* Video Slot & Version 1 Unmuted YouTube Player + Floating Picture-in-Picture (PiP) */
 .ep6-video-slot {
   position: relative;
   min-width: 0;
@@ -29274,6 +29274,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   color: var(--muted, #64748b);
 }
 
+.ep6-yt-box,
 .ep6-video-dock {
   display: flex;
   flex-direction: column;
@@ -29290,7 +29291,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 7px 11px;
   background: #1e293b;
   border-bottom: 1px solid #334155;
 }
@@ -29304,7 +29305,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
 
 .ep6-vdock-head .ep6-slide-pill {
   color: #f8fafc;
-  font-size: 11.6px;
+  font-size: 11.8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -29313,7 +29314,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
 .ep6-vdock-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
@@ -29322,11 +29323,12 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   background: #0f172a;
   color: #e2e8f0;
   border-radius: 6px;
-  padding: 2px 7px;
+  padding: 2.5px 8px;
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+  line-height: 1.35;
 }
 
 .ep6-dock-icon-btn:hover,
@@ -29340,15 +29342,15 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   display: none;
 }
 
-.ep6-drive-aspect {
+.ep6-yt-aspect {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #000000;
+  background: #0f172a;
   overflow: hidden;
 }
 
-.ep6-drive-aspect iframe {
+.ep6-yt-aspect iframe {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -29356,229 +29358,39 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   border: 0;
 }
 
-/* Blocks Google Drive top-right pop-out icon ONLY — never touches bottom controller */
-.ep6-drive-popout-shield {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 108px;
-  height: 58px;
-  z-index: 7;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: 8px 8px 0 0;
-  pointer-events: auto;
-  user-select: none;
-}
-
-.ep6-drive-popout-shield span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  white-space: nowrap;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+.ep6-yt-fallback {
+  padding: 10px 12px;
+  background: #1e293b;
+  border-top: 1px solid #334155;
   color: #cbd5e1;
-  font-family: var(--font-display);
-  font-size: 10.8px;
+  font-size: 12.2px;
+  line-height: 1.5;
+}
+
+.ep6-yt-fallback a {
+  color: #5eead4;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  margin-left: 4px;
 }
 
-/* Temporary ±15s Skip Flash at upper area so it never touches center play or bottom controller */
-.ep6-skip-flash {
-  position: absolute;
-  top: 16px;
-  z-index: 8;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  pointer-events: none;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-}
-
-.ep6-skip-flash.is-left {
-  left: 14px;
-}
-
-.ep6-skip-flash.is-right {
-  left: 14px;
-}
-
-/* ==========================================================================
-   Dedicated Non-Overlapping Cinema CC Bar BELOW Video Frame (0% Controller Overlap!)
-   ========================================================================== */
-.ep6-cc-dock-strip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 6px 11px;
-  background: #090d16;
-  border-top: 1px solid #1e293b;
-}
-
-.ep6-cc-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(254, 240, 138, 0.16);
-  border: 1px solid rgba(254, 240, 138, 0.45);
-  color: #fef08a;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.ep6-cc-text {
-  flex: 1;
-  color: #fef08a;
-  font-family: var(--font-body);
-  font-size: 13.4px;
-  font-weight: 600;
-  line-height: 1.42;
-}
-
-.ep6-cc-dock-strip.is-idle .ep6-cc-text {
-  color: #64748b;
-  font-weight: 500;
-}
-
-.ep6-cc-dock-strip.is-large .ep6-cc-text {
-  font-size: 16px;
-}
-
-/* YouTube-Style Control Bar on the Video Dock */
-.ep6-ytstyle-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  flex-wrap: wrap;
-  padding: 6px 10px;
-  background: #0f172a;
-  border-top: 1px solid #1e293b;
-}
-
-.ep6-ytb-left,
-.ep6-ytb-right {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.ep6-ytb-btn {
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #f1f5f9;
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-family: var(--font-display);
-  font-size: 11.4px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease;
-}
-
-.ep6-ytb-btn:hover {
-  background: #334155;
-  border-color: #64748b;
-}
-
-.ep6-ytb-btn.is-play {
-  background: #dc2626;
-  border-color: #ef4444;
-  color: #ffffff;
-}
-
-.ep6-ytb-btn.is-play:hover {
-  background: #b91c1c;
-}
-
-.ep6-ytb-btn.is-cc.is-on {
-  border-bottom: 2.5px solid #ef4444;
-  color: #fef08a;
-  background: #1e293b;
-}
-
-.ep6-ytb-btn.is-on:not(.is-cc) {
-  background: #2563eb;
-  border-color: #3b82f6;
-  color: #ffffff;
-}
-
-.ep6-ytb-time {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.4px;
-  color: #94a3b8;
-  margin-left: 2px;
-}
-
-.ep6-ytb-time strong {
-  color: #f8fafc;
-}
-
-.ep6-speed-select {
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #f8fafc;
-  border-radius: 6px;
-  padding: 2.5px 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.4px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Fullscreen support for Video Dock (retains non-overlapping CC strip + transport!) */
-.ep6-video-dock:fullscreen {
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  border: 0;
-  display: flex;
-  flex-direction: column;
-  background: #000000;
-}
-
-.ep6-video-dock:fullscreen .ep6-drive-aspect {
-  flex: 1;
-  aspect-ratio: auto;
-}
-
-.ep6-video-dock:fullscreen .ep6-cc-dock-strip {
-  padding: 10px 20px;
-}
-
-.ep6-video-dock:fullscreen .ep6-cc-text {
-  font-size: 20px;
-}
-
-/* Floating Picture-in-Picture (PiP) Mode — Pure Video + CC + Controls (Zero Conceptualized!) */
+/* Floating Picture-in-Picture (PiP) Mode — Keeps Exact Same YouTube IFrame Mounted! */
 .ep6-video-dock.is-pip-floating {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  width: 396px;
+  left: auto;
+  width: 400px;
   max-width: calc(100vw - 24px);
   z-index: 1180;
   border: 1.5px solid #0d9488;
   border-radius: 14px;
   box-shadow: 0 22px 50px rgba(15, 23, 42, 0.48);
   animation: ep6PipSlideIn 0.2s ease-out;
+}
+
+.ep6-video-dock.is-pip-floating.is-pip-left {
+  right: auto;
+  left: 20px;
 }
 
 @keyframes ep6PipSlideIn {
@@ -29601,15 +29413,28 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
   display: none;
 }
 
-.ep6-video-dock.is-pip-floating.is-pip-minimized .ep6-drive-aspect {
-  height: 0 !important;
+/* Minimize PiP without display:none so YouTube audio keeps playing uninterrupted */
+.ep6-video-dock.is-pip-floating.is-pip-minimized .ep6-yt-aspect {
+  height: 1px !important;
   aspect-ratio: auto !important;
-  opacity: 0;
+  opacity: 0.001;
   pointer-events: none;
 }
 
-.ep6-video-dock.is-pip-floating.is-pip-minimized .ep6-cc-dock-strip {
-  display: none !important;
+.ep6-pip-mini-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+}
+
+.ep6-pip-mini-time {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.4px;
+  color: #cbd5e1;
 }
 
 .ep6-pip-restore-pill {
@@ -30742,7 +30567,9 @@ html[data-theme="dark"] .ep6-tool-btn.is-active {
   .ep6-bridge-grid {
     grid-template-columns: 1fr;
   }
-  .ep6-video-dock.is-pip-floating {
+  .ep6-video-dock.is-pip-floating,
+  .ep6-video-dock.is-pip-floating.is-pip-left {
+    left: 10px;
     right: 10px;
     bottom: 12px;
     width: calc(100vw - 20px);
