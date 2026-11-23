@@ -433,6 +433,156 @@
       buildShapeXml(shapeId++, "GoldAccent", { x: 0, y: 520000, w: W, h: 36000 }, "FFB81C", null, "")
     );
 
+    if (slideSpec.kind === "concept-summary" && slideSpec.conceptSummary) {
+      const cs = slideSpec.conceptSummary;
+      const padX = 220000;
+      const workW = W - padX * 2;
+
+      // 1. Hero Definition Banner
+      const heroY = 640000;
+      const heroH = 1520000;
+      const heroParas =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="120"/></a:spcAft></a:pPr>` +
+        buildRunXml(`💡 ${cs.kicker || "สาระสำคัญ (Conceptualized)"}`, { pt: 10.5, bold: true, color: "FDE68A" }) +
+        (cs.sourceNote
+          ? buildRunXml(`   |   ${cs.sourceNote}`, { pt: 9.5, bold: false, color: "DBEAFE" })
+          : "") +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
+        buildRunXml(`${cs.coreTerm || "“สุขภาพ” (health)"} `, { pt: 14, bold: true, color: "FFB81C" }) +
+        buildRunXml(cs.coreDefinition || "", { pt: 12.2, bold: false, color: "FFFFFF" }) +
+        `</a:p>` +
+        (cs.contrastNotOnly || cs.contrastHolistic
+          ? `<a:p><a:pPr algn="l"/>` +
+            (cs.contrastNotOnly
+              ? buildRunXml(`✕ ไม่ใช่แค่: ${cs.contrastNotOnly}     `, { pt: 9.8, bold: true, color: "FECACA" })
+              : "") +
+            (cs.contrastHolistic
+              ? buildRunXml(`✓ แต่คือ: ${cs.contrastHolistic}`, { pt: 9.8, bold: true, color: "A7F3D0" })
+              : "") +
+            `</a:p>`
+          : "");
+      shapes.push(
+        buildShapeXml(
+          shapeId++,
+          "ConceptHeroBanner",
+          { x: padX, y: heroY, w: workW, h: heroH },
+          "0F2D6B",
+          "1E40AF",
+          heroParas,
+          3500,
+          { l: 170000, r: 170000, t: 110000, b: 95000 }
+        )
+      );
+
+      // 2. 2x2 Holistic Dimension Cards
+      const dims = Array.isArray(cs.dimensions) ? cs.dimensions : [];
+      const gridY = heroY + heroH + 135000;
+      const bridgeH = cs.caseBridge ? 430000 : 0;
+      const gridH = H - 340000 - 110000 - bridgeH - (bridgeH ? 105000 : 0) - gridY;
+      const gapX = 160000;
+      const gapY = 140000;
+      const cardW = Math.floor((workW - gapX) / 2);
+      const cardH = Math.floor((gridH - gapY) / 2);
+      const toneStyles = {
+        physical: { fill: "EFF6FF", border: "2563EB", title: "1D4ED8", badge: "DBEAFE" },
+        mental: { fill: "F5F3FF", border: "7C3AED", title: "6D28D9", badge: "EDE9FE" },
+        spiritual: { fill: "FFFBEB", border: "D97706", title: "B45309", badge: "FEF3C7" },
+        social: { fill: "ECFDF5", border: "059669", title: "047857", badge: "D1FAE5" }
+      };
+      const fallbackTones = ["physical", "mental", "spiritual", "social"];
+
+      dims.slice(0, 4).forEach((d, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const cx = padX + col * (cardW + gapX);
+        const cy = gridY + row * (cardH + gapY);
+        const ts = toneStyles[d.tone] || toneStyles[fallbackTones[idx % 4]];
+
+        const cardParas =
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
+          buildRunXml(`มิติที่ ${d.num || idx + 1} · ${d.thTitle || ""}`, { pt: 13.5, bold: true, color: ts.title }) +
+          (d.enTitle ? buildRunXml(`  (${d.enTitle})`, { pt: 10.5, bold: false, color: "475569" }) : "") +
+          `</a:p>` +
+          `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
+          buildRunXml(`${d.quoteTitle || d.thTitle || ""} `, { pt: 11.2, bold: true, color: "0F172A" }) +
+          buildRunXml(d.definition || "", { pt: 11.2, bold: false, color: "1E293B" }) +
+          `</a:p>` +
+          (Array.isArray(d.keywords) && d.keywords.length
+            ? `<a:p><a:pPr algn="l"/>` +
+              buildRunXml(`★ ${d.keywords.join("   ·   ")}`, { pt: 9.6, bold: true, color: ts.title }) +
+              `</a:p>`
+            : "");
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            `ConceptDimCard_${idx + 1}`,
+            { x: cx, y: cy, w: cardW, h: cardH },
+            ts.fill,
+            ts.border,
+            cardParas,
+            3500,
+            { l: 150000, r: 150000, t: 110000, b: 95000 }
+          )
+        );
+      });
+
+      // 3. Conceptualized Bridge Bar
+      if (cs.caseBridge) {
+        const bY = gridY + gridH + 105000;
+        const bParas =
+          `<a:p><a:pPr algn="l"/>` +
+          buildRunXml("🎯 Conceptualized Link: ", { pt: 10.2, bold: true, color: "002663" }) +
+          buildRunXml(cs.caseBridge, { pt: 10, bold: false, color: "1E293B" }) +
+          `</a:p>`;
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            "ConceptBridgeBar",
+            { x: padX, y: bY, w: workW, h: bridgeH, anchor: "ctr" },
+            "F1F5F9",
+            "CBD5E1",
+            bParas,
+            2500,
+            { l: 140000, r: 140000, t: 40000, b: 40000 }
+          )
+        );
+      }
+
+      // Slide Master Footer Bar
+      const footParasCs =
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(
+          `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     Slide ${slideIdx + 1} / ${totalSlides}`,
+          { pt: 8.8, color: "64748B" }
+        ) +
+        `</a:p>`;
+      shapes.push(
+        buildShapeXml(
+          shapeId++,
+          "MasterFooter",
+          { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
+          "F1F5F9",
+          "E2E8F0",
+          footParasCs,
+          0,
+          { l: 160000, r: 160000, t: 25000, b: 25000 }
+        )
+      );
+
+      return (
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+        `<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
+        `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ` +
+        `xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">` +
+        `<p:cSld><p:spTree>` +
+        `<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
+        `<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>` +
+        shapes.join("") +
+        `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`
+      );
+    }
+
     // Content Workspace (y = 630000 .. 6460000 -> height 5830000)
     const padX = 180000;
     const workY = 635000;
@@ -681,62 +831,95 @@
         )
       );
 
-      // Mini Split Content (Left Scenario snippet + Right Question & Key/Table summary)
+      // Mini Split Content (or Concept Summary card in Handout Grid)
       const bodyY = cy + banH + 20000;
       const bodyH = cardH - banH - 40000;
-      const leftW = Math.floor(cardW * 0.44);
-      const scenSnippet = (sSpec.scenarioParagraphs || []).join(" ").slice(0, cols >= 4 ? 160 : 320);
-      const leftP = buildHighlightedParagraphXml(
-        scenSnippet + ((sSpec.scenarioParagraphs || []).join(" ").length > scenSnippet.length ? "…" : ""),
-        sSpec.clues,
-        Math.max(4.5, scalePt - 1),
-        "334155",
-        "l"
-      );
-      shapes.push(
-        buildShapeXml(
-          shapeId++,
-          `MiniScen_${idx + 1}`,
-          { x: cx + 25000, y: bodyY, w: leftW - 35000, h: bodyH },
-          "F8FAFC",
-          "E2E8F0",
-          leftP,
-          0,
-          { l: 45000, r: 45000, t: 35000, b: 35000 }
-        )
-      );
-
-      const rightSummaryLines = [`${sSpec.questionTitle || ""}`];
-      if (sSpec.table && Array.isArray(sSpec.table.rows)) {
-        sSpec.table.rows.slice(0, cols >= 4 ? 3 : 5).forEach((trObj) => {
-          const c0 = (trObj.cells && trObj.cells[0] && trObj.cells[0].text) || "";
-          const c1 = (trObj.cells && trObj.cells[1] && trObj.cells[1].text) || "";
-          rightSummaryLines.push(`• ${c0.replace(/\n+/g, " ")}: ${c1.replace(/\n+/g, " ").slice(0, cols >= 4 ? 42 : 85)}`);
+      if (sSpec.kind === "concept-summary" && sSpec.conceptSummary) {
+        const cs = sSpec.conceptSummary;
+        const lines = [
+          `${cs.coreTerm || "“สุขภาพ” (health)"} ${cs.coreDefinition || ""}`
+        ];
+        (cs.dimensions || []).slice(0, 4).forEach((d) => {
+          lines.push(`• ${d.thTitle} (${d.enTitle || ""}): ${d.definition || ""}`);
         });
+        const csP = lines
+          .map((ln, lIdx) =>
+            `<a:p><a:pPr algn="l"/>` +
+            buildRunXml(ln.slice(0, cols >= 4 ? 75 : 170), {
+              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.0)),
+              bold: lIdx === 0,
+              color: lIdx === 0 ? "002D72" : "1E293B"
+            }) +
+            `</a:p>`
+          )
+          .join("");
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            `MiniConceptSummary_${idx + 1}`,
+            { x: cx + 25000, y: bodyY, w: cardW - 50000, h: bodyH },
+            "F8FAFC",
+            "CBD5E1",
+            csP,
+            0,
+            { l: 45000, r: 45000, t: 35000, b: 35000 }
+          )
+        );
+      } else {
+        const leftW = Math.floor(cardW * 0.44);
+        const scenSnippet = (sSpec.scenarioParagraphs || []).join(" ").slice(0, cols >= 4 ? 160 : 320);
+        const leftP = buildHighlightedParagraphXml(
+          scenSnippet + ((sSpec.scenarioParagraphs || []).join(" ").length > scenSnippet.length ? "…" : ""),
+          sSpec.clues,
+          Math.max(4.5, scalePt - 1),
+          "334155",
+          "l"
+        );
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            `MiniScen_${idx + 1}`,
+            { x: cx + 25000, y: bodyY, w: leftW - 35000, h: bodyH },
+            "F8FAFC",
+            "E2E8F0",
+            leftP,
+            0,
+            { l: 45000, r: 45000, t: 35000, b: 35000 }
+          )
+        );
+
+        const rightSummaryLines = [`${sSpec.questionTitle || ""}`];
+        if (sSpec.table && Array.isArray(sSpec.table.rows)) {
+          sSpec.table.rows.slice(0, cols >= 4 ? 3 : 5).forEach((trObj) => {
+            const c0 = (trObj.cells && trObj.cells[0] && trObj.cells[0].text) || "";
+            const c1 = (trObj.cells && trObj.cells[1] && trObj.cells[1].text) || "";
+            rightSummaryLines.push(`• ${c0.replace(/\n+/g, " ")}: ${c1.replace(/\n+/g, " ").slice(0, cols >= 4 ? 42 : 85)}`);
+          });
+        }
+        const rightP = rightSummaryLines
+          .map((ln, lIdx) =>
+            `<a:p><a:pPr algn="l"/>` +
+            buildRunXml(ln, {
+              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
+              bold: lIdx === 0,
+              color: lIdx === 0 ? "002D72" : "0F172A"
+            }) +
+            `</a:p>`
+          )
+          .join("");
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            `MiniRight_${idx + 1}`,
+            { x: cx + leftW + 10000, y: bodyY, w: cardW - leftW - 35000, h: bodyH },
+            "FFFFFF",
+            "CBD5E1",
+            rightP,
+            0,
+            { l: 45000, r: 45000, t: 35000, b: 35000 }
+          )
+        );
       }
-      const rightP = rightSummaryLines
-        .map((ln, lIdx) =>
-          `<a:p><a:pPr algn="l"/>` +
-          buildRunXml(ln, {
-            pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
-            bold: lIdx === 0,
-            color: lIdx === 0 ? "002D72" : "0F172A"
-          }) +
-          `</a:p>`
-        )
-        .join("");
-      shapes.push(
-        buildShapeXml(
-          shapeId++,
-          `MiniRight_${idx + 1}`,
-          { x: cx + leftW + 10000, y: bodyY, w: cardW - leftW - 35000, h: bodyH },
-          "FFFFFF",
-          "CBD5E1",
-          rightP,
-          0,
-          { l: 45000, r: 45000, t: 35000, b: 35000 }
-        )
-      );
 
       // Optional Ruled Notes Lines on the Right for "3 + Notes" Classic PowerPoint Handout!
       if (withNotes) {
