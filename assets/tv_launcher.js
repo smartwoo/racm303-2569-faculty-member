@@ -188,7 +188,8 @@
         </button>
         ${
           ROLE === "faculty"
-            ? `<button type="button" class="tv-menu-item" id="tvMenuUploadSlideBtn"><span>อัปโหลด Slide ประกอบการสอน</span><span>→</span></button>`
+            ? `<button type="button" class="tv-menu-item" id="tvMenuPrintoutHubBtn"><span>🖨️ เอกสารสำหรับอาจารย์ (Print-out PDF)</span><span>→</span></button>
+               <button type="button" class="tv-menu-item" id="tvMenuUploadSlideBtn"><span>อัปโหลด Slide ประกอบการสอน</span><span>→</span></button>`
             : `<a class="tv-menu-item" href="https://forms.gle/1Gsg2SmSfuuEwmcE9" target="_blank" rel="noopener"><span>ส่งสไลด์ &amp; Health Survey</span><span>↗</span></a>`
         }
         <a class="tv-menu-item" href="https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398" target="_blank" rel="noopener">
@@ -286,6 +287,18 @@
       fab.innerHTML = `${ICONS.upload} <span>Upload Slide / GitHub</span>`;
       fab.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
       document.body.appendChild(fab);
+    }
+
+    const prHubBtn = $("tvMenuPrintoutHubBtn");
+    if (prHubBtn) {
+      prHubBtn.addEventListener("click", () => {
+        morePop.hidden = true;
+        moreBtn.setAttribute("aria-expanded", "false");
+        hideCourseDriveBrowser();
+        const api = getApi();
+        if (api && api.openFacultyPrintoutHub) api.openFacultyPrintoutHub();
+        else navigateTvTab("manual");
+      });
     }
 
     const upSlideBtn = $("tvMenuUploadSlideBtn");
@@ -872,6 +885,15 @@
               <span class="tv-quick-title">EP6 – EP9 &amp; Exercise 5–6</span>
               <span class="tv-quick-meta">ID: 929 4095 3542 · Pass: 165796</span>
             </a>
+            ${
+              ROLE === "faculty"
+                ? `<button type="button" class="tv-quick-card" id="tvQuickPrintBinderCardBtn" data-tv-focus data-tv-row="5">
+                     <span class="tv-quick-tag">🖨️ PRINT-OUT PDF · ครบ 6 หมวด</span>
+                     <span class="tv-quick-title">${esc(t("เอกสารสำหรับอาจารย์ & แฟ้ม 9 พื้นที่", "Faculty Print-out PDFs & 9 Binders"))}</span>
+                     <span class="tv-quick-meta">${esc(t("ใบรูปถ่าย (มีเบอร์โทร) · ฟอร์ม 1A (GRS) · 2A · 3A · 4A", "Photo rosters + Forms 1A, 2A, 3A, 4A"))}</span>
+                   </button>`
+                : ""
+            }
             <button type="button" class="tv-quick-card" id="tvQuickLeaveCardBtn" data-tv-focus data-tv-row="5">
               <span class="tv-quick-tag">${ROLE === "faculty" ? "ธุรการรายวิชา" : "ใบลาออนไลน์"}</span>
               <span class="tv-quick-title">${esc(ROLE === "faculty" ? t("ดูคำขอใบลานักศึกษา", "Student Leave Inbox") : t("ยื่นใบลากิจ / ลาป่วย", "Submit Leave Request"))}</span>
@@ -973,6 +995,15 @@
         if (api && api.openFieldworkSite) api.openFieldworkSite(card.dataset.siteShort);
       });
     });
+
+    const printBinderCard = $("tvQuickPrintBinderCardBtn");
+    if (printBinderCard) {
+      printBinderCard.addEventListener("click", () => {
+        lastHomeTileFocusSelector = "#tvQuickPrintBinderCardBtn";
+        if (api && api.openFacultyPrintoutHub) api.openFacultyPrintoutHub();
+        else navigateTvTab("manual");
+      });
+    }
 
     const leaveCard = $("tvQuickLeaveCardBtn");
     if (leaveCard) {
@@ -2499,6 +2530,22 @@
           },
           ...(ROLE === "faculty"
             ? [
+                {
+                  id: "man:fac-print-master",
+                  folderPath: ["manuals"],
+                  name: "01_เอกสารสำหรับอาจารย์_RACM303_2569_Print-out_(ครบ_6_หมวด_&_9_แฟ้มพื้นที่).pdf",
+                  title: "เอกสารสำหรับอาจารย์ — รายวิชา RACM 303 ปีการศึกษา 2569 (Print-out PDF · ครบ 6 หมวด & 9 แฟ้ม อ.ที่ปรึกษา)",
+                  sub: "1. รูป นศพ. 9 พื้นที่ · 2. รูป Discussion 6 กลุ่ม · 3. ฟอร์ม 1A (GRS) · 4. ฟอร์ม 2A · 5. ฟอร์ม 3A · 6. ฟอร์ม 4A",
+                  meta: "24 หน้า / 58 หน้า · A4",
+                  badge: "🖨️ เปิดชุด Print-out",
+                  icoCls: "is-faculty",
+                  icoTxt: "🖨️",
+                  pdfHref: "exports/pdf/RACM303_2569_Faculty_Documents_Master.pdf",
+                  onOpen: openFileAction(() => {
+                    if (api && api.openFacultyPrintoutHub) api.openFacultyPrintoutHub();
+                    else navigateTvTab("manual");
+                  })
+                },
                 {
                   id: "man:faculty",
                   folderPath: ["manuals"],

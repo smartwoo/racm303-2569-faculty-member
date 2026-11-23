@@ -3816,6 +3816,9 @@
       card.appendChild(make("p", parts.paren, "stu-card-paren"));
     }
     card.appendChild(make("p", `รหัส: ${s.id}${s.program === "MD-M.Eng" ? " (MD-M.Eng)" : ""}`, "sid-mono"));
+    if (ROLE === "faculty" && s.phone) {
+      card.appendChild(make("p", `📞 ${s.phone}`, "stu-card-phone"));
+    }
 
     const pillWrap = make("div", null, "s-area area-sub-pill-wrap");
     pillWrap.innerHTML = `<span class="area-sub-pill area-site-${siteId}"><i class="area-dot"></i>${siteId}. ${escapeHtml(s.area)}</span>`;
@@ -3900,9 +3903,16 @@
 
     const headInfo = make("div", null, "stu-quick-title-col");
     const badgesRow = make("div", null, "stu-quick-badges");
+    const phoneBadgeHtml =
+      ROLE === "faculty"
+        ? s.phone
+          ? `<a class="badge is-phone-pill" href="tel:${escapeHtml(s.phone.replace(/[^0-9+]/g, ""))}">📞 โทร. ${escapeHtml(s.phone)}</a>`
+          : `<span class="badge">📞 โทร. —</span>`
+        : "";
     badgesRow.innerHTML = `<span class="badge cat-EP">รหัส ${escapeHtml(s.id)}</span>` +
       `<span class="area-sub-pill sm area-site-${siteId}"><i class="area-dot"></i>${siteId}. ${escapeHtml(s.area)}</span>` +
       `<span class="badge">${escapeHtml(s.program === "MD-M.Eng" ? "พ.บ.–วศ.ม. (MD-M.Eng)" : "หลักสูตร พ.บ. ชั้นปีที่ 3")}</span>` +
+      phoneBadgeHtml +
       (isMine ? `<span class="badge cat-HS">★ ตารางของฉัน</span>` : "");
     headInfo.appendChild(badgesRow);
     const h3Title = make("h3", "", "stu-modal-name-stack");
@@ -3991,9 +4001,10 @@
         ${site.travelNote ? `<p class="muted-line">${escapeHtml(site.travelNote)}</p>` : ""}
       </div>
     `;
+    const fieldBtnWrap = make("div", null, "header-actions");
+    fieldBtnWrap.style.marginTop = "8px";
     const jumpFieldBtn = make("button", `ไปที่รายชื่อกลุ่มพื้นที่ ${s.area} →`, "btn sm");
     jumpFieldBtn.type = "button";
-    jumpFieldBtn.style.marginTop = "8px";
     jumpFieldBtn.addEventListener("click", () => {
       backdrop.hidden = true;
       if ($("fieldAreaSelect")) $("fieldAreaSelect").value = s.area;
@@ -4004,7 +4015,15 @@
       }
       switchTab("fieldwork");
     });
-    fieldBox.appendChild(jumpFieldBtn);
+    fieldBtnWrap.appendChild(jumpFieldBtn);
+    if (ROLE === "faculty") {
+      const advPdfBtn = make("a", `📕 แฟ้ม อ.ที่ปรึกษา กลุ่ม ${siteId} (PDF) ↗`, "btn sm pdf-red");
+      advPdfBtn.href = `exports/pdf/RACM303_2569_Advisor_Packet_S${siteId}.pdf`;
+      advPdfBtn.target = "_blank";
+      advPdfBtn.rel = "noopener";
+      fieldBtnWrap.appendChild(advPdfBtn);
+    }
+    fieldBox.appendChild(fieldBtnWrap);
 
     detailGrid.append(discBox, fieldBox);
     card.appendChild(detailGrid);
@@ -4032,6 +4051,7 @@
     copyBtn.addEventListener("click", () => {
       const summaryText = [
         `${s.id} ${s.fullName}${s.nickname ? " (" + s.nickname + ")" : ""}`,
+        ...(ROLE === "faculty" && s.phone ? [`โทร. ${s.phone}`] : []),
         `Discussion กลุ่มที่ ${s.disc} (ห้อง ${rot.room || "-"})`,
         `พื้นที่ภาคสนาม: ${siteId}. ${s.area} (${site.hospital || ""} ${site.province || ""})`,
         `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(site, s.advisor)}`
@@ -5033,6 +5053,7 @@
       if (field === "id") cmp = compareTH(a.id, b.id);
       else if (field === "name") cmp = compareTH(a.name || a.fullName, b.name || b.fullName);
       else if (field === "nickname") cmp = compareTH(a.nickname || "", b.nickname || "");
+      else if (field === "phone") cmp = compareTH(a.phone || "", b.phone || "");
       else if (field === "program") cmp = compareTH(a.program || "MD", b.program || "MD");
       else if (field === "disc") cmp = a.disc - b.disc || compareTH(a.id, b.id);
       else if (field === "area") {
@@ -5051,6 +5072,7 @@
       { key: "id", label: "รหัสนักศึกษา" },
       { key: "name", label: "ชื่อ-นามสกุล" },
       { key: "nickname", label: "ชื่อเล่น" },
+      ...(ROLE === "faculty" ? [{ key: "phone", label: "เบอร์โทรศัพท์" }] : []),
       { key: "program", label: "หลักสูตร" },
       { key: "disc", label: "Discussion" },
       { key: "area", label: "กลุ่มพื้นที่ภาคสนาม" },
@@ -5118,6 +5140,21 @@
       tdName.appendChild(nameFlex);
 
       const tdNick = make("td", s.nickname || "-");
+      const tdPhone =
+        ROLE === "faculty"
+          ? (() => {
+              const td = make("td", null, "sid-mono");
+              if (s.phone) {
+                const a = make("a", s.phone, "fac-table-phone-link");
+                a.href = `tel:${s.phone.replace(/[^0-9+]/g, "")}`;
+                a.addEventListener("click", (ev) => ev.stopPropagation());
+                td.appendChild(a);
+              } else {
+                td.textContent = "—";
+              }
+              return td;
+            })()
+          : null;
       const tdProg = make("td", s.program === "MD-M.Eng" ? "MD-M.Eng" : "พ.บ.");
 
       const tdDisc = document.createElement("td");
@@ -5154,7 +5191,8 @@
       });
       tdAct.appendChild(openBtn);
 
-      tr.append(tdNum, tdId, tdName, tdNick, tdProg, tdDisc, tdArea, tdAdv, tdAct);
+      if (tdPhone) tr.append(tdNum, tdId, tdName, tdNick, tdPhone, tdProg, tdDisc, tdArea, tdAdv, tdAct);
+      else tr.append(tdNum, tdId, tdName, tdNick, tdProg, tdDisc, tdArea, tdAdv, tdAct);
       tr.addEventListener("click", () => openStudentQuickModal(s));
       tbody.appendChild(tr);
     });
@@ -5675,7 +5713,8 @@
       const matchQueryOnly = (s) => {
         if (isDisc && areaSubVal && s.area !== areaSubVal) return false;
         if (!q) return true;
-        const hay = `${s.id} ${s.fullName} ${s.nickname} discussion กลุ่มที่ ${s.disc} ${s.area} ${s.advisor || ""}`.toLocaleLowerCase("th");
+        const phHay = ROLE === "faculty" && s.phone ? ` ${s.phone} ${s.phone.replace(/\D/g, "")}` : "";
+        const hay = `${s.id} ${s.fullName} ${s.nickname} discussion กลุ่มที่ ${s.disc} ${s.area} ${s.advisor || ""}${phHay}`.toLocaleLowerCase("th");
         return hay.includes(q);
       };
       const allMatched = ROSTER.students.filter(matchQueryOnly);
@@ -6745,7 +6784,8 @@
       if (q) {
         const rot = (SCHED.hsRotation || []).find((r) => r.group === s.disc) || {};
         const teachers = HS_SLOTS_META.map((m) => (rot[m.mod] && rot[m.mod].instructor) || "").join(" ");
-        const hay = `${s.id} ${s.fullName} ${getEffectiveNickname(s)} discussion กลุ่มที่ ${s.disc} ${s.area} ${s.advisor || ""} ${teachers}`.toLocaleLowerCase("th");
+        const phHay = ROLE === "faculty" && s.phone ? ` ${s.phone} ${s.phone.replace(/\D/g, "")}` : "";
+        const hay = `${s.id} ${s.fullName} ${getEffectiveNickname(s)} discussion กลุ่มที่ ${s.disc} ${s.area} ${s.advisor || ""} ${teachers}${phHay}`.toLocaleLowerCase("th");
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -7351,7 +7391,20 @@
       icsLink.setAttribute("download", `RACM303_2569_group_${curSite.id}_${curSite.slug}.ics`);
       icsLink.innerHTML = `<svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(tr("บันทึกเข้า Google Cal / iCal (.ics)", "Save to Google Cal / iCal (.ics)"))}`;
 
-      actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
+      const advBinderLink =
+        ROLE === "faculty"
+          ? (() => {
+              const a = make("a", `📕 แฟ้ม อ.ที่ปรึกษา กลุ่ม ${curSite.id} (PDF) ↗`, "btn sm primary");
+              a.href = `exports/pdf/RACM303_2569_Advisor_Packet_S${curSite.id}.pdf`;
+              a.target = "_blank";
+              a.rel = "noopener";
+              a.title = `เปิดแฟ้มเอกสารประจำตัว อ.ที่ปรึกษากลุ่ม ${curSite.id} (${curSite.shortName}) พิมพ์ชื่อ นศพ. ลงฟอร์ม 1A & 2A ล่วงหน้าครบทุกคน`;
+              return a;
+            })()
+          : null;
+
+      if (advBinderLink) actRow.append(lockBtn, advBinderLink, pdfSiteLink, printSiteBtn, icsLink);
+      else actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
 
       const friNote = curSite.hasFri11Dec ? "ศ. 11 ธ.ค. มีกลุ่มย่อย 5–6" : "เดินทาง พฤ. 10 / พ. 9 ธ.ค.";
 
@@ -7565,7 +7618,8 @@
       if (areaVal && s.area !== areaVal) return false;
       if (q) {
         const siteMeta = (SCHED.fieldworkSites || []).find((x) => x.shortName === s.area) || {};
-        const hay = `${s.id} ${s.fullName} ${s.nickname} ${s.area} ${siteMeta.hospital || ""} ${siteMeta.province || ""} ${s.advisor} discussion กลุ่มที่ ${s.disc}`.toLocaleLowerCase("th");
+        const phHay = ROLE === "faculty" && s.phone ? ` ${s.phone} ${s.phone.replace(/\D/g, "")}` : "";
+        const hay = `${s.id} ${s.fullName} ${s.nickname} ${s.area} ${siteMeta.hospital || ""} ${siteMeta.province || ""} ${s.advisor} discussion กลุ่มที่ ${s.disc}${phHay}`.toLocaleLowerCase("th");
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -9895,6 +9949,9 @@
     const manualBannerWrap = $("manualUnifiedBannerWrap");
     if (manualBannerWrap) {
       manualBannerWrap.replaceChildren();
+    }
+    if (ROLE === "faculty" && $("facultyPrintoutHubMount")) {
+      renderFacultyPrintoutHub($("facultyPrintoutHubMount"), { collapsible: true });
     }
 
     const picker = $("manualChapterList");
@@ -27298,6 +27355,13 @@
     updatePersonalBanner();
     refreshCalendarStudioUI();
     if ($("deliverablesCardsGrid")) renderDeliverablesCards();
+    if (ROLE === "faculty") {
+      if (state.activeTab === "manual" && $("facultyPrintoutHubMount")) {
+        renderFacultyPrintoutHub($("facultyPrintoutHubMount"), { collapsible: true });
+      } else if (state.activeTab === "faculty-docs" && state.facultySub === "print-binder" && $("facultyPrintBinderWrap")) {
+        renderFacultyPrintoutHub($("facultyPrintBinderWrap"), { collapsible: false });
+      }
+    }
     if (state.activeTab === "schedule") renderScheduleCurrent();
   }
 
@@ -28583,18 +28647,33 @@
     ROSTER.students.forEach((s) => {
       const siteId = getSiteIdByAreaName(s.area);
       const spParts = getStudentNameParts(s);
+      const phoneTxt = ROLE === "faculty" && s.phone ? ` · โทร. ${s.phone}` : "";
+      const phoneHay = ROLE === "faculty" && s.phone ? ` ${s.phone} ${s.phone.replace(/\D/g, "")}` : "";
       pushIfMatch({
         cat: "students",
         icon: "🎓",
         studentObj: s,
         title: `${s.id} — ${spParts.lead}${spParts.paren ? " " + spParts.paren : ""}`,
-        sub: `Discussion กลุ่ม ${s.disc} · พื้นที่ ${siteId}. ${s.area} · อ.${s.advisor || "-"}`,
+        sub: `Discussion กลุ่ม ${s.disc} · พื้นที่ ${siteId}. ${s.area} · อ.${s.advisor || "-"}${phoneTxt}`,
         badge: `G${s.disc} · ${s.area}`,
         defaultShow: false,
-        searchHay: `${s.id} ${s.fullName} ${s.nickname || ""} ${s.program || ""} discussion ${s.disc} g${s.disc} ${s.area} ${s.advisor || ""}`.toLocaleLowerCase("th"),
+        searchHay: `${s.id} ${s.fullName} ${s.nickname || ""} ${s.program || ""} discussion ${s.disc} g${s.disc} ${s.area} ${s.advisor || ""}${phoneHay}`.toLocaleLowerCase("th"),
         run: () => openStudentQuickModal(s)
       });
     });
+
+    if (ROLE === "faculty") {
+      pushIfMatch({
+        cat: "docs",
+        icon: "🖨️",
+        title: "เอกสารสำหรับอาจารย์ (Print-out PDF · ครบ 6 หมวด & 9 แฟ้ม อ.ที่ปรึกษา)",
+        sub: "ใบรูปถ่าย 9 พื้นที่ · 6 Discussion (มีเบอร์โทร นศพ.) · ฟอร์ม 1A (GRS) · ฟอร์ม 2A · ฟอร์ม 3A · ฟอร์ม 4A",
+        badge: "Print-out PDF",
+        defaultShow: true,
+        searchHay: "เอกสารสำหรับอาจารย์ คู่มืออาจารย์ print out pdf ฟอร์ม 1a 2a 3a 4a global rating scale grs แฟ้มอาจารย์ที่ปรึกษา เบอร์โทร",
+        run: () => openFacultyPrintoutHub()
+      });
+    }
 
     // 6. Textbooks & Manual Chapters (+ Faculty Docs/Links if Faculty)
     (HS.docs || []).forEach((d) => {
@@ -35878,6 +35957,274 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  /* ---------- Faculty Print-out PDF Binder Hub (6 Core Sections + 9 Site Advisor Packets) ---------- */
+  function openFacultyPrintoutHub() {
+    state.facPrintHubCollapsed = false;
+    switchTab("manual");
+    requestAnimationFrame(() => {
+      const mount = $("facultyPrintoutHubMount");
+      if (mount) mount.scrollIntoView({ behavior: "smooth", block: "start" });
+      else window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  function renderFacultyPrintoutHub(mountEl, opts = {}) {
+    if (!mountEl || ROLE !== "faculty") return;
+    const collapsible = Boolean(opts.collapsible);
+    const collapsed = collapsible && Boolean(state.facPrintHubCollapsed);
+    const includeManual = Boolean(state.facIncludeManualInMasterPdf);
+    const sites = SCHED.fieldworkSites || [];
+    const activeTeacher = state.myTeacherKey || "";
+
+    const masterHref = includeManual
+      ? "exports/pdf/RACM303_2569_Faculty_Complete_Manual.pdf"
+      : "exports/pdf/RACM303_2569_Faculty_Documents_Master.pdf";
+    const masterDl = includeManual
+      ? "คู่มืออาจารย์และเอกสาร_RACM303_2569_ฉบับรวมเล่มสมบูรณ์_58หน้า.pdf"
+      : "เอกสารสำหรับอาจารย์_RACM303_2569_ครบ6หมวด_24หน้า.pdf";
+    const masterPagesBadge = includeManual ? "58 หน้า A4 · รวมคู่มือ 17 บท + 6 หมวด" : "24 หน้า A4 · ชุดเอกสารสำหรับอาจารย์ 6 หมวด";
+
+    const myAdvisorSite = activeTeacher
+      ? sites.find((s) => String(s.advisors || "").includes(activeTeacher))
+      : null;
+
+    const sixItems = [
+      {
+        num: "1.",
+        title: "รูปภาพนักศึกษาแพทย์ กลุ่มพื้นที่ (9 กลุ่ม)",
+        desc: "ใบรายชื่อรูปถ่าย A4 เรียงตามกลุ่มพื้นที่ภาคสนาม 1–9 พร้อมรหัส ชื่อเล่น ชื่อ-สกุล เบอร์โทรศัพท์ นศพ. และกลุ่ม Discussion",
+        meta: "9 หน้า A4 แนวตั้ง · มีเบอร์โทร นศพ.",
+        openHref: "exports/pdf/RACM303_2569_Fieldwork_All.pdf",
+        dlName: "1_รูปภาพนักศึกษาแพทย์_กลุ่มพื้นที่_9กลุ่ม_RACM303_2569.pdf",
+        extraLinks: [
+          { label: "⬇ Word (.docx)", href: "exports/docx/RACM303_2569_Fieldwork_Roster.docx", dl: "1_รายชื่อ_9พื้นที่ภาคสนาม_สำหรับอาจารย์_2569.docx" },
+          ...sites.map((s) => ({
+            label: `S${s.id} ${s.shortName}`,
+            href: `exports/pdf/RACM303_2569_Fieldwork_S${s.id}.pdf`,
+            targetBlank: true
+          }))
+        ]
+      },
+      {
+        num: "2.",
+        title: "รูปภาพนักศึกษาแพทย์ Discussion (6 กลุ่ม)",
+        desc: "ใบรายชื่อรูปถ่าย A4 กลุ่มอภิปราย 1–6 (ห้อง 1C1-02 ถึง 1C1-07) พร้อมรายชื่ออาจารย์หมุนเวียน HS1–HS6 และเบอร์โทรศัพท์ นศพ.",
+        meta: "6 หน้า A4 แนวตั้ง · มีเบอร์โทร นศพ.",
+        openHref: "exports/pdf/RACM303_2569_Discussion_All.pdf",
+        dlName: "2_รูปภาพนักศึกษาแพทย์_Discussion_6กลุ่ม_RACM303_2569.pdf",
+        extraLinks: [
+          { label: "⬇ Word (.docx)", href: "exports/docx/RACM303_2569_Discussion_Roster.docx", dl: "2_รายชื่อ_Discussion_6กลุ่ม_สำหรับอาจารย์_2569.docx" },
+          ...[1, 2, 3, 4, 5, 6].map((g) => ({
+            label: `กลุ่ม ${g}`,
+            href: `exports/pdf/RACM303_2569_Discussion_G${g}.pdf`,
+            targetBlank: true
+          }))
+        ]
+      },
+      {
+        num: "3.",
+        title: "ฟอร์ม 1A Global rating scale (GRS)",
+        desc: "เกณฑ์ในการประเมินผลพฤติกรรมนักศึกษาแพทย์ชั้นปีที่ 3 และแบบประเมิน GRS รายบุคคลสำหรับอาจารย์ที่ปรึกษาประจำกลุ่มพื้นที่",
+        meta: "2 หน้า A4 (เกณฑ์ + ฟอร์มเปล่า) · หรือฉบับพิมพ์ชื่อครบ 169 คน",
+        openHref: "exports/pdf/RACM303_2569_Form_1A.pdf",
+        dlName: "3_ฟอร์ม_1A_Global_Rating_Scale_RACM303_2569.pdf",
+        extraLinks: [
+          {
+            label: "🖨️ ฉบับพิมพ์ชื่อ-รูป นศพ. ล่วงหน้าครบ 169 คน (170 หน้า)",
+            href: "exports/pdf/RACM303_2569_Form_1A_All_Sites.pdf",
+            targetBlank: true,
+            highlight: true
+          }
+        ]
+      },
+      {
+        num: "4.",
+        title: "ฟอร์ม 2A แบบประเมินภาพรวมของเจตคติและพฤติกรรม",
+        desc: "คำชี้แจงเกณฑ์การประเมิน และตารางสรุปผล 1. ภาคพฤติกรรม (O/S/U) · 2. เจตคติ (O/S/U) · 3. ภาพรวมเจตคติและพฤติกรรม (O/S/U)",
+        meta: "1 หน้า A4 แนวตั้ง · หรือฉบับพิมพ์รายชื่อครบ 9 พื้นที่",
+        openHref: "exports/pdf/RACM303_2569_Form_2A.pdf",
+        dlName: "4_ฟอร์ม_2A_ภาพรวมเจตคติและพฤติกรรม_RACM303_2569.pdf",
+        extraLinks: [
+          {
+            label: "🖨️ ฉบับพิมพ์รายชื่อ นศพ. ล่วงหน้าครบ 9 พื้นที่ (9 หน้า)",
+            href: "exports/pdf/RACM303_2569_Form_2A_All_Sites.pdf",
+            targetBlank: true,
+            highlight: true
+          }
+        ]
+      },
+      {
+        num: "5.",
+        title: "ฟอร์ม 3A ประเมินการนำเสนอ Health system",
+        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอประสบการณ์ภาคสนามด้านระบบสุขภาพ (วันอังคารที่ 29 ธันวาคม 2569 · ห้อง 2C2-03)",
+        meta: "2 หน้า A4 แนวนอน · เต็ม 100 คะแนน",
+        openHref: "exports/pdf/RACM303_2569_Form_3A.pdf",
+        dlName: "5_ฟอร์ม_3A_ประเมินนำเสนอ_Health_System_29ธค2569.pdf",
+        extraLinks: [
+          {
+            label: "🖨️ ชุดกรรมการวันนำเสนอ ติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (10 หน้าแนวนอน)",
+            href: "exports/pdf/RACM303_2569_Form_3A_9Groups_Pack.pdf",
+            targetBlank: true,
+            highlight: true
+          }
+        ]
+      },
+      {
+        num: "6.",
+        title: "ฟอร์ม 4A ประเมินการนำเสนอ Quantitative study",
+        desc: "เกณฑ์การประเมินและใบให้คะแนนการนำเสนอรายงานวิจัยเชิงปริมาณทางระบาดวิทยา (วันพุธที่ 30 ธันวาคม 2569 · ห้อง 2C2-03)",
+        meta: "2 หน้า A4 แนวนอน · เต็ม 100 คะแนน",
+        openHref: "exports/pdf/RACM303_2569_Form_4A.pdf",
+        dlName: "6_ฟอร์ม_4A_ประเมินนำเสนอ_Quantitative_Study_30ธค2569.pdf",
+        extraLinks: [
+          {
+            label: "🖨️ ชุดกรรมการวันนำเสนอ ติ๊กชื่อกลุ่ม 1–9 ล่วงหน้า (10 หน้าแนวนอน)",
+            href: "exports/pdf/RACM303_2569_Form_4A_9Groups_Pack.pdf",
+            targetBlank: true,
+            highlight: true
+          }
+        ]
+      }
+    ];
+
+    mountEl.innerHTML = `
+      <div class="fac-printout-hub${collapsed ? " is-collapsed" : ""}">
+        <div class="fac-printout-hero">
+          <div class="fac-printout-hero-left">
+            <img class="fac-printout-crest" src="assets/images/mahidol-rama-logo.png" alt="มหาวิทยาลัยมหิดล คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี">
+            <div>
+              <div class="fac-printout-kicker-row">
+                <span class="fac-printout-kicker">🖨️ PRINT-OUT PDF FOR FACULTY · เฉพาะคณาจารย์ผู้สอน (มีเบอร์โทร นศพ.)</span>
+                <span class="fac-printout-pages-pill">${escapeHtml(masterPagesBadge)}</span>
+              </div>
+              <h3 class="fac-printout-main-title">เอกสารสำหรับอาจารย์ — รายวิชา RACM 303 ปีการศึกษา 2569</h3>
+              <p class="fac-printout-sub">จัดหน้าพร้อมพิมพ์ลงกระดาษ A4 คมชัด (มี Bookmarks สารบัญคลิกข้ามหมวดได้ทันที) ครบทั้ง 6 รายการหลัก และแฟ้มประจำตัวอาจารย์ที่ปรึกษาแยก 9 พื้นที่</p>
+              <label class="fac-printout-toggle-lbl">
+                <input type="checkbox" data-fac-master-toggle ${includeManual ? "checked" : ""}>
+                <span>รวมเนื้อหา <strong>คู่มือการจัดการเรียนการสอน (บทที่ 1–17)</strong> ไว้ต้นเล่มด้วย (รวม 58 หน้า · หากไม่ติ๊กจะได้ชุดเอกสารอาจารย์ล้วน 24 หน้า)</span>
+              </label>
+            </div>
+          </div>
+          <div class="fac-printout-hero-actions">
+            <a class="btn primary" href="${escapeHtml(masterHref)}" target="_blank" rel="noopener">🖨️ เปิดดู / สั่งพิมพ์ PDF ↗</a>
+            <a class="btn pdf-red" href="${escapeHtml(masterHref)}" download="${escapeHtml(masterDl)}">⬇ ดาวน์โหลด PDF</a>
+            ${
+              collapsible
+                ? `<button type="button" class="btn sm" data-fac-hub-collapse>${collapsed ? "แสดงรายการแยกหมวด & 9 แฟ้มพื้นที่ ▾" : "ย่อแผงเอกสารอาจารย์ ▲"}</button>`
+                : ""
+            }
+          </div>
+        </div>
+
+        ${
+          collapsed
+            ? ""
+            : `
+          <div class="fac-printout-body">
+            <!-- 9 Site-Specific Advisor Packets -->
+            <div class="fac-printout-sec">
+              <div class="fac-printout-sec-head">
+                <div>
+                  <h4>📕 แฟ้มประจำตัวอาจารย์ที่ปรึกษาแยกตามกลุ่มพื้นที่ภาคสนาม 9 แห่ง (Pre-filled Advisor Binders)</h4>
+                  <p>แต่ละแฟ้มจัดเรียงใบรายชื่อกลุ่มของท่านไว้หน้าแรก + พิมพ์ชื่อ-รหัส-รูปถ่าย นศพ. ในกลุ่มลงใน <strong>ฟอร์ม 1A (รายบุคคลทุกคน)</strong> และ <strong>ฟอร์ม 2A (ตารางสรุปกลุ่ม)</strong> พร้อมฟอร์ม 3A &amp; 4A ครบในไฟล์เดียว${
+                    myAdvisorSite ? ` · <strong style="color:var(--crimson)">★ ไฮไลต์กลุ่มที่ปรึกษาของ อ.${escapeHtml(activeTeacher)}: กลุ่มที่ ${myAdvisorSite.id} (${escapeHtml(myAdvisorSite.shortName)})</strong>` : ""
+                  }</p>
+                </div>
+              </div>
+              <div class="fac-advisor-packets-grid">
+                ${sites
+                  .map((s) => {
+                    const isMyAdv = Boolean(activeTeacher && String(s.advisors || "").includes(activeTeacher));
+                    const totalPages = 23 + Number(s.count || 18);
+                    const href = `exports/pdf/RACM303_2569_Advisor_Packet_S${s.id}.pdf`;
+                    const dl = `แฟ้มอาจารย์ที่ปรึกษา_กลุ่ม${s.id}_${s.shortName}_RACM303_2569.pdf`;
+                    return `
+                      <div class="fac-advisor-packet-card${isMyAdv ? " is-my-advisor-site" : ""}">
+                        <div class="fapc-top">
+                          <span class="fapc-num">กลุ่ม ${s.id}</span>
+                          <span class="fapc-meta">${s.count} คน · ${totalPages} หน้า</span>
+                        </div>
+                        <div class="fapc-title">${escapeHtml(s.hospital)} <span class="fapc-prov">(${escapeHtml(s.province)})</span></div>
+                        <div class="fapc-adv">อ.ที่ปรึกษา: ${escapeHtml(s.advisors)}</div>
+                        <div class="fapc-actions">
+                          <a class="btn sm primary" href="${escapeHtml(href)}" target="_blank" rel="noopener">🖨️ เปิดพิมพ์ ↗</a>
+                          <a class="btn sm" href="${escapeHtml(href)}" download="${escapeHtml(dl)}">⬇ PDF</a>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+
+            <!-- 6 Individual Items matching image.png -->
+            <div class="fac-printout-sec">
+              <div class="fac-printout-sec-head">
+                <div>
+                  <h4>📋 แยกเปิดดู / ดาวน์โหลดรายหมวด (ครบทั้ง 6 รายการตามสารบัญเอกสารสำหรับอาจารย์)</h4>
+                  <p>เลือกเปิดพิมพ์เฉพาะหมวดที่ต้องการใช้หน้าห้องสอบ ห้องอภิปราย หรือวันนำเสนอภาคสนาม (29–30 ธ.ค. 2569)</p>
+                </div>
+              </div>
+              <div class="fac-six-items-list">
+                ${sixItems
+                  .map(
+                    (it) => `
+                  <div class="fac-six-item-row">
+                    <div class="fsir-main">
+                      <span class="fsir-num">${escapeHtml(it.num)}</span>
+                      <div class="fsir-copy">
+                        <div class="fsir-title-row">
+                          <strong>${escapeHtml(it.title)}</strong>
+                          <span class="fsir-meta-pill">${escapeHtml(it.meta)}</span>
+                        </div>
+                        <p>${escapeHtml(it.desc)}</p>
+                        ${
+                          it.extraLinks && it.extraLinks.length
+                            ? `<div class="fsir-chips">
+                                ${it.extraLinks
+                                  .map((lk) =>
+                                    lk.dl
+                                      ? `<a class="fsir-chip" href="${escapeHtml(lk.href)}" download="${escapeHtml(lk.dl)}">${escapeHtml(lk.label)}</a>`
+                                      : `<a class="fsir-chip${lk.highlight ? " is-hl" : ""}" href="${escapeHtml(lk.href)}" target="_blank" rel="noopener">${escapeHtml(lk.label)} ↗</a>`
+                                  )
+                                  .join("")}
+                               </div>`
+                            : ""
+                        }
+                      </div>
+                    </div>
+                    <div class="fsir-actions">
+                      <a class="btn sm primary" href="${escapeHtml(it.openHref)}" target="_blank" rel="noopener">🖨️ เปิดพิมพ์ ↗</a>
+                      <a class="btn sm pdf-red" href="${escapeHtml(it.openHref)}" download="${escapeHtml(it.dlName)}">⬇ PDF</a>
+                    </div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          </div>
+        `
+        }
+      </div>
+    `;
+
+    const chk = mountEl.querySelector("[data-fac-master-toggle]");
+    if (chk) {
+      chk.addEventListener("change", () => {
+        state.facIncludeManualInMasterPdf = Boolean(chk.checked);
+        renderFacultyPrintoutHub(mountEl, opts);
+      });
+    }
+    const colBtn = mountEl.querySelector("[data-fac-hub-collapse]");
+    if (colBtn) {
+      colBtn.addEventListener("click", () => {
+        state.facPrintHubCollapsed = !state.facPrintHubCollapsed;
+        renderFacultyPrintoutHub(mountEl, opts);
+      });
+    }
+  }
+
   function initFacultyDocsControls() {
     const docs = (typeof FACULTY !== "undefined" && FACULTY && FACULTY.docs) || [];
     if (!state.activeFacultyDocId && docs[0]) {
@@ -35899,6 +36246,7 @@
 
   function renderFacultyDocsView() {
     const guidesWrap = $("facultyGuidesReaderWrap");
+    const printBinderWrap = $("facultyPrintBinderWrap");
     const linksWrap = $("facultyLinksDirectoryWrap");
     if (!guidesWrap || !linksWrap) return;
 
@@ -35911,25 +36259,35 @@
 
     const facBannerWrap = $("facultyDocsUnifiedBannerWrap");
     if (facBannerWrap) {
-      facBannerWrap.replaceChildren(
-        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "faculty-docs", {
-          showModuleBar: true,
-          onSelectModule: (m) => {
-            const clean = m && /^(HS[1-6]|ST1)$/i.test(m) ? m.toUpperCase() : "HS1";
-            state.activeHsModule = clean;
-            state.facultySub = "guides";
-            state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
-            document.querySelectorAll("[data-fac-sub]").forEach((b) =>
-              b.setAttribute("aria-pressed", b.dataset.facSub === "guides" ? "true" : "false")
-            );
-            renderFacultyDocsView();
-          }
-        })
-      );
+      if (state.facultySub === "print-binder") {
+        facBannerWrap.replaceChildren();
+      } else {
+        facBannerWrap.replaceChildren(
+          buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "faculty-docs", {
+            showModuleBar: true,
+            onSelectModule: (m) => {
+              const clean = m && /^(HS[1-6]|ST1)$/i.test(m) ? m.toUpperCase() : "HS1";
+              state.activeHsModule = clean;
+              state.facultySub = "guides";
+              state.activeFacultyDocId = resolveFacultyGuideDocIdForModule(clean);
+              document.querySelectorAll("[data-fac-sub]").forEach((b) =>
+                b.setAttribute("aria-pressed", b.dataset.facSub === "guides" ? "true" : "false")
+              );
+              renderFacultyDocsView();
+            }
+          })
+        );
+      }
     }
 
     guidesWrap.hidden = state.facultySub !== "guides";
+    if (printBinderWrap) printBinderWrap.hidden = state.facultySub !== "print-binder";
     linksWrap.hidden = state.facultySub !== "links";
+
+    if (state.facultySub === "print-binder" && printBinderWrap) {
+      renderFacultyPrintoutHub(printBinderWrap, { collapsible: false });
+      return;
+    }
 
     if (state.facultySub === "guides") {
       const picker = $("facultyDocList");
@@ -36451,6 +36809,11 @@
     if (ROLE === "faculty" && typeof initFacultyDocsControls === "function") {
       initFacultyDocsControls();
     }
+    if ($("facQuickPrintBinderBtn")) {
+      $("facQuickPrintBinderBtn").addEventListener("click", () => {
+        openFacultyPrintoutHub();
+      });
+    }
     initRoleConcierge();
     initGlobalSpotlightAndFab();
     if (state.lang === "en") applyStaticDomLanguage("en");
@@ -36504,6 +36867,11 @@
         state.epSection = valid.includes(secParam) ? secParam : "all";
       }
       switchTab("epidemiology", false);
+      return;
+    }
+
+    if (params.get("page") === "faculty-pdfs" || params.get("page") === "printout") {
+      openFacultyPrintoutHub();
       return;
     }
 
@@ -36573,6 +36941,10 @@
     }
 
     const hash = (window.location.hash || "").replace(/^#/, "");
+    if (hash === "faculty-pdfs" || hash === "print-binder") {
+      openFacultyPrintoutHub();
+      return;
+    }
     switchTab(hash || "home", false);
   }
 
@@ -36586,6 +36958,7 @@
     role: ROLE,
     getState: () => state,
     switchTab,
+    openFacultyPrintoutHub: () => openFacultyPrintoutHub(),
     openOrientationDeck: (idx, opts) => window.RACM_ORIENTATION_DECK && window.RACM_ORIENTATION_DECK.open(idx, opts),
     openHsDiscussion,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
