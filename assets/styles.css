@@ -25659,13 +25659,13 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
   }
 }
 
-/* ---------- Coherent 4-Step Logical Flow UI (HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion) ---------- */
+/* ---------- Coherent 5-Step Logical Flow UI (HS1–HS6: Full → Abridged → Self-Quiz → Slide อาจารย์ → Case Discussion) ---------- */
 .hs-flow-stepper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 11px 14px;
   border-radius: 20px;
   background: var(--tv-surface, #ffffff);
   border: 1px solid var(--tv-card-border, rgba(15, 29, 53, 0.08));
@@ -25675,11 +25675,11 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 
 .hs-flow-step-node {
   flex: 1 1 0;
-  min-width: 150px;
+  min-width: 128px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 9px;
+  padding: 8px 10px;
   border-radius: 14px;
   border: 1px solid transparent;
   background: transparent;
@@ -25687,7 +25687,7 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
   font-family: var(--font-display);
   text-align: left;
   cursor: pointer;
-  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, opacity 0.18s ease;
 }
 
 .hs-flow-step-node:hover {
@@ -25721,8 +25721,56 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 .tv-ep-step-pill.is-step-3 {
   background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
 }
+/* Step 04 = Slide อาจารย์: Grey when not uploaded, Vibrant Emerald-Blue when uploaded */
 .hs-flow-step-node.is-step-4 .hs-flow-step-num,
-.tv-ep-step-pill.is-step-4 {
+.tv-ep-step-pill.is-step-4,
+.hs-flow-step-node.is-step-4.is-slide-uploaded .hs-flow-step-num,
+.tv-ep-step-pill.is-step-4.is-slide-uploaded {
+  background: linear-gradient(135deg, #059669 0%, #0284c7 100%);
+}
+.hs-flow-step-node.is-step-4.is-slide-pending {
+  background: rgba(148, 163, 184, 0.11);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+.hs-flow-step-node.is-step-4.is-slide-pending .hs-flow-step-num,
+.tv-ep-step-pill.is-step-4.is-slide-pending {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: #f8fafc;
+}
+.hs-flow-step-node.is-step-4.is-slide-pending .hs-flow-step-name {
+  color: #64748b;
+}
+.hs-flow-step-node.is-step-4.is-slide-pending .hs-flow-step-sub {
+  color: #94a3b8;
+}
+.hs-flow-step-node.is-step-4.is-slide-uploaded {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.hs-flow-step-node.is-step-4.is-slide-uploaded .hs-flow-step-sub {
+  color: #059669;
+  font-weight: 700;
+}
+html[data-theme="dark"] .hs-flow-step-node.is-step-4.is-slide-pending {
+  background: rgba(51, 65, 85, 0.42);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+html[data-theme="dark"] .hs-flow-step-node.is-step-4.is-slide-pending .hs-flow-step-name {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .hs-flow-step-node.is-step-4.is-slide-pending .hs-flow-step-sub {
+  color: #94a3b8;
+}
+html[data-theme="dark"] .hs-flow-step-node.is-step-4.is-slide-uploaded {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+html[data-theme="dark"] .hs-flow-step-node.is-step-4.is-slide-uploaded .hs-flow-step-sub {
+  color: #6ee7b7;
+}
+/* Step 05 = Case Discussion in Class */
+.hs-flow-step-node.is-step-5 .hs-flow-step-num,
+.tv-ep-step-pill.is-step-5 {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
 }
 
@@ -25733,14 +25781,14 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 }
 
 .hs-flow-step-name {
-  font-size: 13.4px;
+  font-size: 13.2px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--tv-ink, #0c1829);
 }
 
 .hs-flow-step-sub {
-  font-size: 11.6px;
+  font-size: 11.4px;
   font-weight: 600;
   color: var(--tv-ink-muted, #55657d);
   margin-top: 1px;
@@ -25749,7 +25797,7 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 .hs-flow-step-arrow {
   flex-shrink: 0;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--tv-ink-muted, #64748b);
   opacity: 0.65;
@@ -25786,7 +25834,70 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 .hs-flow-card.is-step-1::before { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
 .hs-flow-card.is-step-2::before { background: linear-gradient(90deg, #0d9488, #14b8a6); }
 .hs-flow-card.is-step-3::before { background: linear-gradient(90deg, #d97706, #f59e0b); }
-.hs-flow-card.is-step-4::before { background: linear-gradient(90deg, #dc2626, #f43f5e); }
+.hs-flow-card.is-step-4::before,
+.hs-flow-card.is-step-4.is-slide-uploaded::before { background: linear-gradient(90deg, #059669, #0284c7); }
+.hs-flow-card.is-step-4.is-slide-pending::before { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+.hs-flow-card.is-step-5::before { background: linear-gradient(90deg, #dc2626, #f43f5e); }
+
+/* Step 04 Card Surface: Muted Grey when not uploaded vs Vibrant Tint when uploaded */
+.hs-flow-card.is-step-4.is-slide-pending {
+  background: linear-gradient(165deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+  border-color: rgba(100, 116, 139, 0.28) !important;
+  box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.08) !important;
+}
+.hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-title {
+  color: #475569;
+}
+.hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-desc {
+  color: #64748b;
+}
+.hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-bridge {
+  color: #64748b;
+}
+.hs-flow-card.is-step-4.is-slide-pending .hs-flow-primary-cta {
+  background: #64748b !important;
+  color: #f8fafc !important;
+  border-color: transparent !important;
+}
+.hs-flow-card.is-step-4.is-slide-uploaded {
+  background: linear-gradient(165deg, #f0fdf4 0%, #eff6ff 100%) !important;
+  border-color: rgba(16, 185, 129, 0.38) !important;
+  box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.16) !important;
+}
+.hs-flow-card.is-step-4.is-slide-uploaded .hs-flow-primary-cta {
+  background: linear-gradient(135deg, #059669 0%, #0284c7 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+.hs-flow-card.is-step-4.is-slide-uploaded .hs-flow-timing-pill {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+}
+.tv-app-icon.tone-grey-pending {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+  color: #f8fafc !important;
+  filter: grayscale(0.35);
+}
+
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-pending {
+  background: linear-gradient(165deg, #1e293b 0%, #172030 100%) !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
+}
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-title {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-desc,
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-pending .hs-flow-card-bridge {
+  color: #94a3b8;
+}
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-uploaded {
+  background: linear-gradient(165deg, rgba(6, 78, 59, 0.36) 0%, rgba(12, 74, 110, 0.36) 100%) !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+}
+html[data-theme="dark"] .hs-flow-card.is-step-4.is-slide-uploaded .hs-flow-timing-pill {
+  background: rgba(16, 185, 129, 0.24);
+  color: #6ee7b7;
+}
 
 .hs-flow-card-top {
   display: flex;
@@ -25819,7 +25930,16 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
   background: rgba(217, 119, 6, 0.13);
   color: #b45309;
 }
-.hs-flow-step-pill.is-step-4 {
+.hs-flow-step-pill.is-step-4,
+.hs-flow-step-pill.is-step-4.is-slide-uploaded {
+  background: rgba(5, 150, 105, 0.14);
+  color: #047857;
+}
+.hs-flow-step-pill.is-step-4.is-slide-pending {
+  background: rgba(100, 116, 139, 0.16);
+  color: #475569;
+}
+.hs-flow-step-pill.is-step-5 {
   background: rgba(220, 38, 38, 0.11);
   color: #b91c1c;
 }
@@ -25836,7 +25956,16 @@ html[data-theme="dark"] .hs-flow-step-pill.is-step-3 {
   background: rgba(245, 158, 11, 0.22);
   color: #fcd34d;
 }
-html[data-theme="dark"] .hs-flow-step-pill.is-step-4 {
+html[data-theme="dark"] .hs-flow-step-pill.is-step-4,
+html[data-theme="dark"] .hs-flow-step-pill.is-step-4.is-slide-uploaded {
+  background: rgba(16, 185, 129, 0.24);
+  color: #6ee7b7;
+}
+html[data-theme="dark"] .hs-flow-step-pill.is-step-4.is-slide-pending {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .hs-flow-step-pill.is-step-5 {
   background: rgba(244, 63, 94, 0.22);
   color: #fda4af;
 }
@@ -27378,6 +27507,181 @@ html[data-theme="dark"] .hs-inline-pdf-head {
   .hs-inline-pdf-frame {
     height: 440px;
   }
+}
+
+/* 4. 5-Step Grid Layout & Inline Step 04 Slide อาจารย์ Card Upload / Status Styles */
+@media (min-width: 901px) {
+  .hs-flow-card.is-step-5 {
+    grid-column: 1 / -1;
+  }
+}
+
+.hs-atv-ep-pill.is-slide-pending-pill {
+  background: rgba(148, 163, 184, 0.22) !important;
+  border-color: rgba(148, 163, 184, 0.4) !important;
+  color: rgba(241, 245, 249, 0.78) !important;
+}
+
+.hs-atv-ep-pill.is-slide-uploaded-pill {
+  background: linear-gradient(135deg, #059669 0%, #0284c7 100%) !important;
+  border-color: rgba(110, 231, 183, 0.65) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.tv-hero-btn.is-slide-pending-hero {
+  background: rgba(100, 116, 139, 0.42) !important;
+  border-color: rgba(203, 213, 225, 0.35) !important;
+  color: rgba(241, 245, 249, 0.88) !important;
+}
+
+.tv-hero-btn.is-slide-uploaded-hero {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.88) 0%, rgba(2, 132, 199, 0.88) 100%) !important;
+  border-color: rgba(167, 243, 208, 0.55) !important;
+  color: #ffffff !important;
+}
+
+.tv-ep-action-btn.is-slide-pending-action {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(100, 116, 139, 0.28);
+  color: #64748b;
+}
+
+.tv-ep-action-btn.is-slide-ready-action {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(2, 132, 199, 0.1) 100%);
+  border-color: rgba(16, 185, 129, 0.38);
+}
+
+html[data-theme="dark"] .tv-ep-action-btn.is-slide-pending-action {
+  background: rgba(51, 65, 85, 0.45);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .tv-ep-action-btn.is-slide-ready-action {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.4) 0%, rgba(12, 74, 110, 0.4) 100%);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Inline Faculty Upload Box & Uploaded File Strip directly inside Step 04 Card */
+.hs-flow-step4-upload-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1.5px dashed #94a3b8;
+  background: rgba(255, 255, 255, 0.78);
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.hs-flow-step4-upload-box:hover,
+.hs-flow-step4-upload-box.is-dragover {
+  border-color: #0d9488;
+  background: #f0fdfa;
+}
+
+.hs-flow-step4-upload-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hs-flow-step4-upload-copy strong {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hs-flow-step4-upload-copy span {
+  font-size: 11.8px;
+  color: #64748b;
+}
+
+.hs-flow-step4-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1px solid #475569;
+  background: #334155;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 12.4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.16s ease, transform 0.14s ease;
+}
+
+.hs-flow-step4-pick-btn:hover {
+  background: #0f766e;
+  border-color: #0f766e;
+  transform: translateY(-1px);
+}
+
+.hs-flow-step4-file-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.11);
+  border: 1px solid rgba(16, 185, 129, 0.32);
+}
+
+.hs-flow-step4-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 12.8px;
+  font-weight: 700;
+  color: #065f46;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.hs-flow-step4-file-meta {
+  font-size: 11.6px;
+  font-weight: 600;
+  color: #047857;
+}
+
+html[data-theme="dark"] .hs-flow-step4-upload-box {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+html[data-theme="dark"] .hs-flow-step4-upload-copy strong {
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .hs-flow-step4-upload-copy span {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .hs-flow-step4-file-bar {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(52, 211, 153, 0.36);
+}
+
+html[data-theme="dark"] .hs-flow-step4-file-name {
+  color: #a7f3d0;
+}
+
+html[data-theme="dark"] .hs-flow-step4-file-meta {
+  color: #6ee7b7;
 }
 
 

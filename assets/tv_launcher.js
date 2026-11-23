@@ -458,8 +458,8 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 4 ขั้นตอน (HS1–HS6)", "Health Systems · 4-Step Flow"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion & เฉลย ครบทุกบท", "4-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion & Key"),
+              title: t("ระบบสุขภาพ · 5 ขั้นตอน (HS1–HS6)", "Health Systems · 5-Step Flow"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion & เฉลย", "5-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Case Discussion & Key"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -518,8 +518,8 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 4 ขั้นตอน (HS1–HS6)", "Health Systems · 4-Step Flow"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Case Discussion in Class ครบทุกบท", "Coherent 4-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Case Discussion"),
+              title: t("ระบบสุขภาพ · 5 ขั้นตอน (HS1–HS6)", "Health Systems · 5-Step Flow"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class", "Coherent 5-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Case Discussion"),
               badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -854,7 +854,7 @@
     fn();
   }
 
-  /* ---------- 3. Episode Quick-Action Sheet Modal (4-Step Logical Flow) ---------- */
+  /* ---------- 3. Episode Quick-Action Sheet Modal (5-Step Logical Flow) ---------- */
   function openEpisodeModal(epCode) {
     const mod = (HSD.modules || []).find((m) => m.code === epCode);
     if (!mod) return;
@@ -868,6 +868,10 @@
     backdrop.setAttribute("role", "dialog");
     backdrop.setAttribute("aria-modal", "true");
 
+    const epSlideInf =
+      (flow && flow.slideInfo) ||
+      (api && api.getHsSlideInfo ? api.getHsSlideInfo(mod.code) : { uploaded: false, extBadge: "", record: null });
+
     const step1Sub = flow
       ? flow.steps[0].bridge
       : t("ปูพื้นฐานทฤษฎี กรอบแนวคิด กรณีตัวอย่าง และเอกสารอ้างอิงฉบับสมบูรณ์", "Full conceptual foundation & references");
@@ -877,13 +881,24 @@
     const step3Sub = flow
       ? `${flow.qaCount} ข้อ Self-Quiz พร้อม AI Mentor · ${flow.glossaryCount} คำศัพท์ · ตาราง Rapid Review`
       : t("ทดสอบความเข้าใจ Active Recall พร้อมคำศัพท์และตารางทบทวนเร็ว", "Active recall Self-Quiz & flashcards");
-    const step4Sub = flow
+    const step4Sub = epSlideInf.uploaded
+      ? `✓ อัปโหลดแล้ว (${epSlideInf.extBadge})${
+          epSlideInf.record && epSlideInf.record.fileName ? ` · ${epSlideInf.record.fileName}` : ""
+        }`
+      : ROLE === "faculty"
+      ? t(
+          `⏳ ยังไม่อัปโหลด (สีเทา) — คลิกเพื่อ Upload ไฟล์ .PPTX / .PDF ประจำคาบ (${mod.lectureTime || "ต้นคาบ"})`,
+          "Pending upload — click to upload .PPTX / .PDF lecture slides"
+        )
+      : t(
+          `⏳ รออาจารย์ Upload สไลด์บรรยายต้นคาบ (${mod.lectureTime || "1 ชม. แรก"})`,
+          "Waiting for instructor slide upload (.PPTX / .PDF)"
+        );
+    const step5Sub = flow
       ? ROLE === "faculty"
         ? `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) & เฉลย 4 ขั้น · ${mod.discTime || ""}`
         : `สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + ${flow.modCases.length} กรณีศึกษา (${flow.subQCnt} ข้อ) · คาบ ${mod.discTime || ""}`
       : t(`สไลด์เปิดคาบเช็คชื่อกลุ่มย่อย + โจทย์ 16:9 ในห้องกลุ่มย่อย · คาบ ${mod.discTime || ""}`, "Opening Check-in + 16:9 in-class case slides");
-
-    const epSlideInf = api && api.getHsSlideInfo ? api.getHsSlideInfo(mod.code) : { uploaded: false, extBadge: "" };
 
     backdrop.innerHTML = `
       <div class="tv-modal-sheet is-compact">
@@ -921,26 +936,33 @@
             <span>→</span>
           </button>
 
+          <button type="button" class="tv-ep-action-btn ${epSlideInf.uploaded ? "is-slide-ready-action" : "is-slide-pending-action"}" id="tvEpActLecSlides" data-tv-modal-focus>
+            <span>
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-4 ${epSlideInf.uploaded ? "is-slide-uploaded" : "is-slide-pending"}">04</span> <span>${esc(
+                epSlideInf.uploaded
+                  ? t(`Slide อาจารย์ประจำคาบ (${mod.code} · ✓ ${epSlideInf.extBadge})`, `${mod.code} Instructor Slides (✓ ${epSlideInf.extBadge})`)
+                  : t(`Slide อาจารย์ประจำคาบ (${mod.code} · รอ Upload)`, `${mod.code} Instructor Slides (Pending)`)
+              )}</span></span>
+              <span class="tv-ep-action-sub">${esc(step4Sub)}</span>
+            </span>
+            <span>→</span>
+          </button>
+
           <button type="button" class="tv-ep-action-btn" id="tvEpActSlides" data-tv-modal-focus>
             <span>
-              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-4">04</span> <span>${esc(
+              <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-5">05</span> <span>${esc(
                 ROLE === "faculty"
                   ? t(`Case Discussion in Class & เฉลย (${mod.code})`, `${mod.code} Case Discussion & Teacher Key`)
                   : t(`Case Discussion in Class (${mod.code})`, `${mod.code} Case Discussion in Class`)
               )}</span></span>
-              <span class="tv-ep-action-sub">${esc(step4Sub)}</span>
+              <span class="tv-ep-action-sub">${esc(step5Sub)}</span>
             </span>
             <span>→</span>
           </button>
         </div>
 
         <div class="tv-ep-secondary-row">
-          <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 4 ขั้นตอน (${mod.code})`, `Open 4-Step Hub (${mod.code})`))}</button>
-          <button type="button" class="tv-hosp-chip ${epSlideInf.uploaded ? "is-slide-ready-chip" : "is-slide-pending-chip"}" id="tvEpActLecSlides" data-tv-modal-focus>🖥️ ${esc(
-            epSlideInf.uploaded
-              ? t(`Slide อาจารย์ (${mod.code} · ✓ ${epSlideInf.extBadge})`, `Instructor Slides (✓ ${epSlideInf.extBadge})`)
-              : t(`Slide อาจารย์ (${mod.code} · รอ Upload)`, `Instructor Slides (Pending)`)
-          )}</button>
+          <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 5 ขั้นตอน (${mod.code})`, `Open 5-Step Hub (${mod.code})`))}</button>
         </div>
       </div>
     `;
@@ -972,6 +994,11 @@
       if (api && api.openPractice) api.openPractice(mod.code, "qa");
     });
 
+    $("tvEpActLecSlides").addEventListener("click", () => {
+      backdrop.remove();
+      if (api && api.openHsLectureSlides) api.openHsLectureSlides(mod.code);
+    });
+
     $("tvEpActSlides").addEventListener("click", () => {
       backdrop.remove();
       if (api && api.openHsDiscussion) api.openHsDiscussion(mod.code);
@@ -980,11 +1007,6 @@
     $("tvEpActHub").addEventListener("click", () => {
       backdrop.remove();
       if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder(mod.code);
-    });
-
-    $("tvEpActLecSlides").addEventListener("click", () => {
-      backdrop.remove();
-      if (api && api.openHsLectureSlides) api.openHsLectureSlides(mod.code);
     });
 
     requestAnimationFrame(() => {
@@ -1837,47 +1859,47 @@
         "Workbook เสริม"
       );
 
-      // Step 04: Case Discussion in Class
-      const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
-      const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
-      files.push({
-        id: `hsppt:${m.id}`,
-        folderPath: ["health-systems", m.id],
-        name: `04_${m.code}_Case_Discussion_in_Class.pptx`,
-        title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
-        sub:
-          (flow && flow.steps[3].desc) ||
-          (ROLE === "faculty"
-            ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
-            : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
-        meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
-        badge: ROLE === "faculty" ? `④ Case + เฉลย` : `④ Case 16:9`,
-        icoCls: "is-pptx",
-        icoTxt: "④",
-        onOpen: openFileAction(() => {
-          if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
-        })
-      });
-
-      // Step 05: Instructor Lecture Slides
+      // Step 04: Instructor Lecture Slides (Grey when pending, Colored when uploaded)
       const mSlideInf = api && api.getHsSlideInfo ? api.getHsSlideInfo(m.code) : { uploaded: false, extBadge: "", icoCls: "is-pptx is-muted-pptx", icoTxt: "P", record: null };
       files.push({
         id: `hslec:${m.id}`,
         folderPath: ["health-systems", m.id],
         name:
           (mSlideInf.uploaded && mSlideInf.record && mSlideInf.record.fileName) ||
-          `05_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
-        title: `สไลด์ประกอบการบรรยายโดยอาจารย์ประจำคาบ ${m.code}`,
+          `04_${m.code}_Slide_อาจารย์บรรยาย.pptx`,
+        title: `Slide อาจารย์ประจำคาบ ${m.code}`,
         sub: mSlideInf.uploaded
-          ? `อัปโหลดแล้ว (${mSlideInf.extBadge}) — คลิกเพื่อเปิดดูหรือดาวน์โหลดไฟล์สไลด์`
-          : `ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
+          ? `④ STEP 04 · อัปโหลดแล้ว (${mSlideInf.extBadge}) — คลิกเพื่อเปิดดูหรือดาวน์โหลดไฟล์สไลด์`
+          : `④ STEP 04 · ช่วงบรรยาย ${m.lectureTime || "1 ชม. แรก"} — สถานะรออาจารย์อัปโหลดไฟล์ (.pptx / .pdf)`,
         meta: m.scheduleDate ? m.scheduleDate.replace(/^วัน/, "") : "",
-        badge: mSlideInf.uploaded ? `✓ อัปโหลดแล้ว (${mSlideInf.extBadge})` : "⏳ รออาจารย์ Upload",
+        badge: mSlideInf.uploaded ? `④ ✓ ${mSlideInf.extBadge}` : "④ ⏳ รอ Upload",
         isPending: !mSlideInf.uploaded,
         icoCls: mSlideInf.icoCls || "is-pptx is-muted-pptx",
-        icoTxt: mSlideInf.icoTxt || "P",
+        icoTxt: mSlideInf.uploaded ? (mSlideInf.icoTxt || "④") : "④",
         onOpen: openFileAction(() => {
           if (api && api.openHsLectureSlides) api.openHsLectureSlides(m.code);
+        })
+      });
+
+      // Step 05: Case Discussion in Class
+      const modCases = (HSD.cases || []).filter((c) => c.module === m.id);
+      const qCount = modCases.reduce((acc, c) => acc + ((c.questions && c.questions.length) || 0), 0);
+      files.push({
+        id: `hsppt:${m.id}`,
+        folderPath: ["health-systems", m.id],
+        name: `05_${m.code}_Case_Discussion_in_Class.pptx`,
+        title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
+        sub:
+          (flow && flow.steps[4] && flow.steps[4].desc) ||
+          (ROLE === "faculty"
+            ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+            : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
+        meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
+        badge: ROLE === "faculty" ? `⑤ Case + เฉลย` : `⑤ Case 16:9`,
+        icoCls: "is-pptx",
+        icoTxt: "⑤",
+        onOpen: openFileAction(() => {
+          if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
         })
       });
 
@@ -1981,9 +2003,9 @@
       "health-systems": {
         id: "health-systems",
         code: "02_ระบบสุขภาพ (HS1–HS6 & เวทีเชิงระบบ)",
-        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 4 ขั้นตอน และเวทีคิดเชิงระบบ & เสวนา 6 คาบสำคัญ",
+        title: "โฟลเดอร์เรียงตามบทเรียน HS1–HS6 ตาม Logical Flow 5 ขั้นตอน และเวทีคิดเชิงระบบ & เสวนา 6 คาบสำคัญ",
         meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
-        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Case Discussion", "🧭 เวทีคิดเชิงระบบ (6 คาบ)"],
+        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case Discussion", "🧭 เวทีคิดเชิงระบบ (6 คาบ)"],
         subfolders: [
           ...modules.map((m) => ({
             id: m.id,
