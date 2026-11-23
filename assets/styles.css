@@ -33401,51 +33401,205 @@ html[data-theme="dark"] .or-check-item.is-checked {
   border-color: #009e73;
 }
 
-/* Nano Banana Publication Figure Plates (Pure #FFFFFF High-Contrast Plate) */
+/* ==========================================================================
+   Apple Keynote Full-Space Typography, Top Key-Message Banner & Cinema Motion
+   ========================================================================== */
+
+/* Tighter Keynote outer frame -> +14% usable canvas area for larger fonts & visuals */
+.or-slide-canvas:not(.is-cover-canvas) .or-sld-inner {
+  padding: 1.35cqw 2.15cqw 1.05cqw;
+  gap: 0.62cqw;
+}
+
+.or-slide-canvas:not(.is-cover-canvas) .or-sld-head {
+  gap: 0.34cqw;
+}
+
+.or-slide-canvas:not(.is-cover-canvas) .or-sld-title {
+  font-size: clamp(16px, 1.92cqw, 29px);
+  line-height: 1.18;
+}
+
+.or-sld-foot {
+  height: 2.05cqw;
+  min-height: 21px;
+  padding: 0 2.15cqw;
+}
+
+/* Prominent Top Key-Message Banner (Directly Beneath Title on Every Slide) */
+.or-top-key-banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.72cqw;
+  padding: 0.48cqw 0.92cqw;
+  border-radius: 10px;
+  background: linear-gradient(95deg, #0f172a 0%, #162544 58%, #0c3559 100%);
+  border-left: 4px solid #fbbf24;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  color: #f8fafc;
+}
+
+html[data-role="faculty"] .or-top-key-banner {
+  background: linear-gradient(95deg, #450a0a 0%, #7f1d1d 60%, #991b1b 100%);
+  border-left-color: #fde68a;
+}
+
+html[data-theme="dark"] .or-top-key-banner {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-left: 4px solid #fbbf24;
+}
+
+.or-top-key-banner.is-cover-key {
+  background: rgba(15, 23, 42, 0.46);
+  border: 1px solid rgba(253, 230, 138, 0.42);
+  border-left: 4px solid #fbbf24;
+  padding: 0.56cqw 0.95cqw;
+  backdrop-filter: blur(8px);
+}
+
+.or-top-key-pill {
+  flex-shrink: 0;
+  padding: 0.18cqw 0.62cqw;
+  border-radius: 6px;
+  background: rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(253, 230, 138, 0.5);
+  color: #fde68a;
+  font-family: var(--font-display);
+  font-size: clamp(9.2px, 0.92cqw, 13.8px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.or-top-key-text {
+  font-family: var(--font-display);
+  font-size: clamp(11px, 1.15cqw, 17.8px);
+  font-weight: 600;
+  line-height: 1.28;
+  color: #f8fafc;
+}
+
+.or-top-key-text strong {
+  color: #fde68a;
+  font-weight: 800;
+}
+
+/* Full-Height Stretched Card Stacks (Zero Dead Whitespace) */
+.or-stack-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52cqw;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.or-stack-col > .or-card {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Upgraded Lecture-Hall Legible Card & Table Typography */
+.or-slide-canvas .or-card {
+  padding: 0.68cqw 0.95cqw;
+  gap: 0.24cqw;
+}
+
+.or-slide-canvas .or-card-kicker {
+  font-size: clamp(9.2px, 0.94cqw, 13.8px);
+}
+
+.or-slide-canvas .or-card-title {
+  font-size: clamp(12px, 1.28cqw, 19px);
+  line-height: 1.24;
+}
+
+.or-slide-canvas .or-card-text,
+.or-slide-canvas .or-list {
+  font-size: clamp(10.2px, 1.06cqw, 16px);
+  line-height: 1.38;
+}
+
+/* Split Ratios & Full-Space Nano Banana Visual Plates */
 .or-infog-split.is-fig-left {
-  grid-template-columns: 0.94fr 1.06fr;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 0.9cqw;
 }
 
 .or-infog-split.is-fig-left-compact {
-  grid-template-columns: 0.76fr 1.24fr;
+  grid-template-columns: 0.78fr 1.22fr;
+  gap: 0.9cqw;
+}
+
+.or-infog-split.is-fig-left-slim {
+  grid-template-columns: 0.56fr 1.44fr;
+  gap: 0.9cqw;
 }
 
 .or-infog-split.is-fig-right {
   grid-template-columns: 0.92fr 1.08fr;
+  gap: 0.9cqw;
 }
 
 .or-top-fig-stack {
   display: grid;
-  grid-template-rows: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 0.68cqw;
+  grid-template-rows: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 0.62cqw;
   flex: 1;
   min-height: 0;
 }
 
+.or-top-fig-stack.is-banner-top {
+  grid-template-rows: minmax(0, 0.78fr) minmax(0, 1.22fr);
+}
+
 .or-fig-plate {
+  position: relative;
   background: #ffffff;
   border: 1px solid #dbe3ee;
-  border-radius: 11px;
-  padding: 0.55cqw 0.72cqw;
+  border-radius: 12px;
+  padding: 0.36cqw 0.48cqw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.3cqw;
+  gap: 0.22cqw;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+/* Subtle Apple Keynote Living Accent Line on Visual Plates */
+.or-fig-plate::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0072b2, #009e73, #f59e0b, #0072b2);
+  background-size: 220% 100%;
+  animation: orKeyGradientFlow 6s linear infinite;
+  opacity: 0.88;
+  pointer-events: none;
 }
 
 .or-fig-plate.is-cover-hero {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.24);
-  padding: 0.5cqw;
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.36));
+  border-color: rgba(147, 197, 253, 0.36);
+  padding: 0.55cqw;
+  height: 100%;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
 }
 
 .or-fig-img-wrap {
   flex: 1;
   width: 100%;
+  height: 100%;
   min-height: 0;
   display: flex;
   align-items: center;
@@ -33456,8 +33610,8 @@ html[data-theme="dark"] .or-check-item.is-checked {
 .or-fig-img {
   max-width: 100%;
   max-height: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
   border-radius: 7px;
@@ -33467,10 +33621,177 @@ html[data-theme="dark"] .or-check-item.is-checked {
   flex-shrink: 0;
   width: 100%;
   text-align: center;
-  font-size: clamp(8px, 0.82cqw, 11.6px);
-  font-weight: 600;
-  color: #475569;
-  line-height: 1.28;
+  font-size: clamp(8.6px, 0.86cqw, 12.4px);
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.24;
+}
+
+/* Visual-Top Column Card (Slide 12 Full-Height 3 Pillars) */
+.or-visual-pillar-card {
+  display: grid;
+  grid-template-rows: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 0.5cqw;
+  padding: 0.58cqw 0.78cqw !important;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.or-visual-pillar-img-box {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 9px;
+  padding: 0.25cqw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.or-visual-pillar-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Auto-Play Keynote Reel Progress Indicator */
+.or-autoplay-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, #38bdf8, #34d399, #fbbf24);
+  z-index: 15;
+  animation: orAutoPlayBar 9s linear forwards;
+}
+
+@keyframes orAutoPlayBar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Apple Keynote Entrance & Ambient Cinema Animations (Deck Mode Only) */
+@keyframes orKeyStageIn {
+  from { opacity: 0.35; transform: scale(0.986); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes orKeyTitleUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orKeyBannerReveal {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes orKeySheen {
+  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  25% { opacity: 0.55; }
+  100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes orKeyVisualIn {
+  from { opacity: 0; transform: scale(0.955) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes orKeyCinemaFloat {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.018) translateY(-2.5px); }
+}
+
+@keyframes orKeyCardCascade {
+  from { opacity: 0; transform: translateY(13px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orKeyBarGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes orKeyGradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated {
+  animation: orKeyStageIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-sld-title,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-cover-h1 {
+  animation: orKeyTitleUp 440ms cubic-bezier(0.16, 1, 0.3, 1) 30ms both;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-top-key-banner {
+  animation: orKeyBannerReveal 480ms cubic-bezier(0.16, 1, 0.3, 1) 85ms both;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-top-key-banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 32%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  animation: orKeySheen 1.5s cubic-bezier(0.22, 1, 0.36, 1) 260ms 1 both;
+  pointer-events: none;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-fig-plate {
+  animation: orKeyVisualIn 540ms cubic-bezier(0.16, 1, 0.3, 1) 130ms both;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-fig-img {
+  animation: orKeyCinemaFloat 8.5s ease-in-out 720ms infinite;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-schematic-box,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-inspector-box,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-cover-kpi,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-table-wrap {
+  animation: orKeyCardCascade 480ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card:nth-child(2),
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-cover-kpi:nth-child(2) {
+  animation-delay: 215ms;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card:nth-child(3),
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-cover-kpi:nth-child(3) {
+  animation-delay: 270ms;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card:nth-child(4),
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-cover-kpi:nth-child(4) {
+  animation-delay: 325ms;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card:nth-child(5) {
+  animation-delay: 380ms;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-card:nth-child(6) {
+  animation-delay: 435ms;
+}
+
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-stat-bar-fill {
+  transform-origin: left center;
+  animation: orKeyBarGrow 900ms cubic-bezier(0.22, 1, 0.36, 1) 280ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .or-slide-canvas.is-keynote-animated,
+  .or-slide-canvas.is-keynote-animated * {
+    animation: none !important;
+  }
 }
 
 /* Mobile Graceful Unlocked Height */
@@ -33497,11 +33818,18 @@ html[data-theme="dark"] .or-check-item.is-checked {
     max-height: none;
   }
   .or-sld-inner {
-    padding: 16px;
-    gap: 12px;
+    padding: 16px !important;
+    gap: 12px !important;
     overflow: visible;
   }
-  .or-top-fig-stack {
+  .or-top-key-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .or-top-fig-stack,
+  .or-top-fig-stack.is-banner-top,
+  .or-visual-pillar-card {
     grid-template-rows: auto auto;
   }
   .or-cover-split,
@@ -33513,6 +33841,7 @@ html[data-theme="dark"] .or-check-item.is-checked {
   .or-infog-split.is-map-left,
   .or-infog-split.is-fig-left,
   .or-infog-split.is-fig-left-compact,
+  .or-infog-split.is-fig-left-slim,
   .or-infog-split.is-fig-right,
   .or-grid-2,
   .or-grid-2-asym,
@@ -33523,10 +33852,6 @@ html[data-theme="dark"] .or-check-item.is-checked {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  .or-story-ribbon {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
   .or-table-wrap {
     overflow-x: auto;
   }
@@ -33535,7 +33860,14 @@ html[data-theme="dark"] .or-check-item.is-checked {
   }
 }
 
-/* Crisp Widescreen 16:9 Print Rules */
+/* Crisp Widescreen 16:9 Print & Handout Rules (Instant Final State, Zero Animation Lag) */
+.or-handout-stack .or-slide-canvas,
+.or-handout-stack .or-slide-canvas * {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @media print {
   body.is-printing-orientation-deck > *:not(#orientationDeckModal) {
     display: none !important;
@@ -33567,6 +33899,12 @@ html[data-theme="dark"] .or-check-item.is-checked {
   body.is-printing-orientation-deck .or-handout-stack {
     width: 100% !important;
     gap: 0 !important;
+  }
+  body.is-printing-orientation-deck .or-slide-canvas,
+  body.is-printing-orientation-deck .or-slide-canvas * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   body.is-printing-orientation-deck .or-slide-canvas {
     width: 100% !important;
