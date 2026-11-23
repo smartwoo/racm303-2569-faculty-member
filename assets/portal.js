@@ -129,7 +129,9 @@
     inspectedPdfBytes: null,
     inspectedPdfOrigName: "",
     manualChapterId: "ALL",
-    activeDocId: "HS1",
+    activeDocId: "HS1-CONCISE",
+    activeHsModule: "HS1",
+    preferredHsFormat: "concise",
     activeFacultyDocId: "hs-disc-teacher-key",
     readerFontPx: Number(localStorage.getItem("racm303_font_px")) || 16.5,
     readerViewMode: "scroll", // scroll | deck | sorter
@@ -9724,8 +9726,203 @@
   }
 
   /* ---------- Tab 4: HS1–HS6 Guided Learning Textbooks, Concise Summaries & Workbooks ---------- */
+  function parseHsDocInfo(docId) {
+    const raw = String(docId || "HS1-CONCISE").trim();
+    const m = raw.match(/^(HS[1-6])/i);
+    const modCode = m ? m[1].toUpperCase() : "HS1";
+    const format = /-CONCISE$/i.test(raw) ? "concise" : /-WB$/i.test(raw) ? "wb" : "full";
+    return { modCode, format };
+  }
+
+  function getHsModuleMeta(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    const found = (HSD_DATA.modules || []).find((m) => m.id === clean);
+    if (found) return found;
+    const docs = HS.docs || [];
+    const baseDoc = docs.find((d) => d.code === clean) || docs[0] || {};
+    return {
+      id: clean,
+      code: clean,
+      title: baseDoc.title || clean,
+      scheduleDate: "",
+      discTime: "",
+      examWeight: "",
+      summaryFocus: baseDoc.subtitle || "",
+      docId: clean,
+      conciseDocId: `${clean}-CONCISE`,
+      wbDocId: docs.some((d) => d.id === `${clean}-WB`) ? `${clean}-WB` : ""
+    };
+  }
+
+  function resolveDocIdForModuleAndFormat(modCode, format) {
+    const mod = getHsModuleMeta(modCode);
+    if (format === "concise" && mod.conciseDocId) return mod.conciseDocId;
+    if (format === "wb") return mod.wbDocId || mod.conciseDocId || mod.docId || mod.code;
+    return mod.docId || mod.conciseDocId || mod.code;
+  }
+
+  function switchTextbookModulePreservingFormat(modCode) {
+    const clean = /^HS[1-6]$/i.test(String(modCode || "")) ? String(modCode).toUpperCase() : "HS1";
+    state.activeHsModule = clean;
+    state.activeDocId = resolveDocIdForModuleAndFormat(clean, state.preferredHsFormat || "concise");
+    renderTextbookReader();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function buildUnifiedHsModuleBanner(modCode, activeFormat, opts) {
+    const options = opts || {};
+    const isAllActive = Boolean(options.isAllActive);
+    const mod = getHsModuleMeta(modCode || state.activeHsModule || "HS1");
+
+    const banner = make(
+      "div",
+      null,
+      `hsd-module-banner is-unified-hs-banner hsd-no-print${options.compact ? " is-compact-slide-banner" : ""}`
+    );
+
+    if (options.showModuleBar) {
+      const strip = make("div", null, "hs-unified-mod-strip");
+      strip.setAttribute("role", "group");
+      strip.setAttribute("aria-label", "เลือกบทเรียน HS1–HS6");
+      strip.appendChild(make("span", "เลือกบทเรียน:", "hs-unified-mod-label"));
+
+      if (options.allowAllModules) {
+        const allPill = make("button", "ครบทุกบท (HS1–HS6)", "hs-unified-mod-pill");
+        allPill.type = "button";
+        allPill.setAttribute("aria-pressed", isAllActive ? "true" : "false");
+        allPill.addEventListener("click", () => {
+          if (typeof options.onSelectModule === "function") options.onSelectModule("");
+        });
+        strip.appendChild(allPill);
+      }
+
+      (HSD_DATA.modules || []).forEach((m) => {
+        const pBtn = make("button", m.code, "hs-unified-mod-pill");
+        pBtn.type = "button";
+        pBtn.title = `${m.code}: ${m.title}`;
+        pBtn.setAttribute("aria-pressed", !isAllActive && m.id === mod.code ? "true" : "false");
+        pBtn.addEventListener("click", () => {
+          state.activeHsModule = m.id;
+          if (typeof options.onSelectModule === "function") {
+            options.onSelectModule(m.id);
+          }
+        });
+        strip.appendChild(pBtn);
+      });
+
+      banner.appendChild(strip);
+    }
+
+    const infoWrap = make("div", null, "hsd-banner-info");
+    if (isAllActive) {
+      infoWrap.append(
+        make("h3", "HS1–HS6: คลังทบทวนรวมครบทุกบทเรียนระบบสุขภาพ"),
+        make(
+          "p",
+          `กำลังแสดงรวมครบทุกบท — เลือกปุ่ม HS1–HS6 ด้านบนเพื่อเจาะจงรายบท หรือสลับไปยังรูปแบบสื่อการเรียนรู้ของ ${mod.code} ด้านล่างได้ทันที`
+        )
+      );
+    } else {
+      const subParts = [];
+      if (mod.scheduleDate) subParts.push(mod.scheduleDate);
+      if (mod.discTime) {
+        subParts.push(
+          `อภิปรายกลุ่มย่อย ${mod.discTime}${mod.examWeight ? ` (น้ำหนัก ${mod.examWeight})` : ""}`
+        );
+      }
+      const prefixStr = subParts.join(" · ");
+      const fullDesc =
+        prefixStr && mod.summaryFocus
+          ? `${prefixStr} — ${mod.summaryFocus}`
+          : prefixStr || mod.summaryFocus || "";
+      infoWrap.append(make("h3", `${mod.code}: ${mod.title}`), make("p", fullDesc));
+    }
+    banner.appendChild(infoWrap);
+
+    const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
+    tabsRow.setAttribute("role", "tablist");
+    tabsRow.setAttribute("aria-label", `สลับรูปแบบเอกสารและกิจกรรมของ ${mod.code}`);
+
+    const makeTabBtn = (label, kind, available, onClick, disabledTitle) => {
+      const isAct = !isAllActive && available && activeFormat === kind;
+      const cls = !available
+        ? "btn sm is-disabled-hs-tab"
+        : isAct
+        ? "btn sm teal is-active-hs-tab"
+        : "btn sm";
+      const b = make("button", label, cls);
+      b.type = "button";
+      if (!available) {
+        b.disabled = true;
+        b.setAttribute("aria-disabled", "true");
+        if (disabledTitle) b.title = disabledTitle;
+      } else {
+        b.setAttribute("aria-selected", isAct ? "true" : "false");
+        if (isAct) b.setAttribute("aria-current", "page");
+        b.addEventListener("click", onClick);
+      }
+      return b;
+    };
+
+    tabsRow.appendChild(
+      makeTabBtn(`ฉบับย่อ (${mod.code})`, "concise", Boolean(mod.conciseDocId), () => {
+        state.preferredHsFormat = "concise";
+        openTextbookDoc(mod.conciseDocId);
+      })
+    );
+
+    tabsRow.appendChild(
+      makeTabBtn(`ฉบับเต็ม (${mod.code})`, "full", Boolean(mod.docId), () => {
+        state.preferredHsFormat = "full";
+        openTextbookDoc(mod.docId);
+      })
+    );
+
+    tabsRow.appendChild(
+      makeTabBtn(
+        `Worksheet (${mod.code})`,
+        "wb",
+        Boolean(mod.wbDocId),
+        () => {
+          state.preferredHsFormat = "wb";
+          openTextbookDoc(mod.wbDocId);
+        },
+        `บทเรียน ${mod.code} ไม่มีสมุด Worksheet แยกต่างหาก — สามารถทำโจทย์ในแท็บโจทย์อภิปรายหรือคำศัพท์ & โจทย์ได้ทันที`
+      )
+    );
+
+    tabsRow.appendChild(
+      makeTabBtn(
+        `${ROLE === "faculty" ? "โจทย์อภิปราย & เฉลย" : "โจทย์อภิปราย"} (${mod.code})`,
+        "discussion",
+        true,
+        () => {
+          state.activeHsModule = mod.code;
+          openHsDiscussion(mod.code);
+        }
+      )
+    );
+
+    tabsRow.appendChild(
+      makeTabBtn(`คำศัพท์ & โจทย์ (${mod.code})`, "practice", true, () => {
+        state.activeHsModule = mod.code;
+        if ($("practiceModuleFilter")) $("practiceModuleFilter").value = mod.code;
+        switchTab("practice");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })
+    );
+
+    banner.appendChild(tabsRow);
+    return banner;
+  }
+
   function openTextbookDoc(docId) {
-    state.activeDocId = docId;
+    if (docId) {
+      state.activeDocId = docId;
+      const parsed = parseHsDocInfo(docId);
+      state.activeHsModule = parsed.modCode;
+      state.preferredHsFormat = parsed.format;
+    }
     switchTab("textbooks");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -9770,20 +9967,30 @@
     const pdfBtn = $("exportTextbookPdfBtn");
     const docxBtn = $("exportTextbookDocxBtn");
     const jumpHsdBtn = $("jumpTextbookToHsDiscBtn");
+    const bannerWrap = $("textbookUnifiedBannerWrap");
     if (!picker || !prose) return;
 
     const docs = HS.docs || [];
+    const current = docs.find((d) => d.id === state.activeDocId) || docs[0];
+    if (!current) return;
+
+    const parsed = parseHsDocInfo(current.id);
+    const baseMod = parsed.modCode;
+    const curFormat = parsed.format;
+    state.activeHsModule = baseMod;
+
     if (!picker.dataset.rendered) {
       picker.dataset.rendered = "1";
-      docs.forEach((doc) => {
+      const modList = HSD_DATA.modules && HSD_DATA.modules.length
+        ? HSD_DATA.modules
+        : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
+      modList.forEach((modItem) => {
         const li = document.createElement("li");
-        const btn = make("button", `${doc.badge} · ${doc.title}`, "doc-picker-btn");
+        const btn = make("button", `${modItem.code} · ${modItem.title}`, "doc-picker-btn");
         btn.type = "button";
-        btn.dataset.docId = doc.id;
+        btn.dataset.modCode = modItem.id;
         btn.addEventListener("click", () => {
-          state.activeDocId = doc.id;
-          renderTextbookReader();
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          switchTextbookModulePreservingFormat(modItem.id);
         });
         li.appendChild(btn);
         picker.appendChild(li);
@@ -9791,15 +9998,19 @@
     }
 
     picker.querySelectorAll(".doc-picker-btn").forEach((b) => {
-      b.setAttribute("aria-current", b.dataset.docId === state.activeDocId ? "true" : "false");
+      b.setAttribute("aria-current", b.dataset.modCode === baseMod ? "true" : "false");
     });
 
-    const current = docs.find((d) => d.id === state.activeDocId) || docs[0];
-    if (!current) return;
+    if (bannerWrap) {
+      bannerWrap.replaceChildren(
+        buildUnifiedHsModuleBanner(baseMod, curFormat, {
+          showModuleBar: true,
+          onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
+        })
+      );
+    }
 
     if (jumpHsdBtn) {
-      const m = String(current.id || "HS1").match(/^HS[1-6]/i);
-      const baseMod = m ? m[0].toUpperCase() : "HS1";
       jumpHsdBtn.textContent =
         ROLE === "faculty" ? `💬 สไลด์โจทย์ & เฉลย ${baseMod} →` : `💬 โจทย์อภิปราย ${baseMod} →`;
     }
@@ -9829,7 +10040,7 @@
     attachProseEnhancements(prose, toc);
   }
 
-  /* ---------- Tab 5: Rapid Review, 111 Flashcards & 82 Self-Check Q&A ---------- */
+  /* ---------- Tab 5: Rapid Review, 111 Flashcards & 60 Self-Check Q&A ---------- */
   function initPracticeControls() {
     document.querySelectorAll("[data-practice-sub]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -9905,6 +10116,24 @@
   }
 
   function renderPracticeCurrent() {
+    const selectedMod = ($("practiceModuleFilter") && $("practiceModuleFilter").value) || "";
+    if (selectedMod) state.activeHsModule = selectedMod;
+    const practiceBannerWrap = $("practiceUnifiedBannerWrap");
+    if (practiceBannerWrap) {
+      practiceBannerWrap.replaceChildren(
+        buildUnifiedHsModuleBanner(selectedMod || state.activeHsModule || "HS1", "practice", {
+          showModuleBar: true,
+          allowAllModules: true,
+          isAllActive: !selectedMod,
+          onSelectModule: (m) => {
+            if ($("practiceModuleFilter")) $("practiceModuleFilter").value = m || "";
+            if (m) state.activeHsModule = m;
+            renderPracticeCurrent();
+          }
+        })
+      );
+    }
+
     $("practiceRapidWrap").hidden = state.practiceSub !== "rapid";
     $("practiceFlashcardsWrap").hidden = state.practiceSub !== "flashcards";
     $("practiceQaWrap").hidden = state.practiceSub !== "qa";
@@ -16671,6 +16900,17 @@
     const { slides, cur } = getActiveSlideDeckContext();
     if (!slides.length || !cur) return;
     const layout = getEffectiveHsdSlideLayout(cur);
+    state.activeHsModule = cur.mod.id;
+
+    if (!state.hsdPptWindowMax) {
+      container.appendChild(
+        buildUnifiedHsModuleBanner(cur.mod.id, "discussion", {
+          showModuleBar: true,
+          compact: true,
+          onSelectModule: (m) => selectHsSessionDeck(m)
+        })
+      );
+    }
 
     // Broadcast active question ID & split orientation (student-safe) when Faculty changes slide
     if (LIVE && ROLE === "faculty") {
@@ -17125,35 +17365,7 @@
     activeModules.forEach((mod) => {
       const modSec = make("section", null, "hsd-module-section");
       modSec.id = `hsd-sec-${mod.id}`;
-
-      const banner = make("div", null, "hsd-module-banner");
-      const bLeft = make("div");
-      bLeft.append(
-        make("h3", `${mod.code}: ${mod.title}`),
-        make("p", `${mod.scheduleDate} · อภิปรายกลุ่มย่อย ${mod.discTime} (น้ำหนัก ${mod.examWeight}) — ${mod.summaryFocus}`)
-      );
-
-      const bRight = make("div", null, "header-actions hsd-no-print");
-      if (mod.conciseDocId) {
-        const bc = make("button", `ฉบับย่อ (${mod.code})`, "btn sm teal");
-        bc.type = "button";
-        bc.addEventListener("click", () => openTextbookDoc(mod.conciseDocId));
-        bRight.appendChild(bc);
-      }
-      if (mod.docId) {
-        const bd = make("button", `ฉบับเต็ม (${mod.code})`, "btn sm");
-        bd.type = "button";
-        bd.addEventListener("click", () => openTextbookDoc(mod.docId));
-        bRight.appendChild(bd);
-      }
-      if (mod.wbDocId) {
-        const bw = make("button", `Worksheet (${mod.code})`, "btn sm");
-        bw.type = "button";
-        bw.addEventListener("click", () => openTextbookDoc(mod.wbDocId));
-        bRight.appendChild(bw);
-      }
-      banner.append(bLeft, bRight);
-      modSec.appendChild(banner);
+      modSec.appendChild(buildUnifiedHsModuleBanner(mod.id, "discussion"));
 
       if (ROLE === "faculty" && state.hsdFacultyMode === "teacher" && typeof appendFacultyFacilitationPlan === "function") {
         appendFacultyFacilitationPlan(modSec, mod.id);
@@ -19292,7 +19504,8 @@
     if (!container || !session || session.category === "HOLIDAY") return;
     const docInfo = resolveSessionTeachingDoc(session);
     if (session.conciseLink && session.docLink) {
-      const bConcise = make("button", `📘 ฉบับย่อ (${session.hsModule || session.docLink})`, "btn sm teal");
+      const mCode = session.hsModule || session.docLink;
+      const bConcise = make("button", `ฉบับย่อ (${mCode})`, "btn sm teal");
       bConcise.type = "button";
       bConcise.addEventListener("click", () => {
         if (closeModalFirst) closeEventModal();
@@ -19300,7 +19513,7 @@
       });
       container.appendChild(bConcise);
 
-      const bFull = make("button", `📘 เอกสารคำสอน ${session.docLink}`, "btn sm");
+      const bFull = make("button", `ฉบับเต็ม (${mCode})`, "btn sm");
       bFull.type = "button";
       bFull.addEventListener("click", () => {
         if (closeModalFirst) closeEventModal();
@@ -19308,15 +19521,18 @@
       });
       container.appendChild(bFull);
 
+      const bWb = make("button", `Worksheet (${mCode})`, session.wbLink ? "btn sm" : "btn sm is-disabled-hs-tab");
+      bWb.type = "button";
       if (session.wbLink) {
-        const bWb = make("button", `Worksheet (${session.wbLink.replace("-WB", "")})`, "btn sm");
-        bWb.type = "button";
         bWb.addEventListener("click", () => {
           if (closeModalFirst) closeEventModal();
           openTextbookDoc(session.wbLink);
         });
-        container.appendChild(bWb);
+      } else {
+        bWb.disabled = true;
+        bWb.title = `บทเรียน ${mCode} ไม่มีสมุด Worksheet แยกต่างหาก`;
       }
+      container.appendChild(bWb);
     } else if (docInfo) {
       const bDoc = make("button", docInfo.fullLabel, "btn sm teal");
       bDoc.type = "button";
@@ -25372,7 +25588,7 @@
       "faculty-docs": `Instructor Guide & Sources`,
       manual: `Course Manual <span class="tab-count">17 Ch</span>`,
       textbooks: `Health Systems Study <span class="tab-count">HS1–HS6</span>`,
-      practice: `Flashcards & Practice <span class="tab-count">82 Qs</span>`
+      practice: `Flashcards & Practice <span class="tab-count">60 Qs</span>`
     };
     Object.keys(tabMap).forEach((tKey) => {
       const btn = document.querySelector(`.nav-tab[data-tab="${tKey}"]`);
@@ -25666,11 +25882,7 @@
     getState: () => state,
     switchTab,
     openHsDiscussion,
-    openTextbookDoc: (docId) => {
-      if (docId) state.activeDocId = docId;
-      switchTab("textbooks");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    },
+    openTextbookDoc: (docId) => openTextbookDoc(docId),
     openFacultyDoc: (docId) => {
       if (docId) state.activeFacultyDocId = docId;
       state.facultySub = "guides";
