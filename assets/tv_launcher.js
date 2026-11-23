@@ -3684,6 +3684,31 @@
     syncProfilePill();
     initTvRemoteNavigation();
 
+    try {
+      const urlP = new URLSearchParams(window.location.search);
+      const upParam = urlP.get("upload");
+      const driveParam = urlP.get("drive");
+      if (driveParam) {
+        if (driveParam.toUpperCase() === "ST1" || /^HS[1-6]$/i.test(driveParam)) {
+          openCourseDriveAtPath(["health-systems", driveParam.toUpperCase()]);
+        } else {
+          openCourseDriveAtPath(["health-systems"]);
+        }
+      } else if (upParam) {
+        const upMap = {
+          ST1: "w1-d1-st",
+          HS1: "w1-d2-hs1",
+          HS2: "w2-d1-hs2",
+          HS3: "w2-d1-hs3",
+          HS4: "w2-d2-hs4",
+          HS5: "w2-d2-hs5",
+          HS6: "w3-d1-hs6"
+        };
+        const targetSid = upMap[String(upParam).toUpperCase()] || (upParam === "1" ? "w1-d1-st" : upParam);
+        setTimeout(() => openGlobalUploadModal(targetSid), 80);
+      }
+    } catch (_) {}
+
     window.addEventListener("racm:tabchange", () => {
       syncViewModeSwitchUI();
       syncSubpageBar();

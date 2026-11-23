@@ -35301,6 +35301,33 @@
       return;
     }
 
+    if (params.get("doc")) {
+      openTextbookDoc(params.get("doc"));
+      return;
+    }
+
+    if (params.get("slides")) {
+      openHsLectureSlides(params.get("slides"));
+      return;
+    }
+
+    if (params.get("hub")) {
+      openTextbookDriveFolder(params.get("hub"));
+      return;
+    }
+
+    if (params.get("quiz")) {
+      openSelfQuizForModule(params.get("quiz"), params.get("sub") || "qa");
+      return;
+    }
+
+    if (ROLE === "faculty" && params.get("guide") && typeof openFacultyDoc === "function") {
+      state.activeFacultyDocId = params.get("guide");
+      state.facultySub = "guides";
+      switchTab("faculty-docs", false);
+      return;
+    }
+
     if (params.get("page") === "systems-forum" || params.get("page") === "beyond-exam") {
       openSystemsForum(params.get("session") || "");
       return;
