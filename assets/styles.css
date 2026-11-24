@@ -7374,15 +7374,24 @@ button.ghost-link {
 }
 
 .cal-mat-btn.is-slide-ready,
+.btn.slide-ready-btn,
 .slide-ready-btn {
-  background: linear-gradient(135deg, #0d9488, #0f766e);
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
   color: #ffffff !important;
   border: 1px solid #0f766e;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.22);
 }
 
 .cal-mat-btn.is-slide-ready:hover,
-.slide-ready-btn:hover {
-  filter: brightness(1.06);
+.cal-mat-btn.is-slide-ready:focus-visible,
+.btn.slide-ready-btn:hover,
+.btn.slide-ready-btn:focus-visible,
+.slide-ready-btn:hover,
+.slide-ready-btn:focus-visible {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+  border-color: #115e59;
+  color: #ffffff !important;
+  filter: none;
 }
 
 .cal-mat-btn.is-disabled-slide {
@@ -11757,14 +11766,15 @@ html[data-theme="dark"] textarea {
   border-color: rgba(148, 163, 184, 0.28);
 }
 
-html[data-theme="dark"] .btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.print-ink):not(.cal-ics-btn):not(.cal-gcal-btn) {
+html[data-theme="dark"] .btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.print-ink):not(.cal-ics-btn):not(.cal-gcal-btn):not(.slide-ready-btn):not(.ghost-teal):not(.ghost-danger) {
   background: #17253b;
   color: #e2e8f0;
   border-color: rgba(148, 163, 184, 0.28);
 }
 
-html[data-theme="dark"] .btn:not(.primary):not(.teal):hover {
+html[data-theme="dark"] .btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.print-ink):not(.cal-ics-btn):not(.cal-gcal-btn):not(.slide-ready-btn):not(.ghost-teal):not(.ghost-danger):hover {
   background: #1f324f;
+  color: #f8fafc;
 }
 
 html[data-theme="dark"] .filter-panel,
@@ -14954,10 +14964,15 @@ html[data-theme="dark"] button.cal-scope-tab[aria-selected="true"] {
   color: #ffffff !important;
 }
 
-html[data-theme="dark"] a.btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.cal-ics-btn):not(.cal-gcal-btn) {
+html[data-theme="dark"] a.btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.print-ink):not(.cal-ics-btn):not(.cal-gcal-btn):not(.slide-ready-btn):not(.ghost-teal):not(.ghost-danger) {
   background: #17253b !important;
   color: #e2e8f0 !important;
   border-color: rgba(148, 163, 184, 0.28) !important;
+}
+
+html[data-theme="dark"] a.btn:not(.primary):not(.teal):not(.pdf-red):not(.docx-blue):not(.xlsx-green):not(.print-ink):not(.cal-ics-btn):not(.cal-gcal-btn):not(.slide-ready-btn):not(.ghost-teal):not(.ghost-danger):hover {
+  background: #1f324f !important;
+  color: #f8fafc !important;
 }
 
 /* ==========================================================================
