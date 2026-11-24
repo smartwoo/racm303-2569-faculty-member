@@ -117,7 +117,7 @@ window.RACM_HS_DISCUSSION_DATA = {
       "frameworks": [
         "กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health Framework)",
         "ความเชื่อมโยงและพลวัตของปัจจัย 3 กลุ่ม (ปัจเจก · สังคมและสิ่งแวดล้อม · ระบบบริการสุขภาพ)",
-        "ปัจจัยเชิงโครงสร้างต้นน้ำและปัจจัยตัวกลาง (Structural & Intermediary Determinants)"
+        "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพและปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Structural & Intermediary Determinants)"
       ],
       "scenarioBlocks": [
         {
@@ -145,13 +145,13 @@ window.RACM_HS_DISCUSSION_DATA = {
           "headingLabel": "คำถามข้อที่ 1",
           "enHeadingLabel": "Question 1",
           "title": "การประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health) สร้างเป็นแผนภาพความเชื่อมโยง (Diagram)",
-          "prompt": "จากสถานการณ์ของเด็กชายโมโน จงลองฝึกใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health Framework) วิเคราะห์และสร้างเป็นแผนภาพความเชื่อมโยง (Diagram) โดยระบุ (1) ภาวะ/ปัญหาสุขภาพหลักตรงกลางแผนภาพ (2) ปัจจัยกำหนดสุขภาพในแต่ละหมวด (ปัจจัยด้านปัจเจก, ปัจจัยด้านสังคมและสิ่งแวดล้อม, ระบบบริการสุขภาพ และปัจจัยด้านโครงสร้าง) พร้อมข้อมูลสนับสนุนจากสถานการณ์ และ (3) ทิศทางลูกศรความสัมพันธ์และวงล้อมเชิงระบบระหว่างองค์ประกอบต่าง ๆ",
+          "prompt": "จากสถานการณ์ของเด็กชายโมโน จงลองฝึกใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health Framework) วิเคราะห์และสร้างเป็นแผนภาพความเชื่อมโยง (Diagram) โดยระบุ (1) ภาวะ/ปัญหาสุขภาพหลักตรงกลางแผนภาพ (2) ปัจจัยกำหนดสุขภาพในแต่ละหมวด (ปัจจัยด้านปัจเจก, ปัจจัยด้านสังคมและสิ่งแวดล้อม, ระบบบริการสุขภาพ และปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ) พร้อมข้อมูลสนับสนุนจากสถานการณ์ และ (3) ทิศทางลูกศรความสัมพันธ์และวงล้อมเชิงระบบระหว่างองค์ประกอบต่าง ๆ",
           "worksheet": {
             "type": "doh-diagram",
             "diagramMeta": {
               "linksInputId": "c1b_q1_links",
-              "outerRingLabel": "วงล้อมชั้นนอก: ปัจจัยด้านโครงสร้างต้นน้ำ (Structural Determinants)",
-              "innerRingLabel": "วงล้อมชั้นใน: พลวัตปัจจัยระดับใกล้ตัวและระบบบริการ (Intermediary & System Determinants)",
+              "outerRingLabel": "วงล้อมชั้นนอก: ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants)",
+              "innerRingLabel": "วงล้อมชั้นใน: ปัจจัยทางสังคมที่มีผลต่อสุขภาพและระบบบริการ (Intermediary & System Determinants)",
               "nodes": {
                 "outcome": {
                   "inputId": "c1b_q1_outcome",
@@ -179,7 +179,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                 },
                 "structural": {
                   "inputId": "c1b_q1_structural",
-                  "title": "ปัจจัยด้านโครงสร้าง",
+                  "title": "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
                   "enTitle": "Structural Determinants",
                   "placeholder": "ระบุนโยบายรัฐ/ท้องถิ่น ผังเมือง อาหาร โรงเรียน เศรษฐกิจ ค่านิยม/โฆษณา…"
                 }
@@ -262,16 +262,16 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "r4",
                 "cells": [
                   {
-                    "static": "4. ปัจจัยด้านโครงสร้าง (Structural determinants)"
+                    "static": "4. ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural determinants)"
                   },
                   {
                     "inputId": "c1b_q1_structural",
-                    "placeholder": "ระบุปัจจัยเชิงโครงสร้าง เช่น การกระจายอำนาจ นโยบายอาหาร ผังเมือง โรงเรียนสร้างเสริมสุขภาพ ค่านิยม/โฆษณา…",
+                    "placeholder": "ระบุปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ เช่น การกระจายอำนาจ นโยบายอาหาร ผังเมือง โรงเรียนสร้างเสริมสุขภาพ ค่านิยม/โฆษณา…",
                     "compact": false,
                     "maxWords": 65,
                     "maxChars": 320,
                     "maxLines": 5,
-                    "a4BoxLabel": "วงล้อมปัจจัยด้านโครงสร้าง (≤65 คำ)"
+                    "a4BoxLabel": "วงล้อมปัจจัยเชิงโครงสร้างฯ (≤65 คำ)"
                   }
                 ]
               },
@@ -317,17 +317,17 @@ window.RACM_HS_DISCUSSION_DATA = {
               "studentBadge": "Key Takeaway #1 · Framework Diagram",
               "shortLabel": "⑤ Framework #1",
               "studentShortLabel": "Framework #1",
-              "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างต้นน้ำ",
+              "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
               "enTitle": "Synthesized Determinants of Health Framework with Structural Determinants",
               "sourceNote": "Synthesized from Wibulpolprasert et al. (2011) & Solar & Irwin / WHO CSDH (2010)",
               "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=3",
               "imageAlt": "Synthesized Determinants of Health Framework with Outer Structural Determinants Ring, Health System Structure/Attributes, and Physician Roles",
-              "caption": "วงล้อม Structural Determinants กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)"
+              "caption": "วงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)"
             },
             "coreTerm": "“แผนภาพปัจจัยกำหนดสุขภาพเชิงระบบ”",
             "coreDefinitionLead": "เชื่อมโยงปฏิสัมพันธ์สองทางของปัจจัยด้านปัจเจก สังคมสิ่งแวดล้อม และระบบบริการสุขภาพที่ส่งผลต่อปัญหาสุขภาพตรงกลาง",
-            "coreDefinitionQualifier": "ภายใต้กรอบวงล้อมของปัจจัยเชิงโครงสร้างต้นน้ำที่กำหนดทางเลือกและโอกาสทางสุขภาพของประชากร",
-            "coreDefinition": "เชื่อมโยงปฏิสัมพันธ์สองทางของปัจจัยด้านปัจเจก สังคมสิ่งแวดล้อม และระบบบริการสุขภาพที่ส่งผลต่อปัญหาสุขภาพตรงกลาง ภายใต้กรอบวงล้อมของปัจจัยเชิงโครงสร้างต้นน้ำที่กำหนดทางเลือกและโอกาสทางสุขภาพของประชากร",
+            "coreDefinitionQualifier": "ภายใต้กรอบวงล้อมของปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพที่กำหนดทางเลือกและโอกาสทางสุขภาพของประชากร",
+            "coreDefinition": "เชื่อมโยงปฏิสัมพันธ์สองทางของปัจจัยด้านปัจเจก สังคมสิ่งแวดล้อม และระบบบริการสุขภาพที่ส่งผลต่อปัญหาสุขภาพตรงกลาง ภายใต้กรอบวงล้อมของปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพที่กำหนดทางเลือกและโอกาสทางสุขภาพของประชากร",
             "dimensions": [
               {
                 "num": "01",
@@ -352,7 +352,7 @@ window.RACM_HS_DISCUSSION_DATA = {
               },
               {
                 "num": "04",
-                "thTitle": "ปัจจัยด้านโครงสร้างต้นน้ำ",
+                "thTitle": "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
                 "enTitle": "Structural Determinants",
                 "definition": "การกระจายอำนาจ นโยบายอาหารปลอดภัย ผังเมืองพื้นที่สาธารณะ โรงเรียนสร้างเสริมสุขภาพ ค่านิยมและโฆษณา",
                 "anchor": "เป็นวงล้อมชั้นนอกที่กำหนดว่าทำไมสภาพแวดล้อมและโอกาสสุขภาพในชีวิตประจำวันจึงเป็นเช่นนั้น"
@@ -376,7 +376,7 @@ window.RACM_HS_DISCUSSION_DATA = {
       "frameworks": [
         "ระดับของการป้องกันโรค (Levels of Disease Prevention — Secondary Prevention / Early Detection)",
         "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (Conceptual Framework for Action on the Social Determinants of Health: WHO CSDH)",
-        "การจำแนกปัจจัยเชิงโครงสร้าง (Structural Determinants) และปัจจัยทางสังคม/ตัวกลาง (Social / Intermediary Determinants)"
+        "การจำแนกปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) และปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary Determinants)"
       ],
       "scenarioBlocks": [
         {
@@ -519,16 +519,16 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "r1",
                 "cells": [
                   {
-                    "static": "1. ปัจจัยเชิงโครงสร้าง (Structural determinants)"
+                    "static": "1. ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural determinants)"
                   },
                   {
                     "inputId": "c1_anc_q2_structural",
-                    "placeholder": "ระบุปัจจัยระดับโครงสร้าง เช่น ระบบการศึกษา ลักษณะการประกอบอาชีพนอกระบบ ประเด็นทางการเมือง/การปราบปรามยาเสพติด และความเชื่อ/ค่านิยมในการทำงาน…",
+                    "placeholder": "ระบุปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ เช่น ระบบการศึกษา ลักษณะการประกอบอาชีพนอกระบบ ประเด็นทางการเมือง/การปราบปรามยาเสพติด และความเชื่อ/ค่านิยมในการทำงาน…",
                     "compact": false,
                     "maxWords": 70,
                     "maxChars": 360,
                     "maxLines": 5,
-                    "a4BoxLabel": "หมวดปัจจัยเชิงโครงสร้าง (≤70 คำ)"
+                    "a4BoxLabel": "ปัจจัยเชิงโครงสร้างฯ (≤70 คำ)"
                   }
                 ]
               },
@@ -536,23 +536,23 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "r2",
                 "cells": [
                   {
-                    "static": "2. ปัจจัยทางสังคม / ปัจจัยตัวกลาง (Social / Intermediary determinants)"
+                    "static": "2. ปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary determinants)"
                   },
                   {
                     "inputId": "c1_anc_q2_social",
-                    "placeholder": "ระบุปัจจัยทางสังคมและบริบทใกล้ตัว เช่น คนใกล้ตัว/ครอบครัว ช่วงอายุการตั้งครรภ์วัยรุ่น (teenage pregnancy) และความไม่มั่นคงของการไม่มีงานประจำ…",
+                    "placeholder": "ระบุปัจจัยทางสังคมที่มีผลต่อสุขภาพ เช่น คนใกล้ตัว/ครอบครัว ช่วงอายุการตั้งครรภ์วัยรุ่น (teenage pregnancy) และความไม่มั่นคงของการไม่มีงานประจำ…",
                     "compact": false,
                     "maxWords": 70,
                     "maxChars": 360,
                     "maxLines": 5,
-                    "a4BoxLabel": "หมวดปัจจัยทางสังคม (≤70 คำ)"
+                    "a4BoxLabel": "ปัจจัยทางสังคมที่มีผลต่อสุขภาพ (≤70 คำ)"
                   }
                 ]
               }
             ],
             "colWidths": [
-              "26%",
-              "74%"
+              "30%",
+              "70%"
             ]
           },
           "conceptSummarySlide": {
@@ -564,19 +564,19 @@ window.RACM_HS_DISCUSSION_DATA = {
             "studentShortLabel": "Key Takeaway #3",
             "kicker": "Key Takeaway #3",
             "title": "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (WHO CSDH Conceptual Framework)",
-            "enTitle": "Structural & Social Determinants of Health",
+            "enTitle": "Structural & Intermediary Determinants of Health",
             "sourceNote": "Solar & Irwin / WHO Commission on Social Determinants of Health (2010)",
             "coreTerm": "“กรอบแนวคิด WHO CSDH”",
-            "coreDefinitionLead": "แยกแยะกลไกต้นน้ำระดับโครงสร้างสังคม เศรษฐกิจ การเมือง และค่านิยม ที่จัดสรรสถานะทางสังคมของบุคคล",
-            "coreDefinitionQualifier": "ซึ่งส่งผลต่อเนื่องผ่านเงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย ไปสู่ความเปราะบางทางสุขภาพ",
-            "coreDefinition": "แยกแยะกลไกต้นน้ำระดับโครงสร้างสังคม เศรษฐกิจ การเมือง และค่านิยม ที่จัดสรรสถานะทางสังคมของบุคคล ซึ่งส่งผลต่อเนื่องผ่านเงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย ไปสู่ความเปราะบางทางสุขภาพ",
+            "coreDefinitionLead": "แยกแยะปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (สังคม เศรษฐกิจ การเมือง และค่านิยม)",
+            "coreDefinitionQualifier": "ซึ่งส่งผลต่อเนื่องผ่านปัจจัยทางสังคมที่มีผลต่อสุขภาพ (เงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย) ไปสู่ความเปราะบางทางสุขภาพ",
+            "coreDefinition": "แยกแยะปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (สังคม เศรษฐกิจ การเมือง และค่านิยม) ซึ่งส่งผลต่อเนื่องผ่านปัจจัยทางสังคมที่มีผลต่อสุขภาพ (เงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย) ไปสู่ความเปราะบางทางสุขภาพ",
             "dimensions": [
               {
                 "num": "01",
                 "thTitle": "ระบบการศึกษาและความรู้เท่าทัน",
                 "enTitle": "Education System",
                 "definition": "โอกาสทางการศึกษาที่จำกัดเพียงระดับ ม.3 อาจยังไม่สร้างความตระหนักรู้เท่าทันต่อพิษภัยของการใช้สารเสพติดและการดูแลครรภ์",
-                "anchor": "เป็นปัจจัยเชิงโครงสร้างที่กำหนดทั้งโอกาสทางอาชีพและทักษะความรอบรู้ด้านสุขภาพ"
+                "anchor": "เป็นปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ ซึ่งกำหนดโอกาสทางอาชีพและความรอบรู้ด้านสุขภาพ"
               },
               {
                 "num": "02",
@@ -594,10 +594,10 @@ window.RACM_HS_DISCUSSION_DATA = {
               },
               {
                 "num": "04",
-                "thTitle": "ปัจจัยทางสังคมใกล้ตัวและวัยรุ่นตั้งครรภ์",
-                "enTitle": "Social Context & Teenage Pregnancy",
+                "thTitle": "ปัจจัยทางสังคมที่มีผลต่อสุขภาพ",
+                "enTitle": "Intermediary Determinants",
                 "definition": "คู่สมรส/คนในครอบครัวใช้สารเสพติด ภาวะตั้งครรภ์วัยรุ่น (15–18 ปี) ที่ยังขาดความพร้อมด้าน self-care และแรงกดดันจากการไม่มีงานประจำ",
-                "anchor": "เป็นปัจจัยตัวกลาง (intermediary determinants) ที่สัมผัสตัวผู้ป่วยโดยตรงในชีวิตประจำวัน"
+                "anchor": "เป็นปัจจัยทางสังคมที่มีผลต่อสุขภาพ (intermediary determinants) ที่สัมผัสตัวผู้ป่วยโดยตรงในชีวิตประจำวัน"
               }
             ],
             "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.2 · หญิงตั้งครรภ์ในชุมชน",

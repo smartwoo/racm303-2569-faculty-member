@@ -610,6 +610,120 @@
 
     const modules = HSD.modules || [];
     const beyondSessions = (api && api.getSystemsForumSessions ? api.getSystemsForumSessions() : []) || [];
+    const hasEp123Slide = Boolean(api && api.getSessionSlideRecord && api.getSessionSlideRecord("w1-d3-ep123"));
+    const hasSpssSlide = Boolean(api && api.getSessionSlideRecord && api.getSessionSlideRecord("w3-d2-spss"));
+    const epiShelfItems = [
+      {
+        id: "EP1",
+        code: "EP1",
+        num: "01",
+        tone: "epi-1",
+        sec: "sessions",
+        tag: hasEp123Slide ? t("✓ มี Slide · ปูพื้นฐาน", "✓ Slides · Intro") : t("ปูพื้นฐาน · Hybrid + Zoom", "Intro · Hybrid + Zoom"),
+        title: t("Introduction to Epidemiology (แนวคิดพื้นฐานทางระบาดวิทยา)", "Introduction to Epidemiology"),
+        date: t("ศ. 27 พ.ย. 69 (08.30 – 11.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–11:00) · Dr. Jakris")
+      },
+      {
+        id: "EP2",
+        code: "EP2",
+        num: "02",
+        tone: "epi-2",
+        sec: "sessions",
+        tag: t("น้ำหนักสอบ 15% · Ex 2", "Exam 15% · Ex 2"),
+        title: t("Diagnostic Test (การประเมินการตรวจวินิจฉัยทางคลินิก)", "Diagnostic Test (Sens, Spec, PPV, NPV & LR)"),
+        date: t("ศ. 27 พ.ย. 69 (08.30 – 12.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–12:00) · Dr. Jakris")
+      },
+      {
+        id: "EP3",
+        code: "EP3",
+        num: "03",
+        tone: "epi-3",
+        sec: "sessions",
+        tag: t("น้ำหนักสอบ 15% · Ex 3", "Exam 15% · Ex 3"),
+        title: t("Errors in Epidemiology (Random Error, Bias & Confounding)", "Errors in Epidemiology (Random Error, Bias & Confounding)"),
+        date: t("ศ. 27 พ.ย. 69 (08.30 – 12.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–12:00) · Dr. Jakris")
+      },
+      {
+        id: "EP4",
+        code: "EP4",
+        num: "04",
+        tone: "epi-4",
+        sec: "ep4",
+        tag: t("🎬 Video Studio · สอบ 10%", "🎬 Video Studio · Exam 10%"),
+        title: t("Overview of Study Designs & Measurement of Impact (AR, AR%, PAR, PAR%)", "Overview of Study Designs & Measurement of Impact (AR, AR%, PAR, PAR%)"),
+        date: t("พ. 2 ธ.ค. 69 (08.30 – 12.00 น.) · อ. พญ.สวนีย์", "Wed 2 Dec 26 (08:30–12:00) · Dr. Sawanee")
+      },
+      {
+        id: "EP5",
+        code: "EP5",
+        num: "05",
+        tone: "epi-5",
+        sec: "ep5",
+        tag: t("🎬 Video Studio · สอบ 15%", "🎬 Video Studio · Exam 15%"),
+        title: t("Disease Surveillance & Outbreak Investigation (การเฝ้าระวังและสอบสวนโรค)", "Disease Surveillance & Outbreak Investigation"),
+        date: t("พ. 2 ธ.ค. 69 (08.30 – 12.00 น.) · อ. พญ.สวนีย์", "Wed 2 Dec 26 (08:30–12:00) · Dr. Sawanee")
+      },
+      {
+        id: "EP6",
+        code: "EP6",
+        num: "06",
+        tone: "epi-6",
+        sec: "ep6",
+        tag: t("🎬 Video Studio · สอบ 15%", "🎬 Video Studio · Exam 15%"),
+        title: t("Measures of Morbidity & Mortality (Measure of Burden of Disease)", "Measures of Morbidity & Mortality (Burden of Disease)"),
+        date: t("พฤ. 3 ธ.ค. 69 (08.30 – 12.00 น.) · อ. นพ.ปวินท์", "Thu 3 Dec 26 (08:30–12:00) · Dr. Pawin")
+      },
+      {
+        id: "EP7",
+        code: "EP7",
+        num: "07",
+        tone: "epi-7",
+        sec: "ep7",
+        tag: t("🎬 Video Studio · สอบ 7.5%", "🎬 Video Studio · Exam 7.5%"),
+        title: t("Health Survey (การสำรวจสุขภาพชุมชนและการสุ่มตัวอย่าง)", "Health Survey & Community Sampling"),
+        date: t("พฤ. 3 ธ.ค. 69 (08.30 – 12.00 น.) · ศ. นพ.วิชัย", "Thu 3 Dec 26 (08:30–12:00) · Prof. Wichai")
+      },
+      {
+        id: "EP8",
+        code: "EP8",
+        num: "08",
+        tone: "epi-8",
+        sec: "ep8",
+        tag: t("🎬 Video Studio · สอบ 15%", "🎬 Video Studio · Exam 15%"),
+        title: t("Experimental Study (การศึกษาระบาดวิทยาเชิงทดลอง & RCT)", "Experimental Study & Randomized Controlled Trials"),
+        date: t("พฤ. 3 ธ.ค. 69 (08.30 – 12.00 น.) · ผศ. พญ.ฉัฐญาณ์", "Thu 3 Dec 26 (08:30–12:00) · Asst. Prof. Chataya")
+      },
+      {
+        id: "EP9",
+        code: "EP9",
+        num: "09",
+        tone: "epi-9",
+        sec: "ep9",
+        tag: t("🎬 Video Studio · สอบ 7.5%", "🎬 Video Studio · Exam 7.5%"),
+        title: t("Evidence-Based Medicine (EBM · PICO, 5S & Critical Appraisal)", "Evidence-Based Medicine (EBM · PICO, 5S & Appraisal)"),
+        date: t("พฤ. 3 ธ.ค. 69 (13.30 – 14.30 น.) · ผศ. พญ.ฉัฐญาณ์", "Thu 3 Dec 26 (13:30–14:30) · Asst. Prof. Chataya")
+      },
+      {
+        id: "SPSS",
+        code: "SPSS",
+        num: "10",
+        tone: "epi-10",
+        sec: "zoom-spss",
+        tag: hasSpssSlide ? t("✓ มี Slide · ปฏิบัติการสถิติ", "✓ Slides · Stats Lab") : t("ปฏิบัติการสถิติ · Hybrid + Zoom", "Stats Lab · Hybrid + Zoom"),
+        title: t("โปรแกรมวิเคราะห์ข้อมูลสถิติ SPSS สำหรับงานวิจัยและสำรวจชุมชน", "SPSS Statistical Data Analysis Workshop"),
+        date: t("อ. 8 ธ.ค. 69 (13.30 – 15.00 น.) · อ. พญ.สวนีย์", "Tue 8 Dec 26 (13:30–15:00) · Dr. Sawanee")
+      },
+      {
+        id: "FORM4A",
+        code: "FORM 4A",
+        num: "11",
+        tone: "epi-11",
+        sec: "exam-field",
+        tag: t("สัดส่วนสอบ & ภาคสนาม", "Exam Spec & Form 4A"),
+        title: t("โครงสร้างข้อสอบ EP (8 ธ.ค.) & นำเสนอระบาดวิทยาภาคสนาม 9 โรงพยาบาล (ฟอร์ม 4A)", "EP Exam Blueprint (8 Dec) & Fieldwork Presentation (Form 4A)"),
+        date: t("อ. 8 ธ.ค. & พ. 30 ธ.ค. 69 · ห้อง 2C2-03", "Tue 8 Dec & Wed 30 Dec 26 · Room 2C2-03")
+      }
+    ];
     const sites = SCHED.fieldworkSites || [];
 
     panel.innerHTML = `
@@ -785,7 +899,7 @@
             ${beyondSessions
               .map(
                 (s) => `
-              <button type="button" class="tv-episode-card ${esc(s.tone)}" id="tvSfCard-${esc(s.id)}" data-sf-id="${esc(s.id)}" data-ep-num="0${s.order}" data-tv-focus data-tv-row="3">
+              <button type="button" class="tv-episode-card ${esc(s.tone)}" id="tvSfCard-${esc(s.id)}" data-sf-id="${esc(s.id)}" data-ep-num="0${s.order}" data-tv-focus data-tv-row="4">
                 <span class="tv-ep-top">
                   <span class="tv-ep-code">${esc(s.code)}</span>
                   <span class="tv-ep-weight">${esc(s.kind === "systems" ? "Systems Thinking" : "Panel / Workshop")}</span>
@@ -803,6 +917,39 @@
         `
             : ""
         }
+
+        <!-- SHELF 2C: CLINICAL & COMMUNITY EPIDEMIOLOGY (EP1 – EP9 · SPSS · FORM 4A) -->
+        <div class="tv-shelf" aria-label="ระบาดวิทยาคลินิกและชุมชน EP1 ถึง EP9 และ SPSS">
+          <div class="tv-shelf-head">
+            <div>
+              <h2 class="tv-shelf-title">${esc(t("📊 ระบาดวิทยาคลินิกและชุมชน EP1 – EP9 (Video Studio · Exercise · Zoom · SPSS · ฟอร์ม 4A)", "📊 Clinical & Community Epidemiology EP1–EP9 (Video Studio · Zoom · SPSS · Form 4A)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("คลิก EP1–EP9 เพื่อเปิด Interactive Video + สไลด์ซิงก์ (EP4–EP9) ตารางคาบเรียน & Exercise ห้องเรียน Zoom ปฏิบัติการ SPSS และเกณฑ์นำเสนอภาคสนาม (ฟอร์ม 4A)", "Click EP1–EP9 for Interactive Video + Synced Slides (EP4–EP9), Exercises, Zoom rooms, SPSS Lab & Fieldwork Form 4A"))}</span>
+            </div>
+            <div class="tv-shelf-controls">
+              <button type="button" class="tv-pill-action-btn" id="tvOpenAllEpidemiologyBtn">${esc(t("ดูครบ EP1–EP9 →", "View All EP1–EP9 →"))}</button>
+              <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpidemiologyTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
+              <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpidemiologyTrack" data-scroll-dir="1" aria-label="เลื่อนขวา">›</button>
+            </div>
+          </div>
+          <div class="tv-shelf-track is-episodes" id="tvEpidemiologyTrack">
+            ${epiShelfItems
+              .map(
+                (item) => `
+              <button type="button" class="tv-episode-card ${esc(item.tone)}" id="tvEpiCard-${esc(item.id)}" data-epi-sec="${esc(item.sec)}" data-ep-num="${esc(item.num)}" data-tv-focus data-tv-row="5">
+                <span class="tv-ep-top">
+                  <span class="tv-ep-code">${esc(item.code)}</span>
+                  <span class="tv-ep-weight">${esc(item.tag)}</span>
+                </span>
+                <span class="tv-ep-bottom">
+                  <span class="tv-ep-title">${esc(item.title)}</span>
+                  <span class="tv-ep-date">${esc(item.date)}</span>
+                </span>
+              </button>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
 
         <!-- SHELF 3: 9 FIELDWORK HOSPITALS -->
         <div class="tv-shelf" aria-label="พื้นที่ฝึกภาคสนาม 9 โรงพยาบาล">
@@ -835,7 +982,7 @@
                   ? `<span class="tv-adv-frame is-staff"><img class="tv-adv-av" src="assets/photos/staff_${s.id}.jpg" alt="" loading="lazy"></span>`
                   : `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:36px;border-radius:6px;background:rgba(15,23,42,0.12);font-size:11px;font-weight:800;flex-shrink:0">${esc(s.staffInitials || "จนท")}</span>`;
                 return `
-              <button type="button" class="tv-site-card" id="tvSiteCard-${s.id}" data-site-short="${esc(s.shortName)}" data-tv-focus data-tv-row="4">
+              <button type="button" class="tv-site-card" id="tvSiteCard-${s.id}" data-site-short="${esc(s.shortName)}" data-tv-focus data-tv-row="6">
                 <span class="tv-site-top">
                   <span class="tv-site-num">0${s.id}</span>
                   <span class="tv-site-count">${s.count} ${esc(t("คน", "students"))}</span>
@@ -865,36 +1012,36 @@
             <h2 class="tv-shelf-title">${esc(t("ห้องเรียน Zoom & ทางลัดด่วน", "Zoom Rooms & Quick Links"))}</h2>
           </div>
           <div class="tv-quick-grid">
-            <a class="tv-quick-card" href="https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
+            <a class="tv-quick-card" href="https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="7">
               <span class="tv-quick-tag">ZOOM · ศ. 27 พ.ย. 69 (08.30–11.00 น.)</span>
               <span class="tv-quick-title">EP1 – EP3 (Hybrid · Auditorium)</span>
               <span class="tv-quick-meta">ID: 910 2256 1292 · Pass: 346256 · หลัง 11.00 SDL ใน E-learning</span>
             </a>
-            <a class="tv-quick-card" href="https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
+            <a class="tv-quick-card" href="https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="7">
               <span class="tv-quick-tag">ZOOM · พ. 2 ธ.ค. 69 (08.30–16.30 น.)</span>
               <span class="tv-quick-title">EP4 – EP5 &amp; Exercise 3–4</span>
               <span class="tv-quick-meta">ID: 943 1762 6613 · Pass: 547989</span>
             </a>
-            <a class="tv-quick-card" href="https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
+            <a class="tv-quick-card" href="https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="7">
               <span class="tv-quick-tag">ZOOM · พฤ. 3 ธ.ค. 69 (08.30–16.30 น.)</span>
               <span class="tv-quick-title">EP6 – EP9 &amp; Exercise 5–6</span>
               <span class="tv-quick-meta">ID: 929 4095 3542 · Pass: 165796</span>
             </a>
-            <a class="tv-quick-card" href="https://zoom.us/j/95270544175?pwd=B7iFJGrjOcvFM4uzwtBfgic83Hse2q.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
+            <a class="tv-quick-card" href="https://zoom.us/j/95270544175?pwd=B7iFJGrjOcvFM4uzwtBfgic83Hse2q.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="7">
               <span class="tv-quick-tag">ZOOM · อ. 8 ธ.ค. 69 (13.30–14.30 น.)</span>
               <span class="tv-quick-title">โปรแกรมวิเคราะห์ข้อมูล SPSS</span>
               <span class="tv-quick-meta">ID: 952 7054 4175 · Pass: 756928 · Hybrid 2C2-03</span>
             </a>
             ${
               ROLE === "faculty"
-                ? `<button type="button" class="tv-quick-card" id="tvQuickPrintBinderCardBtn" data-tv-focus data-tv-row="5">
+                ? `<button type="button" class="tv-quick-card" id="tvQuickPrintBinderCardBtn" data-tv-focus data-tv-row="7">
                      <span class="tv-quick-tag">🖨️ PRINT-OUT PDF · ครบ 6 หมวด</span>
                      <span class="tv-quick-title">${esc(t("เอกสารสำหรับอาจารย์ & แฟ้ม 9 พื้นที่", "Faculty Print-out PDFs & 9 Binders"))}</span>
                      <span class="tv-quick-meta">${esc(t("ใบรูปถ่าย (มีเบอร์โทร) · ฟอร์ม 1A (GRS) · 2A · 3A · 4A", "Photo rosters + Forms 1A, 2A, 3A, 4A"))}</span>
                    </button>`
                 : ""
             }
-            <button type="button" class="tv-quick-card" id="tvQuickLeaveCardBtn" data-tv-focus data-tv-row="5">
+            <button type="button" class="tv-quick-card" id="tvQuickLeaveCardBtn" data-tv-focus data-tv-row="7">
               <span class="tv-quick-tag">${ROLE === "faculty" ? "ธุรการรายวิชา" : "ใบลาออนไลน์"}</span>
               <span class="tv-quick-title">${esc(ROLE === "faculty" ? t("ดูคำขอใบลานักศึกษา", "Student Leave Inbox") : t("ยื่นใบลากิจ / ลาป่วย", "Submit Leave Request"))}</span>
               <span class="tv-quick-meta">${esc(t("ลงลายมือชื่อดิจิทัล & ส่งออก PDF", "Digital signature & PDF export"))}</span>
@@ -982,6 +1129,26 @@
         lastHomeTileFocusSelector = `#${card.id}`;
         if (api && api.openSystemsForum) api.openSystemsForum(card.dataset.sfId);
         else navigateTvTab("systems-forum");
+      });
+    });
+
+    const openAllEpiBtn = $("tvOpenAllEpidemiologyBtn");
+    if (openAllEpiBtn) {
+      openAllEpiBtn.addEventListener("click", () => {
+        lastHomeTileFocusSelector = "#tvOpenAllEpidemiologyBtn";
+        hideCourseDriveBrowser();
+        if (api && api.openEpidemiology) api.openEpidemiology("all");
+        else navigateTvTab("epidemiology");
+      });
+    }
+
+    panel.querySelectorAll("[data-epi-sec]").forEach((card) => {
+      card.addEventListener("click", () => {
+        lastHomeTileFocusSelector = `#${card.id}`;
+        hideCourseDriveBrowser();
+        const targetSec = card.dataset.epiSec || "all";
+        if (api && api.openEpidemiology) api.openEpidemiology(targetSec);
+        else navigateTvTab("epidemiology");
       });
     });
 

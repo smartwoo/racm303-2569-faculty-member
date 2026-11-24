@@ -47,13 +47,68 @@
     STAFF: "เตรียมความพร้อมภาควิชาฯ"
   };
 
+  function getBangkokNowInfo() {
+    const now = new Date();
+    let todayISO = "";
+    let nowMin = 0;
+    let hhmm = "";
+    try {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Bangkok",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(now);
+      const get = (t) => (parts.find((p) => p.type === t) || {}).value || "00";
+      const h = Number(get("hour")) % 24;
+      const m = Number(get("minute"));
+      todayISO = `${get("year")}-${get("month")}-${get("day")}`;
+      nowMin = h * 60 + m;
+      hhmm = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    } catch (_) {
+      const y = now.getFullYear();
+      const mo = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const h = now.getHours();
+      const m = now.getMinutes();
+      todayISO = `${y}-${mo}-${d}`;
+      nowMin = h * 60 + m;
+      hhmm = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+    const matchedWeekObj = WEEK_BOUNDS.find((wb) => todayISO >= wb.start && todayISO <= wb.end);
+    return { todayISO, nowMin, hhmm, currentCourseWeek: matchedWeekObj ? matchedWeekObj.week : null };
+  }
+
+  function getSessionTemporalStatus(s, eff, nowInfo, colISO) {
+    const refISO = colISO || (eff && (eff.endISO || eff.startISO)) || s.endDateISO || s.dateISO || "";
+    if (!refISO || !nowInfo || !nowInfo.todayISO) return "upcoming";
+    if (refISO < nowInfo.todayISO) return "past";
+    if (refISO > nowInfo.todayISO) {
+      const startRef = colISO || (eff && eff.startISO) || s.dateISO || refISO;
+      if (startRef <= nowInfo.todayISO && refISO >= nowInfo.todayISO) return "live";
+      return "upcoming";
+    }
+    if (eff && eff.isAllDay) return "live";
+    const [sh, sm] = String(s.startTime || "08:30").split(":").map(Number);
+    const [eh, em] = String(s.endTime || "12:00").split(":").map(Number);
+    const sMin = (sh || 0) * 60 + (sm || 0);
+    const eMin = (eh || 0) * 60 + (em || 0);
+    if (eMin <= nowInfo.nowMin) return "past";
+    if (sMin <= nowInfo.nowMin && nowInfo.nowMin < eMin) return "live";
+    return "upcoming";
+  }
+
   const state = {
     activeTab: "schedule",
-    schedSub: "month", // month | week | daily | table | spec
+    schedSub: "week", // week | month | daily | table | spec
     schedSort: "date-asc",
     showCalSubDrawer: false,
     calScope: "student", // student | group | teacher | all
-    calWeek: 1,
+    calWeek: getBangkokNowInfo().currentCourseWeek || 1,
+    hasAutoSyncedCurrentWeek: false,
     practiceSub: "qa",
     epSection: "all", // all | sessions | zoom-spss | exam-field
     facultySub: "guides",
@@ -2553,16 +2608,32 @@
     });
 
     if ($("calStartWeekBtn")) {
+      const initNow = getBangkokNowInfo();
+      if (initNow.currentCourseWeek) {
+        $("calStartWeekBtn").textContent = "📍 วันนี้";
+        $("calStartWeekBtn").title = `เลื่อนไปยังวันนี้ (${formatThaiShortDate(initNow.todayISO, true)}) · สัปดาห์ที่ ${initNow.currentCourseWeek}`;
+      }
       $("calStartWeekBtn").addEventListener("click", () => {
-        state.calWeek = 1;
+        const curNow = getBangkokNowInfo();
+        const targetWk = curNow.currentCourseWeek || 1;
+        state.calWeek = targetWk;
         if ($("schedWeekFilter")) $("schedWeekFilter").value = "";
         refreshCalendarStudioUI();
         renderScheduleCurrent();
         if (state.schedSub === "week") {
-          requestAnimationFrame(() => scrollToWeekBlock(1, "smooth"));
+          requestAnimationFrame(() => scrollToWeekBlock(targetWk, "smooth"));
         }
       });
     }
+
+    setInterval(() => {
+      if (state.activeTab === "schedule" && !document.hidden) {
+        const modal = $("calendarEventModal");
+        if (!modal || modal.hidden) {
+          renderScheduleCurrent();
+        }
+      }
+    }, 60000);
 
     const zoomDrawerBtn = $("toggleZoomDrawerBtn");
     const zoomDrawer = $("zoomSyncDrawer");
@@ -2714,6 +2785,7 @@
   function renderScheduleMonth() {
     const wrap = $("schedMonthContent");
     if (!wrap) return;
+    const nowInfo = getBangkokNowInfo();
     const ctx = getActivePersonalContext();
     const sessions = getFilteredSessions(false);
     updateScheduleStatusBar(sessions.length);
@@ -2757,13 +2829,15 @@
       for (let dIdx = 0; dIdx < 7; dIdx++) {
         const iso = addDaysISO(wb.start, dIdx);
         const isOutside = iso < "2026-11-24" || iso > "2026-12-30";
+        const isPastDay = iso < nowInfo.todayISO;
+        const isToday = iso === nowInfo.todayISO;
         const dayItems = byDate.get(iso) || [];
         const hasHoliday = dayItems.some((x) => x.session.category === "HOLIDAY");
         const hasExam = dayItems.some((x) => x.session.category === "EXAM");
         const cell = make(
           "div",
           null,
-          `cal-day-cell${dIdx >= 5 ? " is-weekend" : ""}${dIdx === 5 ? " is-saturday" : ""}${isOutside ? " is-outside" : ""}${hasHoliday ? " is-holiday-day" : ""}${hasExam ? " is-exam-day" : ""}`
+          `cal-day-cell${dIdx >= 5 ? " is-weekend" : ""}${dIdx === 5 ? " is-saturday" : ""}${isOutside ? " is-outside" : ""}${isPastDay ? " is-past-day" : ""}${isToday ? " is-today" : ""}${hasHoliday ? " is-holiday-day" : ""}${hasExam ? " is-exam-day" : ""}`
         );
 
         const dayHead = make("div", null, "cal-day-head");
@@ -2772,8 +2846,8 @@
         const isRedAnchor = isCourseStart || isCourseEnd;
         const dNum = make(
           "span",
-          formatThaiShortDate(iso, dIdx === 0),
-          `cal-day-num${isRedAnchor ? " is-month-start is-course-anchor" : ""}`
+          formatThaiShortDate(iso, dIdx === 0 || isToday),
+          `cal-day-num${isRedAnchor ? " is-month-start is-course-anchor" : ""}${isToday ? " is-today-num" : ""}`
         );
         if (isCourseStart) {
           dNum.title = "วันเปิดกอง / เปิดรายวิชา RACM 303 (พุธที่ 25 พ.ย. 2569)";
@@ -2781,7 +2855,9 @@
           dNum.title = "วันปิดกอง / นำเสนอวันสุดท้ายและปัจฉิมนิเทศ (พุธที่ 30 ธ.ค. 2569)";
         }
         dayHead.appendChild(dNum);
-        if (hasHoliday) {
+        if (isToday) {
+          dayHead.appendChild(make("span", "วันนี้", "cal-day-flag is-today-flag"));
+        } else if (hasHoliday) {
           dayHead.appendChild(make("span", "🏖 วันหยุด", "cal-day-flag is-holiday"));
         } else if (hasExam) {
           dayHead.appendChild(make("span", "สอบ/ส่งงาน", "cal-day-flag is-exam"));
@@ -2790,7 +2866,12 @@
 
         const evWrap = make("div", null, "cal-day-events");
         dayItems.forEach(({ session: s, eff }) => {
-          const chip = make("button", null, `cal-chip cat-${s.category}${eff.isAllDay ? " is-allday" : ""}`);
+          const tStatus = getSessionTemporalStatus(s, eff, nowInfo, iso);
+          const chip = make(
+            "button",
+            null,
+            `cal-chip cat-${s.category}${eff.isAllDay ? " is-allday" : ""}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`
+          );
           chip.type = "button";
           chip.dataset.calSessionId = s.id;
           const shortTime = s.category === "HOLIDAY" ? "🏖 วันหยุด" : eff.isAllDay ? "ทั้งวัน" : (s.startTime || "");
@@ -2862,6 +2943,7 @@
       if (parsedW >= 1 && parsedW <= 6) state.calWeek = parsedW;
     }
 
+    const nowInfo = getBangkokNowInfo();
     const ctx = getActivePersonalContext();
     const filteredSessions = getFilteredSessions(false);
     const byDate = expandSessionsByDate(filteredSessions, ctx);
@@ -2945,8 +3027,14 @@
     renderedWeeks.forEach(({ wb, weekSet, minStartMin, maxEndMin, hasAllDay }) => {
       const HOUR_START = minStartMin < 8 * 60 ? Math.max(0, Math.floor(minStartMin / 60)) : 8;
       const HOUR_END = maxEndMin > 18 * 60 ? Math.min(24, Math.ceil(maxEndMin / 60)) : 18;
+      const isPastWeek = wb.end < nowInfo.todayISO;
+      const isCurrentWeek = wb.week === nowInfo.currentCourseWeek;
 
-      const shell = make("section", null, "cal-week-shell");
+      const shell = make(
+        "section",
+        null,
+        `cal-week-shell${isPastWeek ? " is-past-week" : ""}${isCurrentWeek ? " is-current-week" : ""}`
+      );
       shell.id = `calWeekBlock-${wb.week}`;
       shell.dataset.week = String(wb.week);
       const minWrap = make("div", null, "cal-week-min");
@@ -2957,6 +3045,11 @@
       bannerLeft.appendChild(
         make("span", wb.label.replace(/^สัปดาห์ที่\s*\d+\s*·\s*/, ""), "cal-week-banner-title")
       );
+      if (isCurrentWeek) {
+        bannerLeft.appendChild(make("span", "● สัปดาห์ปัจจุบัน", "cal-week-live-pill"));
+      } else if (isPastWeek) {
+        bannerLeft.appendChild(make("span", "ผ่านแล้ว", "cal-week-past-pill"));
+      }
       banner.appendChild(bannerLeft);
       banner.appendChild(make("span", `${weekSet.size} คาบกิจกรรม`, "cal-week-count-pill"));
       minWrap.appendChild(banner);
@@ -2966,6 +3059,8 @@
       for (let i = 0; i < 7; i++) {
         const iso = addDaysISO(wb.start, i);
         const isOutside = iso < "2026-11-24" || iso > "2026-12-30";
+        const isPastDay = iso < nowInfo.todayISO;
+        const isToday = iso === nowInfo.todayISO;
         const dayItems = byDate.get(iso) || [];
         const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
         const isEx = dayItems.some((x) => x.session.category === "EXAM");
@@ -2973,9 +3068,10 @@
         const hc = make(
           "div",
           null,
-          `cal-week-head-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isOutside ? " is-outside" : ""}${isHol ? " is-holiday-day" : ""}${isEx ? " is-exam-day" : ""}`
+          `cal-week-head-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isOutside ? " is-outside" : ""}${isPastDay ? " is-past-day" : ""}${isToday ? " is-today" : ""}${isHol ? " is-holiday-day" : ""}${isEx ? " is-exam-day" : ""}`
         );
-        hc.innerHTML = `<span class="wd-name">${TH_DOW_SHORT[i]}${isHol ? " · วันหยุด" : ""}</span><span class="wd-num${isAnchor ? " is-course-anchor" : ""}">${escapeHtml(formatThaiShortDate(iso, true))}</span>`;
+        const todayTag = isToday ? ` <span class="cal-today-tag">วันนี้</span>` : "";
+        hc.innerHTML = `<span class="wd-name">${TH_DOW_SHORT[i]}${isHol ? " · วันหยุด" : ""}${todayTag}</span><span class="wd-num${isAnchor ? " is-course-anchor" : ""}${isToday ? " is-today-num" : ""}">${escapeHtml(formatThaiShortDate(iso, true))}</span>`;
         head.appendChild(hc);
       }
       minWrap.appendChild(head);
@@ -2985,17 +3081,24 @@
         allDayRow.appendChild(make("div", "ตลอดวัน", "cal-gutter-label"));
         for (let i = 0; i < 7; i++) {
           const iso = addDaysISO(wb.start, i);
+          const isPastDay = iso < nowInfo.todayISO;
+          const isToday = iso === nowInfo.todayISO;
           const dayItems = byDate.get(iso) || [];
           const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
           const adCell = make(
             "div",
             null,
-            `cal-allday-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
+            `cal-allday-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isPastDay ? " is-past-day" : ""}${isToday ? " is-today-col" : ""}${isHol ? " is-holiday-day" : ""}`
           );
           dayItems
             .filter((x) => x.eff.isAllDay)
             .forEach(({ session: s, eff }) => {
-              const chip = make("button", null, `cal-chip is-allday cat-${s.category}`);
+              const tStatus = getSessionTemporalStatus(s, eff, nowInfo, iso);
+              const chip = make(
+                "button",
+                null,
+                `cal-chip is-allday cat-${s.category}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`
+              );
               chip.type = "button";
               chip.dataset.calSessionId = s.id;
               const txt =
@@ -3022,17 +3125,27 @@
 
       for (let i = 0; i < 7; i++) {
         const iso = addDaysISO(wb.start, i);
+        const isPastDay = iso < nowInfo.todayISO;
+        const isToday = iso === nowInfo.todayISO;
         const dayItems = byDate.get(iso) || [];
         const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
         const col = make(
           "div",
           null,
-          `cal-day-col${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
+          `cal-day-col${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isPastDay ? " is-past-day" : ""}${isToday ? " is-today-col" : ""}${isHol ? " is-holiday-day" : ""}`
         );
         col.style.height = `${(HOUR_END - HOUR_START) * HOUR_PX}px`;
         if (isHol) {
           const holBanner = make("div", "🏖 วันหยุดราชการ (งดการเรียนการสอนในชั้นเรียน)", "cal-week-holiday-watermark");
           col.appendChild(holBanner);
+        }
+        if (isToday && nowInfo.nowMin >= HOUR_START * 60 && nowInfo.nowMin <= HOUR_END * 60) {
+          const nowTopPx = ((nowInfo.nowMin - HOUR_START * 60) / 60) * HOUR_PX;
+          const nowLine = make("div", null, "cal-now-line");
+          nowLine.style.top = `${nowTopPx}px`;
+          nowLine.title = `เวลาปัจจุบัน ${nowInfo.hhmm} น.`;
+          nowLine.appendChild(make("span", nowInfo.hhmm, "cal-now-badge"));
+          col.appendChild(nowLine);
         }
 
         const timedItems = dayItems
@@ -3077,8 +3190,13 @@
         timedItems.forEach(({ session: s, eff, sMin, eMin, lane, totalLanes }) => {
           const topPx = ((sMin - HOUR_START * 60) / 60) * HOUR_PX;
           const heightPx = Math.max(30, ((eMin - sMin) / 60) * HOUR_PX - 2);
+          const tStatus = getSessionTemporalStatus(s, eff, nowInfo, iso);
 
-          const block = make("button", null, `cal-timed-event cat-${s.category}`);
+          const block = make(
+            "button",
+            null,
+            `cal-timed-event cat-${s.category}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`
+          );
           block.type = "button";
           block.dataset.calSessionId = s.id;
           block.style.top = `${topPx}px`;
@@ -3090,7 +3208,8 @@
           }
 
           const slideBadge = typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(s.id) ? " · 📊 Slide" : "";
-          const timeLine = `${s.startTime}–${s.endTime}${s.zoom ? " · 🎥 Zoom" : ""}${slideBadge}`;
+          const liveBadge = tStatus === "live" ? " · 🔴 กำลังเรียน" : "";
+          const timeLine = `${s.startTime}–${s.endTime}${liveBadge}${s.zoom ? " · 🎥 Zoom" : ""}${slideBadge}`;
           block.appendChild(make("span", timeLine, "ev-time"));
           block.appendChild(make("span", `${s.code}: ${eff.title}`, "ev-title"));
           if (heightPx >= 58) {
@@ -3127,10 +3246,18 @@
       );
       stack.querySelectorAll(".cal-week-shell").forEach((sec) => weekScrollObserver.observe(sec));
     }
+
+    if (!state.hasAutoSyncedCurrentWeek && state.activeTab === "schedule" && wrap.offsetParent !== null) {
+      state.hasAutoSyncedCurrentWeek = true;
+      if (nowInfo.currentCourseWeek && nowInfo.currentCourseWeek >= 2 && !weekFilterVal) {
+        requestAnimationFrame(() => scrollToWeekBlock(nowInfo.currentCourseWeek, "auto"));
+      }
+    }
   }
 
   /* ---------- View 3: Detailed Agenda / Daily Cards (Full-Card Color Coding for Rapid Skim/Scan) ---------- */
   function renderScheduleDaily() {
+    const nowInfo = getBangkokNowInfo();
     const ctx = getActivePersonalContext();
     const sessions = sortScheduleSessions(getFilteredSessions(false), ctx);
     updateScheduleStatusBar(sessions.length);
@@ -21963,7 +22090,7 @@
 
     const outerOvalBtn = make("button", "🟠 วงล้อมโครงสร้าง", "doh-tool-pill");
     outerOvalBtn.type = "button";
-    outerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นนอกของปัจจัยด้านโครงสร้างที่ครอบคลุมทั้งระบบ";
+    outerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นนอกของปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ";
 
     const autoArrowsBtn = make("button", "⚡ เชื่อมลูกศรครบวงจร", "doh-tool-pill");
     autoArrowsBtn.type = "button";
@@ -29758,7 +29885,7 @@
       },
       nodes: {
         structural: {
-          title: (nodesMeta.structural && nodesMeta.structural.title) || "ปัจจัยด้านโครงสร้าง",
+          title: (nodesMeta.structural && nodesMeta.structural.title) || "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
           text: readNodeDraft("structural"),
           placeholder: "ระบุปัจจัยโครงสร้าง/นโยบาย/ค่านิยม/โฆษณา และวาดวงล้อมชั้นนอก…"
         },

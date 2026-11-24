@@ -724,6 +724,19 @@ html[data-theme="dark"] .tv-app-badge {
 .tv-episode-card.ep-6 { background: linear-gradient(140deg, #7f1d1d 0%, #e11d48 100%); }
 .tv-episode-card.ep-7 { background: linear-gradient(140deg, #312e81 0%, #6d28d9 100%); }
 
+/* Epidemiology Shelf Cards (EP1 - EP9, SPSS & Form 4A) */
+.tv-episode-card.epi-1 { background: linear-gradient(140deg, #0c4a6e 0%, #0284c7 100%); }
+.tv-episode-card.epi-2 { background: linear-gradient(140deg, #0d4f56 0%, #0d9488 100%); }
+.tv-episode-card.epi-3 { background: linear-gradient(140deg, #78350f 0%, #d97706 100%); }
+.tv-episode-card.epi-4 { background: linear-gradient(140deg, #0a2e6e 0%, #1d5ed8 100%); }
+.tv-episode-card.epi-5 { background: linear-gradient(140deg, #7c2d12 0%, #ea580c 100%); }
+.tv-episode-card.epi-6 { background: linear-gradient(140deg, #064e3b 0%, #059669 100%); }
+.tv-episode-card.epi-7 { background: linear-gradient(140deg, #1e3a5f 0%, #0369a1 100%); }
+.tv-episode-card.epi-8 { background: linear-gradient(140deg, #7f1d1d 0%, #e11d48 100%); }
+.tv-episode-card.epi-9 { background: linear-gradient(140deg, #1e293b 0%, #2563eb 100%); }
+.tv-episode-card.epi-10 { background: linear-gradient(140deg, #115e59 0%, #0d9488 100%); }
+.tv-episode-card.epi-11 { background: linear-gradient(140deg, #1e293b 0%, #475569 100%); }
+
 .tv-episode-card::after {
   content: attr(data-ep-num);
   position: absolute;
