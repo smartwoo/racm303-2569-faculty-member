@@ -10926,7 +10926,7 @@
       abridgedBridge: "จับโครงสร้างบทเรียนให้คมชัด แล้วทดสอบจุดที่ยังสับสนในขั้นที่ 3",
       quizFocus: "การแยกมิติความป่วย ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค (Primordial–Quaternary)",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และอภิปรายกลุ่มย่อยในขั้นที่ 5",
-      caseFocus: "สุขภาวะคนทำงานโรงงานอุตสาหกรรม ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค",
+      caseFocus: "สุขภาวะคนทำงานโรงงานอุตสาหกรรม (เคส 1) และภาวะอ้วนในเด็กกับการสร้าง Diagram ปัจจัยกำหนดสุขภาพ (เคส 2)",
       caseBridge: "ถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS2: {
@@ -12330,10 +12330,10 @@
           fileName: "RACM303_ใบงาน_Discussion_รวมทุกบท_HS1-HS6_(เลื่อนอ่านยาว).web",
           kicker: "📜 ใบงาน Discussion รวมทุกบท (Scroll)",
           headCls: "is-concise",
-          title: "ใบงานกรณีศึกษารวมครบ HS1–HS6 (10 กรณี · 20 ข้อย่อย)",
+          title: "ใบงานกรณีศึกษารวมครบ HS1–HS6 (11 กรณี · 21 ข้อย่อย)",
           subDesc: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทุกกรณีศึกษาในหน้าเดียว สำหรับทบทวนภาพรวมหรือพิมพ์เตรียมสอบ Open Note",
           chipLabel: "Web Scroll · ครบ 6 บท",
-          meta: "HS1–HS6 · 10 กรณีศึกษา",
+          meta: "HS1–HS6 · 11 กรณีศึกษา",
           onOpen: () => {
             state.hsdViewMode = "scroll";
             state.hsdModule = "ALL";
@@ -19821,6 +19821,7 @@
   }
 
   function getShortQuestionNumLabel(qObj, fallbackIdx) {
+    if (qObj && qObj.shortLabel) return String(qObj.shortLabel);
     const raw = String((qObj && qObj.label) || "");
     const matches = raw.match(/\d+\.\d+/g);
     if (matches && matches.length > 0) {
@@ -19830,6 +19831,9 @@
   }
 
   function getClearQuestionHeadingLabel(qObj, fallbackIdx) {
+    if (qObj && qObj.headingLabel) {
+      return tr(String(qObj.headingLabel), String(qObj.enHeadingLabel || qObj.headingLabel));
+    }
     const raw = String((qObj && qObj.label) || "").trim();
     const cleanedNum = raw.replace(/^ประเด็นอภิปรายที่\s*/i, "").trim();
     if (cleanedNum && /\d/.test(cleanedNum)) {
@@ -20784,7 +20788,7 @@
           const remoteVal = teamRec.cells[cell.inputId];
           if (remoteVal === undefined) return;
           const clamped = enforceA4ConciseText(String(remoteVal), cell, false);
-          document.querySelectorAll(`textarea[data-input-id="${cell.inputId}"]`).forEach((ta) => {
+          document.querySelectorAll(`[data-input-id="${cell.inputId}"]`).forEach((ta) => {
             if (ta.id && ta.id.startsWith("demo_")) return;
             if (document.activeElement === ta) return;
             if (ta.value !== clamped) {
@@ -20797,7 +20801,7 @@
               ta._refreshFromTeamSync();
             }
           });
-          if (!document.querySelector(`textarea[data-input-id="${cell.inputId}"]`)) {
+          if (!document.querySelector(`[data-input-id="${cell.inputId}"]`)) {
             persistHsdDraft(cell.inputId, clamped);
           }
         });
@@ -20812,10 +20816,695 @@
     syncLiveBarQuestionPickerDOM();
   }
 
+  let dohInstanceSeq = 0;
+  const DOH_EDGE_DEFS = [
+    { id: "ind_to_out", label: "ปัจเจก→ปัญหา", revLabel: "ปัญหา→ปัจเจก", biLabel: "ปัจเจก↔ปัญหา", std: "fwd" },
+    { id: "soc_to_out", label: "สังคม→ปัญหา", revLabel: "ปัญหา→สังคม", biLabel: "สังคม↔ปัญหา", std: "fwd" },
+    { id: "hsys_to_out", label: "บริการ→ปัญหา", revLabel: "ปัญหา→บริการ", biLabel: "บริการ↔ปัญหา", std: "fwd" },
+    { id: "ind_bi_soc", label: "ปัจเจก→สังคม", revLabel: "สังคม→ปัจเจก", biLabel: "ปัจเจก↔สังคม", std: "bi" },
+    { id: "ind_bi_hsys", label: "ปัจเจก→บริการ", revLabel: "บริการ→ปัจเจก", biLabel: "ปัจเจก↔บริการ", std: "bi" },
+    { id: "soc_bi_hsys", label: "สังคม→บริการ", revLabel: "บริการ→สังคม", biLabel: "สังคม↔บริการ", std: "bi" }
+  ];
+
+  function parseDohLinksString(raw) {
+    const st = {
+      edges: {
+        ind_to_out: "off",
+        soc_to_out: "off",
+        hsys_to_out: "off",
+        ind_bi_soc: "off",
+        ind_bi_hsys: "off",
+        soc_bi_hsys: "off"
+      },
+      innerRing: false,
+      outerRing: false
+    };
+    const str = String(raw || "").trim();
+    if (!str) return st;
+    DOH_EDGE_DEFS.forEach((ed) => {
+      if (str.includes(ed.biLabel) || str.includes(`${ed.id}:bi`)) st.edges[ed.id] = "bi";
+      else if (str.includes(ed.label) || str.includes(`${ed.id}:fwd`)) st.edges[ed.id] = "fwd";
+      else if (str.includes(ed.revLabel) || str.includes(`${ed.id}:rev`)) st.edges[ed.id] = "rev";
+    });
+    if (/วงล้อมใน:เปิด|innerRing:1/i.test(str)) st.innerRing = true;
+    if (/วงล้อมนอก:เปิด|outerRing:1/i.test(str)) st.outerRing = true;
+    return st;
+  }
+
+  function serializeDohLinksState(st) {
+    if (!st || !st.edges) return "";
+    const activeEdges = [];
+    DOH_EDGE_DEFS.forEach((ed) => {
+      const dir = st.edges[ed.id] || "off";
+      if (dir === "bi") activeEdges.push(ed.biLabel);
+      else if (dir === "fwd") activeEdges.push(ed.label);
+      else if (dir === "rev") activeEdges.push(ed.revLabel);
+    });
+    const rings = [];
+    if (st.innerRing) rings.push("วงล้อมใน:เปิด");
+    if (st.outerRing) rings.push("วงล้อมนอก:เปิด");
+    if (!activeEdges.length && !rings.length) return "";
+    if (activeEdges.length && rings.length) return `${activeEdges.join(", ")} | ${rings.join(", ")}`;
+    return activeEdges.length ? activeEdges.join(", ") : rings.join(", ");
+  }
+
+  function mountDohArenaArrows(arenaEl, svgEl, badgeLayerEl, getEdgesFn, onCycleEdgeFn) {
+    if (!arenaEl || !svgEl) return () => {};
+    dohInstanceSeq += 1;
+    const uid = dohInstanceSeq;
+    const svgNS = "http://www.w3.org/2000/svg";
+    let rafId = 0;
+
+    const redrawNow = () => {
+      rafId = 0;
+      if (!arenaEl.isConnected) return;
+      const W = Math.max(300, arenaEl.offsetWidth || 540);
+      const H = Math.max(150, arenaEl.offsetHeight || 230);
+      svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svgEl.replaceChildren();
+      if (badgeLayerEl) badgeLayerEl.replaceChildren();
+
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const strokeHex = isDark ? "#60a5fa" : "#2e6eb5";
+      const offHex = isDark ? "#475569" : "#94a3b8";
+
+      const defs = document.createElementNS(svgNS, "defs");
+      const mkEnd = document.createElementNS(svgNS, "marker");
+      mkEnd.setAttribute("id", `dohArrEnd_${uid}`);
+      mkEnd.setAttribute("viewBox", "0 0 10 10");
+      mkEnd.setAttribute("refX", "8.6");
+      mkEnd.setAttribute("refY", "5");
+      mkEnd.setAttribute("markerWidth", "5.8");
+      mkEnd.setAttribute("markerHeight", "5.8");
+      mkEnd.setAttribute("orient", "auto");
+      const pEnd = document.createElementNS(svgNS, "path");
+      pEnd.setAttribute("d", "M 0 1.2 L 9.2 5 L 0 8.8 z");
+      pEnd.setAttribute("fill", strokeHex);
+      mkEnd.appendChild(pEnd);
+
+      const mkStart = document.createElementNS(svgNS, "marker");
+      mkStart.setAttribute("id", `dohArrStart_${uid}`);
+      mkStart.setAttribute("viewBox", "0 0 10 10");
+      mkStart.setAttribute("refX", "1.4");
+      mkStart.setAttribute("refY", "5");
+      mkStart.setAttribute("markerWidth", "5.8");
+      mkStart.setAttribute("markerHeight", "5.8");
+      mkStart.setAttribute("orient", "auto");
+      const pStart = document.createElementNS(svgNS, "path");
+      pStart.setAttribute("d", "M 9.2 1.2 L 0 5 L 9.2 8.8 z");
+      pStart.setAttribute("fill", strokeHex);
+      mkStart.appendChild(pStart);
+
+      defs.append(mkEnd, mkStart);
+      svgEl.appendChild(defs);
+
+      const aRect = arenaEl.getBoundingClientRect();
+      const sx = aRect.width > 10 ? W / aRect.width : 1;
+      const sy = aRect.height > 10 ? H / aRect.height : 1;
+
+      const getBox = (slotName, fb) => {
+        const el = arenaEl.querySelector(`[data-doh-slot="${slotName}"]`);
+        if (!el || aRect.width < 20) return fb;
+        const r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) return fb;
+        const left = (r.left - aRect.left) * sx;
+        const top = (r.top - aRect.top) * sy;
+        const width = r.width * sx;
+        const height = r.height * sy;
+        return {
+          left,
+          top,
+          width,
+          height,
+          right: left + width,
+          bottom: top + height,
+          cx: left + width / 2,
+          cy: top + height / 2
+        };
+      };
+
+      const ind = getBox("individual", { left: 4, top: 4, width: W * 0.34, height: H * 0.56, right: 4 + W * 0.34, bottom: 4 + H * 0.56, cx: 4 + W * 0.17, cy: 4 + H * 0.28 });
+      const soc = getBox("soc_env", { left: W * 0.65, top: 4, width: W * 0.34, height: H * 0.56, right: W * 0.99, bottom: 4 + H * 0.56, cx: W * 0.82, cy: 4 + H * 0.28 });
+      const out = getBox("outcome", { left: W * 0.39, top: H * 0.30, width: W * 0.22, height: H * 0.24, right: W * 0.61, bottom: H * 0.54, cx: W * 0.50, cy: H * 0.42 });
+      const hsys = getBox("health_sys", { left: W * 0.26, top: H * 0.68, width: W * 0.48, height: H * 0.28, right: W * 0.74, bottom: H * 0.96, cx: W * 0.50, cy: H * 0.82 });
+
+      const topBridgeY = Math.max(10, Math.min(out.top - 10, Math.min(ind.top, soc.top) + 14));
+      const coords = {
+        ind_bi_soc: {
+          x1: ind.right + 5,
+          y1: topBridgeY,
+          x2: soc.left - 5,
+          y2: topBridgeY
+        },
+        ind_to_out: {
+          x1: ind.right + 4,
+          y1: Math.max(topBridgeY + 14, Math.min(ind.bottom - 8, out.cy - 6)),
+          x2: out.left - 5,
+          y2: out.cy - 2
+        },
+        soc_to_out: {
+          x1: soc.left - 4,
+          y1: Math.max(topBridgeY + 14, Math.min(soc.bottom - 8, out.cy - 6)),
+          x2: out.right + 5,
+          y2: out.cy - 2
+        },
+        hsys_to_out: {
+          x1: hsys.cx,
+          y1: hsys.top - 4,
+          x2: out.cx,
+          y2: out.bottom + 5
+        },
+        ind_bi_hsys: {
+          x1: ind.left + ind.width * 0.62,
+          y1: ind.bottom + 4,
+          x2: hsys.left - 6,
+          y2: hsys.cy
+        },
+        soc_bi_hsys: {
+          x1: soc.left + soc.width * 0.38,
+          y1: soc.bottom + 4,
+          x2: hsys.right + 6,
+          y2: hsys.cy
+        }
+      };
+
+      const edgesMap = (typeof getEdgesFn === "function" ? getEdgesFn() : null) || {};
+      const interactive = typeof onCycleEdgeFn === "function";
+
+      DOH_EDGE_DEFS.forEach((ed) => {
+        const dir = edgesMap[ed.id] || "off";
+        if (dir === "off" && !interactive) return;
+        const c = coords[ed.id];
+        if (!c) return;
+
+        const ln = document.createElementNS(svgNS, "line");
+        ln.setAttribute("x1", c.x1.toFixed(1));
+        ln.setAttribute("y1", c.y1.toFixed(1));
+        ln.setAttribute("x2", c.x2.toFixed(1));
+        ln.setAttribute("y2", c.y2.toFixed(1));
+        ln.setAttribute("stroke", dir === "off" ? offHex : strokeHex);
+        ln.setAttribute("stroke-width", dir === "off" ? "1.6" : "2.35");
+        ln.setAttribute("stroke-linecap", "round");
+        if (dir === "off") {
+          ln.setAttribute("stroke-dasharray", "4 4");
+          ln.setAttribute("opacity", "0.65");
+        } else {
+          if (dir === "fwd" || dir === "bi") {
+            ln.setAttribute("marker-end", `url(#dohArrEnd_${uid})`);
+          }
+          if (dir === "rev" || dir === "bi") {
+            ln.setAttribute("marker-start", `url(#dohArrStart_${uid})`);
+          }
+        }
+        svgEl.appendChild(ln);
+
+        if (interactive) {
+          const hit = document.createElementNS(svgNS, "line");
+          hit.setAttribute("x1", c.x1.toFixed(1));
+          hit.setAttribute("y1", c.y1.toFixed(1));
+          hit.setAttribute("x2", c.x2.toFixed(1));
+          hit.setAttribute("y2", c.y2.toFixed(1));
+          hit.setAttribute("stroke", "transparent");
+          hit.setAttribute("stroke-width", "14");
+          hit.setAttribute("class", "doh-hit-line");
+          hit.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            onCycleEdgeFn(ed.id);
+          });
+          svgEl.appendChild(hit);
+
+          if (badgeLayerEl) {
+            const midX = ((c.x1 + c.x2) / 2 / W) * 100;
+            const midY = ((c.y1 + c.y2) / 2 / H) * 100;
+            const sym = dir === "bi" ? "↔" : dir === "fwd" ? "→" : dir === "rev" ? "←" : "⇢";
+            const btn = make(
+              "button",
+              sym,
+              `doh-arrow-mid-btn hsd-no-print${dir === "off" ? " is-off" : ""}`
+            );
+            btn.type = "button";
+            btn.style.left = `${midX.toFixed(2)}%`;
+            btn.style.top = `${midY.toFixed(2)}%`;
+            btn.title =
+              dir === "off"
+                ? `คลิกเพื่อลากเส้นลูกศร (${ed.label} / ${ed.biLabel})`
+                : `คลิกเพื่อเปลี่ยนทิศทางลูกศร (ปัจจุบัน: ${sym})`;
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              onCycleEdgeFn(ed.id);
+            });
+            badgeLayerEl.appendChild(btn);
+          }
+        }
+      });
+    };
+
+    const scheduleRedraw = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(redrawNow);
+    };
+
+    if (typeof ResizeObserver === "function") {
+      const ro = new ResizeObserver(() => scheduleRedraw());
+      ro.observe(arenaEl);
+    }
+    scheduleRedraw();
+    setTimeout(scheduleRedraw, 80);
+    return scheduleRedraw;
+  }
+
+  function buildDohDiagramWorksheetDOM(qObj, forceInteractive) {
+    const frag = document.createDocumentFragment();
+    const ws = qObj.worksheet;
+    if (!ws || ws.type !== "doh-diagram") return frag;
+
+    const isStudentLiveSheet = Boolean(LIVE && ROLE === "student" && !forceInteractive);
+    const activeTeamId =
+      isStudentLiveSheet && state.hsdSessionJoined && typeof LIVE.getTeamId === "function"
+        ? LIVE.getTeamId()
+        : 0;
+    const teamRecOnMount =
+      activeTeamId && typeof LIVE.getMyTeamResponse === "function"
+        ? LIVE.getMyTeamResponse(qObj.id)
+        : null;
+
+    if (isStudentLiveSheet && !state.isPptSlideSharePopup) {
+      if (activeTeamId && state.myStudent) {
+        const st = getKahootRoomRosterStatus();
+        const sNo = String(state.myStudent.id || "").slice(-3);
+        const nick = state.myStudent.nickname ? ` ${state.myStudent.nickname}` : "";
+        const memberCnt = (st.teamCounts && st.teamCounts[activeTeamId]) || 1;
+        const banner = make("div", null, `hsd-team-sheet-banner is-team-${activeTeamId} hsd-no-print`);
+        const leftMeta = make("div", null, "hsd-tsb-left");
+        leftMeta.innerHTML =
+          `<span class="hsd-tsb-pill is-team-${activeTeamId}">กลุ่ม ${activeTeamId}</span>` +
+          `<span class="hsd-tsb-title">ใบงาน Diagram ร่วมกัน (${memberCnt} คน) · เบอร์ ${escapeHtml(sNo)}${escapeHtml(nick)}</span>`;
+        const rightMeta = make("div", null, "hsd-tsb-right");
+        const editorTag = make(
+          "span",
+          teamRecOnMount && teamRecOnMount.editorLabel
+            ? `อัปเดตล่าสุดโดย ${teamRecOnMount.editorLabel}`
+            : "ร่วมกันสร้าง Diagram ในนามกลุ่ม",
+          "hsd-tsb-editor"
+        );
+        editorTag.setAttribute("data-team-live-editor", qObj.id);
+        const switchBtn = make("button", "เปลี่ยนเบอร์/กลุ่ม", "hsd-tsb-switch-btn");
+        switchBtn.type = "button";
+        switchBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
+        rightMeta.append(editorTag, switchBtn);
+        banner.append(leftMeta, rightMeta);
+        frag.appendChild(banner);
+      } else {
+        const inlineGate = make("div", null, "hsd-inline-team-gate hsd-no-print");
+        inlineGate.appendChild(
+          buildSmartTeamCheckinWidgetDOM({
+            compact: true,
+            modId: state.hsdModule !== "ALL" ? state.hsdModule : "HS1"
+          })
+        );
+        frag.appendChild(inlineGate);
+      }
+    }
+
+    const ensureJoinedBeforeLiveSend = () => {
+      const curTid = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+      if (state.hsdSessionJoined && curTid >= 1 && curTid <= 3) return curTid;
+      const numInp = document.querySelector("[data-ppt-ok-sid-input='1']");
+      if (numInp) {
+        numInp.scrollIntoView({ behavior: "smooth", block: "center" });
+        numInp.focus();
+      }
+      showStudentSlideSyncToast("กรุณากรอกเบอร์ตัวเอง 3 หลัก และเลือกเข้า กลุ่ม 1 / 2 / 3 ก่อนส่งคำตอบกลุ่ม");
+      return 0;
+    };
+
+    const meta = ws.diagramMeta || {};
+    const nodesMeta = meta.nodes || {};
+    const linksInputId = meta.linksInputId || "c1b_q1_links";
+
+    // Map each inputId to its cell spec in ws.rows
+    const cellSpecById = {};
+    (ws.rows || []).forEach((r) => {
+      (r.cells || []).forEach((c) => {
+        if (c && c.inputId) cellSpecById[c.inputId] = c;
+      });
+    });
+
+    // Hydrate initial values from live team response if present
+    Object.keys(cellSpecById).forEach((cid) => {
+      const remoteVal =
+        teamRecOnMount && teamRecOnMount.cells && teamRecOnMount.cells[cid]
+          ? String(teamRecOnMount.cells[cid])
+          : "";
+      if (remoteVal && state.hsdDrafts[cid] !== remoteVal) {
+        state.hsdDrafts[cid] = remoteVal;
+      }
+    });
+
+    let linkState = parseDohLinksString(state.hsdDrafts[linksInputId] || "");
+    const cellSyncCallbacks = [];
+    let redrawDiagramArrows = () => {};
+
+    const container = make("div", null, "doh-ws-container");
+
+    // Hidden input for linksInputId so syncStudentTeamWorksheetFromLive updates arrows & rings seamlessly!
+    const hiddenLinksInput = document.createElement("input");
+    hiddenLinksInput.type = "hidden";
+    hiddenLinksInput.id = `${forceInteractive ? "demo_" : "input_"}${linksInputId}`;
+    hiddenLinksInput.dataset.inputId = linksInputId;
+    hiddenLinksInput.value = state.hsdDrafts[linksInputId] || "";
+    container.appendChild(hiddenLinksInput);
+
+    // Interactive Toolbar (Mode toggle + Concentric Ovals + Quick Arrow Controls)
+    const toolbar = make("div", null, "doh-ws-toolbar hsd-no-print");
+    const leftTools = make("div", null, "doh-toolbar-group");
+    const rightTools = make("div", null, "doh-toolbar-group");
+
+    const viewDiagBtn = make("button", "🗺️ สร้างผัง Diagram", "doh-tool-pill is-active");
+    viewDiagBtn.type = "button";
+    const viewTblBtn = make("button", "▦ มุมมองตาราง", "doh-tool-pill");
+    viewTblBtn.type = "button";
+
+    const innerOvalBtn = make("button", "⭕ วงล้อมชั้นใน", "doh-tool-pill");
+    innerOvalBtn.type = "button";
+    innerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นในเชื่อมโยงปัจจัยด้านปัจเจก–สังคมสิ่งแวดล้อม–ระบบบริการสุขภาพ";
+
+    const outerOvalBtn = make("button", "🟠 วงล้อมโครงสร้าง", "doh-tool-pill");
+    outerOvalBtn.type = "button";
+    outerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นนอกของปัจจัยด้านโครงสร้างที่ครอบคลุมทั้งระบบ";
+
+    const autoArrowsBtn = make("button", "⚡ เชื่อมลูกศรครบวงจร", "doh-tool-pill");
+    autoArrowsBtn.type = "button";
+    autoArrowsBtn.title = "ลากลูกศรเชื่อมโยงทั้ง 6 เส้นพร้อมเปิดวงล้อมทั้ง 2 ชั้นอัตโนมัติ (คลิกแก้รายเส้นต่อได้)";
+
+    const clearArrowsBtn = make("button", "↺ ล้างเส้น", "doh-tool-pill");
+    clearArrowsBtn.type = "button";
+    clearArrowsBtn.title = "ล้างลูกศรและวงล้อมทั้งหมดเพื่อฝึกวาดใหม่";
+
+    leftTools.append(viewDiagBtn, viewTblBtn, innerOvalBtn, outerOvalBtn);
+    rightTools.append(
+      make("span", "คลิกปุ่ม ⇢ บนเส้นเพื่อเปลี่ยนลูกศร (→ / ↔ / ←)", "doh-toolbar-hint"),
+      autoArrowsBtn,
+      clearArrowsBtn
+    );
+    toolbar.append(leftTools, rightTools);
+    if (!state.isPptSlideSharePopup) {
+      container.appendChild(toolbar);
+    }
+
+    // Concentric Diagram Canvas
+    const shell = make("div", null, "doh-diagram-shell");
+    const structZone = make("div", null, "doh-structural-zone");
+    const innerOval = make("div", null, "doh-inner-oval");
+    const arena = make("div", null, "doh-inner-arena");
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgEl.setAttribute("class", "doh-arrows-svg");
+    svgEl.setAttribute("aria-hidden", "true");
+    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
+
+    const buildEditableNodeCard = (nodeKey, extraCardCls) => {
+      const nMeta = nodesMeta[nodeKey] || {};
+      const cid = nMeta.inputId || `c1b_q1_${nodeKey}`;
+      const cellSpec = cellSpecById[cid] || { inputId: cid, maxWords: 55, maxChars: 280, compact: nodeKey === "outcome" };
+      const isOutcome = nodeKey === "outcome";
+      const card = make("div", null, `doh-node-card${extraCardCls ? ` ${extraCardCls}` : ""}`);
+      card.setAttribute("data-doh-slot", nodeKey);
+
+      const head = make("div", null, "doh-node-head");
+      head.appendChild(make("span", nMeta.title || nodeKey, "doh-node-title"));
+      card.appendChild(head);
+
+      const savedVal = enforceA4ConciseText(state.hsdDrafts[cid] || "", cellSpec, false);
+      const ta = document.createElement("textarea");
+      ta.className = `hsd-input${isOutcome ? " is-compact" : ""}`;
+      ta.id = `${forceInteractive ? "demo_" : "input_"}${cid}`;
+      ta.dataset.inputId = cid;
+      ta.maxLength = cellSpec.maxChars || 280;
+      ta.rows = isOutcome ? 1 : nodeKey === "health_sys" ? 2 : 3;
+      ta.placeholder = nMeta.placeholder || cellSpec.placeholder || "พิมพ์ประเด็นในโหนดนี้…";
+      ta.value = savedVal;
+
+      const mirror = make(
+        "div",
+        savedVal || `(พื้นที่เขียน ${nMeta.title || ""})`,
+        "hsd-print-mirror"
+      );
+
+      let composing = false;
+      const fitTa = () => {
+        ta.style.height = "auto";
+        const minH = isOutcome ? 32 : 44;
+        const maxH = isOutcome ? 64 : 112;
+        const sh = ta.scrollHeight;
+        ta.style.overflowY = sh > maxH ? "auto" : "hidden";
+        ta.style.height = `${Math.min(maxH, Math.max(minH, sh))}px`;
+        redrawDiagramArrows();
+      };
+
+      ta._refreshFromTeamSync = () => {
+        mirror.textContent = ta.value.trim() || `(พื้นที่เขียน ${nMeta.title || ""})`;
+        fitTa();
+      };
+
+      const onValChange = (clampNow) => {
+        if (clampNow) {
+          const clamped = enforceA4ConciseText(ta.value, cellSpec, false);
+          if (clamped !== ta.value) ta.value = clamped;
+        }
+        mirror.textContent = ta.value.trim() || `(พื้นที่เขียน ${nMeta.title || ""})`;
+        persistHsdDraft(cid, ta.value);
+        // Sync companion table textarea if mounted
+        container.querySelectorAll(`textarea[data-table-mirror-id="${cid}"]`).forEach((mTa) => {
+          if (mTa.value !== ta.value) mTa.value = ta.value;
+        });
+        fitTa();
+        if (LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId()) {
+          LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), cid);
+        }
+      };
+
+      ta.addEventListener("compositionstart", () => {
+        composing = true;
+      });
+      ta.addEventListener("compositionend", () => {
+        composing = false;
+        onValChange(true);
+      });
+      ta.addEventListener("input", () => onValChange(!composing));
+      ta.addEventListener("change", () => {
+        if (LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId() && typeof LIVE.flushLiveTyping === "function") {
+          LIVE.flushLiveTyping(qObj.id, collectQuestionCellsMap(qObj));
+        }
+      });
+
+      requestAnimationFrame(fitTa);
+      card.append(ta, mirror);
+      return card;
+    };
+
+    structZone.appendChild(buildEditableNodeCard("structural", "is-structural-card"));
+
+    const posInd = make("div", null, "doh-pos-ind");
+    posInd.appendChild(buildEditableNodeCard("individual", ""));
+    const posSoc = make("div", null, "doh-pos-soc");
+    posSoc.appendChild(buildEditableNodeCard("soc_env", ""));
+    const posOut = make("div", null, "doh-pos-out");
+    posOut.appendChild(buildEditableNodeCard("outcome", "is-outcome-card"));
+    const posHsys = make("div", null, "doh-pos-hsys");
+    posHsys.appendChild(buildEditableNodeCard("health_sys", ""));
+
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
+    innerOval.appendChild(arena);
+    shell.append(structZone, innerOval);
+    container.appendChild(shell);
+
+    // Companion Table View (for optional quick tabular editing)
+    const tblViewWrap = make("div", null, "hsd-ws-wrap");
+    tblViewWrap.hidden = true;
+    const cmpTbl = make("table", null, "hsd-ws-table");
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    (ws.headers || []).forEach((h) => hr.appendChild(make("th", h)));
+    thead.appendChild(hr);
+    const tbody = document.createElement("tbody");
+    (ws.rows || []).forEach((r) => {
+      if (r.isDiagramLinksRow) return;
+      const trEl = document.createElement("tr");
+      (r.cells || []).forEach((cell) => {
+        const td = document.createElement("td");
+        if (cell.static) {
+          td.className = "hsd-ws-static";
+          td.innerHTML = escapeHtml(cell.static).replace(/\n/g, "<br>");
+        } else if (cell.inputId) {
+          const mTa = document.createElement("textarea");
+          mTa.className = `hsd-input${cell.compact ? " is-compact" : ""}`;
+          mTa.dataset.tableMirrorId = cell.inputId;
+          mTa.maxLength = cell.maxChars || 280;
+          mTa.rows = cell.compact ? 1 : 2;
+          mTa.placeholder = cell.placeholder || "";
+          mTa.value = state.hsdDrafts[cell.inputId] || "";
+          mTa.addEventListener("input", () => {
+            const diagTa = shell.querySelector(`textarea[data-input-id="${cell.inputId}"]`);
+            if (diagTa) {
+              diagTa.value = mTa.value;
+              diagTa.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+          });
+          td.appendChild(mTa);
+        }
+        trEl.appendChild(td);
+      });
+      tbody.appendChild(trEl);
+    });
+    cmpTbl.append(thead, tbody);
+    tblViewWrap.appendChild(cmpTbl);
+    container.appendChild(tblViewWrap);
+
+    const syncVisualLinkState = (broadcastLive) => {
+      shell.classList.toggle("is-outer-oval-on", Boolean(linkState.outerRing));
+      innerOval.classList.toggle("is-inner-oval-on", Boolean(linkState.innerRing));
+      innerOvalBtn.classList.toggle("is-active", Boolean(linkState.innerRing));
+      outerOvalBtn.classList.toggle("is-outer-active", Boolean(linkState.outerRing));
+      const serialized = serializeDohLinksState(linkState);
+      hiddenLinksInput.value = serialized;
+      persistHsdDraft(linksInputId, serialized);
+      redrawDiagramArrows();
+      if (broadcastLive && LIVE && ROLE === "student" && state.hsdSessionJoined && LIVE.getTeamId()) {
+        LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), linksInputId);
+      }
+    };
+
+    hiddenLinksInput._refreshFromTeamSync = () => {
+      linkState = parseDohLinksString(hiddenLinksInput.value || "");
+      shell.classList.toggle("is-outer-oval-on", Boolean(linkState.outerRing));
+      innerOval.classList.toggle("is-inner-oval-on", Boolean(linkState.innerRing));
+      innerOvalBtn.classList.toggle("is-active", Boolean(linkState.innerRing));
+      outerOvalBtn.classList.toggle("is-outer-active", Boolean(linkState.outerRing));
+      redrawDiagramArrows();
+    };
+
+    const cycleOrder = ["off", "fwd", "bi", "rev"];
+    redrawDiagramArrows = mountDohArenaArrows(
+      arena,
+      svgEl,
+      state.isPptSlideSharePopup ? null : badgeLayer,
+      () => linkState.edges,
+      state.isPptSlideSharePopup
+        ? null
+        : (edgeId) => {
+            const curDir = linkState.edges[edgeId] || "off";
+            const nextDir = cycleOrder[(cycleOrder.indexOf(curDir) + 1) % cycleOrder.length];
+            linkState.edges[edgeId] = nextDir;
+            syncVisualLinkState(true);
+          }
+    );
+
+    innerOvalBtn.addEventListener("click", () => {
+      linkState.innerRing = !linkState.innerRing;
+      syncVisualLinkState(true);
+    });
+    outerOvalBtn.addEventListener("click", () => {
+      linkState.outerRing = !linkState.outerRing;
+      syncVisualLinkState(true);
+    });
+    autoArrowsBtn.addEventListener("click", () => {
+      DOH_EDGE_DEFS.forEach((ed) => {
+        linkState.edges[ed.id] = ed.std;
+      });
+      linkState.innerRing = true;
+      linkState.outerRing = true;
+      syncVisualLinkState(true);
+    });
+    clearArrowsBtn.addEventListener("click", () => {
+      DOH_EDGE_DEFS.forEach((ed) => {
+        linkState.edges[ed.id] = "off";
+      });
+      linkState.innerRing = false;
+      linkState.outerRing = false;
+      syncVisualLinkState(true);
+    });
+
+    viewDiagBtn.addEventListener("click", () => {
+      shell.hidden = false;
+      tblViewWrap.hidden = true;
+      viewDiagBtn.classList.add("is-active");
+      viewTblBtn.classList.remove("is-active");
+      redrawDiagramArrows();
+      const parentSheet = container.closest(".ppt-slide-sheet");
+      if (parentSheet) autoFitSingleSheetBoxes(parentSheet, true);
+    });
+    viewTblBtn.addEventListener("click", () => {
+      shell.hidden = true;
+      tblViewWrap.hidden = false;
+      viewTblBtn.classList.add("is-active");
+      viewDiagBtn.classList.remove("is-active");
+      const parentSheet = container.closest(".ppt-slide-sheet");
+      if (parentSheet) autoFitSingleSheetBoxes(parentSheet, true);
+    });
+
+    syncVisualLinkState(false);
+    frag.appendChild(container);
+
+    if (LIVE && ROLE === "student" && !forceInteractive) {
+      const subBar = make("div", null, "hsd-q-submit-bar hsd-no-print");
+      const rNum = LIVE.getRoomId();
+      const curTid = typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
+      const hint = make(
+        "span",
+        curTid
+          ? `● แผนภาพ Diagram ร่วมกันของกลุ่ม ${curTid} (ห้อง ${rNum}) — พิมพ์และลากลูกศรแล้วกดส่งในนามกลุ่ม`
+          : `● กรอกเบอร์ 3 หลักและเลือกเข้า กลุ่ม 1 / 2 / 3 ด้านบนเพื่อส่งแผนภาพร่วมกันในนามกลุ่ม`,
+        "hsd-live-sync-hint"
+      );
+
+      const actWrap = make("div", null, "hsd-q-submit-actions");
+      const prevQBtn = make("button", tr("◀ ข้อก่อนหน้า", "◀ Prev Question"), "btn sm");
+      prevQBtn.type = "button";
+      prevQBtn.addEventListener("click", () => manualStepHsSlide(-1));
+
+      const defaultSendLbl = curTid
+        ? `ส่งแผนภาพกลุ่ม ${curTid} ขึ้นจอ ✓`
+        : "เลือกกลุ่ม 1–3 & ส่งแผนภาพ ✓";
+      const sendBtn = make("button", defaultSendLbl, "btn sm teal");
+      sendBtn.type = "button";
+      sendBtn.addEventListener("click", () => {
+        const map = collectQuestionCellsMap(qObj);
+        if (!Object.keys(map).length) {
+          hint.textContent = "กรุณาพิมพ์วิเคราะห์ในแผนภาพอย่างน้อย 1 โหนดก่อนกดส่งขึ้นจอ";
+          return;
+        }
+        const tidNow = ensureJoinedBeforeLiveSend();
+        if (!tidNow) return;
+        LIVE.submitQuestionFinal(qObj.id, map);
+        cellSyncCallbacks.forEach((fn) => fn());
+        sendBtn.textContent = `✓ ส่งแผนภาพกลุ่ม ${tidNow} แล้ว!`;
+        hint.textContent = `ส่งแผนภาพ Diagram ของกลุ่ม ${tidNow} ขึ้นจอห้องที่ ${LIVE.getRoomId()} เรียบร้อยแล้ว`;
+        syncLiveBarQuestionPickerDOM();
+        setTimeout(() => {
+          sendBtn.textContent = `ส่งแผนภาพกลุ่ม ${tidNow} ขึ้นจอ ✓`;
+        }, 2000);
+      });
+
+      const nextQBtn = make("button", tr("ข้อถัดไป ▶", "Next Question ▶"), "btn sm primary");
+      nextQBtn.type = "button";
+      nextQBtn.addEventListener("click", () => manualStepHsSlide(1));
+
+      actWrap.append(prevQBtn, sendBtn, nextQBtn);
+      subBar.append(hint, actWrap);
+      frag.appendChild(subBar);
+    }
+
+    return frag;
+  }
+
   function buildWideWorksheetTableDOM(qObj, forceInteractive) {
     const frag = document.createDocumentFragment();
     const ws = qObj.worksheet;
-    if (!ws || ws.type !== "table") return frag;
+    if (!ws) return frag;
+    if (ws.type === "doh-diagram") {
+      return buildDohDiagramWorksheetDOM(qObj, forceInteractive);
+    }
+    if (ws.type !== "table") return frag;
 
     const isStudentLiveSheet = Boolean(LIVE && ROLE === "student" && !forceInteractive);
     const activeTeamId =

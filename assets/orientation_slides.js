@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124adv1";
+  const ASSET_VER = "20261124orl1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -16,7 +16,7 @@
   const state = {
     isOpen: false,
     slideIdx: 0,
-    viewMode: "deck", // "deck" | "sorter" | "handout"
+    viewMode: "deck", // "deck" | "live" | "sorter" | "handout"
     sorterFilter: "all",
     presentationMode: false,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
@@ -986,16 +986,71 @@
           </div>
         </div>
       `
+    },
+    {
+      id: "s16-live-recheck",
+      num: "16",
+      section: "action",
+      sectionLabel: "Act IV · Conduct & Launch",
+      actClass: "is-act-4",
+      actLabel: "ACT IV · KAHOOT RECHECK",
+      timeWindow: "กิจกรรมทวนสอบสด (Live Recheck)",
+      kicker: "04 · DO'S & DON'TS + O / S / M / U MASTERY RECHECK",
+      title: "ทวนสอบความเข้าใจ Do's & Don'ts และเกณฑ์ O · S · M · U ก่อนเริ่มเรียน",
+      keyTag: "Recheck ร่วมกันทั้งรุ่น",
+      keyMessageHtml:
+        "ตรวจสอบความเข้าใจกติกาสำคัญตามคู่มือรายวิชาและ มม.4 ปี 2569 เพื่อป้องกันความเข้าใจคลาดเคลื่อนที่อาจนำไปสู่ระดับ <strong>M (ควรปรับปรุง)</strong> หรือ <strong>U (ไม่ผ่าน · ลงทะเบียนเรียนใหม่)</strong>",
+      notes:
+        "ชวนนักศึกษาที่สแกน QR Code ค้างไว้ใน Live Lobby ร่วมกดตอบคำถาม Kahoot Recheck ทบทวน Do's & Don'ts ทั้งเรื่องเวลาเข้าเรียน การลา การส่งงาน การใช้ AI/PDPA ความซื่อสัตย์ทางวิชาการ ระเบียบห้องสอบ และระเบียบภาคสนาม พ.ศ. 2561 พร้อมดูเฉลยรายข้อทันที",
+      render: () => `
+        <div class="or-infog-split is-s16-recheck">
+          <div class="or-stack-col" data-fit-group="cards">
+            <div class="or-card is-amber-tint">
+              <span class="or-card-kicker">① เวลาเข้าเรียน · การลา &amp; การส่งงาน (มม.4 หน้า 11–13)</span>
+              <p class="or-card-text">
+                <strong>Do:</strong> ลงชื่อเข้าเรียนไม่เกิน 15 นาทีหลังเริ่มคาบ (เวลาเรียนรวม ≥ 80%) และยื่นใบลาล่วงหน้า (ทฤษฎี ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน)<br>
+                <strong>ระวัง M / U:</strong> สายเกิน 15 นาที <strong>4 ครั้ง = M · ≥ 5 ครั้ง = U</strong> · ขาดเรียนไม่ลา <strong>≥ 2 ครั้ง = M</strong> · ส่งงานช้า <strong>≥ 2 ครั้ง = M · ≥ 3 ครั้ง = U</strong>
+              </p>
+            </div>
+            <div class="or-card is-rose-tint">
+              <span class="or-card-kicker">② ความซื่อสัตย์วิชาชีพ &amp; ระเบียบภาคสนาม พ.ศ. 2561</span>
+              <p class="or-card-text">
+                <strong>Don't เด็ดขาด (= U ทันที):</strong> ห้ามเซ็นชื่อแทนกัน (ได้ U ทั้งผู้ฝากและผู้ทำแทน) ห้ามเมคข้อมูลสำรวจ ห้ามลอกรายงาน · ภาคสนาม <strong>งดพาหนะส่วนตัว งดออกนอกเขตฝึกโดยพลการ งดแอลกอฮอล์/พนัน</strong> และงดให้คนนอกเข้าที่พัก
+              </p>
+            </div>
+            <div class="or-card is-teal-tint">
+              <span class="or-card-kicker">③ ระเบียบห้องสอบ · โน้ต A4 ลายมือ &amp; เกณฑ์ AI / PDPA</span>
+              <p class="or-card-text">
+                <strong>ห้องสอบ:</strong> สายเกิน 15 นาทีหมดสิทธิ์เข้าสอบ งดกระเป๋า/มือถือ/Smart Watch/เครื่องคิดเลข · สอบระบบสุขภาพนำ <strong>A4 เขียนลายมือตนเองเข้าได้ 1 แผ่น</strong> (ห้ามพิมพ์/สำเนา) · <strong>SRN 1–2 = No AI</strong> และห้ามนำข้อมูลระบุตัวบุคคลเข้า AI สาธารณะ
+              </p>
+            </div>
+            <div class="or-card is-navy-tint">
+              <span class="or-card-kicker">④ กฎเหล็กการขยับ M → U &amp; เกณฑ์ตัดสิน O / S</span>
+              <p class="or-card-text">
+                <strong>เกรด O:</strong> สอบได้ ≥ 3.75 แยกทั้งสองหมวดรอบแรก + ฟอร์ม 2A ได้ O · <strong>สอบซ่อมผ่าน (&lt; 2.00):</strong> ได้สูงสุด <strong>S</strong> · <strong>สำคัญที่สุด:</strong> ได้ <strong>M ≥ 2 หมวด หรือทำซ้ำหมวด M เดิม → ปรับเป็น U</strong> และ <strong>U ด้านเจตคติไม่มีการสอบแก้ตัว!</strong>
+              </p>
+            </div>
+          </div>
+
+          <div class="orl-s16-live-col" data-orl-slide-mount="s16">
+            ${
+              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderCoverCardHtml === "function"
+                ? window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode })
+                : ""
+            }
+          </div>
+        </div>
+      `
     }
   ];
 
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (15)", labelEn: "All Slides (15)" },
-    { id: "intro", labelTh: "เปิดเรื่อง (1)", labelEn: "Opening (1)" },
+    { id: "all", labelTh: "ทั้งหมด (16)", labelEn: "All Slides (16)" },
+    { id: "intro", labelTh: "เปิดเรื่อง & Lobby (1)", labelEn: "Opening & Lobby (1)" },
     { id: "objectives", labelTh: "Act I · ความสำคัญและเป้าหมาย (4)", labelEn: "Act I · Start with Why (4)" },
     { id: "experience", labelTh: "Act II · เส้นทางเรียนรู้ (4)", labelEn: "Act II · Experience (4)" },
     { id: "evaluation", labelTh: "Act III · วัดผล 5 สมรรถนะ (4)", labelEn: "Act III · Evaluation (4)" },
-    { id: "action", labelTh: "Act IV · กติกาและก้าวแรก (2)", labelEn: "Act IV · Launch (2)" }
+    { id: "action", labelTh: "Act IV · กติกา & Live Recheck (3)", labelEn: "Act IV · Launch & Recheck (3)" }
   ];
 
   /* ---------- Per-Frame Binary-Search Auto-Fit Typography Engine ---------- */
@@ -1072,7 +1127,7 @@
   }
 
   function fitSingleSlideCanvas(canvas) {
-    if (!canvas) return;
+    if (!canvas || canvas.classList.contains("is-live-canvas")) return;
     const allScaled = canvas.querySelectorAll(
       ".or-card, .or-visual-pillar-copy, .or-table-wrap, .or-schematic-box, .or-cover-kpi, .or-cover-act-chip"
     );
@@ -1292,13 +1347,17 @@
             </div>
           </div>
 
-          <div class="or-cover-right-col">
-            ${figPlate(
-              "orient_s01_hero.png",
-              "Bedside Care connected to Community & Livelihood and Health Systems Science",
-              "",
-              "is-cover-hero"
-            )}
+          <div class="or-cover-right-col" data-orl-slide-mount="cover">
+            ${
+              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderCoverCardHtml === "function"
+                ? window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode })
+                : figPlate(
+                    "orient_s01_hero.png",
+                    "Bedside Care connected to Community & Livelihood and Health Systems Science",
+                    "",
+                    "is-cover-hero"
+                  )
+            }
           </div>
         </div>
 
@@ -1317,7 +1376,7 @@
               <span class="or-cover-meta-val">อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ และคณาจารย์ 14 ท่าน</span>
             </div>
           </div>
-          <span class="or-cover-code-chip">15 Widescreen Slides · 16:9</span>
+          <span class="or-cover-code-chip">${SLIDES.length} Widescreen Slides · 16:9 + Live Recheck</span>
         </div>
       </div>
     `;
@@ -1485,6 +1544,11 @@
         ev.preventDefault();
         state.laserActive = !state.laserActive;
         renderModal();
+      } else if (ev.key === "k" || ev.key === "K") {
+        ev.preventDefault();
+        state.autoPlay = false;
+        state.viewMode = state.viewMode === "live" ? "deck" : "live";
+        renderModal();
       }
     });
 
@@ -1545,7 +1609,7 @@
     const modal = ensureModalElement();
     state.toolsMenuOpen = false;
     if (!state.presentationMode) {
-      state.viewMode = "deck";
+      if (state.viewMode !== "live") state.viewMode = "deck";
       state.presentationMode = true;
       modal.classList.add("is-presentation-mode");
       if (modal.requestFullscreen) {
@@ -1567,12 +1631,64 @@
     renderModal();
   }
 
+  function syncHostSlideToLive() {
+    if (window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.notifyHostSlide === "function") {
+      window.RACM_ORIENTATION_LIVE.notifyHostSlide(state.slideIdx, SLIDES[state.slideIdx]);
+    }
+  }
+
   function goToSlide(idx) {
     state.slideIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
     state.toolsMenuOpen = false;
+    syncHostSlideToLive();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
     if (vp) vp.scrollTop = 0;
+  }
+
+  function openLiveLobby() {
+    state.isOpen = true;
+    state.autoPlay = false;
+    state.toolsMenuOpen = false;
+    state.viewMode = "live";
+    renderModal();
+  }
+
+  function resumeSlidesFromLobby() {
+    state.autoPlay = false;
+    state.toolsMenuOpen = false;
+    state.viewMode = "deck";
+    if (state.slideIdx === 0 && SLIDES.length > 1) {
+      state.slideIdx = 1;
+    }
+    syncHostSlideToLive();
+    renderModal();
+  }
+
+  function refreshLiveSurface() {
+    if (!state.isOpen || !window.RACM_ORIENTATION_LIVE) return;
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return;
+    const count = window.RACM_ORIENTATION_LIVE.getParticipantCount
+      ? window.RACM_ORIENTATION_LIVE.getParticipantCount()
+      : 0;
+    modal.querySelectorAll("[data-orl-participant-count]").forEach((el) => {
+      el.textContent = String(count);
+    });
+    if (state.viewMode === "live") {
+      const liveCanvas = modal.querySelector(".or-slide-canvas.is-live-canvas");
+      if (liveCanvas) {
+        liveCanvas.innerHTML = window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml();
+        return;
+      }
+      renderModal();
+      return;
+    }
+    if (state.viewMode === "deck") {
+      modal.querySelectorAll("[data-orl-slide-mount]").forEach((mount) => {
+        mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode });
+      });
+    }
   }
 
   function renderModal() {
@@ -1590,6 +1706,10 @@
     const cur = SLIDES[state.slideIdx] || SLIDES[0];
     const showNotesNow = state.viewMode === "deck" && state.showNotes;
     const notesLabel = ROLE === "faculty" ? t("โน้ตผู้สอน", "Presenter Notes") : t("คำอธิบายสไลด์", "Slide Notes");
+    const liveCount =
+      window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.getParticipantCount === "function"
+        ? window.RACM_ORIENTATION_LIVE.getParticipantCount()
+        : 0;
 
     let viewportHtml = "";
     if (state.viewMode === "deck") {
@@ -1597,6 +1717,18 @@
         ${state.autoPlay ? `<div class="or-autoplay-progress" aria-hidden="true"></div>` : ""}
         <div class="or-slide-frame-wrap">
           ${renderSingleSlideCanvasHtml(cur, state.slideIdx, true)}
+        </div>
+      `;
+    } else if (state.viewMode === "live") {
+      viewportHtml = `
+        <div class="or-slide-frame-wrap">
+          <article class="or-slide-canvas is-live-canvas" aria-label="Live Orientation Lobby and Kahoot Recheck">
+            ${
+              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml === "function"
+                ? window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml()
+                : ""
+            }
+          </article>
         </div>
       `;
     } else if (state.viewMode === "sorter") {
@@ -1662,6 +1794,7 @@
 
           <div class="or-top-center" role="tablist" aria-label="สลับมุมมองสไลด์">
             <button type="button" class="or-mode-btn${state.viewMode === "deck" ? " is-active" : ""}" data-or-vmode="deck">${SVG.slides} <span>Slide</span></button>
+            <button type="button" class="or-mode-btn is-live-tab${state.viewMode === "live" ? " is-active" : ""}" data-or-vmode="live" title="เปิดห้องรอผู้เข้าร่วม (Live Waiting Lobby) และยิงคำถาม Kahoot Recheck (กด K)"><span class="or-live-tab-dot"></span><span>Live Lobby &amp; Quiz (<strong data-orl-participant-count>${liveCount}</strong>)</span></button>
             <button type="button" class="or-mode-btn${state.viewMode === "sorter" ? " is-active" : ""}" data-or-vmode="sorter">${SVG.grid} <span>Sorter (${SLIDES.length})</span></button>
             <button type="button" class="or-mode-btn${state.viewMode === "handout" ? " is-active" : ""}" data-or-vmode="handout">${SVG.handout} <span>Handout</span></button>
           </div>
@@ -1707,7 +1840,7 @@
           </div>
         </div>
 
-        <div class="or-deck-viewport${state.viewMode !== "deck" ? " is-scrollable-mode" : ""}" id="orDeckViewport">
+        <div class="or-deck-viewport${state.viewMode !== "deck" && state.viewMode !== "live" ? " is-scrollable-mode" : ""}" id="orDeckViewport">
           ${viewportHtml}
         </div>
 
@@ -1877,6 +2010,7 @@
     if (o.presentationMode) {
       state.presentationMode = true;
     }
+    syncHostSlideToLive();
     renderModal();
     if (o.presentationMode) {
       const modal = ensureModalElement();
@@ -1910,6 +2044,9 @@
     open: openDeck,
     close: closeDeck,
     goToSlide,
+    openLiveLobby,
+    resumeSlidesFromLobby,
+    refreshLiveSurface,
     toggleAutoPlay,
     fitAllVisibleCanvases,
     getSlides: () => SLIDES,
