@@ -42461,7 +42461,14 @@ body.is-ppt-window-max-open #orlFloatingJoinPill {
    Layouts & Multi-Color Interconnected Evidence Highlights (2026-11-24)
    ========================================================================== */
 
-/* 1. True Full-Bleed 100vw x 100vh Slide Show Stage (Zero Heavy Bottom Dock) */
+/* 1. True Full-Bleed 100vw x 100vh Slide Show Stage (Zero Heavy Bottom Dock & Zero Body Scrollbar) */
+html:has(body.is-ppt-fullscreen-open),
+body.is-ppt-fullscreen-open,
+html:has(body.is-ppt-window-max-open),
+body.is-ppt-window-max-open {
+  overflow: hidden !important;
+}
+
 .ppt-presentation-overlay:not(.is-reading-view-tab):not(.is-kbd-open) {
   padding: 0 !important;
 }
@@ -42494,6 +42501,27 @@ body.is-ppt-window-max-open #orlFloatingJoinPill {
 @media (min-width: 760px) {
   .ppt-presentation-overlay:not(.is-reading-view-tab) .ppt-slide-sheet.is-projected .ppt-slide-master-foot {
     padding-left: 268px !important;
+  }
+}
+
+@media (max-width: 759px) {
+  .ppt-presentation-overlay:not(.is-reading-view-tab) .ppt-slide-sheet.is-projected .ppt-slide-master-foot {
+    min-height: 44px !important;
+    padding: 5px 10px 5px 244px !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+  .ppt-presentation-overlay:not(.is-reading-view-tab) .ppt-slide-sheet.is-projected .ppt-slide-master-foot > span:first-child {
+    display: none !important;
+  }
+  .ppt-presentation-overlay:not(.is-reading-view-tab) .ppt-slide-sheet.is-projected .ppt-slide-master-foot > span:nth-of-type(2) {
+    font-size: 9.8px !important;
+    line-height: 1.25 !important;
+    text-align: right !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 
