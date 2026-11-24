@@ -33793,7 +33793,7 @@
     pushIfMatch({
       cat: "docs",
       icon: "📊",
-      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 20 สไลด์ 16:9)",
+      title: `Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · ${window.RACM_ORIENTATION_DECK ? window.RACM_ORIENTATION_DECK.getSlides().length : 31} สไลด์ 16:9)`,
       sub: "Start with Why, 5 วัตถุประสงค์ระบบสุขภาพ, 6-Week Journey & การวัดผลสัมฤทธิ์ 5 สมรรถนะ",
       badge: "16:9 · .pptx / PDF",
       defaultShow: true,

@@ -7,14 +7,25 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124spss1";
+  const ASSET_VER = "20261125vdo1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
   const PREM_BURI_DIR = "assets/images/orientation/prem_buri";
   const PREM_SCREENSAVER_MS = 6000;
+  const CLOSING_VDO_DELAY_MS = 5000;
+  const CLOSING_VDO_SRC = `assets/videos/intro_hss_subtitle.mp4?v=${ASSET_VER}`;
+  const CLOSING_VDO_POSTER = `assets/images/orient_s18_intro_hss_poster.jpg?v=${ASSET_VER}`;
+  const CLOSING_VDO_DRIVE_URL = "https://drive.google.com/file/d/1Ic3FbXnCdMqAOBGZaPOANMYlJ-M7eChf/view?usp=sharing";
   const AUTOPLAY_MS = 9000;
   const CLICKER_HUD_IDLE_MS = 2300;
+
+  const closingVdoState = {
+    timerId: 0,
+    tickId: 0,
+    remainSec: 5,
+    cinemaFull: false
+  };
 
   /* ---------- Netflix Pause Screensaver × Apple TV Photo Grid Catalog (Slide 02: Prem Buri) ---------- */
   const PREM_BURI_REEL_ITEMS = [
@@ -2954,6 +2965,88 @@
           </div>
         </div>
       `
+    },
+    {
+      id: "s18-closing-vdo-hss",
+      num: "31",
+      section: "action",
+      sectionLabel: "Act IV · Closing VDO",
+      actClass: "is-act-4",
+      actLabel: "CLOSING VDO · AUTOPLAY 5s",
+      timeWindow: "ส่งต่อสู่คาบ ST1 · 06:53 นาที",
+      kicker: "04 · INTRODUCTION TO HEALTH SYSTEMS SCIENCE · CLOSING BRIDGE VDO",
+      title: "บทนำเข้าสู่วิทยาระบบสุขภาพ: Introduction to Health Systems Science (VDO)",
+      keyTag: "Autoplay ใน 5 วินาที",
+      keyMessageHtml:
+        "เมื่อเข้าสู่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง <strong>5 วินาที</strong> แล้วเริ่มเล่นวิดีโอ <strong>Introduction to Health Systems Science (พร้อมคำบรรยาย · 06:53 นาที)</strong> อัตโนมัติ เพื่อเชื่อมเข้าสู่คาบ <code>ST1</code> เวลา <strong>09.30 น.</strong>",
+      notes:
+        "สไลด์ปิดท้ายคาบปฐมนิเทศ: เมื่อกด Next Slide เข้ามาที่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง 5 วินาที แล้วเล่นวิดีโอ Introduction to Health Systems Science (with Subtitle, ความยาว 6 นาที 53 วินาที) โดยอัตโนมัติ เรื่องราวสร้างจากเรื่องจริงของผู้ป่วยโรคเรื้อรังที่สะท้อนว่าทำไมแพทย์ยุคใหม่จึงต้องเข้าใจวิทยาระบบสุขภาพ (Health Systems Science) ความปลอดภัยผู้ป่วย และการคิดเชิงระบบ เพื่อส่งต่อเข้าสู่คาบเรียนแรก ST1 เวลา 09.30 น. ได้อย่างต่อเนื่อง",
+      render: () => {
+        const isStaticExport =
+          state.viewMode === "handout" ||
+          Boolean(window.__RACM_EXPORTING_DECK) ||
+          document.body.classList.contains("is-printing-orientation-deck");
+        return `
+          <div class="or-closing-vdo-split${closingVdoState.cinemaFull && !isStaticExport ? " is-cinema-full" : ""}" data-closing-vdo-split="1">
+            <div class="or-closing-vdo-player-card">
+              ${
+                isStaticExport
+                  ? `<img class="or-closing-vdo-el" src="${CLOSING_VDO_POSTER}" alt="Introduction to Health Systems Science (Based on True Story)" loading="eager" decoding="async" />`
+                  : `<video class="or-closing-vdo-el" data-closing-vdo-el="1" src="${CLOSING_VDO_SRC}" poster="${CLOSING_VDO_POSTER}" preload="auto" playsinline controls></video>
+                     <button type="button" class="or-closing-vdo-unmute-float" data-vdo-action="unmute" hidden>🔇 คลิกเพื่อเปิดเสียงบรรยาย 🔊</button>
+                     <div class="or-closing-vdo-countdown-overlay" data-closing-vdo-overlay="1">
+                       <div class="or-closing-vdo-cd-box">
+                         <div class="or-closing-vdo-cd-top">
+                           <span class="or-closing-vdo-cd-pill">🎬 Autoplay ใน <span data-closing-vdo-sec="1">5</span> วินาที</span>
+                           <span class="or-closing-vdo-cd-sub">Introduction to Health Systems Science · 06:53 นาที</span>
+                         </div>
+                         <div class="or-closing-vdo-cd-bar">
+                           <div class="or-closing-vdo-cd-bar-fill is-counting" data-closing-vdo-bar="1"></div>
+                         </div>
+                         <div class="or-closing-vdo-cd-actions">
+                           <span class="or-closing-vdo-cd-sub">เล่นอัตโนมัติหลังเปลี่ยนเข้าสไลด์สุดท้ายครบ 5 วินาที</span>
+                           <div style="display:flex;gap:6px;flex-wrap:wrap">
+                             <button type="button" class="or-closing-vdo-btn is-primary" data-vdo-action="play-now">▶ เล่นทันที</button>
+                             <button type="button" class="or-closing-vdo-btn" data-vdo-action="cancel-autoplay">⏸ ยกเลิกนับถอยหลัง</button>
+                           </div>
+                         </div>
+                       </div>
+                     </div>`
+              }
+            </div>
+
+            <div class="or-closing-vdo-side">
+              <div class="or-card is-navy-tint" data-fit-solo="1" style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between">
+                <div>
+                  <span class="or-card-kicker">BASED ON A TRUE STORY · 06:53 MIN</span>
+                  <h3 class="or-card-title">จากข้างเตียงผู้ป่วยสู่ “วิทยาระบบสุขภาพ”</h3>
+                </div>
+                <ul class="or-list">
+                  <li><strong>1. เรื่องจริงจากข้างเตียง:</strong> ผู้ป่วยเบาหวานที่มีภาวะไตวายแทรกซ้อนและตารางนัดที่แยกส่วนกัน สะท้อนข้อจำกัดของการรักษาเฉพาะโรคตามลำพัง</li>
+                  <li><strong>2. เสาหลักที่ 3 ของแพทยศาสตร์:</strong> เชื่อมโยง <code>Patient Safety</code>, <code>Quality Improvement</code> และการออกแบบระบบบริการรอบตัวผู้ป่วย</li>
+                  <li><strong>3. สะพานสู่คาบ <code>ST1</code> (09.30 น.):</strong> เตรียมกรอบคิดเชิงระบบ (<code>Systems Thinking</code>) ก่อนเริ่มคาบเรียนแรกทันทีหลังจบวิดีโอ</li>
+                </ul>
+              </div>
+
+              <div class="or-closing-vdo-status-bar">
+                <div class="or-closing-vdo-status-txt" data-closing-vdo-status="1">${
+                  isStaticExport
+                    ? "🎬 วิดีโอแนะนำวิทยาระบบสุขภาพ (06:53 นาที · Autoplay 5s)"
+                    : "⏳ นับถอยหลัง 5 วินาทีก่อนเล่นวิดีโออัตโนมัติ..."
+                }</div>
+                <div class="or-closing-vdo-ctrl-row">
+                  <button type="button" class="or-closing-vdo-btn is-light-surface is-primary" data-vdo-action="toggle-play">▶ เล่น / พัก</button>
+                  <button type="button" class="or-closing-vdo-btn is-light-surface" data-vdo-action="cinema-toggle">${
+                    closingVdoState.cinemaFull ? "◫ แสดงแถบสรุป" : "⤢ ขยายเต็มสไลด์"
+                  }</button>
+                  <button type="button" class="or-closing-vdo-btn is-light-surface" data-vdo-action="fullscreen">⛶ เต็มจอ</button>
+                  <a class="or-closing-vdo-btn is-light-surface" href="${CLOSING_VDO_DRIVE_URL}" target="_blank" rel="noopener">🔗 Drive ↗</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
     }
   ];
 
@@ -3728,7 +3821,7 @@
           ev.target &&
           ev.target.closest &&
           ev.target.closest(
-            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl], [data-map-site], [data-s09-jump-site], [data-open-spss-deck], [data-open-attitude-pdf], .fm-tab, .fm-token, .th-map-pin-group"
+            "button, a, video, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl], [data-map-site], [data-s09-jump-site], [data-open-spss-deck], [data-open-attitude-pdf], .fm-tab, .fm-token, .th-map-pin-group, .or-closing-vdo-player-card, .or-closing-vdo-status-bar, [data-vdo-action]"
           );
         if (!inInteractive && !(curSlide && curSlide.isLiveQuizSlide)) {
           const vpRect = modal.getBoundingClientRect();
@@ -4024,6 +4117,10 @@
             if (window.RACM_ORIENTATION_LIVE.stepQuizWithClicker(allowStart)) {
               return;
             }
+          }
+          if (curSlide && curSlide.id === "s18-closing-vdo-hss") {
+            handleClosingVdoClickerAction();
+            return;
           }
           stepSlide(1);
           return;
@@ -5193,6 +5290,7 @@
     if (!state.isOpen) {
       clearAutoPlayTimer();
       clearPremScreensaverTimer();
+      clearClosingVdoTimers(true);
       premReelState.wasOnSlide = false;
       document.body.classList.remove("orient-deck-open");
       modal.hidden = true;
@@ -5220,6 +5318,14 @@
     if (!onPremSlideNow || state.blackoutActive) {
       clearPremScreensaverTimer();
     }
+
+    const onClosingVdoSlideNow =
+      state.viewMode === "deck" &&
+      !document.body.classList.contains("is-printing-orientation-deck") &&
+      !window.__RACM_EXPORTING_DECK &&
+      !state.blackoutActive &&
+      cur.id === "s18-closing-vdo-hss";
+    clearClosingVdoTimers(!onClosingVdoSlideNow);
 
     const progressPct = (((state.slideIdx + 1) / Math.max(1, SLIDES.length)) * 100).toFixed(1);
     const showNotesNow = state.viewMode === "deck" && state.showNotes;
@@ -5730,10 +5836,170 @@
       setTimeout(() => preloadPremUpcoming(true), 160);
     }
     if (onPremSlideNow) wirePremScreensaver(modal);
+    if (onClosingVdoSlideNow) wireClosingVdoSlide(modal);
     scheduleAutoPlayTick();
     if (state.clickerStage || state.presentationMode) {
       armHudIdleTimer();
     }
+  }
+
+  function clearClosingVdoTimers(pauseVideo) {
+    if (closingVdoState.timerId) {
+      clearTimeout(closingVdoState.timerId);
+      closingVdoState.timerId = 0;
+    }
+    if (closingVdoState.tickId) {
+      clearInterval(closingVdoState.tickId);
+      closingVdoState.tickId = 0;
+    }
+    if (pauseVideo) {
+      const m = document.getElementById("orientationDeckModal");
+      if (m) {
+        m.querySelectorAll("[data-closing-vdo-el]").forEach((v) => {
+          try {
+            if (!v.paused) v.pause();
+          } catch (_) {}
+        });
+      }
+    }
+  }
+
+  function startClosingVdoPlayback(modal) {
+    clearClosingVdoTimers(false);
+    if (!modal || modal.hidden) return;
+    const videoEl = modal.querySelector("[data-closing-vdo-el]");
+    const overlayEl = modal.querySelector("[data-closing-vdo-overlay]");
+    const unmuteBtn = modal.querySelector('[data-vdo-action="unmute"]');
+    const statusEl = modal.querySelector("[data-closing-vdo-status]");
+    if (overlayEl) overlayEl.classList.add("is-hidden");
+    if (!videoEl) return;
+
+    videoEl.muted = false;
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise
+        .then(() => {
+          if (unmuteBtn) unmuteBtn.hidden = true;
+          if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ Introduction to Health Systems Science (06:53)";
+        })
+        .catch(() => {
+          videoEl.muted = true;
+          if (unmuteBtn) unmuteBtn.hidden = false;
+          if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ (แตะปุ่มเปิดเสียงหากเบราว์เซอร์ปิดเสียงไว้)";
+          videoEl.play().catch(() => {});
+        });
+    }
+  }
+
+  function handleClosingVdoClickerAction() {
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return;
+    const videoEl = modal.querySelector("[data-closing-vdo-el]");
+    if (!videoEl) return;
+    if (closingVdoState.timerId) {
+      startClosingVdoPlayback(modal);
+      return;
+    }
+    if (videoEl.paused) {
+      startClosingVdoPlayback(modal);
+    } else {
+      videoEl.pause();
+    }
+  }
+
+  function wireClosingVdoSlide(modal) {
+    if (!modal || modal.hidden) return;
+    const splitEl = modal.querySelector("[data-closing-vdo-split]");
+    const videoEl = modal.querySelector("[data-closing-vdo-el]");
+    const overlayEl = modal.querySelector("[data-closing-vdo-overlay]");
+    const secEl = modal.querySelector("[data-closing-vdo-sec]");
+    const statusEl = modal.querySelector("[data-closing-vdo-status]");
+    const unmuteBtn = modal.querySelector('[data-vdo-action="unmute"]');
+    if (!videoEl) return;
+
+    clearClosingVdoTimers(false);
+    closingVdoState.remainSec = Math.round(CLOSING_VDO_DELAY_MS / 1000);
+    if (secEl) secEl.textContent = String(closingVdoState.remainSec);
+    if (statusEl) {
+      statusEl.textContent = `⏳ Autoplay ใน ${closingVdoState.remainSec} วินาที...`;
+    }
+
+    closingVdoState.tickId = setInterval(() => {
+      closingVdoState.remainSec = Math.max(1, closingVdoState.remainSec - 1);
+      if (secEl) secEl.textContent = String(closingVdoState.remainSec);
+      if (statusEl && videoEl.paused) {
+        statusEl.textContent = `⏳ Autoplay ใน ${closingVdoState.remainSec} วินาที...`;
+      }
+    }, 1000);
+
+    closingVdoState.timerId = setTimeout(() => {
+      closingVdoState.timerId = 0;
+      if (!state.isOpen || state.viewMode !== "deck" || state.blackoutActive) return;
+      const curNow = SLIDES[state.slideIdx];
+      if (!curNow || curNow.id !== "s18-closing-vdo-hss") return;
+      startClosingVdoPlayback(modal);
+    }, CLOSING_VDO_DELAY_MS);
+
+    videoEl.addEventListener("play", () => {
+      clearClosingVdoTimers(false);
+      if (overlayEl) overlayEl.classList.add("is-hidden");
+      if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ Introduction to Health Systems Science (06:53)";
+    });
+    videoEl.addEventListener("pause", () => {
+      if (!videoEl.ended && statusEl && !closingVdoState.timerId) {
+        statusEl.textContent = "⏸ หยุดเล่นชั่วคราว — กดเล่นต่อได้ทันที";
+      }
+    });
+    videoEl.addEventListener("ended", () => {
+      if (statusEl) statusEl.textContent = "✓ เล่นจบแล้ว — พร้อมส่งต่อเข้าสู่คาบ ST1 (09.30 น.)";
+    });
+    videoEl.addEventListener("volumechange", () => {
+      if (unmuteBtn) unmuteBtn.hidden = !videoEl.muted;
+    });
+
+    modal.querySelectorAll("[data-vdo-action]").forEach((btn) => {
+      btn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const act = btn.getAttribute("data-vdo-action");
+        if (act === "play-now") {
+          startClosingVdoPlayback(modal);
+        } else if (act === "cancel-autoplay") {
+          clearClosingVdoTimers(false);
+          if (overlayEl) overlayEl.classList.add("is-hidden");
+          if (statusEl) statusEl.textContent = "⏸ ยกเลิก Autoplay แล้ว — กดปุ่ม ▶ เมื่อต้องการเริ่มเล่น";
+        } else if (act === "unmute") {
+          videoEl.muted = false;
+          videoEl.volume = 1;
+          btn.hidden = true;
+          if (videoEl.paused) videoEl.play().catch(() => {});
+        } else if (act === "toggle-play") {
+          if (videoEl.paused) {
+            startClosingVdoPlayback(modal);
+          } else {
+            videoEl.pause();
+          }
+        } else if (act === "cinema-toggle") {
+          closingVdoState.cinemaFull = !closingVdoState.cinemaFull;
+          if (splitEl) splitEl.classList.toggle("is-cinema-full", closingVdoState.cinemaFull);
+          btn.textContent = closingVdoState.cinemaFull ? "◫ แสดงแถบสรุป" : "⤢ ขยายเต็มสไลด์";
+          if (!closingVdoState.cinemaFull) {
+            const c = splitEl && splitEl.closest(".or-slide-canvas");
+            if (c) c._lastFitSig = "";
+            requestAnimationFrame(() => fitAllVisibleCanvases());
+          }
+        } else if (act === "fullscreen") {
+          if (videoEl.requestFullscreen) {
+            videoEl.requestFullscreen().catch(() => {});
+          } else if (videoEl.webkitEnterFullscreen) {
+            try {
+              videoEl.webkitEnterFullscreen();
+            } catch (_) {}
+          }
+        }
+        if (typeof btn.blur === "function") btn.blur();
+      });
+    });
   }
 
   function crossfadePremStageTo(modal, nextCursor) {
@@ -5914,6 +6180,7 @@
     state.hudIdle = false;
     premReelState.wasOnSlide = false;
     clearPremScreensaverTimer();
+    clearClosingVdoTimers(true);
     clearS02Timer();
     clearPipeTimer();
     clearJumpBuffer();
