@@ -367,13 +367,37 @@
       .replace(/"/g, "&quot;");
   }
 
+  const preloadedSet = new Set();
+  function preloadAllSt1Images() {
+    const stems = [
+      "st1_s01_hero.png",
+      "st1_fig1_system_ipo.png",
+      "st1_fig2_system_contexts.png",
+      "st1_fig3_stacey_matrix.png",
+      "st1_fig4_er_crowding_cld.png",
+      "st1_fig5_blind_men_elephant.png",
+      "st1_fig6_iceberg_model.png",
+      "st1_s07_metaphors.png"
+    ];
+    stems.forEach((f) => {
+      [f, f.replace(/\.png$/, "_dark.png")].forEach((variant) => {
+        const url = `${IMG_DIR}/${variant}?v=${ASSET_VER}`;
+        if (preloadedSet.has(url)) return;
+        preloadedSet.add(url);
+        const im = new Image();
+        im.decoding = "sync";
+        im.src = url;
+      });
+    });
+  }
+
   function figPlate(fileName, altText, captionHtml, badgeText) {
     const resolved = resolveSlideImgFile(fileName);
     return `
       <figure class="or-fig-plate is-st1-plate">
         ${badgeText ? `<div class="or-fig-top-badge">${esc(badgeText)}</div>` : ""}
         <div class="or-fig-img-wrap">
-          <img class="or-fig-img" data-base-img="${esc(fileName)}" src="${IMG_DIR}/${esc(resolved)}?v=${ASSET_VER}" alt="${esc(altText)}" loading="eager" decoding="async" />
+          <img class="or-fig-img" data-base-img="${esc(fileName)}" src="${IMG_DIR}/${esc(resolved)}?v=${ASSET_VER}" alt="${esc(altText)}" loading="eager" decoding="sync" />
         </div>
         ${captionHtml ? `<figcaption class="or-fig-cap">${captionHtml}</figcaption>` : ""}
       </figure>
@@ -2694,6 +2718,7 @@
   }
 
   function openDeck(initialSlideIdx, opts) {
+    preloadAllSt1Images();
     const o = opts || {};
     state.isOpen = true;
     state.toolsMenuOpen = false;
