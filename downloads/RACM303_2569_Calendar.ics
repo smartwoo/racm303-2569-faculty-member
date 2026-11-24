@@ -689,13 +689,13 @@ UID:w5-d2-cld-ws@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
 DTSTART;TZID=Asia/Bangkok:20261222T133000
 DTEND;TZID=Asia/Bangkok:20261222T170000
-SUMMARY:[RACM 303] Workshop: Systems Thinking in Actions – CLD / System Archetypes (Synthesis & Wrap-up)
+SUMMARY:[RACM 303] ST2 - Synthesis from Dynamic Complexity from the field
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: สังเคราะห์ข้อมูลและปัญหาซับซ้อนที่พบจากภาคสนามด้วยแผนผังวงจรเหตุปัจจัย (CLD) และแม่แบบเชิงระบบ (System Archetypes) พร้อมระบุจุดคานงัด (Leverage Points) ในการออกแบบข้อเสนอพัฒนาระบบ\nอาจารย์ผู้สอน: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Workshop: Systems Thinking in Actions – CLD / System Archetypes (Synthesis & Wrap-up)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] ST2 - Synthesis from Dynamic Complexity from the field
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT

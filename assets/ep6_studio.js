@@ -11,10 +11,11 @@
   const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v10";
   const LEGACY_UI_PREFS_KEYS = ["racm303_ep_studio_prefs_v9", "racm303_ep_studio_prefs_v8"];
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-  const MODULE_ORDER = ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
+  const MODULE_ORDER = ["EP1", "EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
 
   function getModulesMap() {
     const map = {};
+    if (window.RACM303_EP1_INTRO) map.EP1 = window.RACM303_EP1_INTRO;
     if (window.RACM303_EP2_DIAGNOSTIC) map.EP2 = window.RACM303_EP2_DIAGNOSTIC;
     if (window.RACM303_EP3_ERRORS) map.EP3 = window.RACM303_EP3_ERRORS;
     if (window.RACM303_EP4_STUDY_DESIGNS) map.EP4 = window.RACM303_EP4_STUDY_DESIGNS;
@@ -118,9 +119,9 @@
   };
 
   const studioState = {
-    activeModule: "EP2",
+    activeModule: "EP1",
     perBundleEpisode: {},
-    perLectureSec: { EP2: 0, EP3: 0, EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
+    perLectureSec: { EP1: 0, EP2: 0, EP3: 0, EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
     currentSec: 0,
     activeSlideId: 1,
     activeStageId: 1,
@@ -287,6 +288,7 @@
   ];
 
   const MODULE_SHORT_LABELS = {
+    EP1: { short: "Introduction to Epidemiology", sub: "นิยามระบาดวิทยา · James Lind · William Farr · John Snow & 3 พันธกิจหลัก" },
     EP2: { short: "Diagnostic Test", sub: "Sensitivity / Specificity · Cutoff · PPV & NPV · ROC Curve & Likelihood Ratio" },
     EP3: { short: "Errors in Epidemiology", sub: "Selection & Misclassification Bias · Confounding (Stratification) & Causation" },
     EP4: { short: "Study Designs & Measurement of Impact", sub: "Cohort / Case-Control / OR / RR & AR, AR%, PAR, PAR%" },
@@ -309,11 +311,13 @@
       : standaloneData
       ? { [standaloneCode]: standaloneData }
       : getModulesMap();
+    const allowedOrder =
+      opts && Array.isArray(opts.allowedModules) && opts.allowedModules.length ? opts.allowedModules : MODULE_ORDER;
     const availableCodes = isMultiStandalone
       ? (standaloneData.episodeOrder || Object.keys(modules)).filter((c) => Boolean(modules[c]))
       : standaloneData
       ? [standaloneCode]
-      : MODULE_ORDER.filter((c) => Boolean(modules[c]));
+      : allowedOrder.filter((c) => Boolean(modules[c]));
     if (!availableCodes.length) return;
 
     let modCode = standaloneCode;
@@ -324,9 +328,9 @@
       modCode = wantedEp || (savedEp && modules[savedEp] ? savedEp : defEp);
       studioState.perBundleEpisode[standaloneCode] = modCode;
     } else if (!standaloneData) {
-      if (opts && opts.moduleCode && modules[opts.moduleCode]) {
+      if (opts && opts.moduleCode && modules[opts.moduleCode] && availableCodes.includes(opts.moduleCode)) {
         studioState.activeModule = opts.moduleCode;
-      } else if (!modules[studioState.activeModule]) {
+      } else if (!availableCodes.includes(studioState.activeModule) || !modules[studioState.activeModule]) {
         studioState.activeModule = availableCodes[0];
       }
       modCode = studioState.activeModule;
@@ -406,9 +410,11 @@
 
     // 0. Multi-Lecture Switcher Ribbon
     if (availableCodes.length > 1) {
-      const switcherHeading = standaloneData
-        ? standaloneData.switcherLabel || "🎬 เลือกตอนวิดีโอบรรยายประจำคาบ"
-        : "🎬 เลือกคาบบรรยายระบาดวิทยา";
+      const switcherHeading =
+        (opts && opts.switcherLabel) ||
+        (standaloneData
+          ? standaloneData.switcherLabel || "🎬 เลือกตอนวิดีโอบรรยายประจำคาบ"
+          : "🎯 เลือกคาบบรรยาย RACM 303 EPI ที่ออกสอบ (EP1–EP9 · ครบทั้ง 9 คาบ)");
       const switcher = document.createElement("div");
       switcher.className = "ep6-module-switcher";
       switcher.setAttribute("role", "tablist");

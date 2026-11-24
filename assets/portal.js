@@ -3766,7 +3766,7 @@
       .map(
         (x) =>
           `<tr><td><strong>${escapeHtml(x.code)}</strong></td><td>${escapeHtml(x.title)}${
-            ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(x.code)
+            ["EP1", "EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(x.code)
               ? ` <button type="button" class="spec-hs-jump-link" data-spec-epmod="${escapeHtml(x.code.toLowerCase())}">🎬 เปิด Video + Conceptualized Slides →</button>`
               : ""
           }</td><td>${escapeHtml(x.date)}</td><td><strong>${escapeHtml(x.weight)}</strong></td></tr>`
@@ -11865,7 +11865,7 @@
       timeLabel: "13.00 – 16.30 น.",
       hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Workshop: Systems Thinking in Action – Causal Loop Diagram (CLD) & System Archetypes (Synthesis & Wrap-up)",
+      title: "ST2 - Synthesis from Dynamic Complexity from the field",
       titleThSub: "เวิร์กชอปสังเคราะห์ข้อมูลภาคสนามด้วยแผนผังวงจรเหตุปัจจัย แม่แบบเชิงระบบ และจุดคานงัด",
       speakers: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
       examBadge: "หลังสอบ HS1–HS6 · หัวใจนำเสนอฟอร์ม 3A",
@@ -34399,6 +34399,7 @@
 
     if (session.id === "w1-d3-ep123") {
       [
+        { sec: "ep1", label: "🎬 EP1: Introduction to Epidemiology (Video + 13 สไลด์)" },
         { sec: "ep2", label: "🎬 EP2: Diagnostic Test (Video + 25 สไลด์)" },
         { sec: "ep3", label: "🎬 EP3: Errors in Epidemiology (Video + 18 สไลด์)" }
       ].forEach((epItem) => {
@@ -34455,6 +34456,14 @@
         openEpidemiology("ep9");
       });
       container.appendChild(bEp9);
+    } else if (session.id === "w3-d2-spss" && !(state.activeTab === "epidemiology" && state.epSection === "spss")) {
+      const bSpss = make("button", "💻 เปิดหน้า SPSS Statistical Software →", "btn sm teal");
+      bSpss.type = "button";
+      bSpss.addEventListener("click", () => {
+        if (closeModalFirst) closeEventModal();
+        openEpidemiology("spss");
+      });
+      container.appendChild(bSpss);
     }
 
     const slideRec = getSessionSlideRecord(session.id);
@@ -35103,6 +35112,30 @@
         sub: "เวทีคำถามสดแบบ Kahoot บนสไลด์หน้าปกปฐมนิเทศ ทบทวนข้อควรทำ-ข้อห้ามและเกณฑ์ O / S / M / U ตามคู่มือนักศึกษา",
         hay: "kahoot orientation qr code pin 2569 do dont osmu คู่มือนักศึกษา ปฐมนิเทศ สแกน",
         run: () => { if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0); }
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP1: Introduction to Epidemiology (Video + 13 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายปูพื้นฐานระบาดวิทยา RACM 303: นิยาม US-CDC, James Lind, William Farr, John Snow และ 3 พันธกิจหลักของแพทย์",
+        hay: "ep1 introduction to epidemiology james lind scurvy william farr john snow broad street pump soho cholera จักรกฤษณ์ บทนำระบาดวิทยา",
+        run: () => openEpidemiology("ep1")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "📘",
+        title: "ทบทวน RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Statistics, Statistical & Clinical Significance)",
+        sub: "ไม่ออกสอบทฤษฎี RACM 303 · ความรู้พื้นฐานสำหรับการออกแบบและแปลผล Health Survey ภาคสนาม",
+        hay: "rage 201 rage 301 rage201 rage301 descriptive medical statistics statistical significance clinical significance p-value 95% ci mcid health survey ทบทวน",
+        run: () => openEpidemiology("rage-review")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "💻",
+        title: "Statistical Software (SPSS) · ปฏิบัติการวิเคราะห์ข้อมูล Health Survey",
+        sub: "อ. 8 ธ.ค. 2569 (13.30–15.00 น.) ห้อง 2C2-03 & Zoom · การสร้างฐานข้อมูล ล้างข้อมูล และวิเคราะห์สถิติสำหรับฟอร์ม 4A",
+        hay: "spss statistical software data entry codebook recode frequencies explore crosstabs chi-square t-test สวนีย์ วิเคราะห์สถิติ",
+        run: () => openEpidemiology("spss")
       },
       {
         cat: "บทเรียน & คาบสอนหลัก",
@@ -41938,7 +41971,26 @@
   function normalizeEpSection(sec) {
     const s = String(sec || "").trim().toLowerCase();
     if (s === "morbidity-mortality") return "ep6";
-    const valid = ["all", "ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9", "sessions", "zoom-spss", "exam-field"];
+    const valid = [
+      "all",
+      "racm303-epi",
+      "ep1",
+      "ep2",
+      "ep3",
+      "ep4",
+      "ep5",
+      "ep6",
+      "ep7",
+      "ep8",
+      "ep9",
+      "rage-review",
+      "rage201",
+      "rage301",
+      "spss",
+      "sessions",
+      "zoom-spss",
+      "exam-field"
+    ];
     return valid.includes(s) ? s : "all";
   }
 
@@ -41976,33 +42028,40 @@
     mount.replaceChildren();
 
     const curSec = state.epSection || "all";
+    const isEpLectureCode = ["ep1", "ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(curSec);
+    const isRacmEpiTab = curSec === "racm303-epi" || isEpLectureCode;
+    const isRageReviewTab = ["rage-review", "rage201", "rage301"].includes(curSec);
+    const isSpssTab = curSec === "spss";
+    const isSessionsTab = curSec === "sessions" || curSec === "zoom-spss";
+    const isExamFieldTab = curSec === "exam-field";
+
     const wrap = make("div", null, "ep-hub-wrap");
 
-    // 1. KPI Summary Strip
+    // 1. KPI Summary Strip (Aligned with the 3 core tracks + Exam/Fieldwork)
     const kpiGrid = make("div", null, "ep-kpi-grid");
     const kpis = [
       {
-        badge: "🎬 EP2 – EP9 Interactive",
-        title: tr("8 คาบบรรยาย Video + สไลด์ซิงก์", "8 Interactive Video Lectures (EP2–EP9)"),
-        meta: tr("รวม 243 สไลด์ · ซับไตเติลไทย CC · Verbatim → Conceptualized", "8 Video Lectures · 243 Slides · Verbatim → Conceptualized"),
-        sec: "ep2"
+        badge: "🎯 RACM 303 EPI · EP1–EP9",
+        title: tr("RACM 303 EPI ที่ออกสอบ (9 คาบ VDO)", "RACM 303 EPI Exam Lectures (EP1–EP9)"),
+        meta: tr("ครบ EP1–EP9 รวม 256 สไลด์ · คำพูดอาจารย์ → Conceptualized · สอบ อ. 8 ธ.ค. 69", "9 Interactive Video Lectures · 256 Slides · Exam 8 Dec 2026"),
+        sec: "racm303-epi"
       },
       {
-        badge: "EP1 – EP9 & Ex 1–6",
-        title: tr("9 หัวข้อบรรยาย & 6 แบบฝึกหัด", "9 Core Lectures & 6 Exercises"),
-        meta: tr("ศ. 27 พ.ย. · พ. 2 ธ.ค. · พฤ. 3 ธ.ค. 2569 (มี Zoom)", "27 Nov · 2 Dec · 3 Dec 2026"),
-        sec: "sessions"
+        badge: tr("📘 ทบทวน RAGE 201 & 301 · ไม่ออกสอบ", "📘 RAGE 201 & 301 Review · Non-Exam"),
+        title: tr("ความรู้พื้นฐานสำหรับการทำ Health Survey", "Foundations for Community Health Survey"),
+        meta: tr("RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Stats, Statistical & Clinical Sig.)", "RAGE 201 Overview/Descriptive & RAGE 301 Medical Statistics"),
+        sec: "rage-review"
       },
       {
-        badge: tr("อ. 8 ธ.ค. 2569", "Tue 8 Dec 2026"),
-        title: tr("สอบทฤษฎี EP & ปฏิบัติการ SPSS", "EP Theory Exam & SPSS Lab"),
-        meta: tr("สอบ 09.00–12.00 น. · เรียน SPSS 13.00–14.30 น.", "Exam 09:00–12:00 · SPSS 13:00–14:30"),
-        sec: "exam-field"
+        badge: tr("💻 Statistical Software · อ. 8 ธ.ค. 69", "💻 Statistical Software · Tue 8 Dec 26"),
+        title: tr("โปรแกรมวิเคราะห์ข้อมูลสถิติ SPSS", "Statistical Software (SPSS) Workshop"),
+        meta: tr("13.30–15.00 น. ห้อง 2C2-03 & Zoom · วิเคราะห์ข้อมูลสำรวจสุขภาพชุมชน", "13:30–15:00 · Room 2C2-03 & Zoom · Health Survey Data Analysis"),
+        sec: "spss"
       },
       {
-        badge: tr("พ. 30 ธ.ค. 2569", "Wed 30 Dec 2026"),
-        title: tr("นำเสนอภาคสนาม (ฟอร์ม 4A)", "Fieldwork Oral Presentation (4A)"),
-        meta: tr("ครบทั้ง 9 โรงพยาบาล · ห้อง 2C2-03 (08.30–12.45 น.)", "All 9 hospital sites · Room 2C2-03"),
+        badge: tr("🏥 สอบ 8 ธ.ค. & ฟอร์ม 4A 30 ธ.ค. 69", "🏥 Blueprint & Form 4A · 30 Dec 26"),
+        title: tr("สัดส่วนข้อสอบ 100% & นำเสนอภาคสนาม", "Exam Blueprint (100%) & Form 4A"),
+        meta: tr("ตารางสัดส่วนข้อสอบระบาดฯ & เกณฑ์นำเสนอทั้ง 9 โรงพยาบาล ห้อง 2C2-03", "EP Exam Blueprint & Fieldwork Oral Presentation (9 Hospitals)"),
         sec: "exam-field"
       }
     ];
@@ -42019,47 +42078,233 @@
     });
     wrap.appendChild(kpiGrid);
 
-    // 2. Section Filter Bar
+    // 2. Clean Track Filter Bar (No cramped individual EP pills)
     const filterBar = make("div", null, "ep-filter-bar");
     filterBar.setAttribute("role", "tablist");
     const filterItems = [
-      { id: "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
-      { id: "ep2", label: tr("🎬 EP2: Diagnostic Test", "🎬 EP2: Diagnostic Test") },
-      { id: "ep3", label: tr("🎬 EP3: Errors in Epidemiology", "🎬 EP3: Errors in Epidemiology") },
-      { id: "ep4", label: tr("🎬 EP4: Study Designs & Impact", "🎬 EP4: Study Designs & Impact") },
-      { id: "ep5", label: tr("🎬 EP5: Surveillance & Outbreak", "🎬 EP5: Surveillance & Outbreak") },
-      { id: "ep6", label: tr("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
-      { id: "ep7", label: tr("🎬 EP7: Health Survey", "🎬 EP7: Health Survey") },
-      { id: "ep8", label: tr("🎬 EP8: Experimental Study", "🎬 EP8: Experimental Study") },
-      { id: "ep9", label: tr("🎬 EP9: Evidence-Based Medicine", "🎬 EP9: EBM") },
-      { id: "sessions", label: tr("คาบสอน EP1–EP9 & Exercise 1–6", "EP1–EP9 & Exercise 1–6 Sessions") },
-      { id: "zoom-spss", label: tr("ห้องเรียน Zoom (3 วัน) & SPSS", "3-Day Zoom Classrooms & SPSS") },
-      { id: "exam-field", label: tr("สัดส่วนข้อสอบ & นำเสนอภาคสนาม (4A)", "Exam Blueprint & Fieldwork Form 4A") }
+      { id: "all", active: curSec === "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
+      { id: "racm303-epi", active: isRacmEpiTab, label: tr("🎯 RACM 303 EPI ที่ออกสอบ (EP1–EP9)", "🎯 RACM 303 EPI Exam (EP1–EP9)") },
+      { id: "rage-review", active: isRageReviewTab, label: tr("📘 ทบทวน RAGE 201 & 301 (พื้นฐาน Health Survey)", "📘 RAGE 201 & 301 Review (Health Survey Prep)") },
+      { id: "spss", active: isSpssTab, label: tr("💻 Statistical Software (SPSS)", "💻 Statistical Software (SPSS)") },
+      { id: "sessions", active: isSessionsTab, label: tr("📚 ตารางสอน & Zoom", "📚 Schedule & Zoom") },
+      { id: "exam-field", active: isExamFieldTab, label: tr("📋 สัดส่วนข้อสอบ & ภาคสนาม (4A)", "📋 Exam Blueprint & Form 4A") }
     ];
     filterItems.forEach((f) => {
-      const btn = make("button", f.label, `ep-filter-pill ${curSec === f.id ? "is-active" : ""}`);
+      const btn = make("button", f.label, `ep-filter-pill ${f.active ? "is-active" : ""}`);
       btn.type = "button";
       btn.setAttribute("role", "tab");
-      btn.setAttribute("aria-selected", curSec === f.id ? "true" : "false");
+      btn.setAttribute("aria-selected", f.active ? "true" : "false");
       btn.addEventListener("click", () => setEpidemiologySection(f.id));
       filterBar.appendChild(btn);
     });
     wrap.appendChild(filterBar);
-
-    let ep6StudioHost = null;
-    const isEpLectureSec = ["ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(curSec);
-    if (curSec === "all" || isEpLectureSec) {
-      ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
-      wrap.appendChild(ep6StudioHost);
-    }
 
     const allSessions = SCHED.sessions || [];
     const epSessions = allSessions.filter(
       (s) => s.category === "EP" || s.id === "w3-d2-ep-exam" || s.id === "w6-d3-pres-ep"
     );
 
-    // 3. Zoom Rooms & SPSS Highlight (shown in 'all' or 'zoom-spss')
-    if (curSec === "all" || curSec === "zoom-spss") {
+    // 3A. RACM 303 EPI Interactive Studio (EP1–EP9)
+    let ep6StudioHost = null;
+    if (curSec === "all" || isRacmEpiTab) {
+      ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
+      wrap.appendChild(ep6StudioHost);
+    }
+
+    // 3B. Foundation Review Section: RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Statistics, Statistical & Clinical Significance)
+    if (curSec === "all" || isRageReviewTab) {
+      const rageScope = curSec === "rage201" ? "rage201" : curSec === "rage301" ? "rage301" : "both";
+      const revSection = make("section", null, "ep-section-block");
+      revSection.innerHTML = `
+        <div class="ep-review-banner">
+          <div>
+            <span class="ep-review-banner-badge">📘 ${escapeHtml(tr("ไม่ออกสอบทฤษฎี RACM 303 · ความรู้พื้นฐานสำหรับการทำ Health Survey", "Not Tested in RACM 303 Exam · Essential Foundation for Health Survey"))}</span>
+            <h3 class="ep-sec-title">${escapeHtml(tr("ทบทวนความรู้พื้นฐาน RAGE 201 & RAGE 301 ก่อนลงมือสำรวจสุขภาพชุมชน (Health Survey)", "RAGE 201 & RAGE 301 Foundation Review for Community Health Survey"))}</h3>
+            <p class="ep-sec-sub">${escapeHtml(tr("สรุปกรอบแนวคิดการวิจัยทางระบาดวิทยา สถิติเชิงพรรณนา ชีวสถิติทางการแพทย์ และการแปลผลนัยสำคัญทางสถิติควบคู่กับนัยสำคัญทางคลินิก เพื่อใช้ออกแบบและวิเคราะห์ผล Health Survey ภาคสนามอย่างแม่นยำ", "Core review of descriptive epidemiology/statistics (RAGE 201) and medical statistics, statistical vs. clinical significance (RAGE 301) for fieldwork Health Surveys.") )}</p>
+          </div>
+          <div class="ep-review-subtabs" role="group" aria-label="เลือกวิชาทบทวนพื้นฐาน">
+            <button type="button" class="ep-review-subpill ${rageScope === "both" ? "is-active" : ""}" data-rage-sub="rage-review">${escapeHtml(tr("ทั้งหมด (RAGE 201 + 301)", "Both (RAGE 201 + 301)"))}</button>
+            <button type="button" class="ep-review-subpill ${rageScope === "rage201" ? "is-active" : ""}" data-rage-sub="rage201">📘 RAGE 201</button>
+            <button type="button" class="ep-review-subpill ${rageScope === "rage301" ? "is-active" : ""}" data-rage-sub="rage301">📗 RAGE 301</button>
+          </div>
+        </div>
+        <div class="ep-review-grid ${rageScope !== "both" ? "is-single" : ""}">
+          ${
+            rageScope === "both" || rageScope === "rage201"
+              ? `
+            <article class="ep-review-course-card">
+              <div class="ep-review-course-head">
+                <span class="ep-review-code-chip">📘 RAGE 201 · Foundation Review</span>
+                <span class="ep-review-nonexam-pill">${escapeHtml(tr("ไม่ออกสอบ RACM 303 · พื้นฐานทำ Health Survey", "Non-Exam · Health Survey Foundation"))}</span>
+              </div>
+              <div>
+                <h4 class="ep-review-course-title">${escapeHtml(tr("ทบทวนเนื้อหา RAGE 201: Overview, Descriptive", "RAGE 201 Review: Overview & Descriptive Epidemiology / Statistics"))}</h4>
+                <p class="ep-review-course-sub">${escapeHtml(tr("ปูพื้นฐานภาพรวมกระบวนการสำรวจทางระบาดวิทยา การกำหนดตัวแปร และการสรุปข้อมูลเชิงพรรณนาสำหรับวางแผนเก็บข้อมูลในชุมชน", "Foundational overview of epidemiological survey design, variable types, and descriptive summaries for community fieldwork."))}</p>
+              </div>
+              <div class="ep-review-topic-list">
+                <div class="ep-review-topic-item">
+                  <strong>1. Overview of Community Research & Target Population</strong>
+                  <p>${escapeHtml(tr("การเชื่อมคำถามสำรวจชุมชนเข้ากับประชากรเป้าหมาย (Target Population) ประชากรที่เข้าถึงได้ (Study Population) กรอบการสุ่ม (Sampling Frame) และหน่วยตัวอย่าง เพื่อลดอคติการคัดเลือกตั้งแต่ต้นน้ำ", "Linking community research questions to target population, study population, sampling frame, and sampling units."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>2. Types of Variables & Measurement Scales</strong>
+                  <p>${escapeHtml(tr("จำแนกตัวแปรเชิงกลุ่ม (Nominal เช่น เพศ/สิทธิการรักษา, Ordinal เช่น ระดับความรุนแรง) และตัวแปรเชิงปริมาณต่อเนื่อง (Interval / Ratio เช่น อายุ, ความดันโลหิต, HbA1c) เพื่อออกแบบแบบสอบถามและเลือกสถิติให้ตรงชนิดข้อมูล", "Distinguishing categorical (nominal, ordinal) and continuous (interval, ratio) variables for questionnaire design and summary selection."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>3. Descriptive Epidemiology (Person · Place · Time)</strong>
+                  <p>${escapeHtml(tr("การพรรณนาการกระจายตัวของปัญหาสุขภาพและปัจจัยเสี่ยงในพื้นที่ตามลักษณะบุคคล สถานที่/หมู่บ้าน และช่วงเวลา เพื่อชี้เป้ากลุ่มเปราะบางในชุมชนโรงพยาบาลภาคสนาม", "Describing health states and risk factors by Person, Place, and Time to pinpoint priority community groups."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>4. Descriptive Statistics (Central Tendency & Dispersion)</strong>
+                  <p>${escapeHtml(tr("ข้อมูลกลุ่มรายงานเป็นจำนวนและร้อยละ n (%) หรือความชุก (Prevalence); ข้อมูลต่อเนื่องที่แจกแจงปกติใช้ Mean ± SD ส่วนข้อมูลเบ้หรือมีค่าสุดโต่ง (Outlier) ใช้ Median (IQR / Q1–Q3)", "Reporting n (%) and prevalence for categorical data; Mean ± SD for normal distributions vs. Median (IQR) for skewed continuous data."))}</p>
+                </div>
+              </div>
+              <div class="ep-review-foot">
+                <button type="button" class="btn sm teal" data-ep-jump="ep7">🎬 ${escapeHtml(tr("ไปต่อคาบ EP7: Health Survey (สอบ 7.5%) →", "Open EP7: Health Survey (Exam 7.5%) →"))}</button>
+                <button type="button" class="btn sm" data-ep-jump="spss">💻 ${escapeHtml(tr("ดูวิธีทำ Descriptive ใน SPSS →", "Descriptive Stats in SPSS →"))}</button>
+              </div>
+            </article>
+          `
+              : ""
+          }
+          ${
+            rageScope === "both" || rageScope === "rage301"
+              ? `
+            <article class="ep-review-course-card">
+              <div class="ep-review-course-head">
+                <span class="ep-review-code-chip is-rage301">📗 RAGE 301 · Biostatistics Review</span>
+                <span class="ep-review-nonexam-pill">${escapeHtml(tr("ไม่ออกสอบ RACM 303 · พื้นฐานแปลผลสถิติ & Survey", "Non-Exam · Statistical Interpretation Foundation"))}</span>
+              </div>
+              <div>
+                <h4 class="ep-review-course-title">${escapeHtml(tr("ทบทวนเนื้อหา RAGE 301: Medical statistic, statistical and clinical significance", "RAGE 301 Review: Medical Statistics, Statistical & Clinical Significance"))}</h4>
+                <p class="ep-review-course-sub">${escapeHtml(tr("หลักชีวสถิติเพื่อการอนุมานจากกลุ่มตัวอย่างสู่ประชากรชุมชน และการแยกแยะ ‘นัยสำคัญทางสถิติ’ ออกจาก ‘นัยสำคัญทางคลินิกและสาธารณสุข’", "Biostatistical inference from survey samples to populations, distinguishing statistical significance from clinical and public health significance."))}</p>
+              </div>
+              <div class="ep-review-topic-list">
+                <div class="ep-review-topic-item">
+                  <strong>1. Point Estimation & 95% Confidence Interval (95% CI)</strong>
+                  <p>${escapeHtml(tr("ค่าประมาณจุดควรรายงานคู่กับ 95% CI เสมอเพื่อบอกความแม่นยำ (Precision) — ช่วงแคบสะท้อนขนาดตัวอย่างเพียงพอ ส่วนช่วงกว้างสะท้อนความคลาดเคลื่อนสุ่ม (Random Error) สูง", "Always pair point estimates with 95% CIs to communicate precision and random error magnitude."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>2. Hypothesis Testing & Choosing Basic Statistical Tests</strong>
+                  <p>${escapeHtml(tr("การเปรียบเทียบตัวแปรกลุ่ม 2×2 ใช้ Chi-square test (หรือ Fisher's exact เมื่อค่าคาดหวัง < 5); การเทียบค่ากลาง 2 กลุ่มอิสระใช้ Independent t-test (ปกติ) หรือ Mann-Whitney U test (ข้อมูลเบ้)", "Selecting Chi-square / Fisher's exact for categorical 2×2 tables, and Independent t-test / Mann-Whitney U for two-group continuous comparisons."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>3. Statistical Significance vs. Clinical Significance</strong>
+                  <p>${escapeHtml(tr("Statistical Significance (p < 0.05 หรือ 95% CI ไม่คร่อมค่าว่าง RR/OR = 1 หรือ Diff = 0) บอกเพียงว่าผลต่างไม่น่าเกิดจากความบังเอิญและขึ้นกับขนาดตัวอย่าง n อย่างมาก ขณะที่ Clinical Significance พิจารณาจากขนาดผลกระทบจริง (Effect Size: RR, OR, AR, ARR, NNT, Mean Diff เทียบเกณฑ์ MCID) ว่าใหญ่พอที่จะเปลี่ยนเวชปฏิบัติหรือคุ้มค่าต่อการออกมาตรการชุมชนหรือไม่", "p < 0.05 only reflects low chance of random sampling error (heavily driven by sample size n), whereas clinical significance evaluates whether the Effect Size (RR, OR, AR, NNT, MCID) and entire 95% CI warrant clinical or community action."))}</p>
+                </div>
+                <div class="ep-review-topic-item">
+                  <strong>4. ข้อควรระวังในการอภิปรายผล Health Survey ขนาดตัวอย่างจำกัด</strong>
+                  <p>${escapeHtml(tr("ในงานสำรวจภาคสนามที่ n ไม่ใหญ่มาก หากพบ Effect Size สูงแต่ p ≥ 0.05 (95% CI กว้างคร่อม 1) ควรอภิปรายเรื่องอำนาจการทดสอบ (Statistical Power) ไม่ด่วนสรุปว่าไม่มีความสัมพันธ์ ในทางกลับกันหาก n ใหญ่มากแม้ p < 0.001 ก็ต้องตรวจว่าขนาดผลต่างมีความหมายในทางปฏิบัติจริงหรือไม่", "Avoid equating p ≥ 0.05 in small community samples with 'no effect' (check CI width & power), and avoid over-interpreting tiny trivial effects when n is huge."))}</p>
+                </div>
+              </div>
+              <div class="ep-review-foot">
+                <button type="button" class="btn sm teal" data-ep-jump="ep3">🎬 ${escapeHtml(tr("เชื่อมคาบ EP3: Errors & Bias →", "Open EP3: Errors & Bias →"))}</button>
+                <button type="button" class="btn sm teal" data-ep-jump="ep9">🎬 ${escapeHtml(tr("เชื่อมคาบ EP9: EBM →", "Open EP9: EBM →"))}</button>
+                <button type="button" class="btn sm" data-ep-jump="spss">💻 ${escapeHtml(tr("วิเคราะห์สถิติด้วย SPSS →", "Run Tests in SPSS →"))}</button>
+              </div>
+            </article>
+          `
+              : ""
+          }
+        </div>
+      `;
+      revSection.querySelectorAll("[data-rage-sub]").forEach((b) => {
+        b.addEventListener("click", () => setEpidemiologySection(b.getAttribute("data-rage-sub") || "rage-review"));
+      });
+      revSection.querySelectorAll("[data-ep-jump]").forEach((b) => {
+        b.addEventListener("click", () => setEpidemiologySection(b.getAttribute("data-ep-jump") || "racm303-epi"));
+      });
+      wrap.appendChild(revSection);
+    }
+
+    // 3C. Dedicated Statistical Software (SPSS) Section
+    if (curSec === "all" || isSpssTab) {
+      const spssSection = make("section", null, "ep-section-block");
+      const zoomRoomsAll = (SCHED.courseMeta && SCHED.courseMeta.zoomRooms) || [];
+      const spssZoom = zoomRoomsAll.find((zr) => String(zr.id || "").replace(/\s+/g, "") === "95270544175");
+      const spssSession = epSessions.find((s) => s.id === "w3-d2-spss");
+
+      spssSection.innerHTML = `
+        <div class="ep-sec-head">
+          <div>
+            <h3 class="ep-sec-title">💻 ${escapeHtml(tr("Statistical Software (SPSS) · ปฏิบัติการวิเคราะห์ข้อมูลสถิติสำหรับ Health Survey", "Statistical Software (SPSS) · Community Health Survey Data Analysis"))}</h3>
+            <p class="ep-sec-sub">${escapeHtml(tr("วันอังคารที่ 8 ธันวาคม 2569 เวลา 13.30 – 15.00 น. (หลังสอบทฤษฎีระบาดฯ ช่วงเช้า) · ห้อง 2C2-03 ชั้น 2 อาคารพรีคลินิก & Online Zoom · อาจารย์ผู้สอน: อ. พญ.สวนีย์ ศรีเจริญธรรม", "Tue 8 Dec 2026, 13:30–15:00 · Room 2C2-03 & Zoom · Instructor: Dr. Sawanee Srijaroenthum"))}</p>
+          </div>
+        </div>
+      `;
+
+      if (spssZoom) {
+        const spssLiveCard = make("div", null, "ep-zoom-card is-spss");
+        spssLiveCard.innerHTML = `
+          <div class="ep-zoom-top">
+            <span class="ep-zoom-tag is-spss-tag">SPSS WORKSHOP · ${escapeHtml(spssZoom.dayTag || "อ. 8 ธ.ค. 69")}</span>
+            <span class="ep-zoom-time">${escapeHtml(spssZoom.timeLabel || "13.30 – 15.00 น.")}</span>
+          </div>
+          <div class="ep-zoom-label">${escapeHtml(spssZoom.label || "โปรแกรมวิเคราะห์ข้อมูล SPSS · Hybrid ห้อง 2C2-03")}</div>
+          <div class="ep-zoom-creds">
+            <span><strong>Meeting ID:</strong> <code>${escapeHtml(spssZoom.id || "")}</code></span>
+            <span><strong>Passcode:</strong> <code>${escapeHtml(spssZoom.pass || "")}</code></span>
+            <span><strong>${escapeHtml(tr("ห้องปฏิบัติการ:", "Room:"))}</strong> <code>2C2-03</code></span>
+          </div>
+          <div class="ep-zoom-actions" id="epSpssTabActions">
+            <a class="btn sm primary" href="${escapeHtml(spssZoom.url || "#")}" target="_blank" rel="noopener">🎥 ${escapeHtml(tr("เข้าห้องเรียน Zoom (SPSS) ↗", "Join SPSS Zoom ↗"))}</a>
+            <button type="button" class="btn sm ep-copy-zoom-btn">${escapeHtml(tr("คัดลอกลิงก์ Zoom", "Copy Zoom Link"))}</button>
+          </div>
+        `;
+        const cpBtn = spssLiveCard.querySelector(".ep-copy-zoom-btn");
+        if (cpBtn && navigator.clipboard) {
+          cpBtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(`${spssZoom.label}\nZoom: ${spssZoom.url}\nMeeting ID: ${spssZoom.id} | Passcode: ${spssZoom.pass}`).then(() => {
+              const orig = cpBtn.textContent;
+              cpBtn.textContent = tr("✓ คัดลอกแล้ว", "✓ Copied");
+              setTimeout(() => {
+                cpBtn.textContent = orig;
+              }, 1600);
+            });
+          });
+        }
+        const actWrap = spssLiveCard.querySelector("#epSpssTabActions");
+        if (actWrap && spssSession && typeof appendSessionMaterialButtons === "function") {
+          appendSessionMaterialButtons(actWrap, spssSession, false);
+        }
+        if (actWrap && spssSession) {
+          const detailBtn = make("button", tr("รายละเอียดคาบ SPSS", "SPSS Session Details"), "btn sm");
+          detailBtn.type = "button";
+          detailBtn.addEventListener("click", () => openEventModal(spssSession));
+          actWrap.appendChild(detailBtn);
+        }
+        spssSection.appendChild(spssLiveCard);
+      }
+
+      const spssSteps = make("div", null, "ep-spss-grid");
+      spssSteps.innerHTML = `
+        <div class="ep-spss-step-card">
+          <span class="ep-spss-step-num">STEP 01 · Variable View &amp; Codebook</span>
+          <h4>${escapeHtml(tr("การสร้างโครงสร้างฐานข้อมูลและลงรหัสตัวแปร", "Database Structure & Variable Coding"))}</h4>
+          <p>${escapeHtml(tr("กำหนด Name, Type, Variable Label, Value Labels (เช่น 0 = ไม่เสี่ยง, 1 = เสี่ยง), Missing Values (เช่น 99/999) และระดับการวัด (Nominal / Ordinal / Scale) ให้ตรงกับแบบสอบถาม Health Survey", "Configure Variable View names, labels, value codes, user-missing codes, and measurement scales matching your Health Survey questionnaire."))}</p>
+        </div>
+        <div class="ep-spss-step-card">
+          <span class="ep-spss-step-num">STEP 02 · Data Cleaning, Recode &amp; Compute</span>
+          <h4>${escapeHtml(tr("การตรวจสอบความถูกต้องและแปลงตัวแปรใหม่", "Data Screening, Recoding & Computing Variables"))}</h4>
+          <p>${escapeHtml(tr("ตรวจสอบค่าผิดปกติด้วย Frequencies / Minimum–Maximum, จัดกลุ่มตัวแปรต่อเนื่องเป็นช่วงด้วย Transform → Recode into Different Variables (ไม่ทับตัวแปรเดิม) และคำนวณค่าดัชนีเช่น BMI หรือคะแนนรวมด้วย Compute Variable", "Screen out-of-range entries, recode continuous variables into categories using Recode into Different Variables, and compute composite scores.") )}</p>
+        </div>
+        <div class="ep-spss-step-card">
+          <span class="ep-spss-step-num">STEP 03 · Descriptive Analysis (เชื่อม RAGE 201)</span>
+          <h4>${escapeHtml(tr("การวิเคราะห์สถิติเชิงพรรณนาของชุมชน", "Descriptive Statistics for Community Profiles"))}</h4>
+          <p>${escapeHtml(tr("ตัวแปรกลุ่มใช้ Analyze → Descriptive Statistics → Frequencies สรุปจำนวนและร้อยละ n (%); ตัวแปรต่อเนื่องใช้ Explore เพื่อตรวจการแจกแจงและเลือกรายงาน Mean ± SD หรือ Median (IQR)", "Run Frequencies for categorical prevalence n (%) and Explore to report Mean ± SD vs. Median (IQR) appropriately."))}</p>
+        </div>
+        <div class="ep-spss-step-card">
+          <span class="ep-spss-step-num">STEP 04 · Analytical Testing &amp; Form 4A (เชื่อม RAGE 301)</span>
+          <h4>${escapeHtml(tr("การทดสอบความสัมพันธ์และแปลผลสู่การนำเสนอฟอร์ม 4A", "Bivariate Testing, Effect Size & Form 4A Reporting"))}</h4>
+          <p>${escapeHtml(tr("ใช้ Crosstabs (ติ๊ก Chi-square และ Risk พร้อม Row %) เพื่อหาค่า OR / Prevalence Ratio, 95% CI และ p-value หรือใช้ Independent-Samples T Test / Mann-Whitney U พร้อมแปลผลทั้งนัยสำคัญทางสถิติและทางคลินิก", "Use Crosstabs (Chi-square + Risk + Row %) or t-test / Mann-Whitney U, interpreting both 95% CI / p-value and clinical/public health significance."))}</p>
+        </div>
+      `;
+      spssSection.appendChild(spssSteps);
+      wrap.appendChild(spssSection);
+    }
+
+    // 4. Zoom Rooms (shown in 'all' or 'sessions' / 'zoom-spss')
+    if (curSec === "all" || isSessionsTab) {
       const zoomSection = make("section", null, "ep-section-block");
       zoomSection.innerHTML = `
         <div class="ep-sec-head">
@@ -42124,13 +42369,13 @@
       wrap.appendChild(zoomSection);
     }
 
-    // 4. Day-by-Day Epidemiology Sessions (shown in 'all' or 'sessions')
-    if (curSec === "all" || curSec === "sessions") {
+    // 5. Day-by-Day Epidemiology Sessions (shown in 'all' or 'sessions')
+    if (curSec === "all" || isSessionsTab) {
       const sessSection = make("section", null, "ep-section-block");
       sessSection.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">📚 ${escapeHtml(tr("ตารางคาบสอน & อัปโหลด Slide ระบาดวิทยา (EP1–EP9 · Exercise 1–6)", "Epidemiology Teaching Sessions & Slide Upload"))}</h3>
+            <h3 class="ep-sec-title">📚 ${escapeHtml(tr("ตารางคาบสอน & อัปโหลด Slide ระบาดวิทยา (EP1–EP9 · Exercise 2–7)", "Epidemiology Lectures, Exercises & Assessments"))}</h3>
             <p class="ep-sec-sub">${escapeHtml(tr("คลิกปุ่ม “อัปโหลด Slide” ในแต่ละคาบเพื่อแนบไฟล์ .pdf / .pptx หรือลิงก์สื่อการสอนให้นักศึกษาเปิดดูได้ทันที", "Attach .pdf / .pptx or Drive links per session for instant student access"))}</p>
           </div>
         </div>
@@ -42202,8 +42447,8 @@
       wrap.appendChild(sessSection);
     }
 
-    // 5. Exam Blueprint (Table Specification) & Fieldwork Oral Presentation Form 4A (shown in 'all' or 'exam-field')
-    if (curSec === "all" || curSec === "exam-field") {
+    // 6. Exam Blueprint (Table Specification) & Fieldwork Oral Presentation Form 4A (shown in 'all' or 'exam-field')
+    if (curSec === "all" || isExamFieldTab) {
       const specGrid = make("div", null, "ep-spec-split");
 
       const specCard = make("section", null, "ep-panel-card");
@@ -42211,8 +42456,8 @@
       specCard.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">🎯 ${escapeHtml(tr("โครงสร้างและสัดส่วนข้อสอบระบาดวิทยา (EP1–EP9)", "Epidemiology Exam Blueprint (EP1–EP9)"))}</h3>
-            <p class="ep-sec-sub">${escapeHtml(tr("สอบวันอังคารที่ 8 ธันวาคม 2569 เวลา 09.00 – 12.00 น. ณ ห้อง 2C2-02 และ 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Exam: Tue 8 Dec 2026, 09:00–12:00 at Rooms 2C2-02 & 2C2-03"))}</p>
+            <h3 class="ep-sec-title">🎯 ${escapeHtml(tr("โครงสร้างและสัดส่วนข้อสอบระบาดวิทยา RACM 303 (EP1–EP9)", "RACM 303 Epidemiology Exam Blueprint (EP1–EP9)"))}</h3>
+            <p class="ep-sec-sub">${escapeHtml(tr("สอบวันอังคารที่ 8 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-02 และ 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Exam: Tue 8 Dec 2026, 08:30–12:00 at Rooms 2C2-02 & 2C2-03"))}</p>
           </div>
         </div>
         <div class="ep-spec-table-wrap">
@@ -42234,7 +42479,7 @@
                     <tr>
                       <td><span class="ep-code-pill">${escapeHtml(r.code)}</span></td>
                       <td><strong>${escapeHtml(r.title)}</strong>${
-                        ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(r.code)
+                        ["EP1", "EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(r.code)
                           ? ` <button type="button" class="spec-hs-jump-link" data-ep-open-mod="${escapeHtml(r.code.toLowerCase())}">🎬 เปิด Video + Conceptualized →</button>`
                           : ""
                       }</td>
@@ -42254,7 +42499,7 @@
         </div>
       `;
       specCard.querySelectorAll("[data-ep-open-mod]").forEach((b) => {
-        b.addEventListener("click", () => setEpidemiologySection(b.dataset.epOpenMod || "ep6"));
+        b.addEventListener("click", () => setEpidemiologySection(b.dataset.epOpenMod || "ep1"));
       });
       specGrid.appendChild(specCard);
 
@@ -42264,7 +42509,7 @@
         <div class="ep-sec-head">
           <div>
             <h3 class="ep-sec-title">🏥 ${escapeHtml(tr("การนำเสนอระบาดวิทยาภาคสนาม & เกณฑ์ประเมินฟอร์ม 4A", "Fieldwork Epidemiology Oral Presentation & Form 4A"))}</h3>
-            <p class="ep-sec-sub">${escapeHtml(tr("วันพุธที่ 30 ธันวาคม 2569 เวลา 08.30 – 12.45 น. ณ ห้อง 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Wed 30 Dec 2026, 08:30–12:45 at Room 2C2-03"))}</p>
+            <p class="ep-sec-sub">${escapeHtml(tr("วันพุธที่ 30 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Wed 30 Dec 2026, 08:30–12:00 at Room 2C2-03"))}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="button" class="btn sm" id="epOpenManualCh17Btn">${escapeHtml(tr("บทที่ 17 แนวทางนำเสนอ →", "Ch.17 Guide →"))}</button>
@@ -42295,7 +42540,17 @@
 
     mount.appendChild(wrap);
     if (ep6StudioHost && window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.render === "function") {
-      window.RACM303_EP6_STUDIO.render(ep6StudioHost, isEpLectureSec ? { moduleCode: curSec.toUpperCase() } : undefined);
+      window.RACM303_EP6_STUDIO.render(
+        ep6StudioHost,
+        isEpLectureCode
+          ? {
+              moduleCode: curSec.toUpperCase(),
+              switcherLabel: "🎯 เลือกคาบบรรยาย RACM 303 EPI ที่ออกสอบ (EP1–EP9 · ครบทั้ง 9 คาบ)"
+            }
+          : {
+              switcherLabel: "🎯 เลือกคาบบรรยาย RACM 303 EPI ที่ออกสอบ (EP1–EP9 · ครบทั้ง 9 คาบ)"
+            }
+      );
     }
   }
 

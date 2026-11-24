@@ -3713,6 +3713,42 @@ html[data-role="faculty"] .or-deck-shell.is-io-deck[data-io-theme="dark"] .or-co
 .or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-td-sub { color: #94a3b8; }
 .or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-td-sub.is-danger { color: #f87171; }
 
+/* Slide 13 (5 Core Competencies Assessment Matrix) Optimal Auto-Fit Proportions */
+.or-slide-canvas.is-io-pitch .or-infog-split.is-s10-split {
+  grid-template-columns: 0.34fr 1.66fr;
+  gap: 0.58cqw;
+}
+
+.or-slide-canvas.is-io-pitch .or-table-wrap.is-s10-table .or-table {
+  table-layout: auto;
+  width: 100%;
+  height: 100%;
+  font-size: calc(0.98cqw * var(--fit-scale, 1));
+  line-height: 1.30;
+}
+
+.or-slide-canvas.is-io-pitch .or-table-wrap.is-s10-table .or-table th {
+  padding: calc(0.22cqw * var(--fit-scale, 1)) calc(0.46cqw * var(--fit-scale, 1));
+  font-size: calc(0.98cqw * var(--fit-scale, 1));
+  vertical-align: middle;
+}
+
+.or-slide-canvas.is-io-pitch .or-table-wrap.is-s10-table .or-table td {
+  padding: calc(0.14cqw * var(--fit-scale, 1)) calc(0.46cqw * var(--fit-scale, 1));
+  vertical-align: middle;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.or-slide-canvas.is-io-pitch .or-table-wrap.is-s10-table .or-table tr.is-domain-divider td {
+  padding: calc(0.11cqw * var(--fit-scale, 1)) calc(0.48cqw * var(--fit-scale, 1));
+  font-size: calc(0.92cqw * var(--fit-scale, 1));
+}
+
+.or-slide-canvas.is-io-pitch .or-table-wrap.is-s10-table .or-td-gap {
+  margin-top: calc(0.08cqw * var(--fit-scale, 1));
+}
+
 /* ---------- RACM 303 Schedule Matrix Slides (Weeks 1–3 & Weeks 4–6 · Auto-Fit --fit-scale) ---------- */
 .or-sld-body > .or-infog-split:only-child {
   grid-template-rows: minmax(0, 1fr);
@@ -5285,7 +5321,50 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   }
 }
 
-/* Slides 10 & 11 (Epidemiology & Health Systems 8-Stage Pipelines) Keynote Magic-Move Stage Spotlight (1 -> 2 -> 3 -> 4 -> Overview) */
+/* Slides 06 & 09 Full-Stage Hero Diagram First -> Click to Reveal Cards Below */
+.or-top-fig-stack.is-hero-reveal-stage[data-hero-reveal="0"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.or-top-fig-stack.is-hero-reveal-stage[data-hero-reveal="0"] > :not(.or-fig-plate) {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-hero-reveal-stage[data-hero-reveal="0"] > .or-fig-plate {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0.35cqw 0.55cqw !important;
+  cursor: pointer;
+}
+
+/* Slides 10 & 11 (Epidemiology & Health Systems 8-Stage Pipelines) Keynote Magic-Move:
+   hero (Full-Stage Diagram) -> 0 (Overview + 4 Cards) -> 1..4 (Cropped Stage Zoom) -> 0 (Overview + 4 Cards) */
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="hero"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="hero"] > .or-fig-plate.is-pipe-crop-plate,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="hero"] > .or-grid-4.is-s08-grid {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="hero"] > .or-fig-plate.is-pipe-overview-plate {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0.35cqw 0.55cqw !important;
+  cursor: pointer;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="hero"] .or-pipe-region-anchor {
+  pointer-events: none !important;
+}
+
 .or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="0"] > .or-fig-plate.is-pipe-crop-plate {
   display: none !important;
 }

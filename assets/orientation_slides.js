@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem7";
+  const ASSET_VER = "20261124prem9";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -456,7 +456,8 @@
     s02Focus: 0, // 0 = 3-figure overview, 1 = Fig 1.4, 2 = Fig 2A, 3 = Fig 2B, 4 = final overview
     s02Timer: 0,
     s02PendingTarget: null,
-    pipeFocus: 0, // 0 = 8-stage overview, 1..4 = cropped stage group 1..4, 5 = final overview
+    heroReveal: 0, // Slides 06 & 09: 0 = full-stage diagram, 1 = diagram + bottom cards
+    pipeFocus: 0, // Slides 10 & 11: 0 = full-stage diagram, 1 = overview + 4 cards, 2..5 = cropped stage 1..4, 6 = final overview + 4 cards
     pipeTimer: 0,
     pipePendingTarget: null,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
@@ -564,10 +565,17 @@
     `;
   }
 
+  function pipeDomFocusStr(pf) {
+    if (!pf || pf === 0) return "hero";
+    if (pf === 1 || pf === 6) return "0";
+    if (pf >= 2 && pf <= 5) return String(pf - 1);
+    return "0";
+  }
+
   function renderPipeZoomStageHtml(opts) {
     const isExportOrPrint =
       Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
-    const focusVal = isExportOrPrint || state.pipeFocus === 5 ? 0 : state.pipeFocus || 0;
+    const focusVal = isExportOrPrint ? "0" : pipeDomFocusStr(state.pipeFocus || 0);
     const ovResolved = resolveSlideImgFile(opts.overviewFile);
     const anchorsHtml = (opts.regions || [])
       .map(
@@ -890,8 +898,12 @@
         "<strong>เรียนความรู้ระบบและระบาดฯ จนครบ</strong> &rarr; <strong>สอบระบาดฯ</strong> &rarr; <strong>ลงฝึกภาคสนามและทำ Health Survey</strong> &rarr; <strong>กลับมาสอบระบบฯ ภาคทฤษฎี</strong> &rarr; <strong>สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบและระบาดฯ</strong>",
       notes:
         "สรุปเส้นทางการเรียนรู้ 6 สัปดาห์แบบเข้าใจง่ายตามลำดับขั้น: สัปดาห์ที่ 1–2 เรียนเนื้อหาระบบสุขภาพและระบาดวิทยาจนครบ สัปดาห์ที่ 3 สอบทฤษฎีระบาดวิทยา (8 ธ.ค.) เวิร์กชอป Learning How to Learn (9 ธ.ค.) และเตรียมพร้อมก่อนเดินทาง สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน) พร้อมทำ Health Survey ในชุมชน สัปดาห์ที่ 5 กลับมาสอบทฤษฎีระบบสุขภาพ (22 ธ.ค.) และฝึกวาดผังคิดเชิงระบบ (CLD) ก่อนเข้าสู่สัปดาห์ที่ 6 สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบสุขภาพ (29 ธ.ค.) และระบาดวิทยา (30 ธ.ค.)",
-      render: () => `
-        <div class="or-top-fig-stack is-s06-stack">
+      render: () => {
+        const isExportOrPrint =
+          Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
+        const revVal = isExportOrPrint ? 1 : state.heroReveal ? 1 : 0;
+        return `
+        <div class="or-top-fig-stack is-s06-stack is-hero-reveal-stage" data-hero-reveal="${revVal}">
           ${figPlate("orient_s06_roadmap.png", "6-Week Learning Journey across Classroom Preparation, 9 Training Hospitals, and Team Synthesis", "")}
 
           <div class="or-grid-6 is-s06-grid" data-fit-group="cards">
@@ -950,7 +962,7 @@
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>สอบทฤษฎีระบบสุขภาพ (22 ธ.ค. · โน้ต A4)</strong></li>
-                <li>ฝึกผังคิดเชิงระบบ (<code>CLD</code>) และเสวนานโยบาย</li>
+                <li>สังเคราะห์ความซับซ้อนจากพื้นที่ (<code>ST2</code>) และเสวนานโยบาย</li>
                 <li>วิเคราะห์ข้อมูลและถอดบทเรียน (<code>SG #6–8</code>)</li>
               </ul>
             </div>
@@ -968,7 +980,8 @@
             </div>
           </div>
         </div>
-      `
+      `;
+      }
     },
     {
       id: "s06b-schedule-w1-w3",
@@ -1156,9 +1169,9 @@
       title: "RACM 303 Schedule · ตารางเรียนรายสัปดาห์ ปีการศึกษา 2569 (สัปดาห์ที่ 4 – 6)",
       keyTag: "ตารางสัปดาห์ 4–6",
       keyMessageHtml:
-        "สัปดาห์ที่ 4 <strong>ฝึกภาคสนาม 9 พื้นที่ (9–20 ธ.ค.)</strong> · สัปดาห์ที่ 5 <strong>สอบทฤษฎีระบบสุขภาพ (22 ธ.ค. · โน้ต A4)</strong> ต่อด้วย CLD และสังเคราะห์ข้อมูลใน <code>SG 6–10</code> · สัปดาห์ที่ 6 <strong>นำเสนอระบบฯ (29 ธ.ค.) และระบาดฯ (30 ธ.ค.)</strong>",
+        "สัปดาห์ที่ 4 <strong>ฝึกภาคสนาม 9 พื้นที่ (9–20 ธ.ค.)</strong> · สัปดาห์ที่ 5 <strong>สอบทฤษฎีระบบสุขภาพ (22 ธ.ค. · โน้ต A4)</strong> ต่อด้วย <code>ST2</code> และสังเคราะห์ข้อมูลใน <code>SG 6–10</code> · สัปดาห์ที่ 6 <strong>นำเสนอระบบฯ (29 ธ.ค.) และระบาดฯ (30 ธ.ค.)</strong>",
       notes:
-        "ชี้แจงตารางเรียนสัปดาห์ที่ 4 ถึงสัปดาห์ที่ 6 ปีการศึกษา 2569: สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ รพ.ชุมชนและชุมชนเป้าหมายทั้ง 9 พื้นที่ (เดินทางกลับครบทุกกลุ่มภายในอาทิตย์ที่ 20 ธ.ค.) สัปดาห์ที่ 5 วันจันทร์ 21 ธ.ค. เตรียมสอบ (SDL ไม่เช็คชื่อ) วันอังคาร 22 ธ.ค. เช้าสอบทฤษฎีระบบสุขภาพ (จัดสอบ 3 ห้องใหญ่ Open Note A4 ลายมือ 1 แผ่น) บ่าย Workshop CLD นำโจทย์พื้นที่มาทำ วันพุธ 23 – ศุกร์ 25 ธ.ค. เสวนาสุขภาวะข้างถนน เสวนานโยบายสุขภาพ และพบ อ.ที่ปรึกษา ครั้งที่ 6–8 สัปดาห์ที่ 6 วันจันทร์ 28 ธ.ค. พบ อ.ที่ปรึกษา ครั้งที่ 9–10 วันอังคาร 29 ธ.ค. นำเสนอระบบสุขภาพ (10 นาที + อภิปราย 20 นาที) วันพุธ 30 ธ.ค. เช้านำเสนอระบาดวิทยา (7 นาที + อภิปราย 18 นาที) บ่ายประเมินเจตคติและส่ง SRN 2 + สไลด์ภายใน 17.00 น. ก่อนหยุดวันสิ้นปี 31 ธ.ค. และวันปีใหม่ 1 ม.ค.",
+        "ชี้แจงตารางเรียนสัปดาห์ที่ 4 ถึงสัปดาห์ที่ 6 ปีการศึกษา 2569: สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ รพ.ชุมชนและชุมชนเป้าหมายทั้ง 9 พื้นที่ (เดินทางกลับครบทุกกลุ่มภายในอาทิตย์ที่ 20 ธ.ค.) สัปดาห์ที่ 5 วันจันทร์ 21 ธ.ค. เตรียมสอบ (SDL ไม่เช็คชื่อ) วันอังคาร 22 ธ.ค. เช้าสอบทฤษฎีระบบสุขภาพ (จัดสอบ 3 ห้องใหญ่ Open Note A4 ลายมือ 1 แผ่น) บ่าย ST2 - Synthesis from Dynamic Complexity from the field วันพุธ 23 – ศุกร์ 25 ธ.ค. เสวนาสุขภาวะข้างถนน เสวนานโยบายสุขภาพ และพบ อ.ที่ปรึกษา ครั้งที่ 6–8 สัปดาห์ที่ 6 วันจันทร์ 28 ธ.ค. พบ อ.ที่ปรึกษา ครั้งที่ 9–10 วันอังคาร 29 ธ.ค. นำเสนอระบบสุขภาพ (10 นาที + อภิปราย 20 นาที) วันพุธ 30 ธ.ค. เช้านำเสนอระบาดวิทยา (7 นาที + อภิปราย 18 นาที) บ่ายประเมินเจตคติและส่ง SRN 2 + สไลด์ภายใน 17.00 น. ก่อนหยุดวันสิ้นปี 31 ธ.ค. และวันปีใหม่ 1 ม.ค.",
       render: () => `
         <div class="or-table-wrap is-sched-matrix is-w46-matrix" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูตารางเรียนสัปดาห์ที่ 4–6 ครบทุกวัน">
           <table class="or-table or-sched-matrix">
@@ -1224,8 +1237,8 @@
                   <div class="or-sch-room">13.30–17.00 น.<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
                 <td class="is-panel">
-                  <div><strong>Systems Thinking (CLD Workshop)</strong></div>
-                  <div><span class="or-sch-accent">13.30–17.00 น. สังเคราะห์โจทย์พื้นที่</span><br><span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
+                  <div><strong>ST2: Synthesis from Dynamic Complexity</strong></div>
+                  <div><span class="or-sch-accent">13.30–17.00 น. from the field</span> <span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 6 (SG6)</strong></div>
@@ -1305,8 +1318,12 @@
         "สร้างพื้นฐานความรู้สู่ <strong>โน้ตสรุป A4 สำหรับสอบข้อเขียน</strong> ควบคู่กับการฝึก <strong>การคิดเชิงระบบ</strong> เพื่อเชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอทีม (<code>ฟอร์ม 3A</code>)",
       notes:
         "อธิบายเส้นทางเรียนรู้ 6 ขั้นตอนของ ST1 และ HS1–HS6 ตั้งแต่เอกสารฉบับเต็มและฉบับย่อ แบบทดสอบและคำศัพท์ทบทวน บรรยายสรุป อภิปรายกลุ่มย่อย ไปจนถึงการดู VDO Lecture ทบทวน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ (18.5 ชม.) ซึ่งช่วยบ่มเพาะสมรรถนะการคิดเชิงระบบเพื่อใช้เชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอผลงานทีมฟอร์ม 3A และงานสะท้อนคิด",
-      render: () => `
-        <div class="or-top-fig-stack is-s07-stack">
+      render: () => {
+        const isExportOrPrint =
+          Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
+        const revVal = isExportOrPrint ? 1 : state.heroReveal ? 1 : 0;
+        return `
+        <div class="or-top-fig-stack is-s07-stack is-hero-reveal-stage" data-hero-reveal="${revVal}">
           ${figPlate("orient_s07_guided_flow.png", "6-Step Guided Learning Flow including Subgroup Discussion and VDO Lecture Review", "")}
 
           <div class="or-infog-split is-even is-full-h">
@@ -1330,14 +1347,15 @@
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">1.&nbsp;ST1</span> ระบบซับซ้อนและการคิดเชิงระบบ (25&nbsp;พ.ย.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">2.&nbsp;สุขภาพโลก</span>และวิจัยระบบสุขภาพ (25&nbsp;พ.ย.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">3.&nbsp;Learning How to Learn</span> เตรียมลงพื้นที่ (9&nbsp;ธ.ค.)</span>
-                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">4.&nbsp;แผนผังวงจรเหตุผล</span> CLD (22&nbsp;ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">4.&nbsp;ST2</span> Synthesis from Dynamic Complexity (22&nbsp;ธ.ค.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">5.&nbsp;วิเคราะห์&nbsp;6BB</span> สุขภาวะข้างถนน (23&nbsp;ธ.ค.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">6.&nbsp;นโยบาย</span>และเศรษฐศาสตร์การเมืองสุขภาพ (24&nbsp;ธ.ค.)</span>
               </div>
             </div>
           </div>
         </div>
-      `
+      `;
+      }
     },
     {
       id: "s08-epidemiology",
@@ -1449,18 +1467,18 @@
       title: "หมวดระบบสุขภาพ (ST1 และ HS1–HS6): จากกรอบทฤษฎีสู่การสังเกตระบบจริง สอบ และนำเสนอบูรณาการ",
       keyTag: "จากกรอบคิดสู่ระบบจริง",
       keyMessageHtml:
-        "<strong>เรียนครบ ST1 และ HS1–HS6</strong> &rarr; <strong>เวิร์กชอป Learning How to Learn &amp; SRN 1</strong> &rarr; <strong>ลงสังเกตระบบจริงในภาคสนาม</strong> &rarr; <strong>กลับมาสอบทฤษฎีระบบฯ (โน้ต A4) และวาดผัง CLD</strong> &rarr; <strong>นำเสนอเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
+        "<strong>เรียนครบ ST1 และ HS1–HS6</strong> &rarr; <strong>เวิร์กชอป Learning How to Learn &amp; SRN 1</strong> &rarr; <strong>ลงสังเกตระบบจริงในภาคสนาม</strong> &rarr; <strong>กลับมาสอบทฤษฎีระบบฯ (โน้ต A4) และเรียน ST2</strong> &rarr; <strong>นำเสนอเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
       notes:
-        "อธิบายเส้นทางหมวดระบบสุขภาพตามหลักคิดคู่ขนานกับหมวดระบาดวิทยา (พร้อมซูมขยายทีละช่วง): (1–3) เรียนภาคทฤษฎีครบ ST1 และ HS1–HS6 ในสัปดาห์ที่ 1–2 (4) เวิร์กชอป Learning How to Learn ร่วมกับ รศ. นพ.สุรเกียรติ และส่ง SRN 1 วันที่ 9 ธ.ค. ก่อนออกเดินทาง (5) ลงสังเกตการทำงานของระบบบริการและชุมชนจริงในภาคสนาม 9 พื้นที่ (6) กลับมาสอบภาคทฤษฎีระบบสุขภาพเช้าวันอังคารที่ 22 ธ.ค. แบบ Open Note A4 (7) บ่ายฝึกวาดผังวงจรเหตุผล (CLD) และร่วมเสวนานโยบาย 23–24 ธ.ค. ก่อน (8) นำเสนอผลงานทีม (ฟอร์ม 3A · 29 ธ.ค.) สะท้อนการคิดเชิงระบบเชื่อมโยงครบทั้ง 5 วัตถุประสงค์ พร้อมสังเคราะห์จุดคานงัดและต่อยอดสู่ Implications for Body of Knowledge, Policy and Practices ก่อนซูมออกกลับมาเห็นภาพรวมทั้ง 8 จังหวะ",
+        "อธิบายเส้นทางหมวดระบบสุขภาพตามหลักคิดคู่ขนานกับหมวดระบาดวิทยา (พร้อมซูมขยายทีละช่วง): (1–3) เรียนภาคทฤษฎีครบ ST1 และ HS1–HS6 ในสัปดาห์ที่ 1–2 (4) เวิร์กชอป Learning How to Learn ร่วมกับ รศ. นพ.สุรเกียรติ และส่ง SRN 1 วันที่ 9 ธ.ค. ก่อนออกเดินทาง (5) ลงสังเกตการทำงานของระบบบริการและชุมชนจริงในภาคสนาม 9 พื้นที่ (6) กลับมาสอบภาคทฤษฎีระบบสุขภาพเช้าวันอังคารที่ 22 ธ.ค. แบบ Open Note A4 (7) บ่ายเรียน ST2 - Synthesis from Dynamic Complexity from the field และร่วมเสวนานโยบาย 23–24 ธ.ค. ก่อน (8) นำเสนอผลงานทีม (ฟอร์ม 3A · 29 ธ.ค.) สะท้อนการคิดเชิงระบบเชื่อมโยงครบทั้ง 5 วัตถุประสงค์ พร้อมสังเคราะห์จุดคานงัดและต่อยอดสู่ Implications for Body of Knowledge, Policy and Practices ก่อนซูมออกกลับมาเห็นภาพรวมทั้ง 8 จังหวะ",
       render: () =>
         renderPipeZoomStageHtml({
           overviewFile: "orient_s08b_hs_pipeline.png",
           overviewAlt:
-            "8-Stage Health Systems Science Pipeline from ST1 and HS1–HS6 to Learning How to Learn, Fieldwork, Open-Note Exam, CLD, and Integrated Presentation",
+            "8-Stage Health Systems Science Pipeline from ST1 and HS1–HS6 to Learning How to Learn, Fieldwork, Open-Note Exam, ST2 Synthesis, and Integrated Presentation",
           regions: [
             { slot: "1", left: "0.8%", width: "36.2%", title: "ซูม Stage 1–3: ทฤษฎีครบ ST1 & HS1–HS6" },
             { slot: "2", left: "37.6%", width: "24.2%", title: "ซูม Stage 4–5: Learning How to Learn & ภาคสนาม 9 พื้นที่" },
-            { slot: "3", left: "62.4%", width: "24.2%", title: "ซูม Stage 6–7: สอบทฤษฎีระบบฯ (โน้ต A4) & CLD Workshop" },
+            { slot: "3", left: "62.4%", width: "24.2%", title: "ซูม Stage 6–7: สอบทฤษฎีระบบฯ (โน้ต A4) & ST2" },
             { slot: "4", left: "87.2%", width: "12.0%", title: "ซูม Stage 8: นำเสนอบูรณาการ 5 วัตถุประสงค์ (ฟอร์ม 3A)" }
           ],
           crops: [
@@ -1468,9 +1486,9 @@
               slot: "1",
               badge: "STAGE 1–3 · CLASSROOM FOUNDATION (ST1 & HS1–HS6)",
               fileName: "orient_s08b_hs_f1.png",
-              altText: "Stages 1 to 3 of Health Systems Science: ST1 and HS1 Systems Thinking and SDH, HS2–HS3 6BB and EQESaRR, HS4–HS6 COM-B, PHC and UHC",
+              altText: "Stages 1 to 3 of Health Systems Science: ST1 Systems Thinking, HS1 Health, Determinants of Health, Level of Disease Prevention, HS2–HS3 6BB and EQESaRR, HS4–HS6 COM-B, Health Promotion, PHC/PC, Health Insurance and UHC Concept",
               captionHtml:
-                "<strong>Stage 1–3 (25 พ.ย.–4 ธ.ค. 69):</strong> เรียนรู้กรอบคิดเชิงระบบ <code>ST1</code> ปัจจัยกำหนดสุขภาพ บริการ <code>6BB / EQESaRR</code> สร้างเสริมสุขภาพ ปฐมภูมิ และหลักประกันฯ"
+                "<strong>Stage 1–3 (25 พ.ย.–4 ธ.ค. 69):</strong> <code>Systems Thinking</code> · <code>Health, Determinants of Health, Level of Disease Prevention</code> · <code>6BB &amp; EQESaRR</code> · <code>Health Promotion</code> · <code>PHC/PC</code> · <code>Health Insurance and UHC Concept</code>"
             },
             {
               slot: "2",
@@ -1482,11 +1500,11 @@
             },
             {
               slot: "3",
-              badge: "STAGE 6–7 · OPEN-NOTE EXAM & CLD SYNTHESIS (22–25 ธ.ค. 69)",
+              badge: "STAGE 6–7 · OPEN-NOTE EXAM & ST2 SYNTHESIS (22 ธ.ค. 69)",
               fileName: "orient_s08b_hs_f3.png",
-              altText: "Stages 6 and 7 of Health Systems Science: Open-Note A4 Theory Exam and Causal Loop Diagram Workshop with Policy Panels",
+              altText: "Stages 6 and 7 of Health Systems Science: Open-Note A4 Theory Exam and ST2 - Synthesis from Dynamic Complexity from the field",
               captionHtml:
-                "<strong>Stage 6–7 (22–25 ธ.ค. 69):</strong> เช้า 22 ธ.ค. สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) · บ่ายฝึกผังวงจรเหตุผล (<code>CLD</code>) และร่วมเสวนานโยบาย"
+                "<strong>Stage 6–7 (อังคาร 22 ธ.ค. 69):</strong> เช้าสอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) · บ่ายเรียน <code>ST2 - Synthesis from Dynamic Complexity from the field</code>"
             },
             {
               slot: "4",
@@ -1502,10 +1520,10 @@
               slot: "1",
               tintCls: "is-white",
               kickerHtml: "STAGE 1–3 · ทฤษฎีครบ ST1 &amp; HS1–6 (25 พ.ย.–4 ธ.ค.)",
-              titleHtml: "คิดเชิงระบบ ปัจจัยสุขภาพ บริการ ปฐมภูมิ และ UHC",
+              titleHtml: "คิดเชิงระบบ สุขภาพ บริการ สร้างเสริม ปฐมภูมิ และหลักประกันฯ",
               instRowHtml: `<div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="อ.ณัฐวุฒิ" loading="eager" decoding="async" /></span><span>อ.ณัฐวุฒิ</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="อ.วริษา" loading="eager" decoding="async" /></span><span>อ.วริษา</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="อ.ภูษิต" loading="eager" decoding="async" /></span><span>อ.ภูษิต</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="ผศ.วิชช์" loading="eager" decoding="async" /></span><span>ผศ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="อ.ฉัตรชัย" loading="eager" decoding="async" /></span><span>อ.ฉัตรชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="ผศ.สัมฤทธิ์" loading="eager" decoding="async" /></span><span>ผศ.สัมฤทธิ์</span></span></div>`,
               bodyHtml:
-                "<code>ST1</code> คิดเชิงระบบ · <code>HS1</code> สุขภาพ <code>SDH/CDoH</code> · <code>HS2</code> บริการ <code>6BB</code> · <code>HS3</code> คุณลักษณะ <code>EQESaRR</code> · <code>HS4</code> สร้างเสริมสุขภาพ <code>COM-B</code> · <code>HS5</code> ปฐมภูมิ <code>PHC</code> · <code>HS6</code> <code>UHC</code>"
+                "<code>ST1</code> Systems Thinking · <code>HS1</code> Health, Determinants of Health, Level of Disease Prevention · <code>HS2–3</code> <code>6BB &amp; EQESaRR</code> · <code>HS4</code> <code>COM-B</code> &amp; Health Promotion · <code>HS5</code> <code>PHC/PC</code> · <code>HS6</code> Health Insurance &amp; UHC Concept"
             },
             {
               slot: "2",
@@ -1518,10 +1536,10 @@
             {
               slot: "3",
               tintCls: "is-amber-tint",
-              kickerHtml: "STAGE 6–7 · อ. 22 – ศ. 25 ธ.ค. 69 (หลังกลับพื้นที่)",
-              titleHtml: "กลับมาสอบระบบฯ ภาคทฤษฎี และวาดผัง CLD",
+              kickerHtml: "STAGE 6–7 · อ. 22 – พฤ. 24 ธ.ค. 69 (หลังกลับพื้นที่)",
+              titleHtml: "กลับมาสอบระบบฯ ภาคทฤษฎี และสังเคราะห์ใน ST2",
               bodyHtml:
-                "<strong>เช้า 22 ธ.ค.:</strong> สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) แยกชัดเจนหลังเห็นภาพจริง · <strong>บ่าย 22–25 ธ.ค.:</strong> ฝึกวาดผังวงจรเหตุผล (<code>CLD</code>) และเสวนานโยบายสุขภาพ"
+                "<strong>เช้า 22 ธ.ค.:</strong> สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) หลังเห็นภาพจริง · <strong>บ่าย 22 ธ.ค.:</strong> <code>ST2 - Synthesis from Dynamic Complexity from the field</code> ต่อด้วยเสวนานโยบาย (23–24 ธ.ค.)"
             },
             {
               slot: "4",
@@ -1623,12 +1641,18 @@
 
           <div class="or-table-wrap is-s10-table" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูเครื่องมือและเกณฑ์ตัดสินผลครบทุกช่อง">
             <table class="or-table">
+              <colgroup>
+                <col style="width:19.5%" />
+                <col style="width:50.5%" />
+                <col style="width:13.0%" />
+                <col style="width:17.0%" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th style="width:22%">สมรรถนะหลัก 5 ด้าน</th>
-                  <th style="width:46%">เครื่องมือประเมินเพื่อพัฒนาและตัดสินผล</th>
-                  <th style="width:14%">ผู้ประเมิน</th>
-                  <th style="width:18%">เกณฑ์ตัดสินผล</th>
+                  <th>สมรรถนะหลัก 5 ด้าน</th>
+                  <th>เครื่องมือประเมินเพื่อพัฒนาและตัดสินผล</th>
+                  <th>ผู้ประเมิน</th>
+                  <th>เกณฑ์ตัดสินผล</th>
                 </tr>
               </thead>
               <tbody>
@@ -1636,21 +1660,21 @@
                 <tr>
                   <td><strong>1. Knowledge base</strong><br><span class="or-td-sub">ระบบสุขภาพและระบาดวิทยา</span></td>
                   <td>
-                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา แบบทดสอบทบทวนด้วยตนเอง (<code>ST1, HS1–6</code>) แบบฝึกหัด <code>EP</code> และ <code>SRN 1</code></div>
+                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา ทบทวนด้วยตนเอง (<code>ST1–2, HS1–6</code>) แบบฝึกหัด <code>EP</code> และ <code>SRN 1</code></div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> <strong>Epi Exam</strong> (8 ธ.ค.) และ <strong>Health Systems Exam</strong> (โน้ต A4 · 22 ธ.ค.)</div>
                   </td>
                   <td>คณาจารย์</td>
-                  <td><strong>แยกเกณฑ์สองหมวด:</strong><br>ผ่าน <strong>&ge; 2.00</strong> (<strong>O &ge; 3.75</strong>)</td>
+                  <td><strong>แยกเกณฑ์ 2 หมวด:</strong><br>ผ่าน <strong>&ge; 2.00</strong> (<strong>O &ge; 3.75</strong>)</td>
                 </tr>
 
                 <tr class="is-domain-divider"><td colspan="4">ภาคปฏิบัติและสมรรถนะวิชาชีพในชุมชน (Practical, Community &amp; Professionalism)</td></tr>
                 <tr>
-                  <td><strong>2. Communication &amp; Interpersonal</strong></td>
+                  <td><strong>2. Communication &amp;<wbr> Interpersonal</strong></td>
                   <td>
                     <div><span class="or-tag-inline is-formative">Formative</span> แลกเปลี่ยนเรียนรู้ในกลุ่มย่อย 10 ครั้ง และอภิปราย 6 ครั้ง พร้อมฝึกสื่อสารทำงานร่วมกัน</div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> ประเมินโดยเพื่อนร่วมกลุ่ม <code>ฟอร์ม 1A</code> (ข้อ 1, 3, 4) และการนำเสนอทีม (<code>3A, 4A</code>)</div>
                   </td>
-                  <td>เพื่อนและอาจารย์</td>
+                  <td>เพื่อนและ<wbr>อาจารย์</td>
                   <td><strong>O / S / M / U</strong><br><span class="or-td-sub">(รายบุคคลประกอบ 2A)</span></td>
                 </tr>
                 <tr>
@@ -1659,25 +1683,25 @@
                     <div><span class="or-tag-inline is-formative">Formative</span> ให้คำปรึกษาเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ ณ รพ.แหล่งฝึก และการสำรวจชุมชน</div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> <strong>นำเสนอระบบสุขภาพ (3A)</strong> เชื่อมทั้ง 5 วัตถุประสงค์ และ<strong>ระบาดวิทยา (4A)</strong> ร่วมกับ <code>1A</code></div>
                   </td>
-                  <td>คณาจารย์และเพื่อน</td>
+                  <td>คณาจารย์<wbr>และเพื่อน</td>
                   <td><strong>O / S / M / U</strong><br><span class="or-td-sub">(3A, 4A ทีม · 1A บุคคล)</span></td>
                 </tr>
                 <tr>
-                  <td><strong>4. Continuous Prof. Development</strong></td>
+                  <td><strong>4. Continuous Prof.<wbr> Development</strong></td>
                   <td>
                     <div><span class="or-tag-inline is-formative">Formative</span> <code>SRN 1</code> (ส่ง 9 ธ.ค. เพื่อรับคำแนะนำรายบุคคลระหว่างฝึกภาคสนาม)</div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> <code>SRN 2</code> (ส่ง 30 ธ.ค.) ควบคู่ <code>ฟอร์ม 1A</code> ข้อ 2 ด้านความใฝ่รู้พัฒนาตน</div>
                   </td>
-                  <td>อาจารย์และเพื่อน</td>
+                  <td>อาจารย์<wbr>และเพื่อน</td>
                   <td><strong>O / S / M / U</strong><br><span class="or-td-sub">(รายบุคคล)</span></td>
                 </tr>
                 <tr>
-                  <td><strong>5. Habits, Attitudes, Moral &amp; Ethics</strong></td>
+                  <td><strong>5. Habits, Attitudes,<wbr> Moral &amp; Ethics</strong></td>
                   <td>
                     <div><span class="or-tag-inline is-formative">Formative</span> สังเกตและให้คำแนะนำด้านความรับผิดชอบและจริยธรรมวิชาชีพตลอดรายวิชา</div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> ประเมินตาม <code>ฟอร์ม 1A</code> (ข้อ 6.1–6.3 ความรับผิดชอบ ซื่อสัตย์ น้ำใจ) สรุปใน <code>ฟอร์ม 2A</code></div>
                   </td>
-                  <td>อาจารย์ที่ปรึกษา</td>
+                  <td>อาจารย์<wbr>ที่ปรึกษา</td>
                   <td><strong>O / S / U</strong><br><span class="or-td-sub is-danger">(ระดับ U ลงทะเบียนใหม่)</span></td>
                 </tr>
               </tbody>
@@ -2210,7 +2234,7 @@
       const w = wraps[i];
       const tbl = w.querySelector(".or-table");
       if (!tbl || w.clientHeight <= 0 || w.clientWidth <= 0) continue;
-      if (tbl.offsetHeight > w.clientHeight - 1) return false;
+      if (tbl.offsetHeight > w.clientHeight + 1) return false;
       if (w.scrollHeight > w.clientHeight + 1) return false;
       if (tbl.scrollWidth > w.clientWidth + 1) return false;
       if (tbl.classList.contains("or-sched-matrix")) {
@@ -2427,11 +2451,14 @@
 
     const s02Grid = canvas.querySelector(".or-s02-3fig-grid");
     const pipeStage = canvas.querySelector(".or-top-fig-stack.is-pipe-zoom-stage");
+    const heroStage = canvas.querySelector(".or-top-fig-stack.is-hero-reveal-stage");
     const focusKey = s02Grid
       ? s02Grid.getAttribute("data-s02-focus") || "0"
       : pipeStage
         ? "pipe:" + (pipeStage.getAttribute("data-pipe-focus") || "0")
-        : "";
+        : heroStage
+          ? "hero:" + (heroStage.getAttribute("data-hero-reveal") || "1")
+          : "";
     const printKey = document.body.classList.contains("is-printing-orientation-deck") ? "P" : "S";
     const fitSig = `${canvas.clientWidth}x${canvas.clientHeight}:${focusKey}:${printKey}`;
     if (canvas._lastFitSig === fitSig) return;
@@ -3500,6 +3527,10 @@
     state.pipePendingTarget = null;
   }
 
+  function isHeroRevealSlide(slide) {
+    return Boolean(slide && (slide.id === "s06-roadmap-6weeks" || slide.id === "s07-hs-guided-learning"));
+  }
+
   function isPipeZoomSlide(slide) {
     return Boolean(slide && (slide.id === "s08-epidemiology" || slide.id === "s08b-hs-pipeline"));
   }
@@ -3593,53 +3624,115 @@
     return true;
   }
 
+  function applyHeroRevealDom(slideId, targetRev) {
+    state.heroReveal = targetRev ? 1 : 0;
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return false;
+    const canvas = modal.querySelector(`.or-slide-canvas[data-slide-id="${slideId}"]`);
+    const stageEl = canvas && canvas.querySelector(".or-top-fig-stack.is-hero-reveal-stage");
+    if (!canvas || !stageEl) return false;
+
+    const figPlateEl = stageEl.querySelector(":scope > .or-fig-plate");
+    const bottomEl = stageEl.children[1] || null;
+    const reduceMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const figFirst =
+      !reduceMotion && figPlateEl && figPlateEl.offsetParent !== null ? figPlateEl.getBoundingClientRect() : null;
+
+    stageEl.setAttribute("data-hero-reveal", String(state.heroReveal));
+
+    const slideObj = SLIDES.find((s) => s.id === slideId);
+    const sNum = slideObj ? slideObj.num : "06";
+    const footNum = canvas.querySelector(".or-sld-foot-num");
+    if (footNum) {
+      footNum.textContent = `${sNum} / ${SLIDES.length}${state.heroReveal === 0 ? " · ภาพรวมเต็มจอ" : ""}`;
+    }
+    const cchNum = document.querySelector("#orClickerCornerHud .or-cch-num");
+    if (cchNum) {
+      cchNum.textContent = `${sNum}${state.heroReveal === 0 ? " [ภาพ]" : ""} / ${SLIDES.length}`;
+    }
+    flashStepToast();
+
+    fitSingleSlideCanvas(canvas);
+
+    if (!reduceMotion) {
+      if (figPlateEl && figFirst) {
+        animateFlipElement(figPlateEl, figFirst, 430);
+      }
+      if (state.heroReveal === 1 && bottomEl && typeof bottomEl.animate === "function") {
+        try {
+          bottomEl.getAnimations().forEach((a) => a.cancel());
+          bottomEl.animate(
+            [
+              { opacity: 0, transform: "translateY(20px)" },
+              { opacity: 1, transform: "translateY(0)" }
+            ],
+            { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+          );
+        } catch (_) {}
+      }
+    }
+    return true;
+  }
+
   function applyPipeDomFocus(slideId, targetFocus, animSlot) {
     state.pipeFocus = targetFocus;
-    const domFocus = targetFocus === 5 ? 0 : targetFocus;
     const modal = document.getElementById("orientationDeckModal");
     if (!modal || modal.hidden) return false;
     const canvas = modal.querySelector(`.or-slide-canvas[data-slide-id="${slideId}"]`);
     const stageEl = canvas && canvas.querySelector(".or-top-fig-stack.is-pipe-zoom-stage");
     if (!canvas || !stageEl) return false;
 
+    const prevDomFocus = stageEl.getAttribute("data-pipe-focus") || "hero";
+    const domFocus = pipeDomFocusStr(targetFocus);
     const slotStr = animSlot ? String(animSlot) : "";
     const overviewPlate = stageEl.querySelector(".or-fig-plate.is-pipe-overview-plate");
+    const gridEl = stageEl.querySelector(".or-grid-4.is-s08-grid");
     const regionAnchor = slotStr ? stageEl.querySelector(`.or-pipe-region-anchor[data-pipe-region="${slotStr}"]`) : null;
     const cropPlate = slotStr ? stageEl.querySelector(`.or-fig-plate.is-pipe-crop-plate[data-pipe-crop="${slotStr}"]`) : null;
     const activeCard = slotStr ? stageEl.querySelector(`.or-card.is-s08-card[data-pipe-slot="${slotStr}"]`) : null;
 
     const reduceMotion =
       typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const overviewFirst =
+      !reduceMotion && overviewPlate && overviewPlate.offsetParent !== null ? overviewPlate.getBoundingClientRect() : null;
     const regionFirst =
-      !reduceMotion && domFocus > 0 && regionAnchor && overviewPlate && overviewPlate.offsetParent !== null
+      !reduceMotion &&
+      domFocus !== "hero" &&
+      domFocus !== "0" &&
+      regionAnchor &&
+      overviewPlate &&
+      overviewPlate.offsetParent !== null
         ? regionAnchor.getBoundingClientRect()
         : null;
     const cardFirst =
       !reduceMotion && activeCard && activeCard.offsetParent !== null ? activeCard.getBoundingClientRect() : null;
 
-    stageEl.setAttribute("data-pipe-focus", String(domFocus));
+    stageEl.setAttribute("data-pipe-focus", domFocus);
 
     const slideObj = SLIDES.find((s) => s.id === slideId);
     const sNum = slideObj ? slideObj.num : "10";
     const isEpi = slideId === "s08-epidemiology";
     const stepLabels = isEpi
       ? {
-          0: "",
-          1: " · Stage 1–3 (EP1–9)",
-          2: " · Stage 4–5 (Exam & SPSS)",
-          3: " · Stage 6 (Fieldwork)",
-          4: " · Stage 7–8 (Analysis & 4A)",
-          5: " · ภาพรวมสรุป"
+          0: " · ภาพรวมเต็มจอ",
+          1: "",
+          2: " · Stage 1–3 (EP1–9)",
+          3: " · Stage 4–5 (Exam & SPSS)",
+          4: " · Stage 6 (Fieldwork)",
+          5: " · Stage 7–8 (Analysis & 4A)",
+          6: " · ภาพรวมสรุป"
         }
       : {
-          0: "",
-          1: " · Stage 1–3 (ST1 & HS1–6)",
-          2: " · Stage 4–5 (LHTL & Field)",
-          3: " · Stage 6–7 (Exam & CLD)",
-          4: " · Stage 8 (Present 3A)",
-          5: " · ภาพรวมสรุป"
+          0: " · ภาพรวมเต็มจอ",
+          1: "",
+          2: " · Stage 1–3 (ST1 & HS1–6)",
+          3: " · Stage 4–5 (LHTL & Field)",
+          4: " · Stage 6–7 (Exam & ST2)",
+          5: " · Stage 8 (Present 3A)",
+          6: " · ภาพรวมสรุป"
         };
-    const shortLabels = { 0: "", 1: " [S1]", 2: " [S2]", 3: " [S3]", 4: " [S4]", 5: " [รวม]" };
+    const shortLabels = { 0: " [ภาพ]", 1: "", 2: " [S1]", 3: " [S2]", 4: " [S3]", 5: " [S4]", 6: " [รวม]" };
     const footNum = canvas.querySelector(".or-sld-foot-num");
     if (footNum) {
       footNum.textContent = `${sNum} / ${SLIDES.length}${stepLabels[targetFocus] || ""}`;
@@ -3652,33 +3745,52 @@
 
     fitSingleSlideCanvas(canvas);
 
-    if (!reduceMotion && activeCard) {
-      if (domFocus > 0) {
-        if (cropPlate && regionFirst) {
-          animateFlipElement(cropPlate, regionFirst, 450);
+    if (!reduceMotion) {
+      // Transition between Full-Stage Hero ("hero") and Overview + 4 Cards ("0")
+      if ((prevDomFocus === "hero" && domFocus === "0") || (prevDomFocus === "0" && domFocus === "hero")) {
+        if (overviewPlate && overviewFirst) {
+          animateFlipElement(overviewPlate, overviewFirst, 430);
         }
-        animateFlipElement(activeCard, cardFirst, 450);
-      } else {
-        animateFlipElement(activeCard, cardFirst, 360);
-        if (overviewPlate && typeof overviewPlate.animate === "function") {
+        if (domFocus === "0" && gridEl && typeof gridEl.animate === "function") {
           try {
-            overviewPlate.getAnimations().forEach((a) => a.cancel());
-            overviewPlate.animate(
+            gridEl.getAnimations().forEach((a) => a.cancel());
+            gridEl.animate(
               [
-                { opacity: 0.35, transform: "scale(1.035)" },
-                { opacity: 1, transform: "scale(1)" }
+                { opacity: 0, transform: "translateY(20px)" },
+                { opacity: 1, transform: "translateY(0)" }
               ],
-              { duration: 330, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+              { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
             );
           } catch (_) {}
         }
-        stageEl.querySelectorAll(".or-card.is-s08-card").forEach((card) => {
-          if (card === activeCard || typeof card.animate !== "function") return;
-          try {
-            card.getAnimations().forEach((a) => a.cancel());
-            card.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
-          } catch (_) {}
-        });
+      } else if (activeCard) {
+        if (domFocus !== "0" && domFocus !== "hero") {
+          if (cropPlate && regionFirst) {
+            animateFlipElement(cropPlate, regionFirst, 450);
+          }
+          animateFlipElement(activeCard, cardFirst, 450);
+        } else if (domFocus === "0") {
+          animateFlipElement(activeCard, cardFirst, 360);
+          if (overviewPlate && typeof overviewPlate.animate === "function") {
+            try {
+              overviewPlate.getAnimations().forEach((a) => a.cancel());
+              overviewPlate.animate(
+                [
+                  { opacity: 0.35, transform: "scale(1.035)" },
+                  { opacity: 1, transform: "scale(1)" }
+                ],
+                { duration: 330, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+              );
+            } catch (_) {}
+          }
+          stageEl.querySelectorAll(".or-card.is-s08-card").forEach((card) => {
+            if (card === activeCard || typeof card.animate !== "function") return;
+            try {
+              card.getAnimations().forEach((a) => a.cancel());
+              card.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
+            } catch (_) {}
+          });
+        }
       }
     }
     return true;
@@ -3692,6 +3804,7 @@
     state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = nextIdx;
     state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
+    state.heroReveal = typeof o.heroReveal === "number" ? o.heroReveal : 0;
     state.pipeFocus = typeof o.pipeFocus === "number" ? o.pipeFocus : 0;
     state.zoomScale = 1;
     state.toolsMenuOpen = false;
@@ -3735,7 +3848,6 @@
           return;
         }
         if (state.s02Focus === 1) {
-          // Zoom out Fig 1.4 back to its Column 1 slot, then automatically enlarge Fig 2A + Key Takeaway!
           applyS02DomFocus(0, 1);
           state.s02PendingTarget = 2;
           state.s02Timer = setTimeout(() => {
@@ -3748,7 +3860,6 @@
           return;
         }
         if (state.s02Focus === 2) {
-          // Zoom out Fig 2A back to its Column 2 slot, then automatically enlarge Fig 2B + Key Takeaway!
           applyS02DomFocus(0, 2);
           state.s02PendingTarget = 3;
           state.s02Timer = setTimeout(() => {
@@ -3761,11 +3872,9 @@
           return;
         }
         if (state.s02Focus === 3) {
-          // Zoom out Fig 2B back to full 3-figure Overview and WAIT for the next clicker press!
           applyS02DomFocus(4, 3);
           return;
         }
-        // state.s02Focus === 4 -> proceed to next slide on clicker press!
         goToSlide(state.slideIdx + 1, { s02Focus: 0 });
         return;
       } else {
@@ -3806,80 +3915,127 @@
       }
     }
 
+    // Slides 06 & 09: Full-Stage Hero Diagram (0) -> Click #1 Reveals Cards Below (1) -> Click #2 Next Slide!
+    if (state.viewMode === "deck" && isHeroRevealSlide(cur)) {
+      if (d > 0) {
+        if (state.heroReveal === 0) {
+          applyHeroRevealDom(cur.id, 1);
+          return;
+        }
+        goToSlide(state.slideIdx + 1);
+        return;
+      } else {
+        if (state.heroReveal === 1) {
+          applyHeroRevealDom(cur.id, 0);
+          return;
+        }
+        const prevIdx = state.slideIdx - 1;
+        if (prevIdx >= 0 && isHeroRevealSlide(SLIDES[prevIdx])) {
+          goToSlide(prevIdx, { heroReveal: 1 });
+          return;
+        }
+        if (prevIdx >= 0 && isPipeZoomSlide(SLIDES[prevIdx])) {
+          goToSlide(prevIdx, { pipeFocus: 6 });
+          return;
+        }
+        goToSlide(prevIdx);
+        return;
+      }
+    }
+
+    // Slides 10 & 11: Full-Stage Hero Diagram (0) -> Reveal 4 Cards (1) -> Zoom Stages 1..4 (2..5) -> Overview+Cards (6) -> Next Slide!
     if (state.viewMode === "deck" && isPipeZoomSlide(cur)) {
       const sid = cur.id;
       if (d > 0) {
         if (state.pipeFocus === 0) {
-          applyPipeDomFocus(sid, 1, 1);
+          applyPipeDomFocus(sid, 1, 0);
           return;
         }
-        if (state.pipeFocus >= 1 && state.pipeFocus <= 3) {
-          const curSlot = state.pipeFocus;
-          const nextSlot = curSlot + 1;
-          applyPipeDomFocus(sid, 0, curSlot);
-          state.pipePendingTarget = nextSlot;
+        if (state.pipeFocus === 1) {
+          applyPipeDomFocus(sid, 2, 1);
+          return;
+        }
+        if (state.pipeFocus >= 2 && state.pipeFocus <= 4) {
+          const curSlot = state.pipeFocus - 1;
+          const nextFocus = state.pipeFocus + 1;
+          const nextSlot = nextFocus - 1;
+          applyPipeDomFocus(sid, 1, curSlot);
+          state.pipePendingTarget = nextFocus;
           state.pipeTimer = setTimeout(() => {
             state.pipeTimer = 0;
             state.pipePendingTarget = null;
             if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === sid) {
-              applyPipeDomFocus(sid, nextSlot, nextSlot);
+              applyPipeDomFocus(sid, nextFocus, nextSlot);
             }
           }, 365);
           return;
         }
-        if (state.pipeFocus === 4) {
-          // Zoom out Stage 4 back to Full 8-Stage Overview and WAIT for the next clicker press!
-          applyPipeDomFocus(sid, 5, 4);
+        if (state.pipeFocus === 5) {
+          // Zoom out Stage 4 back to Overview + 4 Cards and WAIT for the next clicker press!
+          applyPipeDomFocus(sid, 6, 4);
           return;
         }
         goToSlide(state.slideIdx + 1, { pipeFocus: 0 });
         return;
       } else {
-        if (state.pipeFocus === 5) {
-          applyPipeDomFocus(sid, 4, 4);
+        if (state.pipeFocus === 6) {
+          applyPipeDomFocus(sid, 5, 4);
           return;
         }
-        if (state.pipeFocus >= 2 && state.pipeFocus <= 4) {
-          const curSlot = state.pipeFocus;
-          const prevSlot = curSlot - 1;
-          applyPipeDomFocus(sid, 0, curSlot);
-          state.pipePendingTarget = prevSlot;
+        if (state.pipeFocus >= 3 && state.pipeFocus <= 5) {
+          const curSlot = state.pipeFocus - 1;
+          const prevFocus = state.pipeFocus - 1;
+          const prevSlot = prevFocus - 1;
+          applyPipeDomFocus(sid, 1, curSlot);
+          state.pipePendingTarget = prevFocus;
           state.pipeTimer = setTimeout(() => {
             state.pipeTimer = 0;
             state.pipePendingTarget = null;
             if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === sid) {
-              applyPipeDomFocus(sid, prevSlot, prevSlot);
+              applyPipeDomFocus(sid, prevFocus, prevSlot);
             }
           }, 365);
           return;
         }
+        if (state.pipeFocus === 2) {
+          applyPipeDomFocus(sid, 1, 1);
+          return;
+        }
         if (state.pipeFocus === 1) {
-          applyPipeDomFocus(sid, 0, 1);
+          applyPipeDomFocus(sid, 0, 0);
           return;
         }
         const prevIdx = state.slideIdx - 1;
         if (prevIdx >= 0 && isPipeZoomSlide(SLIDES[prevIdx])) {
-          goToSlide(prevIdx, { pipeFocus: 5 });
+          goToSlide(prevIdx, { pipeFocus: 6 });
           return;
         }
-        goToSlide(prevIdx, { pipeFocus: 0 });
+        if (prevIdx >= 0 && isHeroRevealSlide(SLIDES[prevIdx])) {
+          goToSlide(prevIdx, { heroReveal: 1 });
+          return;
+        }
+        goToSlide(prevIdx);
         return;
       }
     }
 
-    // Stepping backward lands on final overview of Slide 03 (4) or Slides 10/11 (5) for seamless reverse replay
+    // Stepping backward lands on final overview of Slide 03 (4), Slides 06/09 (heroReveal: 1), or Slides 10/11 (6)
     const targetIdx = state.slideIdx + d;
     if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx]) {
       if (SLIDES[targetIdx].id === "s02-third-pillar-why") {
         goToSlide(targetIdx, { s02Focus: 4 });
         return;
       }
+      if (isHeroRevealSlide(SLIDES[targetIdx])) {
+        goToSlide(targetIdx, { heroReveal: 1 });
+        return;
+      }
       if (isPipeZoomSlide(SLIDES[targetIdx])) {
-        goToSlide(targetIdx, { pipeFocus: 5 });
+        goToSlide(targetIdx, { pipeFocus: 6 });
         return;
       }
     }
-    goToSlide(targetIdx, { s02Focus: 0, pipeFocus: 0 });
+    goToSlide(targetIdx, { s02Focus: 0, heroReveal: 0, pipeFocus: 0 });
   }
 
   function goToSlideById(slideId) {
@@ -4455,6 +4611,32 @@
       });
     });
 
+    modal.querySelectorAll(".or-top-fig-stack.is-hero-reveal-stage > .or-fig-plate").forEach((plate) => {
+      plate.addEventListener("click", (ev) => {
+        if (state.viewMode !== "deck" || state.clickerStage || state.presentationMode) return;
+        if (ev.target && ev.target.closest && ev.target.closest("a, button")) return;
+        const curSlideNow = SLIDES[state.slideIdx];
+        if (!isHeroRevealSlide(curSlideNow)) return;
+        if (state.heroReveal === 0) {
+          state.autoPlay = false;
+          applyHeroRevealDom(curSlideNow.id, 1);
+        }
+      });
+    });
+
+    modal.querySelectorAll(".or-fig-plate.is-pipe-overview-plate").forEach((plate) => {
+      plate.addEventListener("click", (ev) => {
+        if (state.viewMode !== "deck" || state.clickerStage || state.presentationMode) return;
+        if (ev.target && ev.target.closest && ev.target.closest("a, button, .or-pipe-region-anchor")) return;
+        const curSlideNow = SLIDES[state.slideIdx];
+        if (!isPipeZoomSlide(curSlideNow)) return;
+        if (state.pipeFocus === 0) {
+          state.autoPlay = false;
+          applyPipeDomFocus(curSlideNow.id, 1, 0);
+        }
+      });
+    });
+
     modal.querySelectorAll(".or-card.is-s08-card[data-pipe-slot], .or-pipe-region-anchor[data-pipe-region]").forEach((el) => {
       el.addEventListener("click", (ev) => {
         if (state.viewMode !== "deck" || state.clickerStage || state.presentationMode) return;
@@ -4464,8 +4646,8 @@
         const slotNum = Number(el.getAttribute("data-pipe-slot") || el.getAttribute("data-pipe-region")) || 0;
         if (!slotNum) return;
         state.autoPlay = false;
-        if (state.pipeFocus === 0 || state.pipeFocus === 5) {
-          applyPipeDomFocus(curSlideNow.id, slotNum, slotNum);
+        if (state.pipeFocus === 1 || state.pipeFocus === 6) {
+          applyPipeDomFocus(curSlideNow.id, slotNum + 1, slotNum);
         } else {
           stepSlide(1);
         }
@@ -4734,6 +4916,7 @@
     toggleBlackout,
     fitAllVisibleCanvases,
     getS02Focus: () => state.s02Focus,
+    getHeroReveal: () => state.heroReveal,
     getPipeFocus: () => state.pipeFocus,
     getSlides: () => SLIDES,
     pptxHref: PPTX_HREF,

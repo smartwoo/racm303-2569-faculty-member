@@ -618,8 +618,8 @@
         code: "EP1",
         num: "01",
         tone: "epi-1",
-        sec: "sessions",
-        tag: hasEp123Slide ? t("✓ มี Slide · ปูพื้นฐาน", "✓ Slides · Intro") : t("ปูพื้นฐาน · Hybrid + Zoom", "Intro · Hybrid + Zoom"),
+        sec: "ep1",
+        tag: t("🎬 Video Studio · ปูพื้นฐาน RACM 303", "🎬 Video Studio · RACM 303 Intro"),
         title: t("Introduction to Epidemiology (แนวคิดพื้นฐานทางระบาดวิทยา)", "Introduction to Epidemiology"),
         date: t("ศ. 27 พ.ย. 69 (08.30 – 11.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–11:00) · Dr. Jakris")
       },
@@ -628,20 +628,20 @@
         code: "EP2",
         num: "02",
         tone: "epi-2",
-        sec: "sessions",
-        tag: t("น้ำหนักสอบ 15% · Ex 2", "Exam 15% · Ex 2"),
+        sec: "ep2",
+        tag: t("🎬 Video Studio · สอบ 15%", "🎬 Video Studio · Exam 15%"),
         title: t("Diagnostic Test (การประเมินการตรวจวินิจฉัยทางคลินิก)", "Diagnostic Test (Sens, Spec, PPV, NPV & LR)"),
-        date: t("ศ. 27 พ.ย. 69 (08.30 – 12.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–12:00) · Dr. Jakris")
+        date: t("ศ. 27 พ.ย. 69 (08.30 – 11.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–11:00) · Dr. Jakris")
       },
       {
         id: "EP3",
         code: "EP3",
         num: "03",
         tone: "epi-3",
-        sec: "sessions",
-        tag: t("น้ำหนักสอบ 15% · Ex 3", "Exam 15% · Ex 3"),
+        sec: "ep3",
+        tag: t("🎬 Video Studio · สอบ 15%", "🎬 Video Studio · Exam 15%"),
         title: t("Errors in Epidemiology (Random Error, Bias & Confounding)", "Errors in Epidemiology (Random Error, Bias & Confounding)"),
-        date: t("ศ. 27 พ.ย. 69 (08.30 – 12.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–12:00) · Dr. Jakris")
+        date: t("ศ. 27 พ.ย. 69 (08.30 – 11.00 น.) · อ. นพ.จักรกฤษณ์", "Fri 27 Nov 26 (08:30–11:00) · Dr. Jakris")
       },
       {
         id: "EP4",
@@ -704,11 +704,21 @@
         date: t("พฤ. 3 ธ.ค. 69 (13.30 – 14.30 น.) · ผศ. พญ.ฉัฐญาณ์", "Thu 3 Dec 26 (13:30–14:30) · Asst. Prof. Chataya")
       },
       {
+        id: "RAGE",
+        code: "RAGE 201/301",
+        num: "10",
+        tone: "epi-1",
+        sec: "rage-review",
+        tag: t("📘 ไม่ออกสอบ · พื้นฐาน Survey", "📘 Non-Exam · Survey Prep"),
+        title: t("ทบทวน RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Statistics, Statistical & Clinical Significance)", "RAGE 201 & RAGE 301 Foundation Review for Health Survey"),
+        date: t("ทบทวนพื้นฐานด้วยตนเองสำหรับออกแบบและวิเคราะห์ผล Health Survey", "Self-Paced Foundation for Community Health Survey")
+      },
+      {
         id: "SPSS",
         code: "SPSS",
-        num: "10",
+        num: "11",
         tone: "epi-10",
-        sec: "zoom-spss",
+        sec: "spss",
         tag: hasSpssSlide ? t("✓ มี Slide · ปฏิบัติการสถิติ", "✓ Slides · Stats Lab") : t("ปฏิบัติการสถิติ · Hybrid + Zoom", "Stats Lab · Hybrid + Zoom"),
         title: t("โปรแกรมวิเคราะห์ข้อมูลสถิติ SPSS สำหรับงานวิจัยและสำรวจชุมชน", "SPSS Statistical Data Analysis Workshop"),
         date: t("อ. 8 ธ.ค. 69 (13.30 – 15.00 น.) · อ. พญ.สวนีย์", "Tue 8 Dec 26 (13:30–15:00) · Dr. Sawanee")
@@ -716,7 +726,7 @@
       {
         id: "FORM4A",
         code: "FORM 4A",
-        num: "11",
+        num: "12",
         tone: "epi-11",
         sec: "exam-field",
         tag: t("สัดส่วนสอบ & ภาคสนาม", "Exam Spec & Form 4A"),
