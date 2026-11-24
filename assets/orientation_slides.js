@@ -574,26 +574,26 @@
                 </td>
                 <td class="is-hs">
                   <div><strong>HS1: Health, SDH &amp; Prevention</strong></div>
-                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                  <div class="or-sch-room">08.30–09.30 (ห้องใหญ่ 2C2-03)<br>09.40–12.00 (ห้องย่อย 6 ห้อง)</div>
                 </td>
                 <td class="is-ep">
                   <div><strong>ระบาด Day 1 (EP1–EP3)</strong></div>
-                  <div class="or-sch-room">09.00–11.00 (ห้อง Auditorium)<br>11.00–12.00 Ex 2–3 (Online)</div>
+                  <div class="or-sch-room">08.30–11.00 (ห้อง Auditorium)<br>11.00–12.00 Ex 2–3 (Online)</div>
                 </td>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.30–17.00)</span></td>
                 <td class="is-panel">
-                  <div><strong>13.00–16.00 เสวนา Bedside to SBP</strong></div>
+                  <div><strong>13.30–17.00 เสวนา Bedside to SBP</strong></div>
                   <div class="or-sch-room">Global/Planetary Health &amp; HPSR (ห้องใหญ่ 2C2-03)</div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 1 (SG1)</strong></div>
-                  <div class="or-sch-room">13.00–16.30 น. (ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">13.30–17.00 น. (ห้องย่อย 9 ห้อง)</div>
                 </td>
                 <td class="is-ep">
                   <div><strong>Exercise ระบาด Day 1</strong></div>
-                  <div class="or-sch-room">13.00–16.30 น. (Online / Zoom)</div>
+                  <div class="or-sch-room">13.30–17.00 น. (Online / Zoom)</div>
                 </td>
               </tr>
 
@@ -606,49 +606,49 @@
                 <th>ศุกร์ 4 ธันวาคม</th>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30–12.00)</span></td>
                 <td class="is-hs">
                   <div><strong>HS2: Health Services I</strong></div>
-                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                  <div class="or-sch-room">08.30–09.30 (ห้องใหญ่ 2C2-03)<br>09.40–12.00 (ห้องย่อย 6 ห้อง)</div>
                 </td>
                 <td class="is-hs">
                   <div><strong>HS4: Health Promotion &amp; COM-B</strong></div>
-                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                  <div class="or-sch-room">08.30–09.30 (ห้องใหญ่ 2C2-03)<br>09.40–12.00 (ห้องย่อย 6 ห้อง)</div>
                 </td>
                 <td class="is-ep">
                   <div><strong>ระบาด Day 2 (EP4–EP5)</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. Study Designs &amp; Outbreak (2C2-03 / Zoom)</div>
+                  <div class="or-sch-room">08.30–12.00 น. Study Designs &amp; Outbreak (2C2-03 / Zoom)</div>
                 </td>
                 <td class="is-ep">
                   <div><strong>ระบาด Day 3 (EP6–EP8)</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. Burden, Survey &amp; RCT<br>(2C2-03 / Zoom)</div>
+                  <div class="or-sch-room">08.30–12.00 น. Burden, Survey &amp; RCT<br>(2C2-03 / Zoom)</div>
                 </td>
                 <td class="is-hs">
                   <div><strong>HS6: Health Insurance &amp; Payment</strong></div>
-                  <div class="or-sch-room">09.00–10.00 &amp; 10.10–12.00<br>(รวม 6 กลุ่ม ณ ห้องใหญ่ 2C2-03)</div>
+                  <div class="or-sch-room">08.30–09.30 &amp; 09.40–12.00<br>(รวม 6 กลุ่ม ณ ห้องใหญ่ 2C2-03)</div>
                 </td>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.30–17.00)</span></td>
                 <td class="is-hs">
                   <div><strong>HS3: Health Services II (EQESaRR)</strong></div>
-                  <div class="or-sch-room">13.00–14.00 (ห้องใหญ่ 2C2-03)<br>14.10–16.30 (ห้องย่อย 6 ห้อง)</div>
+                  <div class="or-sch-room">13.30–14.30 (ห้องใหญ่ 2C2-03)<br>14.40–17.00 (ห้องย่อย 6 ห้อง)</div>
                 </td>
                 <td class="is-hs">
                   <div><strong>HS5: Primary Health Care &amp; PC</strong></div>
-                  <div class="or-sch-room">13.00–14.00 (ห้องใหญ่ 2C2-03)<br>14.10–16.30 (ห้องย่อย 6 ห้อง)</div>
+                  <div class="or-sch-room">13.30–14.30 (ห้องใหญ่ 2C2-03)<br>14.40–17.00 (ห้องย่อย 6 ห้อง)</div>
                 </td>
                 <td class="is-ep">
                   <div><strong>Exercise ระบาด 4–5 &amp; Q&amp;A</strong></div>
-                  <div class="or-sch-room">13.00–16.00 Ex 4–5 · 16.00–16.30 Q&amp;A Day 1–2 (Zoom)</div>
+                  <div class="or-sch-room">13.30–16.30 Ex 4–5 · 16.30–17.00 Q&amp;A Day 1–2 (Zoom)</div>
                 </td>
                 <td class="is-ep">
-                  <div><strong>13.00–14.00 EP9: EBM</strong> <span class="or-sch-room">(2C2-03)</span></div>
-                  <div class="or-sch-room">14.00–16.30 Ex 6–7 &amp; Q&amp;A Day 3 (Online / Zoom)</div>
+                  <div><strong>13.30–14.30 EP9: EBM</strong> <span class="or-sch-room">(2C2-03)</span></div>
+                  <div class="or-sch-room">14.30–17.00 Ex 6–7 &amp; Q&amp;A Day 3 (Online / Zoom)</div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 2 (SG2)</strong></div>
-                  <div class="or-sch-room">13.00–16.30 น. (ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">13.30–17.00 น. (ห้องย่อย 9 ห้อง)</div>
                 </td>
               </tr>
 
@@ -661,18 +661,18 @@
                 <th>ศุกร์ 11 ธ.ค. (+ ส. 12 ธ.ค.)</th>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30–12.00)</span></td>
                 <td rowspan="2" class="is-holiday">
                   <span class="or-sch-hol">หยุดชดเชยวันพ่อแห่งชาติ</span>
                   <span class="or-sch-room">(วันคล้ายวันพระราชสมภพ ร.9)</span>
                 </td>
                 <td class="is-exam">
                   <div><strong class="or-sch-exam-txt">สอบทฤษฎีระบาดวิทยา (EP1–9)</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. (ห้องใหญ่ 2C2-02..03)</div>
+                  <div class="or-sch-room">08.30–12.00 น. (ห้องใหญ่ 2C2-02..03)</div>
                 </td>
                 <td class="is-panel">
                   <div><strong>Panel: District Health Systems</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. 6BB+1 · อ.สุรเกียรติ (ห้องใหญ่ 2C2-02..03)</div>
+                  <div class="or-sch-room">08.30–12.00 น. 6BB+1 · อ.สุรเกียรติ (ห้องใหญ่ 2C2-02..03)</div>
                 </td>
                 <td rowspan="2" class="is-holiday">
                   <span class="or-sch-hol">หยุดวันรัฐธรรมนูญ</span>
@@ -684,18 +684,18 @@
                 </td>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.30–17.00)</span></td>
                 <td class="is-sg">
-                  <div><strong>13.00–14.30 SPSS</strong> <span class="or-sch-room">(2C2-03 / Zoom)</span></div>
-                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 3</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
+                  <div><strong>13.30–15.00 SPSS</strong> <span class="or-sch-room">(2C2-03 / Zoom)</span></div>
+                  <div><strong>15.00–17.00 พบ อ.ที่ปรึกษา ครั้งที่ 3</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
                 </td>
                 <td class="is-sg">
-                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 4</strong> <span class="or-sch-room" style="white-space:nowrap">(9 ห้อง)</span></div>
+                  <div><strong>13.30–17.00 พบ อ.ที่ปรึกษา ครั้งที่ 4</strong> <span class="or-sch-room" style="white-space:nowrap">(9 ห้อง)</span></div>
                   <div><strong class="or-sch-dl">ส่ง SRN 1 (17.00)</strong> · <span class="or-sch-travel">23.00 อุ้มผางเดินทาง</span></div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 5 (7 เครื่องมือ)</strong></div>
-                  <div class="or-sch-travel">เย็น 11 ธ.ค. ท่าสองยาง · ส. 12 ธ.ค. ด่านซ้าย, ท่าวังผา, อุบลรัตน์เดินทาง</div>
+                  <div class="or-sch-travel">13.30–17.00 น. · เย็นท่าสองยาง · ส. 12 ธ.ค. ด่านซ้าย, ท่าวังผา, อุบลรัตน์เดินทาง</div>
                 </td>
               </tr>
             </tbody>
@@ -754,49 +754,49 @@
                 <th>ศุกร์ 25 ธันวาคม</th>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30/09.00–12.00)</span></td>
                 <td class="is-sdl">
-                  <div><strong>เตรียมสอบ (SDL)</strong></div>
+                  <div><strong>เตรียมสอบ (SDL · 09.00–12.00)</strong></div>
                   <div class="or-sch-room">ทบทวนและสรุปโน้ต A4<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
                 <td class="is-exam">
                   <div><strong class="or-sch-exam-txt">สอบทฤษฎีระบบสุขภาพ (HS1–6)</strong></div>
-                  <div class="or-sch-room">Open Note A4 ลายมือ 1 แผ่น<br>(จัดสอบ 3 ห้องใหญ่ 2C2-01..03)</div>
+                  <div class="or-sch-room">08.30–12.00 น. · Open Note A4<br>(จัดสอบ 3 ห้องใหญ่ 2C2-01..03)</div>
                 </td>
                 <td class="is-panel">
                   <div><strong>เสวนา 6BB สู่ระบบที่เป็นธรรม</strong></div>
-                  <div class="or-sch-room">บทเรียน “สุขภาวะข้างถนน”<br>(ห้องใหญ่ 2C2-03)</div>
+                  <div class="or-sch-room">09.00–12.00 น. “สุขภาวะข้างถนน”<br>(ห้องใหญ่ 2C2-03)</div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 6 (ต่อ)</strong></div>
-                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">09.00–12.00 น. สรุปข้อมูล &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 7 (SG7)</strong></div>
-                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">09.00–12.00 น. สรุปข้อมูล &amp; Survey<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.30–17.00)</span></td>
                 <td class="is-sdl">
                   <div><strong>เตรียมสอบ (SDL ต่อ)</strong></div>
-                  <div class="or-sch-room">13.00–16.30 น.<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
+                  <div class="or-sch-room">13.30–17.00 น.<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
                 <td class="is-panel">
                   <div><strong>Systems Thinking (CLD Workshop)</strong></div>
-                  <div><span class="or-sch-accent">เอาโจทย์พื้นที่มาสังเคราะห์</span><br><span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
+                  <div><span class="or-sch-accent">13.30–17.00 น. สังเคราะห์โจทย์พื้นที่</span><br><span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 6 (SG6)</strong></div>
-                  <div class="or-sch-room">สรุปข้อมูลภาคสนามตามวัตถุประสงค์ (ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">13.30–17.00 น. สรุปข้อมูลภาคสนาม (ห้องย่อย 9 ห้อง)</div>
                 </td>
                 <td class="is-panel">
                   <div><strong>Panel: Young-Gen SBP &amp; นโยบาย</strong></div>
-                  <div class="or-sch-room">เศรษฐศาสตร์การเมืองสุขภาพ<br>(ห้องใหญ่ 2C2-03)</div>
+                  <div class="or-sch-room">13.30–17.00 น. เศรษฐศาสตร์การเมืองสุขภาพ (ห้องใหญ่ 2C2-03)</div>
                 </td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 8 (SG8)</strong></div>
-                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">13.30–17.00 น. สรุปข้อมูล &amp; Survey<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
               </tr>
 
@@ -809,10 +809,10 @@
                 <th>ศุกร์ 1 มกราคม 70</th>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30–12.00)</span></td>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30/09.00–12.00)</span></td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 9 (SG9)</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. สรุปข้อมูลภาคสนาม (ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">09.00–12.00 น. สรุปข้อมูลภาคสนาม (ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
                 <td class="is-oral">
                   <div><strong class="or-sch-oral-txt">นำเสนอระบบ (10 นาที + อภิปราย 20 นาที)</strong></div>
@@ -820,7 +820,7 @@
                 </td>
                 <td class="is-oral">
                   <div><strong class="or-sch-oral-txt">นำเสนอระบาด (7 นาที + อภิปราย 18 นาที)</strong></div>
-                  <div class="or-sch-room">08.30–13.00 น. (ลงทะเบียน 08.00 · ห้องใหญ่ 2C2-03)</div>
+                  <div class="or-sch-room">08.30–12.00 น. (ลงทะเบียน 08.00 · ห้องใหญ่ 2C2-03)</div>
                 </td>
                 <td rowspan="2" class="is-holiday">
                   <span class="or-sch-hol">หยุดวันสิ้นปี</span>
@@ -830,17 +830,17 @@
                 </td>
               </tr>
               <tr>
-                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–15.30)<br>(15.30–17.30)</span></td>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.30–17.00)</span></td>
                 <td class="is-sg">
                   <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 10 (SG10)</strong></div>
-                  <div class="or-sch-room">13.00–16.30 น. ซักซ้อมการนำเสนอ (ห้องย่อย 9 ห้อง)</div>
+                  <div class="or-sch-room">13.30–17.00 น. ซักซ้อมการนำเสนอ (ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
                 </td>
                 <td class="is-oral">
-                  <div><strong>นำเสนอระบบ (ต่อ)</strong> <span class="or-sch-room" style="white-space:nowrap">(2C2-03)</span></div>
-                  <div><strong>เตรียมนำเสนอระบาด</strong> <span class="or-sch-room" style="white-space:nowrap">(ห้องย่อย 9 ห้อง)</span></div>
+                  <div><strong>13.30–15.30 นำเสนอระบบ (ต่อ)</strong> <span class="or-sch-room" style="white-space:nowrap">(2C2-03)</span></div>
+                  <div><strong>15.30–17.00 เตรียมนำเสนอระบาด</strong> <span class="or-sch-room" style="white-space:nowrap">(9 ห้อง · ไม่เช็คชื่อ)</span></div>
                 </td>
                 <td class="is-sdl">
-                  <div><strong>13.00–16.30 SDL &amp; ประเมินเจตคติ</strong></div>
+                  <div><strong>13.30–17.00 SDL &amp; ประเมินเจตคติ</strong></div>
                   <div><strong class="or-sch-dl">ภายใน 17.00 ส่ง SRN 2 + สไลด์ &amp; Survey</strong></div>
                 </td>
               </tr>
