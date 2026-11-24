@@ -5269,6 +5269,158 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   }
 }
 
+/* Slides 10 & 11 (Epidemiology & Health Systems 8-Stage Pipelines) Keynote Magic-Move Stage Spotlight (1 -> 2 -> 3 -> 4 -> Overview) */
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="0"] > .or-fig-plate.is-pipe-crop-plate {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage > .or-fig-plate.is-pipe-overview-plate > .or-fig-img-wrap {
+  position: relative;
+}
+
+.or-pipe-region-anchor {
+  position: absolute;
+  top: 2%;
+  height: 72%;
+  border-radius: 0.72cqw;
+  cursor: zoom-in;
+  z-index: 2;
+  transition: background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.or-pipe-region-anchor:hover {
+  background: rgba(59, 130, 246, 0.06);
+  box-shadow: inset 0 0 0 1.5px rgba(37, 99, 235, 0.28);
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="0"] .or-grid-4.is-s08-grid > .or-card.is-s08-card[data-pipe-slot] {
+  cursor: zoom-in;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 1.10cqw !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: stretch !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] > .or-fig-plate.is-pipe-overview-plate,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] > .or-fig-plate.is-pipe-overview-plate,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] > .or-fig-plate.is-pipe-overview-plate,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] > .or-fig-plate.is-pipe-overview-plate {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] > .or-fig-plate.is-pipe-crop-plate:not([data-pipe-crop="1"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] > .or-fig-plate.is-pipe-crop-plate:not([data-pipe-crop="2"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] > .or-fig-plate.is-pipe-crop-plate:not([data-pipe-crop="3"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] > .or-fig-plate.is-pipe-crop-plate:not([data-pipe-crop="4"]) {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] > .or-fig-plate.is-pipe-crop-plate[data-pipe-crop="1"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] > .or-fig-plate.is-pipe-crop-plate[data-pipe-crop="2"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] > .or-fig-plate.is-pipe-crop-plate[data-pipe-crop="3"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] > .or-fig-plate.is-pipe-crop-plate[data-pipe-crop="4"] {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0.62cqw 0.78cqw !important;
+  gap: 0.38cqw !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-fig-top-badge,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-fig-top-badge,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-fig-top-badge,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-fig-top-badge {
+  font-size: clamp(10px, 1.02cqw, 18.5px) !important;
+  padding: 0.28cqw 0.68cqw !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-fig-plate.is-pipe-crop-plate .or-fig-cap,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-fig-plate.is-pipe-crop-plate .or-fig-cap,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-fig-plate.is-pipe-crop-plate .or-fig-cap,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-fig-plate.is-pipe-crop-plate .or-fig-cap {
+  font-size: clamp(9px, 0.92cqw, 16px) !important;
+  padding: 0.30cqw 0.62cqw !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-grid-4.is-s08-grid,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-grid-4.is-s08-grid,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-grid-4.is-s08-grid,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-grid-4.is-s08-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-grid-4.is-s08-grid > .or-card.is-s08-card:not([data-pipe-slot="1"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-grid-4.is-s08-grid > .or-card.is-s08-card:not([data-pipe-slot="2"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-grid-4.is-s08-grid > .or-card.is-s08-card:not([data-pipe-slot="3"]),
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-grid-4.is-s08-grid > .or-card.is-s08-card:not([data-pipe-slot="4"]) {
+  display: none !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-grid-4.is-s08-grid > .or-card.is-s08-card[data-pipe-slot="1"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-grid-4.is-s08-grid > .or-card.is-s08-card[data-pipe-slot="2"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-grid-4.is-s08-grid > .or-card.is-s08-card[data-pipe-slot="3"],
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-grid-4.is-s08-grid > .or-card.is-s08-card[data-pipe-slot="4"] {
+  flex: 1 1 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 1.15cqw 1.35cqw !important;
+  gap: 0.48cqw !important;
+  justify-content: safe center;
+}
+
+.or-slide-canvas[data-measuring="1"] .or-card.or-s02-takeaway-box,
+.or-slide-canvas[data-measuring="1"] .or-card.is-s08-card {
+  justify-content: flex-start !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-s08-inst-row,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-s08-inst-row,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-s08-inst-row,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-s08-inst-row {
+  gap: 0.36cqw !important;
+  margin-top: 0.36cqw !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-adv-pair,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-adv-pair,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-adv-pair,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-adv-pair {
+  font-size: clamp(10px, 0.96cqw, 16.5px) !important;
+  padding: 0.12cqw 0.48cqw 0.12cqw 0.14cqw !important;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-s09-adv-frame,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-s09-adv-frame,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-s09-adv-frame,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-s09-adv-frame {
+  width: 1.88cqw !important;
+  height: 2.42cqw !important;
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"],
+  .or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"],
+  .or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"],
+  .or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
+    height: auto !important;
+  }
+}
+
 /* True 16:9 Widescreen Print & PDF Export Rules (Zero Portrait A4 Clipping!) */
 @media print {
   .or-clicker-corner-hud,

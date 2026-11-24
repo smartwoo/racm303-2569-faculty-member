@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem6";
+  const ASSET_VER = "20261124prem7";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -453,9 +453,12 @@
     jumpTimer: 0,
     stepToastActive: false,
     stepToastTimer: 0,
-    s02Focus: 0, // 0 = 3-figure overview, 1 = Fig 1.4, 2 = Fig 2A, 3 = Fig 2B
+    s02Focus: 0, // 0 = 3-figure overview, 1 = Fig 1.4, 2 = Fig 2A, 3 = Fig 2B, 4 = final overview
     s02Timer: 0,
     s02PendingTarget: null,
+    pipeFocus: 0, // 0 = 8-stage overview, 1..4 = cropped stage group 1..4, 5 = final overview
+    pipeTimer: 0,
+    pipePendingTarget: null,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
     toolsMenuOpen: false,
     laserActive: false,
@@ -556,6 +559,62 @@
           <span class="or-card-kicker">${esc(opts.takeawayKicker)}</span>
           <h3 class="or-card-title">${esc(opts.takeawayTitle)}</h3>
           <p class="or-card-text">${opts.takeawayHtml}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPipeZoomStageHtml(opts) {
+    const isExportOrPrint =
+      Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
+    const focusVal = isExportOrPrint || state.pipeFocus === 5 ? 0 : state.pipeFocus || 0;
+    const ovResolved = resolveSlideImgFile(opts.overviewFile);
+    const anchorsHtml = (opts.regions || [])
+      .map(
+        (r) =>
+          `<div class="or-pipe-region-anchor" data-pipe-region="${esc(r.slot)}" style="left:${r.left};width:${r.width}" title="${esc(r.title || "")}"></div>`
+      )
+      .join("");
+    const cropsHtml = (opts.crops || [])
+      .map((c) => {
+        const crResolved = resolveSlideImgFile(c.fileName);
+        return `
+          <figure class="or-fig-plate is-s02-plate is-pipe-crop-plate" data-pipe-crop="${esc(c.slot)}">
+            <div class="or-fig-top-badge">${esc(c.badge)}</div>
+            <div class="or-fig-img-wrap">
+              <img class="or-fig-img" data-base-img="${esc(c.fileName)}" src="${IMG_DIR}/${esc(crResolved)}?v=${ASSET_VER}" alt="${esc(c.altText)}" loading="eager" decoding="async" />
+            </div>
+            ${c.captionHtml ? `<figcaption class="or-fig-cap">${c.captionHtml}</figcaption>` : ""}
+          </figure>
+        `;
+      })
+      .join("");
+    const cardsHtml = (opts.cards || [])
+      .map(
+        (cd) => `
+          <div class="or-card ${esc(cd.tintCls || "is-white")} is-s08-card" data-pipe-slot="${esc(cd.slot)}">
+            <div>
+              <span class="or-card-kicker">${cd.kickerHtml}</span>
+              <h3 class="or-card-title">${cd.titleHtml}</h3>
+              ${cd.instRowHtml || ""}
+            </div>
+            <p class="or-card-text">${cd.bodyHtml}</p>
+          </div>
+        `
+      )
+      .join("");
+
+    return `
+      <div class="or-top-fig-stack is-s08-stack is-pipe-zoom-stage" data-pipe-focus="${focusVal}">
+        <figure class="or-fig-plate is-pipe-overview-plate">
+          <div class="or-fig-img-wrap">
+            <img class="or-fig-img" data-base-img="${esc(opts.overviewFile)}" src="${IMG_DIR}/${esc(ovResolved)}?v=${ASSET_VER}" alt="${esc(opts.overviewAlt)}" loading="eager" decoding="async" />
+            ${anchorsHtml}
+          </div>
+        </figure>
+        ${cropsHtml}
+        <div class="or-grid-4 is-s08-grid" data-fit-group="pipe-cards">
+          ${cardsHtml}
         </div>
       </div>
     `;
@@ -830,7 +889,7 @@
       keyMessageHtml:
         "<strong>เรียนความรู้ระบบและระบาดฯ จนครบ</strong> &rarr; <strong>สอบระบาดฯ</strong> &rarr; <strong>ลงฝึกภาคสนามและทำ Health Survey</strong> &rarr; <strong>กลับมาสอบระบบฯ ภาคทฤษฎี</strong> &rarr; <strong>สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบและระบาดฯ</strong>",
       notes:
-        "สรุปเส้นทางการเรียนรู้ 6 สัปดาห์แบบเข้าใจง่ายตามลำดับขั้น: สัปดาห์ที่ 1–2 เรียนเนื้อหาระบบสุขภาพและระบาดวิทยาจนครบ สัปดาห์ที่ 3 สอบทฤษฎีระบาดวิทยา (8 ธ.ค.) และเตรียมพร้อมก่อนเดินทาง สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน) พร้อมทำ Health Survey ในชุมชน สัปดาห์ที่ 5 กลับมาสอบทฤษฎีระบบสุขภาพ (22 ธ.ค.) และฝึกวาดผังคิดเชิงระบบ (CLD) ก่อนเข้าสู่สัปดาห์ที่ 6 สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบสุขภาพ (29 ธ.ค.) และระบาดวิทยา (30 ธ.ค.)",
+        "สรุปเส้นทางการเรียนรู้ 6 สัปดาห์แบบเข้าใจง่ายตามลำดับขั้น: สัปดาห์ที่ 1–2 เรียนเนื้อหาระบบสุขภาพและระบาดวิทยาจนครบ สัปดาห์ที่ 3 สอบทฤษฎีระบาดวิทยา (8 ธ.ค.) เวิร์กชอป Learning How to Learn (9 ธ.ค.) และเตรียมพร้อมก่อนเดินทาง สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน) พร้อมทำ Health Survey ในชุมชน สัปดาห์ที่ 5 กลับมาสอบทฤษฎีระบบสุขภาพ (22 ธ.ค.) และฝึกวาดผังคิดเชิงระบบ (CLD) ก่อนเข้าสู่สัปดาห์ที่ 6 สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบสุขภาพ (29 ธ.ค.) และระบาดวิทยา (30 ธ.ค.)",
       render: () => `
         <div class="or-top-fig-stack is-s06-stack">
           ${figPlate("orient_s06_roadmap.png", "6-Week Learning Journey across Classroom Preparation, 9 Training Hospitals, and Team Synthesis", "")}
@@ -867,7 +926,7 @@
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>สอบทฤษฎีระบาดฯ (8 ธ.ค.)</strong> และฝึก <code>SPSS</code></li>
-                <li>เรียนรู้ระบบสุขภาพอำเภอ และส่ง <code>SRN 1</code></li>
+                <li>เวิร์กชอป <code>Learning How to Learn</code> และส่ง <code>SRN 1</code></li>
                 <li>เตรียมเครื่องมือพร้อมเดินทาง (<code>SG #3–5</code>)</li>
               </ul>
             </div>
@@ -925,7 +984,7 @@
       keyMessageHtml:
         "คาบ <strong>HS1–HS6</strong> บรรยายห้องใหญ่ <code>2C2-03</code> (1 ชม.) ต่อด้วยอภิปราย <strong>6 ห้องย่อย</strong> (<code>1C1-02..07</code>) · <strong>ระบาดวิทยา Day 1–3</strong> ผสมผสาน <code>Auditorium / 2C2-03</code> และ <strong>Online Exercise</strong> · สอบทฤษฎีระบาดฯ <strong>อ. 8 ธ.ค.</strong>",
       notes:
-        "ชี้แจงตารางเรียนรายคาบเช้าและบ่ายของสัปดาห์ที่ 1 ถึงสัปดาห์ที่ 3 ปีการศึกษา 2569: สัปดาห์ที่ 1 เริ่มวันพุธ 25 พ.ย. 08.30 น. Orientation ต่อด้วย ST1 และบ่ายเสวนา Global/Planetary Health & HPSR วันพฤหัสฯ 26 พ.ย. HS1 เช้า และพบ อ.ที่ปรึกษา ครั้งที่ 1 (9 กลุ่ม) บ่าย วันศุกร์ 27 พ.ย. ระบาด Day 1 (EP1–3) ณ ห้อง Auditorium และทำแบบฝึกหัดออนไลน์ สัปดาห์ที่ 2 เรียน HS2–HS5 จันทร์-อังคาร ระบาด Day 2–3 พุธ-พฤหัสฯ และ HS6 + พบ อ.ที่ปรึกษา ครั้งที่ 2 วันศุกร์ สัปดาห์ที่ 3 หยุดชดเชยวันพ่อ 7 ธ.ค. สอบระบาดฯ เช้า 8 ธ.ค. บ่ายเรียน SPSS และกลุ่มย่อยครั้งที่ 3 วันพุธ 9 ธ.ค. Panel DHS เช้า กลุ่มย่อยครั้งที่ 4 บ่าย ส่ง SRN 1 ภายใน 17.00 น. และเริ่มทยอยเดินทางสู่พื้นที่ภาคสนาม 9–12 ธ.ค.",
+        "ชี้แจงตารางเรียนรายคาบเช้าและบ่ายของสัปดาห์ที่ 1 ถึงสัปดาห์ที่ 3 ปีการศึกษา 2569: สัปดาห์ที่ 1 เริ่มวันพุธ 25 พ.ย. 08.30 น. Orientation ต่อด้วย ST1 และบ่ายเสวนา Global/Planetary Health & HPSR วันพฤหัสฯ 26 พ.ย. HS1 เช้า และพบ อ.ที่ปรึกษา ครั้งที่ 1 (9 กลุ่ม) บ่าย วันศุกร์ 27 พ.ย. ระบาด Day 1 (EP1–3) ณ ห้อง Auditorium และทำแบบฝึกหัดออนไลน์ สัปดาห์ที่ 2 เรียน HS2–HS5 จันทร์-อังคาร ระบาด Day 2–3 พุธ-พฤหัสฯ และ HS6 + พบ อ.ที่ปรึกษา ครั้งที่ 2 วันศุกร์ สัปดาห์ที่ 3 หยุดชดเชยวันพ่อ 7 ธ.ค. สอบระบาดฯ เช้า 8 ธ.ค. บ่ายเรียน SPSS และกลุ่มย่อยครั้งที่ 3 วันพุธ 9 ธ.ค. Workshop: Learning How to Learn เช้า กลุ่มย่อยครั้งที่ 4 บ่าย ส่ง SRN 1 ภายใน 17.00 น. และเริ่มทยอยเดินทางสู่พื้นที่ภาคสนาม 9–12 ธ.ค.",
       render: () => `
         <div class="or-table-wrap is-sched-matrix" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูตารางเรียนสัปดาห์ที่ 1–3 ครบทุกวัน">
           <table class="or-table or-sched-matrix">
@@ -1053,8 +1112,8 @@
                   <div class="or-sch-room">08.30–12.00 น. (ห้องใหญ่ 2C2-02..03)</div>
                 </td>
                 <td class="is-panel">
-                  <div><strong>Panel: District Health Systems</strong></div>
-                  <div class="or-sch-room">08.30–12.00 น. 6BB+1 · อ.สุรเกียรติ (ห้องใหญ่ 2C2-02..03)</div>
+                  <div><strong>Workshop: Learning How to Learn</strong></div>
+                  <div class="or-sch-room">08.30–12.00 น. รศ.สุรเกียรติ (ห้องใหญ่ 2C2-02..03)</div>
                 </td>
                 <td rowspan="2" class="is-holiday">
                   <span class="or-sch-hol">หยุดวันรัฐธรรมนูญ</span>
@@ -1270,7 +1329,7 @@
               <div class="or-s07-chips-grid">
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">1.&nbsp;ST1</span> ระบบซับซ้อนและการคิดเชิงระบบ (25&nbsp;พ.ย.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">2.&nbsp;สุขภาพโลก</span>และวิจัยระบบสุขภาพ (25&nbsp;พ.ย.)</span>
-                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">3.&nbsp;ระบบสุขภาพอำเภอ</span>และการมีส่วนร่วม (9&nbsp;ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">3.&nbsp;Learning How to Learn</span> เตรียมลงพื้นที่ (9&nbsp;ธ.ค.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">4.&nbsp;แผนผังวงจรเหตุผล</span> CLD (22&nbsp;ธ.ค.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">5.&nbsp;วิเคราะห์&nbsp;6BB</span> สุขภาวะข้างถนน (23&nbsp;ธ.ค.)</span>
                 <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">6.&nbsp;นโยบาย</span>และเศรษฐศาสตร์การเมืองสุขภาพ (24&nbsp;ธ.ค.)</span>
@@ -1292,50 +1351,91 @@
       title: "หมวดระบาดวิทยาคลินิกและชุมชน (EP1–EP9): จากภาคทฤษฎี สอบ และ SPSS สู่การสำรวจจริงและนำเสนอวิจัย",
       keyTag: "จากหลักฐานสู่การปฏิบัติ",
       keyMessageHtml:
-        "<strong>เรียนครบ EP1–EP9</strong> &rarr; <strong>สอบระบาดฯ และฝึก SPSS Workshop</strong> &rarr; <strong>ออกแบบ Study Design &amp; Data Collection ในภาคสนาม</strong> &rarr; <strong>กลับมา Analysis</strong> &rarr; <strong>นำเสนอเชื่อมโยง Problem Identification &middot; Research Questions &middot; Study Design &middot; Data Collection &middot; Data Analysis/Synthesis และ Flip Up สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
+        "<strong>เรียนครบ EP1–EP9</strong> &rarr; <strong>สอบระบาดฯ และฝึก SPSS Workshop</strong> &rarr; <strong>ออกแบบ Study Design &amp; Data Collection ในภาคสนาม</strong> &rarr; <strong>กลับมา Analysis</strong> &rarr; <strong>นำเสนอเชื่อมโยง Problem Identification &middot; Research Questions &middot; Study Design &middot; Data Collection &middot; Data Analysis/Synthesis สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
       notes:
-        "ไล่เรียงเส้นทางหมวดระบาดวิทยาครบทั้ง 8 จังหวะตามลำดับเวลาจริง: (1–3) เรียนภาคทฤษฎีครบ EP1–EP9 วันที่ 27 พ.ย. และ 2–3 ธ.ค. (4) สอบภาคทฤษฎีระบาดวิทยาเช้าวันอังคารที่ 8 ธ.ค. แยกจากคาบเรียนชัดเจน (5) บ่ายวันเดียวกันฝึก SPSS Workshop เตรียมพร้อมก่อนลงพื้นที่ (6) ออกแบบ Study Design และเก็บข้อมูลจริง (Data Collection) ในภาคสนาม 9 พื้นที่ (7) กลับมาทำ Data Analysis & Synthesis และ (8) นำเสนอผลงานวิจัยทีม (ฟอร์ม 4A · 30 ธ.ค.) เชื่อมโยงตั้งแต่ Problem Identification, Research Questions, Study Design, Data Collection, Data Analysis/Synthesis แล้วปิดจบ Flip Up สู่ Implications for Body of Knowledge, Policy and Practices",
-      render: () => `
-        <div class="or-top-fig-stack is-s08-stack">
-          ${figPlate("orient_s08_epi_pipeline.png", "8-Stage Epidemiology Pipeline from EP1–EP9, Epi Exam, and SPSS Workshop to Fieldwork, Analysis, and Flip-Up Presentation", "")}
-
-          <div class="or-grid-4 is-s08-grid" data-fit-group="cards">
-            <div class="or-card is-white is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 1–3 · ทฤษฎีครบ EP1–EP9 (27 พ.ย. &amp; 2–3 ธ.ค.)</span>
-                <h3 class="or-card-title">เรียนพื้นฐาน วินิจฉัย วิจัย ภาระโรค สำรวจ และ EBM</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
-              </div>
-              <p class="or-card-text"><code>EP1</code> แนวคิดระบาดฯ · <code>EP2</code> การตรวจวินิจฉัย · <code>EP3</code> อคติ · <code>EP4</code> รูปแบบวิจัย · <code>EP5</code> สอบสวนโรค · <code>EP6</code> ภาระโรค · <code>EP7</code> สำรวจสุขภาพ · <code>EP8</code> <code>RCT</code> · <code>EP9</code> <code>EBM</code></p>
-            </div>
-
-            <div class="or-card is-amber-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 4–5 · อ. 8 ธ.ค. 69 (ก่อนออกภาคสนาม)</span>
-                <h3 class="or-card-title">สอบทฤษฎีระบาดฯ และฝึก SPSS Workshop</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์ และทีม</span></span></div>
-              </div>
-              <p class="or-card-text"><strong>เช้า (09.00–12.00 น.):</strong> สอบภาคทฤษฎีระบาดวิทยา (<code>Closed-Book</code>) แยกหลังเรียนจบครบ <code>EP1–9</code> · <strong>บ่าย (13.30–15.00 น.):</strong> ฝึกปฏิบัติการ <strong>SPSS Workshop</strong> ก่อนลงพื้นที่จริง</p>
-            </div>
-
-            <div class="or-card is-teal-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 6 · ภาคสนาม 9 พื้นที่ (9–20 ธ.ค. 69)</span>
-                <h3 class="or-card-title">ออกแบบ Study Design &amp; Data Collection</h3>
-              </div>
-              <p class="or-card-text">ระบุปัญหาสุขภาพและคำถามวิจัยร่วมกับพื้นที่จริง <strong>ออกแบบระเบียบวิธีวิจัย (<code>Study Design</code>) การสุ่มตัวอย่าง และเครื่องมือ</strong> แล้วลงมือเก็บข้อมูลสำรวจสุขภาพชุมชน (<code>Data Collection</code>)</p>
-            </div>
-
-            <div class="or-card is-navy-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 7–8 · 21–30 ธ.ค. 69 (ฟอร์ม 4A)</span>
-                <h3 class="or-card-title">กลับมา Analysis สู่นำเสนอและ Flip Up</h3>
-              </div>
-              <p class="or-card-text">วิเคราะห์และสังเคราะห์ผลเชื่อมโยง <code>Problem Identification</code> &rarr; <code>Research Questions</code> &rarr; <code>Study Design</code> &rarr; <code>Data Collection</code> &rarr; <code>Data Analysis/Synthesis</code> แล้วปิดจบ <strong>Flip Up สู่ <code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong></p>
-            </div>
-          </div>
-        </div>
-      `
+        "ไล่เรียงเส้นทางหมวดระบาดวิทยาครบทั้ง 8 จังหวะตามลำดับเวลาจริง (พร้อมซูมขยายทีละช่วง): (1–3) เรียนภาคทฤษฎีครบ EP1–EP9 วันที่ 27 พ.ย. และ 2–3 ธ.ค. (4) สอบภาคทฤษฎีระบาดวิทยาเช้าวันอังคารที่ 8 ธ.ค. แยกจากคาบเรียนชัดเจน (5) บ่ายวันเดียวกันฝึก SPSS Workshop เตรียมพร้อมก่อนลงพื้นที่ (6) ออกแบบ Study Design และเก็บข้อมูลจริง (Data Collection) ในภาคสนาม 9 พื้นที่ (7) กลับมาทำ Data Analysis & Synthesis และ (8) นำเสนอผลงานวิจัยทีม (ฟอร์ม 4A · 30 ธ.ค.) เชื่อมโยงตั้งแต่ Problem Identification, Research Questions, Study Design, Data Collection, Data Analysis/Synthesis และต่อยอดสู่ข้อเสนอแนะและคุณูปการ (Implications for Body of Knowledge, Policy and Practices) ก่อนซูมออกกลับมาเห็นภาพรวมทั้ง 8 จังหวะ",
+      render: () =>
+        renderPipeZoomStageHtml({
+          overviewFile: "orient_s08_epi_pipeline.png",
+          overviewAlt:
+            "8-Stage Epidemiology Pipeline from EP1–EP9, Epi Exam, and SPSS Workshop to Fieldwork, Analysis, and Research Presentation",
+          regions: [
+            { slot: "1", left: "0.8%", width: "36.2%", title: "ซูม Stage 1–3: ทฤษฎีครบ EP1–EP9" },
+            { slot: "2", left: "37.6%", width: "24.2%", title: "ซูม Stage 4–5: สอบทฤษฎีระบาดฯ & SPSS Workshop" },
+            { slot: "3", left: "62.4%", width: "12.0%", title: "ซูม Stage 6: ภาคสนาม 9 พื้นที่ (Study Design & Data Collection)" },
+            { slot: "4", left: "75.0%", width: "24.2%", title: "ซูม Stage 7–8: วิเคราะห์ สังเคราะห์ และนำเสนอวิจัย (ฟอร์ม 4A)" }
+          ],
+          crops: [
+            {
+              slot: "1",
+              badge: "STAGE 1–3 · CLASSROOM THEORY (EP1–EP9)",
+              fileName: "orient_s08_epi_f1.png",
+              altText: "Stages 1 to 3 of Epidemiology: EP1–EP3 Diagnostic and Bias, EP4–EP5 Study Designs and Outbreak, EP6–EP9 Burden, Survey, RCT and EBM",
+              captionHtml:
+                "<strong>Stage 1–3 (27 พ.ย. &amp; 2–3 ธ.ค. 69):</strong> ปูรากฐานทฤษฎีและแบบฝึกหัดครบ <code>EP1–EP9</code> ทั้งการตรวจวินิจฉัย อคติ รูปแบบวิจัย สอบสวนโรค ภาระโรค การสำรวจ และ EBM"
+            },
+            {
+              slot: "2",
+              badge: "STAGE 4–5 · PRE-FIELD EXAM & SPSS LAB (8 ธ.ค. 69)",
+              fileName: "orient_s08_epi_f2.png",
+              altText: "Stages 4 and 5 of Epidemiology: Morning Closed-Book Theory Exam and Afternoon SPSS Workshop",
+              captionHtml:
+                "<strong>Stage 4–5 (อังคาร 8 ธ.ค. 69):</strong> เช้าสอบทฤษฎีระบาดวิทยาแยกหลังเรียนจบครบ · บ่ายฝึกปฏิบัติการ <code>SPSS Workshop</code> เตรียมพร้อมก่อนออกภาคสนาม"
+            },
+            {
+              slot: "3",
+              badge: "STAGE 6 · FIELDWORK HEALTH SURVEY (9–20 ธ.ค. 69)",
+              fileName: "orient_s08_epi_f3.png",
+              altText: "Stage 6 of Epidemiology: Study Design and Data Collection across 9 Fieldwork Sites",
+              captionHtml:
+                "<strong>Stage 6 (9–20 ธ.ค. 69):</strong> ร่วมกับพื้นที่จริงกำหนดโจทย์ <code>Problem Identification &rarr; Research Questions</code> ออกแบบ <code>Study Design</code> และเก็บข้อมูล <code>Data Collection</code>"
+            },
+            {
+              slot: "4",
+              badge: "STAGE 7–8 · DATA ANALYSIS, SYNTHESIS & IMPLICATIONS (ฟอร์ม 4A)",
+              fileName: "orient_s08_epi_f4.png",
+              altText: "Stages 7 and 8 of Epidemiology: Data Analysis, Synthesis, and Team Oral Presentation with Key Implications",
+              captionHtml:
+                "<strong>Stage 7–8 (21–30 ธ.ค. 69 · ฟอร์ม 4A):</strong> วิเคราะห์และนำเสนอสายโซ่วิจัยครบวงจร ต่อยอดสู่ <code>Implications for Body of Knowledge · Policy · Practices</code>"
+            }
+          ],
+          cards: [
+            {
+              slot: "1",
+              tintCls: "is-white",
+              kickerHtml: "STAGE 1–3 · ทฤษฎีครบ EP1–EP9 (27 พ.ย. &amp; 2–3 ธ.ค.)",
+              titleHtml: "เรียนพื้นฐาน วินิจฉัย วิจัย ภาระโรค สำรวจ และ EBM",
+              instRowHtml: `<div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>`,
+              bodyHtml:
+                "<code>EP1</code> แนวคิดระบาดฯ · <code>EP2</code> การตรวจวินิจฉัย · <code>EP3</code> อคติ · <code>EP4</code> รูปแบบวิจัย · <code>EP5</code> สอบสวนโรค · <code>EP6</code> ภาระโรค · <code>EP7</code> สำรวจสุขภาพ · <code>EP8</code> <code>RCT</code> · <code>EP9</code> <code>EBM</code>"
+            },
+            {
+              slot: "2",
+              tintCls: "is-amber-tint",
+              kickerHtml: "STAGE 4–5 · อ. 8 ธ.ค. 69 (ก่อนออกภาคสนาม)",
+              titleHtml: "สอบทฤษฎีระบาดฯ และฝึก SPSS Workshop",
+              instRowHtml: `<div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์ และทีม</span></span></div>`,
+              bodyHtml:
+                "<strong>เช้า (08.30–12.00 น.):</strong> สอบภาคทฤษฎีระบาดวิทยา (<code>Closed-Book</code>) แยกหลังเรียนจบครบ <code>EP1–9</code> · <strong>บ่าย (13.30–15.00 น.):</strong> ฝึกปฏิบัติการ <strong>SPSS Workshop</strong> ก่อนลงพื้นที่จริง"
+            },
+            {
+              slot: "3",
+              tintCls: "is-teal-tint",
+              kickerHtml: "STAGE 6 · ภาคสนาม 9 พื้นที่ (9–20 ธ.ค. 69)",
+              titleHtml: "ออกแบบ Study Design &amp; Data Collection",
+              bodyHtml:
+                "ระบุปัญหาสุขภาพและคำถามวิจัยร่วมกับพื้นที่จริง <strong>ออกแบบระเบียบวิธีวิจัย (<code>Study Design</code>) การสุ่มตัวอย่าง และเครื่องมือ</strong> แล้วลงมือเก็บข้อมูลสำรวจสุขภาพชุมชน (<code>Data Collection</code>)"
+            },
+            {
+              slot: "4",
+              tintCls: "is-navy-tint",
+              kickerHtml: "STAGE 7–8 · 21–30 ธ.ค. 69 (ฟอร์ม 4A)",
+              titleHtml: "กลับมา Analysis สู่นำเสนอและสรุปข้อเสนอแนะ",
+              bodyHtml:
+                "วิเคราะห์และสังเคราะห์ผลเชื่อมโยง <code>Problem Identification</code> &rarr; <code>Research Questions</code> &rarr; <code>Study Design</code> &rarr; <code>Data Collection</code> &rarr; <code>Data Analysis/Synthesis</code> เพื่อต่อยอดสู่ <strong><code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong>"
+            }
+          ]
+        })
     },
     {
       id: "s08b-hs-pipeline",
@@ -1349,49 +1449,90 @@
       title: "หมวดระบบสุขภาพ (ST1 และ HS1–HS6): จากกรอบทฤษฎีสู่การสังเกตระบบจริง สอบ และนำเสนอบูรณาการ",
       keyTag: "จากกรอบคิดสู่ระบบจริง",
       keyMessageHtml:
-        "<strong>เรียนครบ ST1 และ HS1–HS6</strong> &rarr; <strong>เตรียมมุมมอง DHS &amp; SRN 1</strong> &rarr; <strong>ลงสังเกตระบบจริงในภาคสนาม</strong> &rarr; <strong>กลับมาสอบทฤษฎีระบบฯ (โน้ต A4) และวาดผัง CLD</strong> &rarr; <strong>นำเสนอเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ และ Flip Up สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
+        "<strong>เรียนครบ ST1 และ HS1–HS6</strong> &rarr; <strong>เวิร์กชอป Learning How to Learn &amp; SRN 1</strong> &rarr; <strong>ลงสังเกตระบบจริงในภาคสนาม</strong> &rarr; <strong>กลับมาสอบทฤษฎีระบบฯ (โน้ต A4) และวาดผัง CLD</strong> &rarr; <strong>นำเสนอเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
       notes:
-        "อธิบายเส้นทางหมวดระบบสุขภาพตามหลักคิดคู่ขนานกับหมวดระบาดวิทยา: (1–3) เรียนภาคทฤษฎีครบ ST1 และ HS1–HS6 ในสัปดาห์ที่ 1–2 (4) เตรียมมุมมองระบบสุขภาพอำเภอ (DHS 6BB+1) และส่ง SRN 1 วันที่ 9 ธ.ค. ก่อนออกเดินทาง (5) ลงสังเกตการทำงานของระบบบริการและชุมชนจริงในภาคสนาม 9 พื้นที่ (6) กลับมาสอบภาคทฤษฎีระบบสุขภาพเช้าวันอังคารที่ 22 ธ.ค. แบบ Open Note A4 (7) บ่ายฝึกวาดผังวงจรเหตุผล (CLD) และร่วมเสวนานโยบาย 23–24 ธ.ค. ก่อน (8) นำเสนอผลงานทีม (ฟอร์ม 3A · 29 ธ.ค.) สะท้อนการคิดเชิงระบบเชื่อมโยงครบทั้ง 5 วัตถุประสงค์ และปิดจบ Flip Up สู่จุดคานงัดและ Implications for Body of Knowledge, Policy and Practices",
-      render: () => `
-        <div class="or-top-fig-stack is-s08-stack">
-          ${figPlate("orient_s08b_hs_pipeline.png", "8-Stage Health Systems Science Pipeline from ST1 and HS1–HS6 to Fieldwork, Open-Note Exam, CLD, and Flip-Up Presentation", "")}
-
-          <div class="or-grid-4 is-s08-grid" data-fit-group="cards">
-            <div class="or-card is-white is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 1–3 · ทฤษฎีครบ ST1 &amp; HS1–6 (25 พ.ย.–4 ธ.ค.)</span>
-                <h3 class="or-card-title">คิดเชิงระบบ ปัจจัยสุขภาพ บริการ ปฐมภูมิ และ UHC</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="อ.ณัฐวุฒิ" loading="eager" decoding="async" /></span><span>อ.ณัฐวุฒิ</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="อ.วริษา" loading="eager" decoding="async" /></span><span>อ.วริษา</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="อ.ภูษิต" loading="eager" decoding="async" /></span><span>อ.ภูษิต</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="ผศ.วิชช์" loading="eager" decoding="async" /></span><span>ผศ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="อ.ฉัตรชัย" loading="eager" decoding="async" /></span><span>อ.ฉัตรชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="ผศ.สัมฤทธิ์" loading="eager" decoding="async" /></span><span>ผศ.สัมฤทธิ์</span></span></div>
-              </div>
-              <p class="or-card-text"><code>ST1</code> คิดเชิงระบบ · <code>HS1</code> สุขภาพ <code>SDH/CDoH</code> · <code>HS2</code> บริการ <code>6BB</code> · <code>HS3</code> คุณลักษณะ <code>EQESaRR</code> · <code>HS4</code> สร้างเสริมสุขภาพ <code>COM-B</code> · <code>HS5</code> ปฐมภูมิ <code>PHC</code> · <code>HS6</code> <code>UHC</code></p>
-            </div>
-
-            <div class="or-card is-teal-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 4–5 · เตรียม DHS &amp; ภาคสนาม (9–20 ธ.ค.)</span>
-                <h3 class="or-card-title">เตรียมมุมมองอำเภอ สู่การสังเกตระบบจริง 9 พื้นที่</h3>
-              </div>
-              <p class="or-card-text"><strong>9 ธ.ค.:</strong> เรียนรู้ระบบสุขภาพอำเภอ (<code>DHS 6BB+1</code>) และส่ง <code>SRN 1</code> ก่อนลงเรียนรู้การทำงานเชื่อมโยงของ <strong>รพ. · รพ.สต. · อสม. · ท้องถิ่น · ชุมชน</strong> ในพื้นที่จริง</p>
-            </div>
-
-            <div class="or-card is-amber-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 6–7 · อ. 22 – ศ. 25 ธ.ค. 69 (หลังกลับพื้นที่)</span>
-                <h3 class="or-card-title">กลับมาสอบระบบฯ ภาคทฤษฎี และวาดผัง CLD</h3>
-              </div>
-              <p class="or-card-text"><strong>เช้า 22 ธ.ค.:</strong> สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) แยกชัดเจนหลังเห็นภาพจริง · <strong>บ่าย 22–25 ธ.ค.:</strong> ฝึกวาดผังวงจรเหตุผล (<code>CLD</code>) และเสวนานโยบายสุขภาพ</p>
-            </div>
-
-            <div class="or-card is-navy-tint is-s08-card">
-              <div>
-                <span class="or-card-kicker">STAGE 8 · อ. 29 ธ.ค. 69 (ฟอร์ม 3A)</span>
-                <h3 class="or-card-title">นำเสนอบูรณาการ 5 วัตถุประสงค์และ Flip Up</h3>
-              </div>
-              <p class="or-card-text">สะท้อนการคิดเชิงระบบเชื่อมโยงทั้ง <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> เข้าด้วยกันอย่างบูรณาการ แล้วปิดจบ <strong>Flip Up สู่จุดคานงัดและ <code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong></p>
-            </div>
-          </div>
-        </div>
-      `
+        "อธิบายเส้นทางหมวดระบบสุขภาพตามหลักคิดคู่ขนานกับหมวดระบาดวิทยา (พร้อมซูมขยายทีละช่วง): (1–3) เรียนภาคทฤษฎีครบ ST1 และ HS1–HS6 ในสัปดาห์ที่ 1–2 (4) เวิร์กชอป Learning How to Learn ร่วมกับ รศ. นพ.สุรเกียรติ และส่ง SRN 1 วันที่ 9 ธ.ค. ก่อนออกเดินทาง (5) ลงสังเกตการทำงานของระบบบริการและชุมชนจริงในภาคสนาม 9 พื้นที่ (6) กลับมาสอบภาคทฤษฎีระบบสุขภาพเช้าวันอังคารที่ 22 ธ.ค. แบบ Open Note A4 (7) บ่ายฝึกวาดผังวงจรเหตุผล (CLD) และร่วมเสวนานโยบาย 23–24 ธ.ค. ก่อน (8) นำเสนอผลงานทีม (ฟอร์ม 3A · 29 ธ.ค.) สะท้อนการคิดเชิงระบบเชื่อมโยงครบทั้ง 5 วัตถุประสงค์ พร้อมสังเคราะห์จุดคานงัดและต่อยอดสู่ Implications for Body of Knowledge, Policy and Practices ก่อนซูมออกกลับมาเห็นภาพรวมทั้ง 8 จังหวะ",
+      render: () =>
+        renderPipeZoomStageHtml({
+          overviewFile: "orient_s08b_hs_pipeline.png",
+          overviewAlt:
+            "8-Stage Health Systems Science Pipeline from ST1 and HS1–HS6 to Learning How to Learn, Fieldwork, Open-Note Exam, CLD, and Integrated Presentation",
+          regions: [
+            { slot: "1", left: "0.8%", width: "36.2%", title: "ซูม Stage 1–3: ทฤษฎีครบ ST1 & HS1–HS6" },
+            { slot: "2", left: "37.6%", width: "24.2%", title: "ซูม Stage 4–5: Learning How to Learn & ภาคสนาม 9 พื้นที่" },
+            { slot: "3", left: "62.4%", width: "24.2%", title: "ซูม Stage 6–7: สอบทฤษฎีระบบฯ (โน้ต A4) & CLD Workshop" },
+            { slot: "4", left: "87.2%", width: "12.0%", title: "ซูม Stage 8: นำเสนอบูรณาการ 5 วัตถุประสงค์ (ฟอร์ม 3A)" }
+          ],
+          crops: [
+            {
+              slot: "1",
+              badge: "STAGE 1–3 · CLASSROOM FOUNDATION (ST1 & HS1–HS6)",
+              fileName: "orient_s08b_hs_f1.png",
+              altText: "Stages 1 to 3 of Health Systems Science: ST1 and HS1 Systems Thinking and SDH, HS2–HS3 6BB and EQESaRR, HS4–HS6 COM-B, PHC and UHC",
+              captionHtml:
+                "<strong>Stage 1–3 (25 พ.ย.–4 ธ.ค. 69):</strong> เรียนรู้กรอบคิดเชิงระบบ <code>ST1</code> ปัจจัยกำหนดสุขภาพ บริการ <code>6BB / EQESaRR</code> สร้างเสริมสุขภาพ ปฐมภูมิ และหลักประกันฯ"
+            },
+            {
+              slot: "2",
+              badge: "STAGE 4–5 · LEARNING HOW TO LEARN & FIELDWORK (9–20 ธ.ค. 69)",
+              fileName: "orient_s08b_hs_f2.png",
+              altText: "Stages 4 and 5 of Health Systems Science: Learning How to Learn Workshop, SRN 1, and Observing Real Health Systems in 9 Sites",
+              captionHtml:
+                "<strong>Stage 4–5 (9–20 ธ.ค. 69):</strong> เวิร์กชอป <code>Learning How to Learn</code> (9 ธ.ค.) และส่ง <code>SRN 1</code> ก่อนลงเรียนรู้ระบบบริการและชุมชนจริง 9 พื้นที่"
+            },
+            {
+              slot: "3",
+              badge: "STAGE 6–7 · OPEN-NOTE EXAM & CLD SYNTHESIS (22–25 ธ.ค. 69)",
+              fileName: "orient_s08b_hs_f3.png",
+              altText: "Stages 6 and 7 of Health Systems Science: Open-Note A4 Theory Exam and Causal Loop Diagram Workshop with Policy Panels",
+              captionHtml:
+                "<strong>Stage 6–7 (22–25 ธ.ค. 69):</strong> เช้า 22 ธ.ค. สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) · บ่ายฝึกผังวงจรเหตุผล (<code>CLD</code>) และร่วมเสวนานโยบาย"
+            },
+            {
+              slot: "4",
+              badge: "STAGE 8 · INTEGRATED 5 OBJECTIVES & IMPLICATIONS (ฟอร์ม 3A)",
+              fileName: "orient_s08b_hs_f4.png",
+              altText: "Stage 8 of Health Systems Science: Team Presentation Integrating 5 Objectives and Key Implications",
+              captionHtml:
+                "<strong>Stage 8 (อังคาร 29 ธ.ค. 69 · ฟอร์ม 3A):</strong> เชื่อมโยงทั้ง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ สู่จุดคานงัดและ <code>Implications for Body of Knowledge · Policy · Practices</code>"
+            }
+          ],
+          cards: [
+            {
+              slot: "1",
+              tintCls: "is-white",
+              kickerHtml: "STAGE 1–3 · ทฤษฎีครบ ST1 &amp; HS1–6 (25 พ.ย.–4 ธ.ค.)",
+              titleHtml: "คิดเชิงระบบ ปัจจัยสุขภาพ บริการ ปฐมภูมิ และ UHC",
+              instRowHtml: `<div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="อ.ณัฐวุฒิ" loading="eager" decoding="async" /></span><span>อ.ณัฐวุฒิ</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="อ.วริษา" loading="eager" decoding="async" /></span><span>อ.วริษา</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="อ.ภูษิต" loading="eager" decoding="async" /></span><span>อ.ภูษิต</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="ผศ.วิชช์" loading="eager" decoding="async" /></span><span>ผศ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="อ.ฉัตรชัย" loading="eager" decoding="async" /></span><span>อ.ฉัตรชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="ผศ.สัมฤทธิ์" loading="eager" decoding="async" /></span><span>ผศ.สัมฤทธิ์</span></span></div>`,
+              bodyHtml:
+                "<code>ST1</code> คิดเชิงระบบ · <code>HS1</code> สุขภาพ <code>SDH/CDoH</code> · <code>HS2</code> บริการ <code>6BB</code> · <code>HS3</code> คุณลักษณะ <code>EQESaRR</code> · <code>HS4</code> สร้างเสริมสุขภาพ <code>COM-B</code> · <code>HS5</code> ปฐมภูมิ <code>PHC</code> · <code>HS6</code> <code>UHC</code>"
+            },
+            {
+              slot: "2",
+              tintCls: "is-teal-tint",
+              kickerHtml: "STAGE 4–5 · Learning How to Learn &amp; ภาคสนาม (9–20 ธ.ค.)",
+              titleHtml: "เตรียมท่าทีการเรียนรู้ สู่การสังเกตระบบจริง 9 พื้นที่",
+              bodyHtml:
+                "<strong>9 ธ.ค.:</strong> เวิร์กชอป <code>Learning How to Learn</code> (รศ.สุรเกียรติ) และส่ง <code>SRN 1</code> ก่อนลงเรียนรู้การทำงานเชื่อมโยงของ <strong>รพ. · รพ.สต. · อสม. · ท้องถิ่น · ชุมชน</strong> ในพื้นที่จริง"
+            },
+            {
+              slot: "3",
+              tintCls: "is-amber-tint",
+              kickerHtml: "STAGE 6–7 · อ. 22 – ศ. 25 ธ.ค. 69 (หลังกลับพื้นที่)",
+              titleHtml: "กลับมาสอบระบบฯ ภาคทฤษฎี และวาดผัง CLD",
+              bodyHtml:
+                "<strong>เช้า 22 ธ.ค.:</strong> สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) แยกชัดเจนหลังเห็นภาพจริง · <strong>บ่าย 22–25 ธ.ค.:</strong> ฝึกวาดผังวงจรเหตุผล (<code>CLD</code>) และเสวนานโยบายสุขภาพ"
+            },
+            {
+              slot: "4",
+              tintCls: "is-navy-tint",
+              kickerHtml: "STAGE 8 · อ. 29 ธ.ค. 69 (ฟอร์ม 3A)",
+              titleHtml: "นำเสนอบูรณาการ 5 วัตถุประสงค์และข้อเสนอแนะ",
+              bodyHtml:
+                "สะท้อนการคิดเชิงระบบเชื่อมโยงทั้ง <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> เข้าด้วยกันอย่างบูรณาการ พร้อมสังเคราะห์จุดคานงัดและต่อยอดสู่ <strong><code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong>"
+            }
+          ]
+        })
     },
     {
       id: "s09-fieldwork-9sites",
@@ -2283,7 +2424,12 @@
     if (canvas.clientWidth < 120 || canvas.clientHeight < 80) return;
 
     const s02Grid = canvas.querySelector(".or-s02-3fig-grid");
-    const focusKey = s02Grid ? s02Grid.getAttribute("data-s02-focus") || "0" : "";
+    const pipeStage = canvas.querySelector(".or-top-fig-stack.is-pipe-zoom-stage");
+    const focusKey = s02Grid
+      ? s02Grid.getAttribute("data-s02-focus") || "0"
+      : pipeStage
+        ? "pipe:" + (pipeStage.getAttribute("data-pipe-focus") || "0")
+        : "";
     const printKey = document.body.classList.contains("is-printing-orientation-deck") ? "P" : "S";
     const fitSig = `${canvas.clientWidth}x${canvas.clientHeight}:${focusKey}:${printKey}`;
     if (canvas._lastFitSig === fitSig) return;
@@ -2315,6 +2461,11 @@
           (el) => el.clientHeight > 0 && el.offsetParent !== null
         );
         spread = 1.34;
+      } else if (kind === "pipe-cards") {
+        targets = Array.from(grp.querySelectorAll(":scope > .or-card")).filter(
+          (el) => el.clientHeight > 0 && el.offsetParent !== null
+        );
+        spread = 1.32;
       } else {
         targets = Array.from(grp.querySelectorAll(":scope > .or-card"));
         spread = 1.28;
@@ -3339,6 +3490,18 @@
     state.s02PendingTarget = null;
   }
 
+  function clearPipeTimer() {
+    if (state.pipeTimer) {
+      clearTimeout(state.pipeTimer);
+      state.pipeTimer = 0;
+    }
+    state.pipePendingTarget = null;
+  }
+
+  function isPipeZoomSlide(slide) {
+    return Boolean(slide && (slide.id === "s08-epidemiology" || slide.id === "s08b-hs-pipeline"));
+  }
+
   function animateFlipElement(el, firstRect, durationMs, easing) {
     if (!el || !firstRect || typeof el.animate !== "function") return;
     const lastRect = el.getBoundingClientRect();
@@ -3428,13 +3591,106 @@
     return true;
   }
 
+  function applyPipeDomFocus(slideId, targetFocus, animSlot) {
+    state.pipeFocus = targetFocus;
+    const domFocus = targetFocus === 5 ? 0 : targetFocus;
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return false;
+    const canvas = modal.querySelector(`.or-slide-canvas[data-slide-id="${slideId}"]`);
+    const stageEl = canvas && canvas.querySelector(".or-top-fig-stack.is-pipe-zoom-stage");
+    if (!canvas || !stageEl) return false;
+
+    const slotStr = animSlot ? String(animSlot) : "";
+    const overviewPlate = stageEl.querySelector(".or-fig-plate.is-pipe-overview-plate");
+    const regionAnchor = slotStr ? stageEl.querySelector(`.or-pipe-region-anchor[data-pipe-region="${slotStr}"]`) : null;
+    const cropPlate = slotStr ? stageEl.querySelector(`.or-fig-plate.is-pipe-crop-plate[data-pipe-crop="${slotStr}"]`) : null;
+    const activeCard = slotStr ? stageEl.querySelector(`.or-card.is-s08-card[data-pipe-slot="${slotStr}"]`) : null;
+
+    const reduceMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const regionFirst =
+      !reduceMotion && domFocus > 0 && regionAnchor && overviewPlate && overviewPlate.offsetParent !== null
+        ? regionAnchor.getBoundingClientRect()
+        : null;
+    const cardFirst =
+      !reduceMotion && activeCard && activeCard.offsetParent !== null ? activeCard.getBoundingClientRect() : null;
+
+    stageEl.setAttribute("data-pipe-focus", String(domFocus));
+
+    const slideObj = SLIDES.find((s) => s.id === slideId);
+    const sNum = slideObj ? slideObj.num : "10";
+    const isEpi = slideId === "s08-epidemiology";
+    const stepLabels = isEpi
+      ? {
+          0: "",
+          1: " · Stage 1–3 (EP1–9)",
+          2: " · Stage 4–5 (Exam & SPSS)",
+          3: " · Stage 6 (Fieldwork)",
+          4: " · Stage 7–8 (Analysis & 4A)",
+          5: " · ภาพรวมสรุป"
+        }
+      : {
+          0: "",
+          1: " · Stage 1–3 (ST1 & HS1–6)",
+          2: " · Stage 4–5 (LHTL & Field)",
+          3: " · Stage 6–7 (Exam & CLD)",
+          4: " · Stage 8 (Present 3A)",
+          5: " · ภาพรวมสรุป"
+        };
+    const shortLabels = { 0: "", 1: " [S1]", 2: " [S2]", 3: " [S3]", 4: " [S4]", 5: " [รวม]" };
+    const footNum = canvas.querySelector(".or-sld-foot-num");
+    if (footNum) {
+      footNum.textContent = `${sNum} / ${SLIDES.length}${stepLabels[targetFocus] || ""}`;
+    }
+    const cchNum = document.querySelector("#orClickerCornerHud .or-cch-num");
+    if (cchNum) {
+      cchNum.textContent = `${sNum}${shortLabels[targetFocus] || ""} / ${SLIDES.length}`;
+    }
+    flashStepToast();
+
+    fitSingleSlideCanvas(canvas);
+
+    if (!reduceMotion && activeCard) {
+      if (domFocus > 0) {
+        if (cropPlate && regionFirst) {
+          animateFlipElement(cropPlate, regionFirst, 450);
+        }
+        animateFlipElement(activeCard, cardFirst, 450);
+      } else {
+        animateFlipElement(activeCard, cardFirst, 360);
+        if (overviewPlate && typeof overviewPlate.animate === "function") {
+          try {
+            overviewPlate.getAnimations().forEach((a) => a.cancel());
+            overviewPlate.animate(
+              [
+                { opacity: 0.35, transform: "scale(1.035)" },
+                { opacity: 1, transform: "scale(1)" }
+              ],
+              { duration: 330, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+            );
+          } catch (_) {}
+        }
+        stageEl.querySelectorAll(".or-card.is-s08-card").forEach((card) => {
+          if (card === activeCard || typeof card.animate !== "function") return;
+          try {
+            card.getAnimations().forEach((a) => a.cancel());
+            card.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
+          } catch (_) {}
+        });
+      }
+    }
+    return true;
+  }
+
   function goToSlide(idx, opts) {
     const o = opts || {};
     clearS02Timer();
+    clearPipeTimer();
     const nextIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
     state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = nextIdx;
     state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
+    state.pipeFocus = typeof o.pipeFocus === "number" ? o.pipeFocus : 0;
     state.zoomScale = 1;
     state.toolsMenuOpen = false;
     clearJumpBuffer();
@@ -3458,6 +3714,15 @@
       clearS02Timer();
       state.s02Focus = snapFocus;
       applyS02DomFocus(snapFocus, 0);
+    }
+    if (state.pipeTimer && typeof state.pipePendingTarget === "number") {
+      const snapPipe = state.pipePendingTarget;
+      const curPipeSlide = SLIDES[state.slideIdx];
+      clearPipeTimer();
+      state.pipeFocus = snapPipe;
+      if (isPipeZoomSlide(curPipeSlide)) {
+        applyPipeDomFocus(curPipeSlide.id, snapPipe, 0);
+      }
     }
 
     const cur = SLIDES[state.slideIdx];
@@ -3539,13 +3804,80 @@
       }
     }
 
-    // Stepping backward from Slide 04 lands on Slide 03's final overview (4) for seamless reverse replay
-    const targetIdx = state.slideIdx + d;
-    if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx] && SLIDES[targetIdx].id === "s02-third-pillar-why") {
-      goToSlide(targetIdx, { s02Focus: 4 });
-      return;
+    if (state.viewMode === "deck" && isPipeZoomSlide(cur)) {
+      const sid = cur.id;
+      if (d > 0) {
+        if (state.pipeFocus === 0) {
+          applyPipeDomFocus(sid, 1, 1);
+          return;
+        }
+        if (state.pipeFocus >= 1 && state.pipeFocus <= 3) {
+          const curSlot = state.pipeFocus;
+          const nextSlot = curSlot + 1;
+          applyPipeDomFocus(sid, 0, curSlot);
+          state.pipePendingTarget = nextSlot;
+          state.pipeTimer = setTimeout(() => {
+            state.pipeTimer = 0;
+            state.pipePendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === sid) {
+              applyPipeDomFocus(sid, nextSlot, nextSlot);
+            }
+          }, 365);
+          return;
+        }
+        if (state.pipeFocus === 4) {
+          // Zoom out Stage 4 back to Full 8-Stage Overview and WAIT for the next clicker press!
+          applyPipeDomFocus(sid, 5, 4);
+          return;
+        }
+        goToSlide(state.slideIdx + 1, { pipeFocus: 0 });
+        return;
+      } else {
+        if (state.pipeFocus === 5) {
+          applyPipeDomFocus(sid, 4, 4);
+          return;
+        }
+        if (state.pipeFocus >= 2 && state.pipeFocus <= 4) {
+          const curSlot = state.pipeFocus;
+          const prevSlot = curSlot - 1;
+          applyPipeDomFocus(sid, 0, curSlot);
+          state.pipePendingTarget = prevSlot;
+          state.pipeTimer = setTimeout(() => {
+            state.pipeTimer = 0;
+            state.pipePendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === sid) {
+              applyPipeDomFocus(sid, prevSlot, prevSlot);
+            }
+          }, 365);
+          return;
+        }
+        if (state.pipeFocus === 1) {
+          applyPipeDomFocus(sid, 0, 1);
+          return;
+        }
+        const prevIdx = state.slideIdx - 1;
+        if (prevIdx >= 0 && isPipeZoomSlide(SLIDES[prevIdx])) {
+          goToSlide(prevIdx, { pipeFocus: 5 });
+          return;
+        }
+        goToSlide(prevIdx, { pipeFocus: 0 });
+        return;
+      }
     }
-    goToSlide(targetIdx, { s02Focus: 0 });
+
+    // Stepping backward lands on final overview of Slide 03 (4) or Slides 10/11 (5) for seamless reverse replay
+    const targetIdx = state.slideIdx + d;
+    if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx]) {
+      if (SLIDES[targetIdx].id === "s02-third-pillar-why") {
+        goToSlide(targetIdx, { s02Focus: 4 });
+        return;
+      }
+      if (isPipeZoomSlide(SLIDES[targetIdx])) {
+        goToSlide(targetIdx, { pipeFocus: 5 });
+        return;
+      }
+    }
+    goToSlide(targetIdx, { s02Focus: 0, pipeFocus: 0 });
   }
 
   function goToSlideById(slideId) {
@@ -4123,6 +4455,23 @@
       });
     });
 
+    modal.querySelectorAll(".or-card.is-s08-card[data-pipe-slot], .or-pipe-region-anchor[data-pipe-region]").forEach((el) => {
+      el.addEventListener("click", (ev) => {
+        if (state.viewMode !== "deck" || state.clickerStage || state.presentationMode) return;
+        if (ev.target && ev.target.closest && ev.target.closest("a, button")) return;
+        const curSlideNow = SLIDES[state.slideIdx];
+        if (!isPipeZoomSlide(curSlideNow)) return;
+        const slotNum = Number(el.getAttribute("data-pipe-slot") || el.getAttribute("data-pipe-region")) || 0;
+        if (!slotNum) return;
+        state.autoPlay = false;
+        if (state.pipeFocus === 0 || state.pipeFocus === 5) {
+          applyPipeDomFocus(curSlideNow.id, slotNum, slotNum);
+        } else {
+          stepSlide(1);
+        }
+      });
+    });
+
     const sel = document.getElementById("orSlideSelect");
     if (sel) {
       sel.addEventListener("change", () => {
@@ -4346,6 +4695,8 @@
     state.hudIdle = false;
     premReelState.wasOnSlide = false;
     clearPremScreensaverTimer();
+    clearS02Timer();
+    clearPipeTimer();
     clearJumpBuffer();
     clearHudIdleTimer();
     clearAutoPlayTimer();
@@ -4383,6 +4734,7 @@
     toggleBlackout,
     fitAllVisibleCanvases,
     getS02Focus: () => state.s02Focus,
+    getPipeFocus: () => state.pipeFocus,
     getSlides: () => SLIDES,
     pptxHref: PPTX_HREF,
     pdfHref: PDF_HREF
