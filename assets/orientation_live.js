@@ -1644,22 +1644,48 @@
   }, 22000);
 
   /* ---------- 10. UI Surface 1: Cover Slide 01 QR & Simultaneous Scan Lobby ---------- */
-  function buildJoinedChipsMarkup(limit) {
+  function buildJoinedChipsMarkup(limit, isCover) {
     const list = getSortedParticipants();
     if (!list.length) {
-      return `<span class="orl-empty-wait">ทั้งคณาจารย์และนักศึกษาสแกน QR ด้วยกล้องมือถือ/แท็บเล็ต เพื่อเข้าห้องรอและดูสไลด์ไปพร้อมกัน…</span>`;
+      if (isCover) {
+        return `
+          <div class="orl-empty-onboard">
+            <div class="orl-eo-kicker">📲 เข้าร่วมห้องสดพร้อมกันใน 3 ขั้นตอน</div>
+            <div class="orl-eo-steps">
+              <div class="orl-eo-step"><span class="orl-eo-num">1</span><span>เปิดกล้องมือถือหรือแท็บเล็ต สแกน <strong>QR Code</strong> ด้านซ้าย</span></div>
+              <div class="orl-eo-step"><span class="orl-eo-num">2</span><span>เลือกสถานะ <strong>นศพ. (รหัส 3 ตัวท้าย)</strong> หรือ <strong>คณาจารย์</strong></span></div>
+              <div class="orl-eo-step"><span class="orl-eo-num">3</span><span>ซิงค์สไลด์สด ซูมภาพชัด และร่วมตอบ <strong>Quiz O · S · M · U</strong></span></div>
+            </div>
+          </div>
+        `;
+      }
+      return `
+        <div class="orl-empty-onboard is-stage-wall">
+          <div class="orl-eo-kicker">📲 รอผู้เข้าร่วมสแกน QR Code ด้านซ้าย</div>
+          <div class="orl-eo-subhint">ทั้งคณาจารย์และนักศึกษาสแกน QR ด้วยกล้องมือถือหรือแท็บเล็ต เพื่อเข้าห้องรอ ซิงค์สไลด์สด และร่วมตอบคำถามไปพร้อมกัน — รายชื่อจะแสดงสดที่นี่อัตโนมัติ</div>
+        </div>
+      `;
     }
     const slice = list.slice(0, limit || 10);
     const extra = list.length - slice.length;
-    return (
+    const chipsHtml =
       slice
         .map((p) => {
           const isFac = p.memberType === "faculty" || p.area === "คณาจารย์";
           return `<span class="orl-p-chip${isFac ? " is-fac-chip" : ""}" title="${esc(p.fullName || p.nickname)} (${esc(p.area || "RACM 303")})"><span class="orl-p-ava">${esc(p.avatar || (isFac ? "👨‍⚕️" : "🩺"))}</span><strong>${esc(getPlayerLabel(p))}</strong>${p.area ? `<em>· ${esc(p.area)}</em>` : ""}</span>`;
         })
         .join("") +
-      (extra > 0 ? `<span class="orl-p-chip is-more">+ อีก ${extra} คน</span>` : "")
-    );
+      (extra > 0 ? `<span class="orl-p-chip is-more">+ อีก ${extra} คน</span>` : "");
+
+    if (isCover && list.length <= 3) {
+      return `
+        <div class="orl-chips-sparse-wrap">
+          <div class="orl-chips-row">${chipsHtml}</div>
+          <div class="orl-eo-subhint">📲 สแกน QR Code ด้านซ้ายเพื่อเข้าร่วมเพิ่มเติม — รายชื่อผู้เข้าร่วมและกลุ่มพื้นที่ฝึกจะแสดงสดที่นี่อัตโนมัติ</div>
+        </div>
+      `;
+    }
+    return chipsHtml;
   }
 
   function renderCoverCardHtml(opts) {
@@ -1685,7 +1711,7 @@
           </div>
           <figure class="or-fig-plate is-cover-hero" style="flex:1;min-height:0">
             <div class="or-fig-img-wrap">
-              <img class="or-fig-img" data-base-img="orient_s01_hero.png" src="assets/images/orientation/${heroFile}?v=20261124gio2" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
+              <img class="or-fig-img" data-base-img="orient_s01_hero.png" src="assets/images/orientation/${heroFile}?v=20261124fit1" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
             </div>
           </figure>
         </div>
@@ -1733,7 +1759,7 @@
             </div>
 
             <div class="orl-chips-stream" data-orl-participant-chips>
-              ${buildJoinedChipsMarkup(6)}
+              ${buildJoinedChipsMarkup(8, true)}
             </div>
           </div>
         </div>
@@ -2774,10 +2800,10 @@
       el.textContent = `🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน`;
     });
     document.querySelectorAll("[data-orl-participant-chips]").forEach((el) => {
-      el.innerHTML = buildJoinedChipsMarkup(6);
+      el.innerHTML = buildJoinedChipsMarkup(8, true);
     });
     document.querySelectorAll("[data-orl-participant-wall]").forEach((el) => {
-      el.innerHTML = buildJoinedChipsMarkup(48);
+      el.innerHTML = buildJoinedChipsMarkup(48, false);
     });
     document.querySelectorAll("[data-orl-area-strip]").forEach((areaStrip) => {
       const areaCounts = getAreaCounts();

@@ -1184,9 +1184,7 @@
   function isPhoneReflowMode() {
     const w = window.innerWidth || 1024;
     const h = window.innerHeight || 768;
-    if (w <= 700 && w <= h) return true;
-    if (h <= 540 && w > h) return true;
-    return false;
+    return w <= 700 && w <= h;
   }
 
   function isAutoHeightBox(el) {
