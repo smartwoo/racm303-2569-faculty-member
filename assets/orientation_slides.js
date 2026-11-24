@@ -2313,6 +2313,8 @@
         "บูรณาการ",
         "จุดคานงัด",
         "หลักประกันฯ",
+        "ปฏิบัติการ",
+        "ต่อยอด",
         "ปิดจบ",
         "สังเคราะห์",
         "วิเคราะห์",
@@ -2466,6 +2468,10 @@
           (el) => el.clientHeight > 0 && el.offsetParent !== null
         );
         spread = 1.32;
+        if (targets.length === 1) {
+          fitHarmonizedCardGroup(targets, 0.45, 1.82, 0.95, 1.0);
+          return;
+        }
       } else {
         targets = Array.from(grp.querySelectorAll(":scope > .or-card"));
         spread = 1.28;

@@ -5392,9 +5392,16 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   flex: 1 1 0 !important;
   height: 100% !important;
   min-height: 0 !important;
-  padding: 1.15cqw 1.35cqw !important;
-  gap: 0.48cqw !important;
+  padding: 1.25cqw 1.45cqw !important;
+  gap: 0.54cqw !important;
   justify-content: safe center;
+}
+
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="1"] .or-card.is-s08-card .or-card-text,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="2"] .or-card.is-s08-card .or-card-text,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="3"] .or-card.is-s08-card .or-card-text,
+.or-top-fig-stack.is-pipe-zoom-stage[data-pipe-focus="4"] .or-card.is-s08-card .or-card-text {
+  line-height: 1.46 !important;
 }
 
 .or-slide-canvas[data-measuring="1"] .or-card.or-s02-takeaway-box,
