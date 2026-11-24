@@ -2323,7 +2323,7 @@ html.orl-keyboard-open .orl-m-body {
 
 /* B. Unfolded Foldable / Surface Duo & Tablet / Split-Screen (e.g. 744x1133, 820x840, 820x1180, 960x960, 1024x768)
       Preserves Auto-Fit (--fit-scale) on Content Slides + Crisp Balanced Typography on Cover & Live Lobby! */
-@media (min-width: 701px) and (max-width: 1040px) and (max-aspect-ratio: 4/3) {
+@media screen and (min-width: 701px) and (max-width: 1040px) and (max-aspect-ratio: 4/3) {
   #orDeckViewport {
     overflow-y: auto !important;
     overflow-x: auto !important;
