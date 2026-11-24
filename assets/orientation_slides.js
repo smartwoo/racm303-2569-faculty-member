@@ -2016,9 +2016,14 @@
       document.fonts.ready.then(scheduleFitOnResize).catch(() => {});
     }
 
-    modal.addEventListener("mousemove", () => {
+    modal.addEventListener("mousemove", (ev) => {
       if (!state.isOpen || modal.hidden) return;
-      if (state.clickerStage || state.presentationMode) {
+      if (state.clickerStage) {
+        const nearEdge = ev.clientY <= 76 || ev.clientY >= window.innerHeight - 76;
+        if (nearEdge || !state.hudIdle) {
+          wakeHud();
+        }
+      } else if (state.presentationMode) {
         wakeHud();
       }
     });
@@ -2534,17 +2539,18 @@
     state.toolsMenuOpen = false;
     state.clickerGuideOpen = false;
     if (!state.clickerStage) {
+      clearHudIdleTimer();
       state.viewMode = "deck";
       state.clickerStage = true;
       state.presentationMode = true;
       state.showNotes = false;
-      modal.classList.add("is-presentation-mode", "is-clicker-stage");
+      state.hudIdle = true;
+      modal.classList.add("is-presentation-mode", "is-clicker-stage", "is-hud-idle");
       if (modal.requestFullscreen) {
         modal.requestFullscreen().catch(() => {});
       }
       flashStepToast();
       renderModal();
-      armHudIdleTimer();
     } else {
       exitPresentationMode();
     }
