@@ -37868,7 +37868,8 @@
       mark.dataset.ansStep = String(rowStep);
       mark.dataset.ansCol = String(colIdx);
       mark.dataset.ansPhrase = seg.phrase;
-      const tag = make("span", `★#${rowStep}`, "hsd-ans-hl-tag");
+      const customAnsLbl = (opts && opts.customAnsTag) || (linkInfo && linkInfo.customAnsTag) || `★#${rowStep}`;
+      const tag = make("span", customAnsLbl, "hsd-ans-hl-tag");
       mark.appendChild(tag);
       appendTextWithBr(mark, seg.text);
       bodySpan.appendChild(mark);
@@ -37915,17 +37916,109 @@
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
 
-    // Center Outcome Node (Always visible even at Step 0 — matches Frame 1!)
+    // Center Outcome Node (Highlighted Health Status linked to Scenario Evidence)
     const posOut = make("div", null, "doh-pos-out");
-    const outBox = make("div", null, "doh-key-outcome-box");
-    outBox.setAttribute("data-doh-slot", "outcome");
-    outBox.appendChild(
-      make("div", (dk.outcome && dk.outcome.title) || "ภาวะอ้วนในเด็ก", "doh-key-outcome-title")
-    );
-    if (dk.outcome && dk.outcome.sub && !inCompactProjection()) {
-      outBox.appendChild(make("div", dk.outcome.sub, "doh-key-outcome-sub"));
+    const outStep = (dk.outcome && Number(dk.outcome.step)) || 0;
+    const outColorIdx = (dk.outcome && Number(dk.outcome.colorIdx)) || (outStep > 0 ? ((outStep - 1) % 6) + 1 : 5);
+    const outLinkInfo = outStep > 0 && Array.isArray(tk.conceptLinks) ? tk.conceptLinks[outStep - 1] || null : null;
+    const outRevealed = outStep > 0 ? isStepRevealed(outStep) : true;
+
+    if (outStep > 0 && !outRevealed) {
+      const showOutMask = Boolean(canClickReveal && !state.isPptSlideSharePopup);
+      const outMask = make(
+        "div",
+        null,
+        `doh-key-masked-slot is-outcome-mask${showOutMask ? "" : " is-ghost-hidden"}`
+      );
+      outMask.setAttribute("data-doh-slot", "outcome");
+      outMask.dataset.keyRowMasked = String(outStep);
+      outMask.appendChild(
+        make("span", "+ คลิกเปิดภาวะสุขภาพหลัก (Health Status)", "ppt-key-mask-pill")
+      );
+      if (showOutMask && typeof toggleHsKeySingleStep === "function") {
+        outMask.title = "คลิกเพื่อเปิดแสดงภาวะสุขภาพหลักตรงกลางแผนภาพพร้อมไฮไลต์หลักฐานในโจทย์";
+        outMask.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          toggleHsKeySingleStep(qObj.id, outStep, true);
+        });
+      }
+      posOut.appendChild(outMask);
+    } else {
+      const outBox = make(
+        "div",
+        null,
+        `doh-key-outcome-box${outStep > 0 ? ` is-highlighted-outcome is-c${outColorIdx}` : ""}${
+          outStep > 0 && hasStepMode && justStep === outStep ? " is-just-revealed" : ""
+        }`
+      );
+      outBox.setAttribute("data-doh-slot", "outcome");
+      if (outStep > 0) {
+        outBox.dataset.conceptRowStep = String(outStep);
+        if (hasStepMode && justStep === outStep) {
+          outBox.setAttribute("data-ppt-just-revealed", "1");
+        }
+        const outPillRow = make("div", null, "doh-key-outcome-pill-row");
+        const outPillLbl =
+          (dk.outcome && dk.outcome.pillLabel) ||
+          (outLinkInfo && outLinkInfo.customPill) ||
+          (isConceptStage ? `ประเด็น #${outStep}` : `หลักฐาน #${outStep}`);
+        const outPill = make(
+          "span",
+          outPillLbl,
+          `hsd-concept-step-pill${isConceptStage ? "" : " is-evidence-pill"} is-c${outColorIdx}`
+        );
+        outPillRow.appendChild(outPill);
+        if (hasStepMode && canClickReveal && typeof toggleHsKeySingleStep === "function") {
+          const outHideBtn = make("button", "ซ่อน", "ppt-key-row-hide-btn is-outcome-hide hsd-no-print");
+          outHideBtn.type = "button";
+          outHideBtn.dataset.keyRowToggle = String(outStep);
+          outHideBtn.title = "ซ่อนภาวะสุขภาพหลักและไฮไลต์หลักฐานกลับ";
+          outHideBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            toggleHsKeySingleStep(qObj.id, outStep, false);
+          });
+          outPillRow.appendChild(outHideBtn);
+        }
+        outBox.appendChild(outPillRow);
+      }
+
+      const outTitleText = (dk.outcome && dk.outcome.title) || "ภาวะอ้วนในเด็ก";
+      const outTitleWrap = make("div", null, "doh-key-outcome-title");
+      if (outStep > 0 && (isConceptStage || outLinkInfo)) {
+        const titleMark = document.createElement("mark");
+        titleMark.className = `hsd-ans-hl is-c${outColorIdx} is-outcome-title-hl`;
+        titleMark.dataset.ansStep = String(outStep);
+        titleMark.dataset.ansCol = "1";
+        titleMark.dataset.ansPhrase = outTitleText;
+        const ansTagTxt =
+          (dk.outcome && dk.outcome.ansTag) ||
+          (outLinkInfo && outLinkInfo.customAnsTag) ||
+          `★#${outStep}`;
+        titleMark.appendChild(make("span", ansTagTxt, "hsd-ans-hl-tag"));
+        titleMark.appendChild(document.createTextNode(outTitleText));
+        outTitleWrap.appendChild(titleMark);
+      } else {
+        outTitleWrap.textContent = outTitleText;
+      }
+      outBox.appendChild(outTitleWrap);
+
+      if (dk.outcome && dk.outcome.sub && !inCompactProjection()) {
+        const outSubWrap = make("div", null, "doh-key-outcome-sub");
+        if (outStep > 0 && (isConceptStage || outLinkInfo)) {
+          const subMark = document.createElement("mark");
+          subMark.className = `hsd-ans-hl is-c${outColorIdx} is-outcome-sub-hl`;
+          subMark.dataset.ansStep = String(outStep);
+          subMark.dataset.ansCol = "1";
+          subMark.dataset.ansPhrase = dk.outcome.sub;
+          subMark.textContent = dk.outcome.sub;
+          outSubWrap.appendChild(subMark);
+        } else {
+          outSubWrap.textContent = dk.outcome.sub;
+        }
+        outBox.appendChild(outSubWrap);
+      }
+      posOut.appendChild(outBox);
     }
-    posOut.appendChild(outBox);
 
     function inCompactProjection() {
       return Boolean(state.isPptSlideSharePopup);
@@ -38220,9 +38313,12 @@
             }
 
             if (idx === 0 && (isConceptStage || linkInfo)) {
+              const stepPillLbl =
+                (linkInfo && linkInfo.customPill) ||
+                (isConceptStage ? `ประเด็น #${rowStep}` : `หลักฐาน #${rowStep}`);
               const stepBadge = make(
                 "div",
-                isConceptStage ? `ประเด็น #${rowStep}` : `หลักฐาน #${rowStep}`,
+                stepPillLbl,
                 `hsd-concept-step-pill${isConceptStage ? "" : " is-evidence-pill"} is-c${colorIdx}`
               );
               td.appendChild(stepBadge);
@@ -38588,6 +38684,7 @@
   function resolveQuestionPhraseStep(phrase, idx, totalLinks) {
     const maxS = Math.max(1, totalLinks || 1);
     const p = String(phrase || "");
+    if (/ภาวะ\/ปัญหาสุขภาพหลักตรงกลางแผนภาพ/.test(p) && maxS >= 5) return 5;
     if (/^\(1\)|WHAT|เดิม|ประเทศ A(?![^\n]*และประเทศ B)|ช่องทางใด|SDG 3\.8\.[12]/i.test(p)) return 1;
     if (/^\(2\)|WHY|เป้าหมาย|ใหม่|ประเทศ B|เลือกเงื่อนไข|ปัจจัยสนับสนุน|ปัจจัยสาเหตุ/i.test(p)) {
       return Math.min(maxS, 2);
@@ -38822,7 +38919,12 @@
             if (!prev || sp.start === a) byStep.set(sp.step, sp);
           }
         });
-        const activeList = Array.from(byStep.values()).sort((x, y) => x.step - y.step);
+        const activeList = Array.from(byStep.values()).sort((x, y) => {
+          const xCustom = x.linkInfo && x.linkInfo.customTag ? 1 : 0;
+          const yCustom = y.linkInfo && y.linkInfo.customTag ? 1 : 0;
+          if (xCustom !== yCustom) return yCustom - xCustom;
+          return x.step - y.step;
+        });
         const startTags = activeList.filter((sp) => sp.start === a);
         const stepsKey = activeList.map((sp) => sp.step).join(",");
         const prevSeg = rawSegs[rawSegs.length - 1];
@@ -38890,7 +38992,8 @@
         }
 
         seg.startTags.forEach((sp) => {
-          const tag = make("span", `${tagPrefix}${sp.step}`, `hsd-clue-tag is-tag-c${sp.colorIdx}`);
+          const customTagTxt = sp.linkInfo && sp.linkInfo.customTag ? sp.linkInfo.customTag : `${tagPrefix}${sp.step}`;
+          const tag = make("span", customTagTxt, `hsd-clue-tag is-tag-c${sp.colorIdx}`);
           tag.dataset.tagStep = String(sp.step);
           mark.appendChild(tag);
         });

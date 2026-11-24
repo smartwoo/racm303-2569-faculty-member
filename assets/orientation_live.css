@@ -5294,6 +5294,11 @@ html[data-role="faculty"] .or-keynote-progress-fill {
     break-after: page;
     page-break-after: always;
   }
+  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-card,
+  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-schematic-box,
+  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-visual-pillar-copy {
+    overflow: visible !important;
+  }
   body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch:last-child {
     break-after: auto;
     page-break-after: auto;
