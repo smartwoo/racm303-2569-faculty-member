@@ -33404,7 +33404,7 @@
     pushIfMatch({
       cat: "docs",
       icon: "📊",
-      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 19 สไลด์ 16:9)",
+      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 20 สไลด์ 16:9)",
       sub: "Start with Why, 5 วัตถุประสงค์ระบบสุขภาพ, 6-Week Journey & การวัดผลสัมฤทธิ์ 5 สมรรถนะ",
       badge: "16:9 · .pptx / PDF",
       defaultShow: true,
@@ -33870,7 +33870,7 @@
       return {
         sessionId,
         isBuiltInOrientation: true,
-        fileName: "Slide ปฐมนิเทศรายวิชา (19 สไลด์ · 16:9)",
+        fileName: "Slide ปฐมนิเทศรายวิชา (20 สไลด์ · 16:9)",
         pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",

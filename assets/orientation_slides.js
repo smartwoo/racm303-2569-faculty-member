@@ -1459,7 +1459,7 @@
     },
     {
       id: "s10-competency-blueprint",
-      num: "12",
+      num: "13",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1547,7 +1547,7 @@
     },
     {
       id: "s11-eval-written-exams",
-      num: "13",
+      num: "14",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1610,7 +1610,7 @@
     },
     {
       id: "s12-eval-practical-rubrics",
-      num: "14",
+      num: "15",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1672,7 +1672,7 @@
     },
     {
       id: "s13-attendance-safety",
-      num: "15",
+      num: "16",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -1726,7 +1726,7 @@
     },
     {
       id: "s14-quiz-osmu",
-      num: "16",
+      num: "17",
       section: "evaluation",
       sectionLabel: "Act IV · Live Quiz O/S/M/U",
       actClass: "is-act-4",
@@ -1752,7 +1752,7 @@
     },
     {
       id: "s15-osmu-criteria",
-      num: "17",
+      num: "18",
       section: "evaluation",
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
@@ -1810,7 +1810,7 @@
     },
     {
       id: "s16-grading-milestones",
-      num: "18",
+      num: "19",
       section: "evaluation",
       sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
       actClass: "is-act-3",
@@ -1872,7 +1872,7 @@
     },
     {
       id: "s17-digital-launch",
-      num: "19",
+      num: "20",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -1929,10 +1929,10 @@
   ];
 
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (19)", labelEn: "All Slides (19)" },
+    { id: "all", labelTh: "ทั้งหมด (20)", labelEn: "All Slides (20)" },
     { id: "intro", labelTh: "เปิดเรื่อง & QR Lobby (1)", labelEn: "Opening & Lobby (1)" },
     { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (4)", labelEn: "Act I · Heritage & Why (4)" },
-    { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (6)", labelEn: "Act II · Schedule & Journey (6)" },
+    { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (7)", labelEn: "Act II · Schedule & Journey (7)" },
     { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
     { id: "action", labelTh: "Act IV · เวลาเรียน & ก้าวแรก (2)", labelEn: "Act IV · Conduct & Launch (2)" }
   ];
@@ -3599,7 +3599,7 @@
                 <div class="or-cg-krow"><kbd>PageUp</kbd> <kbd>&larr;</kbd> <kbd>Backspace</kbd><span>สไลด์ก่อนหน้า (Previous Slide)</span></div>
                 <div class="or-cg-krow"><kbd>F5</kbd> หรือ <kbd>C</kbd><span>เข้า/ออกโหมด <strong>Keynote Pitch Stage</strong> (ซ่อนแถบเมนูอัตโนมัติ)</span></div>
                 <div class="or-cg-krow"><kbd>.</kbd> หรือ <kbd>B</kbd><span>พักหน้าจอดำ <strong>Blackout Stage</strong> (รองรับปุ่มจอดำบน Clicker ทุกรุ่น)</span></div>
-                <div class="or-cg-krow"><kbd>1–19</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
+                <div class="or-cg-krow"><kbd>1–20</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
                 <div class="or-cg-krow"><kbd>L</kbd> เลเซอร์ · <kbd>H</kbd> ซ่อน/แสดงแถบ · <kbd>T</kbd> โทนสว่าง/มืด<span>ควบคุมเวทีครบมือโดยไม่ต้องจับเมาส์</span></div>
               </div>
               <div class="or-cg-actions">
