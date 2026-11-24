@@ -2385,6 +2385,14 @@
 
     let bodyHtml = "";
     if (canRemote && state.joined && state.mobileTab === "remote") {
+      const deckSlides =
+        window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.getSlides === "function"
+          ? window.RACM_ORIENTATION_DECK.getSlides()
+          : [];
+      const quizIdx = Math.max(0, deckSlides.findIndex((s) => s.id === "s14-quiz-osmu"));
+      const critIdx = Math.max(0, deckSlides.findIndex((s) => s.id === "s15-osmu-criteria"));
+      const quizSlideNum = deckSlides[quizIdx] ? deckSlides[quizIdx].num : "17";
+      const critSlideNum = deckSlides[critIdx] ? deckSlides[critIdx].num : "18";
       bodyHtml = `
         <div class="orl-m-card">
           <div class="orl-m-badge">🎛️ PRESENTER REMOTE · ควบคุมสไลด์และคำถามสด</div>
@@ -2396,8 +2404,8 @@
             <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-next">สไลด์ถัดไป ▶</button>
           </div>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="14">🎮 ไป Slide 15 (Quiz)</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="15">⚖️ ไป Slide 16 (เกณฑ์ O/S/M/U)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${quizIdx || 16}">🎮 ไป Slide ${quizSlideNum} (Quiz)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${critIdx || 17}">⚖️ ไป Slide ${critSlideNum} (เกณฑ์ O/S/M/U)</button>
           </div>
           <div class="orl-m-lbl" style="margin-top:6px">ควบคุม Kahoot Quiz สด (${state.participants.size} คนในห้อง)</div>
           <button type="button" class="orl-m-join-btn" data-orl-mact="rcmd" data-rcmd="start-q0">⚡ เริ่มยิงคำถามข้อที่ 1</button>

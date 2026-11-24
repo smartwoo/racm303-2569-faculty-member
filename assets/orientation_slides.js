@@ -1,13 +1,13 @@
 /* ==========================================================================
    RACM 303 (2569) — Orientation to Community Medicine & Health Systems Science
-   15-Slide Non-Interactive 16:9 Widescreen Apple-Keynote Slide Deck
+   20-Slide Interactive 16:9 Widescreen Apple-Keynote Slide Deck
    Constructive Policy-Brief Prose · Source-Validated HSS · Auto-Fit Typography
    ========================================================================== */
 (function () {
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124fit1";
+  const ASSET_VER = "20261124sch1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -441,7 +441,7 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "08.54 – 09.00 น. (6 นาที)",
+      timeWindow: "08.54 – 08.57 น. (3 นาที)",
       kicker: "02 · 6-WEEK LEARNING JOURNEY (25 NOV – 30 DEC 2569)",
       title: "เส้นทางการเรียนรู้ 6 สัปดาห์ จากการปูกรอบคิดสู่โรงพยาบาลแหล่งฝึกและการสังเคราะห์ทีม",
       keyTag: "ลำดับการเรียนรู้",
@@ -462,7 +462,7 @@
               <ul class="or-list is-s06-list">
                 <li><strong>25 พ.ย.:</strong> <code>ST1</code> และสุขภาพโลก</li>
                 <li><strong>26 พ.ย.:</strong> <code>HS1</code> ควบคู่ SG #1</li>
-                <li><strong>27 พ.ย.:</strong> <code>EP1–3</code> และ Ex 1–2</li>
+                <li><strong>27 พ.ย.:</strong> <code>EP1–3</code> และ Ex Day 1</li>
               </ul>
             </div>
 
@@ -484,9 +484,9 @@
                 <h3 class="or-card-title is-s06-title">สอบระบาดฯ และเตรียมทีม</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>8 ธ.ค.:</strong> <strong>Epi Exam</strong> และ SPSS</li>
+                <li><strong>8 ธ.ค.:</strong> <strong>Epi Exam</strong>, SPSS, SG #3</li>
                 <li><strong>9 ธ.ค.:</strong> ระบบสุขภาพอำเภอและ <strong>SRN 1</strong></li>
-                <li><strong>9–12 ธ.ค.:</strong> SG #4–6 ก่อนออกเดินทาง</li>
+                <li><strong>9–11 ธ.ค.:</strong> SG #4–5 ก่อนออกเดินทาง</li>
               </ul>
             </div>
 
@@ -510,7 +510,7 @@
               <ul class="or-list is-s06-list">
                 <li><strong>21 ธ.ค.:</strong> เตรียมโน้ตสรุป A4</li>
                 <li><strong>22 ธ.ค.:</strong> <strong>HS Exam</strong> และฝึก CLD</li>
-                <li><strong>23–25 ธ.ค.:</strong> เสวนานโยบายและ SG</li>
+                <li><strong>23–25 ธ.ค.:</strong> เสวนานโยบายและ SG #6–8</li>
               </ul>
             </div>
 
@@ -520,7 +520,7 @@
                 <h3 class="or-card-title is-s06-title">สังเคราะห์และนำเสนอทีม</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>28 ธ.ค.:</strong> SG #11–12 เตรียมนำเสนอ</li>
+                <li><strong>28 ธ.ค.:</strong> SG #9–10 เตรียมนำเสนอ</li>
                 <li><strong>29 ธ.ค.:</strong> <strong>นำเสนอระบบสุขภาพ (3A)</strong></li>
                 <li><strong>30 ธ.ค.:</strong> <strong>นำเสนอระบาดฯ และ SRN 2</strong></li>
               </ul>
@@ -530,13 +530,333 @@
       `
     },
     {
-      id: "s07-hs-guided-learning",
+      id: "s06b-schedule-w1-w3",
       num: "08",
+      section: "experience",
+      sectionLabel: "Act II · Schedule W1–W3",
+      actClass: "is-act-2",
+      actLabel: "ACT II · RACM 303 SCHEDULE (W1–W3)",
+      timeWindow: "08.57 – 09.00 น. (3 นาที)",
+      kicker: "02 · RACM 303 SCHEDULE · WEEKS 1–3 (25 NOV – 12 DEC 2569)",
+      title: "RACM 303 Schedule · ตารางเรียนรายสัปดาห์ ปีการศึกษา 2569 (สัปดาห์ที่ 1 – 3)",
+      keyTag: "ตารางสัปดาห์ 1–3",
+      keyMessageHtml:
+        "คาบ <strong>HS1–HS6</strong> บรรยายห้องใหญ่ <code>2C2-03</code> (1 ชม.) ต่อด้วยอภิปราย <strong>6 ห้องย่อย</strong> (<code>1C1-02..07</code>) · <strong>ระบาดวิทยา Day 1–3</strong> ผสมผสาน <code>Auditorium / 2C2-03</code> และ <strong>Online Exercise</strong> · สอบทฤษฎีระบาดฯ <strong>อ. 8 ธ.ค.</strong>",
+      notes:
+        "ชี้แจงตารางเรียนรายคาบเช้าและบ่ายของสัปดาห์ที่ 1 ถึงสัปดาห์ที่ 3 ปีการศึกษา 2569: สัปดาห์ที่ 1 เริ่มวันพุธ 25 พ.ย. 08.30 น. Orientation ต่อด้วย ST1 และบ่ายเสวนา Global/Planetary Health & HPSR วันพฤหัสฯ 26 พ.ย. HS1 เช้า และพบ อ.ที่ปรึกษา ครั้งที่ 1 (9 กลุ่ม) บ่าย วันศุกร์ 27 พ.ย. ระบาด Day 1 (EP1–3) ณ ห้อง Auditorium และทำแบบฝึกหัดออนไลน์ สัปดาห์ที่ 2 เรียน HS2–HS5 จันทร์-อังคาร ระบาด Day 2–3 พุธ-พฤหัสฯ และ HS6 + พบ อ.ที่ปรึกษา ครั้งที่ 2 วันศุกร์ สัปดาห์ที่ 3 หยุดชดเชยวันพ่อ 7 ธ.ค. สอบระบาดฯ เช้า 8 ธ.ค. บ่ายเรียน SPSS และกลุ่มย่อยครั้งที่ 3 วันพุธ 9 ธ.ค. Panel DHS เช้า กลุ่มย่อยครั้งที่ 4 บ่าย ส่ง SRN 1 ภายใน 17.00 น. และเริ่มทยอยเดินทางสู่พื้นที่ภาคสนาม 9–12 ธ.ค.",
+      render: () => `
+        <div class="or-table-wrap is-sched-matrix" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูตารางเรียนสัปดาห์ที่ 1–3 ครบทุกวัน">
+          <table class="or-table or-sched-matrix">
+            <colgroup>
+              <col style="width:10.5%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+            </colgroup>
+            <tbody>
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 1</th>
+                <th>จันทร์ 23 พ.ย.</th>
+                <th>อังคาร 24 พ.ย.</th>
+                <th>พุธ 25 พฤศจิกายน</th>
+                <th>พฤหัสบดี 26 พฤศจิกายน</th>
+                <th>ศุกร์ 27 พฤศจิกายน</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30–12.00)</span></td>
+                <td rowspan="2" class="is-muted-off"><span class="or-sch-off">—</span><span class="or-sch-room">ยังไม่มีคาบเรียน</span></td>
+                <td rowspan="2" class="is-prep-off"><strong>เตรียมขึ้นกองภาควิชาฯ</strong><span class="or-sch-room">(นศพ. เริ่มเรียน พ. 25 พ.ย.)</span></td>
+                <td class="is-panel">
+                  <div><strong>08.30–09.30 Orientation</strong> <span class="or-sch-room">(2C2-03)</span></div>
+                  <div><strong>09.30–12.00 ST1: Systems Thinking</strong> <span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
+                </td>
+                <td class="is-hs">
+                  <div><strong>HS1: Health, SDH &amp; Prevention</strong></div>
+                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>ระบาด Day 1 (EP1–EP3)</strong></div>
+                  <div class="or-sch-room">09.00–11.00 (ห้อง Auditorium)<br>11.00–12.00 Ex 2–3 (Online)</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-panel">
+                  <div><strong>13.00–16.00 เสวนา Bedside to SBP</strong></div>
+                  <div class="or-sch-room">Global/Planetary Health &amp; HPSR (ห้องใหญ่ 2C2-03)</div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 1 (SG1)</strong></div>
+                  <div class="or-sch-room">13.00–16.30 น. (ห้องย่อย 9 ห้อง)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>Exercise ระบาด Day 1</strong></div>
+                  <div class="or-sch-room">13.00–16.30 น. (Online / Zoom)</div>
+                </td>
+              </tr>
+
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 2</th>
+                <th>จันทร์ 30 พฤศจิกายน</th>
+                <th>อังคาร 1 ธันวาคม</th>
+                <th>พุธ 2 ธันวาคม</th>
+                <th>พฤหัสบดี 3 ธันวาคม</th>
+                <th>ศุกร์ 4 ธันวาคม</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td class="is-hs">
+                  <div><strong>HS2: Health Services I</strong></div>
+                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                </td>
+                <td class="is-hs">
+                  <div><strong>HS4: Health Promotion &amp; COM-B</strong></div>
+                  <div class="or-sch-room">09.00–10.00 (ห้องใหญ่ 2C2-03)<br>10.10–12.00 (ห้องย่อย 6 ห้อง)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>ระบาด Day 2 (EP4–EP5)</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. Study Designs &amp; Outbreak (2C2-03 / Zoom)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>ระบาด Day 3 (EP6–EP8)</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. Burden, Survey &amp; RCT (2C2-03 / Zoom)</div>
+                </td>
+                <td class="is-hs">
+                  <div><strong>HS6: Health Insurance &amp; Payment</strong></div>
+                  <div class="or-sch-room">09.00–10.00 &amp; 10.10–12.00<br>(รวม 6 กลุ่ม ณ ห้องใหญ่ 2C2-03)</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-hs">
+                  <div><strong>HS3: Health Services II (EQESaRR)</strong></div>
+                  <div class="or-sch-room">13.00–14.00 (ห้องใหญ่ 2C2-03)<br>14.10–16.30 (ห้องย่อย 6 ห้อง)</div>
+                </td>
+                <td class="is-hs">
+                  <div><strong>HS5: Primary Health Care &amp; PC</strong></div>
+                  <div class="or-sch-room">13.00–14.00 (ห้องใหญ่ 2C2-03)<br>14.10–16.30 (ห้องย่อย 6 ห้อง)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>Exercise ระบาด 4–5 &amp; Q&amp;A</strong></div>
+                  <div class="or-sch-room">13.00–16.00 Ex 4–5 · 16.00–16.30 Q&amp;A Day 1–2 (Zoom)</div>
+                </td>
+                <td class="is-ep">
+                  <div><strong>13.00–14.00 EP9: EBM</strong> <span class="or-sch-room">(2C2-03)</span></div>
+                  <div class="or-sch-room">14.00–16.30 Ex 6–7 &amp; Q&amp;A Day 3 (Online / Zoom)</div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 2 (SG2)</strong></div>
+                  <div class="or-sch-room">13.00–16.30 น. (ห้องย่อย 9 ห้อง)</div>
+                </td>
+              </tr>
+
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 3</th>
+                <th>จันทร์ 7 ธันวาคม</th>
+                <th>อังคาร 8 ธันวาคม</th>
+                <th>พุธ 9 ธันวาคม</th>
+                <th>พฤหัสบดี 10 ธันวาคม</th>
+                <th>ศุกร์ 11 ธ.ค. (+ ส. 12 ธ.ค.)</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td rowspan="2" class="is-holiday">
+                  <span class="or-sch-hol">หยุดชดเชยวันพ่อแห่งชาติ</span>
+                  <span class="or-sch-room">(วันคล้ายวันพระราชสมภพ ร.9)</span>
+                </td>
+                <td class="is-exam">
+                  <div><strong class="or-sch-exam-txt">สอบทฤษฎีระบาดวิทยา (EP1–9)</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. (ห้องใหญ่ 2C2-02..03)</div>
+                </td>
+                <td class="is-panel">
+                  <div><strong>Panel: District Health Systems</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. 6BB+1 · อ.สุรเกียรติ (ห้องใหญ่ 2C2-02..03)</div>
+                </td>
+                <td rowspan="2" class="is-holiday">
+                  <span class="or-sch-hol">หยุดวันรัฐธรรมนูญ</span>
+                  <span class="or-sch-travel">เดินทาง: เพชรบูรณ์ 1–2 (เช้า)<br>กุฉินารายณ์, ตะกั่วป่า (รถไฟเย็น)</span>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 4 (เตรียมพื้นที่ 1)</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. (4 กลุ่ม: ด่านซ้าย, ท่าวังผา, อุบลรัตน์, ท่าสองยาง)</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-sg">
+                  <div><strong>13.00–14.30 SPSS</strong> <span class="or-sch-room">(2C2-03 / Zoom)</span></div>
+                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 3</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 4</strong> <span class="or-sch-room">(9 ห้อง)</span></div>
+                  <div><strong class="or-sch-dl">ส่ง SRN 1 (17.00)</strong> · <span class="or-sch-travel">23.00 อุ้มผางเดินทาง</span></div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 5 (7 เครื่องมือ)</strong></div>
+                  <div class="or-sch-travel">เย็น 11 ธ.ค. ท่าสองยาง · ส. 12 ธ.ค. ด่านซ้าย, ท่าวังผา, อุบลรัตน์เดินทาง</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `
+    },
+    {
+      id: "s06c-schedule-w4-w6",
+      num: "09",
+      section: "experience",
+      sectionLabel: "Act II · Schedule W4–W6",
+      actClass: "is-act-2",
+      actLabel: "ACT II · RACM 303 SCHEDULE (W4–W6)",
+      timeWindow: "09.00 – 09.03 น. (3 นาที)",
+      kicker: "02 · RACM 303 SCHEDULE · WEEKS 4–6 (13 – 30 DEC 2569)",
+      title: "RACM 303 Schedule · ตารางเรียนรายสัปดาห์ ปีการศึกษา 2569 (สัปดาห์ที่ 4 – 6)",
+      keyTag: "ตารางสัปดาห์ 4–6",
+      keyMessageHtml:
+        "สัปดาห์ที่ 4 <strong>ฝึกภาคสนาม 9 พื้นที่ (9–20 ธ.ค.)</strong> · สัปดาห์ที่ 5 <strong>สอบทฤษฎีระบบสุขภาพ (22 ธ.ค. · โน้ต A4)</strong> ต่อด้วย CLD และสังเคราะห์ข้อมูลใน <code>SG 6–10</code> · สัปดาห์ที่ 6 <strong>นำเสนอระบบฯ (29 ธ.ค.) และระบาดฯ (30 ธ.ค.)</strong>",
+      notes:
+        "ชี้แจงตารางเรียนสัปดาห์ที่ 4 ถึงสัปดาห์ที่ 6 ปีการศึกษา 2569: สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ รพ.ชุมชนและชุมชนเป้าหมายทั้ง 9 พื้นที่ (เดินทางกลับครบทุกกลุ่มภายในอาทิตย์ที่ 20 ธ.ค.) สัปดาห์ที่ 5 วันจันทร์ 21 ธ.ค. เตรียมสอบ (SDL ไม่เช็คชื่อ) วันอังคาร 22 ธ.ค. เช้าสอบทฤษฎีระบบสุขภาพ (จัดสอบ 3 ห้องใหญ่ Open Note A4 ลายมือ 1 แผ่น) บ่าย Workshop CLD นำโจทย์พื้นที่มาทำ วันพุธ 23 – ศุกร์ 25 ธ.ค. เสวนาสุขภาวะข้างถนน เสวนานโยบายสุขภาพ และพบ อ.ที่ปรึกษา ครั้งที่ 6–8 สัปดาห์ที่ 6 วันจันทร์ 28 ธ.ค. พบ อ.ที่ปรึกษา ครั้งที่ 9–10 วันอังคาร 29 ธ.ค. นำเสนอระบบสุขภาพ (10 นาที + อภิปราย 20 นาที) วันพุธ 30 ธ.ค. เช้านำเสนอระบาดวิทยา (7 นาที + อภิปราย 18 นาที) บ่ายประเมินเจตคติและส่ง SRN 2 + สไลด์ภายใน 17.00 น. ก่อนหยุดวันสิ้นปี 31 ธ.ค. และวันปีใหม่ 1 ม.ค.",
+      render: () => `
+        <div class="or-table-wrap is-sched-matrix is-w46-matrix" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูตารางเรียนสัปดาห์ที่ 4–6 ครบทุกวัน">
+          <table class="or-table or-sched-matrix">
+            <colgroup>
+              <col style="width:10.5%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+              <col style="width:17.9%" />
+            </colgroup>
+            <tbody>
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 4</th>
+                <th colspan="5">14 – 20 ธันวาคม 2569 (ต่อเนื่องช่วงเดินทางและฝึกปฏิบัติงานภาคสนาม 9 – 20 ธันวาคม 2569)</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong></td>
+                <td colspan="5" rowspan="2" class="is-field-band">
+                  <div class="or-sch-field-pill">วันที่ 9 – 20 ธันวาคม 2569 · ฝึกปฏิบัติงานภาคสนาม ณ โรงพยาบาลแหล่งฝึกและชุมชนทั้ง 9 พื้นที่ (7–9 คืน)</div>
+                  <div class="or-sch-field-sub"><strong>เดินทางกลับถึง:</strong> อุ้มผาง (ศ. 18 ธ.ค.) · กุฉินารายณ์, ด่านซ้าย, ตะกั่วป่า, ท่าวังผา, เพชรบูรณ์ 1–2, ท่าสองยาง (ส. 19 ธ.ค.) · อุบลรัตน์ (อา. 20 ธ.ค.)</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong></td>
+              </tr>
+
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 5</th>
+                <th>จันทร์ 21 ธันวาคม</th>
+                <th>อังคาร 22 ธันวาคม</th>
+                <th>พุธ 23 ธันวาคม</th>
+                <th>พฤหัสบดี 24 ธันวาคม</th>
+                <th>ศุกร์ 25 ธันวาคม</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(09.00–12.00)</span></td>
+                <td class="is-sdl">
+                  <div><strong>เตรียมสอบ (SDL)</strong></div>
+                  <div class="or-sch-room">ทบทวนและสรุปโน้ต A4<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
+                </td>
+                <td class="is-exam">
+                  <div><strong class="or-sch-exam-txt">สอบทฤษฎีระบบสุขภาพ (HS1–6)</strong></div>
+                  <div class="or-sch-room">Open Note A4 ลายมือ 1 แผ่น<br>(จัดสอบ 3 ห้องใหญ่ 2C2-01..03)</div>
+                </td>
+                <td class="is-panel">
+                  <div><strong>เสวนาเชื่อม 6BB สู่ระบบที่เป็นธรรม</strong></div>
+                  <div class="or-sch-room">บทเรียน “สุขภาวะข้างถนน”<br>(ห้องใหญ่ 2C2-03)</div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 6 (ต่อ)</strong></div>
+                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 7 (SG7)</strong></div>
+                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–16.30)</span></td>
+                <td class="is-sdl">
+                  <div><strong>เตรียมสอบ (SDL ต่อ)</strong></div>
+                  <div class="or-sch-room">13.00–16.30 น.<br>(ห้องย่อย 9 ห้อง · ไม่เช็คชื่อ)</div>
+                </td>
+                <td class="is-panel">
+                  <div><strong>Systems Thinking (CLD Workshop)</strong></div>
+                  <div><span class="or-sch-accent">เอาโจทย์พื้นที่มาสังเคราะห์</span><br><span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 6 (SG6)</strong></div>
+                  <div class="or-sch-room">สรุปข้อมูลภาคสนามตามวัตถุประสงค์ (ห้องย่อย 9 ห้อง)</div>
+                </td>
+                <td class="is-panel">
+                  <div><strong>Panel: Young-Gen SBP &amp; นโยบาย</strong></div>
+                  <div class="or-sch-room">เศรษฐศาสตร์การเมืองสุขภาพ<br>(ห้องใหญ่ 2C2-03)</div>
+                </td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 8 (SG8)</strong></div>
+                  <div class="or-sch-room">สรุปข้อมูลภาคสนาม &amp; Survey<br>(ห้องย่อย 9 ห้อง)</div>
+                </td>
+              </tr>
+
+              <tr class="is-wk-head">
+                <th class="is-wk-badge">สัปดาห์ที่ 6</th>
+                <th>จันทร์ 28 ธันวาคม</th>
+                <th>อังคาร 29 ธันวาคม</th>
+                <th>พุธ 30 ธันวาคม</th>
+                <th>พฤหัสบดี 31 ธันวาคม</th>
+                <th>ศุกร์ 1 มกราคม 70</th>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>เช้า</strong><span class="or-sch-p-time">(08.30–12.00)</span></td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 9 (SG9)</strong></div>
+                  <div class="or-sch-room">09.00–12.00 น. สรุปข้อมูลภาคสนาม (ห้องย่อย 9 ห้อง)</div>
+                </td>
+                <td class="is-oral">
+                  <div><strong class="or-sch-oral-txt">นำเสนอระบบ (10 นาที + อภิปราย 20 นาที)</strong></div>
+                  <div class="or-sch-room">08.30–12.00 น. (ลงทะเบียน 08.00 · ห้องใหญ่ 2C2-03)</div>
+                </td>
+                <td class="is-oral">
+                  <div><strong class="or-sch-oral-txt">นำเสนอระบาด (7 นาที + อภิปราย 18 นาที)</strong></div>
+                  <div class="or-sch-room">08.30–13.00 น. (ลงทะเบียน 08.00 · ห้องใหญ่ 2C2-03)</div>
+                </td>
+                <td rowspan="2" class="is-holiday">
+                  <span class="or-sch-hol">หยุดวันสิ้นปี</span>
+                </td>
+                <td rowspan="2" class="is-holiday">
+                  <span class="or-sch-hol">หยุดวันขึ้นปีใหม่</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="is-period-col"><strong>บ่าย</strong><span class="or-sch-p-time">(13.00–15.30)<br>(15.30–17.30)</span></td>
+                <td class="is-sg">
+                  <div><strong>พบ อ.ที่ปรึกษา ครั้งที่ 10 (SG10)</strong></div>
+                  <div class="or-sch-room">13.00–16.30 น. ซักซ้อมการนำเสนอ (ห้องย่อย 9 ห้อง)</div>
+                </td>
+                <td class="is-oral">
+                  <div><strong>นำเสนอระบบ (ต่อ)</strong> <span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
+                  <div><strong>เตรียมนำเสนอระบาด</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
+                </td>
+                <td class="is-sdl">
+                  <div><strong>13.00–16.30 SDL &amp; ประเมินเจตคติ</strong></div>
+                  <div><strong class="or-sch-dl">ภายใน 17.00 ส่ง SRN 2 + สไลด์ &amp; Survey</strong></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `
+    },
+    {
+      id: "s07-hs-guided-learning",
+      num: "10",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.00 – 09.04 น. (4 นาที)",
+      timeWindow: "09.03 – 09.06 น. (3 นาที)",
       kicker: "02 · HEALTH SYSTEMS SCIENCE ARCHITECTURE (ST1 & HS1–HS6)",
       title: "การเรียนรู้หมวดระบบสุขภาพแบบนำทาง 5 ขั้นตอน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ",
       keyTag: "การออกแบบการเรียนรู้",
@@ -579,19 +899,19 @@
     },
     {
       id: "s08-epidemiology",
-      num: "09",
+      num: "11",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.04 – 09.08 น. (4 นาที)",
+      timeWindow: "09.06 – 09.09 น. (3 นาที)",
       kicker: "02 · CLINICAL & COMMUNITY EPIDEMIOLOGY PIPELINE (EP1–EP9)",
       title: "หมวดระบาดวิทยาคลินิกและชุมชน (EP1–EP9) จากหลักฐานวิชาการสู่การสำรวจจริง",
       keyTag: "จากหลักฐานสู่การปฏิบัติ",
       keyMessageHtml:
         "การประเมินความแม่นยำของการตรวจและการจัดการอคติ (<strong>Selection Bias, Information Bias และ Confounding</strong>) ช่วยให้ผลสำรวจสุขภาพชุมชนน่าเชื่อถือและนำไปใช้ได้จริง",
       notes:
-        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 09.00–11.00 น. (ห้อง 2A01 และ Zoom) ต่อด้วยแบบฝึกหัดที่ 1–2 ในระบบ E-learning วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 09.00 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
+        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 09.00–11.00 น. (ห้อง Auditorium และ Zoom) ต่อด้วยแบบฝึกหัดที่ 2–3 ในระบบออนไลน์ วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 09.00 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
       render: () => `
         <div class="or-top-fig-stack is-s08-stack">
           ${figPlate("orient_s08_epi_pipeline.png", "4-Stage Clinical and Community Epidemiology Pipeline", "")}
@@ -603,7 +923,7 @@
                 <h3 class="or-card-title">EP1–EP3 · การวินิจฉัยและอคติ</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ. นพ.จักรกฤษณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>09.00–11.00 น.</strong> (<code>Auditorium</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 1–2 หลัง 11.00 น.</strong></p>
+              <p class="or-card-text"><strong>09.00–11.00 น.</strong> (<code>Auditorium</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 2–3 หลัง 11.00 น.</strong></p>
             </div>
 
             <div class="or-card is-white is-s08-card">
@@ -612,7 +932,7 @@
                 <h3 class="or-card-title">EP4–EP5 · รูปแบบวิจัยและสอบสวนโรค</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ. พญ.สวนีย์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 3–4</strong></p>
+              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 4–5</strong></p>
             </div>
 
             <div class="or-card is-teal-tint is-s08-card">
@@ -621,7 +941,7 @@
                 <h3 class="or-card-title">EP6–EP9 · ภาระโรคและเวชปฏิบัติอิงหลักฐาน</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย<strong>EP9 &amp; แบบฝึกหัด 5–6</strong></p>
+              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย <strong>EP9 &amp; แบบฝึกหัด 6–7</strong></p>
             </div>
 
             <div class="or-card is-navy-tint is-s08-card">
@@ -638,17 +958,17 @@
     },
     {
       id: "s09-fieldwork-9sites",
-      num: "10",
+      num: "12",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.08 – 09.13 น. (5 นาที)",
+      timeWindow: "09.09 – 09.13 น. (4 นาที)",
       kicker: "02 · KOLB'S EXPERIENTIAL LEARNING & 9 FIELDWORK TRAINING HOSPITALS",
       title: "การเรียนรู้จากประสบการณ์จริงตามวงจร Kolb ณ โรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง",
       keyTag: "การเรียนรู้ร่วมกัน",
       keyMessageHtml:
-        "เตรียมความพร้อมใน <code>SG 1–6</code> ก่อนลงเรียนรู้ในพื้นที่จริง ณ <strong>โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน)</strong> แล้วนำบทเรียนกลับมาแลกเปลี่ยนให้เห็นบริบทระบบสุขภาพไทยอย่างรอบด้าน",
+        "เตรียมความพร้อมใน <code>SG 1–5</code> ก่อนลงเรียนรู้ในพื้นที่จริง ณ <strong>โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน)</strong> แล้วนำบทเรียนกลับมาแลกเปลี่ยนให้เห็นบริบทระบบสุขภาพไทยอย่างรอบด้าน",
       notes:
         "แนะนำโรงพยาบาลแหล่งฝึกทั้ง 9 แห่งทั่วภูมิภาค อาจารย์ที่ปรึกษาประจำกลุ่ม ห้องกลุ่มย่อย และกำหนดการเดินทางของแต่ละกลุ่ม พร้อมเชื่อมโยงกับวงจรการเรียนรู้จากประสบการณ์จริงของ Kolb ทั้ง 4 ขั้นตอน",
       render: () => `
@@ -702,12 +1022,12 @@
     },
     {
       id: "s10-competency-blueprint",
-      num: "11",
+      num: "13",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.13 – 09.17 น. (4 นาที)",
+      timeWindow: "09.13 – 09.16 น. (3 นาที)",
       kicker: "03 · COMPETENCY-BASED ASSESSMENT BLUEPRINT (RACM 303 · ปีการศึกษา 2569)",
       title: "โครงสร้างการประเมินผลตามสมรรถนะหลัก 5 ด้าน ทั้งเพื่อพัฒนาและตัดสินผล",
       keyTag: "หลักการประเมินผล",
@@ -738,7 +1058,7 @@
                 <tr>
                   <td><strong>1. Knowledge base</strong><br><span class="or-td-sub">ระบบสุขภาพและระบาดวิทยา</span></td>
                   <td>
-                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา แบบทดสอบทบทวน 66 ข้อ (<code>ST1, HS1–6</code>) แบบฝึกหัด <code>EP 1–6</code> และ <code>SRN 1</code></div>
+                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา แบบทดสอบทบทวน 66 ข้อ (<code>ST1, HS1–6</code>) แบบฝึกหัด <code>EP</code> และ <code>SRN 1</code></div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> <strong>Epi Exam</strong> (8 ธ.ค.) และ <strong>Health Systems Exam</strong> (โน้ต A4 · 22 ธ.ค.)</div>
                   </td>
                   <td>คณาจารย์</td>
@@ -749,7 +1069,7 @@
                 <tr>
                   <td><strong>2. Communication &amp; Interpersonal</strong></td>
                   <td>
-                    <div><span class="or-tag-inline is-formative">Formative</span> แลกเปลี่ยนเรียนรู้ในกลุ่มย่อย 13 ครั้ง และฝึกสื่อสารทำงานร่วมกัน</div>
+                    <div><span class="or-tag-inline is-formative">Formative</span> แลกเปลี่ยนเรียนรู้ในกลุ่มย่อย 10 ครั้ง และอภิปราย 6 ครั้ง พร้อมฝึกสื่อสารทำงานร่วมกัน</div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> ประเมินโดยเพื่อนร่วมกลุ่ม <code>ฟอร์ม 1A</code> (ข้อ 1, 3, 4) และการนำเสนอทีม (<code>3A, 4A</code>)</div>
                   </td>
                   <td>เพื่อนและอาจารย์</td>
@@ -790,12 +1110,12 @@
     },
     {
       id: "s11-eval-written-exams",
-      num: "12",
+      num: "14",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.17 – 09.20 น. (3 นาที)",
+      timeWindow: "09.16 – 09.19 น. (3 นาที)",
       kicker: "03 · COMPETENCY 1 DEEP DIVE · EPIDEMIOLOGY EXAM & HEALTH SYSTEMS EXAM",
       title: "รายละเอียดการสอบภาคทฤษฎี หมวดระบาดวิทยาและหมวดระบบสุขภาพ",
       keyTag: "แนวปฏิบัติการสอบ",
@@ -853,12 +1173,12 @@
     },
     {
       id: "s12-eval-practical-rubrics",
-      num: "13",
+      num: "15",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.20 – 09.23 น. (3 นาที)",
+      timeWindow: "09.19 – 09.22 น. (3 นาที)",
       kicker: "03 · COMPETENCIES 2–5 · TEAM PRESENTATION, REFLECTION & INTEGRITY",
       title: "การประเมินภาคปฏิบัติ การนำเสนอผลงานทีม งานสะท้อนคิด และเจตคติวิชาชีพ",
       keyTag: "การสังเคราะห์ร่วมกัน",
@@ -915,12 +1235,12 @@
     },
     {
       id: "s13-attendance-safety",
-      num: "14",
+      num: "16",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
       actLabel: "ACT IV · CONDUCT & SAFETY",
-      timeWindow: "09.23 – 09.25 น. (2 นาที)",
+      timeWindow: "09.22 – 09.24 น. (2 นาที)",
       kicker: "04 · ATTENDANCE (≥ 80%), LEAVE QUOTAS (3d / 1.5d) & 6 SAFETY RULES",
       title: "เวลาเรียน สิทธิ์เข้าสอบ โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
       keyTag: "สิทธิ์เข้าสอบ & ความปลอดภัย",
@@ -969,19 +1289,19 @@
     },
     {
       id: "s14-quiz-osmu",
-      num: "15",
+      num: "17",
       section: "evaluation",
       sectionLabel: "Act IV · Live Quiz O/S/M/U",
       actClass: "is-act-4",
       actLabel: "LIVE QUIZ · O / S / M / U",
-      timeWindow: "09.25 – 09.27 น. (กิจกรรมสด)",
+      timeWindow: "09.24 – 09.26 น. (กิจกรรมสด)",
       kicker: "04 · INTERACTIVE KAHOOT QUIZ · DO'S & DON'TS & ATTITUDE (O · S · M · U)",
       title: "Live Quiz ทวนสอบความเข้าใจ: เวลาเรียน พฤติกรรมไม่พึงประสงค์ และเกณฑ์ O · S · M · U",
       keyTag: "ร่วมตอบสดพร้อมกัน",
       keyMessageHtml:
         "ผู้ที่สแกน QR Code แล้วกดตอบคำถาม 4 สีบนมือถือ/แท็บเล็ตได้ทันที เพื่อ <strong>Recheck ความเข้าใจก่อนชี้แจงเกณฑ์ตัดสิน O · S · M · U ฉบับสมบูรณ์ในสไลด์ถัดไป</strong>",
       notes:
-        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (M/U) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่ แล้วกดไปสไลด์ที่ 15 เพื่อสรุปเกณฑ์ O/S/M/U อย่างเป็นทางการ",
+        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (M/U) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่ แล้วกดไปสไลด์ถัดไปเพื่อสรุปเกณฑ์ O/S/M/U อย่างเป็นทางการ",
       isLiveQuizSlide: true,
       render: () => `
         <div class="orl-s14-quiz-wrap" data-orl-slide-mount="quiz">
@@ -995,12 +1315,12 @@
     },
     {
       id: "s15-osmu-criteria",
-      num: "16",
+      num: "18",
       section: "evaluation",
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
       actLabel: "OFFICIAL CRITERIA · O · S · M · U",
-      timeWindow: "09.27 – 09.28 น. (1 นาที)",
+      timeWindow: "09.26 – 09.28 น. (2 นาที)",
       kicker: "04 · SECTION 12–13 · ATTENDANCE, RAMA ATTITUDE RULES B.E. 2567 & FINAL GRADE O / S / M / U",
       title: "ชี้แจงเกณฑ์เวลาเรียน การประเมินด้านเจตคติ (พ.ศ. 2567) และเกณฑ์ตัดสิน O · S · M · U",
       keyTag: "หมายเหตุสำคัญ",
@@ -1053,7 +1373,7 @@
     },
     {
       id: "s16-grading-milestones",
-      num: "17",
+      num: "19",
       section: "evaluation",
       sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
       actClass: "is-act-3",
@@ -1115,7 +1435,7 @@
     },
     {
       id: "s17-digital-launch",
-      num: "18",
+      num: "20",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -1153,7 +1473,7 @@
                 <p class="or-card-text"><strong>เรียนคาบแรก <code>ST1</code>: ระบบซับซ้อนและการคิดเชิงระบบในระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">② วันนี้ · 13.30 – 16.30 น. (ห้อง 2C2-03)</span>
+                <span class="or-card-kicker">② วันนี้ · 13.00 – 16.00 น. (ห้อง 2C2-03)</span>
                 <p class="or-card-text"><strong>ร่วมเสวนาจากข้างเตียงสู่ระบบสุขภาพ สุขภาพโลก และการวิจัยระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
@@ -1161,7 +1481,7 @@
                 <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 09.00 น. และกลุ่มย่อย 10.10 น.</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.30 – 16.30 น.</span>
+                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.00 – 16.30 น.</span>
                 <p class="or-card-text"><strong>พบอาจารย์ที่ปรึกษาประจำกลุ่มโรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง ในชั่วโมงกลุ่มย่อยครั้งที่ 1</strong></p>
               </div>
             </div>
@@ -1172,10 +1492,10 @@
   ];
 
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (18)", labelEn: "All Slides (18)" },
+    { id: "all", labelTh: "ทั้งหมด (20)", labelEn: "All Slides (20)" },
     { id: "intro", labelTh: "เปิดเรื่อง & QR Lobby (1)", labelEn: "Opening & Lobby (1)" },
     { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (5)", labelEn: "Act I · Heritage & Why (5)" },
-    { id: "experience", labelTh: "Act II · เส้นทางเรียนรู้ (4)", labelEn: "Act II · Experience (4)" },
+    { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (6)", labelEn: "Act II · Schedule & Journey (6)" },
     { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
     { id: "action", labelTh: "Act IV · เวลาเรียน & ก้าวแรก (2)", labelEn: "Act IV · Conduct & Launch (2)" }
   ];
@@ -1315,6 +1635,15 @@
       if (tbl.offsetHeight > w.clientHeight - 1) return false;
       if (w.scrollHeight > w.clientHeight + 1) return false;
       if (tbl.scrollWidth > w.clientWidth + 1) return false;
+      if (tbl.classList.contains("or-sched-matrix")) {
+        const cells = tbl.querySelectorAll("th, td");
+        for (let c = 0; c < cells.length; c++) {
+          const cell = cells[c];
+          if (cell.clientWidth > 0 && cell.scrollWidth > cell.clientWidth + 2) {
+            return false;
+          }
+        }
+      }
     }
     return true;
   }
@@ -1441,7 +1770,7 @@
   function formatTimer(sec) {
     const mins = Math.floor(sec / 60);
     const rem = sec % 60;
-    return `${String(mins).padStart(2, "0")}:${String(rem).padStart(2, "0")} / 30:00`;
+    return `${String(mins).padStart(2, "0")}:${String(rem).padStart(2, "0")} / 60:00`;
   }
 
   function clearAutoPlayTimer() {

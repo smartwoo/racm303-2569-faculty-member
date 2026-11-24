@@ -25251,6 +25251,174 @@
     return row;
   }
 
+  function singleCsCardFitsCleanly(el) {
+    if (!el || el.clientHeight <= 0 || el.clientWidth <= 0) return true;
+    if (el.scrollHeight > el.clientHeight + 1) return false;
+    if (el.scrollWidth > el.clientWidth + 1) return false;
+
+    const cs = window.getComputedStyle(el);
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const padB = parseFloat(cs.paddingBottom) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const bT = parseFloat(cs.borderTopWidth) || 0;
+    const bB = parseFloat(cs.borderBottomWidth) || 0;
+    const bR = parseFloat(cs.borderRightWidth) || 0;
+    const r = el.getBoundingClientRect();
+    const innerTop = r.top + bT + padT - 1.0;
+    const innerBot = r.bottom - bB - padB + 1.0;
+    const innerRight = r.right - bR - padR + 1.5;
+
+    const kids = el.children;
+    for (let k = 0; k < kids.length; k++) {
+      const kid = kids[k];
+      const kcs = window.getComputedStyle(kid);
+      if (kcs.display === "none" || kcs.position === "absolute") continue;
+      if (kid.scrollHeight > kid.clientHeight + 2 || kid.scrollWidth > kid.clientWidth + 2) {
+        return false;
+      }
+      const kr = kid.getBoundingClientRect();
+      if (kr.height <= 0 && kr.width <= 0) continue;
+      if (kr.top < innerTop || kr.bottom > innerBot || kr.right > innerRight) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function findMaxCsScaleForCard(el, minS, maxS, safetyFactor) {
+    let lo = minS;
+    let hi = maxS;
+    for (let step = 0; step < 14; step++) {
+      const mid = (lo + hi) * 0.5;
+      el.style.setProperty("--fit-scale", mid.toFixed(4));
+      if (singleCsCardFitsCleanly(el)) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return Math.max(minS, lo * safetyFactor);
+  }
+
+  function fitConceptSummarySlideStage(sheetEl, csStage, forceRefit) {
+    if (!csStage || !csStage.isConnected) return;
+    csStage.style.zoom = "";
+
+    if (!csStage._csResizeObserved && typeof ResizeObserver === "function") {
+      csStage._csResizeObserved = true;
+      const ro = new ResizeObserver(() => {
+        if (!csStage.isConnected) {
+          ro.disconnect();
+          return;
+        }
+        if (csStage._csResizeRaf) cancelAnimationFrame(csStage._csResizeRaf);
+        csStage._csResizeRaf = requestAnimationFrame(() => {
+          csStage._csResizeRaf = 0;
+          fitConceptSummarySlideStage(sheetEl, csStage, false);
+        });
+      });
+      ro.observe(csStage);
+    }
+
+    const stW = csStage.clientWidth;
+    const stH = csStage.clientHeight;
+    if (stW < 50 || stH < 40) {
+      if (!sheetEl._deferredCsFitQueued) {
+        sheetEl._deferredCsFitQueued = true;
+        requestAnimationFrame(() => {
+          sheetEl._deferredCsFitQueued = false;
+          fitConceptSummarySlideStage(sheetEl, csStage, true);
+        });
+      }
+      return;
+    }
+
+    const isPortrait = stH > stW * 1.04;
+    const csLayout = isPortrait ? (stW < 500 ? "portrait-1col" : "portrait-2col") : "landscape";
+    const isFwStage = csStage.classList.contains("is-framework-visual-stage");
+    const fitSig = `${stW}x${stH}:${csLayout}:${isFwStage ? "fw" : "bento"}`;
+    if (!forceRefit && csStage._lastCsFitSig === fitSig) return;
+    csStage._lastCsFitSig = fitSig;
+
+    csStage.setAttribute("data-cs-layout", csLayout);
+    csStage.classList.remove("is-cs-portrait-reflow");
+
+    if (isFwStage) {
+      const fwImg = csStage.querySelector(".ppt-cs-fw-img");
+      if (fwImg && !fwImg.complete && !fwImg._csLoadWired) {
+        fwImg._csLoadWired = true;
+        fwImg.addEventListener("load", () => fitConceptSummarySlideStage(sheetEl, csStage, true), { once: true });
+      }
+      csStage.style.setProperty("--cs-hero-scale", "1");
+      const topEl = csStage.querySelector(".ppt-cs-fw-top");
+      const bridgeEl = csStage.querySelector(".ppt-cs-bridge");
+      const chromeH = (topEl ? topEl.offsetHeight : 0) + (bridgeEl ? bridgeEl.offsetHeight : 0);
+      const maxChromeRatio = stH < 440 ? 0.24 : isPortrait ? 0.36 : 0.28;
+      if (chromeH > stH * maxChromeRatio && chromeH > 0) {
+        const hs = Math.max(0.68, (stH * maxChromeRatio) / chromeH);
+        csStage.style.setProperty("--cs-hero-scale", hs.toFixed(4));
+      } else if (isPortrait && chromeH > 0 && chromeH < stH * 0.18) {
+        const hs = Math.min(1.25, (stH * 0.22) / chromeH);
+        csStage.style.setProperty("--cs-hero-scale", hs.toFixed(4));
+      }
+      return;
+    }
+
+    const heroEl = csStage.querySelector(".ppt-cs-hero");
+    csStage.style.setProperty("--cs-hero-scale", "1");
+    if (heroEl) {
+      const hH = heroEl.offsetHeight;
+      const maxHeroShare = stH < 430 ? 0.25 : isPortrait ? 0.22 : 0.26;
+      const minHeroShare = isPortrait ? 0.12 : 0.15;
+      if (hH > stH * maxHeroShare && hH > 0) {
+        const minHeroScale = isPortrait ? 0.88 : 0.72;
+        const hs = Math.max(minHeroScale, (stH * (maxHeroShare - 0.01)) / hH);
+        csStage.style.setProperty("--cs-hero-scale", hs.toFixed(4));
+      } else if (hH > 0 && hH < stH * minHeroShare) {
+        const hs = Math.min(1.26, (stH * (minHeroShare + 0.02)) / hH);
+        csStage.style.setProperty("--cs-hero-scale", hs.toFixed(4));
+      }
+    }
+
+    const cards = Array.from(csStage.querySelectorAll(".ppt-cs-dim-card"));
+    if (!cards.length) return;
+
+    const minS = 0.46;
+    const maxS = 2.65;
+    const safetyFactor = 0.955;
+    const maxSiblingSpread = 1.18;
+
+    csStage.setAttribute("data-measuring", "1");
+    const rawScales = cards.map((card) => findMaxCsScaleForCard(card, minS, maxS, safetyFactor));
+    const minGroupScale = Math.min.apply(null, rawScales);
+    const cap = minGroupScale * maxSiblingSpread;
+    cards.forEach((card, idx) => {
+      const s = Math.min(rawScales[idx], cap);
+      card.style.setProperty("--fit-scale", s.toFixed(4));
+    });
+    csStage.removeAttribute("data-measuring");
+
+    let anyOverflowAtMin = false;
+    cards.forEach((card) => {
+      let s = parseFloat(card.style.getPropertyValue("--fit-scale")) || 1;
+      for (let guard = 0; guard < 5; guard++) {
+        if (singleCsCardFitsCleanly(card)) break;
+        s = Math.max(minS, s * 0.955);
+        card.style.setProperty("--fit-scale", s.toFixed(4));
+      }
+      if (!singleCsCardFitsCleanly(card)) anyOverflowAtMin = true;
+    });
+
+    if (isPortrait && stW < 460) {
+      const firstDef = cards[0] && cards[0].querySelector(".ppt-cs-dim-def");
+      const defPx = firstDef ? parseFloat(window.getComputedStyle(firstDef).fontSize) || 12 : 12;
+      if (anyOverflowAtMin || defPx < 10.5) {
+        csStage.classList.add("is-cs-portrait-reflow");
+        cards.forEach((card) => card.style.setProperty("--fit-scale", "1.05"));
+      }
+    }
+  }
+
   function autoFitSingleSheetBoxes(sheetEl, forceBoxRefit) {
     if (!sheetEl || !sheetEl.isConnected) return;
     const isHandout = sheetEl.classList.contains("is-handout-sheet");
@@ -25302,26 +25470,7 @@
     ) {
       const csStage = sheetEl.querySelector(".ppt-concept-summary-stage");
       if (csStage) {
-        if (
-          csStage.classList.contains("is-framework-visual-stage") ||
-          isCompactResp ||
-          sheetEl.offsetWidth < 860 ||
-          sheetEl.offsetHeight < 480
-        ) {
-          csStage.style.zoom = "";
-        } else {
-          csStage.style.zoom = "1";
-          const stH = csStage.clientHeight;
-          let natH = 0;
-          Array.from(csStage.children).forEach((ch) => {
-            natH += ch.offsetHeight;
-          });
-          natH += Math.max(0, csStage.children.length - 1) * 14 + 28;
-          if (stH > 200 && natH > 60 && natH < stH * 0.88) {
-            const targetZ = Math.max(1, Math.min(1.48, (stH * 0.92) / natH));
-            csStage.style.zoom = targetZ.toFixed(3);
-          }
-        }
+        fitConceptSummarySlideStage(sheetEl, csStage, Boolean(forceBoxRefit));
       }
       return;
     }
@@ -32490,7 +32639,7 @@
     pushIfMatch({
       cat: "docs",
       icon: "📊",
-      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 15 สไลด์ 16:9)",
+      title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Orientation · 20 สไลด์ 16:9)",
       sub: "Start with Why, 5 วัตถุประสงค์ระบบสุขภาพ, 6-Week Journey & การวัดผลสัมฤทธิ์ 5 สมรรถนะ",
       badge: "16:9 · .pptx / PDF",
       defaultShow: true,
@@ -32855,7 +33004,7 @@
       return { extKind: "none", extBadge: "ยังไม่ Upload", icoCls: "is-pptx is-muted-pptx", icoTxt: "P" };
     }
     if (rec.isBuiltInOrientation) {
-      return { extKind: "pptx", extBadge: "15 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
+      return { extKind: "pptx", extBadge: "20 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
     }
     const fn = String(rec.fileName || rec.repoPath || "").toLowerCase();
     const mt = String(rec.mime || "").toLowerCase();
@@ -32953,7 +33102,7 @@
       return {
         sessionId,
         isBuiltInOrientation: true,
-        fileName: "Slide ปฐมนิเทศรายวิชา (15 สไลด์ · 16:9)",
+        fileName: "Slide ปฐมนิเทศรายวิชา (20 สไลด์ · 16:9)",
         pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",

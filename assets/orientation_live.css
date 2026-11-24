@@ -3697,6 +3697,354 @@ html[data-role="faculty"] .or-deck-shell.is-io-deck[data-io-theme="dark"] .or-co
 .or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-td-sub { color: #94a3b8; }
 .or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-td-sub.is-danger { color: #f87171; }
 
+/* ---------- RACM 303 Schedule Matrix Slides (Weeks 1–3 & Weeks 4–6 · Auto-Fit --fit-scale) ---------- */
+.or-sld-body > .or-table-wrap:only-child {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+
+.or-table-wrap.is-sched-matrix {
+  height: 100%;
+  border-radius: 0.92cqw !important;
+  border: 1.5px solid #94a3b8 !important;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table-wrap.is-sched-matrix {
+  border-color: rgba(148, 163, 184, 0.36) !important;
+  background: #131926;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix {
+  table-layout: fixed;
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  font-size: calc(0.84cqw * var(--fit-scale, 1));
+  line-height: 1.24;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix th,
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td {
+  border: 1px solid #cbd5e1;
+  vertical-align: middle;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix th,
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td {
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix tr.is-wk-head th {
+  padding: calc(0.22cqw * var(--fit-scale, 1)) calc(0.42cqw * var(--fit-scale, 1));
+  font-size: calc(0.88cqw * var(--fit-scale, 1));
+  font-weight: 700;
+  text-align: center;
+  background: #eff5ff;
+  color: #1e3a8a;
+  line-height: 1.2;
+}
+
+html[data-role="faculty"] .or-slide-canvas.is-io-pitch:not([data-io-theme="dark"]) .or-table.or-sched-matrix tr.is-wk-head th {
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix tr.is-wk-head th {
+  background: #1b2538;
+  color: #bfdbfe;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix tr.is-wk-head:not(:first-child) th {
+  border-top: 2px solid #64748b;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix tr.is-wk-head:not(:first-child) th {
+  border-top: 2px solid rgba(148, 163, 184, 0.52);
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix th.is-wk-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 800;
+  text-align: left;
+  padding-left: calc(0.52cqw * var(--fit-scale, 1));
+}
+
+html[data-role="faculty"] .or-slide-canvas.is-io-pitch:not([data-io-theme="dark"]) .or-table.or-sched-matrix th.is-wk-badge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix th.is-wk-badge {
+  background: rgba(37, 99, 235, 0.30);
+  color: #dbeafe;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td {
+  padding: calc(0.20cqw * var(--fit-scale, 1)) calc(0.46cqw * var(--fit-scale, 1));
+  color: #1e293b;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td {
+  color: #e2e8f0;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td strong {
+  color: #f8fafc;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-period-col {
+  background: #f4f2ea;
+  color: #111827;
+  padding: calc(0.20cqw * var(--fit-scale, 1)) calc(0.42cqw * var(--fit-scale, 1));
+  text-align: left;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-period-col {
+  background: #1b202c;
+  color: #f1f5f9;
+}
+
+.or-sch-p-time {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.18;
+  margin-top: 0.04cqw;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-p-time {
+  color: #94a3b8;
+}
+
+.or-sch-room {
+  font-size: 0.88em;
+  color: #475569;
+  line-height: 1.22;
+  margin-top: 0.04cqw;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-room {
+  color: #94a3b8;
+}
+
+/* Semantic Cell Color-Coding Inspired by Reference Schedule Slides */
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-hs { background: #ffffff; }
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-ep { background: #f4faff; }
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-panel { background: #f8f9ff; }
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-sg { background: #f6f4eb; }
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-sdl { background: #f4faf7; }
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-muted-off {
+  background: #f1f5f9;
+  text-align: center;
+  color: #64748b;
+}
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-prep-off {
+  background: #ede9fe;
+  text-align: center;
+  color: #4c1d95;
+}
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-prep-off strong {
+  color: #4c1d95;
+  display: block;
+}
+.or-sch-off {
+  display: block;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-hs { background: #141a26; }
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-ep { background: #122132; }
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-panel { background: #171e32; }
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-sg { background: #1e1d18; }
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-sdl { background: #132220; }
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-muted-off {
+  background: #111622;
+  text-align: center;
+  color: #64748b;
+}
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-prep-off {
+  background: rgba(109, 40, 217, 0.22);
+  text-align: center;
+  color: #ddd6fe;
+}
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-prep-off strong {
+  color: #ede9fe;
+  display: block;
+}
+
+/* Public Holidays & Fieldwork Travel Notes */
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-holiday {
+  background: #eceae0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-holiday {
+  background: #23211c;
+}
+
+.or-sch-hol {
+  display: block;
+  color: #dc2626;
+  font-weight: 800;
+  font-size: 1.04em;
+  line-height: 1.24;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-hol {
+  color: #f87171;
+}
+
+.or-sch-travel {
+  display: block;
+  font-size: 0.86em;
+  color: #334155;
+  line-height: 1.22;
+  margin-top: 0.12cqw;
+}
+
+.or-slide-canvas.is-io-pitch td .or-sch-travel:not(:only-child) {
+  display: inline;
+  margin-top: 0;
+}
+
+.or-slide-canvas.is-io-pitch td.is-holiday .or-sch-travel {
+  display: block;
+  margin-top: 0.14cqw;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-travel {
+  color: #cbd5e1;
+}
+
+/* Written Exams & Oral Presentations */
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-exam {
+  background: #fffbeb;
+  box-shadow: inset 0 0 0 1.5px #f59e0b;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-exam {
+  background: #271f12;
+  box-shadow: inset 0 0 0 1.5px rgba(245, 158, 11, 0.55);
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix .or-sch-exam-txt {
+  color: #b45309 !important;
+  font-weight: 800 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix .or-sch-exam-txt {
+  color: #fbbf24 !important;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-oral {
+  background: #ecfdf5;
+  box-shadow: inset 0 0 0 1.5px #10b981;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-oral {
+  background: #112622;
+  box-shadow: inset 0 0 0 1.5px rgba(16, 185, 129, 0.50);
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix .or-sch-oral-txt {
+  color: #065f46 !important;
+  font-weight: 800 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix .or-sch-oral-txt {
+  color: #6ee7b7 !important;
+}
+
+/* Week 4 Cyan Fieldwork Highlight Band & Red Callout Accents */
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td.is-field-band {
+  background: #f8fafc;
+  text-align: center;
+  vertical-align: middle;
+  padding: calc(0.28cqw * var(--fit-scale, 1)) calc(0.70cqw * var(--fit-scale, 1));
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix td.is-field-band {
+  background: #131c29;
+}
+
+.or-sch-field-pill {
+  display: inline-block;
+  background: #67e8f9;
+  border: 1px solid #06b6d4;
+  color: #0f172a;
+  font-family: var(--io-font-display);
+  font-weight: 800;
+  font-size: 1.05em;
+  padding: calc(0.18cqw * var(--fit-scale, 1)) calc(0.84cqw * var(--fit-scale, 1));
+  border-radius: 0.42cqw;
+  line-height: 1.25;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-field-pill {
+  background: rgba(6, 182, 212, 0.28);
+  border-color: rgba(34, 211, 238, 0.55);
+  color: #a5f3fc;
+}
+
+.or-sch-field-sub {
+  margin-top: calc(0.18cqw * var(--fit-scale, 1));
+  font-size: 0.90em;
+  color: #334155;
+  line-height: 1.25;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-sch-field-sub {
+  color: #cbd5e1;
+}
+
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix .or-sch-accent,
+.or-slide-canvas.is-io-pitch .or-table.or-sched-matrix .or-sch-dl {
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix .or-sch-accent,
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-table.or-sched-matrix .or-sch-dl {
+  color: #fca5a5 !important;
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .or-table-wrap.is-sched-matrix {
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px !important;
+  }
+  .or-table-wrap.is-sched-matrix .or-table.or-sched-matrix {
+    min-width: 720px !important;
+    height: auto !important;
+    font-size: 12.2px !important;
+    line-height: 1.38 !important;
+  }
+  .or-slide-canvas.is-io-pitch .or-table.or-sched-matrix tr.is-wk-head th,
+  .or-slide-canvas.is-io-pitch .or-table.or-sched-matrix td {
+    padding: 7px 9px !important;
+    font-size: 12.2px !important;
+  }
+}
+
 .or-slide-canvas.is-io-pitch .or-stat-bar-head {
   color: #1f2937;
   font-family: var(--io-font-display);

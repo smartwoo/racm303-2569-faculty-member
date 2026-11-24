@@ -26005,19 +26005,26 @@ html[data-theme="dark"] .ppt-slide-sheet .hsd-verbatim-evidence-strip {
   justify-content: flex-start;
 }
 
-/* 4. Stage ④ Key Takeaway Editorial Slide (Adaptive 2, 3, 4, 5, and 6-Card Bento Grids) */
+/* 4. Stage ④ Key Takeaway Editorial Slide (Adaptive 2, 3, 4, 5, and 6-Card Bento Grids · Per-Frame --fit-scale Auto-Fit Like Slide Orientation) */
 .ppt-concept-summary-stage {
   container-type: size;
   container-name: cs-stage;
-  flex: 1;
+  --cs-hero-scale: 1;
+  --cs-unit: clamp(11px, min(1.24cqw, 2.36cqh), 20px);
+  flex: 1 1 0%;
   min-height: 0;
   width: 100%;
-  padding: clamp(18px, 3.6cqh, 40px) clamp(26px, 4.2cqw, 64px) clamp(13px, 2.5cqh, 28px);
+  box-sizing: border-box;
+  padding: clamp(10px, 2.2cqh, 30px) clamp(14px, 3.0cqw, 48px) clamp(8px, 1.8cqh, 22px);
   display: flex;
   flex-direction: column;
-  gap: clamp(13px, 2.5cqh, 28px);
+  gap: clamp(8px, 1.75cqh, 20px);
   background: radial-gradient(115% 68% at 50% -12%, #ffffff 0%, #f5f5f7 64%, #f2f3f7 100%);
   overflow: hidden;
+}
+
+.ppt-concept-summary-stage[data-cs-layout^="portrait"] {
+  --cs-unit: clamp(11.5px, min(2.35cqw, 1.82cqh), 19px);
 }
 
 html[data-theme="dark"] .ppt-concept-summary-stage {
@@ -26028,7 +26035,7 @@ html[data-theme="dark"] .ppt-concept-summary-stage {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(5px, 1.15cqh, 14px);
+  gap: calc(clamp(3px, 0.85cqh, 10px) * clamp(0.72, var(--cs-hero-scale, 1), 1.15));
   padding: 0 clamp(2px, 0.25cqw, 4px);
 }
 
@@ -26036,13 +26043,13 @@ html[data-theme="dark"] .ppt-concept-summary-stage {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px 16px;
   flex-wrap: wrap;
 }
 
 .ppt-cs-kicker {
   font-family: var(--font-display);
-  font-size: clamp(11px, min(1.24cqw, 2.4cqh), 21px);
+  font-size: calc(clamp(10.5px, min(1.16cqw, 2.2cqh), 19px) * var(--cs-hero-scale, 1));
   font-weight: 700;
   color: #0066cc;
   letter-spacing: 0.015em;
@@ -26054,7 +26061,7 @@ html[data-theme="dark"] .ppt-cs-kicker {
 
 .ppt-cs-source-note {
   font-family: var(--font-display);
-  font-size: clamp(10px, min(1.06cqw, 2.04cqh), 18px);
+  font-size: calc(clamp(9.5px, min(1.0cqw, 1.9cqh), 16.5px) * var(--cs-hero-scale, 1));
   font-weight: 500;
   color: #86868b;
   letter-spacing: 0.005em;
@@ -26067,11 +26074,15 @@ html[data-theme="dark"] .ppt-cs-source-note {
 .ppt-cs-core-def {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(14.5px, min(1.98cqw, 3.85cqh), 35px);
-  line-height: 1.38;
+  font-size: calc(clamp(13px, min(1.78cqw, 3.45cqh), 32px) * var(--cs-hero-scale, 1));
+  line-height: 1.35;
   letter-spacing: -0.018em;
   color: #1d1d1f;
-  max-width: 97%;
+  max-width: 99%;
+}
+
+.ppt-concept-summary-stage[data-cs-layout^="portrait"] .ppt-cs-core-def {
+  font-size: calc(clamp(13.5px, min(3.2cqw, 2.35cqh), 26px) * var(--cs-hero-scale, 1));
 }
 
 html[data-theme="dark"] .ppt-cs-core-def {
@@ -26082,14 +26093,15 @@ html[data-theme="dark"] .ppt-cs-core-def strong {
   color: #ffffff;
 }
 
-/* Adaptive Bento Grid Layouts (2, 3, 4, 5, and 6 Cards) */
+/* Adaptive Bento Grid Layouts (2, 3, 4, 5, and 6 Cards + Portrait/Duo/Landscape Adaptation) */
 .ppt-cs-dim-grid {
-  flex: 1;
+  flex: 1 1 0%;
   min-height: 0;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: clamp(10px, 1.9cqh, 22px) clamp(12px, 1.6cqw, 24px);
+  gap: clamp(7px, 1.5cqh, 18px) clamp(9px, 1.4cqw, 22px);
 }
 
 .ppt-cs-dim-grid.count-2 {
@@ -26120,36 +26132,107 @@ html[data-theme="dark"] .ppt-cs-core-def strong {
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
+/* Portrait Tablet & Surface Duo Portrait (portrait-2col) */
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-2 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-3 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-5,
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-6 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card:nth-child(-n+4) {
+  grid-column: span 1;
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-2col"] .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+/* Vertical Phone (portrait-1col: 1-col for 2/3 cards, 2x2 for 4 cards, 2x3 for 5/6 cards — fits 100% on 1 screen!) */
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-2 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-3 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid:not(.count-2):not(.count-3):not(.count-5):not(.count-6) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-5,
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-6 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card:nth-child(-n+4) {
+  grid-column: span 1;
+}
+
+.ppt-concept-summary-stage[data-cs-layout="portrait-1col"] .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+/* Per-Card Binary-Search --fit-scale Typography (Mirrors Slide Orientation .or-card) */
 .ppt-cs-dim-card {
+  --fit-scale: 1;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.065);
-  border-radius: clamp(14px, 1.4cqw, 22px);
-  padding: clamp(14px, 2.7cqh, 28px) clamp(16px, 2.15cqw, 34px) clamp(12px, 2.3cqh, 24px);
+  border-radius: clamp(12px, 1.3cqw, 20px);
+  padding:
+    calc(clamp(9px, 1.85cqh, 22px) * clamp(0.68, var(--fit-scale, 1), 1.16))
+    calc(clamp(11px, 1.75cqw, 28px) * clamp(0.72, var(--fit-scale, 1), 1.14));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: clamp(6px, 1.2cqh, 14px);
+  gap: calc(clamp(4px, 0.9cqh, 11px) * clamp(0.66, var(--fit-scale, 1), 1.18));
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.025),
     0 10px 26px -18px rgba(15, 23, 42, 0.14);
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
-.ppt-cs-dim-grid.count-2 .ppt-cs-dim-card,
-.ppt-cs-dim-grid.count-3 .ppt-cs-dim-card {
-  padding: clamp(20px, 4.2cqh, 42px) clamp(18px, 2.25cqw, 36px) clamp(18px, 3.6cqh, 36px);
-}
-
-.ppt-cs-dim-grid.count-2 .ppt-cs-dim-top,
-.ppt-cs-dim-grid.count-3 .ppt-cs-dim-top {
-  gap: clamp(8px, 1.75cqh, 18px);
-}
-
 .ppt-cs-dim-grid.count-5 .ppt-cs-dim-card,
 .ppt-cs-dim-grid.count-6 .ppt-cs-dim-card {
-  padding: clamp(12px, 2.35cqh, 24px) clamp(14px, 1.75cqw, 28px);
-  justify-content: flex-start;
+  justify-content: safe center;
+}
+
+.ppt-cs-dim-grid.count-5 .ppt-cs-dim-card > :first-child,
+.ppt-cs-dim-grid.count-6 .ppt-cs-dim-card > :first-child {
+  margin-top: auto;
+}
+
+.ppt-cs-dim-grid.count-5 .ppt-cs-dim-card > :last-child,
+.ppt-cs-dim-grid.count-6 .ppt-cs-dim-card > :last-child {
+  margin-bottom: auto;
+}
+
+/* Synchronous Binary-Search Measurement Helpers (Active Only During fitConceptSummarySlideStage) */
+.ppt-concept-summary-stage[data-measuring="1"] .ppt-cs-dim-card {
+  justify-content: flex-start !important;
+}
+
+.ppt-concept-summary-stage[data-measuring="1"] .ppt-cs-dim-card > *,
+.ppt-concept-summary-stage[data-measuring="1"] .ppt-cs-dim-anchor {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .ppt-cs-dim-card:hover {
@@ -26171,10 +26254,10 @@ html[data-theme="dark"] .ppt-cs-dim-card:hover {
 }
 
 .ppt-cs-dim-top {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: clamp(5px, 1.0cqh, 11px);
-  min-height: 0;
+  gap: calc(0.32 * var(--cs-unit) * clamp(0.68, var(--fit-scale, 1), 1.18));
 }
 
 .ppt-cs-dim-meta {
@@ -26187,10 +26270,11 @@ html[data-theme="dark"] .ppt-cs-dim-card:hover {
 .ppt-cs-dim-num {
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-size: clamp(10.5px, min(1.12cqw, 2.18cqh), 18.5px);
+  font-size: calc(0.78 * var(--cs-unit) * var(--fit-scale, 1));
   font-weight: 700;
   color: #0066cc;
   letter-spacing: 0.04em;
+  line-height: 1.15;
 }
 
 html[data-theme="dark"] .ppt-cs-dim-num {
@@ -26199,11 +26283,11 @@ html[data-theme="dark"] .ppt-cs-dim-num {
 
 .ppt-cs-dim-en {
   font-family: var(--font-display);
-  font-size: clamp(10px, min(1.06cqw, 2.06cqh), 17.5px);
+  font-size: calc(0.74 * var(--cs-unit) * var(--fit-scale, 1));
   font-weight: 500;
   color: #86868b;
   letter-spacing: 0.008em;
-  line-height: 1.1;
+  line-height: 1.15;
   text-align: right;
 }
 
@@ -26212,22 +26296,18 @@ html[data-theme="dark"] .ppt-cs-dim-en {
 }
 
 .ppt-cs-dim-th {
-  margin: clamp(1px, 0.2cqh, 3px) 0 0;
+  margin: 1px 0 0;
   font-family: var(--font-display);
-  font-size: clamp(14.5px, min(1.88cqw, 3.65cqh), 31px);
+  font-size: calc(1.22 * var(--cs-unit) * var(--fit-scale, 1));
   font-weight: 700;
   color: #1d1d1f;
   line-height: 1.24;
   letter-spacing: -0.016em;
 }
 
-.ppt-cs-dim-grid.count-3 .ppt-cs-dim-th {
-  font-size: clamp(15px, min(1.86cqw, 3.7cqh), 30.5px);
-}
-
 .ppt-cs-dim-grid.count-5 .ppt-cs-dim-th,
 .ppt-cs-dim-grid.count-6 .ppt-cs-dim-th {
-  font-size: clamp(13px, min(1.58cqw, 3.1cqh), 25.5px);
+  font-size: calc(1.10 * var(--cs-unit) * var(--fit-scale, 1));
 }
 
 html[data-theme="dark"] .ppt-cs-dim-th {
@@ -26236,22 +26316,16 @@ html[data-theme="dark"] .ppt-cs-dim-th {
 
 .ppt-cs-dim-def {
   margin: 0;
-  font-size: clamp(11.5px, min(1.38cqw, 2.7cqh), 23px);
-  line-height: 1.48;
+  font-size: calc(0.96 * var(--cs-unit) * var(--fit-scale, 1));
+  line-height: 1.44;
   color: #3a3a3c;
   font-weight: 400;
 }
 
-.ppt-cs-dim-grid.count-2 .ppt-cs-dim-def,
-.ppt-cs-dim-grid.count-3 .ppt-cs-dim-def {
-  font-size: clamp(12.5px, min(1.48cqw, 2.92cqh), 24.5px);
-  line-height: 1.58;
-}
-
 .ppt-cs-dim-grid.count-5 .ppt-cs-dim-def,
 .ppt-cs-dim-grid.count-6 .ppt-cs-dim-def {
-  font-size: clamp(10.5px, min(1.26cqw, 2.48cqh), 20.5px);
-  line-height: 1.46;
+  font-size: calc(0.88 * var(--cs-unit) * var(--fit-scale, 1));
+  line-height: 1.4;
 }
 
 html[data-theme="dark"] .ppt-cs-dim-def {
@@ -26259,19 +26333,14 @@ html[data-theme="dark"] .ppt-cs-dim-def {
 }
 
 .ppt-cs-dim-anchor {
+  flex: 0 0 auto;
   margin-top: auto;
-  padding-top: clamp(6px, 1.15cqh, 12px);
+  padding-top: calc(0.44 * var(--cs-unit) * clamp(0.65, var(--fit-scale, 1), 1.15));
   border-top: 1px solid rgba(15, 23, 42, 0.06);
-  font-size: clamp(10px, min(1.14cqw, 2.22cqh), 18.5px);
-  line-height: 1.4;
+  font-size: calc(0.82 * var(--cs-unit) * var(--fit-scale, 1));
+  line-height: 1.36;
   color: #6e6e73;
   font-weight: 500;
-}
-
-.ppt-cs-dim-grid.count-2 .ppt-cs-dim-anchor,
-.ppt-cs-dim-grid.count-3 .ppt-cs-dim-anchor {
-  padding-top: clamp(8px, 1.6cqh, 16px);
-  font-size: clamp(11px, min(1.24cqw, 2.42cqh), 20px);
 }
 
 html[data-theme="dark"] .ppt-cs-dim-anchor {
@@ -26285,9 +26354,10 @@ html[data-theme="dark"] .ppt-cs-dim-anchor {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(10px, 1.4cqw, 24px);
-  padding-top: clamp(8px, 1.6cqh, 16px);
+  gap: clamp(6px, 1.1cqw, 18px);
+  padding-top: calc(clamp(5px, 1.2cqh, 13px) * clamp(0.70, var(--cs-hero-scale, 1), 1.12));
   border-top: 1px solid rgba(15, 23, 42, 0.08);
+  flex-wrap: wrap;
 }
 
 html[data-theme="dark"] .ppt-cs-bridge {
@@ -26297,10 +26367,11 @@ html[data-theme="dark"] .ppt-cs-bridge {
 .ppt-cs-bridge-label {
   flex: 0 0 auto;
   font-family: var(--font-display);
-  font-size: clamp(10px, min(1.08cqw, 2.08cqh), 18px);
+  font-size: calc(clamp(9.5px, min(1.02cqw, 1.95cqh), 16.5px) * var(--cs-hero-scale, 1));
   font-weight: 700;
   color: #1d1d1f;
   white-space: nowrap;
+  margin-right: 6px;
 }
 
 html[data-theme="dark"] .ppt-cs-bridge-label {
@@ -26308,14 +26379,33 @@ html[data-theme="dark"] .ppt-cs-bridge-label {
 }
 
 .ppt-cs-bridge-copy {
-  font-size: clamp(10px, min(1.1cqw, 2.12cqh), 18.5px);
-  line-height: 1.38;
+  font-size: calc(clamp(9.5px, min(1.04cqw, 1.98cqh), 17px) * var(--cs-hero-scale, 1));
+  line-height: 1.35;
   color: #6e6e73;
   min-width: 0;
 }
 
 html[data-theme="dark"] .ppt-cs-bridge-copy {
   color: #98989d;
+}
+
+/* Portrait Reflow Reader Safety Fallback (Engages Only on Micro-Screens Where Bounded Fit Would Drop Below Readable Floor) */
+.ppt-concept-summary-stage.is-cs-portrait-reflow {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  justify-content: flex-start !important;
+}
+
+.ppt-concept-summary-stage.is-cs-portrait-reflow .ppt-cs-dim-grid {
+  flex: 0 0 auto !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+}
+
+.ppt-concept-summary-stage.is-cs-portrait-reflow .ppt-cs-dim-card {
+  overflow: visible !important;
 }
 
 /* 5. Dedicated Light / Dark Theme Switcher for Slide Studio, Slide Header & Fullscreen Show */
@@ -40906,70 +40996,67 @@ html[data-theme="dark"] .hsd-msj-btn.is-fold-toggle {
   }
 }
 
-@media (max-width: 960px), (max-height: 620px) {
+/* Multi-Form-Factor Key Takeaway Stage Polish (Horizontal Phone, Vertical Phone, Duo & Tablet — Zero Hardcoded Font Locks!) */
+@media (max-height: 520px) and (orientation: landscape) {
+  .ppt-slide-sheet.is-responsive-slide.is-layout-concept-summary .ppt-slide-master-head {
+    padding: 4px 12px !important;
+    min-height: 34px !important;
+    gap: 6px !important;
+  }
+  .ppt-slide-sheet.is-responsive-slide.is-layout-concept-summary .ppt-sm-title {
+    font-size: 12.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ppt-slide-sheet.is-responsive-slide.is-layout-concept-summary .ppt-slide-master-foot {
+    display: none !important;
+  }
   .ppt-slide-sheet.is-responsive-slide .ppt-concept-summary-stage {
-    container-type: inline-size !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
-    padding: 14px 14px 18px !important;
-    gap: 12px !important;
+    padding: 5px 12px 5px !important;
+    gap: 5px !important;
   }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-3,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-5,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-6 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-template-rows: auto !important;
-    flex: 0 0 auto !important;
-    gap: 12px !important;
+  #pptPresentationOverlay .ppt-slide-sheet.is-responsive-slide .ppt-cs-bridge {
+    padding-left: 264px !important;
   }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card {
-    grid-column: span 1 !important;
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-bridge-actions {
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
+    gap: 4px !important;
   }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-kicker {
-    font-size: 13px !important;
-  }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-source-note {
-    font-size: 12px !important;
-  }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-core-def {
-    font-size: 16px !important;
-    line-height: 1.45 !important;
-  }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-card {
-    padding: 14px 16px !important;
-    border-radius: 14px !important;
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-bridge {
+    padding-top: 4px !important;
     gap: 8px !important;
+    flex-wrap: nowrap !important;
   }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-th {
-    font-size: 15.8px !important;
-    line-height: 1.3 !important;
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-bridge-text {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-def {
-    font-size: 13.8px !important;
-    line-height: 1.5 !important;
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-schedule-tag {
+    display: none !important;
+  }
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-action-btn {
+    height: 22px !important;
+    padding: 0 8px !important;
+    font-size: 10.5px !important;
   }
 }
 
-@media (max-width: 640px) {
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-2,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-3,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-5,
-  .ppt-slide-sheet.is-responsive-slide .ppt-cs-dim-grid.count-6 {
-    grid-template-columns: minmax(0, 1fr) !important;
+@media (max-width: 640px) and (orientation: portrait) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-concept-summary-stage {
+    padding: 10px 11px 10px !important;
+    gap: 8px !important;
+  }
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-source-note {
+    font-size: 10.2px;
+  }
+  .ppt-slide-sheet.is-responsive-slide .ppt-cs-schedule-tag {
+    display: none !important;
   }
 }
 
@@ -42939,15 +43026,21 @@ mark.hsd-clue-hl.is-focused[data-active-focus-c="6"] { box-shadow: 0 0 0 2px rgb
 
 /* 5. Key Takeaway Synthesized Framework Diagram Visual Stage (Preceding Narrative Takeaway Slide) */
 .ppt-concept-summary-stage.is-framework-visual-stage {
-  padding: clamp(10px, 1.8cqh, 20px) clamp(18px, 2.8cqw, 40px) clamp(10px, 1.8cqh, 18px) !important;
-  gap: clamp(8px, 1.4cqh, 14px) !important;
+  padding: clamp(8px, 1.6cqh, 18px) clamp(14px, 2.6cqw, 38px) clamp(8px, 1.5cqh, 16px) !important;
+  gap: clamp(6px, 1.2cqh, 13px) !important;
+  justify-content: space-between;
+}
+
+.ppt-concept-summary-stage.is-framework-visual-stage[data-cs-layout^="portrait"] {
+  justify-content: safe center;
+  gap: clamp(10px, 2.0cqh, 20px) !important;
 }
 
 .ppt-cs-fw-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
   flex-wrap: wrap;
   flex-shrink: 0;
 }
@@ -42955,16 +43048,20 @@ mark.hsd-clue-hl.is-focused[data-active-focus-c="6"] { box-shadow: 0 0 0 2px rgb
 .ppt-cs-fw-top-left {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 6px 12px;
   flex-wrap: wrap;
 }
 
 .ppt-cs-fw-title {
   font-family: var(--font-display);
-  font-size: clamp(13.5px, min(1.5cqw, 2.7cqh), 22px);
+  font-size: calc(clamp(13px, min(1.5cqw, 2.7cqh), 22px) * var(--cs-hero-scale, 1));
   font-weight: 800;
   color: #0f172a;
   line-height: 1.28;
+}
+
+.ppt-concept-summary-stage.is-framework-visual-stage[data-cs-layout^="portrait"] .ppt-cs-fw-title {
+  font-size: calc(clamp(14px, min(3.4cqw, 2.4cqh), 24px) * var(--cs-hero-scale, 1));
 }
 
 html[data-theme="dark"] .ppt-cs-fw-title {
@@ -42982,10 +43079,15 @@ html[data-theme="dark"] .ppt-cs-fw-title {
   background: #ffffff;
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 16px;
-  padding: clamp(4px, 0.8cqh, 10px) clamp(8px, 1.2cqw, 16px);
+  padding: clamp(4px, 0.8cqh, 10px) clamp(6px, 1.1cqw, 16px);
   box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.ppt-concept-summary-stage.is-framework-visual-stage[data-cs-layout^="portrait"] .ppt-cs-fw-figure {
+  flex: 0 1 auto;
+  padding: 8px;
 }
 
 html[data-theme="dark"] .ppt-cs-fw-figure {
@@ -43006,7 +43108,6 @@ html[data-theme="dark"] .ppt-cs-fw-figure {
 @media (max-width: 759px) {
   .ppt-concept-summary-stage.is-framework-visual-stage {
     padding: 8px 10px !important;
-    gap: 6px !important;
   }
   .ppt-cs-fw-top .ppt-cs-source-note {
     display: none;
