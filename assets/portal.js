@@ -26120,10 +26120,7 @@
       requestAnimationFrame(() => {
         const justRow = sheet.querySelector("[data-ppt-just-revealed='1']");
         if (!justRow) return;
-        const paneEl = justRow.closest(".hsd-slide-right, .hsd-key-slide-stage");
-        const stageScrollEl = sheet.closest(".ppt-fs-stage-wrap, .ppt-canvas-stage");
-        const scroller =
-          sheet.classList.contains("is-responsive-flow") && stageScrollEl ? stageScrollEl : paneEl;
+        const scroller = justRow.closest(".hsd-slide-right, .hsd-key-slide-stage");
         if (scroller && scroller.scrollHeight > scroller.clientHeight + 14) {
           const pRect = scroller.getBoundingClientRect();
           const rRect = justRow.getBoundingClientRect();
@@ -26155,35 +26152,48 @@
     const useRespSlide = !isHandout && (
       isProjected
         ? env.useResponsiveSlide
-        : Boolean(env.isKbdOpen || stageW < 880 || stageH < 460)
+        : Boolean(env.isKbdOpen || stageW < 920 || stageH < 500)
     );
 
-    const isPortraitStage = stageH > stageW * 1.02;
-    const userForcedVertSplit = state.hsdUserPickedOrient === "vertical" && state.hsdSplitOrient === "vertical";
-    const useRespFlow = Boolean(
-      useRespSlide &&
-      (
-        !isProjected ||
-        env.isKbdOpen ||
-        stageW < 820 ||
-        stageH < 520 ||
-        state.hsdSplitOrient === "horizontal" ||
-        (isPortraitStage && !userForcedVertSplit && stageW < 980)
-      )
-    );
+    let padX = 0;
+    let padY = 0;
+    if (!isProjected) {
+      const cs = window.getComputedStyle(stageEl);
+      padX =
+        (parseFloat(cs.paddingLeft) || 0) +
+        (parseFloat(cs.paddingRight) || 0) +
+        (parseFloat(cs.borderLeftWidth) || 0) +
+        (parseFloat(cs.borderRightWidth) || 0) +
+        (useRespSlide ? 0 : 6);
+      padY =
+        (parseFloat(cs.paddingTop) || 0) +
+        (parseFloat(cs.paddingBottom) || 0) +
+        (parseFloat(cs.borderTopWidth) || 0) +
+        (parseFloat(cs.borderBottomWidth) || 0) +
+        (useRespSlide ? 0 : 6);
+    }
+
+    const clientW = stageEl.clientWidth || stageW;
+    const clientH = stageEl.clientHeight || stageH;
+    const availW = Math.max(220, clientW - padX);
+    const availH = Math.max(150, clientH - padY);
+
     const curLayout = getEffectiveHsdSlideLayout();
-    const isSinglePane = curLayout === "scenario" || curLayout === "sheet" || curLayout === "key-only";
-    const isMobileStack = Boolean(
-      useRespFlow &&
-      (
-        env.isKbdOpen ||
-        isSinglePane ||
-        state.hsdSplitOrient === "horizontal" ||
-        stageW < 700 ||
-        (isPortraitStage && !userForcedVertSplit)
-      )
+    const isSplitLayout =
+      curLayout === "split-key" ||
+      curLayout === "split-key-all" ||
+      curLayout === "split-sheet" ||
+      curLayout === "split-concept";
+    const userForcedVertSplit =
+      state.hsdUserPickedOrient === "vertical" && state.hsdSplitOrient === "vertical";
+    const isAutoHorizSplit = Boolean(
+      useRespSlide &&
+      isSplitLayout &&
+      state.hsdSplitOrient !== "horizontal" &&
+      !userForcedVertSplit &&
+      availW < 650
     );
-    const modeSig = `${useRespSlide ? 1 : 0}:${useRespFlow ? 1 : 0}:${isMobileStack ? 1 : 0}`;
+    const modeSig = `${useRespSlide ? 1 : 0}:${isAutoHorizSplit ? 1 : 0}:${env.isKbdOpen ? 1 : 0}`;
 
     if (
       !forceRefit &&
@@ -26213,37 +26223,29 @@
       sheetEl._lastScaleFactor = scaleFactor;
       sheetEl._lastModeSig = modeSig;
 
-      stageEl.classList.toggle("is-stage-resp-flow", useRespFlow);
-      stageEl.classList.toggle("is-stage-resp-split", Boolean(useRespSlide && !useRespFlow));
+      stageEl.classList.remove("is-stage-resp-flow");
+      stageEl.classList.toggle("is-stage-resp-split", useRespSlide);
 
       sheetEl.classList.toggle("is-responsive-slide", useRespSlide);
-      sheetEl.classList.toggle("is-responsive-flow", useRespFlow);
-      sheetEl.classList.toggle("is-responsive-split", Boolean(useRespSlide && !useRespFlow));
-      sheetEl.classList.toggle("is-mobile-stack", isMobileStack);
-      sheetEl.classList.toggle("is-flow-two-col", Boolean(useRespFlow && !isMobileStack));
+      sheetEl.classList.toggle("is-responsive-split", useRespSlide);
+      sheetEl.classList.toggle("is-auto-horiz-split", isAutoHorizSplit);
+      sheetEl.classList.remove("is-responsive-flow", "is-mobile-stack", "is-flow-two-col");
 
-      let padX = 0;
-      let padY = 0;
-      if (!isProjected) {
-        const cs = window.getComputedStyle(stageEl);
-        padX =
-          (parseFloat(cs.paddingLeft) || 0) +
-          (parseFloat(cs.paddingRight) || 0) +
-          (parseFloat(cs.borderLeftWidth) || 0) +
-          (parseFloat(cs.borderRightWidth) || 0) +
-          (useRespSlide ? 0 : 6);
-        padY =
-          (parseFloat(cs.paddingTop) || 0) +
-          (parseFloat(cs.paddingBottom) || 0) +
-          (parseFloat(cs.borderTopWidth) || 0) +
-          (parseFloat(cs.borderBottomWidth) || 0) +
-          (useRespSlide ? 0 : 6);
+      const stg = sheetEl.querySelector(".hsd-slide-stage");
+      if (stg) {
+        const baseTop = state.hsdSplitTopPct || 38;
+        const effTop = env.isKbdOpen ? Math.min(baseTop, 28) : baseTop;
+        stg.style.setProperty("--hsd-eff-top-pct", `${effTop}%`);
+        const resEl = stg.querySelector(".hsd-split-resizer");
+        if (resEl) {
+          const horizNow = state.hsdSplitOrient === "horizontal" || isAutoHorizSplit;
+          resEl.classList.toggle("is-horizontal", horizNow);
+          const pill = resEl.querySelector(".hsd-resizer-pill");
+          if (pill && !stg.classList.contains("is-resizing-split")) {
+            pill.textContent = horizNow ? "⋯" : "⋮";
+          }
+        }
       }
-
-      const clientW = stageEl.clientWidth || stageW;
-      const clientH = stageEl.clientHeight || stageH;
-      const availW = Math.max(220, clientW - padX);
-      const availH = Math.max(150, clientH - padY);
 
       if (!useRespSlide) {
         const fitW = Math.min(availW, availH * (16 / 9));
@@ -26257,14 +26259,6 @@
         sheetEl.style.setProperty("--ppt-scale", fontScale.toFixed(3));
         const fitZoom = Math.max(0.45, Math.min(1.32, finalW / 1540));
         sheetEl.dataset.pptFitZoom = fitZoom.toFixed(4);
-      } else if (useRespFlow) {
-        const finalW = Math.floor(availW * scaleFactor);
-        sheetEl.style.width = `${finalW}px`;
-        sheetEl.style.minHeight = `${Math.floor(availH)}px`;
-        sheetEl.style.height = "auto";
-        sheetEl.style.maxWidth = "none";
-        sheetEl.style.setProperty("--ppt-scale", "0.94");
-        sheetEl.dataset.pptFitZoom = "1.0000";
       } else {
         const finalW = Math.floor(availW * scaleFactor);
         const finalH = Math.floor(availH * scaleFactor);
@@ -26274,7 +26268,7 @@
         sheetEl.style.maxWidth = "none";
         const fontScale = Math.max(0.84, Math.min(1.18, finalW / 1140));
         sheetEl.style.setProperty("--ppt-scale", fontScale.toFixed(3));
-        const fitZoom = Math.max(0.86, Math.min(1.06, finalW / 1260));
+        const fitZoom = Math.max(0.88, Math.min(1.06, finalW / 1260));
         sheetEl.dataset.pptFitZoom = fitZoom.toFixed(4);
       }
 
