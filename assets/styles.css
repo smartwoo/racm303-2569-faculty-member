@@ -30087,7 +30087,7 @@ html[data-theme="dark"] .hs-flow-step4-file-meta {
 
 .ep6-ms-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 

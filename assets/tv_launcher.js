@@ -1662,6 +1662,8 @@
       const curEpSec = st.epSection === "morbidity-mortality" ? "ep6" : (st.epSection || "all");
       const epPills = [
         { id: "all", label: t("ภาพรวมทั้งหมด", "All Sections") },
+        { id: "ep4", label: t("🎬 EP4: Study Designs & Impact", "🎬 EP4: Study Designs & Impact") },
+        { id: "ep5", label: t("🎬 EP5: Surveillance & Outbreak", "🎬 EP5: Surveillance & Outbreak") },
         { id: "ep6", label: t("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
         { id: "ep7", label: t("🎬 EP7: Health Survey", "🎬 EP7: Health Survey") },
         { id: "ep8", label: t("🎬 EP8: Experimental Study", "🎬 EP8: Experimental Study") },
@@ -2404,6 +2406,38 @@
         meta: "9 คาบบรรยาย · 6 แบบฝึกหัด",
         tags: ["📊 EP1–EP9", "💻 Ex 1–6 & SPSS", "📋 สัดส่วนสอบ & 4A"],
         files: [
+          {
+            id: "ep:ep4-study-designs",
+            folderPath: ["epidemiology"],
+            name: "EP4_Study_Designs_and_Impact_Video_&_22_Slides.app",
+            title: "EP4: Overview of Study Designs & Measurement of Impact — Native Video (48:38) + 22 Slides",
+            sub: "อ. พญ.สวนีย์ ศรีเจริญธรรม · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 22 หน้า",
+            meta: "EP4 · สอบ 10% · 22 Slides",
+            badge: "🎬 เปิดบทเรียน EP4",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            pdfHref: "downloads/EP4_Overview_of_Study_Designs_and_Impact_Slides.pdf",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("ep4");
+              else navigateTvTab("epidemiology");
+            })
+          },
+          {
+            id: "ep:ep5-surveillance",
+            folderPath: ["epidemiology"],
+            name: "EP5_Disease_Surveillance_and_Outbreak_Investigation_Video_&_50_Slides.app",
+            title: "EP5: Disease Surveillance & Outbreak Investigation — Native Video (76:35) + 50 Slides",
+            sub: "อ. พญ.สวนีย์ ศรีเจริญธรรม · เล่นวิดีโอบรรยาย Native HTML5 (PiP + ซับไทย CC) ควบคู่กับสไลด์ซิงก์ 50 หน้า",
+            meta: "EP5 · สอบ 15% · 50 Slides",
+            badge: "🎬 เปิดบทเรียน EP5",
+            icoCls: "is-slide",
+            icoTxt: "🎬",
+            pdfHref: "downloads/EP5_Disease_Surveillance_and_Outbreak_Investigation_Slides.pdf",
+            onOpen: openFileAction(() => {
+              if (api && api.openEpidemiology) api.openEpidemiology("ep5");
+              else navigateTvTab("epidemiology");
+            })
+          },
           {
             id: "ep:ep6-morbidity",
             folderPath: ["epidemiology"],

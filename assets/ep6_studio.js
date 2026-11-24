@@ -1,5 +1,5 @@
 /* ==========================================================================
-   RACM 303 — Epidemiology Multi-Lecture Interactive Studio (EP6 · EP7 · EP8 · EP9)
+   RACM 303 — Epidemiology Multi-Lecture Interactive Studio (EP4 · EP5 · EP6 · EP7 · EP8 · EP9)
    - 100% Standalone Native HTML5 <video> Streaming (Zero YouTube · Sliced Per Lecture)
    - Synchronized Captured HD Slides + Non-Overlapping Thai CC + Verbatim -> Conceptualized
    - Seamless Auto & Manual Floating Picture-in-Picture (PiP) Without Reloading Video
@@ -8,12 +8,14 @@
 (function () {
   "use strict";
 
-  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v7";
+  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v8";
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-  const MODULE_ORDER = ["EP6", "EP7", "EP8", "EP9"];
+  const MODULE_ORDER = ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
 
   function getModulesMap() {
     const map = {};
+    if (window.RACM303_EP4_STUDY_DESIGNS) map.EP4 = window.RACM303_EP4_STUDY_DESIGNS;
+    if (window.RACM303_EP5_SURVEILLANCE) map.EP5 = window.RACM303_EP5_SURVEILLANCE;
     if (window.RACM303_EP6_MORBIDITY) map.EP6 = window.RACM303_EP6_MORBIDITY;
     if (window.RACM303_EP7_SURVEY) map.EP7 = window.RACM303_EP7_SURVEY;
     if (window.RACM303_EP8_EXPERIMENTAL) map.EP8 = window.RACM303_EP8_EXPERIMENTAL;
@@ -112,8 +114,8 @@
   };
 
   const studioState = {
-    activeModule: "EP6",
-    perLectureSec: { EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
+    activeModule: "EP4",
+    perLectureSec: { EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
     currentSec: 4,
     activeSlideId: 1,
     activeStageId: 1,
@@ -237,6 +239,8 @@
   ];
 
   const MODULE_SHORT_LABELS = {
+    EP4: { short: "Study Designs & Measurement of Impact", sub: "Cohort / Case-Control / OR / RR & AR, AR%, PAR, PAR%" },
+    EP5: { short: "Disease Surveillance & Outbreak Investigation", sub: "Passive/Active รง.506 · Median 5 ปี · Epi Curve & Attack Rate" },
     EP6: { short: "Measures of Morbidity & Mortality", sub: "ความชุก อุบัติการณ์ อัตราตาย DALY & Standardization" },
     EP7: { short: "Health Survey", sub: "การสำรวจสุขภาพชุมชน ขนาดตัวอย่าง & Probability Sampling" },
     EP8: { short: "Experimental Study", sub: "การวิจัยเชิงทดลอง RCT, Blinding & RR / ARR / NNT" },
@@ -260,6 +264,33 @@
     const MIN_SEC = Number(DATA.meta.startSec) || 0;
     const MAX_SEC = Number(DATA.meta.endSec || DATA.meta.durationSec) || 3600;
     const TOTAL_SLIDES = (DATA.slides || []).length;
+    const rawParts = Array.isArray(DATA.meta.videoParts) && DATA.meta.videoParts.length
+      ? DATA.meta.videoParts
+      : [{ src: DATA.meta.videoSrc, duration: MAX_SEC }];
+    const partsList = [];
+    let accOffset = 0;
+    rawParts.forEach((pt, idx) => {
+      const dur = Math.max(1, Number(pt.duration) || MAX_SEC);
+      partsList.push({ idx, src: pt.src, startOffset: accOffset, duration: dur, label: pt.label || "" });
+      accOffset += dur;
+    });
+    function resolvePartForVirtualSec(vSec) {
+      const clampedV = Math.max(MIN_SEC, Math.min(MAX_SEC - 0.05, Number(vSec) || 0));
+      let chosen = partsList[partsList.length - 1];
+      for (let i = 0; i < partsList.length; i++) {
+        if (clampedV < partsList[i].startOffset + partsList[i].duration - 0.02 || i === partsList.length - 1) {
+          chosen = partsList[i];
+          break;
+        }
+      }
+      return {
+        partIdx: chosen.idx,
+        src: chosen.src,
+        startOffset: chosen.startOffset,
+        duration: chosen.duration,
+        localSec: Math.max(0, Math.min(chosen.duration - 0.05, clampedV - chosen.startOffset))
+      };
+    }
 
     // Restore saved position for this specific lecture
     const savedSec = studioState.perLectureSec[modCode];
@@ -282,11 +313,15 @@
     root.dataset.epModule = modCode;
     root.tabIndex = -1;
 
+    const initPartInfo = resolvePartForVirtualSec(studioState.currentSec);
     const instance = {
       container,
       opts,
       root,
       videoEl: null,
+      activePartIdx: initPartInfo.partIdx,
+      pendingLocalSeek: initPartInfo.localSec,
+      pendingAutoPlay: false,
       flashTimer: null,
       dockedMeasuredHeight: 0,
       cleanupListeners: null
@@ -298,7 +333,7 @@
       const switcher = document.createElement("div");
       switcher.className = "ep6-module-switcher";
       switcher.setAttribute("role", "tablist");
-      switcher.setAttribute("aria-label", "เลือกบทเรียนวิดีโอบรรยายระบาดวิทยา (EP6–EP9)");
+      switcher.setAttribute("aria-label", "เลือกบทเรียนวิดีโอบรรยายระบาดวิทยา (EP4–EP9)");
       switcher.innerHTML = `
         <div class="ep6-ms-label">🎬 เลือกคาบบรรยายระบาดวิทยา (ตัดแบ่งคลิปตรงตามแต่ละหัวข้อ EP · เล่นโดยตรงไม่ผ่าน YouTube):</div>
         <div class="ep6-ms-grid">
@@ -462,7 +497,7 @@
                 <video
                   id="ep6NativeVideoEl"
                   class="ep6-native-video"
-                  src="${esc(DATA.meta.videoSrc)}"
+                  src="${esc(initPartInfo.src)}"
                   poster="${esc(getSlideImg(firstSlide))}"
                   preload="metadata"
                   playsinline
@@ -986,19 +1021,28 @@
 
     function seekToSecond(sec, autoPlay) {
       const target = Math.max(MIN_SEC, Math.min(MAX_SEC - 0.5, Number(sec) || MIN_SEC));
+      const res = resolvePartForVirtualSec(target);
       instance.pendingSeekSec = target;
-      instance.pendingSeekUntil = performance.now() + 900;
+      instance.pendingLocalSeek = res.localSec;
+      instance.pendingAutoPlay = Boolean(autoPlay);
+      instance.pendingSeekUntil = performance.now() + 1100;
       updateLiveUI(target, { forceCard: true });
       if (videoEl) {
         try {
-          if (videoEl.readyState >= 1) {
-            videoEl.currentTime = target;
-          }
-          videoEl.playbackRate = studioState.playbackSpeed;
-          if (autoPlay) {
-            if (videoEl.muted) videoEl.muted = false;
-            const p = videoEl.play();
-            if (p && typeof p.catch === "function") p.catch(() => {});
+          if (res.partIdx !== instance.activePartIdx) {
+            instance.activePartIdx = res.partIdx;
+            videoEl.src = res.src;
+            videoEl.load();
+          } else {
+            if (videoEl.readyState >= 1) {
+              videoEl.currentTime = res.localSec;
+            }
+            videoEl.playbackRate = studioState.playbackSpeed;
+            if (autoPlay) {
+              if (videoEl.muted) videoEl.muted = false;
+              const p = videoEl.play();
+              if (p && typeof p.catch === "function") p.catch(() => {});
+            }
           }
         } catch (_) {}
       }
@@ -1026,14 +1070,26 @@
       renderEpStudio(container, { ...opts, moduleCode: nextCode });
     }
 
-    // Bind Native HTML5 <video> Events
+    // Bind Native HTML5 <video> Events (Supports Both Single MP4 & Multi-Part Seamless Timeline)
     if (videoEl) {
+      const getCurrentVirtualSec = () => {
+        const pt = partsList[instance.activePartIdx] || partsList[0];
+        return pt.startOffset + (Number(videoEl.currentTime) || 0);
+      };
       const applyInitialVideoProps = () => {
         try {
           videoEl.playbackRate = studioState.playbackSpeed;
-          const wanted = instance.pendingSeekSec != null ? instance.pendingSeekSec : studioState.currentSec;
-          if (wanted > 0 && Math.abs(videoEl.currentTime - wanted) > 0.5) {
-            videoEl.currentTime = wanted;
+          const wantedLocal = instance.pendingLocalSeek != null
+            ? instance.pendingLocalSeek
+            : resolvePartForVirtualSec(studioState.currentSec).localSec;
+          if (wantedLocal > 0 && Math.abs(videoEl.currentTime - wantedLocal) > 0.4) {
+            videoEl.currentTime = wantedLocal;
+          }
+          if (instance.pendingAutoPlay) {
+            instance.pendingAutoPlay = false;
+            if (videoEl.muted) videoEl.muted = false;
+            const p = videoEl.play();
+            if (p && typeof p.catch === "function") p.catch(() => {});
           }
         } catch (_) {}
       };
@@ -1044,10 +1100,22 @@
         syncTransportButtons();
       });
       videoEl.addEventListener("pause", () => {
+        if (instance.pendingAutoPlay) return;
         studioState.isPlaying = false;
         syncTransportButtons();
       });
       videoEl.addEventListener("ended", () => {
+        if (instance.activePartIdx < partsList.length - 1) {
+          const nextIdx = instance.activePartIdx + 1;
+          instance.activePartIdx = nextIdx;
+          instance.pendingLocalSeek = 0;
+          instance.pendingAutoPlay = true;
+          instance.pendingSeekSec = partsList[nextIdx].startOffset;
+          instance.pendingSeekUntil = performance.now() + 1100;
+          videoEl.src = partsList[nextIdx].src;
+          videoEl.load();
+          return;
+        }
         studioState.isPlaying = false;
         syncTransportButtons();
       });
@@ -1059,28 +1127,30 @@
       });
       videoEl.addEventListener("timeupdate", () => {
         if (!Number.isNaN(videoEl.currentTime)) {
+          const vSec = getCurrentVirtualSec();
           if (
             instance.pendingSeekUntil &&
             performance.now() < instance.pendingSeekUntil &&
-            Math.abs(videoEl.currentTime - instance.pendingSeekSec) > 3
+            Math.abs(vSec - instance.pendingSeekSec) > 3.5
           ) {
             return;
           }
-          updateLiveUI(videoEl.currentTime);
+          updateLiveUI(vSec);
         }
       });
       videoEl.addEventListener("seeked", () => {
         if (!Number.isNaN(videoEl.currentTime)) {
+          const vSec = getCurrentVirtualSec();
           if (
             instance.pendingSeekUntil &&
             performance.now() < instance.pendingSeekUntil &&
             videoEl.currentTime < 0.5 &&
-            instance.pendingSeekSec > 2
+            (instance.pendingLocalSeek || 0) > 2
           ) {
             return;
           }
           instance.pendingSeekUntil = 0;
-          updateLiveUI(videoEl.currentTime, { forceCard: true });
+          updateLiveUI(vSec, { forceCard: true });
         }
       });
     }
