@@ -320,7 +320,7 @@ window.RACM_HS_DISCUSSION_DATA = {
               "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างต้นน้ำ",
               "enTitle": "Synthesized Determinants of Health Framework with Structural Determinants",
               "sourceNote": "Synthesized from Wibulpolprasert et al. (2011) & Solar & Irwin / WHO CSDH (2010)",
-              "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=2",
+              "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=3",
               "imageAlt": "Synthesized Determinants of Health Framework with Outer Structural Determinants Ring, Health System Structure/Attributes, and Physician Roles",
               "caption": "วงล้อม Structural Determinants กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)"
             },

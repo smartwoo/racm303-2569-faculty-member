@@ -21377,6 +21377,32 @@
     return activeEdges.length ? activeEdges.join(", ") : rings.join(", ");
   }
 
+  const CANON_DOH_SHELL_W = 980;
+
+  function syncDohShellScale(shellEl) {
+    if (!shellEl || !shellEl.isConnected) return false;
+    const hostEl = shellEl.parentElement;
+    if (!hostEl) return false;
+    const csHost = window.getComputedStyle(hostEl);
+    const padX = (parseFloat(csHost.paddingLeft) || 0) + (parseFloat(csHost.paddingRight) || 0);
+    const availW = hostEl.clientWidth - padX;
+    if (availW <= 36) return false;
+    let nextW = "100%";
+    let nextZoom = "";
+    if (availW < CANON_DOH_SHELL_W) {
+      nextW = `${CANON_DOH_SHELL_W}px`;
+      nextZoom = Math.max(0.18, (availW - 2) / CANON_DOH_SHELL_W).toFixed(4);
+    }
+    if (shellEl._dohAppliedW !== nextW || shellEl._dohAppliedZoom !== nextZoom) {
+      shellEl._dohAppliedW = nextW;
+      shellEl._dohAppliedZoom = nextZoom;
+      shellEl.style.width = nextW;
+      shellEl.style.zoom = nextZoom;
+      return true;
+    }
+    return false;
+  }
+
   function createDohOvalBgSvg(isOuter) {
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
@@ -21388,8 +21414,8 @@
     path.setAttribute(
       "d",
       isOuter
-        ? "M 500,6 C 875,6 994,108 994,305 C 994,502 875,594 500,594 C 125,594 6,502 6,305 C 6,108 125,6 500,6 Z"
-        : "M 500,6 C 878,6 994,92 994,244 C 994,398 878,474 500,474 C 122,474 6,398 6,244 C 6,92 122,6 500,6 Z"
+        ? "M 500,6 C 936,6 995,68 995,300 C 995,532 936,594 500,594 C 64,594 5,532 5,300 C 5,68 64,6 500,6 Z"
+        : "M 500,6 C 958,6 995,46 995,240 C 995,434 958,474 500,474 C 42,474 5,434 5,240 C 5,46 42,6 500,6 Z"
     );
     path.setAttribute("vector-effect", "non-scaling-stroke");
     svg.appendChild(path);
@@ -21402,10 +21428,26 @@
     const uid = dohInstanceSeq;
     const svgNS = "http://www.w3.org/2000/svg";
     let rafId = 0;
+    let ro = null;
 
     const redrawNow = () => {
       rafId = 0;
       if (!arenaEl.isConnected) return;
+      const shellEl = arenaEl.closest(".doh-diagram-shell");
+      if (shellEl) {
+        if (!shellEl._syncDohScale) {
+          shellEl._syncDohScale = (redrawImmediate) => {
+            const changed = syncDohShellScale(shellEl);
+            if (redrawImmediate) redrawNow();
+            else if (changed) scheduleRedraw();
+          };
+        }
+        syncDohShellScale(shellEl);
+        if (ro && shellEl.parentElement && !shellEl._dohHostObserved) {
+          shellEl._dohHostObserved = true;
+          ro.observe(shellEl.parentElement);
+        }
+      }
       const W = Math.max(300, arenaEl.offsetWidth || 540);
       const H = Math.max(150, arenaEl.offsetHeight || 230);
       svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -21447,14 +21489,14 @@
       svgEl.appendChild(defs);
 
       const aRect = arenaEl.getBoundingClientRect();
-      const sx = aRect.width > 10 ? W / aRect.width : 1;
-      const sy = aRect.height > 10 ? H / aRect.height : 1;
+      const sx = aRect.width > 2 ? W / aRect.width : 1;
+      const sy = aRect.height > 2 ? H / aRect.height : 1;
 
       const getBox = (slotName, fb) => {
         const el = arenaEl.querySelector(`[data-doh-slot="${slotName}"]`);
-        if (!el || aRect.width < 20) return fb;
+        if (!el || aRect.width < 6) return fb;
         const r = el.getBoundingClientRect();
-        if (r.width < 4 || r.height < 4) return fb;
+        if (r.width < 2 || r.height < 2) return fb;
         const left = (r.left - aRect.left) * sx;
         const top = (r.top - aRect.top) * sy;
         const width = r.width * sx;
@@ -21476,41 +21518,42 @@
       const out = getBox("outcome", { left: W * 0.39, top: H * 0.30, width: W * 0.22, height: H * 0.24, right: W * 0.61, bottom: H * 0.54, cx: W * 0.50, cy: H * 0.42 });
       const hsys = getBox("health_sys", { left: W * 0.26, top: H * 0.68, width: W * 0.48, height: H * 0.28, right: W * 0.74, bottom: H * 0.96, cx: W * 0.50, cy: H * 0.82 });
 
-      const topBridgeY = Math.max(10, Math.min(out.top - 10, Math.min(ind.top, soc.top) + 14));
+      const topBridgeY = Math.max(12, Math.min(out.top - 12, Math.min(ind.top, soc.top) + 14));
+      const midOutY = Math.max(topBridgeY + 22, out.cy);
       const coords = {
         ind_bi_soc: {
-          x1: ind.right + 5,
+          x1: ind.right + 7,
           y1: topBridgeY,
-          x2: soc.left - 5,
+          x2: soc.left - 7,
           y2: topBridgeY
         },
         ind_to_out: {
-          x1: ind.right + 4,
-          y1: Math.max(topBridgeY + 14, Math.min(ind.bottom - 8, out.cy - 6)),
-          x2: out.left - 5,
-          y2: out.cy - 2
+          x1: ind.right + 5,
+          y1: midOutY,
+          x2: Math.max(ind.right + 28, out.left - 5),
+          y2: midOutY
         },
         soc_to_out: {
-          x1: soc.left - 4,
-          y1: Math.max(topBridgeY + 14, Math.min(soc.bottom - 8, out.cy - 6)),
-          x2: out.right + 5,
-          y2: out.cy - 2
+          x1: soc.left - 5,
+          y1: midOutY,
+          x2: Math.min(soc.left - 28, out.right + 5),
+          y2: midOutY
         },
         hsys_to_out: {
-          x1: hsys.cx,
-          y1: hsys.top - 4,
+          x1: out.cx,
+          y1: hsys.top - 5,
           x2: out.cx,
-          y2: out.bottom + 5
+          y2: out.bottom + 6
         },
         ind_bi_hsys: {
-          x1: ind.left + ind.width * 0.62,
-          y1: ind.bottom + 4,
+          x1: ind.left + ind.width * 0.64,
+          y1: ind.bottom + 5,
           x2: hsys.left - 6,
           y2: hsys.cy
         },
         soc_bi_hsys: {
-          x1: soc.left + soc.width * 0.38,
-          y1: soc.bottom + 4,
+          x1: soc.left + soc.width * 0.36,
+          y1: soc.bottom + 5,
           x2: hsys.right + 6,
           y2: hsys.cy
         }
@@ -21531,7 +21574,7 @@
         ln.setAttribute("x2", c.x2.toFixed(1));
         ln.setAttribute("y2", c.y2.toFixed(1));
         ln.setAttribute("stroke", dir === "off" ? offHex : strokeHex);
-        ln.setAttribute("stroke-width", dir === "off" ? "1.6" : "2.35");
+        ln.setAttribute("stroke-width", dir === "off" ? "1.6" : "2.4");
         ln.setAttribute("stroke-linecap", "round");
         if (dir === "off") {
           ln.setAttribute("stroke-dasharray", "4 4");
@@ -21553,7 +21596,7 @@
           hit.setAttribute("x2", c.x2.toFixed(1));
           hit.setAttribute("y2", c.y2.toFixed(1));
           hit.setAttribute("stroke", "transparent");
-          hit.setAttribute("stroke-width", "14");
+          hit.setAttribute("stroke-width", "22");
           hit.setAttribute("class", "doh-hit-line");
           hit.addEventListener("click", (ev) => {
             ev.stopPropagation();
@@ -21596,9 +21639,31 @@
     };
 
     if (typeof ResizeObserver === "function") {
-      const ro = new ResizeObserver(() => scheduleRedraw());
+      ro = new ResizeObserver(() => scheduleRedraw());
       ro.observe(arenaEl);
     }
+    const initShell = arenaEl.closest(".doh-diagram-shell");
+    if (initShell) {
+      initShell._syncDohScale = (redrawImmediate) => {
+        const changed = syncDohShellScale(initShell);
+        if (redrawImmediate) redrawNow();
+        else if (changed) scheduleRedraw();
+      };
+      if (ro && initShell.parentElement && !initShell._dohHostObserved) {
+        initShell._dohHostObserved = true;
+        ro.observe(initShell.parentElement);
+      }
+    }
+    const onWinResize = () => {
+      if (!arenaEl.isConnected) {
+        window.removeEventListener("resize", onWinResize);
+        window.removeEventListener("orientationchange", onWinResize);
+        return;
+      }
+      scheduleRedraw();
+    };
+    window.addEventListener("resize", onWinResize, { passive: true });
+    window.addEventListener("orientationchange", onWinResize, { passive: true });
     scheduleRedraw();
     setTimeout(scheduleRedraw, 80);
     return scheduleRedraw;
@@ -25275,6 +25340,14 @@
       const isAuto = isLeft ? state.hsdLeftAutoFit !== false : state.hsdRightAutoFit !== false;
       const manualPct = (isLeft ? state.hsdLeftFontPct : state.hsdRightFontPct) || 100;
       const paneEl = boxEl.closest(".hsd-slide-left, .hsd-slide-right, .hsd-key-slide-stage");
+      const dohShells = Array.from(boxEl.querySelectorAll(".doh-diagram-shell"));
+      const hasDohShell = dohShells.length > 0;
+      const setBoxZoom = (zNum) => {
+        boxEl.style.zoom = zNum.toFixed(4);
+        if (hasDohShell) {
+          dohShells.forEach((sh) => syncDohShellScale(sh));
+        }
+      };
 
       if (!isAuto) {
         boxEl._lastFitSig = "";
@@ -25282,7 +25355,12 @@
           paneEl.style.overflowY = "auto";
           paneEl.style.overflowX = "auto";
         }
-        boxEl.style.zoom = ((manualPct / 100) * fitZ).toFixed(4);
+        setBoxZoom((manualPct / 100) * fitZ);
+        if (hasDohShell) {
+          dohShells.forEach((sh) => {
+            if (typeof sh._syncDohScale === "function") sh._syncDohScale(true);
+          });
+        }
         boxEl.dataset.effectivePct = String(manualPct);
         sheetEl.querySelectorAll(`[data-box-pct="${side}"]`).forEach((b) => {
           b.textContent = `${manualPct}%`;
@@ -25292,7 +25370,7 @@
 
       if (!paneEl || paneEl.hidden) {
         boxEl._lastFitSig = "";
-        boxEl.style.zoom = fitZ.toFixed(4);
+        setBoxZoom(fitZ);
         boxEl.dataset.effectivePct = "100";
         sheetEl.querySelectorAll(`[data-box-pct="${side}"]`).forEach((b) => {
           b.textContent = "Auto 100%";
@@ -25303,7 +25381,7 @@
       const pOffW = paneEl.offsetWidth;
       const pOffH = paneEl.offsetHeight;
       if (pOffH < 36 || pOffW < 50) {
-        boxEl.style.zoom = fitZ.toFixed(4);
+        setBoxZoom(fitZ);
         if (!sheetEl._deferredFitQueued) {
           sheetEl._deferredFitQueued = true;
           requestAnimationFrame(() => {
@@ -25316,6 +25394,11 @@
 
       const fitSig = `${pOffW}x${pOffH}@${fitZ.toFixed(4)}:${isRespSlide ? "rs" : "16x9"}:${isCompactResp ? "c" : "d"}`;
       if (!forceBoxRefit && boxEl._lastFitSig === fitSig) {
+        if (hasDohShell) {
+          dohShells.forEach((sh) => {
+            if (typeof sh._syncDohScale === "function") sh._syncDohScale(false);
+          });
+        }
         return;
       }
 
@@ -25327,15 +25410,27 @@
       paneEl.style.overflowX = "hidden";
       paneEl.scrollTop = 0;
       paneEl.scrollLeft = 0;
-      boxEl.style.zoom = fitZ.toFixed(4);
+      setBoxZoom(fitZ);
 
       const fitsCleanly = () =>
         paneEl.scrollHeight <= paneEl.clientHeight + 2 &&
         boxEl.scrollWidth <= boxEl.clientWidth + 5;
 
-      const minAutoPct = isHandout ? 24 : isCompactResp ? 100 : isRespSlide ? 82 : 64;
+      const minAutoPct = isHandout
+        ? 24
+        : hasDohShell
+        ? pOffW > pOffH
+          ? 28
+          : 64
+        : isCompactResp
+        ? 100
+        : isRespSlide
+        ? 82
+        : 64;
       const maxAutoPct = isHandout
         ? 118
+        : hasDohShell && pOffW < 760
+        ? 104
         : isCompactResp
         ? isFullSingleSlide
           ? 168
@@ -25356,7 +25451,7 @@
           let best = minAutoPct;
           while (lo <= hi) {
             const mid = Math.floor((lo + hi) / 2);
-            boxEl.style.zoom = ((mid / 100) * fitZ).toFixed(4);
+            setBoxZoom((mid / 100) * fitZ);
             if (fitsCleanly()) {
               best = mid;
               lo = mid + 1;
@@ -25365,11 +25460,11 @@
             }
           }
           chosenPct = best;
-          boxEl.style.zoom = ((chosenPct / 100) * fitZ).toFixed(4);
+          setBoxZoom((chosenPct / 100) * fitZ);
           if (isHandout) {
             while (chosenPct > 18 && !fitsCleanly()) {
               chosenPct -= 1;
-              boxEl.style.zoom = ((chosenPct / 100) * fitZ).toFixed(4);
+              setBoxZoom((chosenPct / 100) * fitZ);
             }
           }
         }
@@ -25383,7 +25478,7 @@
           let bestUp = 100;
           while (lo <= hi) {
             const mid = Math.floor((lo + hi) / 2);
-            boxEl.style.zoom = ((mid / 100) * fitZ).toFixed(4);
+            setBoxZoom((mid / 100) * fitZ);
             if (fitsCleanly()) {
               const pR2 = paneEl.getBoundingClientRect();
               const bR2 = boxEl.getBoundingClientRect();
@@ -25402,12 +25497,17 @@
         }
       }
 
-      boxEl.style.zoom = ((chosenPct / 100) * fitZ).toFixed(4);
+      setBoxZoom((chosenPct / 100) * fitZ);
       if (isHandout) {
         while (chosenPct > 14 && !fitsCleanly()) {
           chosenPct -= 1;
-          boxEl.style.zoom = ((chosenPct / 100) * fitZ).toFixed(4);
+          setBoxZoom((chosenPct / 100) * fitZ);
         }
+      }
+      if (hasDohShell) {
+        dohShells.forEach((sh) => {
+          if (typeof sh._syncDohScale === "function") sh._syncDohScale(true);
+        });
       }
 
       if (!isHandout && (isRespSlide || !fitsCleanly())) {
