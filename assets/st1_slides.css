@@ -1,0 +1,594 @@
+/* ==========================================================================
+   RACM 303 (2569) — ST1: Systems & Systems Thinking Slide Deck & Live Quiz
+   16-Slide 16:9 Widescreen Minimalist Studio · Bidirectional Auto-Fit (--fit-scale)
+   ========================================================================== */
+
+body.st1-deck-open {
+  overflow: hidden;
+}
+
+#st1DeckViewport {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+#st1DeckViewport.is-zoomed {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+#st1DeckViewport.is-zoomed .or-slide-frame-wrap {
+  width: max-content !important;
+  height: max-content !important;
+  min-width: 100%;
+  min-height: 100%;
+  flex: 0 0 auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#st1DeckViewport.is-zoomed .or-slide-zoom-sizer {
+  flex: 0 0 auto !important;
+  display: block;
+}
+
+/* ---------- ST1 Semantic Slide Grids (100% Bounded Height for Auto-Fit) ---------- */
+.st1-full-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.72cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-full-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.76cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-full-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.88cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-fig-left {
+  display: grid;
+  grid-template-columns: 0.94fr 1.06fr;
+  gap: 0.82cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-fig-wide {
+  display: grid;
+  grid-template-columns: 1.24fr 0.76fr;
+  gap: 0.82cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-top-bottom {
+  display: grid;
+  grid-template-rows: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 0.62cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-cards-top-table {
+  display: grid;
+  grid-template-rows: minmax(0, 0.34fr) minmax(0, 0.66fr);
+  gap: 0.56cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-table-top-cards {
+  display: grid;
+  grid-template-rows: minmax(0, 0.63fr) minmax(0, 0.37fr);
+  gap: 0.56cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-split-2col-bottom-banner {
+  display: grid;
+  grid-template-rows: minmax(0, 0.67fr) minmax(0, 0.33fr);
+  gap: 0.62cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-roadmap-layout {
+  display: grid;
+  grid-template-rows: minmax(0, 0.72fr) minmax(0, 0.28fr);
+  gap: 0.62cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-cas5-layout {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.58cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Cards inside ST1 grids center safely and respect --fit-scale */
+#st1DeckModal .st1-full-grid-4 > .or-card,
+#st1DeckModal .st1-full-grid-3 > .or-card,
+#st1DeckModal .st1-full-grid-2 > .or-card,
+#st1DeckModal .st1-cas5-layout > .or-card {
+  height: 100%;
+  min-height: 0;
+  justify-content: safe center;
+}
+
+#st1DeckModal .st1-full-grid-4 > .or-card > :first-child,
+#st1DeckModal .st1-full-grid-3 > .or-card > :first-child,
+#st1DeckModal .st1-full-grid-2 > .or-card > :first-child,
+#st1DeckModal .st1-cas5-layout > .or-card > :first-child {
+  margin-top: auto;
+}
+
+#st1DeckModal .st1-full-grid-4 > .or-card > :last-child,
+#st1DeckModal .st1-full-grid-3 > .or-card > :last-child,
+#st1DeckModal .st1-full-grid-2 > .or-card > :last-child,
+#st1DeckModal .st1-cas5-layout > .or-card > :last-child {
+  margin-bottom: auto;
+}
+
+/* Full-space ST1 tables */
+#st1DeckModal .or-table-wrap.is-st1-table {
+  height: 100%;
+  min-height: 0;
+}
+
+#st1DeckModal .or-table-wrap.is-st1-table .or-table {
+  font-size: calc(0.95cqw * var(--fit-scale, 1));
+  line-height: 1.28;
+  height: 100%;
+}
+
+#st1DeckModal .or-slide-canvas[data-measuring="1"] .or-table-wrap.is-st1-table .or-table {
+  height: auto !important;
+}
+
+#st1DeckModal .or-table-wrap.is-st1-table .or-table th {
+  font-size: calc(0.96cqw * var(--fit-scale, 1));
+  padding: calc(0.34cqw * var(--fit-scale, 1)) calc(0.64cqw * var(--fit-scale, 1));
+}
+
+#st1DeckModal .or-table-wrap.is-st1-table .or-table td {
+  padding: calc(0.28cqw * var(--fit-scale, 1)) calc(0.64cqw * var(--fit-scale, 1));
+  vertical-align: middle;
+}
+
+/* Violet tint card variant for Mental Models / Leverage */
+.or-slide-canvas.is-io-pitch .or-card.is-violet-tint {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+.or-slide-canvas.is-io-pitch .or-card.is-violet-tint .or-card-kicker {
+  color: #6d28d9;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-card.is-violet-tint {
+  background: #1d1832;
+  border-color: rgba(167, 139, 250, 0.24);
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-card.is-violet-tint .or-card-kicker {
+  color: #c4b5fd;
+}
+
+/* Figure plates inside ST1 stretch cleanly to fill column/row */
+#st1DeckModal .or-fig-plate.is-st1-plate {
+  height: 100%;
+  min-height: 0;
+  padding: 0.42cqw 0.54cqw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.28cqw;
+}
+
+#st1DeckModal .or-fig-plate.is-st1-plate .or-fig-img-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#st1DeckModal .or-fig-plate.is-st1-plate .or-fig-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ---------- ST1 Interactive Concept Check Quiz Stage (Slide 15 & Live Tab) ---------- */
+.st1-quiz-stage {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.68cqw;
+  padding: 0.92cqw 1.18cqw;
+  border-radius: 1.15cqw;
+  background: #f6f8fc;
+  border: 1px solid #e5eaf2;
+  overflow: hidden;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-quiz-stage {
+  background: #141a26;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.st1-qz-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6cqw;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.st1-qz-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.42cqw;
+  flex-wrap: wrap;
+}
+
+.st1-qz-step-dot {
+  appearance: none;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  border-radius: 999px;
+  padding: 0.22cqw 0.68cqw;
+  font-family: var(--io-font-display, var(--font-display));
+  font-size: clamp(10px, 0.92cqw, 14px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.st1-qz-step-dot.is-current {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.st1-qz-step-dot.is-answered-ok {
+  background: #ecfdf5;
+  border-color: #34d399;
+  color: #047857;
+}
+
+.st1-qz-step-dot.is-answered-err {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #be123c;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-step-dot {
+  background: #1e2636;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-step-dot.is-current {
+  background: #3b82f6;
+  border-color: #60a5fa;
+  color: #ffffff;
+}
+
+.st1-qz-stem-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.0cqw;
+  padding: 0.78cqw 1.12cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.26cqw;
+  flex-shrink: 0;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-stem-box {
+  background: #192131;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.st1-qz-kicker {
+  font-family: var(--io-font-display, var(--font-display));
+  font-size: clamp(9.5px, 0.88cqw, 13.5px);
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-kicker {
+  color: #60a5fa;
+}
+
+.st1-qz-stem {
+  margin: 0;
+  font-family: var(--io-font-display, var(--font-display));
+  font-size: clamp(12px, 1.28cqw, 21px);
+  font-weight: 700;
+  line-height: 1.32;
+  color: #111318;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-stem {
+  color: #f8fafc;
+}
+
+.st1-qz-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.56cqw;
+}
+
+.st1-qz-choice {
+  appearance: none;
+  text-align: left;
+  border-radius: 0.95cqw;
+  padding: 0.68cqw 0.96cqw;
+  border: 2px solid transparent;
+  color: #ffffff;
+  font-family: var(--io-font-sans, var(--font-sans));
+  font-size: clamp(11px, 1.06cqw, 17px);
+  font-weight: 600;
+  line-height: 1.34;
+  display: flex;
+  align-items: center;
+  gap: 0.68cqw;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.st1-qz-choice:hover {
+  transform: translateY(-1px);
+}
+
+.st1-qz-choice.c-0 { background: #ef4444; }
+.st1-qz-choice.c-1 { background: #2563eb; }
+.st1-qz-choice.c-2 { background: #d97706; }
+.st1-qz-choice.c-3 { background: #059669; }
+
+.st1-qz-choice.is-dimmed {
+  opacity: 0.36;
+}
+
+.st1-qz-choice.is-correct-reveal {
+  box-shadow: 0 0 0 3px #10b981, 0 8px 20px rgba(16, 185, 129, 0.28);
+  border-color: #ffffff;
+}
+
+.st1-qz-choice.is-wrong-picked {
+  opacity: 0.72;
+  border-color: #fecaca;
+}
+
+.st1-qz-shape {
+  width: 2.1cqw;
+  height: 2.1cqw;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 0.52cqw;
+  background: rgba(255, 255, 255, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(11px, 1.05cqw, 16px);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.st1-qz-explain {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 0.88cqw;
+  padding: 0.58cqw 0.96cqw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8cqw;
+  font-size: clamp(10.5px, 0.98cqw, 15.5px);
+  line-height: 1.36;
+  color: #064e3b;
+  flex-shrink: 0;
+}
+
+.st1-qz-explain.is-wrong {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #881337;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-explain {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #d1fae5;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .st1-qz-explain.is-wrong {
+  background: rgba(244, 63, 94, 0.16);
+  border-color: rgba(251, 113, 133, 0.35);
+  color: #ffe4e6;
+}
+
+.st1-qz-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6cqw;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* ---------- Tablet / Split-Screen / Foldable Adaptations ---------- */
+@media (min-width: 701px) and (max-width: 1040px) and (max-aspect-ratio: 4/3) {
+  #st1DeckViewport {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    padding: 10px 12px 16px !important;
+  }
+
+  .st1-cas5-layout {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .st1-full-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .st1-split-fig-wide {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(0, 0.56fr) minmax(0, 0.44fr) !important;
+  }
+}
+
+/* ---------- Mobile Portrait Reflow (<= 700px) ---------- */
+@media (max-width: 700px) and (orientation: portrait) {
+  .st1-full-grid-4,
+  .st1-full-grid-3,
+  .st1-full-grid-2,
+  .st1-split-fig-left,
+  .st1-split-fig-wide,
+  .st1-cas5-layout,
+  .st1-qz-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    grid-auto-rows: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    gap: 10px !important;
+  }
+
+  .st1-split-top-bottom,
+  .st1-split-cards-top-table,
+  .st1-split-table-top-cards,
+  .st1-split-2col-bottom-banner,
+  .st1-roadmap-layout {
+    grid-template-rows: auto auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    gap: 10px !important;
+  }
+
+  #st1DeckModal .or-table-wrap.is-st1-table {
+    height: auto !important;
+    overflow-x: auto !important;
+  }
+
+  #st1DeckModal .or-table-wrap.is-st1-table .or-table {
+    min-width: 580px !important;
+    height: auto !important;
+  }
+
+  .st1-quiz-stage {
+    height: auto !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+}
+
+/* ---------- Crisp 16:9 Print Rules for ST1 Deck ---------- */
+@media print {
+  body.is-printing-st1-deck > *:not(#st1DeckModal) {
+    display: none !important;
+  }
+  body.is-printing-st1-deck #st1DeckModal {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  body.is-printing-st1-deck .or-deck-shell {
+    width: 100% !important;
+    height: auto !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    display: block !important;
+  }
+  body.is-printing-st1-deck .or-deck-topbar,
+  body.is-printing-st1-deck .or-deck-bottombar,
+  body.is-printing-st1-deck .or-notes-dock {
+    display: none !important;
+  }
+  body.is-printing-st1-deck .or-deck-viewport {
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  body.is-printing-st1-deck .or-handout-stack {
+    width: 100% !important;
+    gap: 0 !important;
+  }
+  body.is-printing-st1-deck .or-slide-canvas,
+  body.is-printing-st1-deck .or-slide-canvas * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  body.is-printing-st1-deck .or-slide-canvas {
+    width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    page-break-after: always;
+    break-after: page;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    margin-bottom: 8mm;
+  }
+}
