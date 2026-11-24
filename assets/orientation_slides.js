@@ -2071,7 +2071,7 @@
 
   const SECTION_FILTERS = [
     { id: "all", labelTh: "ทั้งหมด (20)", labelEn: "All Slides (20)" },
-    { id: "intro", labelTh: "เปิดเรื่อง & QR Lobby (1)", labelEn: "Opening & Lobby (1)" },
+    { id: "intro", labelTh: "เปิดเรื่องรายวิชา (1)", labelEn: "Course Opening (1)" },
     { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (4)", labelEn: "Act I · Heritage & Why (4)" },
     { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (7)", labelEn: "Act II · Schedule & Journey (7)" },
     { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
@@ -2682,17 +2682,13 @@
             </div>
           </div>
 
-          <div class="or-cover-right-col is-aura-stage" data-orl-slide-mount="cover">
-            ${
-              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderCoverCardHtml === "function"
-                ? window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() })
-                : figPlate(
-                    "orient_s01_hero.png",
-                    "Bedside Care connected to Community & Livelihood and Health Systems Science",
-                    "",
-                    "is-cover-hero"
-                  )
-            }
+          <div class="or-cover-right-col is-aura-stage">
+            ${figPlate(
+              "orient_s01_hero.png",
+              "Bedside Care connected to Community & Livelihood and Health Systems Science",
+              "",
+              "is-cover-hero"
+            )}
           </div>
         </div>
 
@@ -3999,8 +3995,6 @@
         const kind = mount.getAttribute("data-orl-slide-mount");
         if (kind === "quiz" && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function") {
           mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
-        } else {
-          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
         }
       });
     }

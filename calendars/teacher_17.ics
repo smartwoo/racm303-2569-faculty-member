@@ -21,13 +21,13 @@ UID:w3-d3-dhs-panel@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
 DTSTART;TZID=Asia/Bangkok:20261209T083000
 DTEND;TZID=Asia/Bangkok:20261209T120000
-SUMMARY:[RACM 303] Panel Discussion: District Health Systems – Six Building Blocks Plus One
+SUMMARY:[RACM 303] Workshop: Learning How to Learn
 LOCATION:2C2_02-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: เข้าใจโครงสร้างและการทำงานเชื่อมโยงของระบบสุขภาพอำเภอ (District Health Systems: DHS) ตามกรอบ Six Building Blocks Plus One และการมีส่วนร่วมของชุมชนก่อนออกฝึกภาคสนามทั้ง 9 พื้นที่\nอาจารย์ผู้สอน: วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ\nสถานที่/ห้องเรียน: 2C2_02-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Panel Discussion: District Health Systems – Six Building Blocks Plus One
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Workshop: Learning How to Learn
 END:VALARM
 END:VEVENT
 END:VCALENDAR

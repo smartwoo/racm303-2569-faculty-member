@@ -456,7 +456,6 @@
       <div class="ep6-head-main">
         <div class="ep6-head-eyebrow">
           <span class="ep6-badge-code">${esc(modCode)} · ${esc(badgeRightTxt)}</span>
-          <span class="ep6-badge-meta">🎬 Native Video Player (ไม่ใช้ YouTube · หั่นคลิปตรงคาบ)</span>
           <span class="ep6-badge-meta">${TOTAL_SLIDES} Captured Slides · Verbatim → Conceptualized</span>
           <span class="ep6-badge-meta">⏱ ${esc(DATA.meta.durationLabel || fmtTime(MAX_SEC))}</span>
         </div>

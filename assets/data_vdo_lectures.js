@@ -43,7 +43,7 @@
       externalUrl: "https://drive.google.com/file/d/17uz1ZCsGAgqYTQ1IqffNRNuIUl0ecfbb/view?usp=sharing",
       durationLabel: "56:47 · 35 สไลด์",
       lecturer: "อ. พญ.วริษา สุนทรวินิต",
-      note: "เปิดรับชมวิดีโอบรรยาย HS1 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (เล่นตรงไม่ผ่าน YouTube · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
+      note: "เปิดรับชมวิดีโอบรรยาย HS1 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
       slides: [],
       chapters: [],
       companionHeClips: []
@@ -61,7 +61,7 @@
       externalUrl: "https://drive.google.com/file/d/1Bwd8lwEZAO2qfWRSnicZgzEtL6-Uh8Dw/view?usp=sharing",
       durationLabel: "79:33 · 47 สไลด์",
       lecturer: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
-      note: "เปิดรับชมวิดีโอบรรยาย HS2 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (เล่นตรงไม่ผ่าน YouTube · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
+      note: "เปิดรับชมวิดีโอบรรยาย HS2 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
       slides: [],
       chapters: [],
       companionHeClips: [
@@ -83,7 +83,7 @@
       externalUrl: "https://drive.google.com/file/d/1Ld7BH6tNlHJ87tDsCoAy0mv__oGO-vss/view?usp=sharing",
       durationLabel: "83:49 · 57 สไลด์",
       lecturer: "รศ. ดร. นพ.บวรศม ลีระพันธ์ · อ. นพ.ภูษิต ประคองสาย",
-      note: "เปิดรับชมวิดีโอบรรยาย HS3 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (เล่นตรงไม่ผ่าน YouTube · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
+      note: "เปิดรับชมวิดีโอบรรยาย HS3 แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
       slides: [],
       chapters: [],
       companionHeClips: [
@@ -137,7 +137,7 @@
       externalUrl: "https://drive.google.com/drive/folders/1RqT-o4rvYE7DXf7bFU7HfPgue0vp49LW?usp=sharing",
       durationLabel: "6 ตอน · 141:09 · 71 สไลด์",
       lecturer: "อ. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย · อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
-      note: "เปิดรับชมวิดีโอบรรยาย HS6 ครบทั้ง 6 ตอน (HE00–HE05 · รวม 141 นาที 71 สไลด์) แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (สลับตอน HE00–HE05 ทันที · เล่นตรงไม่ผ่าน YouTube · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
+      note: "เปิดรับชมวิดีโอบรรยาย HS6 ครบทั้ง 6 ตอน (HE00–HE05 · รวม 141 นาที 71 สไลด์) แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (สลับตอน HE00–HE05 ทันที · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
       slides: [],
       chapters: [],
       companionHeClips: [
