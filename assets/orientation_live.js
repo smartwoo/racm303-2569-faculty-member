@@ -1681,7 +1681,14 @@
       return `
         <div class="orl-chips-sparse-wrap">
           <div class="orl-chips-row">${chipsHtml}</div>
-          <div class="orl-eo-subhint">📲 สแกน QR Code ด้านซ้ายเพื่อเข้าร่วมเพิ่มเติม — รายชื่อผู้เข้าร่วมและกลุ่มพื้นที่ฝึกจะแสดงสดที่นี่อัตโนมัติ</div>
+          <div class="orl-empty-onboard is-with-chips">
+            <div class="orl-eo-kicker">📲 สแกน QR ด้านซ้ายเพื่อเข้าร่วมเพิ่มเติม</div>
+            <div class="orl-eo-steps">
+              <div class="orl-eo-step"><span class="orl-eo-num">1</span><span>เปิดกล้องมือถือหรือแท็บเล็ต สแกน <strong>QR Code</strong></span></div>
+              <div class="orl-eo-step"><span class="orl-eo-num">2</span><span>เลือก <strong>นศพ. (รหัส 3 ตัวท้าย)</strong> หรือ <strong>คณาจารย์</strong></span></div>
+              <div class="orl-eo-step"><span class="orl-eo-num">3</span><span>ซิงค์สไลด์สด ซูมภาพชัด และร่วมตอบ <strong>Quiz O · S · M · U</strong></span></div>
+            </div>
+          </div>
         </div>
       `;
     }
