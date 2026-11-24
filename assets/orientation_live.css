@@ -5151,9 +5151,7 @@ html[data-role="faculty"] .or-keynote-progress-fill {
 }
 
 .or-subitem {
-  display: inline-block;
-  max-width: 100%;
-  vertical-align: baseline;
+  display: inline;
 }
 
 .or-sub-sep {
@@ -5165,8 +5163,105 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   color: #64748b;
 }
 
-.or-num-keep {
+.or-num-keep,
+.or-nw {
   white-space: nowrap;
+}
+
+.or-slide-canvas[data-measuring="1"],
+.or-slide-canvas[data-measuring="1"] *,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-schematic-box .or-card {
+  animation: none !important;
+  transition: none !important;
+}
+
+.or-slide-canvas .or-infog-split {
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.or-slide-canvas .or-stack-col.is-s05-stack {
+  display: grid !important;
+  grid-template-rows: repeat(5, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+.or-slide-canvas .or-stack-col[data-fit-group] {
+  min-height: 0;
+}
+
+.or-slide-canvas .or-stack-col[data-fit-group] > .or-card {
+  min-height: 0;
+}
+
+/* Slide 03 (Three-Pillar & HSS Framework) Keynote Magic-Move Spotlight States (1 -> 2A -> 2B) */
+.or-s02-3fig-grid[data-s02-focus="0"] > .or-s02-flow-card {
+  cursor: zoom-in;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"],
+.or-s02-3fig-grid[data-s02-focus="2"],
+.or-s02-3fig-grid[data-s02-focus="3"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  height: 100% !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] > .or-s02-flow-card:not([data-s02-slot="1"]),
+.or-s02-3fig-grid[data-s02-focus="2"] > .or-s02-flow-card:not([data-s02-slot="2"]),
+.or-s02-3fig-grid[data-s02-focus="3"] > .or-s02-flow-card:not([data-s02-slot="3"]) {
+  display: none !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] > .or-s02-flow-card[data-s02-slot="1"],
+.or-s02-3fig-grid[data-s02-focus="2"] > .or-s02-flow-card[data-s02-slot="2"],
+.or-s02-3fig-grid[data-s02-focus="3"] > .or-s02-flow-card[data-s02-slot="3"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 1.10cqw !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: stretch !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] .or-fig-plate.is-s02-plate,
+.or-s02-3fig-grid[data-s02-focus="2"] .or-fig-plate.is-s02-plate,
+.or-s02-3fig-grid[data-s02-focus="3"] .or-fig-plate.is-s02-plate {
+  padding: 0.62cqw 0.78cqw !important;
+  gap: 0.38cqw !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] .or-fig-top-badge,
+.or-s02-3fig-grid[data-s02-focus="2"] .or-fig-top-badge,
+.or-s02-3fig-grid[data-s02-focus="3"] .or-fig-top-badge {
+  font-size: clamp(10px, 1.05cqw, 19px) !important;
+  padding: 0.30cqw 0.68cqw !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] .or-fig-plate.is-s02-plate .or-fig-cap,
+.or-s02-3fig-grid[data-s02-focus="2"] .or-fig-plate.is-s02-plate .or-fig-cap,
+.or-s02-3fig-grid[data-s02-focus="3"] .or-fig-plate.is-s02-plate .or-fig-cap {
+  font-size: clamp(9px, 0.92cqw, 16px) !important;
+  padding: 0.30cqw 0.62cqw !important;
+}
+
+.or-s02-3fig-grid[data-s02-focus="1"] .or-card.or-s02-takeaway-box,
+.or-s02-3fig-grid[data-s02-focus="2"] .or-card.or-s02-takeaway-box,
+.or-s02-3fig-grid[data-s02-focus="3"] .or-card.or-s02-takeaway-box {
+  padding: 1.15cqw 1.35cqw !important;
+  gap: 0.42cqw !important;
+  justify-content: safe center !important;
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .or-s02-3fig-grid[data-s02-focus="1"] > .or-s02-flow-card[data-s02-slot="1"],
+  .or-s02-3fig-grid[data-s02-focus="2"] > .or-s02-flow-card[data-s02-slot="2"],
+  .or-s02-3fig-grid[data-s02-focus="3"] > .or-s02-flow-card[data-s02-slot="3"] {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
+    height: auto !important;
+  }
 }
 
 /* True 16:9 Widescreen Print & PDF Export Rules (Zero Portrait A4 Clipping!) */

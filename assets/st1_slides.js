@@ -8,7 +8,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124tv2";
+  const ASSET_VER = "20261124tv3";
   const PPTX_HREF = `exports/pptx/RACM303_2569_ST1_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_ST1_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/st1";
@@ -1513,10 +1513,125 @@
     }
   }
 
+  const ST1_THAI_COMPOUND_RE = new RegExp(
+    "(" +
+      [
+        "สหสาขาวิชาชีพ",
+        "สหวิชาชีพ",
+        "เวชศาสตร์ชุมชน",
+        "เวชศาสตร์ครอบครัว",
+        "อาชีวเวชศาสตร์",
+        "แพทยศาสตรศึกษา",
+        "แพทยศาสตร์",
+        "เวชปฏิบัติ",
+        "หลักประกันสุขภาพ",
+        "ปัจจัยกำหนดสุขภาพ",
+        "สร้างเสริมสุขภาพ",
+        "บริการสุขภาพ",
+        "สุขภาพประชากร",
+        "สุขภาพดาวเคราะห์",
+        "สุขภาพโลก",
+        "สุขภาพจิต",
+        "ระบบสุขภาพ",
+        "สาธารณสุข",
+        "สุขภาวะ",
+        "ระบาดวิทยา",
+        "เศรษฐศาสตร์",
+        "สารสนเทศ",
+        "ภูมิปัญญา",
+        "จริยธรรม",
+        "วิชาชีพ",
+        "สมรรถนะ",
+        "เจตคติ",
+        "พฤติกรรม",
+        "ปฐมภูมิ",
+        "ทุติยภูมิ",
+        "ตติยภูมิ",
+        "โรงพยาบาล",
+        "คลินิก",
+        "ผู้ป่วย",
+        "ครอบครัว",
+        "ประชากร",
+        "ประชาชน",
+        "นักศึกษาแพทย์",
+        "นักศึกษา",
+        "คณาจารย์",
+        "ภาคสนาม",
+        "ห้องฉุกเฉิน",
+        "โรคเรื้อรัง",
+        "โรคเฉียบพลัน",
+        "ภาวะแทรกซ้อน",
+        "องค์ประกอบ",
+        "องค์ความรู้",
+        "องค์รวม",
+        "กระบวนการ",
+        "โครงสร้าง",
+        "ความสัมพันธ์",
+        "ความเหลื่อมล้ำ",
+        "ความเป็นธรรม",
+        "ความไม่แน่นอน",
+        "ประสานงาน",
+        "บูรณาการ",
+        "สังเคราะห์",
+        "วิเคราะห์",
+        "ประเมินผล",
+        "วินิจฉัย",
+        "\\d+(?:\\.\\d+)?\\s*(?:นาที|ชั่วโมง|ชม\\.|วัน|คืน|สัปดาห์|ครั้ง|แห่ง|ห้อง|ด้าน|ข้อ|คน|ท่าน|ระดับ)"
+      ].join("|") +
+      ")",
+    "g"
+  );
+
+  function protectThaiCompounds(rootEl) {
+    if (!rootEl || rootEl.getAttribute("data-thai-protected") === "1") return;
+    rootEl.setAttribute("data-thai-protected", "1");
+    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    let curNode;
+    while ((curNode = walker.nextNode())) {
+      const val = curNode.nodeValue;
+      if (!val || val.length < 3) continue;
+      const p = curNode.parentElement;
+      if (!p) continue;
+      const tag = p.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE" || tag === "CODE" || tag === "KBD" || tag === "PRE" || tag === "SVG") continue;
+      if (p.closest(".or-nw, .or-num-keep, code, kbd, svg")) continue;
+      ST1_THAI_COMPOUND_RE.lastIndex = 0;
+      if (ST1_THAI_COMPOUND_RE.test(val)) {
+        nodes.push(curNode);
+      }
+    }
+    for (let i = 0; i < nodes.length; i += 1) {
+      const tn = nodes[i];
+      const text = tn.nodeValue || "";
+      ST1_THAI_COMPOUND_RE.lastIndex = 0;
+      let lastIdx = 0;
+      let match;
+      const frag = document.createDocumentFragment();
+      while ((match = ST1_THAI_COMPOUND_RE.exec(text)) !== null) {
+        if (match.index > lastIdx) {
+          frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+        }
+        const sp = document.createElement("span");
+        sp.className = "or-nw";
+        sp.textContent = match[0];
+        frag.appendChild(sp);
+        lastIdx = match.index + match[0].length;
+      }
+      if (lastIdx < text.length) {
+        frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+      }
+      if (tn.parentNode) {
+        tn.parentNode.replaceChild(frag, tn);
+      }
+    }
+  }
+
   function fitSingleSlideCanvas(canvas) {
     if (!canvas || canvas.classList.contains("is-live-canvas") || canvas.classList.contains("is-quiz-slide-canvas")) {
       return;
     }
+    protectThaiCompounds(canvas);
     const allScaled = Array.from(canvas.querySelectorAll(".or-card, .or-table-wrap, .or-cover-kpi, .or-cover-act-chip"));
     if (isPhoneReflowMode() && !document.body.classList.contains("is-printing-st1-deck")) {
       allScaled.forEach((el) => el.style.removeProperty("--fit-scale"));

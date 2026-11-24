@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124tv2";
+  const ASSET_VER = "20261124tv3";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -42,6 +42,9 @@
     jumpTimer: 0,
     stepToastActive: false,
     stepToastTimer: 0,
+    s02Focus: 0, // 0 = 3-figure overview, 1 = Fig 1.4, 2 = Fig 2A, 3 = Fig 2B
+    s02Timer: 0,
+    s02PendingTarget: null,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
     toolsMenuOpen: false,
     laserActive: false,
@@ -130,7 +133,7 @@
   function s02FlowCard(opts) {
     const resolved = resolveSlideImgFile(opts.fileName);
     return `
-      <div class="or-s02-flow-card ${esc(opts.tintCls || "")}">
+      <div class="or-s02-flow-card ${esc(opts.tintCls || "")}" data-s02-slot="${esc(opts.slot || "")}">
         <figure class="or-fig-plate is-s02-plate">
           <div class="or-fig-top-badge">${esc(opts.stepBadge)}</div>
           <div class="or-fig-img-wrap">
@@ -239,46 +242,54 @@
       keyMessageHtml:
         "<strong>วิทยาศาสตร์พื้นฐาน</strong> อธิบายกลไกของโรค <strong>วิทยาศาสตร์คลินิก</strong> ชี้แนวทางวินิจฉัยและรักษาผู้ป่วยรายบุคคล ควบคู่กับ <strong>วิทยาศาสตร์ระบบสุขภาพ (HSS)</strong> ที่ศึกษาการจัดบริการ การทำงานร่วมกันของทีม และการพัฒนาระบบให้ดียิ่งขึ้น",
       notes:
-        "ไล่เรียงตามลำดับความคิดของแผนภาพต้นฉบับทั้ง 3 รูป: (1) รูปที่ 1 แสดงเสาหลักทั้ง 3 ของแพทยศาสตรศึกษา ชี้ให้เห็นว่าแม้การวินิจฉัยและรักษาทางคลินิกจะแม่นยำ แต่เมื่อระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องยังไม่เชื่อมถึงกัน ผู้ป่วยก็ยังมีความเสี่ยงที่จะกลับมาป่วยซ้ำ การเสริมเสาหลักด้านระบบสุขภาพจึงช่วยให้การรักษาเกิดผลต่อเนื่อง (2) รูปที่ 2A (Gonzalo et al., 2017) แสดงโครงสร้างหลักสูตรที่ประกอบด้วยโดเมนหลัก 6 ด้านและโดเมนตัดขวาง 5 ด้าน โดยมี Systems thinking เป็นตัวเชื่อมเข้ากับความรู้พื้นฐานและคลินิก และ (3) รูปที่ 2B (AMA / Skochelak et al., 2020) เป็นแผนภาพกรอบแนวคิดเดียวกันกับรูป 2A แต่ปรับจุดเน้นเพื่อสื่อสารว่าทุกระบบมุ่งรับใช้ผู้ป่วย ครอบครัว และชุมชนเป็นศูนย์กลาง",
-      render: () => `
-        <div class="or-s02-3fig-grid" data-fit-group="s02-takeaways">
+        "ไล่เรียงตามลำดับความคิดของแผนภาพต้นฉบับทั้ง 3 รูป: (1) รูปที่ 1 แสดงเสาหลักทั้ง 3 ของแพทยศาสตรศึกษา ชี้ให้เห็นว่าลำพังการวินิจฉัยและรักษาทางคลินิกที่แม่นยำยังไม่เพียงพอ หากระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องที่บ้านและชุมชนยังขาดช่วงจนผู้ป่วยกลับมาป่วยซ้ำ (2) รูปที่ 2A (Gonzalo et al., 2017) แสดงกรอบการเรียนรู้ที่ผสานองค์ประกอบหลักของระบบสุขภาพ 6 ด้าน เข้ากับสมรรถนะร่วมที่ใช้สอดประสานในการทำงานทุกบริบท 5 ด้าน โดยมี Systems thinking เป็นตัวเชื่อมเข้ากับความรู้พื้นฐานและคลินิก และ (3) รูปที่ 2B (AMA / Skochelak et al., 2020) นำกรอบแนวคิดชุดเดียวกันมาจัดวางใหม่เพื่อย้ำว่าผู้ป่วย ครอบครัว และชุมชนคือจุดมุ่งหมายตรงกลางของทุกระบบ",
+      render: () => {
+        const isExportOrPrint =
+          Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
+        const focusVal = isExportOrPrint ? 0 : state.s02Focus || 0;
+        return `
+        <div class="or-s02-3fig-grid" data-fit-group="s02-takeaways" data-s02-focus="${focusVal}">
           ${s02FlowCard({
-            stepBadge: "1 · THREE-PILLAR MODEL (ทำไมต้องมีเสาหลักที่ 3)",
+            slot: "1",
+            stepBadge: "1 · THREE-PILLAR MODEL (ทำไมต้องเข้าใจระบบสุขภาพ)",
             fileName: "orient_s02_three_pillars_orig.png",
             altText: "Three-pillar model of medical education: Basic science, Clinical science, and Health systems science",
             citationHtml: "<strong>Fig. 1.4</strong> Three-pillar model · <em>Skochelak SE et al., Health Systems Science</em> (AMA / Elsevier, 2017)",
             takeawayCls: "is-rose-tint",
             takeawayKicker: "KEY TAKEAWAY · ภาพที่ 1",
-            takeawayTitle: "การผสานทั้งสามเสาหลักช่วยให้การรักษาต่อเนื่องถึงชีวิตจริง",
+            takeawayTitle: "รักษาข้างเตียงได้แม่นยำ จะเกิดผลต่อเนื่องเมื่อระบบรองรับผู้ป่วยได้จริง",
             takeawayHtml:
-              "แม้การวินิจฉัยและรักษาทางคลินิกจะแม่นยำ แต่เมื่อระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องยังไม่เชื่อมถึงกัน ผู้ป่วยก็ยัง<strong>มีความเสี่ยงที่จะกลับมาป่วยซ้ำ</strong> การเรียนรู้ระบบสุขภาพควบคู่กับความรู้พื้นฐานและคลินิกจึงช่วยให้การดูแลเกิดผลต่อเนื่อง"
+              "แม้การวินิจฉัยและรักษาในโรงพยาบาลจะแม่นยำ แต่หากระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องที่บ้านและชุมชนยังขาดช่วง ผู้ป่วยก็ยัง<strong>เสี่ยงกลับมาป่วยซ้ำ</strong> เสาหลักที่ 3 จึงช่วยให้แพทย์มองเห็นและร่วมพัฒนาระบบที่ประคองผู้ป่วยได้ตลอดเส้นทางชีวิตจริง"
           })}
 
           ${s02FlowCard({
-            stepBadge: "2A · HSS CURRICULAR DOMAINS (เรียนอะไรและเชื่อมอย่างไร)",
+            slot: "2",
+            stepBadge: "2A · HSS FRAMEWORK (เรียนรู้อะไรและเชื่อมกันอย่างไร)",
             fileName: "orient_s02_hss_domains_orig.png",
-            altText: "Core, cross-cutting, and linking domains for a health systems science curricular framework",
-            citationHtml: "<strong>Fig. 1</strong> Curricular domains · <em>Gonzalo JD et al., Acad Med.</em> 2017;92(1):123–131",
+            altText: "Health systems science curricular framework connecting 6 core areas and 5 shared professional capabilities via systems thinking",
+            citationHtml: "<strong>Fig. 1</strong> Curricular framework · <em>Gonzalo JD et al., Acad Med.</em> 2017;92(1):123–131",
             takeawayCls: "is-navy-tint",
             takeawayKicker: "KEY TAKEAWAY · ภาพที่ 2A",
-            takeawayTitle: "คิดเชิงระบบเชื่อม 6 โดเมนหลักและ 5 โดเมนตัดขวางเข้ากับคลินิก",
+            takeawayTitle: "ผสาน ‘องค์ประกอบหลักของระบบ 6 ด้าน’ เข้ากับ ‘สมรรถนะร่วมในการทำงานจริง 5 ด้าน’",
             takeawayHtml:
-              "ครอบคลุม<strong>โดเมนหลัก 6 ด้าน</strong> (โครงสร้างและกระบวนการบริการ นโยบาย เศรษฐศาสตร์และการจัดการ สารสนเทศสุขภาพ สุขภาพประชากร การดูแลที่คุ้มค่า และการพัฒนาระบบ) ร่วมกับ<strong>โดเมนตัดขวาง 5 ด้าน</strong> (ผู้นำการเปลี่ยนแปลง ทีมสหวิชาชีพ เวชปฏิบัติอิงหลักฐาน จริยธรรมวิชาชีพ และการสร้างองค์ความรู้) โดยมี <strong>Systems thinking</strong> เชื่อมทุกมิติให้เห็นบริบทสังคมและเศรษฐกิจของผู้ป่วย"
+              "เรียนรู้<strong>องค์ประกอบหลักของระบบสุขภาพ 6 ด้าน</strong> (การจัดบริการ · นโยบายและเศรษฐศาสตร์ · สารสนเทศสุขภาพ · สุขภาพประชากร · การดูแลที่คุ้มค่า · การพัฒนาระบบ) ควบคู่กับ<strong>สมรรถนะร่วมที่ใช้สอดประสานในทุกบริบทการทำงาน 5 ด้าน</strong> (ภาวะผู้นำการเปลี่ยนแปลง · ทีมสหวิชาชีพ · เวชปฏิบัติอิงหลักฐาน · จริยธรรมวิชาชีพ · การสร้างองค์ความรู้) โดยมี<strong>การคิดเชิงระบบ (Systems thinking)</strong> เชื่อมความรู้ทั้งหมดเข้ากับการดูแลผู้ป่วย"
           })}
 
           ${s02FlowCard({
-            stepBadge: "2B · SAME FRAMEWORK, PATIENT FOCUS (รูปเดียวกับ 2A ต่างจุดเน้น)",
+            slot: "3",
+            stepBadge: "2B · PATIENT & COMMUNITY FOCUS (หัวใจเดียวกันในมุมผู้ป่วย)",
             fileName: "orient_s02_ama_wheel_orig.png",
             altText: "AMA Health Systems Science framework wheel with Patient, family and community at the center",
             citationHtml: "<strong>Fig. 1.2</strong> AMA HSS wheel · <em>Skochelak SE et al., Health Systems Science</em>, 2nd ed. (AMA / Elsevier, 2020)",
             takeawayCls: "is-teal-tint",
             takeawayKicker: "KEY TAKEAWAY · ภาพที่ 2B (กรอบเดียวกับ 2A)",
-            takeawayTitle: "แผนภาพชุดเดียวกับ 2A ที่วางผู้ป่วย ครอบครัว และชุมชนไว้ตรงกลาง",
+            takeawayTitle: "กรอบคิดเดียวกันที่วาง ‘ผู้ป่วย ครอบครัว และชุมชน’ ไว้เป็นหัวใจตรงกลาง",
             takeawayHtml:
-              "สื่อสารหัวใจคนละมุมกับรูป 2A โดยชี้ว่า<strong>ทุกระบบขับเคลื่อนไปเพื่อผู้ป่วย ครอบครัว และชุมชน</strong> ขยายมิติปัจจัยกำหนดสุขภาพทางสังคม (SDH) พร้อมเน้นรากฐานด้านภาวะผู้นำ การทำงานเป็นทีม จริยธรรมและกฎหมาย ตลอดจนการขับเคลื่อนการเปลี่ยนแปลงและสนับสนุนนโยบาย โดยมีลูกศรการคิดเชิงระบบโอบประสานทุกวงล้อ"
+              "นำองค์ประกอบชุดเดียวกับภาพ 2A มาจัดวางใหม่เป็นวงล้อ เพื่อย้ำว่า<strong>กลไกของระบบสุขภาพทุกระดับมีไว้เกื้อหนุนผู้ป่วย ครอบครัว และชุมชน</strong> พร้อมขยายความเข้าใจเรื่องปัจจัยกำหนดสุขภาพทางสังคม (SDH) และการขับเคลื่อนเชิงนโยบาย โดยมี<strong>การคิดเชิงระบบ</strong>โอบประสานการทำงานทุกมิติ"
           })}
         </div>
-      `
+      `;
+      }
     },
     {
       id: "s03-beyond-bedside",
@@ -358,7 +369,7 @@
               <ul class="or-list is-s04-list">
                 <li>ระบาดวิทยาคลินิกและชุมชนควบคู่เวชปฏิบัติอิงหลักฐาน (<code>EP1–EP9</code>)</li>
                 <li>สุขภาพ ปัจจัยกำหนดสุขภาพ <code>SDH, CDoH</code> และการป้องกันโรค (<code>HS1</code>)</li>
-                <li>ระบบบริการ <code>6BB/6W</code> คุณลักษณะ <code>EQESaRR</code> ปฐมภูมิ และหลักประกันสุขภาพ (<code>HS2–6</code>)</li>
+                <li>ระบบบริการ <code>6BB/Models of Care</code> คุณลักษณะ <code>EQESaRR</code> ปฐมภูมิ และหลักประกันสุขภาพ (<code>HS2–6</code>)</li>
               </ul>
             </div>
 
@@ -408,7 +419,7 @@
       keyMessageHtml:
         "การนำเสนอหมวดระบบสุขภาพ (<code>ฟอร์ม 3A</code>) มุ่งใช้ <strong>การคิดเชิงระบบ (Systems Thinking)</strong> เชื่อมโยงทั้ง 5 วัตถุประสงค์ให้เห็นภาพรวมของพื้นที่จริงโดยไม่แยกส่วนรายข้อ",
       notes:
-        "ย้ำหัวใจสำคัญของการเรียนรู้หมวดระบบสุขภาพ ทั้ง 5 วัตถุประสงค์ออกแบบให้เชื่อมถึงกันผ่านการคิดเชิงระบบ (Linking Domain) เพื่อให้ทีมมองเห็นความสัมพันธ์ของปัญหาและศักยภาพในพื้นที่จริงอย่างเป็นองค์รวมในการนำเสนอฟอร์ม 3A",
+        "ย้ำหัวใจสำคัญของการเรียนรู้หมวดระบบสุขภาพ ทั้ง 5 วัตถุประสงค์ออกแบบให้เชื่อมถึงกันผ่านการคิดเชิงระบบซึ่งทำหน้าที่เชื่อมทุกมิติเข้าด้วยกัน เพื่อให้ทีมมองเห็นความสัมพันธ์ของปัญหาและศักยภาพในพื้นที่จริงอย่างเป็นองค์รวมในการนำเสนอฟอร์ม 3A",
       render: () => `
         <div class="or-infog-split is-fig-left">
           ${figPlate(
@@ -425,7 +436,7 @@
 
             <div class="or-card is-navy-tint is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">2 · ระบบสุขภาพและระบบบริการสุขภาพ (Health Service Systems)</span><span class="or-mini-chip">ST1 · HS2–3, 5–6</span></div>
-              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>2.1</strong>&nbsp;ระบบซับซ้อน</span>และการคิดเชิงระบบ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.2</strong>&nbsp;ระบบบริการ</span>&nbsp;(<code>6BB/6W/PHC/UHC</code>)<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.3</strong>&nbsp;คุณลักษณะ</span>&nbsp;<code>EQESaRR</code><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.4</strong>&nbsp;วิจัยพัฒนาระบบ</span></span></p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>2.1</strong>&nbsp;ระบบซับซ้อน</span>และการคิดเชิงระบบ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.2</strong>&nbsp;ระบบบริการ</span>&nbsp;(<code>6BB/Models of Care/PHC/UHC</code>)<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.3</strong>&nbsp;คุณลักษณะ&nbsp;<code>EQESaRR</code></span><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.4</strong>&nbsp;วิจัยพัฒนาระบบ</span></span></p>
             </div>
 
             <div class="or-card is-amber-tint is-s05-card">
@@ -1614,8 +1625,8 @@
     const bB = parseFloat(cs.borderBottomWidth) || 0;
     const bR = parseFloat(cs.borderRightWidth) || 0;
     const r = el.getBoundingClientRect();
-    const innerTop = r.top + bT + padT - 1.0;
-    const innerBot = r.bottom - bB - padB + 1.0;
+    const innerTop = r.top + bT + padT - 1.25;
+    const innerBot = r.bottom - bB - padB + 1.25;
     const innerRight = r.right - bR - padR + 1.5;
 
     const kids = el.children;
@@ -1667,10 +1678,136 @@
       if (!curStr) continue;
       let s = parseFloat(curStr);
       if (!Number.isFinite(s)) continue;
-      for (let guard = 0; guard < 4; guard++) {
+      for (let guard = 0; guard < 6; guard++) {
         if (checkSingleFn(el)) break;
         s = Math.max(minS, s * 0.96);
         el.style.setProperty("--fit-scale", s.toFixed(4));
+      }
+    }
+  }
+
+  const THAI_COMPOUND_RE = new RegExp(
+    "(" +
+      [
+        "สหสาขาวิชาชีพ",
+        "สหวิชาชีพ",
+        "เวชศาสตร์ชุมชน",
+        "เวชศาสตร์ครอบครัว",
+        "อาชีวเวชศาสตร์",
+        "แพทยศาสตรศึกษา",
+        "แพทยศาสตร์",
+        "เวชปฏิบัติ",
+        "หลักประกันสุขภาพ",
+        "ปัจจัยกำหนดสุขภาพ",
+        "สร้างเสริมสุขภาพ",
+        "บริการสุขภาพ",
+        "สุขภาพประชากร",
+        "สุขภาพดาวเคราะห์",
+        "สุขภาพโลก",
+        "สุขภาพจิต",
+        "ระบบสุขภาพ",
+        "สาธารณสุข",
+        "สุขภาวะ",
+        "ระบาดวิทยา",
+        "เศรษฐศาสตร์",
+        "สารสนเทศ",
+        "ภูมิปัญญา",
+        "จริยธรรม",
+        "วิชาชีพ",
+        "สมรรถนะ",
+        "เจตคติ",
+        "เกียรตินิยม",
+        "พฤติกรรม",
+        "ปฐมภูมิ",
+        "ทุติยภูมิ",
+        "ตติยภูมิ",
+        "โรงพยาบาล",
+        "คลินิก",
+        "ผู้ป่วย",
+        "ครอบครัว",
+        "ประชากร",
+        "ประชาชน",
+        "นักศึกษาแพทย์",
+        "นักศึกษา",
+        "คณาจารย์",
+        "เพื่อนร่วมทีม",
+        "เพื่อนร่วมกลุ่ม",
+        "ภาคสนาม",
+        "ภาคทฤษฎี",
+        "ภาคปฏิบัติ",
+        "ห้องฉุกเฉิน",
+        "โรคเรื้อรัง",
+        "โรคเฉียบพลัน",
+        "ภาวะแทรกซ้อน",
+        "องค์ประกอบ",
+        "องค์ความรู้",
+        "องค์รวม",
+        "กระบวนการ",
+        "โครงสร้าง",
+        "ความสัมพันธ์",
+        "ความเหลื่อมล้ำ",
+        "ความเป็นธรรม",
+        "ความปลอดภัย",
+        "ความรับผิดชอบ",
+        "ความซื่อสัตย์",
+        "ความไม่แน่นอน",
+        "ประสานงาน",
+        "บูรณาการ",
+        "สังเคราะห์",
+        "วิเคราะห์",
+        "ประเมินผล",
+        "วินิจฉัย",
+        "สอบซ่อม",
+        "ลงทะเบียน",
+        "จัดวางใหม่",
+        "ทุกมิติ",
+        "\\d+(?:\\.\\d+)?\\s*(?:นาที|ชั่วโมง|ชม\\.|วัน|คืน|สัปดาห์|ครั้ง|แห่ง|ห้อง|ด้าน|ข้อ|คน|ท่าน|แผ่น|หน้า|รายการ|หมวด|ขั้นตอน|ระดับ)"
+      ].join("|") +
+      ")",
+    "g"
+  );
+
+  function protectThaiCompounds(rootEl) {
+    if (!rootEl || rootEl.getAttribute("data-thai-protected") === "1") return;
+    rootEl.setAttribute("data-thai-protected", "1");
+    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    let curNode;
+    while ((curNode = walker.nextNode())) {
+      const val = curNode.nodeValue;
+      if (!val || val.length < 3) continue;
+      const p = curNode.parentElement;
+      if (!p) continue;
+      const tag = p.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE" || tag === "CODE" || tag === "KBD" || tag === "PRE" || tag === "SVG") continue;
+      if (p.closest(".or-nw, .or-num-keep, code, kbd, svg")) continue;
+      THAI_COMPOUND_RE.lastIndex = 0;
+      if (THAI_COMPOUND_RE.test(val)) {
+        nodes.push(curNode);
+      }
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      const tn = nodes[i];
+      const text = tn.nodeValue || "";
+      THAI_COMPOUND_RE.lastIndex = 0;
+      let lastIdx = 0;
+      let match;
+      const frag = document.createDocumentFragment();
+      while ((match = THAI_COMPOUND_RE.exec(text)) !== null) {
+        if (match.index > lastIdx) {
+          frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+        }
+        const sp = document.createElement("span");
+        sp.className = "or-nw";
+        sp.textContent = match[0];
+        frag.appendChild(sp);
+        lastIdx = match.index + match[0].length;
+      }
+      if (lastIdx < text.length) {
+        frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+      }
+      if (tn.parentNode) {
+        tn.parentNode.replaceChild(frag, tn);
       }
     }
   }
@@ -1683,6 +1820,7 @@
     ) {
       return;
     }
+    protectThaiCompounds(canvas);
     const allScaled = Array.from(
       canvas.querySelectorAll(
         ".or-card, .or-visual-pillar-copy, .or-table-wrap, .or-schematic-box, .or-cover-kpi, .or-cover-act-chip"
@@ -1716,7 +1854,9 @@
         targets = Array.from(grp.querySelectorAll(":scope > .or-visual-pillar-card > .or-visual-pillar-copy"));
         spread = 1.28;
       } else if (kind === "s02-takeaways") {
-        targets = Array.from(grp.querySelectorAll(":scope > .or-s02-flow-card > .or-s02-takeaway-box"));
+        targets = Array.from(grp.querySelectorAll(":scope > .or-s02-flow-card > .or-s02-takeaway-box")).filter(
+          (el) => el.clientHeight > 0 && el.offsetParent !== null
+        );
         spread = 1.34;
       } else {
         targets = Array.from(grp.querySelectorAll(":scope > .or-card"));
@@ -2181,10 +2321,10 @@
         if (state.viewMode !== "deck" || ignoreSwipe || (state.zoomScale || 1) > 1.03) return;
         if (Math.abs(dx) > 58 && Math.abs(dx) > Math.abs(dy) * 1.55) {
           state.autoPlay = false;
-          if (dx < 0 && state.slideIdx < SLIDES.length - 1) {
-            goToSlide(state.slideIdx + 1);
-          } else if (dx > 0 && state.slideIdx > 0) {
-            goToSlide(state.slideIdx - 1);
+          if (dx < 0) {
+            stepSlide(1);
+          } else if (dx > 0) {
+            stepSlide(-1);
           }
         }
       },
@@ -2725,10 +2865,103 @@
     }
   }
 
-  function goToSlide(idx) {
+  function clearS02Timer() {
+    if (state.s02Timer) {
+      clearTimeout(state.s02Timer);
+      state.s02Timer = 0;
+    }
+    state.s02PendingTarget = null;
+  }
+
+  function animateFlipElement(el, firstRect, durationMs, easing) {
+    if (!el || !firstRect || typeof el.animate !== "function") return;
+    const lastRect = el.getBoundingClientRect();
+    if (firstRect.width <= 4 || firstRect.height <= 4 || lastRect.width <= 4 || lastRect.height <= 4) return;
+    const dx = firstRect.left - lastRect.left;
+    const dy = firstRect.top - lastRect.top;
+    const sx = firstRect.width / lastRect.width;
+    const sy = firstRect.height / lastRect.height;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < 0.015 && Math.abs(sy - 1) < 0.015) return;
+    try {
+      el.getAnimations().forEach((a) => a.cancel());
+      el.animate(
+        [
+          {
+            transformOrigin: "0 0",
+            transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`
+          },
+          {
+            transformOrigin: "0 0",
+            transform: "translate(0px, 0px) scale(1, 1)"
+          }
+        ],
+        {
+          duration: durationMs,
+          easing: easing || "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "none"
+        }
+      );
+    } catch (_) {}
+  }
+
+  function applyS02DomFocus(targetFocus, animSlot) {
+    state.s02Focus = targetFocus;
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return false;
+    const canvas = modal.querySelector('.or-slide-canvas[data-slide-id="s02-third-pillar-why"]');
+    const grid = canvas && canvas.querySelector(".or-s02-3fig-grid");
+    if (!canvas || !grid) return false;
+
+    const slotStr = animSlot ? String(animSlot) : "";
+    const activeCard = slotStr ? grid.querySelector(`.or-s02-flow-card[data-s02-slot="${slotStr}"]`) : null;
+    const plateEl = activeCard && activeCard.querySelector(".or-fig-plate");
+    const boxEl = activeCard && activeCard.querySelector(".or-s02-takeaway-box");
+
+    const reduceMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const plateFirst = !reduceMotion && plateEl && plateEl.offsetParent !== null ? plateEl.getBoundingClientRect() : null;
+    const boxFirst = !reduceMotion && boxEl && boxEl.offsetParent !== null ? boxEl.getBoundingClientRect() : null;
+
+    grid.setAttribute("data-s02-focus", String(targetFocus));
+
+    const footNum = canvas.querySelector(".or-sld-foot-num");
+    const stepLabels = { 0: "", 1: " · ภาพ 1 (Fig. 1.4)", 2: " · ภาพ 2A (Framework)", 3: " · ภาพ 2B (Patient Focus)" };
+    if (footNum) {
+      footNum.textContent = `03 / ${SLIDES.length}${stepLabels[targetFocus] || ""}`;
+    }
+    const cchNum = document.querySelector("#orClickerCornerHud .or-cch-num");
+    if (cchNum) {
+      const shortLabels = { 0: "", 1: " [1]", 2: " [2A]", 3: " [2B]" };
+      cchNum.textContent = `03${shortLabels[targetFocus] || ""} / ${SLIDES.length}`;
+    }
+    flashStepToast();
+
+    fitSingleSlideCanvas(canvas);
+
+    if (!reduceMotion && activeCard) {
+      const dur = targetFocus === 0 ? 340 : 450;
+      animateFlipElement(plateEl, plateFirst, dur);
+      animateFlipElement(boxEl, boxFirst, dur);
+      if (targetFocus === 0) {
+        grid.querySelectorAll(".or-s02-flow-card").forEach((card) => {
+          if (card === activeCard || typeof card.animate !== "function") return;
+          try {
+            card.getAnimations().forEach((a) => a.cancel());
+            card.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
+          } catch (_) {}
+        });
+      }
+    }
+    return true;
+  }
+
+  function goToSlide(idx, opts) {
+    const o = opts || {};
+    clearS02Timer();
     const nextIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
     state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = nextIdx;
+    state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
     state.zoomScale = 1;
     state.toolsMenuOpen = false;
     clearJumpBuffer();
@@ -2743,7 +2976,94 @@
   }
 
   function stepSlide(delta) {
-    goToSlide(state.slideIdx + (Number(delta) || 0));
+    const d = Number(delta) || 0;
+    if (!d) return;
+
+    // If a 2-phase Overview -> Spotlight transition is mid-flight, snap to its target before processing the new click!
+    if (state.s02Timer && typeof state.s02PendingTarget === "number") {
+      const snapFocus = state.s02PendingTarget;
+      clearS02Timer();
+      state.s02Focus = snapFocus;
+      applyS02DomFocus(snapFocus, 0);
+    }
+
+    const cur = SLIDES[state.slideIdx];
+    if (state.viewMode === "deck" && cur && cur.id === "s02-third-pillar-why") {
+      if (d > 0) {
+        if (state.s02Focus === 0) {
+          applyS02DomFocus(1, 1);
+          return;
+        }
+        if (state.s02Focus === 1) {
+          // Zoom out Fig 1.4 back to its Column 1 slot, then automatically enlarge Fig 2A + Key Takeaway!
+          applyS02DomFocus(0, 1);
+          state.s02PendingTarget = 2;
+          state.s02Timer = setTimeout(() => {
+            state.s02Timer = 0;
+            state.s02PendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === "s02-third-pillar-why") {
+              applyS02DomFocus(2, 2);
+            }
+          }, 365);
+          return;
+        }
+        if (state.s02Focus === 2) {
+          // Zoom out Fig 2A back to its Column 2 slot, then automatically enlarge Fig 2B + Key Takeaway!
+          applyS02DomFocus(0, 2);
+          state.s02PendingTarget = 3;
+          state.s02Timer = setTimeout(() => {
+            state.s02Timer = 0;
+            state.s02PendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === "s02-third-pillar-why") {
+              applyS02DomFocus(3, 3);
+            }
+          }, 365);
+          return;
+        }
+        // state.s02Focus === 3 -> proceed to Slide 04
+        goToSlide(state.slideIdx + 1, { s02Focus: 0 });
+        return;
+      } else {
+        if (state.s02Focus === 3) {
+          applyS02DomFocus(0, 3);
+          state.s02PendingTarget = 2;
+          state.s02Timer = setTimeout(() => {
+            state.s02Timer = 0;
+            state.s02PendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === "s02-third-pillar-why") {
+              applyS02DomFocus(2, 2);
+            }
+          }, 365);
+          return;
+        }
+        if (state.s02Focus === 2) {
+          applyS02DomFocus(0, 2);
+          state.s02PendingTarget = 1;
+          state.s02Timer = setTimeout(() => {
+            state.s02Timer = 0;
+            state.s02PendingTarget = null;
+            if (state.isOpen && SLIDES[state.slideIdx] && SLIDES[state.slideIdx].id === "s02-third-pillar-why") {
+              applyS02DomFocus(1, 1);
+            }
+          }, 365);
+          return;
+        }
+        if (state.s02Focus === 1) {
+          applyS02DomFocus(0, 1);
+          return;
+        }
+        goToSlide(state.slideIdx - 1, { s02Focus: 0 });
+        return;
+      }
+    }
+
+    // Stepping backward from Slide 04 lands on Slide 03's final spotlight (2B) for seamless reverse replay
+    const targetIdx = state.slideIdx + d;
+    if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx] && SLIDES[targetIdx].id === "s02-third-pillar-why") {
+      goToSlide(targetIdx, { s02Focus: 3 });
+      return;
+    }
+    goToSlide(targetIdx, { s02Focus: 0 });
   }
 
   function goToSlideById(slideId) {
@@ -3276,7 +3596,7 @@
     if (prevBtn) {
       prevBtn.addEventListener("click", () => {
         state.autoPlay = false;
-        goToSlide(state.slideIdx - 1);
+        stepSlide(-1);
       });
     }
 
@@ -3284,9 +3604,24 @@
     if (nextBtn) {
       nextBtn.addEventListener("click", () => {
         state.autoPlay = false;
-        goToSlide(state.slideIdx + 1);
+        stepSlide(1);
       });
     }
+
+    modal.querySelectorAll(".or-s02-flow-card[data-s02-slot]").forEach((card) => {
+      card.addEventListener("click", (ev) => {
+        if (state.viewMode !== "deck" || state.clickerStage || state.presentationMode) return;
+        if (ev.target && ev.target.closest && ev.target.closest("a, button")) return;
+        const slotNum = Number(card.getAttribute("data-s02-slot")) || 0;
+        if (!slotNum) return;
+        state.autoPlay = false;
+        if (state.s02Focus === 0) {
+          applyS02DomFocus(slotNum, slotNum);
+        } else {
+          stepSlide(1);
+        }
+      });
+    });
 
     const sel = document.getElementById("orSlideSelect");
     if (sel) {
@@ -3397,6 +3732,7 @@
     toggleClickerStage,
     toggleBlackout,
     fitAllVisibleCanvases,
+    getS02Focus: () => state.s02Focus,
     getSlides: () => SLIDES,
     pptxHref: PPTX_HREF,
     pdfHref: PDF_HREF
