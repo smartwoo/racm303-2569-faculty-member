@@ -578,7 +578,7 @@
                 </td>
                 <td class="is-ep">
                   <div><strong>ระบาด Day 1 (EP1–EP3)</strong></div>
-                  <div class="or-sch-room">08.30–11.00 (ห้อง Auditorium)<br>11.00–12.00 Ex 2–3 (Online)</div>
+                  <div class="or-sch-room">08.30–11.00 (Auditorium) · 11.00–12.00 Ex 2–3<br>(SDL Exercise via Moodle RAMA e-Learning · ไม่เช็คชื่อ)</div>
                 </td>
               </tr>
               <tr>
@@ -592,8 +592,8 @@
                   <div class="or-sch-room">13.30–17.00 น. (ห้องย่อย 9 ห้อง)</div>
                 </td>
                 <td class="is-ep">
-                  <div><strong>Exercise ระบาด Day 1</strong></div>
-                  <div class="or-sch-room">13.30–17.00 น. (Online / Zoom)</div>
+                  <div><strong>SDL Exercise via Moodle RAMA e-Learning</strong></div>
+                  <div class="or-sch-room">13.30–17.00 น. Exercise Day 1 (ไม่เช็คชื่อ)</div>
                 </td>
               </tr>
 
