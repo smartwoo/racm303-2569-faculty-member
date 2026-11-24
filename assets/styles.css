@@ -43592,3 +43592,412 @@ html[data-theme="dark"] .ppt-case-cover-title {
 
 
 
+
+/* ==========================================================================
+   HS1 Case 1: Center Health Status (ภาวะอ้วนในเด็ก) Highlight & Evidence Link
+   ========================================================================== */
+.doh-key-outcome-box.is-highlighted-outcome {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 9px 6px;
+  border-radius: 12px;
+  background: rgba(255, 241, 242, 0.94);
+  border: 1.5px solid rgba(225, 29, 72, 0.45);
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.09);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease, background 0.14s ease;
+}
+
+html[data-theme="dark"] .doh-key-outcome-box.is-highlighted-outcome {
+  background: rgba(136, 19, 55, 0.34);
+  border-color: rgba(251, 113, 133, 0.52);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.32);
+}
+
+.doh-key-outcome-box.is-highlighted-outcome:hover,
+.doh-key-outcome-box.is-highlighted-outcome.is-focused {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2.5px rgba(225, 29, 72, 0.62), 0 5px 14px rgba(225, 29, 72, 0.18);
+}
+
+.doh-key-outcome-box.is-highlighted-outcome.is-dimmed {
+  opacity: 0.34;
+}
+
+.doh-key-outcome-pill-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 1px;
+}
+
+.doh-key-outcome-title mark.is-outcome-title-hl {
+  font-size: inherit;
+  font-weight: 900;
+  color: #881337;
+  padding: 1px 6px 1px 4px;
+  border-radius: 5px;
+}
+
+html[data-theme="dark"] .doh-key-outcome-title mark.is-outcome-title-hl {
+  color: #ffe4e6;
+}
+
+.doh-key-outcome-sub mark.is-outcome-sub-hl {
+  font-size: inherit;
+  font-weight: 700;
+  color: #9f1239;
+  background: rgba(255, 228, 230, 0.78);
+  padding: 0.5px 5px;
+  border-radius: 4px;
+  border-bottom-width: 1.5px;
+}
+
+html[data-theme="dark"] .doh-key-outcome-sub mark.is-outcome-sub-hl {
+  color: #fecdd3;
+  background: rgba(225, 29, 72, 0.24);
+}
+
+.ppt-key-row-hide-btn.is-outcome-hide {
+  font-size: 9.5px !important;
+  padding: 1px 5px !important;
+  line-height: 1.2 !important;
+}
+
+/* ==========================================================================
+   Key Takeaway Analytical Matrix Stage (4 Levels x 3 Elements + Citations)
+   ========================================================================== */
+.ppt-concept-summary-stage.is-matrix-takeaway-stage {
+  --matrix-scale: 1;
+  padding: clamp(7px, 1.35cqh, 14px) clamp(12px, 2.1cqw, 28px) clamp(6px, 1.15cqh, 12px) !important;
+  gap: clamp(5px, 0.9cqh, 9px) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="dark"] .ppt-concept-summary-stage.is-matrix-takeaway-stage {
+  background: #0f172a !important;
+}
+
+.ppt-cs-matrix-hero {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.7cqh, 7px);
+}
+
+.ppt-cs-matrix-rulebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  padding: 5px 11px;
+  border-radius: 9px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  font-size: clamp(10.5px, min(1.02cqw, 1.85cqh), 14px);
+  line-height: 1.32;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-rulebar {
+  background: rgba(14, 116, 144, 0.2);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #f1f5f9;
+}
+
+.ppt-csm-rule-lead {
+  font-weight: 800;
+  color: #0c4a6e;
+}
+
+html[data-theme="dark"] .ppt-csm-rule-lead {
+  color: #7dd3fc;
+}
+
+.ppt-csm-rule-tail {
+  font-weight: 600;
+  color: #334155;
+}
+
+html[data-theme="dark"] .ppt-csm-rule-tail {
+  color: #cbd5e1;
+}
+
+.ppt-csm-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1.5px 8px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.94em;
+}
+
+.ppt-csm-pill.is-p1 { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+.ppt-csm-pill.is-p2 { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+.ppt-csm-pill.is-p3 { background: #fef3c7; color: #78350f; border: 1px solid #fcd34d; }
+
+html[data-theme="dark"] .ppt-csm-pill.is-p1 { background: rgba(22, 163, 74, 0.25); color: #bbf7d0; border-color: rgba(134, 239, 172, 0.4); }
+html[data-theme="dark"] .ppt-csm-pill.is-p2 { background: rgba(37, 99, 235, 0.25); color: #bfdbfe; border-color: rgba(147, 197, 253, 0.4); }
+html[data-theme="dark"] .ppt-csm-pill.is-p3 { background: rgba(217, 119, 6, 0.25); color: #fde68a; border-color: rgba(252, 211, 77, 0.4); }
+
+.ppt-cs-matrix-wrap {
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 11px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-wrap {
+  background: #111827;
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.ppt-cs-matrix-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: calc(clamp(9.6px, min(0.90cqw, 1.62cqh), 13.4px) * var(--matrix-scale, 1));
+  line-height: 1.32;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-table {
+  color: #f1f5f9;
+}
+
+.ppt-cs-matrix-table th,
+.ppt-cs-matrix-table td {
+  border: 1px solid #dbe4ee;
+  padding: calc(5px * var(--matrix-scale, 1)) calc(8px * var(--matrix-scale, 1));
+  vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-table th,
+html[data-theme="dark"] .ppt-cs-matrix-table td {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.ppt-cs-matrix-table thead th.is-corner-th {
+  width: 11.2%;
+  background: #1e293b;
+  color: #ffffff;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ppt-cs-matrix-table thead th.is-level-th {
+  color: #ffffff;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ppt-cs-matrix-table thead th.is-lv-1 { width: 24.2%; background: #265448; }
+.ppt-cs-matrix-table thead th.is-lv-2 { width: 21.2%; background: #2f6a5b; }
+.ppt-cs-matrix-table thead th.is-lv-3 { width: 21.4%; background: #397f6d; }
+.ppt-cs-matrix-table thead th.is-lv-4 { width: 22.0%; background: #43937f; }
+
+.ppt-csm-th-main {
+  font-family: var(--font-display);
+  font-size: 1.06em;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.ppt-csm-th-sub {
+  font-size: 0.88em;
+  font-weight: 600;
+  opacity: 0.92;
+  margin-top: 1px;
+}
+
+.ppt-cs-matrix-table tbody th.is-row-th {
+  background: #f8fafc;
+  text-align: left;
+  font-family: var(--font-display);
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-table tbody th.is-row-th {
+  background: #1e293b;
+}
+
+.ppt-csm-rth-num {
+  display: inline-block;
+  padding: 0.5px 5px;
+  border-radius: 4px;
+  font-size: 0.82em;
+  font-weight: 800;
+  margin-bottom: 2px;
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.ppt-cs-matrix-table tbody th.is-r-1 .ppt-csm-rth-num { background: #dcfce7; color: #14532d; }
+.ppt-cs-matrix-table tbody th.is-r-2 .ppt-csm-rth-num { background: #dbeafe; color: #1e3a8a; }
+.ppt-cs-matrix-table tbody th.is-r-3 .ppt-csm-rth-num { background: #fef3c7; color: #78350f; }
+
+.ppt-csm-rth-th {
+  font-size: 1.03em;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.24;
+}
+
+html[data-theme="dark"] .ppt-csm-rth-th {
+  color: #f8fafc;
+}
+
+.ppt-csm-rth-en {
+  font-size: 0.88em;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 1px;
+}
+
+html[data-theme="dark"] .ppt-csm-rth-en {
+  color: #94a3b8;
+}
+
+.ppt-cs-matrix-table td.is-lv-1 { background: #fbfdfc; }
+.ppt-cs-matrix-table td.is-lv-2 { background: #ffffff; }
+.ppt-cs-matrix-table td.is-lv-3 { background: #fbfdfc; }
+.ppt-cs-matrix-table td.is-lv-4 { background: #ffffff; }
+
+html[data-theme="dark"] .ppt-cs-matrix-table td.is-lv-1,
+html[data-theme="dark"] .ppt-cs-matrix-table td.is-lv-3 {
+  background: rgba(30, 41, 59, 0.55);
+}
+
+html[data-theme="dark"] .ppt-cs-matrix-table td.is-lv-2,
+html[data-theme="dark"] .ppt-cs-matrix-table td.is-lv-4 {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.ppt-csm-line + .ppt-csm-line {
+  margin-top: calc(3.5px * var(--matrix-scale, 1));
+}
+
+.ppt-csm-line.is-subnote {
+  padding-top: calc(3px * var(--matrix-scale, 1));
+  border-top: 1px dashed rgba(100, 116, 139, 0.3);
+  color: #1e293b;
+}
+
+html[data-theme="dark"] .ppt-csm-line.is-subnote {
+  color: #e2e8f0;
+  border-top-color: rgba(148, 163, 184, 0.25);
+}
+
+a.ppt-cs-cite-link {
+  color: #0369a1;
+  text-decoration: underline;
+  text-decoration-color: rgba(3, 105, 161, 0.42);
+  text-underline-offset: 2px;
+  font-weight: 600;
+  border-radius: 3px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+a.ppt-cs-cite-link:hover {
+  background: #e0f2fe;
+  color: #075985;
+  text-decoration-color: #075985;
+}
+
+html[data-theme="dark"] a.ppt-cs-cite-link {
+  color: #7dd3fc;
+  text-decoration-color: rgba(125, 211, 252, 0.45);
+}
+
+html[data-theme="dark"] a.ppt-cs-cite-link:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #bae6fd;
+}
+
+/* Portrait Phone & Narrow Duo Screen Reflow: Clean Readable Stacked Cards */
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-wrap {
+  flex: 0 0 auto;
+  overflow: visible;
+  border: none;
+  background: transparent;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table,
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody {
+  display: block;
+  width: 100%;
+  font-size: clamp(12.2px, 3.3cqw, 14.5px);
+  line-height: 1.46;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table thead {
+  display: none;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody tr {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+html[data-theme="dark"] .ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody tr {
+  background: #111827;
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody th.is-row-th {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1.5px solid #cbd5e1;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-mcell {
+  display: block;
+  padding: 9px 12px;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-mcell:last-child {
+  border-bottom: none;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-mcell::before {
+  content: attr(data-level-label);
+  display: inline-block;
+  margin-bottom: 5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 0.9em;
+  font-weight: 800;
+  color: #ffffff;
+  background: #265448;
+}
+
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-lv-2::before { background: #2f6a5b; }
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-lv-3::before { background: #397f6d; }
+.ppt-concept-summary-stage.is-matrix-takeaway-stage.is-matrix-stacked .ppt-cs-matrix-table tbody td.is-lv-4::before { background: #43937f; }

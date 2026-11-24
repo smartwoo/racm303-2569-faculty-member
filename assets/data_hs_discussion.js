@@ -632,14 +632,67 @@ window.RACM_HS_DISCUSSION_DATA = {
           "conceptSummarySlide": {
             "id": "cs-hs1-anc-1",
             "takeawayNumber": 3,
-            "badge": "ขั้น ⑤ Key Takeaway #3",
-            "studentBadge": "Key Takeaway #3",
-            "shortLabel": "⑤ Key Takeaway #3",
+            "badge": "ขั้น ⑦ Key Takeaway #3 (คำอธิบายเคส ANC)",
+            "studentBadge": "Key Takeaway #3 · การคัดกรองในคลินิกฝากครรภ์",
+            "shortLabel": "⑦ คำอธิบาย #3",
             "studentShortLabel": "Key Takeaway #3",
-            "kicker": "Key Takeaway #3",
+            "kicker": "Key Takeaway #3 · คำอธิบายสังเคราะห์เคสฝากครรภ์",
             "title": "การคัดกรองในคลินิกฝากครรภ์และการป้องกันขั้นที่สอง (Secondary Prevention)",
             "enTitle": "ANC Screening & Secondary Prevention",
-            "sourceNote": "Leavell & Clark (1958) · WHO Antenatal Care Guidelines",
+            "sourceNote": "Leavell & Clark (1965) · WHO Antenatal Care Guidelines",
+            "frameworkSynthesisSlide": {
+              "id": "cs-hs1-anc-1-framework-1",
+              "kicker": "Key Takeaway #3 · Levels of Disease Prevention (1/4)",
+              "badge": "ขั้น ⑤ Key Takeaway #3 (Level of Disease Prevention)",
+              "studentBadge": "Key Takeaway #3 · Level of Disease Prevention",
+              "shortLabel": "⑤ Level of Prevention",
+              "studentShortLabel": "Level of Prevention",
+              "stageBtnLabel": "⑤ 4 Levels",
+              "studentStageBtnLabel": "🖼 4 Levels",
+              "title": "Level of Disease Prevention, Stage of the Disease, and Target Population",
+              "enTitle": "Primary · Secondary · Tertiary · Quaternary Prevention",
+              "sourceNote": "Leavell & Clark (1965) · Jamoulle (2015)",
+              "imageSrc": "assets/images/hs1_levels_of_prevention_overview.jpg?v=1",
+              "imageAlt": "Level of disease prevention, stage of the disease, and target population across Primary, Secondary, Tertiary, and Quaternary prevention",
+              "caption": "ภาพรวมการป้องกันโรคทั้ง 4 ระดับ (Primary → Secondary → Tertiary → Quaternary) เชื่อมโยงระยะของโรค กลุ่มเป้าหมาย (Target Population) และจุดเน้นของมาตรการหลัก (Focus & Key Interventions)",
+              "nextBtnLabel": "ธรรมชาติการดำเนินโรค (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-hs1-anc-1-framework-1",
+                "kicker": "Key Takeaway #3 · Levels of Disease Prevention (1/4)",
+                "badge": "ขั้น ⑤ Key Takeaway #3 (Level of Disease Prevention)",
+                "studentBadge": "Key Takeaway #3 · Level of Disease Prevention",
+                "shortLabel": "⑤ Level of Prevention",
+                "studentShortLabel": "Level of Prevention",
+                "stageBtnLabel": "⑤ 4 Levels",
+                "studentStageBtnLabel": "🖼 4 Levels",
+                "title": "Level of Disease Prevention, Stage of the Disease, and Target Population",
+                "enTitle": "Primary · Secondary · Tertiary · Quaternary Prevention",
+                "sourceNote": "Leavell & Clark (1965) · Jamoulle (2015)",
+                "imageSrc": "assets/images/hs1_levels_of_prevention_overview.jpg?v=1",
+                "imageAlt": "Level of disease prevention, stage of the disease, and target population across Primary, Secondary, Tertiary, and Quaternary prevention",
+                "caption": "ภาพรวมการป้องกันโรคทั้ง 4 ระดับ (Primary → Secondary → Tertiary → Quaternary) เชื่อมโยงระยะของโรค กลุ่มเป้าหมาย (Target Population) และจุดเน้นของมาตรการหลัก (Focus & Key Interventions)",
+                "nextBtnLabel": "ธรรมชาติการดำเนินโรค (Slide ถัดไป)"
+              },
+              {
+                "id": "cs-hs1-anc-1-framework-2",
+                "kicker": "Key Takeaway #3 · Natural History of Disease & Prevention (2/4)",
+                "badge": "ขั้น ⑥ Key Takeaway #3 (Natural History of Disease)",
+                "studentBadge": "Key Takeaway #3 · Natural History of Disease",
+                "shortLabel": "⑥ Natural History",
+                "studentShortLabel": "Natural History",
+                "stageBtnLabel": "⑥ Natural History",
+                "studentStageBtnLabel": "🖼 Natural History",
+                "title": "Natural History of Disease and Prevention",
+                "enTitle": "Stages of Disease, Clinical Threshold, and Prevention Trajectories",
+                "sourceNote": "Adapted from Leavell & Clark (1965) · Bonita et al. / WHO (2006)",
+                "imageSrc": "assets/images/hs1_natural_history_prevention.jpg?v=1",
+                "imageAlt": "Natural History of Disease and Prevention: Prevention level (Primary, Secondary, Tertiary), Health status vs Clinical threshold vs Disease status trajectories (Health maintained, Disease averted, Disease limited, Health restored, Chronicity, Mortality, Impairment/disability), and Stages of disease",
+                "caption": "ธรรมชาติการดำเนินโรค (Susceptibility → Subclinical → Clinical disease → Outcome) เทียบกับเส้นแบ่งอาการทางคลินิก (Clinical threshold): ชี้ให้เห็นว่า Primary รักษาสุขภาวะ/สกัดกั้นไม่ให้เกิดโรค Secondary ค้นหาตั้งแต่ระยะ Subclinical เพื่อจำกัดโรคและฟื้นคืนสุขภาพ ส่วน Tertiary ลดภาวะแทรกซ้อน ฟื้นฟูสมรรถภาพ และลดอุปสรรคแวดล้อม",
+                "nextBtnLabel": "เชื่อมโยงเคสฝากครรภ์ ANC (Slide ถัดไป)"
+              }
+            ],
             "coreTerm": "“การป้องกันขั้นที่สอง” (secondary prevention)",
             "coreDefinitionLead": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ",
             "coreDefinitionQualifier": "เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
@@ -678,7 +731,114 @@ window.RACM_HS_DISCUSSION_DATA = {
             "caseBridge": "การคัดกรองในคลินิกช่วยค้นหาและดูแลผู้ป่วยรายบุคคลได้ทันเวลา (Secondary prevention) แต่การแก้ปัญหาอย่างยั่งยืนต้องควบคู่กับการจัดการปัจจัยกำหนดสุขภาพทางสังคมในข้อ 2.1",
             "docId": "HS1-CONCISE",
             "docSec": "1.4",
-            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)"
+            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)",
+            "followUpSummarySlides": [
+              {
+                "id": "cs-hs1-anc-1-matrix-1",
+                "subKind": "matrix",
+                "kicker": "Key Takeaway #3 · กรอบการตอบ Level of Disease Prevention (4/4)",
+                "badge": "ขั้น ⑧ Key Takeaway #3 (กรอบตอบ 4 ระดับ × 3 องค์ประกอบ)",
+                "studentBadge": "Key Takeaway #3 · กรอบตอบ Level of Disease Preventionครบ 3 องค์ประกอบ",
+                "shortLabel": "⑧ ตาราง 4 ระดับ",
+                "studentShortLabel": "ตาราง 4 ระดับ",
+                "stageBtnLabel": "⑧ ตาราง 4 ระดับ",
+                "studentStageBtnLabel": "📊 ตาราง 4 ระดับ",
+                "title": "การวิเคราะห์ Level of Disease Prevention ต้องตอบให้ครบทั้ง กลุ่มเป้าหมาย · วัตถุประสงค์ · ตัวอย่างมาตรการ",
+                "enTitle": "Analytical Matrix of the 4 Levels of Disease Prevention",
+                "sourceNote": "Leavell & Clark (1965) · Strasser (1978) · Bonita et al. (2006) · Jamoulle (2015) · White (2020) · Kisling & M Das (2023)",
+                "ruleLead": "หลักการตอบ Level of Disease Prevention:",
+                "rulePills": [
+                  "① กลุ่มเป้าหมาย (Target population)",
+                  "② วัตถุประสงค์ (Purpose)",
+                  "③ ตัวอย่างมาตรการ (Key interventions)"
+                ],
+                "ruleTail": "ต้องสอดคล้องตรงกันทั้งระยะของการดำเนินโรค เป้าหมายผลลัพธ์ และหลักฐานวิชาการรองรับ (คลิกชื่อผู้แต่งเพื่อเปิดเอกสารอ้างอิง)",
+                "matrix": {
+                  "cornerHeader": "องค์ประกอบ",
+                  "cornerSub": "Analytical Elements",
+                  "columns": [
+                    {
+                      "thTitle": "ระดับที่หนึ่ง",
+                      "enTitle": "Primary prevention"
+                    },
+                    {
+                      "thTitle": "ระดับที่สอง",
+                      "enTitle": "Secondary prevention"
+                    },
+                    {
+                      "thTitle": "ระดับที่สาม",
+                      "enTitle": "Tertiary prevention"
+                    },
+                    {
+                      "thTitle": "ระดับที่สี่",
+                      "enTitle": "Quaternary prevention"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "thLabel": "กลุ่มเป้าหมาย",
+                      "enLabel": "(target population)",
+                      "cells": [
+                        [
+                          "ผู้ที่ยังไม่เป็นโรค (healthy population and at-risk individuals) ได้แก่ ประชาชนทั่วไป ผู้ทำงานในสถานประกอบการ และกลุ่มเสี่ยง ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Jamoulle, 2015](https://doi.org/10.15171/ijhpm.2015.24); [White, 2020](https://doi.org/10.1159/000508718))",
+                          "• กรอบระบาดวิทยาขององค์การอนามัยโลกแยก การป้องกันก่อนเกิดปัจจัยเสี่ยง (primordial prevention) ออกมาสำหรับประชากรทั้งหมดก่อนปัจจัยเสี่ยงก่อตัว (total population before risk factors emerge) และใช้ primary prevention กับผู้ที่ยังไม่เป็นโรคแต่มีปัจจัยเสี่ยงแล้ว ([Strasser, 1978](https://doi.org/10.1179/030801878791925921); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "ผู้ที่โรคเริ่มก่อตัวในระยะก่อนมีอาการหรือระยะแรกแต่ยังไม่ได้รับการวินิจฉัย (asymptomatic individuals with early-stage disease) รวมทั้งผู้ปฏิบัติงานที่สัมผัสสิ่งคุกคาม (exposed workers) ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Trout, 2011](https://doi.org/10.1097/JOM.0b013e31821b1e45); [Jamoulle, 2015](https://doi.org/10.15171/ijhpm.2015.24); [White, 2020](https://doi.org/10.1159/000508718))"
+                        ],
+                        [
+                          "ผู้ป่วยที่มีอาการทางคลินิกและได้รับการวินิจฉัยโรคแล้ว (symptomatic or diagnosed patients) ซึ่งเสี่ยงต่อความเรื้อรัง ภาวะแทรกซ้อน หรือความพิการ ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Jamoulle, 2015](https://doi.org/10.15171/ijhpm.2015.24); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "ทั้งผู้ที่มีสุขภาพดีแต่กังวลว่าตนป่วย และผู้ที่เจ็บป่วยหรือเป็นโรคทุกระยะซึ่งเสี่ยงต่อการดูแลทางการแพทย์ที่เกินจำเป็น (individuals or patients at risk of overmedicalization) ([Jamoulle, 2015](https://doi.org/10.15171/ijhpm.2015.24); [Martins et al., 2018](https://doi.org/10.1080/13814788.2017.1422177))"
+                        ]
+                      ]
+                    },
+                    {
+                      "thLabel": "วัตถุประสงค์",
+                      "enLabel": "(purpose)",
+                      "cells": [
+                        [
+                          "สร้างเสริมสุขภาพและคุ้มครองเฉพาะเพื่อป้องกันมิให้เกิดโรคตั้งแต่ต้น (health promotion and specific protection) ก่อให้เกิดผลลดจำนวนผู้ป่วยรายใหม่หรืออุบัติการณ์ของโรค (reducing disease incidence / incidence effect) ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [White, 2020](https://doi.org/10.1159/000508718))",
+                          "• หากแยก primordial prevention จะมุ่งป้องกันมิให้ปัจจัยเสี่ยงก่อตัวตั้งแต่แรก (preventing the emergence of risk factors) ส่วน primary prevention มุ่งลดการสัมผัสปัจจัยเสี่ยงที่มีอยู่แล้ว (reducing exposure to existing risk factors) ([Strasser, 1978](https://doi.org/10.1179/030801878791925921); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "ค้นหาโรคแต่เนิ่นและรักษาทันท่วงที (early detection and prompt treatment) เพื่อหยุดยั้งหรือชะลอโรคและย่นระยะเวลาป่วยผ่านผลจากการรักษา (halting or slowing disease progression / treatment effect) โดยมุ่งลดผลลบลวง ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "จำกัดความพิการ ป้องกันภาวะแทรกซ้อน ฟื้นฟูสมรรถภาพ และลดอุปสรรคแวดล้อม (disability limitation, rehabilitation, and reducing barriers) เพื่อให้กลับไปดำเนินชีวิตและทำบทบาททางสังคมได้ใกล้เคียงปกติที่สุด (preventing complications and restoring function) ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "ปกป้องผู้รับบริการจากการดูแลทางการแพทย์ที่เกินจำเป็นและเสนอทางเลือกที่เหมาะสมทางจริยธรรม (protection from overmedicalization and ethically acceptable care) เพื่อลดอันตรายจากผลบวกลวง การวินิจฉัยเกินจริง และการรักษาเกินจำเป็น (preventing false positives, overdiagnosis, and overtreatment) ([Jamoulle, 2015](https://doi.org/10.15171/ijhpm.2015.24); [Martins et al., 2018](https://doi.org/10.1080/13814788.2017.1422177))"
+                        ]
+                      ]
+                    },
+                    {
+                      "thLabel": "ตัวอย่างมาตรการ",
+                      "enLabel": "(key interventions)",
+                      "cells": [
+                        [
+                          "1. ระดับโครงสร้างและสิ่งแวดล้อม (primordial prevention): นโยบายสาธารณะและสิ่งแวดล้อมที่เอื้อต่อสุขภาพ (healthy public policy and environmental modifications) เช่น ภาษีบุหรี่และเครื่องดื่มน้ำตาลสูง การห้ามไขมันทรานส์ และการออกแบบผังเมืองทางเท้าและพื้นที่สีเขียว ([Strasser, 1978](https://doi.org/10.1179/030801878791925921); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [Twohig-Bennett & Jones, 2018](https://doi.org/10.1016/j.envres.2018.06.030))",
+                          "2. ระดับบุคคลและสถานที่ทำงาน (primary prevention): น้ำสะอาดและสุขาภิบาล การให้วัคซีน (immunization) การปรับพฤติกรรม (behavior and lifestyle modification) และการควบคุมสิ่งคุกคามในสถานประกอบการ (workplace hazard control) ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "การค้นหาผู้ป่วยรายกรณี (case finding) การตรวจคัดกรองโรคที่มีหลักฐานวิชาการรองรับ (evidence-based screening test) การตรวจสุขภาพตามความเสี่ยง (periodic health examination) และการเฝ้าระวังทางการแพทย์ในผู้ประกอบอาชีพ (occupational medical surveillance) เช่น ตรวจการได้ยินในพนักงานสัมผัสเสียงดัง ([Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [Trout, 2011](https://doi.org/10.1097/JOM.0b013e31821b1e45); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "การรักษาเพื่อควบคุมโรค (clinical management) การฟื้นฟูสมรรถภาพ (rehabilitation) การดูแลแบบประคับประคอง (palliative care) การฟื้นฟูเพื่อกลับเข้าทำงานและการประเมินก่อนกลับทำงาน (vocational rehabilitation & return to work examination) ตลอดจนการออกแบบอาคารรองรับรถเข็นและลดตราบาป ([Leavell & Clark, 1965](https://archive.org/details/preventivemedici0000leav_3edi); [Bonita et al., 2006](https://iris.who.int/handle/10665/43541); [White, 2020](https://doi.org/10.1159/000508718); [Kisling & M Das, 2023](https://www.ncbi.nlm.nih.gov/books/NBK537222/))"
+                        ],
+                        [
+                          "การงดส่งตรวจหรือรักษาที่ไร้ข้อบ่งชี้ (avoiding unnecessary testing and interventions) เช่น งดตรวจสารบ่งชี้มะเร็งในผู้ไม่มีอาการ ([US Preventive Services Task Force, 2018a](https://doi.org/10.1001/jama.2017.21926)) งดใช้ซีรัมเฟอร์ริทินคัดกรองคนทำงานโดยไร้ข้อบ่งชี้ ([Koperdanova & Cullis, 2015](https://doi.org/10.1136/bmj.h3692)) และการตัดสินใจร่วมกัน (shared decision-making) เช่น การตรวจ PSA ([US Preventive Services Task Force, 2018b](https://doi.org/10.1001/jama.2018.3710); [Martins et al., 2018](https://doi.org/10.1080/13814788.2017.1422177))"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                "caseBridgeLabel": "แนวทางการตอบและการนำไปใช้",
+                "caption": "เวลาวิเคราะห์มาตรการในโจทย์ (เช่น การคัดกรองในคลินิก ANC หรือโครงการอาชีวอนามัยในโรงงานเคสที่ 3) ให้ตรวจสอบทั้ง 3 องค์ประกอบเสมอว่าทำในกลุ่มเป้าหมายระยะใด เพื่อวัตถุประสงค์ใด และมีหลักฐานวิชาการรองรับหรือไม่",
+                "nextBtnLabel": "เข้าสู่ Case Scenario #3 (Slide ถัดไป)"
+              }
+            ]
           }
         }
       ],
