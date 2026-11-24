@@ -1316,7 +1316,7 @@
       keyMessageHtml:
         "พกคำถาม 4 ชั้นของ <strong>ภูเขาน้ำแข็ง</strong> และสายตาสังเกต <strong>วงจรป้อนกลับของ CAS</strong> ไปใช้ตั้งแต่วันนี้จนถึงวันนำเสนอผลงานภาคสนาม",
       notes:
-        "สรุปรวบยอดสาระสำคัญทั้ง 4 หมวดของ ST1 และชี้จุดเชื่อมต่อทันที: บ่ายวันนี้ 13.00–16.00 น. พบกับเวทีเสวนา Bedside to Systems-Based Practice: Global/Planetary Health & HPSR ณ ห้อง 2C2-03 จากนั้นต่อยอดสู่ HS1–HS6 การลงพื้นที่ 9 รพช. และกลับมาฝึกวาด CLD จากโจทย์พื้นที่จริงในวันอังคารที่ 22 ธ.ค. 13.00–16.30 น.",
+        "สรุปรวบยอดสาระสำคัญทั้ง 4 หมวดของ ST1 และชี้จุดเชื่อมต่อทันที: บ่ายวันนี้ 13.30–17.00 น. พบกับเวทีเสวนา จากการดูแลผู้ป่วยรายบุคคลสู่เวชปฏิบัติฐานระบบ (From Bedside to Systems-Based Practice) ณ ห้อง 2C2-03 จากนั้นต่อยอดสู่ HS1–HS6 การลงพื้นที่ 9 รพช. และกลับมาฝึกวาด CLD จากโจทย์พื้นที่จริงในวันอังคารที่ 22 ธ.ค. 13.00–16.30 น.",
       render: () => `
         <div class="st1-full-grid-2">
           <div class="or-stack-col" data-fit-group="left-sum">
@@ -1335,8 +1335,8 @@
 
           <div class="or-stack-col" data-fit-group="right-steps">
             <div class="or-card is-white">
-              <span class="or-card-kicker">① วันนี้ · 13.00 – 16.00 น. (ห้อง 2C2-03)</span>
-              <p class="or-card-text"><strong>เวทีเสวนา <code>Bedside to Systems-Based Practice</code>: สุขภาพโลก สุขภาพดาวเคราะห์ และ HPSR สู่นโยบายสาธารณะ</strong></p>
+              <span class="or-card-kicker">① วันนี้ · 13.30 – 17.00 น. (ห้อง 2C2-03)</span>
+              <p class="or-card-text"><strong>เวทีเสวนา <code>จากการดูแลผู้ป่วยรายบุคคลสู่เวชปฏิบัติฐานระบบ</code> (From Bedside to Systems-Based Practice): บทบาทและเส้นทางวิชาชีพแพทย์ด้าน HSS, HPSR, สุขภาพโลก และสุขภาพของพิภพโลก</strong></p>
             </div>
             <div class="or-card is-white">
               <span class="or-card-kicker">② สัปดาห์ที่ 1 – 3 · บทเรียน HS1 – HS6 &amp; Self-Quiz</span>

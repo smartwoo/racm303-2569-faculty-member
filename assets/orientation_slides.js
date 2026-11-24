@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem2";
+  const ASSET_VER = "20261124prem3";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -37,9 +37,9 @@
       pos: "50% 46%",
       badge: "COMMUNITY MEDICINE CENTER · 28 ต.ค. 2551",
       era: "สำนักงานศูนย์เวชศาสตร์ชุมชน",
-      shortTag: "ท่ามกลางลูกศิษย์ (2551)",
-      title: "ท่ามกลางลูกศิษย์ลูกหา ณ สำนักงานศูนย์เวชศาสตร์ชุมชน",
-      desc: "ภาพถ่ายประวัติศาสตร์วันที่ 28 ตุลาคม 2551 ร่วมกับคณาจารย์และบุคลากรผู้สืบสานพันธกิจเวชศาสตร์ชุมชน รามาธิบดี"
+      shortTag: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้ายศูนย์ฯ",
+      title: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้าย “สำนักงานศูนย์เวชศาสตร์ชุมชน” (Community Medicine Center)",
+      desc: "ภาพถ่ายประวัติศาสตร์วันที่ 28 ตุลาคม 2551 พร้อมหน้าลูกศิษย์ คณาจารย์ และบุคลากรผู้สืบสานพันธกิจเวชศาสตร์ชุมชน รามาธิบดี"
     },
     {
       id: "pb_03",
@@ -134,6 +134,7 @@
       id: "pb_11",
       file: "pb_11_cmc_monk_blessing_2526.webp",
       orient: "wide",
+      preserveFrame: true,
       pos: "50% 32%",
       badge: "ARCHIVAL MILESTONE · พ.ศ. 2526",
       era: "ก่อตั้งศูนย์เวชศาสตร์ชุมชน",
@@ -239,16 +240,29 @@
     return isExpanded ? `${PREM_ICO.split}<span>คู่เนื้อหา</span>` : `${PREM_ICO.expand}<span>เต็มกรอบ</span>`;
   }
 
+  function buildPremCuratedBaseOrder() {
+    const lockedIds = ["pb_01", "pb_11", "pb_02"];
+    const locked = lockedIds
+      .map((id) => PREM_BURI_REEL_ITEMS.find((x) => x.id === id))
+      .filter(Boolean);
+    const rest = PREM_BURI_REEL_ITEMS.filter((x) => lockedIds.indexOf(x.id) === -1);
+    return { locked, rest };
+  }
+
   function buildPremShuffledOrder() {
-    const first = PREM_BURI_REEL_ITEMS[0];
-    const rest = PREM_BURI_REEL_ITEMS.slice(1);
+    const { locked, rest } = buildPremCuratedBaseOrder();
     for (let i = rest.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
       const tmp = rest[i];
       rest[i] = rest[j];
       rest[j] = tmp;
     }
-    return [first].concat(rest);
+    return locked.concat(rest);
+  }
+
+  function buildPremStaticOrder() {
+    const { locked, rest } = buildPremCuratedBaseOrder();
+    return locked.concat(rest);
   }
 
   const premReelState = {
@@ -272,13 +286,15 @@
     }
   }
 
-  function preloadPremUpcoming() {
+  function preloadPremUpcoming(startAtZero) {
     if (typeof Image === "undefined" || !premReelState.order.length) return;
     const n = premReelState.order.length;
-    for (let k = 1; k <= 6; k += 1) {
+    const startOffset = startAtZero ? 0 : 1;
+    for (let k = startOffset; k <= 6; k += 1) {
       const item = premReelState.order[(premReelState.cursor + k) % n];
       if (item && !item._preloaded) {
         const im = new Image();
+        im.decoding = "async";
         im.src = premImgHref(item);
         item._preloaded = true;
       }
@@ -286,34 +302,51 @@
   }
 
   function buildPremGridLayerInnerHtml(isStaticPrint) {
-    const order = isStaticPrint ? PREM_BURI_REEL_ITEMS : premReelState.order;
+    const order = isStaticPrint ? buildPremStaticOrder() : premReelState.order;
     const n = order.length;
     const curIdx = isStaticPrint ? 0 : ((premReelState.cursor % n) + n) % n;
     const hero = order[curIdx] || PREM_BURI_REEL_ITEMS[0];
     const mosaicCount = !isStaticPrint && premReelState.expanded ? 4 : 3;
     const mosaics = [];
-    if (isStaticPrint) {
-      mosaics.push(PREM_BURI_REEL_ITEMS[5], PREM_BURI_REEL_ITEMS[1], PREM_BURI_REEL_ITEMS[10]);
-    } else {
-      for (let m = 1; m <= mosaicCount; m += 1) {
-        mosaics.push(order[(curIdx + m) % n]);
-      }
+    for (let m = 1; m <= mosaicCount; m += 1) {
+      mosaics.push(order[(curIdx + m) % n]);
     }
 
     const layoutCls =
       !isStaticPrint && premReelState.expanded
         ? "is-wall-5"
-        : hero.orient === "wide"
-          ? "is-hero-wide"
-          : "is-hero-portrait";
+        : hero.preserveFrame
+          ? "is-hero-fullframe"
+          : hero.orient === "wide"
+            ? "is-hero-wide"
+            : "is-hero-portrait";
 
     const kbHero = premReelState.kbFlip ? "is-kb-b" : "is-kb-a";
     const preserveCls = hero.preserveFrame ? " is-preserve-frame" : "";
 
-    const heroHtml = `
+    const heroHtml = hero.preserveFrame
+      ? `
+      <div class="or-prem-tile is-hero is-docked-hero ${kbHero}${preserveCls}" data-prem-tile-hero="${esc(hero.id)}" style="--prem-pos:${esc(hero.pos || "50% 50%")}">
+        <div class="or-prem-hero-media">
+          <img class="or-prem-tile-amb" src="${esc(premImgHref(hero))}" alt="" aria-hidden="true" decoding="async" />
+          <img class="or-prem-img" src="${esc(premImgHref(hero))}" alt="${esc(hero.title)}" loading="eager" decoding="sync" />
+        </div>
+        <div class="or-prem-hero-overlay is-docked-caption">
+          <div class="or-prem-hero-meta">
+            <span class="or-prem-ep-badge">${esc(hero.badge)}</span>
+            <span class="or-prem-era-tag">${esc(hero.era)}</span>
+          </div>
+          <h4 class="or-prem-hero-title">${esc(hero.title)}</h4>
+          <p class="or-prem-hero-desc">${esc(hero.desc)}</p>
+          <div class="or-prem-progress-rail" aria-hidden="true">
+            <div class="or-prem-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    `
+      : `
       <div class="or-prem-tile is-hero ${kbHero}${preserveCls}" data-prem-tile-hero="${esc(hero.id)}" style="--prem-pos:${esc(hero.pos || "50% 24%")}">
-        <img class="or-prem-tile-amb" src="${esc(premImgHref(hero))}" alt="" aria-hidden="true" decoding="async" />
-        <img class="or-prem-img" src="${esc(premImgHref(hero))}" alt="${esc(hero.title)}" loading="eager" decoding="async" />
+        <img class="or-prem-img" src="${esc(premImgHref(hero))}" alt="${esc(hero.title)}" loading="eager" decoding="sync" />
         <div class="or-prem-hero-overlay">
           <div class="or-prem-hero-meta">
             <span class="or-prem-ep-badge">${esc(hero.badge)}</span>
@@ -331,10 +364,11 @@
     const mosaicHtml = mosaics
       .map((item, idx) => {
         const kbCls = (idx + (premReelState.kbFlip ? 1 : 0)) % 2 === 0 ? "is-kb-b" : "is-kb-a";
+        const mPreserveCls = item.preserveFrame ? " is-preserve-frame" : "";
         return `
-          <div class="or-prem-tile is-mosaic ${kbCls}" data-prem-jump-id="${esc(item.id)}" title="คลิกเพื่อแสดงภาพนี้เป็นภาพหลัก: ${esc(item.title)}" style="--prem-pos:${esc(item.pos || "50% 26%")}">
-            <img class="or-prem-tile-amb" src="${esc(premImgHref(item))}" alt="" aria-hidden="true" decoding="async" />
-            <img class="or-prem-img" src="${esc(premImgHref(item))}" alt="${esc(item.title)}" loading="eager" decoding="async" />
+          <div class="or-prem-tile is-mosaic ${kbCls}${mPreserveCls}" data-prem-jump-id="${esc(item.id)}" title="คลิกเพื่อแสดงภาพนี้เป็นภาพหลัก: ${esc(item.title)}" style="--prem-pos:${esc(item.pos || "50% 26%")}">
+            ${item.preserveFrame ? `<img class="or-prem-tile-amb" src="${esc(premImgHref(item))}" alt="" aria-hidden="true" decoding="async" />` : ""}
+            <img class="or-prem-img" src="${esc(premImgHref(item))}" alt="${esc(item.title)}" loading="eager" decoding="sync" />
             <div class="or-prem-mosaic-overlay">
               <span class="or-prem-mosaic-kicker">${idx === 0 ? "UP NEXT · ถัดไป" : "ARCHIVAL MOMENT"}</span>
               <span class="or-prem-mosaic-title">${esc(item.shortTag || item.title)}</span>
