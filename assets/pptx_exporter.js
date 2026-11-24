@@ -236,6 +236,358 @@
     );
   }
 
+  function buildCustomGeomShapeXml(id, name, box, prstGeom, fillHex, borderHex, paragraphsXml, opts) {
+    const o = opts || {};
+    const avLst = o.radiusAdj ? `<a:avLst><a:gd name="adj" fmla="val ${o.radiusAdj}"/></a:avLst>` : "<a:avLst/>";
+    const fillXml = fillHex
+      ? `<a:solidFill><a:srgbClr val="${fillHex.replace(/^#/, "").toUpperCase()}"/></a:solidFill>`
+      : "<a:noFill/>";
+    const lineW = o.lineW || 15875;
+    const dashXml = o.dashStyle ? `<a:prstDash val="${o.dashStyle}"/>` : "";
+    const lnXml = borderHex
+      ? `<a:ln w="${lineW}"><a:solidFill><a:srgbClr val="${borderHex.replace(/^#/, "").toUpperCase()}"/></a:solidFill>${dashXml}</a:ln>`
+      : "<a:ln><a:noFill/></a:ln>";
+    const p = o.padEmu || { l: 68580, r: 68580, t: 45720, b: 45720 };
+
+    return (
+      `<p:sp>` +
+      `<p:nvSpPr>` +
+      `<p:cNvPr id="${id}" name="${xmlEsc(name)}"/>` +
+      `<p:cNvSpPr/>` +
+      `<p:nvPr/>` +
+      `</p:nvSpPr>` +
+      `<p:spPr>` +
+      `<a:xfrm><a:off x="${Math.round(box.x)}" y="${Math.round(box.y)}"/><a:ext cx="${Math.round(box.w)}" cy="${Math.round(box.h)}"/></a:xfrm>` +
+      `<a:prstGeom prst="${prstGeom || "rect"}">${avLst}</a:prstGeom>` +
+      fillXml +
+      lnXml +
+      `</p:spPr>` +
+      `<p:txBody>` +
+      `<a:bodyPr wrap="square" lIns="${p.l}" tIns="${p.t}" rIns="${p.r}" bIns="${p.b}" anchor="${box.anchor || "t"}"/>` +
+      `<a:lstStyle/>` +
+      (paragraphsXml || `<a:p><a:endParaRPr lang="th-TH" sz="900"/></a:p>`) +
+      `</p:txBody>` +
+      `</p:sp>`
+    );
+  }
+
+  function buildStraightArrowXml(id, name, x1, y1, x2, y2, colorHex, dirMode, dashStyle) {
+    const left = Math.round(Math.min(x1, x2));
+    const top = Math.round(Math.min(y1, y2));
+    const cx = Math.max(0, Math.round(Math.abs(x2 - x1)));
+    const cy = Math.max(0, Math.round(Math.abs(y2 - y1)));
+    const flipH = x2 < x1 ? ' flipH="1"' : "";
+    const flipV = y2 < y1 ? ' flipV="1"' : "";
+    const hex = (colorHex || "2E6EB5").replace(/^#/, "").toUpperCase();
+    const dashXml = dashStyle ? `<a:prstDash val="${dashStyle}"/>` : "";
+    const headXml = dirMode === "rev" || dirMode === "bi" ? `<a:headEnd type="triangle" w="med" len="med"/>` : "";
+    const tailXml = dirMode === "fwd" || dirMode === "bi" ? `<a:tailEnd type="triangle" w="med" len="med"/>` : "";
+    return (
+      `<p:cxnSp>` +
+      `<p:nvCxnSpPr>` +
+      `<p:cNvPr id="${id}" name="${xmlEsc(name)}"/>` +
+      `<p:cNvCxnSpPr/>` +
+      `<p:nvPr/>` +
+      `</p:nvCxnSpPr>` +
+      `<p:spPr>` +
+      `<a:xfrm${flipH}${flipV}><a:off x="${left}" y="${top}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+      `<a:prstGeom prst="line"><a:avLst/></a:prstGeom>` +
+      `<a:ln w="20320"><a:solidFill><a:srgbClr val="${hex}"/></a:solidFill>${dashXml}${headXml}${tailXml}</a:ln>` +
+      `</p:spPr>` +
+      `</p:cxnSp>`
+    );
+  }
+
+  function buildDohDiagramShapesXml(startId, box, diagSpec, isDark) {
+    let nextId = startId;
+    const outShapes = [];
+    const outerOn = Boolean(diagSpec && diagSpec.outerRing);
+    const innerOn = Boolean(diagSpec && diagSpec.innerRing);
+    const nodes = (diagSpec && diagSpec.nodes) || {};
+    const edges = (diagSpec && diagSpec.edges) || {};
+    const isBlank = diagSpec && diagSpec.mode === "blank-sheet";
+
+    const ox = box.x + 12000;
+    const oy = box.y + 8000;
+    const ow = box.w - 24000;
+    const oh = box.h - 16000;
+
+    // 1. Outer Peach/Apricot Oval (Structural Ring)
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohOuterOval",
+        { x: ox, y: oy, w: ow, h: oh },
+        "ellipse",
+        outerOn ? (isDark ? "2A1912" : "FDECE0") : isDark ? "16181E" : "FCFAF7",
+        outerOn ? (isDark ? "FB923C" : "C55A11") : isDark ? "475569" : "E2C6B0",
+        "",
+        { lineW: outerOn ? 22225 : 14000, dashStyle: outerOn ? "" : "dash" }
+      )
+    );
+
+    // 2. Top Structural Determinants Card inside Outer Oval
+    const sw = Math.round(ow * 0.68);
+    const sx = ox + Math.round((ow - sw) / 2);
+    const sy = oy + Math.round(oh * 0.032);
+    const sh = Math.round(oh * 0.22);
+
+    const buildNodeParas = (nSpec, headColor, alignCenter, bulletPt) => {
+      const titleTxt = (nSpec && nSpec.title) || "";
+      const headP =
+        `<a:p><a:pPr algn="${alignCenter ? "ctr" : "l"}"><a:spcAft><a:spcPts val="60"/></a:spcAft></a:pPr>` +
+        buildRunXml(titleTxt, { pt: bulletPt + 1.1, bold: true, color: headColor }) +
+        `</a:p>`;
+      const bullets = Array.isArray(nSpec && nSpec.bullets) ? nSpec.bullets : [];
+      if (bullets.length) {
+        if (alignCenter && bullets.length >= 4) {
+          // Compact 2-per-line layout for wide top Structural box so all 5 items fit cleanly!
+          const paired = [];
+          for (let i = 0; i < bullets.length; i += 2) {
+            paired.push(
+              bullets[i + 1] ? `• ${bullets[i]}     • ${bullets[i + 1]}` : `• ${bullets[i]}`
+            );
+          }
+          return (
+            headP +
+            paired
+              .map(
+                (ln) =>
+                  `<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="112000"/></a:lnSpc></a:pPr>` +
+                  buildRunXml(ln, { pt: bulletPt, color: isDark ? "F1F5F9" : "0F172A" }) +
+                  `</a:p>`
+              )
+              .join("")
+          );
+        }
+        return (
+          headP +
+          bullets
+            .map(
+              (b) =>
+                `<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="112000"/></a:lnSpc></a:pPr>` +
+                buildRunXml(`• ${b}`, { pt: bulletPt, color: isDark ? "F1F5F9" : "0F172A" }) +
+                `</a:p>`
+            )
+            .join("")
+        );
+      }
+      const rawTxt = String((nSpec && nSpec.text) || "").trim();
+      if (rawTxt) {
+        return (
+          headP +
+          rawTxt
+            .split(/\n+/)
+            .map(
+              (ln) =>
+                `<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="112000"/></a:lnSpc></a:pPr>` +
+                buildRunXml(ln, { pt: bulletPt, color: isDark ? "F1F5F9" : "0F172A" }) +
+                `</a:p>`
+            )
+            .join("")
+        );
+      }
+      const ph = (nSpec && nSpec.placeholder) || "(เขียนวิเคราะห์ประเด็นในหมวดนี้)";
+      return (
+        headP +
+        `<a:p><a:pPr algn="${alignCenter ? "ctr" : "l"}"/>` +
+        buildRunXml(ph, { pt: bulletPt - 0.4, italic: true, color: isDark ? "94A3B8" : "64748B" }) +
+        `</a:p>`
+      );
+    };
+
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohNode_Structural",
+        { x: sx, y: sy, w: sw, h: sh },
+        "roundRect",
+        isDark ? "1E222D" : "FFFDFB",
+        isDark ? "FB923C" : "E2B08A",
+        buildNodeParas(nodes.structural, isDark ? "FB923C" : "C55A11", true, 8.6),
+        { radiusAdj: 6500, lineW: 11000, padEmu: { l: 72000, r: 72000, t: 36000, b: 36000 } }
+      )
+    );
+
+    // 3. Inner Sage-Green Oval (Intermediary & Health System Ring)
+    const ix = ox + Math.round(ow * 0.045);
+    const iy = sy + sh + Math.round(oh * 0.018);
+    const iw = Math.round(ow * 0.91);
+    const ih = oy + oh - iy - Math.round(oh * 0.028);
+
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohInnerOval",
+        { x: ix, y: iy, w: iw, h: ih },
+        "ellipse",
+        innerOn ? (isDark ? "13261E" : "E6EEDB") : isDark ? "181C26" : "FFFFFF",
+        innerOn ? (isDark ? "38BDF8" : "2B547E") : isDark ? "475569" : "CBD5E1",
+        "",
+        { lineW: innerOn ? 22225 : 14000, dashStyle: innerOn ? "" : "dash" }
+      )
+    );
+
+    // 4. Four Non-Overlapping Inner Nodes
+    const indBox = {
+      x: ix + Math.round(iw * 0.055),
+      y: iy + Math.round(ih * 0.08),
+      w: Math.round(iw * 0.31),
+      h: Math.round(ih * 0.50)
+    };
+    const socBox = {
+      x: ix + iw - Math.round(iw * 0.335) - Math.round(iw * 0.055),
+      y: iy + Math.round(ih * 0.07),
+      w: Math.round(iw * 0.335),
+      h: Math.round(ih * 0.54)
+    };
+    const outBox = {
+      x: ix + Math.round(iw * 0.39),
+      y: iy + Math.round(ih * 0.35),
+      w: Math.round(iw * 0.21),
+      h: Math.round(ih * 0.22),
+      anchor: "ctr"
+    };
+    const hsBox = {
+      x: ix + Math.round((iw - Math.round(iw * 0.44)) / 2),
+      y: iy + ih - Math.round(ih * 0.25) - Math.round(ih * 0.045),
+      w: Math.round(iw * 0.44),
+      h: Math.round(ih * 0.25)
+    };
+
+    const tealHead = isDark ? "5EEAD4" : "217083";
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohNode_Individual",
+        indBox,
+        "roundRect",
+        isDark ? "1A2230" : "F9FBF7",
+        isDark ? "334155" : "BFD0B8",
+        buildNodeParas(nodes.individual, tealHead, false, 8.6),
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 36000, b: 36000 } }
+      )
+    );
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohNode_SocEnv",
+        socBox,
+        "roundRect",
+        isDark ? "1A2230" : "F9FBF7",
+        isDark ? "334155" : "BFD0B8",
+        buildNodeParas(nodes.soc_env, tealHead, false, 8.3),
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 34000, b: 34000 } }
+      )
+    );
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohNode_HealthSys",
+        hsBox,
+        "roundRect",
+        isDark ? "1A2230" : "F9FBF7",
+        isDark ? "334155" : "BFD0B8",
+        buildNodeParas(nodes.health_sys, tealHead, false, 8.5),
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 34000, b: 34000 } }
+      )
+    );
+
+    const outTitle = (diagSpec && diagSpec.outcome && diagSpec.outcome.title) || "ภาวะอ้วนในเด็ก";
+    const outSub = (diagSpec && diagSpec.outcome && diagSpec.outcome.sub) || "";
+    const outParas =
+      `<a:p><a:pPr algn="ctr"/>` +
+      buildRunXml(outTitle, {
+        pt: 11.4,
+        bold: true,
+        color: isDark ? "FDA4AF" : "9A3B2E"
+      }) +
+      `</a:p>` +
+      (outSub
+        ? `<a:p><a:pPr algn="ctr"><a:spcBef><a:spcPts val="40"/></a:spcBef></a:pPr>` +
+          buildRunXml(outSub, { pt: 7.4, italic: isBlank, color: isDark ? "FED7AA" : "7C2D12" }) +
+          `</a:p>`
+        : "");
+    outShapes.push(
+      buildCustomGeomShapeXml(
+        nextId++,
+        "DohNode_Outcome",
+        outBox,
+        "roundRect",
+        isDark ? "3B1812" : "FFF9F2",
+        isDark ? "F59E0B" : "B45309",
+        outParas,
+        { radiusAdj: 8500, lineW: 18000, padEmu: { l: 45000, r: 45000, t: 30000, b: 30000 } }
+      )
+    );
+
+    // 5. Six Directional Straight Arrow Connectors
+    const arrowHex = isDark ? "60A5FA" : "2E6EB5";
+    const ghostHex = isDark ? "475569" : "CBD5E1";
+    const topBridgeY = iy + Math.round(ih * 0.155);
+    const edgeCoords = {
+      ind_bi_soc: [indBox.x + indBox.w + 14000, topBridgeY, socBox.x - 14000, topBridgeY],
+      ind_to_out: [
+        indBox.x + indBox.w + 12000,
+        iy + Math.round(ih * 0.30),
+        outBox.x - 14000,
+        outBox.y + Math.round(outBox.h * 0.44)
+      ],
+      soc_to_out: [
+        socBox.x - 12000,
+        iy + Math.round(ih * 0.30),
+        outBox.x + outBox.w + 14000,
+        outBox.y + Math.round(outBox.h * 0.44)
+      ],
+      hsys_to_out: [
+        outBox.x + Math.round(outBox.w / 2),
+        hsBox.y - 12000,
+        outBox.x + Math.round(outBox.w / 2),
+        outBox.y + outBox.h + 14000
+      ],
+      ind_bi_hsys: [
+        indBox.x + Math.round(indBox.w * 0.62),
+        indBox.y + indBox.h + 12000,
+        hsBox.x - 14000,
+        hsBox.y + Math.round(hsBox.h * 0.52)
+      ],
+      soc_bi_hsys: [
+        socBox.x + Math.round(socBox.w * 0.38),
+        socBox.y + socBox.h + 12000,
+        hsBox.x + hsBox.w + 14000,
+        hsBox.y + Math.round(hsBox.h * 0.52)
+      ]
+    };
+
+    Object.keys(edgeCoords).forEach((edgeId) => {
+      const dir = edges[edgeId] || "off";
+      if (dir === "off" && !isBlank) return;
+      const [x1, y1, x2, y2] = edgeCoords[edgeId];
+      outShapes.push(
+        buildStraightArrowXml(
+          nextId++,
+          `DohArrow_${edgeId}`,
+          x1,
+          y1,
+          x2,
+          y2,
+          dir === "off" ? ghostHex : arrowHex,
+          dir === "off" ? "none" : dir,
+          dir === "off" ? "dash" : ""
+        )
+      );
+    });
+
+    const stepTargetsY = [
+      indBox.y + Math.round(indBox.h * 0.45),
+      socBox.y + Math.round(socBox.h * 0.45),
+      hsBox.y + Math.round(hsBox.h * 0.5),
+      sy + Math.round(sh * 0.5)
+    ];
+
+    return { xml: outShapes.join(""), nextId, stepTargetsY };
+  }
+
   function buildConnectorXml(id, name, x1, y1, x2, y2, colorHex, dashStyle) {
     const left = Math.round(Math.min(x1, x2));
     const top = Math.round(Math.min(y1, y2));
@@ -765,7 +1117,37 @@
       )
     );
 
-    if (slideSpec.table) {
+    if (slideSpec.diagram) {
+      const tblBox = {
+        x: rightBox.x,
+        y: rightBox.y + qHeadH + 100000,
+        w: rightBox.w,
+        h: rightBox.h - qHeadH - 100000
+      };
+      const diagRes = buildDohDiagramShapesXml(shapeId, tblBox, slideSpec.diagram, isDark);
+      shapeId = diagRes.nextId;
+      shapes.push(diagRes.xml);
+
+      if (slideSpec.drawConnectors && diagRes.stepTargetsY && diagRes.stepTargetsY.length) {
+        const rowCnt = diagRes.stepTargetsY.length;
+        for (let r = 0; r < rowCnt; r += 1) {
+          const hex = THEME_HL_FG[r % 6];
+          if (!isHoriz) {
+            const x1 = scenBox.x + scenBox.w - 6000;
+            const y1 = scenBox.y + 420000 + Math.round(((r + 0.5) / rowCnt) * (scenBox.h - 560000));
+            const x2 = tblBox.x + 12000;
+            const y2 = diagRes.stepTargetsY[r];
+            shapes.push(buildConnectorXml(shapeId++, `ScenToDiag_${r + 1}`, x1, y1, x2, y2, hex));
+          } else {
+            const x1 = scenBox.x + Math.round(((r + 0.5) / rowCnt) * scenBox.w);
+            const y1 = scenBox.y + scenBox.h - 6000;
+            const x2 = tblBox.x + Math.round(((r + 0.5) / rowCnt) * tblBox.w);
+            const y2 = tblBox.y + 12000;
+            shapes.push(buildConnectorXml(shapeId++, `ScenToDiag_${r + 1}`, x1, y1, x2, y2, hex));
+          }
+        }
+      }
+    } else if (slideSpec.table) {
       const tblBox = {
         x: rightBox.x,
         y: rightBox.y + qHeadH + 100000,
@@ -989,37 +1371,49 @@
           )
         );
 
-        const rightSummaryLines = [`${sSpec.questionTitle || ""}`];
-        if (sSpec.table && Array.isArray(sSpec.table.rows)) {
-          sSpec.table.rows.slice(0, cols >= 4 ? 3 : 5).forEach((trObj) => {
-            const c0 = (trObj.cells && trObj.cells[0] && trObj.cells[0].text) || "";
-            const c1 = (trObj.cells && trObj.cells[1] && trObj.cells[1].text) || "";
-            rightSummaryLines.push(`• ${c0.replace(/\n+/g, " ")}: ${c1.replace(/\n+/g, " ").slice(0, cols >= 4 ? 42 : 85)}`);
-          });
+        if (sSpec.diagram && cols <= 2) {
+          const miniDiagBox = {
+            x: cx + leftW + 10000,
+            y: bodyY,
+            w: cardW - leftW - 35000,
+            h: bodyH
+          };
+          const miniRes = buildDohDiagramShapesXml(shapeId, miniDiagBox, sSpec.diagram, isDark);
+          shapeId = miniRes.nextId;
+          shapes.push(miniRes.xml);
+        } else {
+          const rightSummaryLines = [`${sSpec.questionTitle || ""}`];
+          if (sSpec.table && Array.isArray(sSpec.table.rows)) {
+            sSpec.table.rows.slice(0, cols >= 4 ? 3 : 5).forEach((trObj) => {
+              const c0 = (trObj.cells && trObj.cells[0] && trObj.cells[0].text) || "";
+              const c1 = (trObj.cells && trObj.cells[1] && trObj.cells[1].text) || "";
+              rightSummaryLines.push(`• ${c0.replace(/\n+/g, " ")}: ${c1.replace(/\n+/g, " ").slice(0, cols >= 4 ? 42 : 85)}`);
+            });
+          }
+          const rightP = rightSummaryLines
+            .map((ln, lIdx) =>
+              `<a:p><a:pPr algn="l"/>` +
+              buildRunXml(ln, {
+                pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
+                bold: lIdx === 0,
+                color: lIdx === 0 ? pal.ink : pal.body
+              }) +
+              `</a:p>`
+            )
+            .join("");
+          shapes.push(
+            buildShapeXml(
+              shapeId++,
+              `MiniRight_${idx + 1}`,
+              { x: cx + leftW + 10000, y: bodyY, w: cardW - leftW - 35000, h: bodyH },
+              pal.cardBg,
+              pal.border,
+              rightP,
+              0,
+              { l: 45000, r: 45000, t: 35000, b: 35000 }
+            )
+          );
         }
-        const rightP = rightSummaryLines
-          .map((ln, lIdx) =>
-            `<a:p><a:pPr algn="l"/>` +
-            buildRunXml(ln, {
-              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.4 : 1.1)),
-              bold: lIdx === 0,
-              color: lIdx === 0 ? pal.ink : pal.body
-            }) +
-            `</a:p>`
-          )
-          .join("");
-        shapes.push(
-          buildShapeXml(
-            shapeId++,
-            `MiniRight_${idx + 1}`,
-            { x: cx + leftW + 10000, y: bodyY, w: cardW - leftW - 35000, h: bodyH },
-            pal.cardBg,
-            pal.border,
-            rightP,
-            0,
-            { l: 45000, r: 45000, t: 35000, b: 35000 }
-          )
-        );
       }
 
       // Optional Ruled Notes Lines on the Right for "3 + Notes" Classic PowerPoint Handout!

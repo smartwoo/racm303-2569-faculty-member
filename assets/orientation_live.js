@@ -1,8 +1,9 @@
 /* ==========================================================================
-   RACM 303 (2569) — Live Orientation Lobby & Kahoot-Style Recheck Engine
-   Scan-to-Join QR Code (Pure-JS ISO/IEC 18004 SVG) · Live Participant Lobby
-   Real-Time Cross-Portal Sync (MQTT WSS + PeerJS WebRTC + BroadcastChannel)
-   Do's & Don'ts + O / S / M / U Mastery Recheck (Course Manual & TQF3 2569)
+   RACM 303 (2569) — Live Orientation Lobby, Synced Slides & Kahoot Recheck v2
+   - Simultaneous Faculty (14 Advisors) & Student (169) QR Scan-to-Join (#live)
+   - Multi-Form-Factor Ready (Vertical/Horizontal/Duo Phone & Tablet + Keyboard)
+   - Embedded Slide 14 O/S/M/U Live Quiz -> Slide 15 Official Criteria Debrief
+   - Real-Time Sync via MQTT WSS + PeerJS WebRTC + BroadcastChannel
    ========================================================================== */
 (function () {
   "use strict";
@@ -16,16 +17,86 @@
     "wss://broker.emqx.io:8084/mqtt"
   ];
   const PROD_STUDENT_JOIN_URL = "https://smartwoo.github.io/racm303-2569-student/#live";
+  const PROD_FACULTY_JOIN_URL = "https://smartwoo.github.io/racm303-2569-faculty-member/#live";
   const STALE_SESSION_MS = 3 * 60 * 60 * 1000;
   const STALE_PRESENCE_MS = 90 * 60 * 1000;
 
   const AVATARS = ["🩺", "🏥", "🌿", "🧭", "🔬", "💡", "🤝", "🌟"];
+  const FACULTY_LIST = [
+    { code: "FAC01", short: "อ.ณัฐวุฒิ", fullName: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์", unit: "ประธานรายวิชา" },
+    { code: "FAC02", short: "อ.ปวินท์", fullName: "รศ. นพ.ปวินท์ พัวพรพงษ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC03", short: "อ.ฉัตรชัย", fullName: "รศ. ดร. นพ.ฉัตรชัย อิ่มอารมณ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC04", short: "อ.วิชช์", fullName: "รศ. ดร. นพ.วิชช์ เกษมทรัพย์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC05", short: "อ.สัมฤทธิ์", fullName: "รศ. ดร. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC06", short: "อ.ภูษิต", fullName: "รศ. นพ.ภูษิต ประคองสาย", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC07", short: "อ.จักรกฤษณ์", fullName: "ผศ. ดร. นพ.จักรกฤษณ์ โพดาพล", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC08", short: "อ.พีรสิทธิ์", fullName: "ผศ. นพ.พีรสิทธิ์ สิทธิถาวร", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC09", short: "อ.เริงฤดี", fullName: "ศ. พญ.เริงฤดี ปธานวนิช", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC10", short: "อ.สวรรณี", fullName: "ผศ. พญ.สวรรณี รัตนปัญญา", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC11", short: "อ.วริศา", fullName: "อ. ดร. พญ.วริศา พานิชเกรียงไกร", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC12", short: "อ.ฉัตรฑญา", fullName: "อ. พญ.ฉัตรฑญา บำรุงเชาว์เกษม", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC13", short: "อ.ภรัญยู", fullName: "อ. นพ.ภรัญยู คูหาทอง", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC14", short: "อ.วิชัย", fullName: "ศ. นพ.วิชัย เอกพลากร", unit: "คณาจารย์ประจำรายวิชา" }
+  ];
+
   const CHOICE_META = [
     { idx: 0, shape: "▲", cls: "is-red", hex: "#e21b3c", nameTh: "สีแดง (▲)" },
     { idx: 1, shape: "◆", cls: "is-blue", hex: "#1368ce", nameTh: "สีน้ำเงิน (◆)" },
-    { idx: 2, shape: "●", cls: "is-gold", hex: "#d89e00", nameTh: "สีเหลือง (●)" },
+    { idx: 2, shape: "●", cls: "is-gold", hex: "#c99000", nameTh: "สีเหลือง (●)" },
     { idx: 3, shape: "■", cls: "is-green", hex: "#26890c", nameTh: "สีเขียว (■)" }
   ];
+
+  /* ---------- 0. VisualViewport & On-Screen Keyboard Tracker ---------- */
+  function syncVisualViewportVars() {
+    try {
+      const root = document.documentElement;
+      const vv = window.visualViewport;
+      const winH = window.innerHeight || document.documentElement.clientHeight || 800;
+      const winW = window.innerWidth || document.documentElement.clientWidth || 1024;
+      if (vv) {
+        const vvh = Math.max(180, Math.round(vv.height));
+        const kbInset = Math.max(0, Math.round(winH - vv.height - (vv.offsetTop || 0)));
+        root.style.setProperty("--orl-vvh", `${vvh}px`);
+        root.style.setProperty("--orl-kb-inset", `${kbInset}px`);
+        root.classList.toggle("orl-keyboard-open", kbInset > 105);
+      } else {
+        root.style.setProperty("--orl-vvh", `${winH}px`);
+        root.style.setProperty("--orl-kb-inset", "0px");
+        root.classList.remove("orl-keyboard-open");
+      }
+      const ratio = winW / Math.max(1, winH);
+      const isCompactOrFold = winW <= 760 || winH <= 540 || (winW <= 1040 && ratio < 1.32);
+      root.classList.toggle("orl-compact-device", isCompactOrFold);
+    } catch (_) {}
+  }
+
+  if (typeof window !== "undefined") {
+    syncVisualViewportVars();
+    window.addEventListener("resize", syncVisualViewportVars, { passive: true });
+    window.addEventListener("orientationchange", () => setTimeout(syncVisualViewportVars, 120), { passive: true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", syncVisualViewportVars, { passive: true });
+      window.visualViewport.addEventListener("scroll", syncVisualViewportVars, { passive: true });
+    }
+    document.addEventListener("focusin", (ev) => {
+      const t = ev.target;
+      if (!t || !t.tagName) return;
+      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") {
+        if (t.closest("#orientParticipantModal, #orientLiveAuxOverlay, #orientationDeckModal")) {
+          syncVisualViewportVars();
+          setTimeout(() => {
+            syncVisualViewportVars();
+            try {
+              t.scrollIntoView({ block: "center", behavior: "smooth" });
+            } catch (_) {}
+          }, 220);
+        }
+      }
+    });
+    document.addEventListener("focusout", () => {
+      setTimeout(syncVisualViewportVars, 140);
+    });
+  }
 
   /* ---------- 1. Pure-JS ISO/IEC 18004 QR Code SVG Generator (Versions 1..10, ECC-M) ---------- */
   const QR_ECC_M = [
@@ -344,206 +415,206 @@
     return svg;
   }
 
-  /* ---------- 2. Source-Verified Question Bank (Course Manual 2569, มม.4 2569, Regs 2561, Forms 1A–4A) ---------- */
+  /* ---------- 2. Source-Verified O/S/M/U & Do's/Don'ts Question Bank ---------- */
   const BASE_QUESTIONS = [
     {
-      id: "q1_late_osmu",
+      id: "q1_attendance_leave",
       quick5: true,
-      badge: "DO'S & DON'TS · เวลาเข้าเรียน & เกณฑ์ M / U",
-      impactTag: "สาย 4 ครั้ง = M · สาย ≥ 5 ครั้ง = U",
+      badge: "เวลาเรียน & สิทธิ์เข้าสอบ · โควตาการลา",
+      impactTag: "เวลาเรียน ≥ 80% · ทฤษฎี ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน",
       durationSec: 20,
-      stem: "ในกิจกรรมที่กำหนดให้เช็คชื่อเข้าเรียน หาก นศพ. เข้าห้องเรียน “สายเกิน 15 นาที” จะเกิดผลประเมินเจตคติระดับ M (ควรปรับปรุง) และ U (ไม่ผ่าน) เมื่อสายกี่ครั้งตามลำดับ?",
+      stem: "ตามคู่มือรายวิชา RACM 303 นักศึกษาจะมี “สิทธิ์เข้าสอบ” เมื่อมีเวลาเรียนไม่น้อยกว่าร้อยละเท่าใด และลาได้ไม่เกินกี่วันในช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามตามลำดับ?",
       choices: [
-        "สาย 2 ครั้ง = M · สาย 3 ครั้งขึ้นไป = U",
-        "สาย 4 ครั้ง = M · สาย 5 ครั้งขึ้นไป = U (ต้องลงทะเบียนเรียนใหม่)",
-        "สาย 5 ครั้ง = M · สาย 8 ครั้งขึ้นไป = U",
-        "หักเฉพาะคะแนนเก็บรายคาบ ไม่มีผลต่อเกรด M หรือ U"
+        "เวลาเรียน ≥ ร้อยละ 70 · ลาช่วงก่อน-หลังภาคสนาม ≤ 5 วัน · ภาคสนาม ≤ 2 วัน",
+        "เวลาเรียน ≥ ร้อยละ 80 · ลาช่วงก่อนและหลังภาคสนามรวมกัน ≤ 3 วัน · ช่วงภาคสนาม ≤ 1.5 วัน",
+        "เวลาเรียน ≥ ร้อยละ 80 · ลาช่วงก่อน-หลังภาคสนาม ≤ 4 วัน · ช่วงภาคสนามห้ามลาทุกกรณี",
+        "เวลาเรียน ≥ ร้อยละ 90 · ลาได้รวมตลอดรายวิชาไม่เกิน 3 วันโดยไม่แยกช่วง"
       ],
       correctIdx: 1,
-      sourceRef: "มม.4 RACM 303 ปีการศึกษา 2569 (หน้า 11–12) & คู่มือรายวิชา 2569",
-      doSummary: "ลงชื่อเข้าเรียนตั้งแต่ก่อนเริ่มคาบ 15 นาที ถึงไม่เกิน 15 นาทีหลังเริ่มคาบ และมีเวลาเรียนรวมตลอดรายวิชา ≥ 80%",
-      dontSummary: "ห้ามเข้าห้องเรียนสายเกิน 15 นาทีสะสม (หากมีเหตุสุดวิสัยต้องรีบแจ้ง อ.ที่ปรึกษาทันที)",
-      osmuRule: "สายเกิน 15 นาที 4 ครั้ง = M (Marginal) · สายตั้งแต่ 5 ครั้งขึ้นไป = U (Unsatisfactory · ลงทะเบียนเรียนใหม่)",
+      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 หัวข้อ เวลาเรียนและการลา",
+      doSummary: "รักษาเวลาเรียนรวมตลอดรายวิชา ≥ ร้อยละ 80 และยื่นใบลาขออนุมัติล่วงหน้าเสมอ (ก่อน-หลังภาคสนามรวม ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน)",
+      dontSummary: "ห้ามขาดเรียนโดยไม่ยื่นใบลา (ขาดไม่ลา ≥ 2 ครั้ง = M) และห้ามลาเกินโควตาที่กำหนด",
+      osmuRule: "เวลาเรียนต่ำกว่าร้อยละ 80 จะไม่มีสิทธิ์เข้าสอบ · ขาดเรียนโดยไม่ได้รับอนุญาต ≥ 2 ครั้งติดระดับ M ตามประกาศคณะฯ พ.ศ. 2567",
       wrongHints: [
-        "เกณฑ์จริงให้โอกาสถึงครั้งที่ 3 ยังไม่ติด M แต่ครั้งที่ 4 ติด M และครั้งที่ 5 ติด U ทันที",
+        "เกณฑ์สิทธิ์เข้าสอบต้องมีเวลาเรียนไม่น้อยกว่าร้อยละ 80 และโควตาลาช่วงทฤษฎีรวมไม่เกิน 3 วัน ภาคสนามไม่เกิน 1.5 วัน",
         "",
-        "ระวังจำสลับ! เกิน 15 นาทีครบ 5 ครั้งคือ U ทันที ไม่ใช่แค่ M",
-        "การมาสายมีผลตรงต่อเกณฑ์เจตคติ M และ U ตามประกาศคณะฯ พ.ศ. 2567"
+        "ช่วงภาคสนามสามารถลาเมื่อมีเหตุจำเป็นได้ไม่เกิน 1.5 วัน (ต้องแจ้งและได้รับอนุมัติจากอาจารย์ที่ปรึกษา)",
+        "รายวิชาแยกเพดานวันลาชัดเจน: ช่วงก่อนและหลังภาคสนามรวม ≤ 3 วัน และช่วงภาคสนาม ≤ 1.5 วัน"
       ]
     },
     {
-      id: "q2_absence_m_to_u",
+      id: "q2_conduct_2567_mu",
       quick5: true,
-      badge: "เกณฑ์ O · S · M · U · การขาดเรียน & ส่งงานช้า",
-      impactTag: "ได้ M ≥ 2 หมวด หรือซ้ำหมวดเดิม → กลายเป็น U",
+      badge: "ประกาศคณะฯ พ.ศ. 2567 · พฤติกรรมไม่พึงประสงค์ (M / U)",
+      impactTag: "สาย 4 ครั้ง = M (≥ 5 = U) · ได้ M ซ้ำ/2 หมวด = U",
       durationSec: 22,
-      stem: "ข้อใดกล่าว “ถูกต้อง” เกี่ยวกับการเกิดระดับ M (Marginal) และการขยับเป็น U (Unsatisfactory) ตามคู่มือและ มม.4 รายวิชา RACM 303?",
+      stem: "ตามประกาศคณะแพทยศาสตร์ รพ.รามาธิบดี เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 ข้อใดเกิดระดับ M (ควรปรับปรุง) และขยับเป็น U (ไม่ผ่าน) อย่างถูกต้อง?",
       choices: [
-        "ขาดเรียนโดยไม่ลา 1 ครั้ง ได้รับเกรด U ทันทีโดยไม่มีข้อยกเว้น",
-        "ส่งงานช้ากว่ากำหนด 2 ครั้ง ยังได้เกรด O หากคะแนนสอบทฤษฎีถึง 3.75",
-        "ขาดเรียนไม่ลา ≥ 2 ครั้ง หรือส่งงานช้า ≥ 2 ครั้ง ได้ M (และหากได้ M ≥ 2 หมวด หรือทำซ้ำหมวดเดิม จะกลายเป็น U)",
-        "หากติด U ด้านเจตคติ สามารถขอสอบข้อเขียนแก้ตัว 1 ครั้งเพื่อปรับเป็น S ได้"
+        "เข้าเรียนสายเกิน 15 นาที 4 ครั้ง = M (≥ 5 ครั้ง = U) · ส่งงานช้า 2 ครั้ง = M (≥ 3 ครั้ง = U) · และได้ M ≥ 2 หมวดหรือซ้ำหมวดเดิมจะกลายเป็น U",
+        "สายเกิน 15 นาที 2 ครั้ง = M · สาย 3 ครั้ง = U · แต่ส่งงานช้าไม่มีผลต่อเกรดเจตคติ",
+        "ขาดเรียนไม่ลา 1 ครั้งได้ U ทันที ส่วนการมาสายหักเฉพาะคะแนนสอบทฤษฎี",
+        "ติดระดับ M กี่หมวดก็ได้ ตราบใดที่คะแนนสอบทฤษฎีเกิน 2.00 จะไม่กลายเป็น U"
+      ],
+      correctIdx: 0,
+      sourceRef: "คู่มือรายวิชา ข้อ 13 & ประกาศคณะฯ เรื่องพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 (มม.4 หน้า 11–13)",
+      doSummary: "ลงชื่อเข้าเรียนภายใน 15 นาทีแรกของคาบ ส่งงานทุกชิ้นตรงเวลา และรับผิดชอบต่อกลุ่มร่วมกัน",
+      dontSummary: "ห้ามสายเกิน 15 นาทีสะสม (4 ครั้ง = M, ≥ 5 = U) ห้ามขาดไม่ลา (≥ 2 = M) และห้ามส่งงานช้า (2 ครั้ง = M, ≥ 3 = U)",
+      osmuRule: "สำคัญมาก: หากได้รับ M ตั้งแต่ 2 หมวดขึ้นไป หรือทำผิดซ้ำในหมวด M เดิม จะถูกปรับผลเจตคติเป็น U ทันที!",
+      wrongHints: [
+        "",
+        "สายเกิน 15 นาทีติด M ที่ครั้งที่ 4 (และ U ที่ครั้งที่ 5) ส่วนการส่งงานช้ามีผลโดยตรง: ช้า 2 ครั้ง = M และ ≥ 3 ครั้ง = U",
+        "ขาดเรียนโดยไม่ได้รับอนุญาตตั้งแต่ 2 ครั้งขึ้นไปจะได้ระดับ M และการมาสายมีผลตรงต่อเจตคติ M / U",
+        "หากได้ M ตั้งแต่ 2 หมวดขึ้นไป หรือทำผิดซ้ำในหมวด M เดิม จะขยับเป็น U ทันทีแม้สอบทฤษฎีผ่าน!"
+      ]
+    },
+    {
+      id: "q3_peer_and_grade_o",
+      quick5: true,
+      badge: "ข้อ 13 การประเมินเจตคติ · เพื่อนในกลุ่ม & เกรด O",
+      impactTag: "เจตคติ O + สอบทฤษฎี O ทั้งคู่ + ไม่เคยสอบซ่อม = เกรด O",
+      durationSec: 22,
+      stem: "ข้อใดกล่าว “ถูกต้อง” เกี่ยวกับแบบประเมินพฤติกรรมและเจตคติจากเพื่อนในกลุ่ม และการได้รับเกรดสุดท้ายระดับ O (Outstanding) ของรายวิชา RACM 303?",
+      choices: [
+        "แบบประเมินจากเพื่อนไม่มีผลใด ๆ และเกรด O ดูเฉพาะคะแนนสอบทฤษฎีเฉลี่ยรวมกันเกิน 3.50",
+        "ได้เกรด O ได้แม้เคยสอบซ่อม 1 ครั้ง หากหลังสอบซ่อมได้คะแนนสูงและเพื่อนประเมินให้ดี",
+        "แบบประเมินจากเพื่อนเป็นข้อมูลที่อาจารย์ใช้ประกอบการพิจารณาประเมินนักศึกษา และเกรดสุดท้ายได้ O เมื่อเจตคติภาพรวมได้ O + ผลสอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม",
+        "แบบประเมินจากเพื่อนใช้ตัดสินเกรดสุดท้ายแทนคะแนนสอบทฤษฎีทั้งหมด"
       ],
       correctIdx: 2,
-      sourceRef: "มม.4 RACM 303 ปีการศึกษา 2569 (หน้า 11–13) & คู่มือรายวิชา หัวข้อ 13–14",
-      doSummary: "ส่งงานครบตรงเวลา และหากจำเป็นต้องลา ให้ยื่นใบลาล่วงหน้าและได้รับอนุมัติก่อนเสมอ (ทฤษฎี ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน)",
-      dontSummary: "ห้ามขาดเรียนโดยไม่ลา (≥ 2 ครั้ง = M) และห้ามส่งงานล่าช้า (ช้า ≥ 2 ครั้ง = M · ช้า ≥ 3 ครั้ง = U)",
-      osmuRule: "ได้ M ตั้งแต่ 2 หมวดขึ้นไป หรือทำผิดซ้ำในหมวด M เดิม → ปรับเป็น U ทันที และ U ด้านเจตคติไม่มีการสอบแก้ตัว!",
+      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 ข้อ 13 การประเมินด้านเจตคติและการตัดสินเกรด",
+      doSummary: "ทำงานร่วมกับเพื่อนในกลุ่มอย่างรับผิดชอบ มีน้ำใจ ซื่อสัตย์ (สะท้อนใน Peer Evaluation & ฟอร์ม 2A) และเตรียมสอบทั้งสองวิชาให้พร้อมตั้งแต่รอบแรก",
+      dontSummary: "อย่ากินแรงกลุ่ม และอย่าประมาททิ้งวิชาใดวิชาหนึ่ง เพราะต้องผ่านเกณฑ์ระดับ O ทั้งเจตคติและผลสอบทฤษฎีโดยไม่มีการสอบซ่อม",
+      osmuRule: "เกรดสุดท้าย O = คะแนนประเมินภาพรวมเจตคติและพฤติกรรมได้ O + ผลสอบทฤษฎีได้ O (≥ 3.75 ทั้งระบบฯ และระบาดฯ) + ไม่มีการสอบซ่อม",
       wrongHints: [
-        "ขาดเรียนโดยไม่ได้รับอนุญาตตั้งแต่ 2 ครั้งขึ้นไปจึงจะได้ M (แต่ควรยื่นใบลาให้ถูกต้องทุกครั้ง)",
-        "ไม่ส่งงานตามกำหนดตั้งแต่ 2 ครั้งขึ้นไปจะได้ M ทันที (และ ≥ 3 ครั้งได้ U)",
+        "คู่มือข้อ 13 ระบุชัดว่า แบบประเมินจากเพื่อนในกลุ่มเป็นข้อมูลสำคัญที่อาจารย์ใช้ประกอบการพิจารณาประเมินผลนักศึกษา",
+        "หากมีการสอบซ่อม จะไม่ได้รับเกรด O (เมื่อสอบซ่อมผ่านจะได้รับเกรดเป็น S เท่านั้น)",
         "",
-        "สำคัญมาก: เกรด U จากหมวดเจตคติและพฤติกรรม ไม่มีการสอบแก้ตัว ต้องลงทะเบียนเรียนใหม่เท่านั้น!"
+        "ผลประเมินจากเพื่อนเป็นข้อมูลประกอบการพิจารณาของอาจารย์ ควบคู่กับฟอร์ม 1A/2A และผลสอบทฤษฎี"
       ]
     },
     {
-      id: "q3_fieldwork_donts",
+      id: "q4_retest_honors",
       quick5: true,
-      badge: "DO'S & DON'TS · ระเบียบภาคสนาม พ.ศ. 2561",
-      impactTag: "ฝ่าฝืนระเบียบภาคสนาม/ปกปิด = โทษวินัย & U",
+      badge: "การสอบซ่อมแยกวิชา (< 2.00) · เกรด S & เกียรตินิยม",
+      impactTag: "ต่ำกว่า 2.00 สอบซ่อมแยกวิชา 1 ครั้ง → ผ่านได้ S & กระทบเกียรตินิยม",
       durationSec: 22,
-      stem: "ระหว่างฝึกภาคสนาม ณ รพ.แหล่งฝึกทั้ง 9 แห่ง ข้อใดคือ “Don't (ห้ามทำเด็ดขาด)” ที่ฝ่าฝืนประกาศระเบียบฝึกนอกสถานที่ พ.ศ. 2561 และเสี่ยงได้รับ U?",
+      stem: "นศพ. สอบวิชาระบาดวิทยาได้ 3.80 แต่สอบวิชาระบบสุขภาพได้ 1.85 [แต้มต่ำกว่า 2.00] และผลเจตคติได้ O ข้อใดคือผลตามเกณฑ์การสอบซ่อมของรายวิชา?",
       choices: [
-        "เดินทางเป็นทีมด้วยรถที่ภาควิชา/รพ.จัดให้ และแจ้ง อ.ที่ปรึกษาทุกครั้งก่อนลงพื้นที่",
-        "นำรถยนต์/มอเตอร์ไซค์ส่วนตัวไปใช้ ออกนอกเขตฝึกโดยพลการ ดื่มแอลกอฮอล์/เล่นพนัน หรือให้คนนอกเข้าที่พักโดยไม่ขออนุญาต",
-        "แต่งกายชุดสุภาพ (กางเกงขายาว เสื้อมีแขน) ลงชุมชน และแต่งชุด นศพ. ติดป้ายชื่อเมื่อขึ้น รพช.",
-        "ขออนุมัติใบลาเป็นลายลักษณ์อักษรจาก อ.ที่ปรึกษาก่อนลาหยุด (โควตาภาคสนามไม่เกิน 1.5 วัน)"
+        "นำคะแนนทั้งสองวิชามาถัวเฉลี่ยกันได้ 2.82 จึงผ่านเป็นเกรด S ทันทีโดยไม่ต้องสอบซ่อม",
+        "ต้องสอบซ่อมเฉพาะวิชาระบบสุขภาพ (แก้ตัวได้ 1 ครั้ง) ถ้าผ่านจะได้เกรด S (และมีผลต่อการได้รับเกียรตินิยม) ถ้าไม่ผ่านต้องลงทะเบียนเรียนใหม่",
+        "ต้องสอบซ่อมใหม่ทั้งวิชาระบาดวิทยาและระบบสุขภาพพร้อมกัน และยังลุ้นเกรด O ได้",
+        "ให้โอกาสสอบแก้ตัวได้ไม่จำกัดจำนวนครั้งจนกว่าจะผ่าน 2.00 โดยไม่กระทบเกียรตินิยม"
       ],
       correctIdx: 1,
-      sourceRef: "คู่มือรายวิชา 2569 หัวข้อที่ 2, 10, 14 (ประกาศระเบียบฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ข้อ 3–8)",
-      doSummary: "ใช้พาหนะและพักในที่พักที่จัดให้ ลงเก็บข้อมูลเป็นทีม แต่งกายสุภาพติดป้ายชื่อ ดูแลความปลอดภัยของตนเองและเพื่อน",
-      dontSummary: "งดพาหนะส่วนตัว งดออกนอกเขตฝึกโดยพลการ งดแอลกอฮอล์/สารเสพติด/การพนัน งดพาบุคคลภายนอกเข้าที่พักโดยไม่ได้รับอนุญาต",
-      osmuRule: "การฝ่าฝืนประกาศฯ หรือพยายามปกปิดการฝ่าฝืนของตนเอง/ผู้อื่น → พิจารณาดำเนินการทางวินัยและประเมินรายวิชาเป็น U",
+      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 ข้อ 13 หัวข้อการสอบซ่อมและหมายเหตุเกียรตินิยม",
+      doSummary: "เตรียมตัวสอบให้ได้แต้ม ≥ 2.00 แยกกันทั้งวิชาระบบสุขภาพและวิชาระบาดวิทยาตั้งแต่การสอบรอบแรก",
+      dontSummary: "ห้ามเข้าใจผิดว่าคะแนนสอบทั้งสองวิชาถัวเฉลี่ยข้ามหมวดกันได้ — แต้มต่ำกว่า 2.00 แม้หมวดเดียวต้องสอบซ่อม!",
+      osmuRule: "สอบแยกวิชา [แต้ม < 2.00 ต้องสอบซ่อม] แก้ตัวได้ 1 ครั้ง: ผ่านได้เกรด S (หมายเหตุ: มีผลต่อการได้รับเกียรตินิยม!) · ไม่ผ่านต้องลงทะเบียนเรียนใหม่",
       wrongHints: [
-        "ข้อนี้คือแนวปฏิบัติที่ถูกต้อง (Do) เพื่อความปลอดภัยตลอดการฝึกภาคสนาม",
+        "คะแนนสอบคิดแยกวิชาระบบฯ และวิชาระบาดฯ ไม่นำมาถัวเฉลี่ยกัน หากวิชาใดต่ำกว่า 2.00 ต้องสอบซ่อมวิชานั้น!",
         "",
-        "ข้อนี้คือแนวปฏิบัติการแต่งกายที่ถูกต้อง (Do) ตามคู่มือรายวิชา หัวข้อที่ 10",
-        "ข้อนี้คือแนวปฏิบัติการลาที่ถูกต้อง (Do) โดยช่วงภาคสนามลาได้ไม่เกิน 1.5 วัน"
+        "สอบซ่อมเฉพาะวิชาที่ได้แต้มต่ำกว่า 2.00 เท่านั้น และเมื่อสอบซ่อมผ่านจะได้รับเกรดเป็น S (ไม่ได้ O)",
+        "รายวิชาให้โอกาสสอบแก้ตัวได้เพียง 1 ครั้งเท่านั้น และคู่มือระบุหมายเหตุชัดว่า การสอบซ่อมมีผลต่อการได้รับเกียรตินิยม!"
       ]
     },
     {
-      id: "q4_integrity_1a",
-      quick5: false,
-      badge: "DO'S & DON'TS · ความซื่อสัตย์วิชาชีพ (ฟอร์ม 1A)",
-      impactTag: "เซ็นชื่อแทนกัน / เมคข้อมูล / ลอกงาน = U ทั้งคู่",
+      id: "q5_attitude_u_reregister",
+      quick5: true,
+      badge: "การลงทะเบียนเรียนใหม่ · เจตคติได้ U & ความซื่อสัตย์",
+      impactTag: "ผลประเมินเจตคติและพฤติกรรมได้ U → ต้องลงทะเบียนเรียนใหม่ทันที",
       durationSec: 20,
-      stem: "เพื่อนฝากเช็คชื่อเข้าเรียน หรือช่วยกันกรอกข้อมูลเท็จในแบบสำรวจ Health Survey เพื่อให้เก็บครบเร็วขึ้น ผลตามเกณฑ์ฟอร์ม 1A (ข้อ 6.2) และ มม.4 คือข้อใด?",
+      stem: "เพื่อนฝากเช็คชื่อเข้าเรียน หรือช่วยกันเมคข้อมูลเท็จในแบบสำรวจชุมชน จนผลการประเมินเจตคติและพฤติกรรมได้ระดับ “U” ผลตามคู่มือข้อ 13 คือข้อใด?",
       choices: [
-        "ตักเตือนเฉพาะผู้ฝากเช็คชื่อ ส่วนผู้กดเช็คชื่อให้ถือว่ามีน้ำใจช่วยเหลือเพื่อน",
-        "ได้รับระดับ M ในฟอร์ม 1A แต่ยังผ่านรายวิชาเป็นเกรด S ได้",
-        "หักคะแนนเฉพาะพาร์ทการนำเสนอวิจัยฟอร์ม 4A ลงครึ่งหนึ่ง",
-        "เข้าข่ายไม่ซื่อสัตย์ (ทั้งผู้ให้ทำแทนและผู้ทำแทนโดยสิเน่หา/สินจ้าง บิดเบือนข้อมูล หรือลอกรายงาน) ได้รับ U ทั้งคู่"
+        "ขอสอบข้อเขียนแก้ตัวเพิ่มเติม 1 ครั้งเพื่อเปลี่ยนเกรดจาก U เป็น S ได้",
+        "ทำรายงานบำเพ็ญประโยชน์ส่งท้ายรายวิชาเพื่อปรับระดับ U เป็น M",
+        "ตักเตือนเฉพาะผู้ฝากเช็คชื่อ ส่วนผู้ทำให้ถือว่ามีน้ำใจช่วยเหลือเพื่อนในกลุ่ม",
+        "ทั้งผู้ฝากและผู้ทำแทนเข้าข่ายไม่ซื่อสัตย์ได้รับเจตคติระดับ U และเมื่อเจตคติและพฤติกรรมได้ U ต้องลงทะเบียนเรียนใหม่ (ไม่มีการสอบซ่อม)"
       ],
       correctIdx: 3,
-      sourceRef: "คู่มือรายวิชา 2569 ภาคผนวก ฟอร์ม 1A (ข้อ 6.2 ความซื่อสัตย์) & มม.4 หน้า 12",
-      doSummary: "ลงชื่อเข้าเรียนด้วยตนเอง เก็บข้อมูลชุมชนตามความจริง ซื่อสัตย์ต่อหน้าและลับหลัง และกล้ารับผิดชอบเมื่อเกิดข้อผิดพลาด",
-      dontSummary: "ห้ามเซ็นชื่อแทนกัน ห้ามบิดเบือน/เมคข้อมูลวิจัย ห้ามปลอมใบรับรองแพทย์ และห้ามคัดลอกรายงาน",
-      osmuRule: "การบิดเบือนข้อมูล ลอกงาน ปลอมลายเซ็น หรือทำกิจกรรมแทนกัน (ทั้งผู้รับและผู้ทำให้) = ประเมินเจตคติเป็น U ทันที",
+      sourceRef: "คู่มือรายวิชา 2569 ข้อ 13 การลงทะเบียนเรียนใหม่ & ภาคผนวกฟอร์ม 1A ข้อ 6.2",
+      doSummary: "ลงชื่อเข้าเรียนด้วยตนเอง เก็บข้อมูลชุมชนตามความจริง ไม่คัดลอกผลงาน และซื่อสัตย์ต่อวิชาชีพแพทย์",
+      dontSummary: "ห้ามเซ็นชื่อแทนกัน ห้ามบิดเบือน/เมคข้อมูลสำรวจ ห้ามปลอมใบรับรองแพทย์ และห้ามทุจริตการสอบเด็ดขาด",
+      osmuRule: "การลงทะเบียนเรียนใหม่: ผลการประเมินเจตคติและพฤติกรรมได้ U ต้องลงทะเบียนเรียนใหม่สถานเดียว (ไม่มีการสอบแก้ตัว!)",
       wrongHints: [
-        "มม.4 ระบุชัดว่าทั้งผู้ให้ทำแทนและผู้ทำให้โดยสิเน่หา/สินจ้างในการเซ็นชื่อหรือเขียนงานแทน มีความผิดระดับ U ทั้งคู่",
-        "ความไม่ซื่อสัตย์ทางวิชาการและวิชาชีพจัดเป็นพฤติกรรมระดับ U ไม่ใช่ M",
-        "การเมคหรือบิดเบือนข้อมูลวิจัยชุมชนผิดจริยธรรมวิชาชีพร้ายแรง ส่งผลถึงระดับ U รายบุคคล",
+        "การสอบแก้ตัว 1 ครั้งใช้เฉพาะกรณีคะแนนสอบทฤษฎีต่ำกว่า 2.00 เท่านั้น ส่วนเจตคติได้ U ต้องลงทะเบียนเรียนใหม่ทันที!",
+        "เมื่อสรุปผลเจตคติและพฤติกรรมเป็น U แล้ว ไม่สามารถทำรายงานแก้ตัวได้ ต้องลงทะเบียนเรียนใหม่",
+        "ประกาศคณะฯ พ.ศ. 2567 และ มม.4 ระบุชัดว่าทั้งผู้ให้ทำแทนและผู้ทำแทนในการลงชื่อหรือทำงานแทน ได้รับ U ทั้งคู่",
         ""
       ]
     },
     {
-      id: "q5_exam_opennote",
-      quick5: true,
-      badge: "DO'S & DON'TS · ระเบียบห้องสอบ & โน้ต A4",
-      impactTag: "สาย > 15 นาทีหมดสิทธิ์เข้าสอบ · A4 ลายมือตนเองเท่านั้น",
+      id: "q6_fieldwork_donts",
+      quick5: false,
+      badge: "DO'S & DON'TS · ระเบียบภาคสนาม พ.ศ. 2561",
+      impactTag: "งดพาหนะส่วนตัว · งดออกนอกเขตฝึก · งดแอลกอฮอล์/พนัน",
       durationSec: 20,
-      stem: "ข้อใดปฏิบัติ “ถูกต้อง (Do)” ในการเข้าสอบภาคทฤษฎีระบาดวิทยา (8 ธ.ค.) และการสอบระบบสุขภาพ (22 ธ.ค. แบบ Open Note)?",
+      stem: "ระหว่างฝึกภาคสนาม ณ รพ.แหล่งฝึกทั้ง 9 แห่ง ข้อใดคือ “Don't (ห้ามทำเด็ดขาด)” ที่ฝ่าฝืนระเบียบฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 และนำไปสู่ระดับ U?",
       choices: [
-        "เข้าห้องสอบสายได้ไม่เกิน 30 นาที และสวม Smart Watch เข้าห้องสอบได้หากเปิด Airplane Mode",
+        "เดินทางเป็นทีมด้วยรถที่ภาควิชา/รพ.จัดให้ และแจ้งอาจารย์ที่ปรึกษาทุกครั้งก่อนลงพื้นที่",
+        "นำรถยนต์/มอเตอร์ไซค์ส่วนตัวไปใช้ ออกนอกเขตฝึกโดยพลการ ดื่มแอลกอฮอล์/เล่นพนัน หรือพาคนนอกเข้าที่พักโดยไม่ขออนุญาต",
+        "แต่งกายสุภาพลงชุมชน และสวมชุดนักศึกษาแพทย์ติดป้ายชื่อเมื่อขึ้นปฏิบัติงานใน รพช.",
+        "เคารพสิทธิผู้ป่วยและชุมชนโดยไม่โพสต์ภาพหรือข้อมูลผู้ป่วยลงสื่อสังคมออนไลน์"
+      ],
+      correctIdx: 1,
+      sourceRef: "คู่มือรายวิชา 2569 หัวข้อ 2, 10, 14 (ประกาศระเบียบฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561)",
+      doSummary: "ใช้พาหนะและพักในที่พักที่จัดให้ ลงพื้นที่เป็นทีม แต่งกายสุภาพติดป้ายชื่อ และดูแลความปลอดภัยของเพื่อนร่วมทีม",
+      dontSummary: "งดพาหนะส่วนตัว งดออกนอกพื้นที่โดยพลการ งดแอลกอฮอล์/สารเสพติด/การพนัน งดพาคนนอกเข้าที่พัก และห้ามปกปิดการกระทำผิด",
+      osmuRule: "ฝ่าฝืนระเบียบภาคสนาม พ.ศ. 2561 หรือปกปิดการฝ่าฝืน = ดำเนินการทางวินัยและประเมินเจตคติเป็น U (ลงทะเบียนเรียนใหม่)",
+      wrongHints: [
+        "ข้อนี้เป็นแนวปฏิบัติที่ถูกต้อง (Do) เพื่อความปลอดภัยตลอดการฝึกภาคสนาม",
+        "",
+        "ข้อนี้เป็นแนวปฏิบัติการแต่งกายที่ถูกต้อง (Do)",
+        "ข้อนี้เป็นแนวปฏิบัติการคุ้มครองสิทธิผู้ป่วยที่ถูกต้อง (Do)"
+      ]
+    },
+    {
+      id: "q7_exam_opennote",
+      quick5: false,
+      badge: "DO'S & DON'TS · ระเบียบห้องสอบ & โน้ต A4",
+      impactTag: "สาย > 15 นาทีหมดสิทธิ์สอบ · A4 เขียนลายมือตนเองเท่านั้น",
+      durationSec: 20,
+      stem: "ข้อใดปฏิบัติ “ถูกต้อง (Do)” ในการเข้าสอบทฤษฎีระบาดวิทยา (8 ธ.ค.) และการสอบระบบสุขภาพ (22 ธ.ค. แบบ Open Note)?",
+      choices: [
+        "เข้าห้องสอบสายได้ไม่เกิน 30 นาที และสวม Smart Watch เข้าห้องสอบได้หากปิดเสียง",
         "สอบระบบสุขภาพนำกระดาษ A4 ที่พิมพ์สรุปจาก iPad หรือถ่ายเอกสารลายมือเพื่อนเข้าห้องสอบได้ 1 แผ่น",
-        "เข้าห้องสอบไม่เกิน 15 นาที งดกระเป๋า/มือถือ/Smart Watch และสอบระบบสุขภาพนำ A4 เขียนลายมือตนเอง (ปากกา/ดินสอ หน้า-หลัง) เข้าได้ 1 แผ่น",
-        "สอบระบาดวิทยาเป็น Closed-Book แต่อนุญาตให้นำเครื่องคิดเลขวิทยาศาสตร์ส่วนตัวเข้าห้องสอบได้"
+        "เข้าห้องสอบไม่สายเกิน 15 นาที งดกระเป๋า/มือถือ/Smart Watch/เครื่องคิดเลข และสอบระบบสุขภาพนำ A4 เขียนลายมือตนเอง (หน้า-หลัง) เข้าได้ 1 แผ่น",
+        "สอบระบาดวิทยาอนุญาตให้นำเครื่องคิดเลขวิทยาศาสตร์ส่วนตัวเข้าห้องสอบได้"
       ],
       correctIdx: 2,
       sourceRef: "คู่มือรายวิชา 2569 หัวข้อที่ 9 ระเบียบการสอบภาคทฤษฎี (หน้า 11–12)",
-      doSummary: "แต่งชุด นศพ. ถูกระเบียบ ติดป้ายชื่อมีรูปชัดเจน เข้าห้องสอบก่อนเวลา (สายเกิน 15 นาทีไม่ให้เข้าสอบ) และเขียนสรุป A4 ด้วยลายมือตนเอง",
+      doSummary: "แต่งชุด นศพ. ติดป้ายชื่อ เข้าห้องสอบก่อนเวลา (สายเกิน 15 นาทีไม่อนุญาตให้เข้าสอบ) และเขียนสรุป A4 ด้วยลายมือตนเอง",
       dontSummary: "ห้ามนำกระเป๋า มือถือ Smart Watch เครื่องคิดเลข เอกสารพิมพ์/สำเนา และอาหารเครื่องดื่มเข้าห้องสอบเด็ดขาด",
-      osmuRule: "ทุจริตการสอบหรือนำอุปกรณ์ต้องห้ามเข้าห้องสอบ = U · คะแนนสอบแต่ละหมวดต้อง ≥ 2.00 จึงผ่าน (≥ 3.75 จึงมีสิทธิ์ลุ้น O)",
+      osmuRule: "ทุจริตหรือนำอุปกรณ์ต้องห้ามเข้าห้องสอบ = U ทันที · สอบต่ำกว่า 2.00 ต้องสอบซ่อมแยกหมวด",
       wrongHints: [
-        "เข้าห้องสอบสายเกิน 15 นาที ไม่อนุญาตให้เข้าห้องสอบ และห้ามสวม Smart Watch ทุกชนิดเข้าห้องสอบ!",
-        "กระดาษ A4 1 แผ่นในวิชาสอบระบบสุขภาพ ต้องเขียนสดด้วยลายมือตนเอง (ปากกา/ดินสอ) เท่านั้น ห้ามพิมพ์จาก iPad หรือถ่ายสำเนา!",
+        "สายเกิน 15 นาทีหมดสิทธิ์เข้าสอบ และห้ามสวม Smart Watch ทุกชนิดเข้าห้องสอบ!",
+        "กระดาษ A4 1 แผ่นในวิชาสอบระบบสุขภาพต้องเขียนสดด้วยลายมือตนเองเท่านั้น ห้ามพิมพ์หรือถ่ายสำเนา!",
         "",
-        "ห้ามนำเครื่องคิดเลขและอุปกรณ์อิเล็กทรอนิกส์ทุกชนิดเข้าห้องสอบ"
+        "ไม่อนุญาตให้นำเครื่องคิดเลขและอุปกรณ์อิเล็กทรอนิกส์ทุกชนิดเข้าห้องสอบ"
       ]
     },
     {
-      id: "q6_ai_pdpa",
-      quick5: true,
-      badge: "DO'S & DON'TS · การใช้ AI & กฎหมาย PDPA",
-      impactTag: "SRN 1–2 = No AI · ห้ามนำข้อมูลชาวบ้านเข้า AI สาธารณะ",
+      id: "q8_ai_pdpa_3a4a",
+      quick5: false,
+      badge: "DO'S & DON'TS · AI, PDPA & นำเสนอ 3A/4A",
+      impactTag: "SRN 1–2 = No AI · งด VDO ล่วงหน้า · ห้ามข้อมูลชาวบ้านเข้า AI",
       durationSec: 22,
-      stem: "ข้อใดปฏิบัติ “ถูกต้อง” ตามเกณฑ์ AI Scale Assessment ม.มหิดล และการคุ้มครองสิทธิผู้ป่วย/ชุมชน (PDPA) ในรายวิชา RACM 303 ปี 2569?",
+      stem: "ข้อใดปฏิบัติ “ถูกต้อง” ตามเกณฑ์การใช้ AI ม.มหิดล, กฎหมาย PDPA และการนำเสนอผลงานภาคสนาม (ฟอร์ม 3A / 4A)?",
       choices: [
-        "ใช้ Generative AI ร่างบันทึกสะท้อนคิด SRN 1 และ SRN 2 ได้ หากนำมาปรับสำนวนเป็นตัวเอง",
-        "อัปโหลดตารางข้อมูลดิบที่มีชื่อ-นามสกุลและประวัติโรคของผู้ป่วยในชุมชนเข้า AI สาธารณะเพื่อช่วยวิเคราะห์สถิติ",
-        "ถ่ายภาพใบหน้าผู้ป่วยติดเตียงขณะเยี่ยมบ้านลงโซเชียลสาธารณะเพื่อบอกเล่าความประทับใจโดยไม่ต้องขอความยินยอม",
-        "SRN 1–2 และการสอบเป็น No AI เด็ดขาด · ส่วนสไลด์กลุ่ม (3A/4A) ใช้ AI ช่วยวางโครง/ทำกราฟได้โดยต้อง Declare Prompt และห้ามใส่ข้อมูลระบุตัวบุคคล"
+        "ใช้ Generative AI เขียนบันทึกสะท้อนคิด SRN 1 และ SRN 2 แทนตนเองเพื่อส่งให้ทันเวลา",
+        "อัปโหลดไฟล์ข้อมูลดิบที่มีชื่อ-นามสกุลผู้ป่วยในชุมชนเข้า AI สาธารณะเพื่อวิเคราะห์สถิติ",
+        "อัดคลิปวิดีโอนำเสนอล่วงหน้ามาเปิดฉายในวันนำเสนอ 29–30 ธ.ค. เพื่อคุมเวลาให้เป๊ะ",
+        "เขียน SRN 1–2 ด้วยตนเอง (No AI) · งานกลุ่ม 3A/4A ใช้ AI ช่วยได้โดยต้อง Declare Prompt ห้ามใส่ข้อมูลระบุตัวบุคคล และต้องนำเสนอสดตรงเวลา"
       ],
       correctIdx: 3,
-      sourceRef: "มม.4 RACM 303 ปีการศึกษา 2569 (หน้า 9–10 AI Scale Assessment) & ระเบียบภาคสนาม ข้อ 5",
-      doSummary: "เขียน SRN 1–2 จากการสะท้อนคิดจริงด้วยตนเอง (PDF ≤ 5 หน้า TH Sarabun New 16pt) และระบุชื่อเครื่องมือ + Prompt เมื่อใช้ AI ช่วยงานกลุ่ม 3A/4A",
-      dontSummary: "ห้ามใช้ AI เขียน SRN ห้ามนำข้อมูลดิบ/ข้อมูลระบุตัวบุคคลเข้า AI สาธารณะ และห้ามโพสต์ละเมิดสิทธิผู้ป่วยในสื่อออนไลน์",
-      osmuRule: "จงใจละเมิดสิทธิผู้ป่วย/PDPA หรือลอก/ปลอมผลงาน = U · ส่ง SRN ช้า ≥ 2 ครั้ง = M (และต้องทำแบบประเมินออนไลน์ก่อนส่ง SRN)",
+      sourceRef: "มม.4 ปี 2569 (AI Scale Assessment) & คู่มือรายวิชา หัวข้อ 15–17",
+      doSummary: "เขียน SRN 1–2 ด้วยตนเอง (ทำแบบประเมินออนไลน์ก่อนส่ง!) · นำเสนอ 3A (≤ 10 นาที) และ 4A (≤ 7 นาที) แบบสด และ Declare Prompt เมื่อใช้ AI",
+      dontSummary: "ห้ามใช้ AI เขียน SRN ห้ามนำข้อมูลระบุตัวบุคคลเข้า AI สาธารณะ และห้ามใช้วิดีโออัดล่วงหน้าในการนำเสนอ",
+      osmuRule: "ละเมิด PDPA/ลอกหรือปลอมงาน = U · ไม่รักษาเวลาหรือไม่หยุดเมื่อเตือนใน 3A/4A เสี่ยงติดหมวด U!",
       wrongHints: [
-        "SRN 1–2 กำหนดเป็น No AI เด็ดขาด เพื่อป้องกันความเข้าอกเข้าใจสังเคราะห์ (Synthetic Empathy)",
-        "ห้ามนำข้อมูลดิบหรือข้อมูลที่ระบุตัวบุคคลของประชาชนเข้าสู่ระบบ AI สาธารณะโดยเด็ดขาด (ผิด PDPA และจริยธรรมวิจัย)",
-        "การโพสต์ภาพหรือข้อมูลผู้ป่วยลงสื่อออนไลน์โดยไม่เคารพสิทธิผู้ป่วย ผิดระเบียบภาคสนามและจริยธรรมวิชาชีพ (เสี่ยง U)",
+        "SRN 1–2 กำหนดเป็น No AI เด็ดขาด เพื่อประเมินการสะท้อนคิดจริงของนักศึกษา",
+        "ห้ามนำข้อมูลระบุตัวบุคคลของชาวบ้านเข้า AI สาธารณะโดยเด็ดขาด (ผิด PDPA และจริยธรรมวิจัย)",
+        "คู่มือรายวิชา หัวข้อ 16–17 ไม่อนุญาตให้ใช้วิดีโอถ่ายบันทึกล่วงหน้ามาเปิดนำเสนอ!",
         ""
-      ]
-    },
-    {
-      id: "q7_grade_criteria",
-      quick5: false,
-      badge: "เกณฑ์ตัดสินเกรด · O / S / สอบซ่อม / U",
-      impactTag: "เกรด O = สอบ ≥ 3.75 ทั้งสองหมวด + 2A ได้ O + ไม่เคยซ่อม",
-      durationSec: 22,
-      stem: "นศพ. สอบระบาดวิทยาได้ 3.80 สอบระบบสุขภาพรอบแรกได้ 1.85 (สอบซ่อมครั้งที่ 1 ผ่านได้ 3.50) และได้ฟอร์ม 2A ระดับ O เกรดสุดท้ายของรายวิชาจะเป็นข้อใด?",
-      choices: [
-        "ได้เกรด O เพราะคะแนนหลังสอบซ่อมสูงและผลประเมินเจตคติ 2A ได้ระดับ O",
-        "ได้เกรด S (เนื่องจากหมวดที่ได้ < 2.00 ต้องสอบซ่อม และเมื่อมีการสอบซ่อมผ่านจะได้รับเกรดเป็น S)",
-        "ได้เกรด M เพราะผ่านจากการสอบแก้ตัว",
-        "ได้เกรด U เพราะมีหมวดที่ต่ำกว่า 2.00 ในการสอบรอบแรก"
-      ],
-      correctIdx: 1,
-      sourceRef: "คู่มือรายวิชา 2569 หัวข้อที่ 13 (หน้า 13) & มม.4 หน้า 11–13",
-      doSummary: "เตรียมตัวให้ผ่านเกณฑ์ ≥ 2.00 แยกทั้งระบาดวิทยาและระบบสุขภาพตั้งแต่รอบแรก (ลุ้น O เมื่อได้ ≥ 3.75 ทั้งสองหมวดคู่กับ 2A ระดับ O)",
-      dontSummary: "อย่าชะล่าใจทิ้งหมวดใดหมวดหนึ่ง เพราะคะแนนคิดแยกหมวดกัน ไม่นำมาถัวเฉลี่ยข้ามหมวดเพื่อผ่านเกณฑ์ 2.00!",
-      osmuRule: "ต่ำกว่า 2.00 สอบซ่อมแยกหมวดได้ 1 ครั้ง: ซ่อมผ่านได้เกรด S · ซ่อมไม่ผ่านได้เกรด U ต้องลงทะเบียนเรียนใหม่",
-      wrongHints: [
-        "เกรด O ต้องได้ ≥ 3.75 ทั้งสองหมวดตั้งแต่รอบแรก คู่กับฟอร์ม 2A ระดับ O และต้องไม่มีการสอบซ่อม",
-        "",
-        "เกรดสรุปรายวิชาเมื่อสอบซ่อมผ่านจะได้รับสัญลักษณ์ S (ไม่ใช่ M)",
-        "รายวิชาให้โอกาสสอบแก้ตัวได้ 1 ครั้งในหมวดที่ได้ต่ำกว่า 2.00 จะได้ U ก็ต่อเมื่อสอบแก้ตัวไม่ผ่าน"
-      ]
-    },
-    {
-      id: "q8_presentation_3a4a",
-      quick5: false,
-      badge: "DO'S & DON'TS · การนำเสนอทีม (ฟอร์ม 3A & 4A)",
-      impactTag: "ห้ามใช้ VDO อัดล่วงหน้า · รักษาเวลาเคร่งครัด",
-      durationSec: 20,
-      stem: "ในวันนำเสนอผลงานภาคสนาม (29–30 ธ.ค. 2569) ข้อใดคือแนวปฏิบัติที่ถูกต้องตามกติกาและนำไปสู่ระดับ “โดดเด่น (O)” ในฟอร์ม 3A และ 4A?",
-      choices: [
-        "อัดคลิปวิดีโอนำเสนอล่วงหน้ามาเปิดฉายในห้อง 2C2-03 เพื่อป้องกันการพูดเกินเวลา",
-        "แบ่งสไลด์ระบบสุขภาพออกเป็น 5 ส่วนแยกขาดจากกันตามคนพูดโดยไม่ต้องเชื่อมโยงกัน",
-        "นำเสนอสด (งด VDO ล่วงหน้า) รักษาเวลาเคร่งครัด (3A พูด ≤ 10 นาที · 4A พูด ≤ 7 นาที) ใช้ Systems Thinking เชื่อม 5 วัตถุประสงค์ และวิพากษ์ข้อจำกัดข้อมูลอย่างตรงไปตรงมา",
-        "พูดเกินเวลาที่กำหนดไปเรื่อย ๆ เพื่อให้ครอบคลุมข้อมูลทุกตารางแม้กรรมการกดกริ่งเตือนแล้ว"
-      ],
-      correctIdx: 2,
-      sourceRef: "คู่มือรายวิชา 2569 หัวข้อที่ 16–17 & ภาคผนวกเกณฑ์ฟอร์ม 3A และ 4A",
-      doSummary: "นำเสนอสด ซ้อมจับเวลาทีม (3A: 10+20 นาที · 4A: 7+18 นาที) เชื่อมโยง 5 วัตถุประสงค์เชิงระบบ และส่งสไลด์+Health Survey ภายใน 30 ธ.ค. 17.00 น.",
-      dontSummary: "ห้ามใช้วิดีโอถ่ายบันทึกล่วงหน้ามาเปิดนำเสนอ และห้ามพูดเกินเวลาแม้กรรมการกดกริ่งเตือน",
-      osmuRule: "ไม่รักษาเวลา/ไม่หยุดเมื่อเตือน หรืออ้างข้อมูลเกินจริงโดยไม่ตระหนักข้อจำกัด = ได้หมวด U ในฟอร์ม 3A/4A (และต้องไม่ได้ U ในการนำเสนอรายกลุ่มจึงจะผ่านวิชา!)",
-      wrongHints: [
-        "คู่มือรายวิชา หัวข้อ 16 และ 17 ระบุชัดว่า ยกเว้น (ไม่อนุญาต) การถ่ายบันทึก VDO ล่วงหน้ามาเปิด Present!",
-        "หัวใจของฟอร์ม 3A ระดับ O คือการใช้ Systems Thinking ร้อยเรียงทั้ง 5 วัตถุประสงค์เข้าด้วยกัน ไม่ใช่แยกส่วน",
-        "",
-        "เกณฑ์ฟอร์ม 3A/4A หมวดการรักษาเวลา: ไม่หยุดนำเสนอเมื่อกรรมการเตือน ได้ 0–4 คะแนน (ระดับไม่ผ่าน U)"
       ]
     }
   ];
@@ -601,13 +672,14 @@
 
   let savedPid = safeGet("racm303_orient_pid_v1", "");
   if (!savedPid) {
-    savedPid = randomId("stu");
+    savedPid = randomId("part");
     safeSet("racm303_orient_pid_v1", savedPid);
   }
 
   const state = {
     role: ROLE,
     participantId: savedPid,
+    memberType: safeGet("racm303_orient_mtype_v1", ROLE === "faculty" ? "faculty" : "student"), // "student" | "faculty"
     joined: safeGet("racm303_orient_joined_v1", "0") === "1",
     studentId: safeGet("racm303_orient_sid_v1", ""),
     shortNo: safeGet("racm303_orient_sno_v1", ""),
@@ -615,26 +687,28 @@
     fullName: safeGet("racm303_orient_fname_v1", ""),
     area: safeGet("racm303_orient_area_v1", ""),
     disc: Number(safeGet("racm303_orient_disc_v1", "0")) || 0,
-    avatar: safeGet("racm303_orient_avatar_v1", "🩺"),
+    avatar: safeGet("racm303_orient_avatar_v1", ROLE === "faculty" ? "👨‍⚕️" : "🩺"),
+
+    mobileTab: "pad", // "pad" | "remote"
+    followHostSlide: safeGet("racm303_orient_follow_v1", "1") !== "0",
 
     coverPaneMode: "lobby", // "lobby" | "hero"
-    qrUrlMode: "prod", // "prod" | "current"
+    qrUrlMode: "prod", // "prod" | "faculty" | "current"
     qrZoomOpen: false,
     customPollModalOpen: false,
     questionPickerOpen: false,
     soundMuted: safeGet("racm303_orient_mute_v1", "0") === "1",
     participantModalOpen: false,
 
-    presetMode: "all8", // "all8" | "quick5"
+    presetMode: "quick5", // Default to crisp 5-question core O/S/M/U & Conduct 2567 check! ("quick5" | "all8")
     customDurationSec: 20,
     customQuestions: loadCustomQuestions(),
 
-    // Shared Live Session State (controlled by Faculty / Host)
     session: {
       seq: 0,
       sessionId: safeGet("racm303_orient_sess_id_v1", "orient_2569"),
       phase: "lobby", // "lobby" | "question" | "reveal" | "podium"
-      activeDeckIds: BASE_QUESTIONS.map((q) => q.id),
+      activeDeckIds: BASE_QUESTIONS.filter((q) => q.quick5).map((q) => q.id),
       qPos: 0,
       currentQuestion: null,
       durationSec: 20,
@@ -647,12 +721,9 @@
       updatedWallMs: 0
     },
 
-    // Map<participantId, ParticipantRecord>
     participants: new Map(),
-    // Map<questionId, Map<participantId, AnswerRecord>>
     answersByQ: new Map(),
 
-    // Transports
     transports: new Set(),
     mqttClients: [],
     peer: null,
@@ -661,17 +732,8 @@
     bc: null
   };
 
-  // Auto-seed student profile if already bound in Student Portal!
-  (function tryPrebindFromPortal() {
-    if (state.studentId) return;
-    const portalSid = safeGet("racm303_personal_student_id", "") || safeGet("racm303_student_id", "");
-    if (!portalSid) return;
-    const stu = findRosterStudent(portalSid);
-    if (stu) applyRosterToLocalState(stu, false);
-  })();
-
   function getRosterList() {
-    return (window.RACM_ROSTER_DATA && Array.isArray(window.RACM_ROSTER_DATA.students))
+    return window.RACM_ROSTER_DATA && Array.isArray(window.RACM_ROSTER_DATA.students)
       ? window.RACM_ROSTER_DATA.students
       : [];
   }
@@ -692,7 +754,7 @@
   function searchRosterCandidates(query) {
     const q = String(query || "").trim().toLowerCase();
     const list = getRosterList();
-    if (!q) return list.slice(0, 8);
+    if (!q) return list.slice(0, 6);
     return list
       .filter((s) => {
         const sid = String(s.id || "");
@@ -702,11 +764,12 @@
         const area = String(s.area || "").toLowerCase();
         return sid.includes(q) || sno === q || nick.includes(q) || name.includes(q) || area.includes(q);
       })
-      .slice(0, 10);
+      .slice(0, 8);
   }
 
   function applyRosterToLocalState(stu, persistJoin) {
     if (!stu || !stu.id) return;
+    state.memberType = "student";
     state.studentId = String(stu.id);
     state.shortNo = String(stu.id).slice(-3);
     state.participantId = `sid_${stu.id}`;
@@ -714,6 +777,8 @@
     state.fullName = String(stu.fullName || stu.name || "").trim();
     state.area = String(stu.area || "").trim();
     state.disc = Number(stu.disc) || 0;
+    if (state.avatar === "👨‍⚕️") state.avatar = "🩺";
+    safeSet("racm303_orient_mtype_v1", "student");
     safeSet("racm303_orient_pid_v1", state.participantId);
     safeSet("racm303_orient_sid_v1", state.studentId);
     safeSet("racm303_orient_sno_v1", state.shortNo);
@@ -721,18 +786,52 @@
     safeSet("racm303_orient_fname_v1", state.fullName);
     safeSet("racm303_orient_area_v1", state.area);
     safeSet("racm303_orient_disc_v1", String(state.disc));
+    safeSet("racm303_orient_avatar_v1", state.avatar);
     if (persistJoin) {
       state.joined = true;
       safeSet("racm303_orient_joined_v1", "1");
     }
   }
 
+  function applyFacultyToLocalState(fac, persistJoin) {
+    if (!fac) return;
+    state.memberType = "faculty";
+    state.studentId = fac.code || "";
+    state.shortNo = "อาจารย์";
+    state.participantId = `fac_${fac.code || randomId("f")}`;
+    state.nickname = fac.short || fac.fullName || "อาจารย์";
+    state.fullName = fac.fullName || fac.short || "อาจารย์ประจำรายวิชา";
+    state.area = "คณาจารย์";
+    state.disc = 0;
+    state.avatar = "👨‍⚕️";
+    safeSet("racm303_orient_mtype_v1", "faculty");
+    safeSet("racm303_orient_pid_v1", state.participantId);
+    safeSet("racm303_orient_sid_v1", state.studentId);
+    safeSet("racm303_orient_sno_v1", state.shortNo);
+    safeSet("racm303_orient_nick_v1", state.nickname);
+    safeSet("racm303_orient_fname_v1", state.fullName);
+    safeSet("racm303_orient_area_v1", state.area);
+    safeSet("racm303_orient_avatar_v1", state.avatar);
+    if (persistJoin) {
+      state.joined = true;
+      safeSet("racm303_orient_joined_v1", "1");
+    }
+  }
+
+  (function tryPrebindFromPortal() {
+    if (state.studentId) return;
+    const portalSid = safeGet("racm303_personal_student_id", "") || safeGet("racm303_student_id", "");
+    if (!portalSid) return;
+    const stu = findRosterStudent(portalSid);
+    if (stu) applyRosterToLocalState(stu, false);
+  })();
+
   function getJoinUrl() {
+    if (state.qrUrlMode === "faculty") {
+      return PROD_FACULTY_JOIN_URL;
+    }
     if (state.qrUrlMode === "current" && typeof window !== "undefined" && window.location) {
       const href = window.location.href.split("#")[0].split("?")[0];
-      if (href.includes("racm303-2569-faculty-member")) {
-        return href.replace("racm303-2569-faculty-member", "racm303-2569-student") + "#live";
-      }
       return `${href}#live`;
     }
     return PROD_STUDENT_JOIN_URL;
@@ -745,9 +844,10 @@
   function getActiveQuestionList() {
     const all = getAllQuestions();
     const map = new Map(all.map((q) => [q.id, q]));
-    const ids = state.session.activeDeckIds && state.session.activeDeckIds.length
-      ? state.session.activeDeckIds
-      : all.map((q) => q.id);
+    const ids =
+      state.session.activeDeckIds && state.session.activeDeckIds.length
+        ? state.session.activeDeckIds
+        : all.filter((q) => q.quick5).map((q) => q.id);
     const resolved = ids.map((id) => map.get(id)).filter(Boolean);
     return resolved.length ? resolved : BASE_QUESTIONS;
   }
@@ -857,6 +957,7 @@
       }
       const prevPhase = state.session.phase;
       const prevQId = state.session.currentQuestion && state.session.currentQuestion.id;
+      const prevHostSlide = state.session.hostSlideIdx;
       let rem = Math.max(0, Number(msg.remainingMs) || 0);
       if (msg.timerRunning && isRetained && msg.sentWallMs) {
         rem = Math.max(0, rem - Math.max(0, Date.now() - Number(msg.sentWallMs)));
@@ -884,14 +985,29 @@
       if (msg.hostSlideTitle) state.session.hostSlideTitle = String(msg.hostSlideTitle);
       state.session.updatedWallMs = Number(msg.sentWallMs) || Date.now();
 
+      // Synced Slide Follow: if participant has Deck open with Follow Live Slide enabled, follow presenter!
+      if (
+        !isRetained &&
+        state.followHostSlide &&
+        state.session.hostSlideIdx !== prevHostSlide &&
+        window.RACM_ORIENTATION_DECK &&
+        typeof window.RACM_ORIENTATION_DECK.followRemoteSlide === "function"
+      ) {
+        window.RACM_ORIENTATION_DECK.followRemoteSlide(state.session.hostSlideIdx);
+      }
+
       const nextQId = state.session.currentQuestion && state.session.currentQuestion.id;
-      if (state.role === "student" && state.session.phase === "question" && (prevPhase !== "question" || prevQId !== nextQId)) {
-        // Vibrate phone & auto-surface participant pad when teacher launches a question!
+      if (state.session.phase === "question" && (prevPhase !== "question" || prevQId !== nextQId)) {
         if (navigator.vibrate) {
           try { navigator.vibrate([110, 50, 110]); } catch (_) {}
         }
-        if (state.joined) {
+        // Auto-open answer pad for any joined participant (both student and faculty participants!) unless this screen is presenting the Deck!
+        const deckModal = document.getElementById("orientationDeckModal");
+        const isPresentingBigScreen =
+          state.role === "faculty" && deckModal && !deckModal.hidden && window.innerWidth >= 1024;
+        if (state.joined && !isPresentingBigScreen) {
           state.participantModalOpen = true;
+          state.mobileTab = "pad";
         }
         playTone([523.25, 659.25, 783.99], 0.13, "triangle", 0.08);
       } else if (state.session.phase === "reveal" && prevPhase === "question") {
@@ -900,6 +1016,26 @@
 
       renderAllSurfaces(true);
       updateFloatingBanner();
+      return;
+    }
+
+    if (msg.type === "remote_cmd" && !isRetained) {
+      if (state.role === "faculty" && window.RACM_ORIENTATION_DECK) {
+        const cmd = String(msg.cmd || "");
+        if (cmd === "slide-next") {
+          window.RACM_ORIENTATION_DECK.stepSlide(1);
+        } else if (cmd === "slide-prev") {
+          window.RACM_ORIENTATION_DECK.stepSlide(-1);
+        } else if (cmd === "goto-slide" && typeof msg.slideIdx === "number") {
+          window.RACM_ORIENTATION_DECK.goToSlide(msg.slideIdx);
+        } else if (cmd === "start-q0") {
+          hostStartQuestionAt(0);
+        } else if (cmd === "reveal-now") {
+          hostRevealAnswer();
+        } else if (cmd === "next-question") {
+          hostNextStep();
+        }
+      }
       return;
     }
 
@@ -916,9 +1052,10 @@
       const isNew = !state.participants.has(pid);
       state.participants.set(pid, {
         participantId: pid,
+        memberType: msg.memberType === "faculty" ? "faculty" : "student",
         studentId: String(msg.studentId || "").slice(0, 16),
-        shortNo: String(msg.shortNo || "").slice(0, 6),
-        nickname: String(msg.nickname || "").slice(0, 32),
+        shortNo: String(msg.shortNo || "").slice(0, 12),
+        nickname: String(msg.nickname || "").slice(0, 36),
         fullName: String(msg.fullName || "").slice(0, 80),
         area: String(msg.area || "").slice(0, 40),
         disc: Number(msg.disc) || 0,
@@ -943,26 +1080,27 @@
       if (!qMap.has(pid)) {
         qMap.set(pid, {
           participantId: pid,
+          memberType: msg.memberType === "faculty" ? "faculty" : "student",
           qId,
           choiceIdx: Math.max(0, Math.min(3, Number(msg.choiceIdx) || 0)),
           correct: Boolean(msg.correct),
           points: Math.max(0, Math.min(1500, Number(msg.points) || 0)),
           elapsedMs: Math.max(0, Number(msg.elapsedMs) || 0),
           studentId: String(msg.studentId || "").slice(0, 16),
-          shortNo: String(msg.shortNo || "").slice(0, 6),
-          nickname: String(msg.nickname || "").slice(0, 32),
+          shortNo: String(msg.shortNo || "").slice(0, 12),
+          nickname: String(msg.nickname || "").slice(0, 36),
           area: String(msg.area || "").slice(0, 40),
           avatar: String(msg.avatar || "🩺").slice(0, 8),
           sentWallMs: Number(msg.sentWallMs) || Date.now()
         });
       }
-      // Refresh sender's presence too
       if (!state.participants.has(pid)) {
         state.participants.set(pid, {
           participantId: pid,
+          memberType: msg.memberType === "faculty" ? "faculty" : "student",
           studentId: String(msg.studentId || "").slice(0, 16),
-          shortNo: String(msg.shortNo || "").slice(0, 6),
-          nickname: String(msg.nickname || "ผู้เข้าร่วม").slice(0, 32),
+          shortNo: String(msg.shortNo || "").slice(0, 12),
+          nickname: String(msg.nickname || "ผู้เข้าร่วม").slice(0, 36),
           fullName: String(msg.fullName || "").slice(0, 80),
           area: String(msg.area || "").slice(0, 40),
           disc: 0,
@@ -974,7 +1112,6 @@
         state.participants.get(pid).lastSeenMs = Date.now();
       }
 
-      // Auto-reveal if Host is running a question and 100% of joined participants answered!
       if (
         state.role === "faculty" &&
         state.session.phase === "question" &&
@@ -1006,9 +1143,8 @@
     }
 
     if (msg.type === "who_is_here" && !isRetained) {
-      if (state.joined && state.role === "student") {
+      if (state.joined) {
         publishMyPresence();
-        // Re-broadcast my submitted answers in current session so a refreshed Host recovers scores!
         state.answersByQ.forEach((qMap) => {
           const mine = qMap.get(state.participantId);
           if (mine) {
@@ -1049,7 +1185,7 @@
             try {
               client.subscribe(`${TOPIC_NS}/#`, { qos: 0 });
             } catch (_) {}
-            if (state.joined && state.role === "student") publishMyPresence();
+            if (state.joined) publishMyPresence();
             publishPacket("cmd", { type: "who_is_here" }, false);
             refreshLiveCountsAndChips();
           });
@@ -1134,9 +1270,12 @@
     return false;
   }
 
-  /* ---------- 6. Presence, Scoring & Leaderboard Computations ---------- */
+  /* ---------- 6. Presence, Breakdown & Leaderboard ---------- */
   function getPlayerLabel(p) {
     if (!p) return "ผู้เข้าร่วม";
+    if (p.memberType === "faculty" || p.area === "คณาจารย์") {
+      return p.nickname || p.fullName || "อาจารย์";
+    }
     const sno = p.shortNo || (p.studentId ? String(p.studentId).slice(-3) : "");
     if (sno && p.nickname) return `${sno} ${p.nickname}`;
     if (p.nickname) return p.nickname;
@@ -1144,17 +1283,28 @@
     return p.fullName || p.studentId || "ผู้เข้าร่วม";
   }
 
+  function getParticipantRoleBreakdown() {
+    let stu = 0;
+    let fac = 0;
+    state.participants.forEach((p) => {
+      if (p.memberType === "faculty" || p.area === "คณาจารย์") fac += 1;
+      else stu += 1;
+    });
+    return { total: stu + fac, stu, fac };
+  }
+
   function publishMyPresence() {
     if (!state.joined) return;
     const rec = {
       participantId: state.participantId,
+      memberType: state.memberType === "faculty" ? "faculty" : "student",
       studentId: state.studentId || "",
-      shortNo: state.shortNo || (state.studentId ? String(state.studentId).slice(-3) : ""),
+      shortNo: state.shortNo || (state.studentId && state.memberType !== "faculty" ? String(state.studentId).slice(-3) : ""),
       nickname: state.nickname || "ผู้เข้าร่วม",
       fullName: state.fullName || "",
-      area: state.area || "",
+      area: state.area || (state.memberType === "faculty" ? "คณาจารย์" : ""),
       disc: state.disc || 0,
-      avatar: state.avatar || "🩺",
+      avatar: state.avatar || (state.memberType === "faculty" ? "👨‍⚕️" : "🩺"),
       joinedWallMs: Date.now(),
       lastSeenMs: Date.now()
     };
@@ -1172,7 +1322,7 @@
   function getAreaCounts() {
     const counts = {};
     state.participants.forEach((p) => {
-      const k = p.area || "ทั่วไป/คณาจารย์";
+      const k = p.memberType === "faculty" ? "คณาจารย์" : p.area || "ทั่วไป";
       counts[k] = (counts[k] || 0) + 1;
     });
     return counts;
@@ -1183,6 +1333,7 @@
     state.participants.forEach((p, pid) => {
       board.set(pid, {
         participantId: pid,
+        memberType: p.memberType || "student",
         label: getPlayerLabel(p),
         avatar: p.avatar || "🩺",
         area: p.area || "",
@@ -1202,6 +1353,7 @@
         if (!board.has(pid)) {
           board.set(pid, {
             participantId: pid,
+            memberType: ans.memberType || "student",
             label: getPlayerLabel(ans),
             avatar: ans.avatar || "🩺",
             area: ans.area || "",
@@ -1259,7 +1411,7 @@
     return { counts, total, correctCount, pctCorrect, topWrongIdx, topWrongCount };
   }
 
-  /* ---------- 7. Host Controls (Start Lobby, Launch Question, Reveal, Podium, Reset) ---------- */
+  /* ---------- 7. Host & Remote Controls ---------- */
   function buildSessionPacket() {
     return {
       type: "session",
@@ -1364,20 +1516,34 @@
       state.session.hostSlideNum = String(slideObj.num || "01");
       state.session.hostSlideTitle = String(slideObj.title || "");
     }
-    // If teacher moves to slides 02..15 while quiz was idle/podium, keep lobby waiting state synced
-    if (state.session.phase !== "question") {
-      broadcastSessionState();
+    broadcastSessionState();
+    if (state.participantModalOpen) renderParticipantModal();
+  }
+
+  function sendRemoteCommand(cmd, extra) {
+    publishPacket("cmd", Object.assign({ type: "remote_cmd", cmd }, extra || {}), false);
+    if (window.RACM_ORIENTATION_DECK) {
+      if (cmd === "slide-next") window.RACM_ORIENTATION_DECK.stepSlide(1);
+      else if (cmd === "slide-prev") window.RACM_ORIENTATION_DECK.stepSlide(-1);
+      else if (cmd === "goto-slide" && extra && typeof extra.slideIdx === "number") {
+        window.RACM_ORIENTATION_DECK.goToSlide(extra.slideIdx);
+      }
+    }
+    if (state.role === "faculty") {
+      if (cmd === "start-q0") hostStartQuestionAt(0);
+      else if (cmd === "reveal-now") hostRevealAnswer();
+      else if (cmd === "next-question") hostNextStep();
     }
   }
 
-  /* ---------- 8. Student Answer Submission ---------- */
+  /* ---------- 8. Answer Submission ---------- */
   function submitMyAnswer(choiceIdx) {
     if (state.session.phase !== "question") return;
     const q = getCurrentQuestion();
     if (!q) return;
     if (!state.answersByQ.has(q.id)) state.answersByQ.set(q.id, new Map());
     const qMap = state.answersByQ.get(q.id);
-    if (qMap.has(state.participantId)) return; // Already locked in!
+    if (qMap.has(state.participantId)) return;
 
     const remMs = getRemainingMs();
     const durMs = Math.max(1000, (state.session.durationSec || 20) * 1000);
@@ -1388,6 +1554,7 @@
 
     const rec = {
       participantId: state.participantId,
+      memberType: state.memberType || "student",
       qId: q.id,
       choiceIdx: Number(choiceIdx),
       correct: isCorrect,
@@ -1442,23 +1609,23 @@
       }
     });
     if (changed) refreshLiveCountsAndChips();
-    if (state.joined && state.role === "student") publishMyPresence();
-  }, 18000);
+    if (state.joined) publishMyPresence();
+  }, 22000);
 
-  /* ---------- 10. UI Surface 1: Cover Slide Right-Column Card (Slide 01) ---------- */
+  /* ---------- 10. UI Surface 1: Cover Slide 01 QR & Simultaneous Scan Lobby ---------- */
   function buildJoinedChipsMarkup(limit) {
     const list = getSortedParticipants();
     if (!list.length) {
-      return `<span class="orl-empty-wait">สแกน QR ด้วยกล้องมือถือหรือ LINE เพื่อแสดงชื่อขึ้นหน้าจอสดทันที…</span>`;
+      return `<span class="orl-empty-wait">ทั้งคณาจารย์และนักศึกษาสแกน QR ด้วยกล้องมือถือ/แท็บเล็ต เพื่อเข้าห้องรอและดูสไลด์ไปพร้อมกัน…</span>`;
     }
     const slice = list.slice(0, limit || 10);
     const extra = list.length - slice.length;
     return (
       slice
-        .map(
-          (p) =>
-            `<span class="orl-p-chip" title="${esc(p.fullName || p.nickname)} (${esc(p.area || "RACM 303")})"><span class="orl-p-ava">${esc(p.avatar || "🩺")}</span><strong>${esc(getPlayerLabel(p))}</strong>${p.area ? `<em>· ${esc(p.area)}</em>` : ""}</span>`
-        )
+        .map((p) => {
+          const isFac = p.memberType === "faculty" || p.area === "คณาจารย์";
+          return `<span class="orl-p-chip${isFac ? " is-fac-chip" : ""}" title="${esc(p.fullName || p.nickname)} (${esc(p.area || "RACM 303")})"><span class="orl-p-ava">${esc(p.avatar || (isFac ? "👨‍⚕️" : "🩺"))}</span><strong>${esc(getPlayerLabel(p))}</strong>${p.area ? `<em>· ${esc(p.area)}</em>` : ""}</span>`;
+        })
         .join("") +
       (extra > 0 ? `<span class="orl-p-chip is-more">+ อีก ${extra} คน</span>` : "")
     );
@@ -1469,7 +1636,7 @@
     const isHandout = o.viewMode === "handout";
     const joinUrl = getJoinUrl();
     const qrSvg = buildQrSvg(joinUrl);
-    const count = state.participants.size;
+    const brk = getParticipantRoleBreakdown();
     const cloudOk = isCloudConnected();
 
     if (state.coverPaneMode === "hero" && !isHandout) {
@@ -1477,11 +1644,11 @@
         <div class="orl-cover-card is-hero-view">
           <div class="orl-cover-head">
             <span class="orl-live-pill"><span class="orl-dot"></span> COURSE VISUAL</span>
-            <button type="button" class="orl-mini-switch" data-orl-action="show-cover-lobby">📱 สลับกลับหน้า QR &amp; Live Lobby (${count})</button>
+            <button type="button" class="orl-mini-switch" data-orl-action="show-cover-lobby">📱 สลับกลับหน้า QR &amp; Live Lobby (${brk.total})</button>
           </div>
           <figure class="or-fig-plate is-cover-hero" style="flex:1;min-height:0">
             <div class="or-fig-img-wrap">
-              <img class="or-fig-img" src="assets/images/orientation/orient_s01_hero.png?v=20261124orl1" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
+              <img class="or-fig-img" src="assets/images/orientation/orient_s01_hero.png?v=20261124orl2" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
             </div>
           </figure>
         </div>
@@ -1492,40 +1659,40 @@
       <div class="orl-cover-card" data-orl-cover-mount="1">
         <div class="orl-cover-head">
           <div class="orl-cover-head-left">
-            <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> LIVE LOBBY · KAHOOT RECHECK</span>
-            <span class="orl-sync-sub" data-orl-sync-label>${cloudOk ? "ซิงค์สดข้ามอุปกรณ์พร้อมใช้งาน" : "พร้อมซิงค์ในเครือข่าย"}</span>
+            <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> SCAN พร้อมกัน · อาจารย์ &amp; นศพ.</span>
+            <span class="orl-sync-sub" data-orl-sync-label>${cloudOk ? "ซิงค์สดทุกแพลตฟอร์ม" : "พร้อมซิงค์ในเครือข่าย"}</span>
           </div>
           <div class="orl-cover-head-actions">
-            ${!isHandout ? `<button type="button" class="orl-mini-switch" data-orl-action="zoom-qr" title="ขยาย QR Code เต็มจอสำหรับแถวหลัง">🔍 ขยาย QR</button>` : ""}
+            ${!isHandout ? `<button type="button" class="orl-mini-switch" data-orl-action="zoom-qr" title="ขยาย QR Code เต็มจอสำหรับสแกนทั่วห้อง">🔍 ขยาย QR</button>` : ""}
             ${!isHandout ? `<button type="button" class="orl-mini-switch" data-orl-action="show-cover-hero" title="สลับดูภาพประกอบหน้าปก">🖼️ ภาพปก</button>` : ""}
           </div>
         </div>
 
         <div class="orl-cover-body">
           <div class="orl-cover-qr-col">
-            <button type="button" class="orl-qr-frame-btn" data-orl-action="zoom-qr" title="คลิกเพื่อขยาย QR Code ขนาดใหญ่">
+            <button type="button" class="orl-qr-frame-btn" data-orl-action="zoom-qr" title="แตะเพื่อขยาย QR Code ขนาดใหญ่">
               ${qrSvg}
             </button>
             <div class="orl-qr-url-box">
-              <span class="orl-qr-scan-kicker">📱 สแกนเข้าร่วมเป็น Participants</span>
-              <code class="orl-qr-url-code">smartwoo.github.io/racm303-2569-student/#live</code>
+              <span class="orl-qr-scan-kicker">📱 สแกนร่วมกันทั้งอาจารย์ &amp; นศพ.</span>
+              <code class="orl-qr-url-code">${state.qrUrlMode === "faculty" ? "racm303-2569-faculty-member/#live" : "racm303-2569-student/#live"}</code>
             </div>
           </div>
 
           <div class="orl-cover-info-col">
             <div class="orl-count-hero-box">
               <div class="orl-count-nums">
-                <span class="orl-count-big" data-orl-participant-count>${count}</span>
-                <span class="orl-count-denom">/ 169 คน</span>
+                <span class="orl-count-big" data-orl-participant-count>${brk.total}</span>
+                <span class="orl-count-denom">ผู้เข้าร่วมสด</span>
               </div>
-              <span class="orl-count-caption">เข้าร่วมรอคำถาม Recheck สดในห้องแล้ว</span>
+              <span class="orl-count-caption" data-orl-role-breakdown>🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน</span>
             </div>
 
             <div class="orl-topic-tags">
-              <span class="orl-tag is-do">✅ Do &amp; Don'ts</span>
-              <span class="orl-tag is-osmu">⚖️ เกณฑ์ O · S · M · U</span>
-              <span class="orl-tag is-exam">📝 ห้องสอบ &amp; โน้ต A4</span>
-              <span class="orl-tag is-ai">🤖 AI &amp; PDPA</span>
+              <span class="orl-tag is-do">⏱️ เวลาเรียน ≥ 80%</span>
+              <span class="orl-tag is-osmu">⚖️ Quiz O · S · M · U</span>
+              <span class="orl-tag is-exam">📜 ประกาศเจตคติ 2567</span>
+              <span class="orl-tag is-ai">🔍 ซิงค์สไลด์ &amp; Zoom ได้</span>
             </div>
 
             <div class="orl-chips-stream" data-orl-participant-chips>
@@ -1542,18 +1709,18 @@
               ROLE === "faculty"
                 ? `
               <button type="button" class="orl-cta-btn is-lobby-expand" data-orl-action="open-deck-live">
-                📺 เปิดห้อง Live Lobby เต็มจอ (รอคนครบก่อนไปต่อ)
+                📺 ขยาย Live Lobby รอคนครบก่อนไปต่อ
               </button>
-              <button type="button" class="orl-cta-btn is-launch-quiz" data-orl-action="quick-start-quiz">
-                ⚡ เริ่มคำถาม Recheck
+              <button type="button" class="orl-cta-btn is-launch-quiz" data-orl-action="jump-to-quiz-slide">
+                🎯 ไปหน้า Quiz O/S/M/U
               </button>
             `
                 : `
               <button type="button" class="orl-cta-btn is-launch-quiz" data-orl-action="open-participant-pad">
-                🙋 เข้าร่วมเป็นผู้ตอบคำถาม (Join Live Lobby)
+                🙋 เข้าร่วม Live Lobby / ตอบ Quiz
               </button>
               <button type="button" class="orl-cta-btn is-lobby-expand" data-orl-action="open-deck-live">
-                📺 ดูหน้าจอ Live Lobby
+                📺 ดูห้อง Live Lobby
               </button>
             `
             }
@@ -1565,39 +1732,39 @@
     `;
   }
 
-  /* ---------- 11. UI Surface 2: Full 16:9 Kahoot Stage Inside Orientation Deck ---------- */
-  function renderLobbyStageHtml() {
+  /* ---------- 11. UI Surface 2: Full / Embedded Kahoot Stage (Lobby, Question, Reveal, Podium) ---------- */
+  function renderLobbyStageHtml(isEmbeddedSlide) {
     const joinUrl = getJoinUrl();
     const qrSvg = buildQrSvg(joinUrl, "is-stage-qr");
-    const count = state.participants.size;
+    const brk = getParticipantRoleBreakdown();
     const areaCounts = getAreaCounts();
-    const areasOrder = ["กุฉินารายณ์", "ด่านซ้าย", "ตะกั่วป่า", "ท่าวังผา", "เพชรบูรณ์ 1", "เพชรบูรณ์ 2", "อุบลรัตน์", "ท่าสองยาง", "อุ้มผาง"];
+    const areasOrder = ["คณาจารย์", "กุฉินารายณ์", "ด่านซ้าย", "ตะกั่วป่า", "ท่าวังผา", "เพชรบูรณ์ 1", "เพชรบูรณ์ 2", "อุบลรัตน์", "ท่าสองยาง", "อุ้มผาง"];
     const deck = getActiveQuestionList();
 
     return `
-      <div class="orl-stage is-lobby-stage">
+      <div class="orl-stage is-lobby-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
         <div class="orl-stage-topbar">
           <div class="orl-st-left">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> RACM 303 · LIVE WAITING LOBBY</span>
-            <span class="orl-st-sub">สแกน QR เพื่อเข้าห้องรอคำถาม Recheck (Do's &amp; Don'ts และเกณฑ์ O / S / M / U ตามคู่มือนักศึกษา 2569)</span>
+            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> ${isEmbeddedSlide ? "LIVE QUIZ · PRE-CHECK O / S / M / U" : "LIVE WAITING LOBBY · อาจารย์ & นศพ."}</span>
+            <span class="orl-st-sub">สแกน QR ร่วมกันได้ทุกอุปกรณ์ (มือถือแนวตั้ง/แนวนอน · จอพับ Duo · แท็บเล็ต)</span>
           </div>
           <div class="orl-st-right">
-            <button type="button" class="orl-bar-btn" data-orl-action="toggle-mute">${state.soundMuted ? "🔇 ปิดเสียงอยู่" : "🔊 เสียงเกม On"}</button>
-            <button type="button" class="orl-bar-btn" data-orl-action="copy-join-url">🔗 คัดลอกลิงก์</button>
-            <button type="button" class="orl-bar-btn" data-orl-action="open-participant-pad">📱 จำลองจอผู้เรียน</button>
-            ${ROLE === "faculty" ? `<button type="button" class="orl-bar-btn" data-orl-action="open-custom-modal">+ เพิ่มคำถามสด</button>` : ""}
+            <button type="button" class="orl-bar-btn" data-orl-action="zoom-qr">🔍 ขยาย QR</button>
+            <button type="button" class="orl-bar-btn" data-orl-action="toggle-mute">${state.soundMuted ? "🔇 ปิดเสียง" : "🔊 เสียง On"}</button>
+            <button type="button" class="orl-bar-btn" data-orl-action="open-participant-pad">📱 จอผู้เข้าร่วม</button>
+            ${ROLE === "faculty" ? `<button type="button" class="orl-bar-btn" data-orl-action="open-custom-modal">+ คำถามสด</button>` : ""}
           </div>
         </div>
 
         <div class="orl-lobby-grid">
           <div class="orl-lobby-qr-panel">
-            <button type="button" class="orl-stage-qr-box" data-orl-action="zoom-qr" title="คลิกเพื่อขยาย QR Code เต็มจอ">
+            <button type="button" class="orl-stage-qr-box" data-orl-action="zoom-qr" title="แตะเพื่อขยาย QR Code เต็มจอ">
               ${qrSvg}
             </button>
             <div class="orl-stage-join-steps">
-              <div class="orl-step-badge">1. เปิดกล้องมือถือ / LINE สแกน QR Code</div>
-              <div class="orl-url-pill">smartwoo.github.io/racm303-2569-student/#live</div>
-              <div class="orl-step-badge">2. พิมพ์เลขท้ายรหัส 3 ตัว (เช่น <code>006</code>) เพื่อเข้าห้องรอคำถาม</div>
+              <div class="orl-step-badge">1. อาจารย์และนักศึกษาสแกน QR Code พร้อมกัน</div>
+              <div class="orl-url-pill">${state.qrUrlMode === "faculty" ? "smartwoo.github.io/racm303-2569-faculty-member/#live" : "smartwoo.github.io/racm303-2569-student/#live"}</div>
+              <div class="orl-step-badge">2. เลือก <code>นศพ. (รหัส 3 ตัวท้าย)</code> หรือ <code>คณาจารย์</code></div>
             </div>
 
             ${
@@ -1607,8 +1774,8 @@
                 <div class="orl-cfg-row">
                   <span class="orl-cfg-lbl">ชุดคำถาม:</span>
                   <div class="orl-seg-group">
-                    <button type="button" class="orl-seg-btn${state.presetMode === "all8" ? " is-active" : ""}" data-orl-preset="all8">ครบ ${ getAllQuestions().length } ข้อ</button>
-                    <button type="button" class="orl-seg-btn${state.presetMode === "quick5" ? " is-active" : ""}" data-orl-preset="quick5">เน้นพลาดบ่อย 5 ข้อ</button>
+                    <button type="button" class="orl-seg-btn${state.presetMode === "quick5" ? " is-active" : ""}" data-orl-preset="quick5">เน้นเกณฑ์ O·S·M·U (5 ข้อ)</button>
+                    <button type="button" class="orl-seg-btn${state.presetMode === "all8" ? " is-active" : ""}" data-orl-preset="all8">ครบทุกหมวด (${getAllQuestions().length} ข้อ)</button>
                   </div>
                 </div>
                 <div class="orl-cfg-row">
@@ -1631,15 +1798,15 @@
           <div class="orl-lobby-players-panel">
             <div class="orl-players-head">
               <div class="orl-players-counter">
-                <span class="orl-players-num" data-orl-participant-count>${count}</span>
+                <span class="orl-players-num" data-orl-participant-count>${brk.total}</span>
                 <div>
-                  <div class="orl-players-title">ผู้เข้าร่วมใน Live Lobby (จาก นศพ. 169 คน)</div>
-                  <div class="orl-players-sub">พร้อมรับคำถามแบบ Kahoot (${deck.length} ข้อ · เฉลยเชื่อมเกณฑ์ O / S / M / U ทันที)</div>
+                  <div class="orl-players-title">ผู้เข้าร่วมในห้องสด (<span data-orl-role-breakdown>🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน</span>)</div>
+                  <div class="orl-players-sub">ทวนสอบเวลาเรียน ≥ 80% · ประกาศเจตคติ พ.ศ. 2567 · เกณฑ์ O / S / M / U (${deck.length} ข้อ)</div>
                 </div>
               </div>
               ${
                 ROLE === "faculty" && state.answersByQ.size > 0
-                  ? `<button type="button" class="orl-bar-btn is-subtle" data-orl-action="reset-session" title="ล้างคะแนนรอบเก่าเพื่อเริ่มรอบใหม่">↺ รีเซ็ตคะแนน</button>`
+                  ? `<button type="button" class="orl-bar-btn is-subtle" data-orl-action="reset-session">↺ รีเซ็ตคะแนน</button>`
                   : ""
               }
             </div>
@@ -1648,7 +1815,8 @@
               ${areasOrder
                 .map((area) => {
                   const c = areaCounts[area] || 0;
-                  return `<span class="orl-area-pill${c > 0 ? " has-joined" : ""}">${esc(area)} <strong>${c}</strong></span>`;
+                  const isFacPill = area === "คณาจารย์";
+                  return `<span class="orl-area-pill${c > 0 ? " has-joined" : ""}${isFacPill ? " is-fac-area" : ""}">${isFacPill ? "👨‍⚕️ " : ""}${esc(area)} <strong>${c}</strong></span>`;
                 })
                 .join("")}
             </div>
@@ -1658,22 +1826,33 @@
             </div>
 
             <div class="orl-lobby-action-bar">
-              <button type="button" class="orl-big-btn is-secondary" data-orl-action="continue-slides">
-                ▶ ไปต่อเนื้อหาสไลด์ Orientation (Slide 02) &rarr;
-                <small>ผู้เข้าร่วมถือมือถือค้างไว้ในโหมดรอคำถามได้ตลอดการบรรยาย</small>
-              </button>
+              ${
+                isEmbeddedSlide
+                  ? `
+                <button type="button" class="orl-big-btn is-secondary" data-orl-action="goto-criteria-slide">
+                  📘 ข้ามไปดูสไลด์ชี้แจงเกณฑ์ O / S / M / U ทันที &rarr;
+                  <small>อธิบายเวลาเรียน ≥ 80%, ประกาศเจตคติ 2567, การสอบซ่อม และเกียรตินิยม</small>
+                </button>
+              `
+                  : `
+                <button type="button" class="orl-big-btn is-secondary" data-orl-action="continue-slides">
+                  ▶ ไปต่อเนื้อหาสไลด์ Orientation &rarr;
+                  <small>ผู้ที่สแกนแล้วดูสไลด์ซิงค์สดและรอรับคำถามบนมือถือได้ต่อเนื่อง</small>
+                </button>
+              `
+              }
               ${
                 ROLE === "faculty"
                   ? `
                 <button type="button" class="orl-big-btn is-primary" data-orl-action="start-q0">
-                  ⚡ เริ่มยิงคำถาม Recheck ข้อที่ 1 (${deck.length} ข้อ)
-                  <small>ตรวจสอบความเข้าใจ Do's &amp; Don'ts &amp; เกณฑ์ O · S · M · U</small>
+                  ⚡ เริ่มยิงคำถาม Quiz O / S / M / U ข้อที่ 1 (${deck.length} ข้อ)
+                  <small>ส่งคำถามขึ้นจอมือถือของทั้งนักศึกษาและคณาจารย์พร้อมกันทันที</small>
                 </button>
               `
                   : `
                 <button type="button" class="orl-big-btn is-primary" data-orl-action="open-participant-pad">
-                  🙋 เปิดจอกดตอบคำถามบนเครื่องนี้
-                  <small>${state.joined ? `เชื่อมต่อในชื่อ ${esc(getPlayerLabel(state))} แล้ว` : "คลิกเพื่อลงชื่อเข้าห้องรอคำถาม"}</small>
+                  🙋 เปิดแป้นกดตอบคำถามบนอุปกรณ์นี้
+                  <small>${state.joined ? `เชื่อมต่อในชื่อ ${esc(getPlayerLabel(state))} แล้ว` : "แตะเพื่อลงชื่อเข้าร่วมตอบคำถามสด"}</small>
                 </button>
               `
               }
@@ -1684,7 +1863,7 @@
     `;
   }
 
-  function renderQuestionStageHtml() {
+  function renderQuestionStageHtml(isEmbeddedSlide) {
     const q = getCurrentQuestion();
     const deck = getActiveQuestionList();
     const stats = getQuestionStats(q);
@@ -1694,7 +1873,7 @@
     const pct = Math.max(0, Math.min(100, (remMs / durMs) * 100));
 
     return `
-      <div class="orl-stage is-question-stage">
+      <div class="orl-stage is-question-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
         <div class="orl-q-topbar">
           <div class="orl-q-meta">
             <span class="orl-q-num-pill">ข้อ ${state.session.qPos + 1} / ${deck.length}</span>
@@ -1710,7 +1889,7 @@
             ${
               ROLE === "faculty"
                 ? `<button type="button" class="orl-bar-btn is-accent" data-orl-action="reveal-now">⏭️ ปิดรับ &amp; เฉลยทันที</button>`
-                : `<button type="button" class="orl-bar-btn is-accent" data-orl-action="open-participant-pad">📱 เปิดปุ่มกดตอบ</button>`
+                : `<button type="button" class="orl-bar-btn is-accent" data-orl-action="open-participant-pad">📱 เปิดแป้นกดตอบ</button>`
             }
           </div>
         </div>
@@ -1740,7 +1919,7 @@
     `;
   }
 
-  function renderRevealStageHtml() {
+  function renderRevealStageHtml(isEmbeddedSlide) {
     const q = getCurrentQuestion();
     const deck = getActiveQuestionList();
     const stats = getQuestionStats(q);
@@ -1748,7 +1927,7 @@
 
     let recheckInsightHtml = "";
     if (stats.total === 0) {
-      recheckInsightHtml = `<div class="orl-insight-banner is-neutral">ℹ️ ยังไม่มีคำตอบที่ส่งเข้ามาในข้อนี้ — อาจารย์สามารถชวนผู้เรียนอภิปรายเกณฑ์ด้านล่างร่วมกันได้ทันที</div>`;
+      recheckInsightHtml = `<div class="orl-insight-banner is-neutral">ℹ️ ยังไม่มีคำตอบส่งเข้ามาในข้อนี้ — อภิปรายหลักเกณฑ์ที่ถูกต้องด้านล่างร่วมกันได้ทันที</div>`;
     } else if (stats.topWrongCount === 0) {
       recheckInsightHtml = `<div class="orl-insight-banner is-perfect">🎯 <strong>ยอดเยี่ยม! ผู้ตอบทั้ง ${stats.total} คน (100%) ตอบถูกต้องครบทุกคน</strong> — เข้าใจเกณฑ์ข้อนี้ตรงกันอย่างแม่นยำ</div>`;
     } else {
@@ -1757,7 +1936,7 @@
       recheckInsightHtml = `
         <div class="orl-insight-banner is-recheck">
           <div>
-            <strong>🔍 Recheck จุดที่ผู้เข้าร่วมยังสับสน (${stats.pctCorrect}% ตอบถูก · เลือก ${wrongMeta.nameTh} ${stats.topWrongCount} คน):</strong>
+            <strong>🔍 Recheck จุดที่ยังสับสน (${stats.pctCorrect}% ตอบถูก · เลือก ${wrongMeta.nameTh} ${stats.topWrongCount} คน):</strong>
             <span>${esc(hintText)}</span>
           </div>
         </div>
@@ -1765,19 +1944,19 @@
     }
 
     return `
-      <div class="orl-stage is-reveal-stage">
+      <div class="orl-stage is-reveal-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
         <div class="orl-q-topbar">
           <div class="orl-q-meta">
             <span class="orl-q-num-pill">เฉลยข้อ ${state.session.qPos + 1} / ${deck.length}</span>
             <span class="orl-q-cat-pill">${esc(q.badge)}</span>
-            <span class="orl-source-cite">📘 อ้างอิง: ${esc(q.sourceRef)}</span>
+            <span class="orl-source-cite">📘 ${esc(q.sourceRef)}</span>
           </div>
           <div class="orl-q-stats-right">
             ${
               ROLE === "faculty"
                 ? `
               <div class="orl-picker-wrap">
-                <button type="button" class="orl-bar-btn" data-orl-action="toggle-q-picker">🔢 เลือกข้ออื่น ▾</button>
+                <button type="button" class="orl-bar-btn" data-orl-action="toggle-q-picker">🔢 เลือกข้อ ▾</button>
                 ${
                   state.questionPickerOpen
                     ? `
@@ -1793,12 +1972,12 @@
                     : ""
                 }
               </div>
-              <button type="button" class="orl-bar-btn" data-orl-action="continue-slides">▶ กลับไปสไลด์บรรยาย</button>
+              <button type="button" class="orl-bar-btn" data-orl-action="goto-criteria-slide">📘 ไปสไลด์ชี้แจงเกณฑ์ O/S/M/U</button>
               <button type="button" class="orl-bar-btn is-primary-next" data-orl-action="next-question">
-                ${state.session.qPos + 1 < deck.length ? `ข้อถัดไป (ข้อ ${state.session.qPos + 2}) →` : "🏆 ดูสรุปผล & Podium →"}
+                ${state.session.qPos + 1 < deck.length ? `ข้อถัดไป (${state.session.qPos + 2}/${deck.length}) →` : "🏆 ดูสรุปผล & Podium →"}
               </button>
             `
-                : `<span class="orl-q-cat-pill">ตอบถูก ${stats.correctCount} / ${stats.total} คน (${stats.pctCorrect}%)</span>`
+                : `<span class="orl-q-cat-pill">ตอบถูก ${stats.correctCount}/${stats.total} (${stats.pctCorrect}%)</span>`
             }
           </div>
         </div>
@@ -1821,7 +2000,7 @@
                       <div class="orl-rev-bar-fill" style="width:${barH}%"></div>
                     </div>
                     <span class="orl-rev-count">${cnt} คน (${pct}%)</span>
-                    ${isCorrect ? `<span class="orl-rev-correct-badge">✓ คำตอบที่ถูก</span>` : ""}
+                    ${isCorrect ? `<span class="orl-rev-correct-badge">✓ ถูกต้อง</span>` : ""}
                   </div>
                   <div class="orl-rev-choice-txt">${esc(txt)}</div>
                 </div>
@@ -1834,11 +2013,11 @@
 
         <div class="orl-recheck-3col">
           <div class="orl-rc-box is-do">
-            <span class="orl-rc-kicker">✅ DO · สิ่งที่ต้องปฏิบัติ</span>
+            <span class="orl-rc-kicker">✅ DO · แนวปฏิบัติที่ถูกต้อง</span>
             <p>${esc(q.doSummary)}</p>
           </div>
           <div class="orl-rc-box is-dont">
-            <span class="orl-rc-kicker">🚫 DON'T · สิ่งที่ห้ามทำเด็ดขาด</span>
+            <span class="orl-rc-kicker">🚫 DON'T · ข้อพึงระวัง / ห้ามทำ</span>
             <p>${esc(q.dontSummary)}</p>
           </div>
           <div class="orl-rc-box is-osmu">
@@ -1850,34 +2029,33 @@
     `;
   }
 
-  function renderPodiumStageHtml() {
+  function renderPodiumStageHtml(isEmbeddedSlide) {
     const deck = getActiveQuestionList();
     const board = computeLeaderboard();
     const top3 = [board[0], board[1], board[2]];
 
     return `
-      <div class="orl-stage is-podium-stage">
+      <div class="orl-stage is-podium-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
         <div class="orl-stage-topbar">
           <div class="orl-st-left">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สรุปผล Recheck ความเข้าใจกติการายวิชา RACM 303</span>
-            <span class="orl-st-sub">ทวนสอบความพร้อม Do's &amp; Don'ts และเกณฑ์ O / S / M / U ก่อนเริ่มเรียนคาบแรก</span>
+            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สรุปผล Quiz O / S / M / U — พร้อมไปสไลด์ชี้แจงเกณฑ์ฉบับเต็ม</span>
           </div>
           <div class="orl-st-right">
             ${
               ROLE === "faculty"
                 ? `
-              <button type="button" class="orl-bar-btn" data-orl-action="back-to-lobby">📺 กลับหน้า Lobby</button>
-              <button type="button" class="orl-bar-btn" data-orl-action="reset-session">🔄 เริ่มรอบใหม่</button>
+              <button type="button" class="orl-bar-btn" data-orl-action="back-to-lobby">📺 หน้า Lobby</button>
+              <button type="button" class="orl-bar-btn" data-orl-action="reset-session">🔄 รีเซ็ต</button>
             `
                 : ""
             }
-            <button type="button" class="orl-bar-btn is-primary-next" data-orl-action="continue-slides">▶ ไปต่อสไลด์ Orientation &rarr;</button>
+            <button type="button" class="orl-bar-btn is-primary-next" data-orl-action="goto-criteria-slide">📘 ไปสไลด์ถัดไป: ชี้แจงเกณฑ์ O / S / M / U &rarr;</button>
           </div>
         </div>
 
         <div class="orl-podium-split">
           <div class="orl-diagnostic-panel">
-            <h3 class="orl-panel-h3">📊 ความแม่นยำรายประเด็น (Class Rule Mastery)</h3>
+            <h3 class="orl-panel-h3">📊 ความแม่นยำรายหัวข้อ (Class Rule Mastery)</h3>
             <div class="orl-diag-list">
               ${deck
                 .map((q, idx) => {
@@ -1891,7 +2069,7 @@
                       </div>
                       <div class="orl-diag-right">
                         <span class="orl-diag-pct">${st.total > 0 ? `${st.pctCorrect}% (${st.correctCount}/${st.total})` : "ยังไม่ถาม"}</span>
-                        ${ROLE === "faculty" ? `<button type="button" class="orl-reask-btn" data-orl-jump-q="${idx}">ดู/ถามซ้ำ</button>` : ""}
+                        ${ROLE === "faculty" ? `<button type="button" class="orl-reask-btn" data-orl-jump-q="${idx}">ถามซ้ำ</button>` : ""}
                       </div>
                     </div>
                   `;
@@ -1949,15 +2127,48 @@
     `;
   }
 
-  function renderDeckLiveStageHtml() {
+  function renderDeckLiveStageHtml(isEmbeddedSlide) {
     const ph = state.session.phase;
-    if (ph === "question") return renderQuestionStageHtml();
-    if (ph === "reveal") return renderRevealStageHtml();
-    if (ph === "podium") return renderPodiumStageHtml();
-    return renderLobbyStageHtml();
+    if (ph === "question") return renderQuestionStageHtml(isEmbeddedSlide);
+    if (ph === "reveal") return renderRevealStageHtml(isEmbeddedSlide);
+    if (ph === "podium") return renderPodiumStageHtml(isEmbeddedSlide);
+    return renderLobbyStageHtml(isEmbeddedSlide);
   }
 
-  /* ---------- 12. UI Surface 3: Mobile Participant Controller Modal (#live) ---------- */
+  function renderEmbeddedQuizSlideHtml(opts) {
+    const o = opts || {};
+    if (o.viewMode === "handout") {
+      return `
+        <div class="or-grid-2">
+          ${BASE_QUESTIONS.slice(0, 4)
+            .map(
+              (q, i) => `
+            <div class="or-card is-white">
+              <span class="or-card-kicker">QUIZ ${i + 1} · ${esc(q.badge)}</span>
+              <p class="or-card-text"><strong>คำถาม:</strong> ${esc(q.stem)}<br><strong>หลักเกณฑ์สำคัญ:</strong> ${esc(q.osmuRule)}</p>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      `;
+    }
+    return `
+      <div class="orl-slide-quiz-host">
+        ${renderDeckLiveStageHtml(true)}
+      </div>
+    `;
+  }
+
+  /* ---------- 12. UI Surface 3: Mobile / Tablet / Foldable Participant & Remote Modal (#live) ---------- */
+  function mountOverlayToActiveRoot(el) {
+    if (!el) return;
+    const hostParent = document.fullscreenElement || document.body;
+    if (hostParent && el.parentElement !== hostParent) {
+      hostParent.appendChild(el);
+    }
+  }
+
   function ensureParticipantModal() {
     let el = document.getElementById("orientParticipantModal");
     if (el) return el;
@@ -1966,28 +2177,59 @@
     el.className = "orl-mobile-backdrop";
     el.setAttribute("role", "dialog");
     el.setAttribute("aria-modal", "true");
-    el.setAttribute("aria-label", "RACM 303 Live Orientation Participant");
+    el.setAttribute("aria-label", "RACM 303 Live Orientation Participant & Synced Slide");
     el.hidden = true;
     document.body.appendChild(el);
 
     el.addEventListener("click", (ev) => {
       const actBtn = ev.target.closest("[data-orl-mact]");
-      if (actBtn) {
-        const act = actBtn.getAttribute("data-orl-mact");
-        if (act === "close") {
-          closeParticipantModal();
-        } else if (act === "pick-avatar") {
-          state.avatar = actBtn.getAttribute("data-ava") || "🩺";
-          safeSet("racm303_orient_avatar_v1", state.avatar);
+      if (!actBtn) return;
+      const act = actBtn.getAttribute("data-orl-mact");
+
+      if (act === "close") {
+        closeParticipantModal();
+      } else if (act === "switch-mtype") {
+        state.memberType = actBtn.getAttribute("data-mtype") === "faculty" ? "faculty" : "student";
+        safeSet("racm303_orient_mtype_v1", state.memberType);
+        if (state.memberType === "faculty") state.avatar = "👨‍⚕️";
+        else if (state.avatar === "👨‍⚕️") state.avatar = "🩺";
+        renderParticipantModal();
+      } else if (act === "switch-mtab") {
+        state.mobileTab = actBtn.getAttribute("data-mtab") === "remote" ? "remote" : "pad";
+        renderParticipantModal();
+      } else if (act === "pick-avatar") {
+        state.avatar = actBtn.getAttribute("data-ava") || "🩺";
+        safeSet("racm303_orient_avatar_v1", state.avatar);
+        renderParticipantModal();
+      } else if (act === "pick-roster") {
+        const sid = actBtn.getAttribute("data-sid");
+        const stu = findRosterStudent(sid);
+        if (stu) {
+          applyRosterToLocalState(stu, false);
           renderParticipantModal();
-        } else if (act === "pick-roster") {
-          const sid = actBtn.getAttribute("data-sid");
-          const stu = findRosterStudent(sid);
-          if (stu) {
-            applyRosterToLocalState(stu, false);
-            renderParticipantModal();
+        }
+      } else if (act === "pick-faculty") {
+        const fcode = actBtn.getAttribute("data-fcode");
+        const fac = FACULTY_LIST.find((f) => f.code === fcode);
+        if (fac) {
+          applyFacultyToLocalState(fac, true);
+          publishMyPresence();
+          publishPacket("cmd", { type: "who_is_here" }, false);
+          renderParticipantModal();
+        }
+      } else if (act === "join-now") {
+        if (state.memberType === "faculty") {
+          const finp = document.getElementById("orlFacLookupInput");
+          const fval = finp ? finp.value.trim() : "";
+          if (fval) {
+            applyFacultyToLocalState({ code: randomId("fc"), short: fval.slice(0, 28), fullName: fval.slice(0, 60) }, true);
+          } else if (state.nickname) {
+            state.joined = true;
+            safeSet("racm303_orient_joined_v1", "1");
+          } else {
+            applyFacultyToLocalState(FACULTY_LIST[0], true);
           }
-        } else if (act === "join-now") {
+        } else {
           const inp = document.getElementById("orlStuLookupInput");
           const rawVal = inp ? inp.value.trim() : "";
           if (rawVal) {
@@ -2007,22 +2249,28 @@
             if (inp) inp.focus();
             return;
           }
-          publishMyPresence();
-          publishPacket("cmd", { type: "who_is_here" }, false);
-          renderParticipantModal();
-        } else if (act === "edit-profile") {
-          state.joined = false;
-          safeSet("racm303_orient_joined_v1", "0");
-          renderParticipantModal();
-        } else if (act === "view-slides") {
-          closeParticipantModal();
-          if (window.RACM_ORIENTATION_DECK) {
-            window.RACM_ORIENTATION_DECK.open(state.session.hostSlideIdx || 0);
-          }
-        } else if (act === "submit-choice") {
-          const cIdx = Number(actBtn.getAttribute("data-choice-idx"));
-          submitMyAnswer(cIdx);
         }
+        publishMyPresence();
+        publishPacket("cmd", { type: "who_is_here" }, false);
+        renderParticipantModal();
+      } else if (act === "edit-profile") {
+        state.joined = false;
+        safeSet("racm303_orient_joined_v1", "0");
+        renderParticipantModal();
+      } else if (act === "view-synced-slides") {
+        state.followHostSlide = true;
+        safeSet("racm303_orient_follow_v1", "1");
+        closeParticipantModal();
+        if (window.RACM_ORIENTATION_DECK) {
+          window.RACM_ORIENTATION_DECK.open(state.session.hostSlideIdx || 0, { viewMode: "deck" });
+        }
+      } else if (act === "submit-choice") {
+        const cIdx = Number(actBtn.getAttribute("data-choice-idx"));
+        submitMyAnswer(cIdx);
+      } else if (act === "rcmd") {
+        const rcmd = actBtn.getAttribute("data-rcmd");
+        const sIdx = actBtn.hasAttribute("data-sidx") ? Number(actBtn.getAttribute("data-sidx")) : undefined;
+        sendRemoteCommand(rcmd, sIdx !== undefined ? { slideIdx: sIdx } : undefined);
       }
     });
 
@@ -2047,14 +2295,6 @@
     return el;
   }
 
-  function mountOverlayToActiveRoot(el) {
-    if (!el) return;
-    const hostParent = document.fullscreenElement || document.body;
-    if (hostParent && el.parentElement !== hostParent) {
-      hostParent.appendChild(el);
-    }
-  }
-
   function renderParticipantModal() {
     const modal = ensureParticipantModal();
     if (!state.participantModalOpen) {
@@ -2063,6 +2303,7 @@
       return;
     }
     mountOverlayToActiveRoot(modal);
+    syncVisualViewportVars();
     modal.hidden = false;
     document.body.classList.add("orl-participant-open");
 
@@ -2070,51 +2311,104 @@
     const board = computeLeaderboard();
     const myRankIdx = board.findIndex((x) => x.participantId === state.participantId);
     const myEntry = myRankIdx >= 0 ? board[myRankIdx] : { score: 0, correctCount: 0 };
+    const canRemote = ROLE === "faculty" || state.memberType === "faculty";
 
     let bodyHtml = "";
-    if (!state.joined) {
-      const prefill = state.studentId
+    if (canRemote && state.joined && state.mobileTab === "remote") {
+      bodyHtml = `
+        <div class="orl-m-card">
+          <div class="orl-m-badge">🎛️ PRESENTER REMOTE · ควบคุมสไลด์และคำถามสด</div>
+          <div class="orl-m-slide-tracker" style="text-align:center">
+            สไลด์ปัจจุบัน: <strong>Slide ${esc(state.session.hostSlideNum || "01")}</strong> · ${esc(state.session.hostSlideTitle || "Orientation")}
+          </div>
+          <div class="orl-m-foot-btns">
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-prev">◀ สไลด์ก่อนหน้า</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-next">สไลด์ถัดไป ▶</button>
+          </div>
+          <div class="orl-m-foot-btns">
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="13">🎮 ไป Slide 14 (Quiz)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="14">⚖️ ไป Slide 15 (เกณฑ์ O/S/M/U)</button>
+          </div>
+          <div class="orl-m-lbl" style="margin-top:6px">ควบคุม Kahoot Quiz สด (${state.participants.size} คนในห้อง)</div>
+          <button type="button" class="orl-m-join-btn" data-orl-mact="rcmd" data-rcmd="start-q0">⚡ เริ่มยิงคำถามข้อที่ 1</button>
+          <div class="orl-m-foot-btns">
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="reveal-now">⏭️ ปิดรับ &amp; เฉลย</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="next-question">ข้อถัดไป / Podium →</button>
+          </div>
+          <button type="button" class="orl-m-sec-btn" data-orl-mact="view-synced-slides" style="margin-top:4px">📖 เปิดดูหน้าสไลด์เต็มจอ (Pinch-Zoom ได้)</button>
+        </div>
+      `;
+    } else if (!state.joined) {
+      const isFacPick = state.memberType === "faculty";
+      const prefill = !isFacPick && state.studentId
         ? `${state.studentId} ${state.nickname ? `(${state.nickname})` : ""}`
         : state.nickname || "";
       const initialMatches = searchRosterCandidates(state.studentId || "");
+
       bodyHtml = `
         <div class="orl-m-card">
-          <div class="orl-m-badge">🎮 RACM 303 · LIVE ORIENTATION</div>
-          <h2 class="orl-m-title">เข้าร่วมห้องรอคำถาม Recheck</h2>
-          <p class="orl-m-desc">พิมพ์เลขท้ายรหัสนักศึกษา 3 หลัก หรือชื่อเล่น เพื่อขึ้นชื่อบนหน้าจอ Lobby และรอกดตอบคำถาม Do's &amp; Don'ts / เกณฑ์ O·S·M·U</p>
+          <div class="orl-m-head-compact">
+            <div class="orl-m-badge">🎮 RACM 303 · SCAN-TO-JOIN LIVE</div>
+            <h2 class="orl-m-title">เข้าร่วมปฐมนิเทศสดพร้อมกัน</h2>
+            <p class="orl-m-desc">รองรับทั้งคณาจารย์และนักศึกษาแพทย์ — ดูสไลด์ซิงค์สด (Pinch-Zoom ได้) และกดตอบ Quiz เกณฑ์ O · S · M · U</p>
+          </div>
 
-          <label class="orl-m-lbl" for="orlStuLookupInput">รหัสนักศึกษา 3 ตัวท้าย / ชื่อเล่น</label>
-          <input id="orlStuLookupInput" class="orl-m-input" type="search" autocomplete="off" value="${esc(prefill)}" placeholder="เช่น 006, เดือนอ้าย, มิน, 6702xxx…">
+          <div class="orl-role-tabs" role="tablist" aria-label="เลือกบทบาทผู้เข้าร่วม">
+            <button type="button" class="orl-role-tab${!isFacPick ? " is-active" : ""}" data-orl-mact="switch-mtype" data-mtype="student">🎓 นักศึกษาแพทย์ (169)</button>
+            <button type="button" class="orl-role-tab${isFacPick ? " is-active" : ""}" data-orl-mact="switch-mtype" data-mtype="faculty">👨‍⚕️ อาจารย์ประจำรายวิชา</button>
+          </div>
 
           ${
-            state.studentId
-              ? `<div class="orl-m-selected-stu">✅ เลือกแล้ว: <strong>${esc(state.shortNo)} ${esc(state.nickname)}</strong> · ${esc(state.fullName)} (${esc(state.area)})</div>`
-              : ""
-          }
-
-          <div class="orl-sug-list" id="orlRosterSuggestBox">
-            ${initialMatches
-              .slice(0, 5)
-              .map(
-                (s) => `
-              <button type="button" class="orl-sug-item" data-orl-mact="pick-roster" data-sid="${esc(s.id)}">
-                <strong>${esc(String(s.id).slice(-3))} · ${esc(s.nickname || s.name)}</strong>
-                <span>${esc(s.fullName || s.name)} · กลุ่ม ${esc(s.area)}</span>
-              </button>
+            isFacPick
+              ? `
+              <div class="orl-m-lbl">แตะเลือกชื่ออาจารย์เพื่อเข้าร่วมทันที (14 ท่าน)</div>
+              <div class="orl-fac-grid">
+                ${FACULTY_LIST.map(
+                  (f) =>
+                    `<button type="button" class="orl-fac-chip-btn" data-orl-mact="pick-faculty" data-fcode="${f.code}">👨‍⚕️ ${esc(f.short)}</button>`
+                ).join("")}
+              </div>
+              <label class="orl-m-lbl" for="orlFacLookupInput">หรือพิมพ์ชื่ออาจารย์ / ผู้ร่วมฟัง</label>
+              <input id="orlFacLookupInput" class="orl-m-input" type="text" autocomplete="off" value="${esc(state.memberType === "faculty" ? state.nickname : "")}" placeholder="เช่น อ.สมชาย…">
+              <button type="button" class="orl-m-join-btn" data-orl-mact="join-now">🚀 เข้าร่วมในฐานะอาจารย์</button>
             `
-              )
-              .join("")}
-          </div>
+              : `
+              <label class="orl-m-lbl" for="orlStuLookupInput">พิมพ์รหัสนักศึกษา 3 ตัวท้าย หรือชื่อเล่น</label>
+              <input id="orlStuLookupInput" class="orl-m-input" type="search" inputmode="search" enterkeyhint="go" autocomplete="off" value="${esc(prefill)}" placeholder="เช่น 006, เดือนอ้าย, มิน, 6702xxx…">
 
-          <div class="orl-m-lbl" style="margin-top:8px">เลือกไอคอนประจำตัว</div>
-          <div class="orl-ava-picker">
-            ${AVATARS.map(
-              (a) =>
-                `<button type="button" class="orl-ava-btn${state.avatar === a ? " is-picked" : ""}" data-orl-mact="pick-avatar" data-ava="${a}">${a}</button>`
-            ).join("")}
-          </div>
+              ${
+                state.studentId && state.memberType === "student"
+                  ? `<div class="orl-m-selected-stu">✅ เลือกแล้ว: <strong>${esc(state.shortNo)} ${esc(state.nickname)}</strong> · ${esc(state.fullName)} (${esc(state.area)})</div>`
+                  : ""
+              }
 
-          <button type="button" class="orl-m-join-btn" data-orl-mact="join-now">🚀 เข้าร่วม Live Lobby ทันที</button>
+              <div class="orl-sug-list" id="orlRosterSuggestBox">
+                ${initialMatches
+                  .slice(0, 5)
+                  .map(
+                    (s) => `
+                  <button type="button" class="orl-sug-item" data-orl-mact="pick-roster" data-sid="${esc(s.id)}">
+                    <strong>${esc(String(s.id).slice(-3))} · ${esc(s.nickname || s.name)}</strong>
+                    <span>${esc(s.fullName || s.name)} · กลุ่ม ${esc(s.area)}</span>
+                  </button>
+                `
+                  )
+                  .join("")}
+              </div>
+
+              <div class="orl-ava-section">
+                <div class="orl-m-lbl">เลือกไอคอนประจำตัว</div>
+                <div class="orl-ava-picker">
+                  ${AVATARS.map(
+                    (a) =>
+                      `<button type="button" class="orl-ava-btn${state.avatar === a ? " is-picked" : ""}" data-orl-mact="pick-avatar" data-ava="${a}">${a}</button>`
+                  ).join("")}
+                </div>
+              </div>
+
+              <button type="button" class="orl-m-join-btn" data-orl-mact="join-now">🚀 เข้าร่วม Live Lobby ทันที</button>
+            `
+          }
         </div>
       `;
     } else if (state.session.phase === "question") {
@@ -2130,7 +2424,7 @@
           <div class="orl-m-card is-centered">
             <div class="orl-m-locked-chip ${pickedMeta.cls}">${pickedMeta.shape} เลือก${pickedMeta.nameTh}แล้ว</div>
             <h2 class="orl-m-title">ส่งคำตอบสำเร็จ! ⏳</h2>
-            <p class="orl-m-desc">รอลุ้นผลเฉลยและทบทวนเกณฑ์ O / S / M / U พร้อมเพื่อนทั้งห้องบนหน้าจอหลัก…</p>
+            <p class="orl-m-desc">รอลุ้นผลเฉลยและคำอธิบายเกณฑ์ O / S / M / U พร้อมกันทั้งห้อง…</p>
             <div class="orl-m-wait-pulse">เหลือเวลา <strong data-orl-timer-sec>${remSec}s</strong></div>
           </div>
         `;
@@ -2185,7 +2479,7 @@
           <div class="orl-m-recheck-notes">
             <div><strong>✅ DO:</strong> ${esc(q.doSummary)}</div>
             <div><strong>🚫 DON'T:</strong> ${esc(q.dontSummary)}</div>
-            <div><strong>⚖️ O·S·M·U:</strong> ${esc(q.osmuRule)}</div>
+            <div><strong>⚖️ เกณฑ์ O·S·M·U:</strong> ${esc(q.osmuRule)}</div>
           </div>
           <div class="orl-m-rank-strip">
             <span>คะแนนสะสม: <strong>${myEntry.score.toLocaleString()} pts</strong></span>
@@ -2202,51 +2496,51 @@
       });
       bodyHtml = `
         <div class="orl-m-card">
-          <div class="orl-m-badge">🏆 สรุปผล Recheck ของคุณ</div>
+          <div class="orl-m-badge">🏆 สรุปผล Quiz O / S / M / U ของคุณ</div>
           <h2 class="orl-m-title">${esc(state.avatar)} ${esc(getPlayerLabel(state))}</h2>
-          <div class="orl-m-rank-strip" style="margin:8px 0 12px">
+          <div class="orl-m-rank-strip" style="margin:4px 0 8px">
             <span>คะแนนรวม: <strong>${myEntry.score.toLocaleString()} pts</strong></span>
-            <span>ตอบถูก: <strong>${myEntry.correctCount} / ${deck.length} ข้อ</strong></span>
+            <span>ตอบถูก: <strong>${myEntry.correctCount}/${deck.length}</strong></span>
             <span>อันดับ: <strong>#${myRankIdx >= 0 ? myRankIdx + 1 : "-"}</strong></span>
           </div>
           ${
             missedList.length === 0
-              ? `<div class="orl-m-selected-stu">🌟 ยอดเยี่ยม! คุณตอบถูกครบทุกข้อ พร้อมลุย RACM 303 อย่างมั่นใจ</div>`
+              ? `<div class="orl-m-selected-stu">🌟 ยอดเยี่ยม! คุณตอบถูกครบทุกข้อ แม่นยำทุกเกณฑ์ O / S / M / U</div>`
               : `
-                <div class="orl-m-lbl">📌 กติกาสำคัญที่ควรทบทวนเตือนตัวเอง:</div>
+                <div class="orl-m-lbl">📌 สรุปเกณฑ์สำคัญที่ควรจดจำ:</div>
                 <div class="orl-m-recheck-notes">
                   ${missedList.map((q) => `<div>• <strong>${esc(q.badge)}:</strong> ${esc(q.osmuRule)}</div>`).join("")}
                 </div>
               `
           }
-          <button type="button" class="orl-m-join-btn" data-orl-mact="close" style="margin-top:14px">เข้าใช้งาน Student Portal ต่อ &rarr;</button>
+          <button type="button" class="orl-m-join-btn" data-orl-mact="view-synced-slides" style="margin-top:8px">📘 เปิดอ่านสไลด์ชี้แจงเกณฑ์ O/S/M/U (Pinch-Zoom ได้) &rarr;</button>
         </div>
       `;
     } else {
-      // Waiting in Lobby!
       bodyHtml = `
         <div class="orl-m-card is-centered">
-          <div class="orl-m-you-in">🎉 You're in! เชื่อมต่อสำเร็จ</div>
+          <div class="orl-m-you-in">🎉 You're in! เข้าร่วมห้องสดสำเร็จ</div>
           <div class="orl-m-player-hero">
             <span class="orl-m-big-ava">${esc(state.avatar)}</span>
             <div>
               <div class="orl-m-pname">${esc(getPlayerLabel(state))}</div>
-              <div class="orl-m-parea">${esc(state.area ? `กลุ่ม รพ.${state.area}` : "ผู้เข้าร่วม RACM 303")}</div>
+              <div class="orl-m-parea">${esc(state.memberType === "faculty" ? "คณาจารย์ประจำรายวิชา RACM 303" : state.area ? `กลุ่ม รพ.${state.area}` : "ผู้เข้าร่วม RACM 303")}</div>
             </div>
           </div>
 
           <div class="orl-m-wait-box">
             <div class="orl-m-spinner" aria-hidden="true"></div>
-            <strong>กำลังรออาจารย์ปล่อยคำถาม Recheck บนหน้าจอ…</strong>
-            <p>เมื่ออาจารย์เริ่มคำถาม หน้าจอมือถือนี้จะเปลี่ยนเป็นปุ่มกดตอบ 4 สีอัตโนมัติ (ผู้เข้าร่วมในห้องขณะนี้ <strong data-orl-participant-count>${state.participants.size}</strong> คน)</p>
+            <strong>รอรับคำถาม Quiz O / S / M / U อัตโนมัติ…</strong>
+            <p>คุณสามารถกดเปิดอ่านสไลด์ซิงค์ตามจอหน้าห้อง (รองรับ Pinch-Zoom และเลื่อนขึ้น-ลงในสไลด์) ได้เลย เมื่อถึงข้อคำถาม แป้นกดตอบ 4 สีจะเด้งขึ้นมาเองอัตโนมัติ!</p>
             <div class="orl-m-slide-tracker">
               📡 สไลด์ปัจจุบัน: <strong>Slide ${esc(state.session.hostSlideNum || "01")}</strong> · ${esc(state.session.hostSlideTitle || "Orientation")}
             </div>
           </div>
 
+          <button type="button" class="orl-m-join-btn" data-orl-mact="view-synced-slides" style="width:100%">📖 ดูสไลด์ซิงค์ตามจอหน้าห้อง (Pinch-Zoom ได้)</button>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="view-slides">📖 เปิดอ่านสไลด์ควบคู่</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="edit-profile">✏️ เปลี่ยนชื่อ/รหัส</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="edit-profile">✏️ เปลี่ยนชื่อ / บทบาท</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="close">เข้าหน้าหลักพอร์ทัล</button>
           </div>
         </div>
       `;
@@ -2256,7 +2550,16 @@
       <div class="orl-m-shell">
         <div class="orl-m-topbar">
           <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> RACM 303 LIVE</span>
-          <span class="orl-m-score-pill">${myEntry.score.toLocaleString()} pts</span>
+          ${
+            canRemote && state.joined
+              ? `
+            <div class="orl-seg-group">
+              <button type="button" class="orl-seg-btn${state.mobileTab === "pad" ? " is-active" : ""}" data-orl-mact="switch-mtab" data-mtab="pad">🎮 ตอบ Quiz</button>
+              <button type="button" class="orl-seg-btn${state.mobileTab === "remote" ? " is-active" : ""}" data-orl-mact="switch-mtab" data-mtab="remote">🎛️ รีโมท</button>
+            </div>
+          `
+              : `<span class="orl-m-score-pill">${myEntry.score.toLocaleString()} pts</span>`
+          }
           <button type="button" class="orl-m-close" data-orl-mact="close" aria-label="ย่อหน้าต่าง">&times;</button>
         </div>
         <div class="orl-m-body">${bodyHtml}</div>
@@ -2298,7 +2601,7 @@
       if (urlSwitch) {
         state.qrUrlMode = urlSwitch.getAttribute("data-orl-url-mode");
         renderAuxOverlay();
-        renderAllSurfaces(false);
+        renderAllSurfaces(true);
       }
     });
 
@@ -2347,14 +2650,16 @@
       return;
     }
     mountOverlayToActiveRoot(el);
+    syncVisualViewportVars();
     el.hidden = false;
 
     if (state.qrZoomOpen) {
       const joinUrl = getJoinUrl();
+      const brk = getParticipantRoleBreakdown();
       el.innerHTML = `
         <div class="orl-qr-zoom-card">
           <div class="orl-qz-top">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สแกนเข้าร่วม Live Orientation RACM 303</span>
+            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สแกนพร้อมกันทั้งอาจารย์ &amp; นศพ.</span>
             <button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button>
           </div>
           <div class="orl-qz-svg-wrap">
@@ -2362,10 +2667,10 @@
           </div>
           <div class="orl-qz-url">${esc(joinUrl)}</div>
           <div class="orl-qz-foot">
-            <span>เข้าร่วมแล้ว <strong data-orl-participant-count>${state.participants.size}</strong> / 169 คน</span>
+            <span>เข้าร่วมสด <strong data-orl-participant-count>${brk.total}</strong> คน (<span data-orl-role-breakdown>🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน</span>)</span>
             <div class="orl-seg-group">
-              <button type="button" class="orl-seg-btn${state.qrUrlMode === "prod" ? " is-active" : ""}" data-orl-url-mode="prod">GitHub Pages (มือถือ 5G)</button>
-              <button type="button" class="orl-seg-btn${state.qrUrlMode === "current" ? " is-active" : ""}" data-orl-url-mode="current">ลิงก์โดเมนปัจจุบัน</button>
+              <button type="button" class="orl-seg-btn${state.qrUrlMode === "prod" ? " is-active" : ""}" data-orl-url-mode="prod">🔵 ลิงก์รวม นศ.+อาจารย์</button>
+              <button type="button" class="orl-seg-btn${state.qrUrlMode === "faculty" ? " is-active" : ""}" data-orl-url-mode="faculty">🔴 ลิงก์ Faculty Portal</button>
             </div>
           </div>
         </div>
@@ -2399,7 +2704,7 @@
           </div>
           <label class="orl-m-lbl">สรุปเฉลย / เกณฑ์ O·S·M·U ที่แสดงหลังเฉลย</label>
           <input name="osmuRule" class="orl-m-input" placeholder="คำอธิบายสั้นๆ เมื่อเฉลยคำตอบ…">
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
             <button type="button" class="orl-bar-btn" data-orl-aux-close="1">ยกเลิก</button>
             <button type="submit" class="orl-bar-btn is-primary-next">บันทึกเข้าชุดคำถาม</button>
           </div>
@@ -2423,9 +2728,12 @@
   }
 
   function refreshLiveCountsAndChips() {
-    const count = state.participants.size;
+    const brk = getParticipantRoleBreakdown();
     document.querySelectorAll("[data-orl-participant-count]").forEach((el) => {
-      el.textContent = String(count);
+      el.textContent = String(brk.total);
+    });
+    document.querySelectorAll("[data-orl-role-breakdown]").forEach((el) => {
+      el.textContent = `🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน`;
     });
     document.querySelectorAll("[data-orl-participant-chips]").forEach((el) => {
       el.innerHTML = buildJoinedChipsMarkup(6);
@@ -2433,17 +2741,17 @@
     document.querySelectorAll("[data-orl-participant-wall]").forEach((el) => {
       el.innerHTML = buildJoinedChipsMarkup(48);
     });
-    const areaStrip = document.querySelector("[data-orl-area-strip]");
-    if (areaStrip) {
+    document.querySelectorAll("[data-orl-area-strip]").forEach((areaStrip) => {
       const areaCounts = getAreaCounts();
-      const areasOrder = ["กุฉินารายณ์", "ด่านซ้าย", "ตะกั่วป่า", "ท่าวังผา", "เพชรบูรณ์ 1", "เพชรบูรณ์ 2", "อุบลรัตน์", "ท่าสองยาง", "อุ้มผาง"];
+      const areasOrder = ["คณาจารย์", "กุฉินารายณ์", "ด่านซ้าย", "ตะกั่วป่า", "ท่าวังผา", "เพชรบูรณ์ 1", "เพชรบูรณ์ 2", "อุบลรัตน์", "ท่าสองยาง", "อุ้มผาง"];
       areaStrip.innerHTML = areasOrder
         .map((area) => {
           const c = areaCounts[area] || 0;
-          return `<span class="orl-area-pill${c > 0 ? " has-joined" : ""}">${esc(area)} <strong>${c}</strong></span>`;
+          const isFacPill = area === "คณาจารย์";
+          return `<span class="orl-area-pill${c > 0 ? " has-joined" : ""}${isFacPill ? " is-fac-area" : ""}">${isFacPill ? "👨‍⚕️ " : ""}${esc(area)} <strong>${c}</strong></span>`;
         })
         .join("");
-    }
+    });
     const q = getCurrentQuestion();
     if (q) {
       const stats = getQuestionStats(q);
@@ -2453,7 +2761,7 @@
     }
     const cloudOk = isCloudConnected();
     document.querySelectorAll("[data-orl-sync-label]").forEach((el) => {
-      el.textContent = cloudOk ? "ซิงค์สดข้ามอุปกรณ์พร้อมใช้งาน" : "พร้อมซิงค์ในเครือข่าย";
+      el.textContent = cloudOk ? "ซิงค์สดทุกแพลตฟอร์ม" : "พร้อมซิงค์ในเครือข่าย";
     });
   }
 
@@ -2468,7 +2776,6 @@
   }
 
   function updateFloatingBanner() {
-    if (ROLE !== "student") return;
     let bar = document.getElementById("orlFloatingJoinPill");
     const isActiveQuiz = state.session.phase === "question" || (state.session.updatedWallMs > 0 && Date.now() - state.session.updatedWallMs < 45 * 60 * 1000);
     if (!isActiveQuiz || state.participantModalOpen) {
@@ -2486,11 +2793,10 @@
     bar.hidden = false;
     bar.innerHTML =
       state.session.phase === "question"
-        ? `⚡ อาจารย์กำลังถามคำถามสด Orientation! กดตอบทันที &rarr;`
-        : `🟢 ห้อง Orientation Live เปิดอยู่ (${state.participants.size} คน) · กดเข้าร่วม`;
+        ? `⚡ คำถาม Quiz O/S/M/U กำลังเปิดรับคำตอบ! แตะเพื่อตอบทันที &rarr;`
+        : `🟢 Orientation Live เปิดอยู่ (${state.participants.size} คน) · แตะเปิดแป้นตอบ/ซิงค์สไลด์`;
   }
 
-  // Global delegated click handler for Cover Card & Deck Live Stage buttons
   document.addEventListener("click", (ev) => {
     const btn = ev.target.closest("[data-orl-action], [data-orl-preset], [data-orl-dur], [data-orl-jump-q]");
     if (!btn) return;
@@ -2530,6 +2836,14 @@
       if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.openLiveLobby === "function") {
         window.RACM_ORIENTATION_DECK.openLiveLobby();
       }
+    } else if (act === "jump-to-quiz-slide") {
+      if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.goToSlideById === "function") {
+        window.RACM_ORIENTATION_DECK.goToSlideById("s14-quiz-osmu");
+      }
+    } else if (act === "goto-criteria-slide") {
+      if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.goToSlideById === "function") {
+        window.RACM_ORIENTATION_DECK.goToSlideById("s15-osmu-criteria");
+      }
     } else if (act === "quick-start-quiz") {
       if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.openLiveLobby === "function") {
         window.RACM_ORIENTATION_DECK.openLiveLobby();
@@ -2552,52 +2866,12 @@
       state.soundMuted = !state.soundMuted;
       safeSet("racm303_orient_mute_v1", state.soundMuted ? "1" : "0");
       renderAllSurfaces(true);
-    } else if (act === "copy-join-url") {
-      const url = getJoinUrl();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => {
-          btn.textContent = "✅ คัดลอกลิงก์แล้ว!";
-          setTimeout(() => renderAllSurfaces(true), 1400);
-        }).catch(() => {});
-      }
     } else if (act === "open-participant-pad") {
       openParticipantModal();
     } else if (act === "continue-slides") {
       if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.resumeSlidesFromLobby === "function") {
         window.RACM_ORIENTATION_DECK.resumeSlidesFromLobby();
       }
-    }
-  });
-
-  function checkAutoJoinUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
-    if (params.get("orient_join") === "1" || h === "live" || h === "orient-live") {
-      setTimeout(() => {
-        openParticipantModal();
-      }, 60);
-    }
-  }
-
-  document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && hasOpenOverlay()) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      closeTopOverlay();
-    }
-  }, true);
-
-  window.addEventListener("hashchange", checkAutoJoinUrl);
-
-  document.addEventListener("fullscreenchange", () => {
-    if (state.participantModalOpen) mountOverlayToActiveRoot(document.getElementById("orientParticipantModal"));
-    if (state.qrZoomOpen || state.customPollModalOpen) mountOverlayToActiveRoot(document.getElementById("orientLiveAuxOverlay"));
-  });
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      if (state.joined && state.role === "student") publishMyPresence();
-      publishPacket("cmd", { type: "who_is_here" }, false);
     }
   });
 
@@ -2619,6 +2893,43 @@
     return false;
   }
 
+  document.addEventListener(
+    "keydown",
+    (ev) => {
+      if (ev.key === "Escape" && hasOpenOverlay()) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        closeTopOverlay();
+      }
+    },
+    true
+  );
+
+  function checkAutoJoinUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+    if (params.get("orient_join") === "1" || h === "live" || h === "orient-live") {
+      setTimeout(() => {
+        openParticipantModal();
+      }, 60);
+    }
+  }
+
+  window.addEventListener("hashchange", checkAutoJoinUrl);
+
+  document.addEventListener("fullscreenchange", () => {
+    if (state.participantModalOpen) mountOverlayToActiveRoot(document.getElementById("orientParticipantModal"));
+    if (state.qrZoomOpen || state.customPollModalOpen) mountOverlayToActiveRoot(document.getElementById("orientLiveAuxOverlay"));
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      syncVisualViewportVars();
+      if (state.joined) publishMyPresence();
+      publishPacket("cmd", { type: "who_is_here" }, false);
+    }
+  });
+
   initTransports();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", checkAutoJoinUrl);
@@ -2629,11 +2940,18 @@
   window.RACM_ORIENTATION_LIVE = {
     renderCoverCardHtml,
     renderDeckLiveStageHtml,
+    renderEmbeddedQuizSlideHtml,
     openParticipantModal,
     closeParticipantModal,
     hasOpenOverlay,
     closeTopOverlay,
     notifyHostSlide,
+    isFollowEnabled: () => state.followHostSlide,
+    toggleFollowHostSlide: () => {
+      state.followHostSlide = !state.followHostSlide;
+      safeSet("racm303_orient_follow_v1", state.followHostSlide ? "1" : "0");
+      return state.followHostSlide;
+    },
     getParticipantCount: () => state.participants.size,
     getPhase: () => state.session.phase,
     buildQrSvg

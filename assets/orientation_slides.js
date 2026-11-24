@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124orl1";
+  const ASSET_VER = "20261124orl2";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -17,6 +17,7 @@
     isOpen: false,
     slideIdx: 0,
     viewMode: "deck", // "deck" | "live" | "sorter" | "handout"
+    zoomScale: 1,
     sorterFilter: "all",
     presentationMode: false,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
@@ -816,20 +817,158 @@
       `
     },
     {
-      id: "s13-grading-milestones",
+      id: "s13-attendance-safety",
       num: "13",
+      section: "action",
+      sectionLabel: "Act IV · Conduct & Launch",
+      actClass: "is-act-4",
+      actLabel: "ACT IV · CONDUCT & SAFETY",
+      timeWindow: "09.26 – 09.27 น. (1 นาที)",
+      kicker: "04 · ATTENDANCE (≥ 80%), LEAVE QUOTAS (3d / 1.5d) & 6 SAFETY RULES",
+      title: "เวลาเรียน สิทธิ์เข้าสอบ โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
+      keyTag: "สิทธิ์เข้าสอบ & ความปลอดภัย",
+      keyMessageHtml:
+        "นักศึกษาจะมีสิทธิ์เข้าสอบเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong> (ลาไม่เกิน <strong>3 วัน</strong> ช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามลาได้ไม่เกิน <strong>1.5 วัน</strong>) พร้อมปฏิบัติตามระเบียบภาคสนาม 6 ข้อ",
+      notes:
+        "ชี้แจงเกณฑ์เวลาเรียนไม่น้อยกว่าร้อยละ 80 จึงมีสิทธิ์เข้าสอบ โควตาการลาช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน ช่วงฝึกภาคสนามลาได้ไม่เกิน 1.5 วัน ช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ ก่อนเข้าสู่ช่วง Live Quiz ทดสอบความเข้าใจเกณฑ์ O/S/M/U ในสไลด์ถัดไป",
+      render: () => `
+        <div class="or-infog-split is-s14-split">
+          <div class="or-schematic-box is-s14-left" data-fit-solo="1">
+            <div>
+              <span class="or-card-kicker">SIGN-IN WINDOW &amp; LEAVE QUOTAS</span>
+              <h3 class="or-card-title">การลงชื่อเข้าเรียน สิทธิ์เข้าสอบ และโควตาการลา</h3>
+            </div>
+
+            <div>
+              <div class="or-s14-subhead">ช่วงเวลาลงชื่อเข้าเรียนประจำแต่ละคาบ</div>
+              <div class="or-s14-signin-bar">
+                <div class="is-open">ก่อนคาบ 15 นาที เปิดระบบ</div>
+                <div class="is-norm">0–15 นาที ตรงเวลา</div>
+                <div class="is-late">เกิน 15 นาที นับว่าสาย</div>
+              </div>
+            </div>
+
+            <div class="or-stat-bar-list is-s14-bars">
+              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>เวลาเรียนรวมตลอดรายวิชาที่มีสิทธิ์เข้าสอบ</span><span>&ge; 80%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:80%"></div></div></div>
+              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาช่วงก่อนและหลังภาคสนามรวมกัน</span><span>&le; 3.0 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-amber" style="width:45%"></div></div></div>
+              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาเฉพาะช่วงฝึกปฏิบัติงานภาคสนาม</span><span>&le; 1.5 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-crimson" style="width:24%"></div></div></div>
+            </div>
+
+            <div class="or-card is-amber-tint is-s14-note">
+              <p class="or-card-text"><strong>การขอลา:</strong> ยื่นใบลาล่วงหน้าและได้รับอนุมัติจากอาจารย์ที่ปรึกษาก่อนเสมอ (กรณีเจ็บป่วยกะทันหันในพื้นที่ให้รีบแจ้งอาจารย์ทันที)</p>
+            </div>
+          </div>
+
+          <div class="or-s14-right-stack">
+            ${figPlate("orient_s14_safety_shields.png", "6 Fieldwork Safety and Professionalism Shields", "")}
+            <div class="or-card is-white is-s14-shield-note" data-fit-solo="1">
+              <p class="or-card-text">
+                <strong>ระเบียบภาคสนาม พ.ศ. 2561:</strong> (1) <strong>งดนำรถยนต์หรือพาหนะส่วนตัวไปใช้</strong> · (2) <strong>งดออกนอกพื้นที่หรือเดินทางลำพัง</strong> · (3) งดให้บุคคลภายนอกเข้าเยี่ยมในที่พัก · (4) แต่งกายสุภาพและติดป้ายชื่อ · (5) <strong>งดเครื่องดื่มแอลกอฮอล์ สารเสพติด และการพนัน</strong> · (6) เคารพสิทธิผู้ป่วยและชุมชนในการสื่อสารออนไลน์
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s14-quiz-osmu",
+      num: "14",
       section: "evaluation",
-      sectionLabel: "Act III · Evaluation",
+      sectionLabel: "Act IV · Live Quiz O/S/M/U",
+      actClass: "is-act-4",
+      actLabel: "LIVE QUIZ · O / S / M / U",
+      timeWindow: "09.27 – 09.28 น. (กิจกรรมสด)",
+      kicker: "04 · INTERACTIVE KAHOOT QUIZ · DO'S & DON'TS & ATTITUDE (O · S · M · U)",
+      title: "Live Quiz ทวนสอบความเข้าใจ: เวลาเรียน พฤติกรรมไม่พึงประสงค์ และเกณฑ์ O · S · M · U",
+      keyTag: "ร่วมตอบสดพร้อมกัน",
+      keyMessageHtml:
+        "ผู้ที่สแกน QR Code แล้วกดตอบคำถาม 4 สีบนมือถือ/แท็บเล็ตได้ทันที เพื่อ <strong>Recheck ความเข้าใจก่อนชี้แจงเกณฑ์ตัดสิน O · S · M · U ฉบับสมบูรณ์ในสไลด์ถัดไป</strong>",
+      notes:
+        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (M/U) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่ แล้วกดไปสไลด์ที่ 15 เพื่อสรุปเกณฑ์ O/S/M/U อย่างเป็นทางการ",
+      isLiveQuizSlide: true,
+      render: () => `
+        <div class="orl-s14-quiz-wrap" data-orl-slide-mount="quiz">
+          ${
+            window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function"
+              ? window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode })
+              : ""
+          }
+        </div>
+      `
+    },
+    {
+      id: "s15-osmu-criteria",
+      num: "15",
+      section: "evaluation",
+      sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
-      actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.27 – 09.28 น. (1 นาที)",
-      kicker: "03 · FINAL GRADE CRITERIA (O / S / U), REMEDIATION & 7 MILESTONES",
-      title: "เกณฑ์การตัดสินเกรดรายวิชา (O, S, U) การสอบซ่อม และกำหนดการสำคัญ 7 รายการ",
+      actLabel: "OFFICIAL CRITERIA · O · S · M · U",
+      timeWindow: "09.28 – 09.29 น. (1 นาที)",
+      kicker: "04 · SECTION 12–13 · ATTENDANCE, RAMA ATTITUDE RULES B.E. 2567 & FINAL GRADE O / S / M / U",
+      title: "ชี้แจงเกณฑ์เวลาเรียน การประเมินด้านเจตคติ (พ.ศ. 2567) และเกณฑ์ตัดสิน O · S · M · U",
+      keyTag: "หมายเหตุสำคัญ",
+      keyMessageHtml:
+        "ผลการประเมินเจตคติและพฤติกรรมได้ <strong><code>U</code> ต้องลงทะเบียนเรียนใหม่</strong> · การสอบซ่อมแยกวิชา [แต้ม <strong>&lt; 2.00</strong>] ให้โอกาสแก้ตัว <strong>1 ครั้ง</strong> (ผ่านได้เกรด <strong><code>S</code></strong> และ<strong>มีผลต่อการได้รับเกียรตินิยม</strong>)",
+      notes:
+        "ชี้แจงสรุปเกณฑ์ตามคู่มือรายวิชาหัวข้อเวลาเรียนและข้อ 13 การประเมินด้านเจตคติ: (1) เวลาเรียน ≥ ร้อยละ 80 จึงมีสิทธิ์เข้าสอบ ลาช่วงก่อน-หลังภาคสนาม ≤ 3 วัน ภาคสนาม ≤ 1.5 วัน (2) อ้างอิงประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 และใช้แบบประเมินจากเพื่อนในกลุ่มประกอบการพิจารณาของอาจารย์ (3) เกรดสุดท้ายได้ O มาจากเจตคติภาพรวม O + สอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม (4) แต้มต่ำกว่า 2.00 ต้องสอบซ่อมแยกวิชาระบบฯ/ระบาดฯ โอกาสแก้ตัว 1 ครั้ง ผ่านได้เกรด S มีผลต่อเกียรตินิยม หากไม่ผ่านหรือเจตคติได้ U ต้องลงทะเบียนเรียนใหม่",
+      render: () => `
+        <div class="or-grid-2 is-s15-osmu-grid" data-fit-group="cards">
+          <div class="or-card is-teal-tint">
+            <span class="or-card-kicker">① เวลาเรียน · สิทธิ์เข้าสอบ &amp; โควตาการลา</span>
+            <h3 class="or-card-title">เงื่อนไขเวลาเรียนไม่น้อยกว่าร้อยละ 80</h3>
+            <ul class="or-list">
+              <li><strong>สิทธิ์เข้าสอบ:</strong> นักศึกษาจะมีสิทธิ์เข้าสอบได้ต่อเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong></li>
+              <li><strong>ช่วงก่อนและหลังภาคสนาม:</strong> ลาได้รวมกัน <strong>ไม่เกิน 3 วัน</strong></li>
+              <li><strong>ช่วงฝึกภาคสนาม:</strong> ลาได้ <strong>ไม่เกิน 1.5 วัน</strong> (ยื่นใบลาและได้รับอนุมัติจากอาจารย์ที่ปรึกษา)</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-amber-tint">
+            <span class="or-card-kicker">② ข้อ 13 การประเมินด้านเจตคติ · ประกาศคณะฯ พ.ศ. 2567</span>
+            <h3 class="or-card-title">พฤติกรรมไม่พึงประสงค์ (M / U) &amp; เพื่อนประเมิน</h3>
+            <ul class="or-list">
+              <li><strong>แบบประเมินจากเพื่อนในกลุ่ม:</strong> เป็นข้อมูลที่อาจารย์ใช้ประกอบการพิจารณาประเมินผลนักศึกษา</li>
+              <li><strong>ระดับ <code>M</code> (ควรปรับปรุง):</strong> สายเกิน 15 นาที <strong>4 ครั้ง</strong> · ขาดเรียนไม่ลา <strong>&ge; 2 ครั้ง</strong> · ส่งงานช้า <strong>2 ครั้ง</strong> <em>(ได้ M &ge; 2 หมวด หรือซ้ำหมวดเดิม &rarr; ปรับเป็น <strong>U</strong>)</em></li>
+              <li><strong>ระดับ <code>U</code> (ไม่ผ่าน):</strong> สาย <strong>&ge; 5 ครั้ง</strong> · ส่งงานช้า <strong>&ge; 3 ครั้ง</strong> · ไม่ซื่อสัตย์ (เซ็นชื่อแทนกัน/เมคข้อมูล/ลอกงาน) หรือฝ่าฝืนระเบียบภาคสนาม</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-navy-tint">
+            <span class="or-card-kicker">③ การตัดสินเกรดสุดท้าย O / S &amp; การสอบซ่อมแยกวิชา</span>
+            <h3 class="or-card-title">เกณฑ์ได้เกรด O และการสอบแก้ตัว [แต้ม &lt; 2.00]</h3>
+            <ul class="or-list">
+              <li><strong>เกรดสุดท้ายได้ <code>O</code>:</strong> มาจากคะแนนประเมินภาพรวมของ<strong>เจตคติและพฤติกรรมได้ <code>O</code></strong> + <strong>ผลสอบทฤษฎีได้ <code>O</code></strong> ทั้งวิชาระบบฯ และระบาดฯ (&ge; 3.75) + <strong>ไม่มีการสอบซ่อม</strong></li>
+              <li><strong>การสอบซ่อม (แยกวิชาระบบฯ / ระบาดฯ):</strong> วิชาที่ได้ <strong>[แต้มต่ำกว่า 2.00] ต้องสอบซ่อม</strong> ให้โอกาสแก้ตัวได้ <strong>1 ครั้ง</strong> &rarr; ถ้าสอบผ่านจะได้รับ<strong>เกรดเป็น <code>S</code></strong></li>
+            </ul>
+          </div>
+
+          <div class="or-card is-rose-tint">
+            <span class="or-card-kicker">④ การลงทะเบียนเรียนใหม่ &amp; ผลต่อเกียรตินิยม</span>
+            <h3 class="or-card-title">กรณีไม่ผ่านรายวิชาและข้อควรระวังสำคัญ</h3>
+            <ul class="or-list">
+              <li><strong>สอบซ่อมไม่ผ่าน:</strong> หากสอบแก้ตัว 1 ครั้งแล้วยังไม่ผ่านเกณฑ์ <strong>ต้องลงทะเบียนเรียนใหม่</strong></li>
+              <li><strong>เจตคติได้ <code>U</code>:</strong> ผลการประเมินเจตคติและพฤติกรรมได้ <strong><code>U</code> ต้องลงทะเบียนเรียนใหม่ทันที</strong> (ไม่มีการสอบซ่อมด้านเจตคติ)</li>
+              <li><strong>หมายเหตุสำคัญ:</strong> <strong>หากนักศึกษามีการสอบซ่อม จะมีผลต่อการได้รับเกียรตินิยม</strong></li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s16-grading-milestones",
+      num: "16",
+      section: "evaluation",
+      sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
+      actClass: "is-act-3",
+      actLabel: "ACT IV · FLOW & 7 MILESTONES",
+      timeWindow: "09.29 น. (สรุปกำหนดการ)",
+      kicker: "04 · FINAL GRADE FLOWCHART & 7 KEY ASSESSMENT MILESTONES",
+      title: "ผังสรุปการตัดสินเกรดรายวิชา และกำหนดการสอบ–ส่งงานสำคัญ 7 รายการ",
       keyTag: "ข้อควรจำสำคัญ",
       keyMessageHtml:
         "ก่อนส่งงานสะท้อนคิด <code>SRN 1</code> (9 ธ.ค.) และ <code>SRN 2</code> (30 ธ.ค.) ในระบบ E-learning นักศึกษาต้องทำ <strong>แบบประเมินการสอนและแบบประเมินรายวิชา</strong> ให้ครบถ้วน",
       notes:
-        "สรุปเกณฑ์การตัดสินเกรดรายวิชา เกรด O เมื่อได้คะแนนตั้งแต่ 3.75 ทั้งสองหมวดข้อเขียน ควบคู่ผลประเมินฟอร์ม 2A ระดับ O โดยไม่เคยสอบซ่อม เกรด S เมื่อสอบผ่านทั้งสองหมวด (ตั้งแต่ 2.00) และฟอร์ม 2A ได้ระดับ O หรือ S หากหมวดใดต่ำกว่า 2.00 มีสิทธิ์สอบซ่อมเฉพาะหมวดนั้นได้ 1 ครั้ง และต้องลงทะเบียนเรียนใหม่เมื่อซ่อมไม่ผ่านหรือฟอร์ม 2A ได้ระดับ U",
+        "ทบทวนผังไหลการตัดสินเกรด O, S, U และตารางกำหนดการสอบ-ส่งงานสำคัญทั้ง 7 รายการตลอด 6 สัปดาห์ พร้อมย้ำการทำแบบประเมินออนไลน์ก่อนส่ง SRN 1 และ SRN 2",
       render: () => `
         <div class="or-top-fig-stack is-s13-stack">
           ${figPlate(
@@ -843,16 +982,16 @@
               <div class="or-card is-teal-tint">
                 <span class="or-card-kicker">เกณฑ์ระดับดีเยี่ยม (O) และระดับผ่านมาตรฐาน (S)</span>
                 <ul class="or-list is-s13-list">
-                  <li><strong>เกรด O:</strong> สอบได้ <strong>&ge; 3.75</strong> ทั้งหมวดระบาดวิทยาและระบบสุขภาพ ควบคู่ผลประเมิน <strong>ฟอร์ม 2A ระดับ O</strong> โดยไม่เคยสอบซ่อม</li>
-                  <li><strong>เกรด S:</strong> สอบผ่านเกณฑ์ทั้งสองหมวด (<strong>&ge; 2.00</strong>) และผลประเมิน <strong>ฟอร์ม 2A ได้ระดับ O หรือ S</strong></li>
+                  <li><strong>เกรด O:</strong> สอบได้ <strong>&ge; 3.75</strong> ทั้งหมวดระบาดวิทยาและระบบสุขภาพ ควบคู่ผลประเมิน <strong>เจตคติภาพรวม (ฟอร์ม 2A) ระดับ O</strong> โดยไม่เคยสอบซ่อม</li>
+                  <li><strong>เกรด S:</strong> สอบผ่านเกณฑ์ทั้งสองหมวด (<strong>&ge; 2.00</strong>) และผลประเมิน <strong>เจตคติได้ระดับ O หรือ S</strong></li>
                 </ul>
               </div>
 
               <div class="or-card is-rose-tint">
-                <span class="or-card-kicker">การสอบซ่อมรายหมวดและการลงทะเบียนเรียนใหม่ (U)</span>
+                <span class="or-card-kicker">การสอบซ่อมแยกวิชาและการลงทะเบียนเรียนใหม่ (U)</span>
                 <ul class="or-list is-s13-list">
-                  <li><strong>สอบซ่อมได้ 1 ครั้ง:</strong> เฉพาะหมวดที่ได้ต่ำกว่า <strong>2.00</strong> เมื่อสอบซ่อมผ่านจะได้รับเกรด <strong>S</strong> <em>(มีผลต่อการพิจารณาเกียรตินิยม)</em></li>
-                  <li><strong>ลงทะเบียนเรียนใหม่:</strong> กรณีสอบซ่อมไม่ผ่านเกณฑ์ หรือได้รับการประเมินเจตคติใน <strong>ฟอร์ม 2A ระดับ U</strong></li>
+                  <li><strong>สอบซ่อมได้ 1 ครั้ง:</strong> แยกวิชาระบบฯ / ระบาดฯ ที่ได้ต่ำกว่า <strong>2.00</strong> สอบผ่านได้เกรด <strong>S</strong> <em>(มีผลต่อการได้รับเกียรตินิยม)</em></li>
+                  <li><strong>ลงทะเบียนเรียนใหม่:</strong> สอบซ่อมไม่ผ่าน หรือผลประเมินเจตคติและพฤติกรรมได้ <strong>U</strong></li>
                 </ul>
               </div>
             </div>
@@ -878,62 +1017,8 @@
       `
     },
     {
-      id: "s14-attendance-safety",
-      num: "14",
-      section: "action",
-      sectionLabel: "Act IV · Conduct & Launch",
-      actClass: "is-act-4",
-      actLabel: "ACT IV · CONDUCT & SAFETY",
-      timeWindow: "09.28 – 09.29 น. (1 นาที)",
-      kicker: "04 · ATTENDANCE POLICY & 6 FIELDWORK SAFETY REGULATIONS (B.E. 2561)",
-      title: "กติกาการลงชื่อเข้าเรียน โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
-      keyTag: "ความปลอดภัยเป็นสำคัญ",
-      keyMessageHtml:
-        "แนวปฏิบัติทั้ง 6 ข้อกำหนดขึ้นเพื่อดูแลให้ <strong>นักศึกษาแพทย์ทั้ง 169 คนได้เรียนรู้ร่วมกับชุมชนและเดินทางกลับอย่างปลอดภัยตลอดการฝึกภาคสนาม</strong>",
-      notes:
-        "ชี้แจงช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) เกณฑ์เวลาเรียนรวมไม่น้อยกว่า 80% โควตาการลา (ช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน ช่วงฝึกภาคสนามไม่เกิน 1.5 วัน) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ",
-      render: () => `
-        <div class="or-infog-split is-s14-split">
-          <div class="or-schematic-box is-s14-left" data-fit-solo="1">
-            <div>
-              <span class="or-card-kicker">SIGN-IN WINDOW &amp; LEAVE QUOTAS</span>
-              <h3 class="or-card-title">การลงชื่อเข้าเรียนและเกณฑ์การยื่นใบลา</h3>
-            </div>
-
-            <div>
-              <div class="or-s14-subhead">ช่วงเวลาลงชื่อเข้าเรียนประจำแต่ละคาบ</div>
-              <div class="or-s14-signin-bar">
-                <div class="is-open">ก่อนคาบ 15 นาที เปิดระบบ</div>
-                <div class="is-norm">0–15 นาที ตรงเวลา</div>
-                <div class="is-late">เกิน 15 นาที นับว่าสาย</div>
-              </div>
-            </div>
-
-            <div class="or-stat-bar-list is-s14-bars">
-              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>เวลาเรียนรวมตลอดรายวิชาที่มีสิทธิ์เข้าสอบ</span><span>&ge; 80%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:80%"></div></div></div>
-              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาช่วงก่อนและหลังภาคสนามรวมกัน</span><span>&le; 3.0 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-amber" style="width:45%"></div></div></div>
-              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาเฉพาะช่วงฝึกปฏิบัติงานภาคสนาม</span><span>&le; 1.5 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-crimson" style="width:24%"></div></div></div>
-            </div>
-
-            <div class="or-card is-amber-tint is-s14-note">
-              <p class="or-card-text"><strong>การขอลา:</strong> ยื่นใบลาล่วงหน้าเป็นลายลักษณ์อักษรหรือผ่านระบบของรายวิชา และได้รับอนุมัติจากอาจารย์ที่ปรึกษาก่อนเสมอ (กรณีเจ็บป่วยกะทันหันในพื้นที่ให้รีบแจ้งอาจารย์ทันที)</p>
-            </div>
-          </div>
-
-          <div class="or-s14-right-stack">
-            ${figPlate("orient_s14_safety_shields.png", "6 Fieldwork Safety and Professionalism Shields", "")}
-            <div class="or-card is-white is-s14-shield-note" data-fit-solo="1">
-              <p class="or-card-text">
-                <strong>ระเบียบภาคสนาม พ.ศ. 2561:</strong> (1) <strong>งดนำรถยนต์หรือพาหนะส่วนตัวไปใช้</strong> · (2) <strong>งดออกนอกพื้นที่หรือเดินทางลำพัง</strong> · (3) งดให้บุคคลภายนอกเข้าเยี่ยมในที่พัก · (4) แต่งกายสุภาพและติดป้ายชื่อ · (5) <strong>งดเครื่องดื่มแอลกอฮอล์ สารเสพติด และการพนัน</strong> · (6) เคารพสิทธิผู้ป่วยและชุมชนในการสื่อสารออนไลน์
-              </p>
-            </div>
-          </div>
-        </div>
-      `
-    },
-    {
-      id: "s15-digital-launch",
-      num: "15",
+      id: "s17-digital-launch",
+      num: "17",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -986,76 +1071,30 @@
           </div>
         </div>
       `
-    },
-    {
-      id: "s16-live-recheck",
-      num: "16",
-      section: "action",
-      sectionLabel: "Act IV · Conduct & Launch",
-      actClass: "is-act-4",
-      actLabel: "ACT IV · KAHOOT RECHECK",
-      timeWindow: "กิจกรรมทวนสอบสด (Live Recheck)",
-      kicker: "04 · DO'S & DON'TS + O / S / M / U MASTERY RECHECK",
-      title: "ทวนสอบความเข้าใจ Do's & Don'ts และเกณฑ์ O · S · M · U ก่อนเริ่มเรียน",
-      keyTag: "Recheck ร่วมกันทั้งรุ่น",
-      keyMessageHtml:
-        "ตรวจสอบความเข้าใจกติกาสำคัญตามคู่มือรายวิชาและ มม.4 ปี 2569 เพื่อป้องกันความเข้าใจคลาดเคลื่อนที่อาจนำไปสู่ระดับ <strong>M (ควรปรับปรุง)</strong> หรือ <strong>U (ไม่ผ่าน · ลงทะเบียนเรียนใหม่)</strong>",
-      notes:
-        "ชวนนักศึกษาที่สแกน QR Code ค้างไว้ใน Live Lobby ร่วมกดตอบคำถาม Kahoot Recheck ทบทวน Do's & Don'ts ทั้งเรื่องเวลาเข้าเรียน การลา การส่งงาน การใช้ AI/PDPA ความซื่อสัตย์ทางวิชาการ ระเบียบห้องสอบ และระเบียบภาคสนาม พ.ศ. 2561 พร้อมดูเฉลยรายข้อทันที",
-      render: () => `
-        <div class="or-infog-split is-s16-recheck">
-          <div class="or-stack-col" data-fit-group="cards">
-            <div class="or-card is-amber-tint">
-              <span class="or-card-kicker">① เวลาเข้าเรียน · การลา &amp; การส่งงาน (มม.4 หน้า 11–13)</span>
-              <p class="or-card-text">
-                <strong>Do:</strong> ลงชื่อเข้าเรียนไม่เกิน 15 นาทีหลังเริ่มคาบ (เวลาเรียนรวม ≥ 80%) และยื่นใบลาล่วงหน้า (ทฤษฎี ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน)<br>
-                <strong>ระวัง M / U:</strong> สายเกิน 15 นาที <strong>4 ครั้ง = M · ≥ 5 ครั้ง = U</strong> · ขาดเรียนไม่ลา <strong>≥ 2 ครั้ง = M</strong> · ส่งงานช้า <strong>≥ 2 ครั้ง = M · ≥ 3 ครั้ง = U</strong>
-              </p>
-            </div>
-            <div class="or-card is-rose-tint">
-              <span class="or-card-kicker">② ความซื่อสัตย์วิชาชีพ &amp; ระเบียบภาคสนาม พ.ศ. 2561</span>
-              <p class="or-card-text">
-                <strong>Don't เด็ดขาด (= U ทันที):</strong> ห้ามเซ็นชื่อแทนกัน (ได้ U ทั้งผู้ฝากและผู้ทำแทน) ห้ามเมคข้อมูลสำรวจ ห้ามลอกรายงาน · ภาคสนาม <strong>งดพาหนะส่วนตัว งดออกนอกเขตฝึกโดยพลการ งดแอลกอฮอล์/พนัน</strong> และงดให้คนนอกเข้าที่พัก
-              </p>
-            </div>
-            <div class="or-card is-teal-tint">
-              <span class="or-card-kicker">③ ระเบียบห้องสอบ · โน้ต A4 ลายมือ &amp; เกณฑ์ AI / PDPA</span>
-              <p class="or-card-text">
-                <strong>ห้องสอบ:</strong> สายเกิน 15 นาทีหมดสิทธิ์เข้าสอบ งดกระเป๋า/มือถือ/Smart Watch/เครื่องคิดเลข · สอบระบบสุขภาพนำ <strong>A4 เขียนลายมือตนเองเข้าได้ 1 แผ่น</strong> (ห้ามพิมพ์/สำเนา) · <strong>SRN 1–2 = No AI</strong> และห้ามนำข้อมูลระบุตัวบุคคลเข้า AI สาธารณะ
-              </p>
-            </div>
-            <div class="or-card is-navy-tint">
-              <span class="or-card-kicker">④ กฎเหล็กการขยับ M → U &amp; เกณฑ์ตัดสิน O / S</span>
-              <p class="or-card-text">
-                <strong>เกรด O:</strong> สอบได้ ≥ 3.75 แยกทั้งสองหมวดรอบแรก + ฟอร์ม 2A ได้ O · <strong>สอบซ่อมผ่าน (&lt; 2.00):</strong> ได้สูงสุด <strong>S</strong> · <strong>สำคัญที่สุด:</strong> ได้ <strong>M ≥ 2 หมวด หรือทำซ้ำหมวด M เดิม → ปรับเป็น U</strong> และ <strong>U ด้านเจตคติไม่มีการสอบแก้ตัว!</strong>
-              </p>
-            </div>
-          </div>
-
-          <div class="orl-s16-live-col" data-orl-slide-mount="s16">
-            ${
-              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderCoverCardHtml === "function"
-                ? window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode })
-                : ""
-            }
-          </div>
-        </div>
-      `
     }
   ];
 
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (16)", labelEn: "All Slides (16)" },
-    { id: "intro", labelTh: "เปิดเรื่อง & Lobby (1)", labelEn: "Opening & Lobby (1)" },
+    { id: "all", labelTh: "ทั้งหมด (17)", labelEn: "All Slides (17)" },
+    { id: "intro", labelTh: "เปิดเรื่อง & QR Lobby (1)", labelEn: "Opening & Lobby (1)" },
     { id: "objectives", labelTh: "Act I · ความสำคัญและเป้าหมาย (4)", labelEn: "Act I · Start with Why (4)" },
     { id: "experience", labelTh: "Act II · เส้นทางเรียนรู้ (4)", labelEn: "Act II · Experience (4)" },
-    { id: "evaluation", labelTh: "Act III · วัดผล 5 สมรรถนะ (4)", labelEn: "Act III · Evaluation (4)" },
-    { id: "action", labelTh: "Act IV · กติกา & Live Recheck (3)", labelEn: "Act IV · Launch & Recheck (3)" }
+    { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
+    { id: "action", labelTh: "Act IV · เวลาเรียน & ก้าวแรก (2)", labelEn: "Act IV · Conduct & Launch (2)" }
   ];
 
-  /* ---------- Per-Frame Binary-Search Auto-Fit Typography Engine ---------- */
+  /* ---------- Per-Frame Binary-Search Auto-Fit Typography & Multi-Device Reflow ---------- */
+  function isScrollReflowDevice() {
+    const w = window.innerWidth || 1024;
+    const h = window.innerHeight || 768;
+    if (w <= 760) return true;
+    if (h <= 520) return true;
+    if (w <= 1040 && w / Math.max(1, h) < 1.32) return true;
+    return false;
+  }
+
   function isPortraitMobileMode() {
-    return window.innerWidth <= 700 && window.innerHeight > window.innerWidth;
+    return isScrollReflowDevice();
   }
 
   function findMaxScaleForBox(el, checkFn, minS, maxS, safetyFactor) {
@@ -1127,7 +1166,13 @@
   }
 
   function fitSingleSlideCanvas(canvas) {
-    if (!canvas || canvas.classList.contains("is-live-canvas")) return;
+    if (
+      !canvas ||
+      canvas.classList.contains("is-live-canvas") ||
+      canvas.getAttribute("data-slide-id") === "s14-quiz-osmu"
+    ) {
+      return;
+    }
     const allScaled = canvas.querySelectorAll(
       ".or-card, .or-visual-pillar-copy, .or-table-wrap, .or-schematic-box, .or-cover-kpi, .or-cover-act-chip"
     );
@@ -1449,31 +1494,104 @@
       }
     });
 
-    // Touch swipe left/right for phones, foldables, and tablets
+    // Multi-Touch Pinch-Zoom In/Out + Double-Tap Zoom + Single-Finger Swipe (within bounded slide!)
     let touchStartX = 0;
     let touchStartY = 0;
     let ignoreSwipe = false;
+    let hadMultiTouch = false;
+    let pinchStartDist = 0;
+    let pinchStartZoom = 1;
+    let lastTapTime = 0;
+    let lastTapX = 0;
+    let lastTapY = 0;
+
+    function getTouchDist(t0, t1) {
+      return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    }
+
     modal.addEventListener(
       "touchstart",
       (ev) => {
-        if (!state.isOpen || state.viewMode !== "deck" || !ev.touches || ev.touches.length !== 1) return;
-        const t0 = ev.touches[0];
-        touchStartX = t0.clientX;
-        touchStartY = t0.clientY;
-        const inScrollTable = ev.target && ev.target.closest && ev.target.closest(".or-table-wrap, .or-filmstrip, .or-tools-popover");
-        ignoreSwipe = !!inScrollTable;
+        if (!state.isOpen || (state.viewMode !== "deck" && state.viewMode !== "live") || !ev.touches) return;
+        if (ev.touches.length >= 2) {
+          hadMultiTouch = true;
+          ignoreSwipe = true;
+          pinchStartDist = Math.max(20, getTouchDist(ev.touches[0], ev.touches[1]));
+          pinchStartZoom = state.zoomScale || 1;
+          return;
+        }
+        if (ev.touches.length === 1) {
+          hadMultiTouch = false;
+          const t0 = ev.touches[0];
+          touchStartX = t0.clientX;
+          touchStartY = t0.clientY;
+          const inInteractiveZone =
+            ev.target &&
+            ev.target.closest &&
+            ev.target.closest(
+              ".or-table-wrap, .or-filmstrip, .or-tools-popover, .orl-players-wall, .orl-chips-stream, .orl-diag-list, input, select, textarea"
+            );
+          ignoreSwipe = Boolean(inInteractiveZone) || (state.zoomScale || 1) > 1.03;
+        }
       },
       { passive: true }
     );
 
     modal.addEventListener(
+      "touchmove",
+      (ev) => {
+        if (!state.isOpen || (state.viewMode !== "deck" && state.viewMode !== "live") || !ev.touches) return;
+        if (ev.touches.length >= 2 && pinchStartDist > 0) {
+          hadMultiTouch = true;
+          ignoreSwipe = true;
+          ev.preventDefault();
+          const curDist = getTouchDist(ev.touches[0], ev.touches[1]);
+          const midX = (ev.touches[0].clientX + ev.touches[1].clientX) * 0.5;
+          const midY = (ev.touches[0].clientY + ev.touches[1].clientY) * 0.5;
+          setZoomScale(pinchStartZoom * (curDist / pinchStartDist), midX, midY);
+        }
+      },
+      { passive: false }
+    );
+
+    modal.addEventListener(
       "touchend",
       (ev) => {
-        if (!state.isOpen || state.viewMode !== "deck" || ignoreSwipe || !ev.changedTouches || !ev.changedTouches.length) return;
+        if (!state.isOpen || !ev.changedTouches || !ev.changedTouches.length) return;
+        if (ev.touches && ev.touches.length > 0) return;
+
+        if (hadMultiTouch) {
+          hadMultiTouch = false;
+          pinchStartDist = 0;
+          return;
+        }
+
         const t1 = ev.changedTouches[0];
         const dx = t1.clientX - touchStartX;
         const dy = t1.clientY - touchStartY;
-        if (Math.abs(dx) > 54 && Math.abs(dx) > Math.abs(dy) * 1.45) {
+
+        // Double-tap on slide figure/canvas (outside buttons & inputs) toggles 1.0x <-> 1.75x zoom!
+        if (Math.abs(dx) < 16 && Math.abs(dy) < 16) {
+          const isControl =
+            ev.target &&
+            ev.target.closest &&
+            ev.target.closest("button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar");
+          if (!isControl && (state.viewMode === "deck" || state.viewMode === "live")) {
+            const now = Date.now();
+            if (now - lastTapTime < 310 && Math.hypot(t1.clientX - lastTapX, t1.clientY - lastTapY) < 36) {
+              const targetZ = (state.zoomScale || 1) > 1.08 ? 1 : 1.75;
+              setZoomScale(targetZ, t1.clientX, t1.clientY);
+              lastTapTime = 0;
+              return;
+            }
+            lastTapTime = now;
+            lastTapX = t1.clientX;
+            lastTapY = t1.clientY;
+          }
+        }
+
+        if (state.viewMode !== "deck" || ignoreSwipe || (state.zoomScale || 1) > 1.03) return;
+        if (Math.abs(dx) > 58 && Math.abs(dx) > Math.abs(dy) * 1.55) {
           state.autoPlay = false;
           if (dx < 0 && state.slideIdx < SLIDES.length - 1) {
             goToSlide(state.slideIdx + 1);
@@ -1483,6 +1601,19 @@
         }
       },
       { passive: true }
+    );
+
+    modal.addEventListener(
+      "wheel",
+      (ev) => {
+        if (!state.isOpen || (state.viewMode !== "deck" && state.viewMode !== "live")) return;
+        if (ev.ctrlKey || ev.metaKey) {
+          ev.preventDefault();
+          const factor = ev.deltaY < 0 ? 1.12 : 0.89;
+          setZoomScale((state.zoomScale || 1) * factor, ev.clientX, ev.clientY);
+        }
+      },
+      { passive: false }
     );
 
     document.addEventListener("keydown", (ev) => {
@@ -1548,7 +1679,17 @@
         ev.preventDefault();
         state.autoPlay = false;
         state.viewMode = state.viewMode === "live" ? "deck" : "live";
+        state.zoomScale = 1;
         renderModal();
+      } else if (ev.key === "+" || ev.key === "=") {
+        ev.preventDefault();
+        setZoomScale((state.zoomScale || 1) + 0.25);
+      } else if (ev.key === "-" || ev.key === "_") {
+        ev.preventDefault();
+        setZoomScale((state.zoomScale || 1) - 0.25);
+      } else if (ev.key === "0") {
+        ev.preventDefault();
+        setZoomScale(1);
       }
     });
 
@@ -1631,6 +1772,55 @@
     renderModal();
   }
 
+  function applyZoomToCurrentSlide(prevZoom, focalX, focalY) {
+    const vp = document.getElementById("orDeckViewport");
+    if (!vp) return;
+    const z = state.zoomScale || 1;
+    vp.classList.toggle("is-zoomed", z > 1.02 || z < 0.98);
+    document.querySelectorAll("[data-or-zoom-label]").forEach((el) => {
+      el.textContent = `${Math.round(z * 100)}%`;
+    });
+    const sizer = vp.querySelector(".or-slide-zoom-sizer");
+    const canvas = vp.querySelector(".or-slide-canvas");
+    if (!sizer || !canvas) return;
+
+    if (Math.abs(z - 1) < 0.025) {
+      sizer.style.width = "";
+      sizer.style.height = "";
+      canvas.style.transform = "";
+      canvas.style.transformOrigin = "";
+      return;
+    }
+
+    // Measure natural unzoomed layout dimensions
+    canvas.style.transform = "none";
+    const baseW = Math.max(240, canvas.offsetWidth);
+    const baseH = Math.max(180, canvas.offsetHeight);
+
+    const vpRect = vp.getBoundingClientRect();
+    const cx = typeof focalX === "number" ? focalX - vpRect.left : vp.clientWidth * 0.5;
+    const cy = typeof focalY === "number" ? focalY - vpRect.top : vp.clientHeight * 0.5;
+    const oldZ = prevZoom || 1;
+    const contentX = (vp.scrollLeft + cx) / oldZ;
+    const contentY = (vp.scrollTop + cy) / oldZ;
+
+    sizer.style.width = `${Math.round(baseW * z)}px`;
+    sizer.style.height = `${Math.round(baseH * z)}px`;
+    canvas.style.transformOrigin = "0 0";
+    canvas.style.transform = `scale(${z.toFixed(3)})`;
+
+    vp.scrollLeft = Math.max(0, Math.round(contentX * z - cx));
+    vp.scrollTop = Math.max(0, Math.round(contentY * z - cy));
+  }
+
+  function setZoomScale(nextZoom, focalX, focalY) {
+    const oldZ = state.zoomScale || 1;
+    let clamped = Math.max(0.75, Math.min(3.0, Number(nextZoom) || 1));
+    if (Math.abs(clamped - 1) < 0.04) clamped = 1;
+    state.zoomScale = clamped;
+    applyZoomToCurrentSlide(oldZ, focalX, focalY);
+  }
+
   function syncHostSlideToLive() {
     if (window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.notifyHostSlide === "function") {
       window.RACM_ORIENTATION_LIVE.notifyHostSlide(state.slideIdx, SLIDES[state.slideIdx]);
@@ -1639,17 +1829,52 @@
 
   function goToSlide(idx) {
     state.slideIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
+    state.zoomScale = 1;
     state.toolsMenuOpen = false;
     syncHostSlideToLive();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
-    if (vp) vp.scrollTop = 0;
+    if (vp) {
+      vp.scrollTop = 0;
+      vp.scrollLeft = 0;
+    }
+  }
+
+  function stepSlide(delta) {
+    goToSlide(state.slideIdx + (Number(delta) || 0));
+  }
+
+  function goToSlideById(slideId) {
+    const idx = SLIDES.findIndex((s) => s.id === slideId);
+    state.isOpen = true;
+    state.viewMode = "deck";
+    state.autoPlay = false;
+    if (idx >= 0) {
+      goToSlide(idx);
+    } else {
+      renderModal();
+    }
+  }
+
+  function followRemoteSlide(remoteIdx) {
+    if (!state.isOpen || state.viewMode !== "deck") return;
+    const safeIdx = Math.max(0, Math.min(SLIDES.length - 1, Number(remoteIdx) || 0));
+    if (safeIdx === state.slideIdx) return;
+    state.slideIdx = safeIdx;
+    state.zoomScale = 1;
+    renderModal();
+    const vp = document.getElementById("orDeckViewport");
+    if (vp) {
+      vp.scrollTop = 0;
+      vp.scrollLeft = 0;
+    }
   }
 
   function openLiveLobby() {
     state.isOpen = true;
     state.autoPlay = false;
     state.toolsMenuOpen = false;
+    state.zoomScale = 1;
     state.viewMode = "live";
     renderModal();
   }
@@ -1657,6 +1882,7 @@
   function resumeSlidesFromLobby() {
     state.autoPlay = false;
     state.toolsMenuOpen = false;
+    state.zoomScale = 1;
     state.viewMode = "deck";
     if (state.slideIdx === 0 && SLIDES.length > 1) {
       state.slideIdx = 1;
@@ -1678,7 +1904,7 @@
     if (state.viewMode === "live") {
       const liveCanvas = modal.querySelector(".or-slide-canvas.is-live-canvas");
       if (liveCanvas) {
-        liveCanvas.innerHTML = window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml();
+        liveCanvas.innerHTML = window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false);
         return;
       }
       renderModal();
@@ -1686,7 +1912,12 @@
     }
     if (state.viewMode === "deck") {
       modal.querySelectorAll("[data-orl-slide-mount]").forEach((mount) => {
-        mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode });
+        const kind = mount.getAttribute("data-orl-slide-mount");
+        if (kind === "quiz" && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function") {
+          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode });
+        } else {
+          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderCoverCardHtml({ viewMode: state.viewMode });
+        }
       });
     }
   }
@@ -1711,24 +1942,34 @@
         ? window.RACM_ORIENTATION_LIVE.getParticipantCount()
         : 0;
 
+    const followOn =
+      window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.isFollowEnabled === "function"
+        ? window.RACM_ORIENTATION_LIVE.isFollowEnabled()
+        : false;
+    const zoomPct = Math.round((state.zoomScale || 1) * 100);
+
     let viewportHtml = "";
     if (state.viewMode === "deck") {
       viewportHtml = `
         ${state.autoPlay ? `<div class="or-autoplay-progress" aria-hidden="true"></div>` : ""}
         <div class="or-slide-frame-wrap">
-          ${renderSingleSlideCanvasHtml(cur, state.slideIdx, true)}
+          <div class="or-slide-zoom-sizer">
+            ${renderSingleSlideCanvasHtml(cur, state.slideIdx, true)}
+          </div>
         </div>
       `;
     } else if (state.viewMode === "live") {
       viewportHtml = `
         <div class="or-slide-frame-wrap">
-          <article class="or-slide-canvas is-live-canvas" aria-label="Live Orientation Lobby and Kahoot Recheck">
-            ${
-              window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml === "function"
-                ? window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml()
-                : ""
-            }
-          </article>
+          <div class="or-slide-zoom-sizer">
+            <article class="or-slide-canvas is-live-canvas" aria-label="Live Orientation Lobby and Kahoot Recheck">
+              ${
+                window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml === "function"
+                  ? window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false)
+                  : ""
+              }
+            </article>
+          </div>
         </div>
       `;
     } else if (state.viewMode === "sorter") {
@@ -1859,26 +2100,51 @@
         }
 
         ${
-          state.viewMode === "deck"
+          state.viewMode === "deck" || state.viewMode === "live"
             ? `
           <div class="or-deck-bottombar">
             <div class="or-nav-cluster">
-              <button type="button" class="or-tool-btn or-prevnext-btn" id="orPrevBtn" ${state.slideIdx === 0 ? "disabled" : ""}>&larr; <span class="or-nav-word">${esc(t("ก่อนหน้า", "Prev"))}</span></button>
-              <select class="or-slide-select" id="orSlideSelect" aria-label="เลือกสไลด์">
-                ${SLIDES.map(
-                  (s, i) =>
-                    `<option value="${i}" ${i === state.slideIdx ? "selected" : ""}>${s.num}/${SLIDES.length} · ${esc(s.title)}</option>`
-                ).join("")}
-              </select>
-              <button type="button" class="or-tool-btn is-primary or-prevnext-btn" id="orNextBtn" ${state.slideIdx === SLIDES.length - 1 ? "disabled" : ""}><span class="or-nav-word">${esc(t("ถัดไป", "Next"))}</span> &rarr;</button>
+              ${
+                state.viewMode === "deck"
+                  ? `
+                <button type="button" class="or-tool-btn or-prevnext-btn" id="orPrevBtn" ${state.slideIdx === 0 ? "disabled" : ""}>&larr; <span class="or-nav-word">${esc(t("ก่อนหน้า", "Prev"))}</span></button>
+                <select class="or-slide-select" id="orSlideSelect" aria-label="เลือกสไลด์">
+                  ${SLIDES.map(
+                    (s, i) =>
+                      `<option value="${i}" ${i === state.slideIdx ? "selected" : ""}>${s.num}/${SLIDES.length} · ${esc(s.title)}</option>`
+                  ).join("")}
+                </select>
+                <button type="button" class="or-tool-btn is-primary or-prevnext-btn" id="orNextBtn" ${state.slideIdx === SLIDES.length - 1 ? "disabled" : ""}><span class="or-nav-word">${esc(t("ถัดไป", "Next"))}</span> &rarr;</button>
+              `
+                  : `<button type="button" class="or-tool-btn is-primary" id="orBackToSlidesBtn">&larr; กลับไปยังสไลด์ (${cur.num}/${SLIDES.length})</button>`
+              }
             </div>
 
-            <div class="or-filmstrip" role="navigation" aria-label="แถบลำดับสไลด์">
-              ${SLIDES.map(
-                (s, i) =>
-                  `<button type="button" class="or-film-dot${i === state.slideIdx ? " is-active" : ""}" data-or-jump="${i}" title="${s.num}. ${esc(s.title)}">${s.num}</button>`
-              ).join("")}
+            <div class="or-zoom-sync-cluster">
+              ${
+                ROLE === "student"
+                  ? `<button type="button" class="or-follow-pill${followOn ? " is-on" : ""}" id="orFollowLiveBtn" title="ซิงค์เปลี่ยนหน้าสไลด์ตามจอผู้สอนอัตโนมัติ">📡 ${followOn ? "ซิงค์สด On" : "ซิงค์สด Off"}</button>`
+                  : ""
+              }
+              <div class="or-zoom-pill" role="group" aria-label="ย่อขยายสไลด์ (Pinch-Zoom ได้)">
+                <button type="button" class="or-zoom-btn" id="orZoomOutBtn" title="ซูมออก (−)">&minus;</button>
+                <button type="button" class="or-zoom-lbl" id="orZoomResetBtn" data-or-zoom-label title="แตะเพื่อรีเซ็ตขนาด 100% (หรือใช้ 2 นิ้วถ่างซูมบนจอ)">${zoomPct}%</button>
+                <button type="button" class="or-zoom-btn" id="orZoomInBtn" title="ซูมเข้า (+)">&#43;</button>
+              </div>
             </div>
+
+            ${
+              state.viewMode === "deck"
+                ? `
+              <div class="or-filmstrip" role="navigation" aria-label="แถบลำดับสไลด์">
+                ${SLIDES.map(
+                  (s, i) =>
+                    `<button type="button" class="or-film-dot${i === state.slideIdx ? " is-active" : ""}${s.isLiveQuizSlide ? " is-quiz-dot" : ""}" data-or-jump="${i}" title="${s.num}. ${esc(s.title)}">${s.num}</button>`
+                ).join("")}
+              </div>
+            `
+                : ""
+            }
           </div>
         `
             : ""
@@ -1991,8 +2257,33 @@
       });
     }
 
+    const backToSlidesBtn = document.getElementById("orBackToSlidesBtn");
+    if (backToSlidesBtn) {
+      backToSlidesBtn.addEventListener("click", () => {
+        state.viewMode = "deck";
+        state.zoomScale = 1;
+        renderModal();
+      });
+    }
+
+    const zoomOutBtn = document.getElementById("orZoomOutBtn");
+    if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => setZoomScale((state.zoomScale || 1) - 0.25));
+    const zoomInBtn = document.getElementById("orZoomInBtn");
+    if (zoomInBtn) zoomInBtn.addEventListener("click", () => setZoomScale((state.zoomScale || 1) + 0.25));
+    const zoomResetBtn = document.getElementById("orZoomResetBtn");
+    if (zoomResetBtn) zoomResetBtn.addEventListener("click", () => setZoomScale(1));
+
+    const followBtn = document.getElementById("orFollowLiveBtn");
+    if (followBtn && window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.toggleFollowHostSlide === "function") {
+      followBtn.addEventListener("click", () => {
+        window.RACM_ORIENTATION_LIVE.toggleFollowHostSlide();
+        renderModal();
+      });
+    }
+
     // Run Per-Frame Auto-Fit Typography synchronously before paint & re-verify on image decode!
     fitAllVisibleCanvases();
+    applyZoomToCurrentSlide(1);
     wireImageLoadRefit(modal);
     wireLaserIfActive(modal);
     if (cur.isCover) animateCoverKpis(modal);
@@ -2044,6 +2335,10 @@
     open: openDeck,
     close: closeDeck,
     goToSlide,
+    goToSlideById,
+    stepSlide,
+    followRemoteSlide,
+    setZoomScale,
     openLiveLobby,
     resumeSlidesFromLobby,
     refreshLiveSurface,

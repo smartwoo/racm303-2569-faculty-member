@@ -111,6 +111,12 @@
     hsdFsAutoHideHud: false,
     hsdFsHudCollapsed: false,
     hsdFsGridOpen: false,
+    hsdFsCanvasMode: localStorage.getItem("racm303_hsd_fs_canvas_mode") || "auto", // auto | responsive | 16x9
+    hsdFsZoomScale: 1,
+    hsdFsToolsExpanded: false,
+    hsdFsScenFolded: false,
+    hsdUserPickedOrient: "",
+    hsdNativeFsEntered: false,
     hsdBigSlideTimer: false,
     hsdPptWindowMax: false,
     hsdLeftAutoFit: true,
@@ -20350,12 +20356,25 @@
 
     const handleNativeFullscreenChange = () => {
       const fsActive = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      if (fsActive) {
+        state.hsdNativeFsEntered = true;
+      }
+      const envNow = typeof getPptViewportEnv === "function" ? getPptViewportEnv() : { isCoarse: false, isKbdOpen: false, w: window.innerWidth };
       if (!fsActive && state.hsdTheater && !state.isPptSlideSharePopup) {
-        state.hsdTheater = false;
-        state.hsdFsGridOpen = false;
-        syncViewModeButtonsUI();
-        renderPptPresentationOverlay();
-      } else if (!fsActive && state.hsdPptWindowMax) {
+        // On touch/mobile/tablet or when virtual keyboard triggers browser FS exit, keep the Slide Discussion overlay open!
+        if (!envNow.isCoarse && !envNow.isKbdOpen && envNow.w >= 1100 && state.hsdNativeFsEntered) {
+          state.hsdNativeFsEntered = false;
+          state.hsdTheater = false;
+          state.hsdFsGridOpen = false;
+          syncViewModeButtonsUI();
+          renderPptPresentationOverlay();
+        } else {
+          state.hsdNativeFsEntered = false;
+          if (typeof syncPptOverlayViewportMetrics === "function") {
+            syncPptOverlayViewportMetrics(true);
+          }
+        }
+      } else if (!fsActive && state.hsdPptWindowMax && !envNow.isCoarse && !envNow.isKbdOpen) {
         togglePptStudioWindowMax(false);
       } else if (state.isPptSlideSharePopup) {
         renderPptPresentationOverlay();
@@ -20363,6 +20382,9 @@
     };
     document.addEventListener("fullscreenchange", handleNativeFullscreenChange);
     document.addEventListener("webkitfullscreenchange", handleNativeFullscreenChange);
+    if (typeof initPptVisualViewportListeners === "function") {
+      initPptVisualViewportListeners();
+    }
 
     // Spotlight modal close handlers & PowerPoint keyboard shortcuts (F5 / ← / → / K / G / L / Esc)
     const spot = $("hsdSpotlightModal");
@@ -21866,7 +21888,352 @@
   let isApplyingRemotePptSync = false;
   let pptCanvasResizeObserver = null;
   let pptProjectedResizeObserver = null;
+  let pptSheetSizeObserver = null;
   let pptHudIdleTimer = null;
+  let pptVvListenersInited = false;
+
+  function isCoarseTouchDevice() {
+    try {
+      if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return true;
+      if (window.matchMedia && window.matchMedia("(any-pointer: coarse)").matches && window.innerWidth <= 1400) return true;
+    } catch (_) {}
+    return Boolean("ontouchstart" in window && (navigator.maxTouchPoints || 0) > 0 && window.innerWidth <= 1400);
+  }
+
+  function isEditableElementFocusedInOverlay() {
+    const ae = document.activeElement;
+    if (!ae) return false;
+    const tag = ae.tagName || "";
+    const isEdit = tag === "TEXTAREA" || tag === "INPUT" || Boolean(ae.isContentEditable);
+    if (!isEdit) return false;
+    if (tag === "INPUT") {
+      const tp = String(ae.type || "text").toLowerCase();
+      if (["range", "checkbox", "radio", "button", "submit", "file", "color"].includes(tp)) return false;
+    }
+    return Boolean(ae.closest("#pptPresentationOverlay, .hsd-slide-shell"));
+  }
+
+  function getPptViewportEnv() {
+    const vv = window.visualViewport;
+    const layoutW = window.innerWidth || document.documentElement.clientWidth || 1280;
+    const layoutH = window.innerHeight || document.documentElement.clientHeight || 800;
+    const vvScale = vv && vv.scale ? vv.scale : 1;
+    const w = vv && vvScale <= 1.06 ? Math.round(vv.width) : layoutW;
+    const h = vv && vvScale <= 1.06 ? Math.round(vv.height) : layoutH;
+    const offsetTop = vv && vvScale <= 1.06 ? Math.max(0, Math.round(vv.offsetTop || 0)) : 0;
+    const isCoarse = isCoarseTouchDevice();
+    const editFocused = isEditableElementFocusedInOverlay();
+    const heightDrop = layoutH - (vv ? vv.height : layoutH);
+    const isKbdOpen = Boolean(
+      (editFocused && (isCoarse || h < 580 || heightDrop > 85)) ||
+      (isCoarse && vvScale <= 1.06 && heightDrop > 135)
+    );
+    const aspect = h > 0 ? w / h : 1.77;
+    const useCompactDock = Boolean(isKbdOpen || isCoarse || w < 1180 || h < 680);
+    const isShortLandscape = Boolean(h < 500 && w > h);
+    let useResponsiveSlide = false;
+    if (state.hsdFsCanvasMode === "responsive") {
+      useResponsiveSlide = true;
+    } else if (state.hsdFsCanvasMode === "16x9" && !isKbdOpen) {
+      useResponsiveSlide = false;
+    } else {
+      // Auto: responsive adaptive slide for vertical/horizontal/Duo phones, vertical/horizontal tablets, compact windows, or virtual keyboard!
+      useResponsiveSlide = Boolean(
+        isKbdOpen ||
+        isCoarse ||
+        w < 1180 ||
+        h < 620 ||
+        aspect < 1.50
+      );
+    }
+    return {
+      w,
+      h,
+      offsetTop,
+      aspect,
+      isCoarse,
+      isKbdOpen,
+      useCompactDock,
+      isShortLandscape,
+      useResponsiveSlide
+    };
+  }
+
+  function scrollFocusedFieldIntoSlideView(fieldEl) {
+    if (!fieldEl || !fieldEl.isConnected) return;
+    const ov = $("pptPresentationOverlay");
+    const scroller =
+      (ov && !ov.hidden && ov.querySelector(".ppt-fs-stage-wrap")) ||
+      fieldEl.closest(".hsd-slide-right, .hsd-slide-left, .ppt-canvas-stage");
+    if (!scroller) return;
+    const sRect = scroller.getBoundingClientRect();
+    const fRect = fieldEl.getBoundingClientRect();
+    if (!sRect.height) return;
+    const padTop = 52;
+    const padBot = 28;
+    if (fRect.top < sRect.top + padTop) {
+      scroller.scrollBy({ top: fRect.top - (sRect.top + padTop), behavior: "smooth" });
+    } else if (fRect.bottom > sRect.bottom - padBot) {
+      scroller.scrollBy({ top: fRect.bottom - (sRect.bottom - padBot), behavior: "smooth" });
+    }
+  }
+
+  function syncPptOverlayViewportMetrics(forceRefit) {
+    const ov = $("pptPresentationOverlay");
+    const env = getPptViewportEnv();
+    if (ov && !ov.hidden) {
+      ov.style.setProperty("--ppt-vvh", `${env.h}px`);
+      ov.style.setProperty("--ppt-vv-top", `${env.offsetTop}px`);
+      ov.classList.toggle("is-kbd-open", env.isKbdOpen);
+      ov.classList.toggle("is-compact-fs-ui", env.useCompactDock);
+      ov.classList.toggle("is-short-landscape", env.isShortLandscape);
+      ov.classList.toggle("is-fs-tools-open", Boolean(state.hsdFsToolsExpanded));
+      const stageWrap = ov.querySelector(".ppt-fs-stage-wrap");
+      const sheetEl = ov.querySelector(".ppt-slide-sheet");
+      if (stageWrap && sheetEl) {
+        fitSlideSheetToStage(stageWrap, sheetEl, false, Boolean(forceRefit));
+      }
+      ov.querySelectorAll("[data-fs-canvas-mode-btn]").forEach((btn) => {
+        const modeVal = btn.getAttribute("data-fs-canvas-mode-btn");
+        const activeNow =
+          modeVal === "responsive" ? env.useResponsiveSlide : !env.useResponsiveSlide;
+        btn.classList.toggle("is-active", activeNow);
+        btn.setAttribute("aria-pressed", activeNow ? "true" : "false");
+      });
+    }
+    if (env.isKbdOpen && isEditableElementFocusedInOverlay()) {
+      scrollFocusedFieldIntoSlideView(document.activeElement);
+    }
+  }
+
+  function initPptVisualViewportListeners() {
+    if (pptVvListenersInited) return;
+    pptVvListenersInited = true;
+
+    let vvRaf = 0;
+    const onViewportShift = () => {
+      if (vvRaf) return;
+      vvRaf = requestAnimationFrame(() => {
+        vvRaf = 0;
+        syncPptOverlayViewportMetrics(true);
+      });
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", onViewportShift, { passive: true });
+      window.visualViewport.addEventListener("scroll", onViewportShift, { passive: true });
+    }
+    window.addEventListener("resize", onViewportShift, { passive: true });
+    window.addEventListener("orientationchange", () => {
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 120);
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 340);
+    }, { passive: true });
+
+    document.addEventListener("focusin", (ev) => {
+      const t = ev.target;
+      if (!t || !(t instanceof HTMLElement)) return;
+      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
+      syncPptOverlayViewportMetrics(true);
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 140);
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 340);
+    });
+
+    document.addEventListener("focusout", (ev) => {
+      const t = ev.target;
+      if (!t || !(t instanceof HTMLElement)) return;
+      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 120);
+      setTimeout(() => syncPptOverlayViewportMetrics(true), 320);
+    });
+  }
+
+  function syncFsZoomUiReadouts(rootEl, scaleVal) {
+    const scope = rootEl || $("pptPresentationOverlay") || document;
+    const pctText = `${Math.round((scaleVal || 1) * 100)}%`;
+    scope.querySelectorAll("[data-fs-zoom-pct]").forEach((el) => {
+      el.textContent = pctText;
+    });
+  }
+
+  function applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, nextScale) {
+    if (!stageWrap || !zoomSizer || !sheetEl) return 1;
+    const clamped = Math.max(0.70, Math.min(3.50, Number(nextScale) || 1));
+    const isIdentity = Math.abs(clamped - 1) < 0.015;
+    const finalScale = isIdentity ? 1 : clamped;
+    state.hsdFsZoomScale = finalScale;
+
+    if (isIdentity) {
+      stageWrap.classList.remove("is-pinch-zoomed", "is-pinch-zoomed-out");
+      zoomSizer.style.width = "";
+      zoomSizer.style.height = "";
+      sheetEl.style.transformOrigin = "";
+      sheetEl.style.transform = "";
+    } else {
+      const baseW = sheetEl.offsetWidth || stageWrap.clientWidth || 360;
+      const baseH = sheetEl.offsetHeight || stageWrap.clientHeight || 480;
+      stageWrap.classList.add("is-pinch-zoomed");
+      stageWrap.classList.toggle("is-pinch-zoomed-out", finalScale < 1);
+      zoomSizer.style.width = `${Math.max(180, Math.round(baseW * finalScale))}px`;
+      zoomSizer.style.height = `${Math.max(140, Math.round(baseH * finalScale))}px`;
+      sheetEl.style.transformOrigin = "0 0";
+      sheetEl.style.transform = `scale(${finalScale.toFixed(4)})`;
+    }
+    syncFsZoomUiReadouts(stageWrap.closest("#pptPresentationOverlay") || document, finalScale);
+    return finalScale;
+  }
+
+  function stepOverlayPinchZoom(deltaScale, resetToOne) {
+    const ov = $("pptPresentationOverlay");
+    if (!ov || ov.hidden) return;
+    const stageWrap = ov.querySelector(".ppt-fs-stage-wrap");
+    const zoomSizer = ov.querySelector(".ppt-fs-zoom-sizer");
+    const sheetEl = ov.querySelector(".ppt-slide-sheet");
+    if (!stageWrap || !zoomSizer || !sheetEl) return;
+
+    const prevScale = state.hsdFsZoomScale || 1;
+    const targetScale = resetToOne ? 1 : Math.max(0.70, Math.min(3.50, Math.round((prevScale + deltaScale) * 20) / 20));
+    const sRect = stageWrap.getBoundingClientRect();
+    const shRect = sheetEl.getBoundingClientRect();
+    const cx = sRect.left + sRect.width / 2;
+    const cy = sRect.top + sRect.height / 2;
+    const localX = (cx - shRect.left) / prevScale;
+    const localY = (cy - shRect.top) / prevScale;
+
+    const applied = applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, targetScale);
+    if (applied !== 1) {
+      stageWrap.scrollLeft = Math.max(0, zoomSizer.offsetLeft + localX * applied - sRect.width / 2);
+      stageWrap.scrollTop = Math.max(0, zoomSizer.offsetTop + localY * applied - sRect.height / 2);
+    }
+  }
+
+  function attachPptStagePinchZoom(stageWrap, zoomSizer, sheetEl) {
+    if (!stageWrap || !zoomSizer || !sheetEl) return;
+
+    let pinching = false;
+    let startDist = 0;
+    let startScale = 1;
+    let startLocalX = 0;
+    let startLocalY = 0;
+    let lastTapTs = 0;
+    let lastTapX = 0;
+    let lastTapY = 0;
+
+    const getTouchDist = (t0, t1) => Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+
+    stageWrap.addEventListener(
+      "touchstart",
+      (ev) => {
+        if (ev.touches.length === 2) {
+          const d = getTouchDist(ev.touches[0], ev.touches[1]);
+          if (d < 12) return;
+          pinching = true;
+          startDist = d;
+          startScale = state.hsdFsZoomScale || 1;
+          const shRect = sheetEl.getBoundingClientRect();
+          const mx = (ev.touches[0].clientX + ev.touches[1].clientX) / 2;
+          const my = (ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+          startLocalX = (mx - shRect.left) / startScale;
+          startLocalY = (my - shRect.top) / startScale;
+        } else if (ev.touches.length === 1 && !pinching) {
+          const t = ev.touches[0];
+          const target = ev.target;
+          const isInteractive =
+            target instanceof Element &&
+            Boolean(target.closest("button, input, textarea, select, a, label, mark, .hsd-split-resizer"));
+          if (!isInteractive) {
+            const now = Date.now();
+            if (now - lastTapTs < 290 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 28) {
+              ev.preventDefault();
+              lastTapTs = 0;
+              const curS = state.hsdFsZoomScale || 1;
+              const nextS = curS > 1.08 || curS < 0.94 ? 1 : 1.85;
+              const sRect = stageWrap.getBoundingClientRect();
+              const shRect = sheetEl.getBoundingClientRect();
+              const lx = (t.clientX - shRect.left) / curS;
+              const ly = (t.clientY - shRect.top) / curS;
+              const applied = applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, nextS);
+              if (applied !== 1) {
+                stageWrap.scrollLeft = Math.max(0, zoomSizer.offsetLeft + lx * applied - (t.clientX - sRect.left));
+                stageWrap.scrollTop = Math.max(0, zoomSizer.offsetTop + ly * applied - (t.clientY - sRect.top));
+              }
+              return;
+            }
+            lastTapTs = now;
+            lastTapX = t.clientX;
+            lastTapY = t.clientY;
+          }
+        }
+      },
+      { passive: false }
+    );
+
+    stageWrap.addEventListener(
+      "touchmove",
+      (ev) => {
+        if (!pinching || ev.touches.length < 2) return;
+        ev.preventDefault();
+        const curDist = getTouchDist(ev.touches[0], ev.touches[1]);
+        if (curDist < 8 || startDist < 8) return;
+        const nx = (ev.touches[0].clientX + ev.touches[1].clientX) / 2;
+        const ny = (ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+        const sRect = stageWrap.getBoundingClientRect();
+        const rawNext = startScale * (curDist / startDist);
+        const applied = applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, rawNext);
+        if (applied !== 1) {
+          stageWrap.scrollLeft = Math.max(0, zoomSizer.offsetLeft + startLocalX * applied - (nx - sRect.left));
+          stageWrap.scrollTop = Math.max(0, zoomSizer.offsetTop + startLocalY * applied - (ny - sRect.top));
+        }
+      },
+      { passive: false }
+    );
+
+    const endPinch = (ev) => {
+      if (!pinching) return;
+      if (!ev.touches || ev.touches.length < 2) {
+        pinching = false;
+        if (Math.abs((state.hsdFsZoomScale || 1) - 1) < 0.045) {
+          applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, 1);
+        }
+      }
+    };
+    stageWrap.addEventListener("touchend", endPinch, { passive: true });
+    stageWrap.addEventListener("touchcancel", endPinch, { passive: true });
+
+    // Trackpad / Ctrl+Wheel pinch-zoom support
+    stageWrap.addEventListener(
+      "wheel",
+      (ev) => {
+        if (!ev.ctrlKey && !ev.metaKey) return;
+        ev.preventDefault();
+        const curS = state.hsdFsZoomScale || 1;
+        const factor = Math.exp(-ev.deltaY * 0.0045);
+        const nextS = Math.max(0.70, Math.min(3.50, curS * factor));
+        const sRect = stageWrap.getBoundingClientRect();
+        const shRect = sheetEl.getBoundingClientRect();
+        const lx = (ev.clientX - shRect.left) / curS;
+        const ly = (ev.clientY - shRect.top) / curS;
+        const applied = applyOverlayPinchZoomScale(stageWrap, zoomSizer, sheetEl, nextS);
+        if (applied !== 1) {
+          stageWrap.scrollLeft = Math.max(0, zoomSizer.offsetLeft + lx * applied - (ev.clientX - sRect.left));
+          stageWrap.scrollTop = Math.max(0, zoomSizer.offsetTop + ly * applied - (ev.clientY - sRect.top));
+        }
+      },
+      { passive: false }
+    );
+
+    // Keep zoomSizer height synced if content expands (e.g. unhiding Answer Key row while zoomed)
+    if (pptSheetSizeObserver) pptSheetSizeObserver.disconnect();
+    if (typeof ResizeObserver === "function") {
+      pptSheetSizeObserver = new ResizeObserver(() => {
+        const curS = state.hsdFsZoomScale || 1;
+        if (Math.abs(curS - 1) >= 0.015 && sheetEl.isConnected) {
+          zoomSizer.style.width = `${Math.max(180, Math.round(sheetEl.offsetWidth * curS))}px`;
+          zoomSizer.style.height = `${Math.max(140, Math.round(sheetEl.offsetHeight * curS))}px`;
+        }
+      });
+      pptSheetSizeObserver.observe(sheetEl);
+    }
+  }
 
   function getEffectiveHsdSlideLayout(curSlideOpt) {
     const activeCur = curSlideOpt || (() => {
@@ -21918,6 +22285,7 @@
   function setHsdSlideLayout(nextLayout, nextSplitPct, isAutoKeyOpen, nextOrientOpt) {
     if (nextOrientOpt === "horizontal" || nextOrientOpt === "vertical") {
       state.hsdSplitOrient = nextOrientOpt;
+      state.hsdUserPickedOrient = nextOrientOpt;
       try {
         localStorage.setItem("racm303_hsd_split_orient", nextOrientOpt);
       } catch (_) {}
@@ -22011,6 +22379,7 @@
   function setHsdSplitOrientation(nextOrient, nextPctOpt) {
     const orient = nextOrient === "horizontal" ? "horizontal" : "vertical";
     state.hsdSplitOrient = orient;
+    state.hsdUserPickedOrient = orient;
     state.hsdSinglePaneOverride = "";
     try {
       localStorage.setItem("racm303_hsd_split_orient", orient);
@@ -22302,6 +22671,8 @@
     state.hsdSinglePaneOverride = "";
     state.hsdFocusedConceptStep = 0;
     state.hsdKeyJustRevealedQ = "";
+    state.hsdFsZoomScale = 1;
+    state.hsdFsScenFolded = false;
     const targetSlide = slides[next];
     if (targetSlide && targetSlide.qObj) {
       state.hsdLastSelectedQId = targetSlide.qObj.id;
@@ -22406,12 +22777,18 @@
       (el) => el && !el.hidden && el.offsetParent !== null
     );
 
-    const candidates =
+    const unifiedStageScroller = [
+      root.querySelector(".ppt-fs-stage-wrap"),
+      root.querySelector(".ppt-canvas-stage")
+    ].filter((el) => el && !el.hidden && el.offsetParent !== null);
+
+    const basePanes =
       qPanes.length > 0
         ? opts && opts.questionOnly
           ? qPanes
           : [...qPanes, ...scenPanes]
         : scenPanes;
+    const candidates = [...basePanes, ...unifiedStageScroller];
 
     const dir = deltaDir >= 0 ? 1 : -1;
     const now = Date.now();
@@ -22699,17 +23076,20 @@
     }
     state.hsdPptWindowMax = nextMax;
     document.body.classList.toggle("is-ppt-window-max-open", nextMax);
+    const envNow = getPptViewportEnv();
     if (nextMax) {
       ensureStudentRoomReadyForPresentation();
       state.hsdViewMode = "slide";
-      const docEl = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
-        } else if (docEl.webkitRequestFullscreen) {
-          try {
-            docEl.webkitRequestFullscreen();
-          } catch (_) {}
+      if (!envNow.isCoarse && envNow.w >= 1140) {
+        const docEl = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => {});
+          } else if (docEl.webkitRequestFullscreen) {
+            try {
+              docEl.webkitRequestFullscreen();
+            } catch (_) {}
+          }
         }
       }
     } else if (document.fullscreenElement && document.exitFullscreen && !state.hsdTheater) {
@@ -22728,6 +23108,8 @@
     state.hsdSlideIdx = 0;
     state.hsdSinglePaneOverride = "";
     state.hsdFocusedConceptStep = 0;
+    state.hsdFsZoomScale = 1;
+    state.hsdFsScenFolded = false;
     enterPptFullscreenShow();
   }
 
@@ -22744,19 +23126,25 @@
     if (targetCaseOrQId) jumpSlideIndexToTarget(targetCaseOrQId);
     state.hsdTheater = true;
     state.hsdFsGridOpen = false;
+    state.hsdFsZoomScale = 1;
+    state.hsdFsScenFolded = false;
+    state.hsdNativeFsEntered = false;
     markSlideBoxesAutoOptimize("both");
     syncViewModeButtonsUI();
     renderHsDiscussionView();
     broadcastPptPresentationState();
 
-    const docEl = document.documentElement;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      if (docEl.requestFullscreen) {
-        docEl.requestFullscreen().catch(() => {});
-      } else if (docEl.webkitRequestFullscreen) {
-        try {
-          docEl.webkitRequestFullscreen();
-        } catch (_) {}
+    const envNow = getPptViewportEnv();
+    if (!envNow.isCoarse && envNow.w >= 1140) {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          try {
+            docEl.webkitRequestFullscreen();
+          } catch (_) {}
+        }
       }
     }
   }
@@ -22764,6 +23152,9 @@
   function exitPptFullscreenShow() {
     state.hsdTheater = false;
     state.hsdFsGridOpen = false;
+    state.hsdFsZoomScale = 1;
+    state.hsdFsScenFolded = false;
+    state.hsdNativeFsEntered = false;
     markSlideBoxesAutoOptimize("both");
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});
@@ -23105,6 +23496,9 @@
 
     stageEl.querySelectorAll("[data-pane-snap-drag]").forEach((handleEl) => {
       handleEl.addEventListener("pointerdown", (ev) => {
+        if (ev.pointerType === "touch" || ev.pointerType === "pen") return;
+        const parentSheetEl = stageEl.closest(".ppt-slide-sheet");
+        if (parentSheetEl && parentSheetEl.classList.contains("is-responsive-flow")) return;
         if (ev.target.closest("button, select, input, a")) return;
         const startX = ev.clientX;
         const startY = ev.clientY;
@@ -35338,10 +35732,44 @@
       }
     }
 
+    if (panel._dohModeBtns && diagObj) {
+      const { diagModeBtn, tblModeBtn } = panel._dohModeBtns;
+      const switchKeyView = (nextMode) => {
+        state.hsdKeyDiagramViewMode = nextMode;
+        diagObj.wrap.hidden = nextMode !== "diagram";
+        if (tblWrapRef) tblWrapRef.hidden = nextMode !== "table";
+        diagModeBtn.classList.toggle("is-active", nextMode === "diagram");
+        tblModeBtn.classList.toggle("is-active", nextMode === "table");
+        if (nextMode === "diagram" && typeof diagObj.redraw === "function") {
+          diagObj.redraw();
+        }
+        const sh = panel.closest(".ppt-slide-sheet");
+        if (sh) {
+          autoFitSingleSheetBoxes(sh, true);
+          if (typeof sh._redrawConceptLines === "function") sh._redrawConceptLines();
+        }
+      };
+      diagModeBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        switchKeyView("diagram");
+      });
+      tblModeBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        switchKeyView("table");
+      });
+    }
+
     return panel;
   }
 
   const QUESTION_PROMPT_HIGHLIGHTS = {
+    "q-hs1-2": [
+      "กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health Framework)",
+      "สร้างเป็นแผนภาพความเชื่อมโยง (Diagram)",
+      "(1) ภาวะ/ปัญหาสุขภาพหลักตรงกลางแผนภาพ",
+      "(2) ปัจจัยกำหนดสุขภาพในแต่ละหมวด",
+      "(3) ทิศทางลูกศรความสัมพันธ์และวงล้อมเชิงระบบ"
+    ],
     "q-1-1": [
       "สุขภาวะ 4 มิติ",
       "ธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ พ.ศ. 2552",
@@ -35899,7 +36327,11 @@
         const step = idx + 1;
         const colorIdx = (idx % 6) + 1;
         const hex = CONCEPT_HEX[colorIdx - 1];
-        const rowEl = rightZoomBody.querySelector(`tr[data-concept-row-step="${step}"]`);
+        const rowCandidates = Array.from(
+          rightZoomBody.querySelectorAll(`[data-concept-row-step="${step}"]`)
+        );
+        const rowEl =
+          rowCandidates.find((el) => !el.closest("[hidden]")) || rowCandidates[0] || null;
         if (!rowEl) return;
         const marks = Array.from(leftZoomBody.querySelectorAll(`mark[data-concept-step="${step}"]`));
         if (!marks.length) return;
@@ -36090,7 +36522,7 @@
         m.classList.toggle("is-focused", activeStep > 0 && s === activeStep);
         m.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
       });
-      rightZoomBody.querySelectorAll("tr[data-concept-row-step]").forEach((tr) => {
+      rightZoomBody.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
         const s = Number(tr.dataset.conceptRowStep) || 0;
         tr.classList.toggle("is-focused", activeStep > 0 && s === activeStep);
         tr.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
@@ -36128,7 +36560,7 @@
         });
       });
 
-      rightZoomBody.querySelectorAll("tr[data-concept-row-step]").forEach((tr) => {
+      rightZoomBody.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
         const s = Number(tr.dataset.conceptRowStep) || 0;
         tr.addEventListener("mouseenter", () => applyFocusState(s));
         tr.addEventListener("mouseleave", () => applyFocusState(0));
@@ -36262,12 +36694,42 @@
       };
     });
 
+    let diagramSpec = null;
+    if (tk.diagramKey && Array.isArray(tk.diagramKey.steps)) {
+      const dk = tk.diagramKey;
+      const nodesObj = {};
+      const edgesObj = {};
+      dk.steps.forEach((sDef) => {
+        nodesObj[sDef.nodeId] = {
+          title: sDef.title,
+          bullets: Array.isArray(sDef.bullets) ? sDef.bullets : [],
+          text: (sDef.bullets || []).map((b) => `• ${b}`).join("\n")
+        };
+        (sDef.arrows || []).forEach((edgeId) => {
+          const ed = DOH_EDGE_DEFS.find((x) => x.id === edgeId);
+          edgesObj[edgeId] = ed ? ed.std : "fwd";
+        });
+      });
+      diagramSpec = {
+        mode: "teacher-key",
+        outerRing: true,
+        innerRing: true,
+        edges: edgesObj,
+        outcome: {
+          title: (dk.outcome && dk.outcome.title) || "ภาวะอ้วนในเด็ก",
+          sub: (dk.outcome && dk.outcome.sub) || ""
+        },
+        nodes: nodesObj
+      };
+    }
+
     return {
       table: {
         headers: tk.keyTable.headers || [],
         colFractions,
         rows
       },
+      diagram: diagramSpec,
       clues,
       questionClues
     };
@@ -36643,7 +37105,11 @@
         const step = idx + 1;
         const colorIdx = (idx % 6) + 1;
         const hex = CONCEPT_HEX[colorIdx - 1];
-        const rowEl = activeQBlock.querySelector(`tr[data-concept-row-step="${step}"]`);
+        const rowCandidates = Array.from(
+          activeQBlock.querySelectorAll(`[data-concept-row-step="${step}"]`)
+        );
+        const rowEl =
+          rowCandidates.find((el) => !el.closest("[hidden]")) || rowCandidates[0] || null;
         if (!rowEl) return;
         const marks = Array.from(scenSticky.querySelectorAll(`mark[data-concept-step="${step}"]`));
         if (!marks.length) return;
@@ -36824,7 +37290,7 @@
         m.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
       });
       if (activeQBlock) {
-        activeQBlock.querySelectorAll("tr[data-concept-row-step]").forEach((tr) => {
+        activeQBlock.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
           const s = Number(tr.dataset.conceptRowStep) || 0;
           tr.classList.toggle("is-focused", activeStep > 0 && s === activeStep);
           tr.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
@@ -37122,7 +37588,7 @@
         );
       });
 
-      activeQBlock.querySelectorAll("tr[data-concept-row-step]").forEach((tr) => {
+      activeQBlock.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
         const s = Number(tr.dataset.conceptRowStep) || 0;
         tr.addEventListener("mouseenter", () => applyScrollFocusState(s), { signal: qSig });
         tr.addEventListener("mouseleave", () => applyScrollFocusState(0), { signal: qSig });
