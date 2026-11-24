@@ -320,9 +320,9 @@ window.RACM_HS_DISCUSSION_DATA = {
               "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างต้นน้ำ",
               "enTitle": "Synthesized Determinants of Health Framework with Structural Determinants",
               "sourceNote": "Synthesized from Wibulpolprasert et al. (2011) & Solar & Irwin / WHO CSDH (2010)",
-              "imageSrc": "assets/images/hs1_doh_structural_framework.jpg",
-              "imageAlt": "Synthesized Determinants of Health Framework enclosed by Structural Determinants outer oval ring",
-              "caption": "วงล้อมชั้นนอก Structural Determinants (ธรรมาภิบาล การกระจายอำนาจ นโยบายเศรษฐกิจ-สังคม กฎระเบียบอาหาร/ผังเมือง และค่านิยมสังคม) กำหนดบริบทของปัจจัยสิ่งแวดล้อมและระบบบริการสุขภาพ ซึ่งมีปฏิสัมพันธ์สองทางกับปัจจัยระดับปัจเจกและสุขภาวะตรงกลางอย่างเป็นพลวัต (Dynamics)"
+              "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=2",
+              "imageAlt": "Synthesized Determinants of Health Framework with Outer Structural Determinants Ring, Health System Structure/Attributes, and Physician Roles",
+              "caption": "วงล้อม Structural Determinants กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)"
             },
             "coreTerm": "“แผนภาพปัจจัยกำหนดสุขภาพเชิงระบบ”",
             "coreDefinitionLead": "เชื่อมโยงปฏิสัมพันธ์สองทางของปัจจัยด้านปัจเจก สังคมสิ่งแวดล้อม และระบบบริการสุขภาพที่ส่งผลต่อปัญหาสุขภาพตรงกลาง",
@@ -333,22 +333,22 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "num": "01",
                 "thTitle": "ปัจจัยด้านปัจเจก",
                 "enTitle": "Individual Factors",
-                "definition": "พื้นฐานทางชีวภาพ/พันธุกรรม พฤติกรรมการบริโภค กิจกรรมทางกาย และการรับรู้ต่อภาวะสุขภาพของตนเอง",
+                "definition": "พื้นฐานทางชีวภาพ/พันธุกรรม ความรู้ทักษะ พฤติกรรมสุขภาพ และทัศนคติ/จิตสำนึกต่อภาวะสุขภาพ",
                 "anchor": "พฤติกรรมเด็กไม่ได้เกิดขึ้นลอย ๆ แต่สะท้อนอิทธิพลย้อนกลับจากครอบครัว โรงเรียน และสื่อรอบตัว"
               },
               {
                 "num": "02",
                 "thTitle": "ปัจจัยด้านสังคมและสิ่งแวดล้อม",
                 "enTitle": "Social & Environmental",
-                "definition": "เวลาการดูแลของครอบครัว เจตคติคนรอบข้าง สภาพที่พัก พื้นที่เล่น และสิ่งแวดล้อมทางอาหารในโรงเรียน",
+                "definition": "สิ่งแวดล้อมกายภาพ-ชีวภาพ ครอบครัว ที่พัก โรงเรียน สังคมวัฒนธรรม และศักยภาพชุมชน",
                 "anchor": "เป็นสภาพแวดล้อมก่อโรคอ้วน (obesogenic environment) ที่มีปฏิสัมพันธ์สองทางกับพฤติกรรมเด็ก"
               },
               {
                 "num": "03",
-                "thTitle": "ระบบบริการสุขภาพ",
-                "enTitle": "Health Services System",
-                "definition": "บทบาทการคัดกรอง เฝ้าระวัง และดำเนินการเชิงรุกเพื่อสร้างเสริมสุขภาพในโรงเรียนและชุมชน",
-                "anchor": "หากตั้งรับเฉพาะในคลินิกโดยขาดงานเชิงรุกในโรงเรียน จะพลาดโอกาสสกัดโรคตั้งแต่ระยะเริ่มต้น"
+                "thTitle": "ระบบบริการสุขภาพและบทบาทแพทย์",
+                "enTitle": "Health System & Physician Roles",
+                "definition": "โครงสร้างบริการ (Type & Level) คุณสมบัติที่พึงประสงค์ (Equity, Quality, Efficiency, Good Governance) และบทบาทแพทย์ (Clinician · Manager · Health Promoter)",
+                "anchor": "แพทย์ต้องทำหน้าที่ทั้งผู้ให้การรักษา ผู้บริหารจัดการระบบ และนักสร้างเสริมสุขภาพเชิงรุกในโรงเรียนและชุมชน"
               },
               {
                 "num": "04",
