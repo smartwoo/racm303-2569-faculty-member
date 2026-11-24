@@ -1779,7 +1779,13 @@
       }
     }
     if (tabId === "fieldwork") renderFieldworkView();
-    if (tabId !== "epidemiology" && window.RACM303_EP6_STUDIO && typeof window.RACM303_EP6_STUDIO.destroy === "function") {
+    if (
+      tabId !== "epidemiology" &&
+      tabId !== "textbooks" &&
+      tabId !== "systems-forum" &&
+      window.RACM303_EP6_STUDIO &&
+      typeof window.RACM303_EP6_STUDIO.destroy === "function"
+    ) {
       window.RACM303_EP6_STUDIO.destroy();
     }
     if (tabId === "epidemiology") renderEpidemiologyView();
@@ -10791,7 +10797,7 @@
       HSD_DATA.modules && HSD_DATA.modules.length
         ? HSD_DATA.modules
         : ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((c) => getHsModuleMeta(c));
-    return [getHsModuleMeta("ST1"), ...hsMods.filter((m) => m.code !== "ST1")];
+    return hsMods.filter((m) => m.code !== "ST1");
   }
 
   function getHsLecturerName(modCode) {
@@ -10936,10 +10942,14 @@
   }
 
   function openTextbookDriveFolder(modCode) {
+    if (/^ST1$/i.test(String(modCode || ""))) {
+      openSystemsForum("w1-d1-st");
+      return;
+    }
     state.textbookSubMode = "docs-drive";
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       state.tbDriveScope = "folders";
-    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
+    } else if (/^HS[1-6]$/i.test(String(modCode))) {
       state.activeHsModule = String(modCode).toUpperCase();
       state.tbDriveScope = "module";
     } else {
@@ -10950,10 +10960,16 @@
   }
 
   function openHsLectureSlides(modCode) {
+    if (/^ST1$/i.test(String(modCode || ""))) {
+      state.activeHsModule = "ST1";
+      state.lsDriveScope = "module";
+      openSystemsForum("w1-d1-st", "lecture-slides");
+      return;
+    }
     state.textbookSubMode = "lecture-slides";
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       state.lsDriveScope = "folders";
-    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
+    } else if (/^HS[1-6]$/i.test(String(modCode))) {
       state.activeHsModule = String(modCode).toUpperCase();
       state.lsDriveScope = "module";
     } else {
@@ -10964,10 +10980,16 @@
   }
 
   function openHsVdoLecture(modCode) {
+    if (/^ST1$/i.test(String(modCode || ""))) {
+      state.activeHsModule = "ST1";
+      state.vdoDriveScope = "module";
+      openSystemsForum("w1-d1-st", "vdo-lecture");
+      return;
+    }
     state.textbookSubMode = "vdo-lecture";
     if (!modCode || /^(ALL|FOLDERS)$/i.test(String(modCode))) {
       state.vdoDriveScope = "folders";
-    } else if (/^(HS[1-6]|ST1)$/i.test(String(modCode))) {
+    } else if (/^HS[1-6]$/i.test(String(modCode))) {
       state.activeHsModule = String(modCode).toUpperCase();
       state.vdoDriveScope = "module";
     } else {
@@ -11696,7 +11718,8 @@
     return HS_BEYOND_SESSIONS.find((s) => s.id === sessionId || s.code === sessionId) || null;
   }
 
-  function openSystemsForum(sessionIdOrFilter) {
+  function openSystemsForum(sessionIdOrFilter, subMode) {
+    state.sfSubMode = subMode || "";
     if (sessionIdOrFilter === "systems" || sessionIdOrFilter === "panel" || sessionIdOrFilter === "all") {
       state.sfFilter = sessionIdOrFilter;
       state.sfSelectedId = "";
@@ -11740,20 +11763,6 @@
         strip.appendChild(allPill);
       }
 
-      const stPill = make("button", tr("ST1 · รากฐาน", "ST1 · Intro"), "hs-unified-mod-pill");
-      stPill.type = "button";
-      stPill.title = "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ (ปูรากฐานก่อน HS1–HS6)";
-      stPill.setAttribute("aria-pressed", !isBeyondActive && !isAllActive && mod.code === "ST1" ? "true" : "false");
-      stPill.addEventListener("click", () => {
-        state.activeHsModule = "ST1";
-        if (typeof options.onSelectModule === "function" && effectiveFormat !== "discussion") {
-          options.onSelectModule("ST1");
-        } else {
-          openTextbookDoc("ST1");
-        }
-      });
-      strip.appendChild(stPill);
-
       (HSD_DATA.modules || []).forEach((m) => {
         const pBtn = make("button", m.code, "hs-unified-mod-pill");
         pBtn.type = "button";
@@ -11773,16 +11782,16 @@
       strip.appendChild(make("span", null, "hs-unified-mod-divider"));
       const beyondPill = make(
         "button",
-        tr("🧭 คิดเชิงระบบ & เสวนา (6 คาบ)", "🧭 Systems & Panels (6)"),
+        tr("🧭 คิดเชิงระบบ (ST1) & เสวนา (6 คาบ)", "🧭 Systems (ST1) & Panels (6)"),
         "hs-unified-mod-pill is-beyond-pill"
       );
       beyondPill.type = "button";
       beyondPill.title = tr(
-        "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 — Systems Thinking, CLD Workshop, Panel Discussions & Policy Exercise",
-        "6 key taught sessions beyond the HS1–HS6 written exam — Systems Thinking, CLD Workshop & Expert Panels"
+        "คาบปูรากฐาน ST1 (Systems Thinking) และเวทีเสวนา 6 คาบสำคัญนอกกรอบสอบทฤษฎี HS1–HS6",
+        "Foundational ST1 (Systems Thinking) & 6 key taught sessions beyond the HS1–HS6 written exam"
       );
-      beyondPill.setAttribute("aria-pressed", isBeyondActive ? "true" : "false");
-      beyondPill.addEventListener("click", () => openSystemsForum(""));
+      beyondPill.setAttribute("aria-pressed", isBeyondActive || (!isAllActive && mod.code === "ST1") ? "true" : "false");
+      beyondPill.addEventListener("click", () => openSystemsForum(mod.code === "ST1" ? "w1-d1-st" : ""));
       strip.appendChild(beyondPill);
 
       banner.appendChild(strip);
@@ -11809,7 +11818,7 @@
                   "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
                   "6 high-impact taught sessions beyond the HS1–HS6 written exam (17.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
                 )
-              : `เลือกบทเรียน ST1 & HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (รอแขวน VDO)`)
+              : `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 อยู่ในเวทีคิดเชิงระบบ & เสวนา)`)
         )
       );
     } else {
@@ -14612,6 +14621,7 @@
     const backBtn = make("button", tr("← กลับหน้ารวม 6 คาบสำคัญ", "← All 6 Key Sessions"), "hs-atv-back-pill");
     backBtn.type = "button";
     backBtn.addEventListener("click", () => {
+      state.sfSubMode = "";
       state.sfSelectedId = "";
       renderSystemsForumView();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -14693,6 +14703,18 @@
       heroActions.appendChild(upSlBtn);
     } else if (!sessFullDoc) {
       heroActions.appendChild(make("span", "⏳ Slide ประกอบคาบ: รออาจารย์ / วิทยากร Upload", "hs-atv-pending-badge"));
+    }
+
+    if (sess.code === "ST1") {
+      const stVdoInfo = getHsVdoLectureInfo("ST1");
+      const vdoHeroBtn = make(
+        "button",
+        stVdoInfo.uploaded ? `⑥ VDO Lecture (✓ ${stVdoInfo.extBadge})` : "⑥ VDO Lecture (รอแขวน VDO)",
+        `tv-hero-btn is-glass ${stVdoInfo.uploaded ? "is-slide-uploaded-hero" : "is-slide-pending-hero"}`
+      );
+      vdoHeroBtn.type = "button";
+      vdoHeroBtn.addEventListener("click", () => openHsVdoLecture("ST1"));
+      heroActions.appendChild(vdoHeroBtn);
     }
 
     const schedBtn = make("button", "📅 ดูในตารางเรียน & บันทึก .ics", "tv-hero-btn is-glass");
@@ -15236,69 +15258,122 @@
 
       const pills = make("div", null, "hs-atv-ep-pills");
       if (s.docId) {
-        const bFull = make("button", "① ฉบับเต็ม", "hs-atv-ep-pill is-solid");
+        const mSlide = getHsSlideInfo(s.code);
+        const mVdo = getHsVdoLectureInfo(s.code);
+
+        const bFull = make("button", "① Full", "hs-atv-ep-pill is-solid");
         bFull.type = "button";
+        bFull.title = `ขั้นที่ 1: เอกสารคำสอนฉบับเต็ม (${s.code})`;
         bFull.addEventListener("click", (ev) => {
           ev.stopPropagation();
           openTextbookDoc(s.docId);
         });
         pills.appendChild(bFull);
+
         if (s.conciseDocId) {
-          const bCon = make("button", "② ฉบับย่อ", "hs-atv-ep-pill");
+          const bCon = make("button", "② Abridged", "hs-atv-ep-pill");
           bCon.type = "button";
+          bCon.title = `ขั้นที่ 2: เอกสารคำสอนฉบับย่อ (${s.code})`;
           bCon.addEventListener("click", (ev) => {
             ev.stopPropagation();
             openTextbookDoc(s.conciseDocId);
           });
           pills.appendChild(bCon);
         }
+
         const bQuiz = make("button", "③ Self-Quiz", "hs-atv-ep-pill");
         bQuiz.type = "button";
+        bQuiz.title = `ขั้นที่ 3: Self-Quiz ประเมินตนเอง (${s.code})`;
         bQuiz.addEventListener("click", (ev) => {
           ev.stopPropagation();
           openSelfQuizForModule(s.code, "qa");
         });
         pills.appendChild(bQuiz);
-      }
-      const openBtn = make("button", s.docId ? "🧭 กรอบคาบเรียน" : "🧭 ดูกรอบแนวคิด & คำถามชวนคิด", s.docId ? "hs-atv-ep-pill" : "hs-atv-ep-pill is-solid");
-      openBtn.type = "button";
-      openBtn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        state.sfSelectedId = s.id;
-        renderSystemsForumView();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-      pills.appendChild(openBtn);
 
-      if (slideRec) {
-        const sBtn = make("button", "📊 เปิด Slide", "hs-atv-ep-pill");
-        sBtn.type = "button";
-        sBtn.addEventListener("click", (ev) => {
+        const bSlide = make(
+          "button",
+          mSlide.uploaded ? `④ Slide (✓ ${mSlide.extBadge})` : "④ Slide",
+          `hs-atv-ep-pill ${mSlide.uploaded ? "is-slide-uploaded-pill" : "is-slide-pending-pill"}`
+        );
+        bSlide.type = "button";
+        bSlide.title = mSlide.uploaded
+          ? `ขั้นที่ 4: Slide อาจารย์ (${s.code}) — อัปโหลดแล้ว (${mSlide.extBadge})`
+          : `ขั้นที่ 4: Slide อาจารย์ (${s.code}) — รออาจารย์ Upload`;
+        bSlide.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          openSessionSlide(s.id);
+          openHsLectureSlides(s.code);
         });
-        pills.appendChild(sBtn);
-      } else if (ROLE === "faculty") {
-        const upBtn = make("button", "📤 Upload Slide / ไฟล์สอน", "hs-atv-ep-pill");
-        upBtn.type = "button";
-        upBtn.addEventListener("click", (ev) => {
+        pills.appendChild(bSlide);
+
+        const openBtn = make("button", "⑤ กรอบคาบเรียน", "hs-atv-ep-pill");
+        openBtn.type = "button";
+        openBtn.title = `ขั้นที่ 5: กรอบคาบเรียนและคำถามชวนคิด (${s.code})`;
+        openBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
+          state.sfSubMode = "";
           state.sfSelectedId = s.id;
           renderSystemsForumView();
-          requestAnimationFrame(() => {
-            const upBox = document.getElementById(`sfInlineUploadCard_${s.id}`);
-            if (upBox) upBox.scrollIntoView({ behavior: "smooth", block: "center" });
-          });
+          window.scrollTo({ top: 0, behavior: "smooth" });
         });
-        pills.appendChild(upBtn);
-      } else {
-        const calBtn = make("button", "📅 ตารางเรียน", "hs-atv-ep-pill");
-        calBtn.type = "button";
-        calBtn.addEventListener("click", (ev) => {
+        pills.appendChild(openBtn);
+
+        const bVdo = make(
+          "button",
+          mVdo.uploaded ? "⑥ VDO (✓)" : "⑥ VDO Lecture",
+          `hs-atv-ep-pill ${mVdo.uploaded ? "is-slide-uploaded-pill" : "is-slide-pending-pill"}`
+        );
+        bVdo.type = "button";
+        bVdo.title = mVdo.uploaded
+          ? `ขั้นที่ 6: VDO Lecture (${s.code}) — พร้อมรับชม`
+          : `ขั้นที่ 6: VDO Lecture (${s.code}) — รอแขวน VDO`;
+        bVdo.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          openSystemsForumScheduleModal(s.id);
+          openHsVdoLecture(s.code);
         });
-        pills.appendChild(calBtn);
+        pills.appendChild(bVdo);
+      } else {
+        const openBtn = make("button", "🧭 ดูกรอบแนวคิด & คำถามชวนคิด", "hs-atv-ep-pill is-solid");
+        openBtn.type = "button";
+        openBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          state.sfSubMode = "";
+          state.sfSelectedId = s.id;
+          renderSystemsForumView();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        pills.appendChild(openBtn);
+
+        if (slideRec) {
+          const sBtn = make("button", "📊 เปิด Slide", "hs-atv-ep-pill");
+          sBtn.type = "button";
+          sBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openSessionSlide(s.id);
+          });
+          pills.appendChild(sBtn);
+        } else if (ROLE === "faculty") {
+          const upBtn = make("button", "📤 Upload Slide / ไฟล์สอน", "hs-atv-ep-pill");
+          upBtn.type = "button";
+          upBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            state.sfSubMode = "";
+            state.sfSelectedId = s.id;
+            renderSystemsForumView();
+            requestAnimationFrame(() => {
+              const upBox = document.getElementById(`sfInlineUploadCard_${s.id}`);
+              if (upBox) upBox.scrollIntoView({ behavior: "smooth", block: "center" });
+            });
+          });
+          pills.appendChild(upBtn);
+        } else {
+          const calBtn = make("button", "📅 ตารางเรียน", "hs-atv-ep-pill");
+          calBtn.type = "button";
+          calBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openSystemsForumScheduleModal(s.id);
+          });
+          pills.appendChild(calBtn);
+        }
       }
 
       const openSpotlight = () => {
@@ -15779,30 +15854,56 @@
 
     const isDriveUi = state.hsUiMode === "drive";
     const sel = state.sfSelectedId ? getSystemsForumSessionById(state.sfSelectedId) : null;
+    const isStSub = Boolean(sel && sel.code === "ST1" && (state.sfSubMode === "lecture-slides" || state.sfSubMode === "vdo-lecture"));
+
+    if (
+      state.sfSubMode !== "vdo-lecture" &&
+      window.RACM303_EP_STUDIO &&
+      typeof window.RACM303_EP_STUDIO.destroyIfInside === "function"
+    ) {
+      window.RACM303_EP_STUDIO.destroyIfInside(mount);
+    }
 
     if (bannerWrap) {
       bannerWrap.replaceChildren(
-        buildUnifiedHsModuleBanner(state.activeHsModule || "HS1", "systems-forum", {
-          showModuleBar: true,
-          allowAllModules: true,
-          isAllActive: false,
-          keepFormatTabActiveWhenAll: true,
-          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
-          allHeading: sel
-            ? `${sel.code}: ${sel.title}`
-            : tr(
-                "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (Beyond HS1–HS6 · 6 คาบสอนสำคัญ)",
-                "Systems Thinking & Expert Panels (Beyond HS1–HS6 · 6 Key Sessions)"
-              ),
-          allDesc: sel
-            ? `${sel.dateTH} (${sel.timeLabel}) · ${sel.speakers} — ${sel.examBadge}`
-            : tr(
-                "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
-                "6 high-impact taught sessions beyond the HS1–HS6 written exam (17.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
-              ),
-          onSelectModule: (m) => openTextbookDriveFolder(m || "FOLDERS")
-        })
+        buildUnifiedHsModuleBanner(
+          sel && sel.code === "ST1" ? "ST1" : state.activeHsModule || "HS1",
+          isStSub ? state.sfSubMode : "systems-forum",
+          {
+            showModuleBar: true,
+            allowAllModules: true,
+            isAllActive: false,
+            keepFormatTabActiveWhenAll: true,
+            allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
+            allHeading: sel
+              ? `${sel.code}: ${sel.title}`
+              : tr(
+                  "คิดเชิงระบบ (ST1) & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6)",
+                  "Systems Thinking (ST1) & Expert Panels (6 Key Sessions Beyond HS1–HS6)"
+                ),
+            allDesc: sel
+              ? `${sel.dateTH} (${sel.timeLabel}) · ${sel.speakers} — ${sel.examBadge}`
+              : tr(
+                  "รวมคาบปูรากฐาน ST1 (Systems Thinking ครบทั้ง 6 ขั้นตอน: Full · Abridged · Self-Quiz · Slide · กรอบคาบเรียน · VDO Lecture) และเวทีเสวนาสดรวม 17.5 ชม. เชื่อมสู่ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
+                  "Includes foundational ST1 (Systems Thinking 6-step hub) & live panels (17.5 hrs) anchoring Fieldwork, Form 3A & SRN 1–2."
+                ),
+            onSelectModule: (m) => openTextbookDriveFolder(m || "FOLDERS")
+          }
+        )
       );
+    }
+
+    if (sel && sel.code === "ST1" && state.sfSubMode === "lecture-slides") {
+      mount.replaceChildren(
+        isDriveUi ? buildLectureSlidesDriveExplorerDOM("ST1") : buildLectureSlidesAppleTvDOM("ST1")
+      );
+      return;
+    }
+    if (sel && sel.code === "ST1" && state.sfSubMode === "vdo-lecture") {
+      mount.replaceChildren(
+        isDriveUi ? buildVdoLectureDriveExplorerDOM("ST1") : buildVdoLectureAppleTvDOM("ST1")
+      );
+      return;
     }
 
     mount.replaceChildren(isDriveUi ? buildSystemsForumDriveExplorerDOM() : buildSystemsForumAppleTvDOM());
@@ -15822,10 +15923,10 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 7 บท (ST1 รากฐาน & HS1 – HS6)", "tv-shelf-title"),
+        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
         make(
           "span",
-          "เริ่มจาก ST1 (ปูรากฐานระบบและการคิดเชิงระบบ) ต่อเนื่องสู่ HS1–HS6 เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ ประยุกต์ในชั้นเรียน → ⑥ VDO Lecture (รอแขวน VDO)",
+          "เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 Systems Thinking อยู่ในแท็บ คิดเชิงระบบ & เสวนา)",
           "tv-shelf-sub"
         )
       );
@@ -15988,7 +16089,7 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backAllBtn = make("button", "← ดูครบทุกตอน (ST1 & HS1–HS6)", "hs-atv-back-pill");
+    const backAllBtn = make("button", "← ดูครบทุกบท (HS1–HS6)", "hs-atv-back-pill");
     backAllBtn.type = "button";
     backAllBtn.addEventListener("click", () => {
       state.tbDriveScope = "folders";
@@ -16374,7 +16475,7 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", `④ STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (ST1 & HS1 – HS6) · อัปโหลดแล้ว ${hsCounts.uploaded}/${hsCounts.total} คาบ`, "tv-shelf-title"),
+        make("h3", `④ STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (HS1 – HS6) · อัปโหลดแล้ว ${hsCounts.uploaded}/${hsCounts.total} คาบ`, "tv-shelf-title"),
         make(
           "span",
           hsCounts.uploaded > 0
@@ -16526,9 +16627,17 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backAllBtn = make("button", "← รวมครบทั้ง 7 คาบ (ST1 & HS1–HS6)", "hs-atv-back-pill");
+    const backAllBtn = make(
+      "button",
+      curMod.code === "ST1" ? "← กลับคิดเชิงระบบ & เสวนา (6 คาบ)" : "← รวมครบทั้ง 6 คาบ (HS1–HS6)",
+      "hs-atv-back-pill"
+    );
     backAllBtn.type = "button";
     backAllBtn.addEventListener("click", () => {
+      if (curMod.code === "ST1") {
+        openSystemsForum("");
+        return;
+      }
       state.lsDriveScope = "folders";
       renderTextbookReader();
       window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
@@ -16948,13 +17057,13 @@
         make(
           "h3",
           vdoCounts.uploaded > 0
-            ? `⑥ STEP 06 · VDO Lecture ประจำคาบ (ST1 & HS1 – HS6) · แขวนแล้ว ${vdoCounts.uploaded}/${vdoCounts.total} คาบ`
-            : `⑥ STEP 06 · VDO Lecture ประจำคาบ (ST1 & HS1 – HS6) · รอแขวน VDO`,
+            ? `⑥ STEP 06 · VDO Lecture ประจำคาบ (HS1 – HS6) · แขวนแล้ว ${vdoCounts.uploaded}/${vdoCounts.total} คาบ`
+            : `⑥ STEP 06 · VDO Lecture ประจำคาบ (HS1 – HS6) · รอแขวน VDO`,
           "tv-shelf-title"
         ),
         make(
           "span",
-          "เตรียมโครงสร้างขั้นที่ 6 สำหรับวิดีโอบรรยายครบทั้ง 7 บท (ST1 & HS1–HS6) — คาบที่รอแขวน VDO จะแสดงสถานะสีเทา และจะเปลี่ยนเป็นสีม่วงครามพร้อมเชื่อม Interactive VDO Lecture Studio ทันทีเมื่อแขวนไฟล์",
+          "วิดีโอบรรยายประจำคาบครบทั้ง 6 บท (HS1–HS6) — คาบที่แขวนแล้วเปิดรับชมแบบ Interactive VDO Lecture Studio ได้ทันที (ส่วนคาบ ST1 อยู่ในแท็บ คิดเชิงระบบ & เสวนา)",
           "tv-shelf-sub"
         )
       );
@@ -17051,9 +17160,17 @@
     hero.setAttribute("data-ep-num", `0${epIdx}`);
 
     const heroTop = make("div", null, "hs-atv-hero-top");
-    const backAllBtn = make("button", "← รวมครบทั้ง 7 คาบ (ST1 & HS1–HS6)", "hs-atv-back-pill");
+    const backAllBtn = make(
+      "button",
+      curMod.code === "ST1" ? "← กลับคิดเชิงระบบ & เสวนา (6 คาบ)" : "← รวมครบทั้ง 6 คาบ (HS1–HS6)",
+      "hs-atv-back-pill"
+    );
     backAllBtn.type = "button";
     backAllBtn.addEventListener("click", () => {
+      if (curMod.code === "ST1") {
+        openSystemsForum("");
+        return;
+      }
       state.vdoDriveScope = "folders";
       renderTextbookReader();
       window.dispatchEvent(new CustomEvent("racm:tabchange", { detail: { tabId: state.activeTab, role: ROLE } }));
@@ -17541,6 +17658,13 @@
 
     const isDriveUi = state.hsUiMode === "drive";
     const subMode = state.textbookSubMode || "docs-drive";
+    const tbTabBtn = $("tabBtnTextbooks") || $("fTabTextbooks");
+    const sfTabBtn = $("tabBtnSystemsForum") || $("fTabSystemsForum");
+    if (tbTabBtn && sfTabBtn && state.activeTab === "textbooks") {
+      const stDocActive = isStReader && subMode === "doc-reader";
+      tbTabBtn.setAttribute("aria-selected", stDocActive ? "false" : "true");
+      sfTabBtn.setAttribute("aria-selected", stDocActive ? "true" : "false");
+    }
     const isDocsFoldersRoot = subMode === "docs-drive" && (state.tbDriveScope || "folders") === "folders";
     const isSlidesFoldersRoot = subMode === "lecture-slides" && (state.lsDriveScope || "folders") === "folders";
     const isVdoFoldersRoot = subMode === "vdo-lecture" && (state.vdoDriveScope || "folders") === "folders";
@@ -17565,35 +17689,35 @@
           allowAllModules: true,
           isAllActive: isFoldersRoot,
           keepFormatTabActiveWhenAll: true,
-          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (ST1 & HS1–6)" : "📚 รวมทุกบท (ST1 & HS1–6)",
+          allModulesLabel: isDriveUi ? "📁 ทุกโฟลเดอร์ (HS1–HS6)" : "📚 รวมทุกบท (HS1–HS6)",
           allHeading:
             subMode === "lecture-slides"
               ? isDriveUi
-                ? "ST1 & HS1–HS6: STEP 04 · โฟลเดอร์ Slide อาจารย์ / ไฟล์สอนประจำคาบ"
+                ? "HS1–HS6: STEP 04 · โฟลเดอร์ Slide อาจารย์ / ไฟล์สอนประจำคาบ"
                 : (() => {
                     const sc = countUploadedHsSlides();
                     return sc.uploaded > 0
-                      ? `ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (อัปโหลดแล้ว ${sc.uploaded}/${sc.total} คาบ)`
-                      : "ST1 & HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (รออาจารย์ Upload)";
+                      ? `HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (อัปโหลดแล้ว ${sc.uploaded}/${sc.total} คาบ)`
+                      : "HS1–HS6: STEP 04 · Slide อาจารย์ / ไฟล์สอนประจำคาบ (รออาจารย์ Upload)";
                   })()
               : subMode === "vdo-lecture"
               ? (() => {
                   const vc = countUploadedHsVdoLectures();
                   return vc.uploaded > 0
-                    ? `ST1 & HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (แขวนแล้ว ${vc.uploaded}/${vc.total} คาบ)`
-                    : "ST1 & HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (รอแขวน VDO)";
+                    ? `HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (แขวนแล้ว ${vc.uploaded}/${vc.total} คาบ)`
+                    : "HS1–HS6: STEP 06 · VDO Lecture ประจำคาบ (รอแขวน VDO)";
                 })()
               : isDriveUi
-              ? "Google Drive · ระบบสุขภาพ (ST1 & HS1–HS6) — เรียงตาม Logical Flow 6 ขั้นตอน"
-              : "ST1 & HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · ประยุกต์ในชั้นเรียน · VDO Lecture)",
+              ? "Google Drive · ระบบสุขภาพ (HS1–HS6) — เรียงตาม Logical Flow 6 ขั้นตอน"
+              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน (Full · Abridged · Self-Quiz · Slide อาจารย์ · Case Discussion · VDO Lecture)",
           allDesc:
             subMode === "lecture-slides"
-              ? "เลือกบทเรียน ST1 & HS1–HS6 เพื่อดูหรืออัปโหลดสไลด์ประกอบการบรรยายต้นคาบของอาจารย์ผู้สอน (ขั้นที่ 4)"
+              ? "เลือกบทเรียน HS1–HS6 เพื่อดูหรืออัปโหลดสไลด์ประกอบการบรรยายต้นคาบของอาจารย์ผู้สอน (ส่วนคาบ ST1 อยู่ในแท็บ คิดเชิงระบบ & เสวนา)"
               : subMode === "vdo-lecture"
-              ? "เลือกบทเรียน ST1 & HS1–HS6 เพื่อเปิดหน้า VDO Lecture ประจำคาบ (ขั้นที่ 6 · สถานะรอแขวน VDO และพร้อมเชื่อม Interactive VDO Lecture Studio)"
+              ? "เลือกบทเรียน HS1–HS6 เพื่อเปิดรับชม VDO Lecture ประจำคาบแบบ Interactive VDO Lecture Studio (ส่วนคาบ ST1 อยู่ในแท็บ คิดเชิงระบบ & เสวนา)"
               : isDriveUi
-              ? "File Explorer รวมไฟล์ทุกบทเรียน ST1 & HS1–HS6 เรียงตามลำดับ 01 ฉบับเต็ม (Full) → 02 ฉบับย่อ (Abridged) → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion → 06 VDO Lecture"
-              : "เลือกบทเรียน ST1 & HS1–HS6 เพื่อเดินตามเส้นทางการเรียนรู้ 6 ขั้นตอนอย่างต่อเนื่อง ตั้งแต่ปูพื้นฐาน สรุปแก่น ทดสอบตนเอง สไลด์อาจารย์ อภิปรายกรณีศึกษา จนถึง VDO Lecture ประจำคาบ",
+              ? "File Explorer รวมไฟล์ทุกบทเรียน HS1–HS6 เรียงตามลำดับ 01 ฉบับเต็ม (Full) → 02 ฉบับย่อ (Abridged) → 03 Self-Quiz → 04 Slide อาจารย์ → 05 Case Discussion → 06 VDO Lecture"
+              : "เลือกบทเรียน HS1–HS6 เพื่อเดินตามเส้นทางการเรียนรู้ 6 ขั้นตอนอย่างต่อเนื่อง (ส่วนคาบ ST1 Systems Thinking อยู่ในแท็บ คิดเชิงระบบ & เสวนา)",
           onSelectModule: (m) => switchTextbookModulePreservingFormat(m)
         })
       );
@@ -17609,10 +17733,11 @@
     }
 
     if (subMode === "docs-drive") {
+      const safeHsMod = baseMod === "ST1" ? "HS1" : baseMod;
       if (driveMount) {
         driveMount.hidden = false;
         driveMount.replaceChildren(
-          isDriveUi ? buildTextbookDriveExplorerDOM(baseMod) : buildTextbookAppleTvDOM(baseMod)
+          isDriveUi ? buildTextbookDriveExplorerDOM(safeHsMod) : buildTextbookAppleTvDOM(safeHsMod)
         );
       }
       if (readerWrap) readerWrap.hidden = true;
@@ -17664,11 +17789,17 @@
       const backGroup = make("div", null, "tb-drive-file-pills");
       const backAllBtn = make(
         "button",
-        isDriveUi ? "📂 โฟลเดอร์ ST1 & HS1–6" : "📚 รวมทุกบท ST1 & HS1–6",
+        isStReader
+          ? "🧭 ← คิดเชิงระบบ & เสวนา (6 คาบ)"
+          : isDriveUi
+          ? "📂 โฟลเดอร์ HS1–HS6"
+          : "📚 รวมทุกบท HS1–HS6",
         "btn sm"
       );
       backAllBtn.type = "button";
-      backAllBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+      backAllBtn.addEventListener("click", () =>
+        isStReader ? openSystemsForum("") : openTextbookDriveFolder("FOLDERS")
+      );
       const backDriveBtn = make(
         "button",
         isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `🧭 ← ภาพรวม 6 ขั้น (${baseMod})`,
@@ -17762,11 +17893,17 @@
     const backRootLi = document.createElement("li");
     const backRootSideBtn = make(
       "button",
-      isDriveUi ? "📂 หน้ารวมโฟลเดอร์ ST1 & HS1–6" : "📚 รวมทุกบท ST1 & HS1–6",
+      isStReader
+        ? "🧭 กลับคิดเชิงระบบ & เสวนา (6 คาบ)"
+        : isDriveUi
+        ? "📂 หน้ารวมโฟลเดอร์ HS1–HS6"
+        : "📚 รวมทุกบท HS1–HS6",
       "doc-picker-btn"
     );
     backRootSideBtn.type = "button";
-    backRootSideBtn.addEventListener("click", () => openTextbookDriveFolder("FOLDERS"));
+    backRootSideBtn.addEventListener("click", () =>
+      isStReader ? openSystemsForum("") : openTextbookDriveFolder("FOLDERS")
+    );
     backRootLi.appendChild(backRootSideBtn);
     picker.appendChild(backRootLi);
 
@@ -20024,6 +20161,8 @@
     if (!slideObj) return null;
     return {
       kind: slideObj.kind || "question",
+      subKind: slideObj.subKind || "",
+      pedKey: slideObj.pedKey || "",
       modId: slideObj.mod ? slideObj.mod.id : "",
       caseId: slideObj.caseObj ? slideObj.caseObj.id : "",
       qId: slideObj.qObj ? slideObj.qObj.id : "",
@@ -20050,7 +20189,14 @@
     } else if (ref.kind === "case-scenario" && ref.caseId) {
       nextIdx = nextSlides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === ref.caseId);
     } else if (ref.kind === "concept-summary" && ref.qId) {
-      nextIdx = nextSlides.findIndex((s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ref.qId);
+      if (ref.pedKey) {
+        nextIdx = nextSlides.findIndex(
+          (s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ref.qId && s.pedKey === ref.pedKey
+        );
+      }
+      if (nextIdx < 0) {
+        nextIdx = nextSlides.findIndex((s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ref.qId);
+      }
       if (nextIdx < 0) {
         nextIdx = nextSlides.findIndex((s) => s.kind === "question" && s.qObj && s.qObj.id === ref.qId);
       }
@@ -20233,8 +20379,8 @@
   function jumpToQuestionPedStage(qId, targetPedStage) {
     if (!qId) return;
     const rawNum = Number(targetPedStage);
-    const stageNum = Number.isFinite(rawNum) ? Math.max(0, Math.min(5, rawNum)) : 2;
-    if (stageNum === 5 && !canNavigateConceptSummarySlide(findHsQuestionById(qId))) {
+    const stageNum = Number.isFinite(rawNum) ? Math.max(0, Math.min(6, rawNum)) : 2;
+    if ((stageNum === 5 || stageNum === 6) && !canNavigateConceptSummarySlide(findHsQuestionById(qId))) {
       return;
     }
     const ownerCase = (HSD_DATA.cases || []).find((c) => (c.questions || []).some((q) => q.id === qId));
@@ -32553,7 +32699,7 @@
   }
 
   function countUploadedHsSlides() {
-    const codes = ["ST1", "HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
+    const codes = ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
     const uploaded = codes.filter((c) => getHsSlideInfo(c).uploaded).length;
     return { uploaded, total: codes.length };
   }
@@ -40648,7 +40794,16 @@
       });
     });
     document.querySelectorAll(".nav-tab").forEach((btn) => {
-      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      btn.addEventListener("click", () => {
+        if (btn.dataset.tab === "textbooks" && state.activeHsModule === "ST1") {
+          state.activeHsModule = "HS1";
+          state.textbookSubMode = "docs-drive";
+          state.tbDriveScope = "folders";
+        } else if (btn.dataset.tab === "systems-forum") {
+          state.sfSubMode = "";
+        }
+        switchTab(btn.dataset.tab);
+      });
     });
     bindHorizontalScrollShell($("primaryNavScrollShell"), $("primaryCategoryBar"));
     bindHorizontalScrollShell($("secondaryNavScrollShell"), $("secondaryNavTabs"));

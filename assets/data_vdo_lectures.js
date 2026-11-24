@@ -11,6 +11,7 @@
 
   var STORAGE_KEY = "racm303_vdo_lectures_v1";
   var MODULE_ORDER = ["ST1", "HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
+  var HS_CORE_ORDER = ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"];
 
   var DEFAULT_MANIFEST = {
     ST1: {
@@ -187,10 +188,10 @@
 
   function countUploaded() {
     var uploaded = 0;
-    for (var i = 0; i < MODULE_ORDER.length; i++) {
-      if (getVdoRecord(MODULE_ORDER[i]).uploaded) uploaded += 1;
+    for (var i = 0; i < HS_CORE_ORDER.length; i++) {
+      if (getVdoRecord(HS_CORE_ORDER[i]).uploaded) uploaded += 1;
     }
-    return { uploaded: uploaded, total: MODULE_ORDER.length };
+    return { uploaded: uploaded, total: HS_CORE_ORDER.length };
   }
 
   function saveOverride(modCode, patch) {

@@ -27401,6 +27401,7 @@ html[data-theme="dark"] .hsd-cs-unlock-cta {
 .hs-atv-hero.ep-4 { background: linear-gradient(135deg, #064434 0%, #059669 100%); }
 .hs-atv-hero.ep-5 { background: linear-gradient(135deg, #172f4d 0%, #0284c7 100%); }
 .hs-atv-hero.ep-6 { background: linear-gradient(135deg, #6f1818 0%, #e11d48 100%); }
+.hs-atv-hero.ep-7 { background: linear-gradient(135deg, #312e81 0%, #6d28d9 100%); }
 
 .hs-atv-hero::after {
   content: attr(data-ep-num);

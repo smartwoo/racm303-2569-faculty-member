@@ -506,9 +506,9 @@
               id: "app-hsd",
               tone: "tone-crimson",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 6 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 6-Step Flow (ST1 & HS1–6)"),
-              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture (รอแขวน VDO)", "6-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
-              badge: "ST1 · HS1 – HS6",
+              title: t("ระบบสุขภาพ · 6 ขั้นตอน (HS1–HS6)", "Health Systems · 6-Step Flow (HS1–6)"),
+              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture", "6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
+              badge: "HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
                 if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
@@ -566,9 +566,9 @@
               id: "app-hsd",
               tone: "tone-teal",
               icon: ICONS.slides,
-              title: t("ระบบสุขภาพ · 6 ขั้นตอน (ST1 & HS1–HS6)", "Health Systems · 6-Step Flow (ST1 & HS1–6)"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture (รอแขวน VDO)", "Coherent 6-step flow across ST1 & HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
-              badge: t("ST1 · HS1 – HS6", "ST1 · HS1 – HS6"),
+              title: t("ระบบสุขภาพ · 6 ขั้นตอน (HS1–HS6)", "Health Systems · 6-Step Flow (HS1–6)"),
+              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture", "Coherent 6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
+              badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
                 if (a && a.openTextbookDriveFolder) a.openTextbookDriveFolder("FOLDERS");
@@ -733,12 +733,12 @@
           </div>
         </div>
 
-        <!-- SHELF 2: EPISODES ST1 & HS1 - HS6 -->
-        <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ ST1 และ HS1 ถึง HS6">
+        <!-- SHELF 2: EPISODES HS1 - HS6 -->
+        <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ HS1 ถึง HS6">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ ST1 & HS1 – HS6 (เอกสารคำสอน · Self-Quiz · Slide อาจารย์)", "Health Systems ST1 & HS1–HS6 (5-Step Learning Hub)"))}</h2>
-              <span class="tv-shelf-sub">${esc(t("คลิก ST1 (รากฐานคิดเชิงระบบ) หรือ HS1–HS6 เพื่อเปิดอ่านฉบับเต็ม ฉบับย่อ ทำ Self-Quiz และอัปโหลด/ดาวน์โหลด Slide", "Click ST1 (Foundation) or HS1–HS6 for Full/Abridged docs, Self-Quiz & Slide Upload/Download"))}</span>
+              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6 (เอกสารคำสอน · Self-Quiz · Slide อาจารย์ · VDO Lecture)", "Health Systems HS1–HS6 (6-Step Learning Hub)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("คลิก HS1–HS6 เพื่อเปิดอ่านฉบับเต็ม ฉบับย่อ ทำ Self-Quiz ดูสไลด์อาจารย์ Case Discussion และรับชม VDO Lecture (ส่วนคาบ ST1 อยู่ในเวทีคิดเชิงระบบ & เสวนาด้านล่าง)", "Click HS1–HS6 for Full/Abridged docs, Self-Quiz, Slide Upload/Download & VDO Lecture (ST1 is in Systems Thinking & Panels below)"))}</span>
             </div>
             <div class="tv-shelf-controls">
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpisodesTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
@@ -746,25 +746,9 @@
             </div>
           </div>
           <div class="tv-shelf-track is-episodes" id="tvEpisodesTrack">
-            ${(() => {
-              const stMeta = api && api.getHsModuleMeta ? api.getHsModuleMeta("ST1") : null;
-              const stSlide = api && api.getHsSlideInfo ? api.getHsSlideInfo("ST1") : { uploaded: false, extBadge: "" };
-              const stCardHtml = stMeta
-                ? `
-              <button type="button" class="tv-episode-card sf-1" id="tvEpCard-ST1" data-ep-code="ST1" data-ep-num="ST" data-tv-focus data-tv-row="3">
-                <span class="tv-ep-top">
-                  <span class="tv-ep-code">ST1 · รากฐาน</span>
-                  <span class="tv-ep-weight">${esc(stSlide.uploaded ? `✓ Slide (${stSlide.extBadge})` : t("คำสอน Full & ย่อ", "Full & Abridged"))}</span>
-                </span>
-                <span class="tv-ep-bottom">
-                  <span class="tv-ep-title">${esc(stMeta.title)}</span>
-                  <span class="tv-ep-date">${esc(stMeta.scheduleDate.replace(/^วัน/, ""))} · ${esc(stMeta.lectureTime || "09.30 – 12.00 น.")}</span>
-                </span>
-              </button>`
-                : "";
-              const hsCardsHtml = modules
-                .map(
-                  (m, idx) => `
+            ${modules
+              .map(
+                (m, idx) => `
               <button type="button" class="tv-episode-card ep-${idx + 1}" id="tvEpCard-${m.code}" data-ep-code="${esc(m.code)}" data-ep-num="0${idx + 1}" data-tv-focus data-tv-row="3">
                 <span class="tv-ep-top">
                   <span class="tv-ep-code">${esc(m.code)}</span>
@@ -776,10 +760,8 @@
                 </span>
               </button>
             `
-                )
-                .join("");
-              return stCardHtml + hsCardsHtml;
-            })()}
+              )
+              .join("")}
           </div>
         </div>
 
@@ -787,11 +769,11 @@
         ${
           beyondSessions.length
             ? `
-        <div class="tv-shelf" aria-label="เวทีคิดเชิงระบบและเสวนา 6 คาบสำคัญนอกกรอบสอบ">
+        <div class="tv-shelf" aria-label="เวทีคิดเชิงระบบและเสวนา ST1 และ 6 คาบสำคัญ">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("🧭 เวทีคิดเชิงระบบ & เสวนา (6 คาบสำคัญนอกกรอบสอบ HS1–HS6)", "🧭 Systems Thinking & Panels (6 Key Sessions Beyond HS1–HS6)"))}</h2>
-              <span class="tv-shelf-sub">${esc(t("ไม่ได้ออกข้อสอบทฤษฎี แต่มีการสอนสด (17.5 ชม.) และเป็นหัวใจของภาคสนาม ฟอร์ม 3A และ SRN 1–2", "Not on the written exam, yet essential onsite sessions (17.5 hrs) powering Fieldwork, Form 3A & SRN 1–2"))}</span>
+              <h2 class="tv-shelf-title">${esc(t("🧭 คิดเชิงระบบ (ST1) & เวทีเสวนา (6 คาบสำคัญนอกกรอบสอบ HS1–HS6)", "🧭 Systems Thinking (ST1) & Panels (6 Key Sessions Beyond HS1–HS6)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("เริ่มจากคาบปูรากฐาน ST1 (Systems Thinking · Full/Abridged/Self-Quiz/Slide/VDO) และเวทีเสวนาสดรวม 17.5 ชม. เชื่อมสู่ภาคสนาม ฟอร์ม 3A และ SRN 1–2", "Starts with foundational ST1 (Systems Thinking 6-step hub) & live panels (17.5 hrs) powering Fieldwork, Form 3A & SRN 1–2"))}</span>
             </div>
             <div class="tv-shelf-controls">
               <button type="button" class="tv-pill-action-btn" id="tvOpenAllSystemsForumBtn">${esc(t("ดูครบ 6 คาบ →", "View All 6 →"))}</button>
@@ -998,10 +980,6 @@
     panel.querySelectorAll("[data-sf-id]").forEach((card) => {
       card.addEventListener("click", () => {
         lastHomeTileFocusSelector = `#${card.id}`;
-        if (card.dataset.sfId === "w1-d1-st") {
-          openEpisodeModal("ST1");
-          return;
-        }
         if (api && api.openSystemsForum) api.openSystemsForum(card.dataset.sfId);
         else navigateTvTab("systems-forum");
       });
@@ -2319,27 +2297,11 @@
       },
       "health-systems": {
         id: "health-systems",
-        code: "02_ระบบสุขภาพ (ST1 · HS1–HS6 & เวทีเชิงระบบ)",
-        title: "โฟลเดอร์บทเรียน ST1 (รากฐานคิดเชิงระบบ) และ HS1–HS6 ตาม Logical Flow 6 ขั้นตอน พร้อมเวทีเสวนา 6 คาบสำคัญ",
-        meta: "7 โฟลเดอร์บทเรียน (ST1 & HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ & เสวนา (6 คาบ)",
-        tags: ["📘 ST1 รากฐาน", "① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case / เวที", "⑥ VDO Lecture"],
+        code: "02_ระบบสุขภาพ (HS1–HS6 & เวทีคิดเชิงระบบ)",
+        title: "โฟลเดอร์บทเรียนระบบสุขภาพ HS1–HS6 ตาม Logical Flow 6 ขั้นตอน พร้อมโฟลเดอร์คิดเชิงระบบ (ST1) & เสวนา 6 คาบสำคัญ",
+        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ (ST1) & เสวนา (6 คาบ)",
+        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case Discussion", "⑥ VDO Lecture", "🧭 ST1 & เสวนา"],
         subfolders: [
-          ...(api && api.getHsModuleMeta
-            ? (() => {
-                const stMod = api.getHsModuleMeta("ST1");
-                return [
-                  {
-                    id: stMod.id,
-                    code: stMod.code,
-                    title: stMod.title,
-                    examWeight: "",
-                    customPill: "ปูรากฐาน",
-                    meta: `${stMod.scheduleDate.replace(/^วัน/, "")} (${stMod.lectureTime || "09.30–12.00 น."}) · ปูรากฐานก่อน HS1–HS6`,
-                    files: buildHsModuleFiles(stMod)
-                  }
-                ];
-              })()
-            : []),
           ...modules.map((m) => ({
             id: m.id,
             code: m.code,
@@ -2350,27 +2312,30 @@
           })),
           {
             id: "systems-forum",
-            code: "07_เวทีคิดเชิงระบบและเสวนา",
-            title: "Beyond HS1–HS6: Systems Thinking, Learning How to Learn & Expert Panels",
+            code: "07_เวทีคิดเชิงระบบและเสวนา (รวม ST1)",
+            title: "Systems Thinking (ST1 · Full/Abridged/Self-Quiz/Slide/VDO), CLD Workshop & Expert Panels",
             examWeight: "",
-            customPill: "6 คาบสำคัญ",
-            customTags: ["🧠 Systems & Workshop (3)", "🎙️ Expert Panels (3)", "📋 ฟอร์ม 3A · SRN"],
-            meta: "สัปดาห์ที่ 1, 3, 5 · 17.5 ชม. (นอกกรอบสอบ HS1–HS6 · เช็คชื่อ Onsite)",
-            files: ((api && api.getSystemsForumSessions ? api.getSystemsForumSessions() : []) || []).map((s) => ({
-              id: `sf:${s.id}`,
-              folderPath: ["health-systems", "systems-forum"],
-              name: s.driveFileName || `0${s.order}_${s.code}.md`,
-              title: `[${s.code}] ${s.title}`,
-              sub: `${s.titleThSub} · ${s.speakers}`,
-              meta: `${s.shortDate} (${s.timeLabel}) · ${s.hours}`,
-              badge: "🧭 เปิดกรอบแนวคิด",
-              icoCls: s.kind === "systems" ? "is-quiz" : "is-manual",
-              icoTxt: s.kind === "systems" ? "🧠" : "🎙️",
-              onOpen: openFileAction(() => {
-                if (api && api.openSystemsForum) api.openSystemsForum(s.id);
-                else navigateTvTab("systems-forum");
-              })
-            }))
+            customPill: "ST1 + 5 เวที",
+            customTags: ["📘 ST1 รากฐาน 6 ขั้น", "🧠 Systems & CLD", "🎙️ Expert Panels", "📋 ฟอร์ม 3A · SRN"],
+            meta: "สัปดาห์ที่ 1, 3, 5 · 17.5 ชม. (รวมคาบ ST1 Systems Thinking · เช็คชื่อ Onsite)",
+            files: [
+              ...(api && api.getHsModuleMeta ? buildHsModuleFiles(api.getHsModuleMeta("ST1")) : []),
+              ...((api && api.getSystemsForumSessions ? api.getSystemsForumSessions() : []) || []).map((s) => ({
+                id: `sf:${s.id}`,
+                folderPath: ["health-systems", "systems-forum"],
+                name: s.driveFileName || `0${s.order}_${s.code}.md`,
+                title: `[${s.code}] ${s.title}`,
+                sub: `${s.titleThSub} · ${s.speakers}`,
+                meta: `${s.shortDate} (${s.timeLabel}) · ${s.hours}`,
+                badge: "🧭 เปิดกรอบแนวคิด",
+                icoCls: s.kind === "systems" ? "is-quiz" : "is-manual",
+                icoTxt: s.kind === "systems" ? "🧠" : "🎙️",
+                onOpen: openFileAction(() => {
+                  if (api && api.openSystemsForum) api.openSystemsForum(s.id);
+                  else navigateTvTab("systems-forum");
+                })
+              }))
+            ]
           }
         ],
         files: [
@@ -3138,7 +3103,7 @@
           path: ["health-systems", sf.id]
         };
       });
-      renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพเรียงตาม ST1 (รากฐาน) & HS1–HS6");
+      renderFolderCards(hsFolderObjs, "โฟลเดอร์บทเรียนระบบสุขภาพ HS1–HS6 และเวทีคิดเชิงระบบ (รวม ST1)");
       renderFilesSection(hsF.files, "ไฟล์รวมทั้งหมวดระบบสุขภาพ (HS1–HS6)");
     } else if (rootKey === "health-systems" && subKey) {
       // INSIDE SPECIFIC HS FOLDER (HS1..HS6)
