@@ -11044,7 +11044,7 @@
       abridgedBridge: "จับโครงสร้างบทเรียนให้คมชัด แล้วทดสอบจุดที่ยังสับสนในขั้นที่ 3",
       quizFocus: "การแยกมิติความป่วย ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค (Primordial–Quaternary)",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และอภิปรายกลุ่มย่อยในขั้นที่ 5",
-      caseFocus: "สุขภาวะคนทำงานโรงงานอุตสาหกรรม (เคส 1) และภาวะอ้วนในเด็กกับการสร้าง Diagram ปัจจัยกำหนดสุขภาพ (เคส 2)",
+      caseFocus: "ภาวะอ้วนในเด็กและการสร้าง Diagram ปัจจัยกำหนดสุขภาพ (เคส 1) เชื่อมสู่สุขภาวะ 4 มิติและระดับการป้องกันโรคของคนทำงาน (เคส 2)",
       caseBridge: "ถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
     },
     HS2: {
@@ -19974,7 +19974,7 @@
   function getShortQuestionNumLabel(qObj, fallbackIdx) {
     if (qObj && qObj.shortLabel) return String(qObj.shortLabel);
     const raw = String((qObj && qObj.label) || "");
-    const matches = raw.match(/\d+\.\d+/g);
+    const matches = raw.match(/\d+(?:\.\d+)?/g);
     if (matches && matches.length > 0) {
       return matches.join(" & ");
     }
@@ -20985,12 +20985,12 @@
 
   let dohInstanceSeq = 0;
   const DOH_EDGE_DEFS = [
-    { id: "ind_to_out", label: "ปัจเจก→ปัญหา", revLabel: "ปัญหา→ปัจเจก", biLabel: "ปัจเจก↔ปัญหา", std: "fwd" },
-    { id: "soc_to_out", label: "สังคม→ปัญหา", revLabel: "ปัญหา→สังคม", biLabel: "สังคม↔ปัญหา", std: "fwd" },
-    { id: "hsys_to_out", label: "บริการ→ปัญหา", revLabel: "ปัญหา→บริการ", biLabel: "บริการ↔ปัญหา", std: "fwd" },
-    { id: "ind_bi_soc", label: "ปัจเจก→สังคม", revLabel: "สังคม→ปัจเจก", biLabel: "ปัจเจก↔สังคม", std: "bi" },
-    { id: "ind_bi_hsys", label: "ปัจเจก→บริการ", revLabel: "บริการ→ปัจเจก", biLabel: "ปัจเจก↔บริการ", std: "bi" },
-    { id: "soc_bi_hsys", label: "สังคม→บริการ", revLabel: "บริการ→สังคม", biLabel: "สังคม↔บริการ", std: "bi" }
+    { id: "ind_to_out", label: "ปัจเจก→ปัญหา", revLabel: "ปัญหา→ปัจเจก", biLabel: "ปัจเจก↔ปัญหา", std: "fwd", syms: { fwd: "↘", rev: "↖", bi: "↖↘" } },
+    { id: "soc_to_out", label: "สังคม→ปัญหา", revLabel: "ปัญหา→สังคม", biLabel: "สังคม↔ปัญหา", std: "fwd", syms: { fwd: "↙", rev: "↗", bi: "↙↗" } },
+    { id: "hsys_to_out", label: "บริการ→ปัญหา", revLabel: "ปัญหา→บริการ", biLabel: "บริการ↔ปัญหา", std: "fwd", syms: { fwd: "↑", rev: "↓", bi: "↕" } },
+    { id: "ind_bi_soc", label: "ปัจเจก→สังคม", revLabel: "สังคม→ปัจเจก", biLabel: "ปัจเจก↔สังคม", std: "bi", syms: { fwd: "→", rev: "←", bi: "↔" } },
+    { id: "ind_bi_hsys", label: "ปัจเจก→บริการ", revLabel: "บริการ→ปัจเจก", biLabel: "ปัจเจก↔บริการ", std: "bi", syms: { fwd: "↘", rev: "↖", bi: "↖↘" } },
+    { id: "soc_bi_hsys", label: "สังคม→บริการ", revLabel: "บริการ→สังคม", biLabel: "สังคม↔บริการ", std: "bi", syms: { fwd: "↙", rev: "↗", bi: "↙↗" } }
   ];
 
   function parseDohLinksString(raw) {
@@ -21203,7 +21203,10 @@
           if (badgeLayerEl) {
             const midX = ((c.x1 + c.x2) / 2 / W) * 100;
             const midY = ((c.y1 + c.y2) / 2 / H) * 100;
-            const sym = dir === "bi" ? "↔" : dir === "fwd" ? "→" : dir === "rev" ? "←" : "⇢";
+            const sym =
+              dir === "off"
+                ? "+"
+                : (ed.syms && ed.syms[dir]) || (dir === "bi" ? "↔" : dir === "fwd" ? "→" : "←");
             const btn = make(
               "button",
               sym,
@@ -21214,7 +21217,7 @@
             btn.style.top = `${midY.toFixed(2)}%`;
             btn.title =
               dir === "off"
-                ? `คลิกเพื่อลากเส้นลูกศร (${ed.label} / ${ed.biLabel})`
+                ? `คลิกปุ่ม + เพื่อลากเส้นลูกศร (${ed.label} / ${ed.biLabel})`
                 : `คลิกเพื่อเปลี่ยนทิศทางลูกศร (ปัจจุบัน: ${sym})`;
             btn.addEventListener("click", (ev) => {
               ev.stopPropagation();
@@ -21370,7 +21373,7 @@
 
     leftTools.append(viewDiagBtn, viewTblBtn, innerOvalBtn, outerOvalBtn);
     rightTools.append(
-      make("span", "คลิกปุ่ม ⇢ บนเส้นเพื่อเปลี่ยนลูกศร (→ / ↔ / ←)", "doh-toolbar-hint"),
+      make("span", "คลิกปุ่ม + บนเส้นประเพื่อเชื่อม/เปลี่ยนทิศทางลูกศร", "doh-toolbar-hint"),
       autoArrowsBtn,
       clearArrowsBtn
     );
