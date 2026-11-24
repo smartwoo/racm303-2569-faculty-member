@@ -19761,7 +19761,7 @@
       const isReleased = Boolean(isConceptSummaryUnlockedForStudent(cur.qObj));
       slideKind = isReleased ? "concept-summary" : "question";
     }
-    const studentStage = slideKind === "case-scenario" ? 0 : cur.pedStage === 1 ? 1 : 2;
+    const studentStage = slideKind === "case-cover" ? -1 : slideKind === "case-scenario" ? 0 : cur.pedStage === 1 ? 1 : 2;
     LIVE.broadcastTeacherQuestionPointer(cur.mod.id, cur.caseObj.id, cur.qObj.id, {
       splitOrient: state.hsdSplitOrient,
       slideKind,
@@ -20496,6 +20496,8 @@
     let nextIdx = -1;
     if (ref.kind === "opening-kahoot") {
       nextIdx = nextSlides.findIndex((s) => s.kind === "opening-kahoot" && (!ref.modId || (s.mod && s.mod.id === ref.modId)));
+    } else if (ref.kind === "case-cover" && ref.caseId) {
+      nextIdx = nextSlides.findIndex((s) => s.kind === "case-cover" && s.caseObj && s.caseObj.id === ref.caseId);
     } else if (ref.kind === "case-scenario" && ref.caseId) {
       nextIdx = nextSlides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === ref.caseId);
     } else if (ref.kind === "concept-summary" && ref.qId) {
@@ -20862,13 +20864,17 @@
       const slides = buildHsSlideDeckItems(matchedCases);
       const targetQObj = findHsQuestionById(ptr.questionId);
       const wantKind =
-        ptr.slideKind === "case-scenario"
+        ptr.slideKind === "case-cover"
+          ? "case-cover"
+          : ptr.slideKind === "case-scenario"
           ? "case-scenario"
           : ptr.slideKind === "concept-summary" && isConceptSummaryUnlockedForStudent(targetQObj)
           ? "concept-summary"
           : "question";
       let idx = -1;
-      if (wantKind === "case-scenario" && ptr.caseId) {
+      if (wantKind === "case-cover" && ptr.caseId) {
+        idx = slides.findIndex((s) => s.kind === "case-cover" && s.caseObj && s.caseObj.id === ptr.caseId);
+      } else if (wantKind === "case-scenario" && ptr.caseId) {
         idx = slides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === ptr.caseId);
       } else if (wantKind === "concept-summary") {
         idx = slides.findIndex((s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ptr.questionId);
@@ -23152,6 +23158,7 @@
       return deck[Math.max(0, Math.min(deck.length - 1, state.hsdSlideIdx))] || null;
     })();
     if (activeCur && activeCur.kind === "opening-kahoot") return "opening-kahoot";
+    if (activeCur && activeCur.kind === "case-cover") return "case-cover";
     if (activeCur && activeCur.kind === "case-scenario") return "case-scenario";
     if (activeCur && activeCur.kind === "concept-summary") return "concept-summary";
 
@@ -23431,6 +23438,17 @@
 
       if ((Array.isArray(c.scenarioBlocks) && c.scenarioBlocks.length > 0) || c.scenarioHtml) {
         const firstQObj = (Array.isArray(c.questions) && c.questions[0]) || null;
+        items.push({
+          kind: "case-cover",
+          pedStage: -1,
+          pedKey: "case-cover",
+          pedBadge: `Case Scenario #${c.caseNumber}`,
+          pedShort: `Case #${c.caseNumber}`,
+          mod,
+          caseObj: c,
+          qObj: firstQObj,
+          shortNum: `Case #${c.caseNumber}`
+        });
         items.push({
           kind: "case-scenario",
           pedStage: 0,
@@ -24682,6 +24700,8 @@
       let optLabel = "";
       if (s.kind === "opening-kahoot") {
         optLabel = `Slide ${idx + 1}: สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${s.mod.code})`;
+      } else if (s.kind === "case-cover") {
+        optLabel = `[Case Scenario #${s.caseObj.caseNumber}] ${s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title}`;
       } else if (s.kind === "case-scenario") {
         optLabel = `[เนื้อหาโจทย์เต็มจอ] กรณีศึกษาที่ ${s.caseObj.caseNumber}: ${s.caseObj.subtitle || s.caseObj.title}`;
       } else if (s.kind === "concept-summary") {
@@ -26953,6 +26973,74 @@
       return sheet;
     }
 
+    if (cur && cur.kind === "case-cover") {
+      const sheet = make(
+        "div",
+        null,
+        `ppt-slide-sheet${isProjected ? " is-projected" : ""}${exp ? " is-handout-sheet" : ""}${state.hsdLaserActive && !exp ? " is-laser-cursor" : ""} is-layout-case-cover`
+      );
+      sheet.dataset.pptFitZoom = "0.92";
+      const conciseTitle = cur.caseObj.coverTitle || cur.caseObj.subtitle || cur.caseObj.title || "";
+
+      const mHead = make("div", null, "ppt-slide-master-head");
+      const mLeft = make("div", null, "ppt-sm-left");
+      mLeft.append(
+        make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
+        make("h4", `Case Scenario #${cur.caseObj.caseNumber}: ${conciseTitle}`, "ppt-sm-title")
+      );
+
+      const mRight = make("div", null, "ppt-sm-right");
+      if (!exp && slides.length > 1) {
+        const nextScenBtn = make("button", "อ่านเนื้อหาโจทย์ →", "ppt-sm-qpill is-current");
+        nextScenBtn.type = "button";
+        nextScenBtn.addEventListener("click", () => stepHsQuestionSlide(1));
+        mRight.appendChild(nextScenBtn);
+      }
+      if (!exp && !isProjected && !state.isPptSlideSharePopup) {
+        mRight.appendChild(buildPptSlideThemeSwitcherDOM("is-on-slide"));
+      }
+      if (!exp) {
+        mRight.appendChild(buildInteractiveSlideHeaderTimerDOM());
+      }
+      mHead.append(mLeft, mRight);
+      sheet.appendChild(mHead);
+
+      if (state.hsdBigSlideTimer && !exp) {
+        sheet.appendChild(buildBigSlideFloatingTimerDOM(sheet));
+      }
+
+      const coverStage = make("div", null, "ppt-case-cover-stage");
+      const coverInner = make("div", null, "ppt-case-cover-inner");
+      coverInner.append(
+        make("p", `Case Scenario #${cur.caseObj.caseNumber}`, "ppt-case-cover-kicker"),
+        make("h2", conciseTitle, "ppt-case-cover-title")
+      );
+      coverStage.appendChild(coverInner);
+      if (!exp && !state.isPptSlideSharePopup) {
+        coverStage.title = "คลิกเพื่อเปิดเนื้อหาโจทย์ของกรณีศึกษานี้";
+        coverStage.addEventListener("click", () => stepHsQuestionSlide(1));
+      }
+      sheet.appendChild(coverStage);
+
+      const mFoot = make("div", null, "ppt-slide-master-foot");
+      const slidePosIdx = exp && typeof exp.slideNumber === "number" ? exp.slideNumber : state.hsdSlideIdx + 1;
+      mFoot.append(
+        make("span", "RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี"),
+        make("span", `คาบ ${cur.mod.code} · Case Scenario #${cur.caseObj.caseNumber}  |  Slide ${slidePosIdx} / ${slides.length}`)
+      );
+      const progLine = make("div", null, "ppt-slide-progress-line");
+      progLine.style.width = `${(slidePosIdx / Math.max(1, slides.length)) * 100}%`;
+      mFoot.appendChild(progLine);
+      sheet.appendChild(mFoot);
+
+      const laserDot = make("div", null, "ppt-laser-dot");
+      laserDot.hidden = true;
+      sheet.appendChild(laserDot);
+
+      requestAnimationFrame(() => syncTimerWidgetDOM());
+      return sheet;
+    }
+
     if (cur && cur.kind === "concept-summary") {
       const isHiddenNow = Boolean(cur.isHiddenSlide);
       const cs = isHiddenNow ? {} : cur.conceptSummary || (cur.qObj && cur.qObj.conceptSummarySlide) || {};
@@ -27764,6 +27852,17 @@
           `<div style="font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.35">สไลด์เปิดคาบ Discussion ระบบสุขภาพ: ${escapeHtml(s.mod.title)}</div>` +
           `</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
+      } else if (s.kind === "case-cover") {
+        card.innerHTML =
+          `<div class="ppt-thumb-top">` +
+          `<span class="ppt-thumb-mod">${escapeHtml(s.mod.code)} · Case #${s.caseObj.caseNumber}</span>` +
+          `<span class="ppt-thumb-flag is-key">ปกเคส</span>` +
+          `</div>` +
+          `<div>` +
+          `<div style="font-size:11px;color:var(--muted);margin-bottom:3px">Case Scenario #${s.caseObj.caseNumber}</div>` +
+          `<div style="font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.35">${escapeHtml(s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title)}</div>` +
+          `</div>` +
+          `<div class="ppt-thumb-wire"><span></span></div>`;
       } else if (s.kind === "case-scenario") {
         card.innerHTML =
           `<div class="ppt-thumb-top">` +
@@ -27993,6 +28092,8 @@
           "span",
           cur.kind === "opening-kahoot"
             ? `คาบ ${cur.mod.code} · สไลด์เปิดคาบ`
+            : cur.kind === "case-cover"
+            ? `คาบ ${cur.mod.code} · Case Scenario #${cur.caseObj.caseNumber}`
             : cur.kind === "case-scenario"
             ? `คาบ ${cur.mod.code} · กรณีที่ ${cur.caseObj.caseNumber} (เนื้อหาโจทย์เต็มจอ)`
             : cur.kind === "concept-summary"
@@ -28014,6 +28115,8 @@
         const lbl =
           s.kind === "opening-kahoot"
             ? `${idx + 1}/${slides.length} · เปิดคาบ ${s.mod.code}`
+            : s.kind === "case-cover"
+            ? `${idx + 1}/${slides.length} · [Case Scenario #${s.caseObj.caseNumber}] ${s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title}`
             : s.kind === "case-scenario"
             ? `${idx + 1}/${slides.length} · [เนื้อหาโจทย์เต็มจอ] กรณีที่ ${s.caseObj.caseNumber}: ${s.caseObj.subtitle || s.caseObj.title}`
             : s.kind === "concept-summary"
@@ -28261,6 +28364,8 @@
         const lbl =
           s.kind === "opening-kahoot"
             ? `${idx + 1}/${slides.length} · สไลด์เปิดคาบ (${s.mod.code})`
+            : s.kind === "case-cover"
+            ? `${idx + 1}/${slides.length} · [Case Scenario #${s.caseObj.caseNumber}] ${s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title}`
             : s.kind === "case-scenario"
             ? `${idx + 1}/${slides.length} · [เนื้อหาโจทย์เต็มจอ] กรณีที่ ${s.caseObj.caseNumber}`
             : s.kind === "concept-summary"
@@ -29965,6 +30070,17 @@
         ((Array.isArray(c.scenarioBlocks) && c.scenarioBlocks.length > 0) || c.scenarioHtml)
       ) {
         out.push({
+          kind: "case-cover",
+          pedStage: -1,
+          forceLayout: "case-cover",
+          pedBadge: `Case Scenario #${c.caseNumber}`,
+          pedShort: `Case #${c.caseNumber}`,
+          mod,
+          caseObj: c,
+          qObj: (c.questions && c.questions[0]) || null,
+          shortNum: `Case #${c.caseNumber}`
+        });
+        out.push({
           kind: "case-scenario",
           pedStage: 0,
           forceLayout: "case-scenario",
@@ -30766,6 +30882,15 @@
           `</div>` +
           `<div class="ppt-thumb-title">สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
+      } else if (s.kind === "case-cover") {
+        item.title = `Slide ${idx + 1}: Case Scenario #${s.caseObj.caseNumber} — ${s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title}`;
+        tCard.innerHTML =
+          `<div class="ppt-thumb-top">` +
+          `<span class="ppt-thumb-mod">Case Scenario #${s.caseObj.caseNumber}</span>` +
+          `<span class="ppt-thumb-flag is-key">ปกเคส</span>` +
+          `</div>` +
+          `<div class="ppt-thumb-title">${escapeHtml(s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title)}</div>` +
+          `<div class="ppt-thumb-wire"><span></span></div>`;
       } else if (s.kind === "case-scenario") {
         item.title = `Slide ${idx + 1}: [เนื้อหาโจทย์เต็มจอ] กรณีที่ ${s.caseObj.caseNumber} — ${s.caseObj.subtitle || s.caseObj.title}`;
         tCard.innerHTML =
