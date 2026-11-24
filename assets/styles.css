@@ -42427,3 +42427,30 @@ html[data-theme="dark"] .ppt-reading-select {
     font-size: 11.8px;
   }
 }
+
+/* Hide floating Orientation Live pill during Case Discussion Full Screen & Reading Mode */
+body.is-ppt-fullscreen-open #orlFloatingJoinPill,
+body.is-ppt-slideshare-window #orlFloatingJoinPill,
+body.is-ppt-window-max-open #orlFloatingJoinPill {
+  display: none !important;
+}
+
+@media (max-width: 960px) {
+  .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-center {
+    flex: 1 1 100% !important;
+    order: -1;
+    justify-content: flex-start !important;
+  }
+  .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-left,
+  .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-right {
+    flex-wrap: wrap !important;
+  }
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-menu-right {
+  display: inline-flex !important;
+}
