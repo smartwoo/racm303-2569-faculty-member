@@ -24,26 +24,26 @@
   const AVATARS = ["🩺", "🏥", "🌿", "🧭", "🔬", "💡", "🤝", "🌟"];
   const FACULTY_LIST = [
     { code: "FAC01", short: "อ.ณัฐวุฒิ", fullName: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์", unit: "ประธานรายวิชา" },
-    { code: "FAC02", short: "อ.ปวินท์", fullName: "รศ. นพ.ปวินท์ พัวพรพงษ์", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC03", short: "อ.ฉัตรชัย", fullName: "รศ. ดร. นพ.ฉัตรชัย อิ่มอารมณ์", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC04", short: "อ.วิชช์", fullName: "รศ. ดร. นพ.วิชช์ เกษมทรัพย์", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC05", short: "อ.สัมฤทธิ์", fullName: "รศ. ดร. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC06", short: "อ.ภูษิต", fullName: "รศ. นพ.ภูษิต ประคองสาย", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC07", short: "อ.จักรกฤษณ์", fullName: "ผศ. ดร. นพ.จักรกฤษณ์ โพดาพล", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC08", short: "อ.พีรสิทธิ์", fullName: "ผศ. นพ.พีรสิทธิ์ สิทธิถาวร", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC09", short: "อ.เริงฤดี", fullName: "ศ. พญ.เริงฤดี ปธานวนิช", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC10", short: "อ.สวรรณี", fullName: "ผศ. พญ.สวรรณี รัตนปัญญา", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC11", short: "อ.วริศา", fullName: "อ. ดร. พญ.วริศา พานิชเกรียงไกร", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC12", short: "อ.ฉัตรฑญา", fullName: "อ. พญ.ฉัตรฑญา บำรุงเชาว์เกษม", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC13", short: "อ.ภรัญยู", fullName: "อ. นพ.ภรัญยู คูหาทอง", unit: "คณาจารย์ประจำรายวิชา" },
-    { code: "FAC14", short: "อ.วิชัย", fullName: "ศ. นพ.วิชัย เอกพลากร", unit: "คณาจารย์ประจำรายวิชา" }
+    { code: "FAC02", short: "อ.ปวินท์", fullName: "อ. นพ.ปวินท์ พัวพรพงษ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC03", short: "อ.ฉัตรชัย", fullName: "อ. ดร. นพ.ฉัตรชัย อิ่มอารมณ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC04", short: "ผศ.วิชช์", fullName: "ผศ. ดร. นพ.วิชช์ เกษมทรัพย์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC05", short: "ผศ.สัมฤทธิ์", fullName: "ผศ. ดร. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC06", short: "อ.ภูษิต", fullName: "อ. นพ.ภูษิต ประคองสาย", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC07", short: "อ.จักรกฤษณ์", fullName: "อ. ดร. นพ.จักรกฤษณ์ โพดาพล", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC08", short: "นพ.พีรสิชฌ์", fullName: "นพ.พีรสิชฌ์ สิทธิถาวร", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC09", short: "รศ.เริงฤดี", fullName: "รศ. ดร. พญ.เริงฤดี ปธานวนิช", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC10", short: "อ.สวนีย์", fullName: "อ. พญ.สวนีย์ รัตนปัญญา", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC11", short: "อ.วริษา", fullName: "อ. ดร. พญ.วริษา พานิชเกรียงไกร", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC12", short: "ผศ.ฉัฐญาณ์", fullName: "ผศ. พญ.ฉัฐญาณ์ บำรุงเชาว์เกษม", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC13", short: "นพ.ภรัณยู", fullName: "นพ.ภรัณยู คูหาทอง", unit: "คณาจารย์ประจำรายวิชา" },
+    { code: "FAC14", short: "ศ.วิชัย", fullName: "ศ. นพ.วิชัย เอกพลากร", unit: "คณาจารย์ประจำรายวิชา" }
   ];
 
   const CHOICE_META = [
-    { idx: 0, shape: "▲", cls: "is-red", hex: "#e21b3c", nameTh: "สีแดง (▲)" },
-    { idx: 1, shape: "◆", cls: "is-blue", hex: "#1368ce", nameTh: "สีน้ำเงิน (◆)" },
-    { idx: 2, shape: "●", cls: "is-gold", hex: "#c99000", nameTh: "สีเหลือง (●)" },
-    { idx: 3, shape: "■", cls: "is-green", hex: "#26890c", nameTh: "สีเขียว (■)" }
+    { idx: 0, shape: "▲", cls: "is-red", hex: "#ea4335", nameTh: "สีแดง Google Red (▲)" },
+    { idx: 1, shape: "◆", cls: "is-blue", hex: "#4285f4", nameTh: "สีน้ำเงิน Google Blue (◆)" },
+    { idx: 2, shape: "●", cls: "is-gold", hex: "#f9ab00", nameTh: "สีเหลือง Google Yellow (●)" },
+    { idx: 3, shape: "■", cls: "is-green", hex: "#34a853", nameTh: "สีเขียว Google Green (■)" }
   ];
 
   /* ---------- 0. VisualViewport & On-Screen Keyboard Tracker ---------- */
@@ -738,13 +738,36 @@
       : [];
   }
 
+  function sanitizeStudentNickname(nick, sid, sno) {
+    let n = String(nick || "").trim();
+    if (!n) return "";
+    if (sid) {
+      const escSid = String(sid).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      n = n.replace(new RegExp(`\\b${escSid}\\b`, "g"), "").trim();
+    }
+    const pm = n.match(/^\(([^)]+)\)$/);
+    if (pm) n = pm[1].trim();
+    if (sno && n.startsWith(`${sno} `)) n = n.slice(String(sno).length).trim();
+    return n;
+  }
+
   function findRosterStudent(query) {
-    const q = String(query || "").trim().toLowerCase();
+    const raw = String(query || "").trim();
+    const q = raw.toLowerCase();
     if (!q) return null;
     const list = getRosterList();
+    const id7 = raw.match(/\b(\d{7})\b/);
+    if (id7) {
+      const m7 = list.find((s) => String(s.id) === id7[1]);
+      if (m7) return m7;
+    }
+    const id3 = raw.match(/^(\d{3})(?:\b|\s|·|-)/);
+    const parenNick = raw.match(/\(([^)]+)\)/);
     return (
       list.find((s) => String(s.id) === q) ||
       list.find((s) => String(s.id).slice(-3) === q) ||
+      (id3 && list.find((s) => String(s.id).slice(-3) === id3[1])) ||
+      (parenNick && list.find((s) => String(s.nickname || "").toLowerCase() === parenNick[1].trim().toLowerCase())) ||
       list.find((s) => String(s.nickname || "").toLowerCase() === q) ||
       list.find((s) => String(s.name || "").toLowerCase().includes(q) || String(s.nickname || "").toLowerCase().includes(q)) ||
       null
@@ -819,6 +842,13 @@
   }
 
   (function tryPrebindFromPortal() {
+    if (state.memberType === "student" && state.studentId && state.nickname) {
+      const cleaned = sanitizeStudentNickname(state.nickname, state.studentId, state.shortNo);
+      if (cleaned && cleaned !== state.nickname) {
+        state.nickname = cleaned;
+        safeSet("racm303_orient_nick_v1", cleaned);
+      }
+    }
     if (state.studentId) return;
     const portalSid = safeGet("racm303_personal_student_id", "") || safeGet("racm303_student_id", "");
     if (!portalSid) return;
@@ -1277,8 +1307,9 @@
       return p.nickname || p.fullName || "อาจารย์";
     }
     const sno = p.shortNo || (p.studentId ? String(p.studentId).slice(-3) : "");
-    if (sno && p.nickname) return `${sno} ${p.nickname}`;
-    if (p.nickname) return p.nickname;
+    const nick = sanitizeStudentNickname(p.nickname, p.studentId, sno);
+    if (sno && nick) return `${sno} ${nick}`;
+    if (nick) return nick;
     if (sno && p.fullName) return `${sno} ${p.fullName.split(" ")[0]}`;
     return p.fullName || p.studentId || "ผู้เข้าร่วม";
   }
@@ -1648,7 +1679,7 @@
           </div>
           <figure class="or-fig-plate is-cover-hero" style="flex:1;min-height:0">
             <div class="or-fig-img-wrap">
-              <img class="or-fig-img" src="assets/images/orientation/orient_s01_hero.png?v=20261124orl2" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
+              <img class="or-fig-img" src="assets/images/orientation/orient_s01_hero.png?v=20261124gio1" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
             </div>
           </figure>
         </div>
@@ -2340,9 +2371,10 @@
       `;
     } else if (!state.joined) {
       const isFacPick = state.memberType === "faculty";
+      const cleanPrefillNick = sanitizeStudentNickname(state.nickname, state.studentId, state.shortNo);
       const prefill = !isFacPick && state.studentId
-        ? `${state.studentId} ${state.nickname ? `(${state.nickname})` : ""}`
-        : state.nickname || "";
+        ? `${state.studentId}${cleanPrefillNick ? ` (${cleanPrefillNick})` : ""}`
+        : cleanPrefillNick || state.nickname || "";
       const initialMatches = searchRosterCandidates(state.studentId || "");
 
       bodyHtml = `

@@ -7,16 +7,28 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124orl2";
+  const ASSET_VER = "20261124gio1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
   const AUTOPLAY_MS = 9000;
 
+  function loadIoStageTheme() {
+    try {
+      const saved = localStorage.getItem("racm303_io_stage_theme");
+      if (saved === "light" || saved === "dark") return saved;
+    } catch (_) {}
+    return "dark";
+  }
+
+  const IO_PRISM_BAR = `<div class="or-io-prism-bar" aria-hidden="true"><span class="is-g-blue"></span><span class="is-g-red"></span><span class="is-g-yellow"></span><span class="is-g-green"></span></div>`;
+  const IO_DOTS_HTML = `<span class="or-io-dots" aria-hidden="true"><i class="is-g-blue"></i><i class="is-g-red"></i><i class="is-g-yellow"></i><i class="is-g-green"></i></span>`;
+
   const state = {
     isOpen: false,
     slideIdx: 0,
     viewMode: "deck", // "deck" | "live" | "sorter" | "handout"
+    ioStageTheme: loadIoStageTheme(), // "dark" (Google I/O Carbon Stage) | "light" (Google I/O Daylight Bento)
     zoomScale: 1,
     sorterFilter: "all",
     presentationMode: false,
@@ -30,6 +42,15 @@
     timerInterval: null,
     resizeRaf: 0
   };
+
+  function toggleIoStageTheme() {
+    state.ioStageTheme = state.ioStageTheme === "light" ? "dark" : "light";
+    try {
+      localStorage.setItem("racm303_io_stage_theme", state.ioStageTheme);
+    } catch (_) {}
+    state.toolsMenuOpen = false;
+    renderModal();
+  }
 
   function getApi() {
     return window.RACM_PORTAL_API || null;
@@ -1350,45 +1371,45 @@
     return `
       <div class="or-cover-stage">
         <div class="or-cover-top">
-          <span class="or-cover-dept">ภาควิชาเวชศาสตร์ชุมชน · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล</span>
-          <span class="or-cover-code-chip">RACM 303 · ปีการศึกษา 2569</span>
+          <span class="or-cover-dept">${IO_DOTS_HTML} <span>ภาควิชาเวชศาสตร์ชุมชน · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล</span></span>
+          <span class="or-cover-code-chip"><span class="or-io-spark">✦</span> RACM 303 · ปีการศึกษา 2569</span>
         </div>
 
         <div class="or-cover-split">
           <div class="or-cover-left-col">
             <div class="or-cover-head-stack">
-              <span class="or-cover-kicker">COURSE ORIENTATION · วันพุธที่ 25 พฤศจิกายน 2569 · 09.00 – 09.30 น.</span>
+              <span class="or-cover-kicker"><span class="or-io-eyebrow-pill">KEYNOTE ORIENTATION</span> วันพุธที่ 25 พฤศจิกายน 2569 · 09.00 – 09.30 น.</span>
               <h2 class="or-cover-h1">${esc(slide.title)}</h2>
               <div class="or-top-key-banner is-cover-key">
-                <span class="or-top-key-pill">${esc(slide.keyTag || "สาระสำคัญ")}</span>
+                <span class="or-top-key-pill"><span class="or-io-spark">✦</span> ${esc(slide.keyTag || "สาระสำคัญ")}</span>
                 <span class="or-top-key-text">${slide.keyMessageHtml}</span>
               </div>
             </div>
 
             <div class="or-cover-kpi-row">
-              <div class="or-cover-kpi">
+              <div class="or-cover-kpi is-io-blue">
                 <span class="or-cover-kpi-val" data-count-to="169">169</span>
                 <span class="or-cover-kpi-lbl">นศพ. ชั้นปีที่ 3</span>
               </div>
-              <div class="or-cover-kpi">
+              <div class="or-cover-kpi is-io-green">
                 <span class="or-cover-kpi-val" data-count-to="6">6</span>
                 <span class="or-cover-kpi-lbl">สัปดาห์เรียนรู้</span>
               </div>
-              <div class="or-cover-kpi">
+              <div class="or-cover-kpi is-io-yellow">
                 <span class="or-cover-kpi-val" data-count-to="9">9</span>
                 <span class="or-cover-kpi-lbl">โรงพยาบาลแหล่งฝึก</span>
               </div>
-              <div class="or-cover-kpi">
+              <div class="or-cover-kpi is-io-red">
                 <span class="or-cover-kpi-val" data-count-to="5">5</span>
                 <span class="or-cover-kpi-lbl">สมรรถนะหลัก</span>
               </div>
             </div>
 
             <div class="or-cover-acts-grid">
-              <div class="or-cover-act-chip"><strong class="is-gold">Act I · Why HSS:</strong> เสาหลักที่ 3 และวัตถุประสงค์ระบบสุขภาพทั้ง 5 ด้าน</div>
-              <div class="or-cover-act-chip"><strong class="is-mint">Act II · Journey:</strong> เส้นทางเรียนรู้ 6 สัปดาห์ ณ โรงพยาบาลแหล่งฝึก 9 แห่ง</div>
-              <div class="or-cover-act-chip"><strong class="is-sky">Act III · Mastery:</strong> การประเมินผลตามสมรรถนะหลัก 5 ด้าน</div>
-              <div class="or-cover-act-chip"><strong class="is-rose">Act IV · Launch:</strong> แนวปฏิบัติความปลอดภัย 6 ข้อ และก้าวแรกสัปดาห์ที่ 1</div>
+              <div class="or-cover-act-chip is-io-blue"><strong class="is-sky">Act I · Why HSS:</strong> เสาหลักที่ 3 และวัตถุประสงค์ระบบสุขภาพทั้ง 5 ด้าน</div>
+              <div class="or-cover-act-chip is-io-green"><strong class="is-mint">Act II · Journey:</strong> เส้นทางเรียนรู้ 6 สัปดาห์ ณ โรงพยาบาลแหล่งฝึก 9 แห่ง</div>
+              <div class="or-cover-act-chip is-io-yellow"><strong class="is-gold">Act III · Mastery:</strong> การประเมินผลตามสมรรถนะหลัก 5 ด้าน</div>
+              <div class="or-cover-act-chip is-io-red"><strong class="is-rose">Act IV · Launch:</strong> แนวปฏิบัติความปลอดภัย 6 ข้อ และก้าวแรกสัปดาห์ที่ 1</div>
             </div>
           </div>
 
@@ -1421,23 +1442,33 @@
               <span class="or-cover-meta-val">อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ และคณาจารย์ 14 ท่าน</span>
             </div>
           </div>
-          <span class="or-cover-code-chip">${SLIDES.length} Widescreen Slides · 16:9 + Live Recheck</span>
+          <span class="or-cover-code-chip">${IO_DOTS_HTML} <span>${SLIDES.length} Slides · 16:9 · Google I/O Stage</span></span>
         </div>
       </div>
     `;
   }
 
+  function getEffectiveIoTheme() {
+    if (document.body.classList.contains("is-printing-orientation-deck") || state.viewMode === "handout") {
+      return "light";
+    }
+    return state.ioStageTheme === "light" ? "light" : "dark";
+  }
+
   function renderSingleSlideCanvasHtml(slide, idx, animateDeck) {
     const animCls = animateDeck ? " is-keynote-animated" : "";
+    const ioTheme = getEffectiveIoTheme();
     if (slide.isCover) {
       return `
-        <article class="or-slide-canvas is-cover-canvas${animCls}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
+        <article class="or-slide-canvas is-io-pitch is-cover-canvas${animCls}" data-io-theme="${ioTheme}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
+          ${IO_PRISM_BAR}
           ${renderCoverSlideHtml(slide)}
         </article>
       `;
     }
     return `
-      <article class="or-slide-canvas${animCls}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
+      <article class="or-slide-canvas is-io-pitch${slide.isLiveQuizSlide ? " is-quiz-slide-canvas" : ""}${animCls}" data-io-theme="${ioTheme}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
+        ${IO_PRISM_BAR}
         <div class="or-sld-inner">
           <header class="or-sld-head">
             <div class="or-sld-eyebrow-row">
@@ -1449,7 +1480,7 @@
             </div>
             <h2 class="or-sld-title">${esc(slide.title)}</h2>
             <div class="or-top-key-banner">
-              <span class="or-top-key-pill">${esc(slide.keyTag || "สาระสำคัญ")}</span>
+              <span class="or-top-key-pill"><span class="or-io-spark">✦</span> ${esc(slide.keyTag || "สาระสำคัญ")}</span>
               <span class="or-top-key-text">${slide.keyMessageHtml}</span>
             </div>
           </header>
@@ -1458,8 +1489,8 @@
           </div>
         </div>
         <footer class="or-sld-foot">
-          <span class="or-sld-foot-course">RACM 303 (ปีการศึกษา 2569) · Orientation to Community Medicine &amp; Health Systems Science</span>
-          <span class="or-sld-foot-num">Slide ${idx + 1} / ${SLIDES.length}</span>
+          <span class="or-sld-foot-course">${IO_DOTS_HTML} <span>RACM 303 (ปีการศึกษา 2569) · Orientation to Community Medicine &amp; Health Systems Science</span></span>
+          <span class="or-sld-foot-num">Slide ${String(idx + 1).padStart(2, "0")} / ${SLIDES.length}</span>
         </footer>
       </article>
     `;
@@ -1681,6 +1712,9 @@
         state.viewMode = state.viewMode === "live" ? "deck" : "live";
         state.zoomScale = 1;
         renderModal();
+      } else if (ev.key === "t" || ev.key === "T") {
+        ev.preventDefault();
+        toggleIoStageTheme();
       } else if (ev.key === "+" || ev.key === "=") {
         ev.preventDefault();
         setZoomScale((state.zoomScale || 1) + 0.25);
@@ -1904,7 +1938,7 @@
     if (state.viewMode === "live") {
       const liveCanvas = modal.querySelector(".or-slide-canvas.is-live-canvas");
       if (liveCanvas) {
-        liveCanvas.innerHTML = window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false);
+        liveCanvas.innerHTML = `${IO_PRISM_BAR}${window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false)}`;
         return;
       }
       renderModal();
@@ -1947,6 +1981,8 @@
         ? window.RACM_ORIENTATION_LIVE.isFollowEnabled()
         : false;
     const zoomPct = Math.round((state.zoomScale || 1) * 100);
+    const effectiveIoTheme = getEffectiveIoTheme();
+    const isIoDark = effectiveIoTheme === "dark";
 
     let viewportHtml = "";
     if (state.viewMode === "deck") {
@@ -1962,7 +1998,8 @@
       viewportHtml = `
         <div class="or-slide-frame-wrap">
           <div class="or-slide-zoom-sizer">
-            <article class="or-slide-canvas is-live-canvas" aria-label="Live Orientation Lobby and Kahoot Recheck">
+            <article class="or-slide-canvas is-io-pitch is-live-canvas" data-io-theme="${effectiveIoTheme}" aria-label="Live Orientation Lobby and Kahoot Recheck">
+              ${IO_PRISM_BAR}
               ${
                 window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml === "function"
                   ? window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false)
@@ -1991,16 +2028,16 @@
             ${visible
               .map(
                 ({ s, i }) => `
-              <button type="button" class="or-sorter-card${i === state.slideIdx ? " is-current" : ""}" data-or-jump="${i}">
+              <button type="button" class="or-sorter-card is-sec-${esc(s.section)}${i === state.slideIdx ? " is-current" : ""}" data-or-jump="${i}">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%">
                   <span class="or-code-pill">Slide ${s.num}</span>
-                  <span style="font-size:11.5px;color:#64748b;font-weight:600">${esc(s.timeWindow)}</span>
+                  <span class="or-sorter-time">${esc(s.timeWindow)}</span>
                 </div>
-                <div style="font-family:var(--font-display);font-size:14px;font-weight:700;line-height:1.34;color:inherit">
+                <div class="or-sorter-title">
                   ${esc(s.title)}
                 </div>
-                <div style="font-size:12px;color:#64748b;line-height:1.4">
-                  ${esc(s.actLabel || s.sectionLabel)}
+                <div class="or-sorter-act">
+                  ${IO_DOTS_HTML} <span>${esc(s.actLabel || s.sectionLabel)}</span>
                 </div>
               </button>
             `
@@ -2017,11 +2054,12 @@
       `;
     }
 
+    modal.setAttribute("data-io-theme", effectiveIoTheme);
     modal.innerHTML = `
-      <div class="or-deck-shell${showNotesNow ? " has-notes-open" : ""}">
+      <div class="or-deck-shell is-io-deck${showNotesNow ? " has-notes-open" : ""}" data-io-theme="${effectiveIoTheme}">
         <div class="or-deck-topbar">
           <div class="or-top-left">
-            <span class="or-code-pill">ORIENT</span>
+            <span class="or-code-pill is-io-brand-pill">${IO_DOTS_HTML} <span>ORIENT</span></span>
             <div class="or-top-title-wrap">
               <span class="or-top-title">${esc(
                 t(
@@ -2042,6 +2080,7 @@
 
           <div class="or-top-right">
             <div class="or-desktop-tools">
+              <button type="button" class="or-tool-btn is-io-theme-toggle" id="orIoThemeBtn" title="สลับโทนเวที Google I/O Stage (Dark / Daylight · กด T)"><span>${isIoDark ? "🌙 I/O Stage" : "☀️ I/O Light"}</span></button>
               ${
                 ROLE === "faculty"
                   ? `<button type="button" class="or-timer-pill${state.timerRunning && state.timerSeconds <= 1800 ? " is-running" : ""}${state.timerSeconds > 1800 ? " is-overtime" : ""}" id="orTimerBtn" data-or-timer-display title="คลิกเพื่อเริ่ม/หยุดจับเวลาคาบปฐมนิเทศ 30 นาที (ดับเบิลคลิกเพื่อรีเซ็ต)">${formatTimer(state.timerSeconds)}</button>`
@@ -2059,6 +2098,7 @@
             <div class="or-tools-menu-wrap">
               <button type="button" class="or-tool-btn or-compact-more-btn${state.toolsMenuOpen || state.autoPlay || state.showNotes ? " is-active-toggle" : ""}" id="orMoreToolsBtn" aria-expanded="${state.toolsMenuOpen ? "true" : "false"}" title="เครื่องมือสไลด์เพิ่มเติม">${SVG.more}</button>
               <div class="or-tools-popover" ${state.toolsMenuOpen ? "" : "hidden"}>
+                <button type="button" class="or-pop-item" id="orPopIoThemeBtn"><span>${isIoDark ? "☀️ สลับเป็น Google I/O Daylight" : "🌙 สลับเป็น Google I/O Dark Stage"}</span></button>
                 ${
                   ROLE === "faculty"
                     ? `<button type="button" class="or-pop-item" id="orPopTimerBtn" data-or-timer-display>${formatTimer(state.timerSeconds)}</button>`
@@ -2176,6 +2216,11 @@
         state.viewMode = "deck";
         renderModal();
       });
+    });
+
+    ["orIoThemeBtn", "orPopIoThemeBtn"].forEach((id) => {
+      const b = document.getElementById(id);
+      if (b) b.addEventListener("click", toggleIoStageTheme);
     });
 
     ["orTimerBtn", "orPopTimerBtn"].forEach((id) => {
