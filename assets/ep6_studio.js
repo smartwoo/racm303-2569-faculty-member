@@ -8,8 +8,8 @@
 (function () {
   "use strict";
 
-  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v9";
-  const LEGACY_UI_PREFS_KEY = "racm303_ep_studio_prefs_v8";
+  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v10";
+  const LEGACY_UI_PREFS_KEYS = ["racm303_ep_studio_prefs_v9", "racm303_ep_studio_prefs_v8"];
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const MODULE_ORDER = ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
 
@@ -108,9 +108,10 @@
     stages: true,
     video: true,
     slide: false,
+    verbatim: true,
     scrubber: true,
     concept: true,
-    verbatim: true,
+    flow: true,
     atlas: true
   };
 
@@ -134,6 +135,8 @@
     isPipActive: false,
     isPipMinimized: false,
     pipCorner: "right",
+    pipWidth: 400,
+    pipCustomPos: null,
     manualPipPinned: false,
     pipDismissedWhileScrolled: false
   };
@@ -142,15 +145,21 @@
     try {
       const raw = localStorage.getItem(STORAGE_UI_PREFS_KEY);
       if (!raw) {
-        const legacyRaw = localStorage.getItem(LEGACY_UI_PREFS_KEY);
-        if (legacyRaw) {
-          const legacy = JSON.parse(legacyRaw);
-          if (legacy && typeof legacy === "object") {
-            if (MODULE_ORDER.includes(legacy.activeModule)) {
-              studioState.activeModule = legacy.activeModule;
-            }
-            if (typeof legacy.playbackSpeed === "number" && SPEEDS.includes(legacy.playbackSpeed)) {
-              studioState.playbackSpeed = legacy.playbackSpeed;
+        for (let i = 0; i < LEGACY_UI_PREFS_KEYS.length; i++) {
+          const legacyRaw = localStorage.getItem(LEGACY_UI_PREFS_KEYS[i]);
+          if (legacyRaw) {
+            const legacy = JSON.parse(legacyRaw);
+            if (legacy && typeof legacy === "object") {
+              if (MODULE_ORDER.includes(legacy.activeModule)) {
+                studioState.activeModule = legacy.activeModule;
+              }
+              if (typeof legacy.playbackSpeed === "number" && SPEEDS.includes(legacy.playbackSpeed)) {
+                studioState.playbackSpeed = legacy.playbackSpeed;
+              }
+              if (typeof legacy.timelineSync === "boolean") {
+                studioState.timelineSync = legacy.timelineSync;
+              }
+              break;
             }
           }
         }
@@ -176,7 +185,17 @@
         if (["right", "left"].includes(parsed.pipCorner)) {
           studioState.pipCorner = parsed.pipCorner;
         }
-        if (typeof parsed.playbackSpeed === "number" && SPEEDS.includes(parsed.playbackSpeed)) {
+        if (typeof parsed.pipWidth === "number" && parsed.pipWidth >= 240 && parsed.pipWidth <= 1000) {
+          studioState.pipWidth = parsed.pipWidth;
+        }
+        if (
+          parsed.pipCustomPos &&
+          typeof parsed.pipCustomPos.x === "number" &&
+          typeof parsed.pipCustomPos.y === "number"
+        ) {
+          studioState.pipCustomPos = { x: parsed.pipCustomPos.x, y: parsed.pipCustomPos.y };
+        }
+        if (typeof parsed.playbackSpeed === "number" && SPEEDS.includes(legacyOrNum(parsed.playbackSpeed))) {
           studioState.playbackSpeed = parsed.playbackSpeed;
         }
         if (typeof parsed.timelineSync === "boolean") {
@@ -191,6 +210,9 @@
         }
       }
     } catch (_) {}
+    function legacyOrNum(v) {
+      return Number(v);
+    }
   })();
 
   function savePersistedPrefs() {
@@ -204,6 +226,8 @@
           ccEnabled: studioState.ccEnabled,
           ccLarge: studioState.ccLarge,
           pipCorner: studioState.pipCorner,
+          pipWidth: studioState.pipWidth,
+          pipCustomPos: studioState.pipCustomPos,
           playbackSpeed: studioState.playbackSpeed,
           timelineSync: studioState.timelineSync,
           panels: studioState.panels
@@ -245,10 +269,11 @@
     { key: "stages", label: "🗺️ แถบ 5 องก์" },
     { key: "video", label: "🎥 วิดีโอ" },
     { key: "slide", label: "🖼️ สไลด์ซิงก์" },
+    { key: "verbatim", label: "🎙️ คำพูดอาจารย์" },
     { key: "scrubber", label: "⏱️ แถบเลื่อนเวลา" },
     { key: "concept", label: "💡 Conceptualized" },
-    { key: "verbatim", label: "🎙️ คำพูด & Flow" },
-    { key: "atlas", label: "🧭 ผังสไลด์ทั้งหมด" }
+    { key: "flow", label: "🧭 Logical Flow" },
+    { key: "atlas", label: "📋 ผังสไลด์ทั้งหมด" }
   ];
 
   const LAYOUT_DEFS = [
@@ -502,8 +527,13 @@
             </div>
 
             <div class="ep6-video-dock ${studioState.pipCorner === "left" ? "is-pip-left" : ""}" id="ep6VideoDock">
-              <div class="ep6-vdock-head">
+              <span class="ep6-pip-resizer is-tl ep6-pip-only" data-pip-resize="tl" title="ลากมุมหรือกางนิ้ว (Pinch) เพื่อย่อ/ขยายขนาด PiP"></span>
+              <span class="ep6-pip-resizer is-tr ep6-pip-only" data-pip-resize="tr" title="ลากมุมหรือกางนิ้ว (Pinch) เพื่อย่อ/ขยายขนาด PiP"></span>
+              <span class="ep6-pip-resizer is-bl ep6-pip-only" data-pip-resize="bl" title="ลากมุมหรือกางนิ้ว (Pinch) เพื่อย่อ/ขยายขนาด PiP"></span>
+              <span class="ep6-pip-resizer is-br ep6-pip-only" data-pip-resize="br" title="ลากมุมหรือกางนิ้ว (Pinch) เพื่อย่อ/ขยายขนาด PiP">⤡</span>
+              <div class="ep6-vdock-head" id="ep6VdockHead">
                 <div class="ep6-vdock-title-wrap">
+                  <span class="ep6-pip-drag-grip ep6-pip-only" title="ลากแถบหัวนี้เพื่อย้ายตำแหน่ง PiP ได้อิสระ">⠿</span>
                   <span class="ep6-live-dot" id="ep6DockDot"></span>
                   <span class="ep6-slide-pill" id="ep6DockHeaderLabel">🎥 ${esc(modCode)} วิดีโอบรรยาย · Slide 1/${TOTAL_SLIDES}</span>
                 </div>
@@ -512,8 +542,10 @@
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" id="ep6BrowserPipBtn" title="เปิดโหมดหน้าต่างลอยระดับเบราว์เซอร์ (OS Picture-in-Picture)">⧉ แยกจอ</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-hide-panel="video" title="ซ่อนส่วนวิดีโอ">ซ่อน</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only ${studioState.timelineSync ? "is-active" : ""}" data-timeline-sync-btn data-pip-sync-pill="1" aria-pressed="${studioState.timelineSync}" title="เปิด/ปิด Timeline Sync เลื่อนผังสไลด์ตามเวลา VDO อัตโนมัติ">${studioState.timelineSync ? "✓ Sync" : "☐ Sync"}</button>
-                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipSideBtn" title="สลับตำแหน่งมุมซ้าย / ขวา">⇄ ซ้าย/ขวา</button>
-                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipMinBtn" title="ย่อ/ขยาย หน้าต่าง PiP">—</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipZoomOutBtn" title="ย่อขนาดหน้าต่าง PiP (หรือบีบ 2 นิ้ว)">−</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipZoomInBtn" title="ขยายขนาดหน้าต่าง PiP (หรือกาง 2 นิ้ว Pinch Out)">+</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipSideBtn" title="สลับมุมซ้าย / ขวา และคืนตำแหน่งมาตรฐาน">⇄ ซ้าย/ขวา</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipMinBtn" title="ย่อเก็บเฉพาะแถบเสียง/เวลา">—</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipTopBtn" title="เลื่อนกลับขึ้นด้านบนสุด">⬆ บนสุด</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipCloseBtn" title="ดึงกลับช่องหลัก / ปิด PiP">✕</button>
                 </div>
@@ -577,6 +609,26 @@
               <img id="ep6SyncSlideImg" src="${esc(getSlideImg(firstSlide))}" alt="Captured lecture slide">
             </div>
           </div>
+        </div>
+
+        <!-- LIVE AUTO-SCROLL-UP VERBATIM QUOTATION TICKER DIRECTLY UNDER PLAYER -->
+        <div class="ep6-upv-box" id="ep6UnderPlayerVerbatim" aria-live="polite">
+          <div class="ep6-upv-head">
+            <div class="ep6-upv-title-wrap">
+              <span class="ep6-live-dot" id="ep6UpvDot"></span>
+              <span class="ep6-upv-title">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ <small>(Verbatim Quotation · คลิกเวลาเพื่อฟังเสียงช่วงนั้นทันที)</small></span>
+            </div>
+            <div class="ep6-upv-controls">
+              <div class="ep6-upv-dots" id="ep6UpvDots" role="tablist" aria-label="ช่วงคำพูดในสไลด์นี้"></div>
+              <span class="ep6-upv-counter" id="ep6UpvCounter">1 / 1</span>
+              <div class="ep6-upv-nav">
+                <button type="button" class="ep6-upv-step-btn" id="ep6UpvPrevBtn" title="คำพูดก่อนหน้า">▲</button>
+                <button type="button" class="ep6-upv-step-btn" id="ep6UpvNextBtn" title="คำพูดถัดไป">▼</button>
+              </div>
+              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="verbatim" title="ซ่อนส่วนคำพูดอาจารย์">ซ่อน ✕</button>
+            </div>
+          </div>
+          <div class="ep6-upv-stage" id="ep6UpvStage"></div>
         </div>
 
         <!-- Custom Interactive Timeline Scrubber with 5-Stage Color Segments & Slide Ticks -->
@@ -654,6 +706,8 @@
         </div>
 
         <div class="ep6-live-card" id="ep6LiveConceptCard"></div>
+
+        <div class="ep6-live-bridge-card" id="ep6LiveBridgePanel"></div>
       </div>
     `;
     root.appendChild(theater);
@@ -726,29 +780,28 @@
       const videoSlot = root.querySelector("#ep6VideoSlot");
       const slideBox = root.querySelector("#ep6SyncSlideBox");
       const playerStage = root.querySelector("#ep6PlayerStage");
+      const upvBox = root.querySelector("#ep6UnderPlayerVerbatim");
       const scrubberCard = root.querySelector("#ep6ScrubberCard");
       const mediaCol = root.querySelector("#ep6MediaCol");
       const conceptCol = root.querySelector("#ep6ConceptCol");
+      const liveCardEl = root.querySelector("#ep6LiveConceptCard");
+      const bridgeBox = root.querySelector("#ep6LiveBridgePanel");
       const atlasEl = root.querySelector("#ep6PanelAtlas");
 
       if (stagesEl) stagesEl.hidden = !p.stages;
       if (videoSlot) videoSlot.hidden = !p.video;
       if (slideBox) slideBox.hidden = !p.slide;
       if (playerStage) playerStage.hidden = !p.video && !p.slide;
+      if (upvBox) upvBox.hidden = !p.verbatim;
       if (scrubberCard) scrubberCard.hidden = !p.scrubber;
+      if (liveCardEl) liveCardEl.hidden = !p.concept;
+      if (bridgeBox) bridgeBox.hidden = !p.flow;
       if (atlasEl) atlasEl.hidden = !p.atlas;
 
-      const anyMediaShown = p.video || p.slide || p.scrubber;
-      const anyConceptShown = p.concept || p.verbatim;
+      const anyMediaShown = p.video || p.slide || p.verbatim || p.scrubber;
+      const anyConceptShown = p.concept || p.flow;
       if (mediaCol) mediaCol.hidden = !anyMediaShown;
       if (conceptCol) conceptCol.hidden = !anyConceptShown;
-
-      const thesisBox = root.querySelector("#ep6LiveThesisPanel");
-      const quotesBox = root.querySelector("#ep6LiveVerbatimPanel");
-      const bridgeBox = root.querySelector("#ep6LiveBridgePanel");
-      if (thesisBox) thesisBox.hidden = !p.concept;
-      if (quotesBox) quotesBox.hidden = !p.verbatim;
-      if (bridgeBox) bridgeBox.hidden = !p.verbatim;
 
       const cls = [`ep6-theater`, `layout-${studioState.layoutMode}`];
       if (!anyMediaShown || !anyConceptShown) cls.push("is-single-col");
@@ -864,19 +917,108 @@
       const quotes = slide.verbatimQuotes || [];
       let activeQuoteIdx = 0;
       for (let i = 0; i < quotes.length; i++) {
-        if (clamped >= quotes[i].tSec - 2) {
+        if (clamped >= quotes[i].tSec - 0.35) {
           activeQuoteIdx = i;
         }
       }
 
+      const prevSlide = slide.id > 1 ? getSlideById(DATA, slide.id - 1) : null;
+      const nextSlide = slide.id < TOTAL_SLIDES ? getSlideById(DATA, slide.id + 1) : null;
+
+      // 6A. Update Under-Player Live Auto-Scroll-Up Verbatim Ticker
+      const upvStage = root.querySelector("#ep6UpvStage");
+      const upvCounter = root.querySelector("#ep6UpvCounter");
+      const upvDots = root.querySelector("#ep6UpvDots");
+      const upvKey = `${modCode}:${slide.id}:${activeQuoteIdx}`;
+      if (upvStage && (optsUpdate?.forceCard || instance.lastUpvKey !== upvKey)) {
+        const activeQ = quotes[activeQuoteIdx] || null;
+        const activeQSec = activeQ ? Number(activeQ.tSec) || slide.startSec : slide.startSec;
+        const shouldAnimate = Boolean(instance.lastUpvKey && instance.lastUpvKey !== upvKey && !optsUpdate?.forceCard);
+        const goingForward = activeQSec >= (instance.lastUpvSec ?? -1);
+        instance.lastUpvKey = upvKey;
+        instance.lastUpvSec = activeQSec;
+
+        if (upvCounter) {
+          upvCounter.textContent = quotes.length
+            ? `ช่วงคำพูด ${activeQuoteIdx + 1} / ${quotes.length}`
+            : `Slide ${slide.id}/${TOTAL_SLIDES}`;
+        }
+        if (upvDots) {
+          upvDots.innerHTML =
+            quotes.length > 1
+              ? quotes
+                  .map(
+                    (qItem, qIdx) =>
+                      `<button type="button" class="ep6-upv-dot ${qIdx === activeQuoteIdx ? "is-active" : qIdx < activeQuoteIdx ? "is-done" : ""}" data-upv-seek="${qItem.tSec}" title="ข้ามไปคำพูดช่วง ${esc(qItem.time)}" aria-label="คำพูดที่ ${qIdx + 1} (${esc(qItem.time)})"></button>`
+                  )
+                  .join("")
+              : "";
+          upvDots.querySelectorAll("[data-upv-seek]").forEach((dBtn) => {
+            dBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              seekToSecond(Number(dBtn.getAttribute("data-upv-seek")) || slide.startSec, true);
+            });
+          });
+        }
+
+        const nextHintTxt =
+          activeQuoteIdx + 1 < quotes.length
+            ? `ถัดไป ${quotes[activeQuoteIdx + 1].time} ↑`
+            : nextSlide
+            ? `ถัดไป Slide ${nextSlide.id} (${fmtTime(nextSlide.startSec)}) ↑`
+            : "";
+
+        const cardEl = document.createElement("blockquote");
+        cardEl.className = `ep6-upv-card ${shouldAnimate ? (goingForward ? "is-enter-from-bottom" : "is-enter-from-top") : "is-current"}`;
+        if (activeQ) {
+          cardEl.setAttribute("data-seek-sec", String(activeQ.tSec));
+          cardEl.title = `คลิกเพื่อฟังเสียงช่วง ${activeQ.time} ทันที`;
+          cardEl.innerHTML = `
+            <div class="ep6-upv-card-meta">
+              <button type="button" class="ep6-quote-time is-live" data-seek-sec="${activeQ.tSec}">▶ ${esc(activeQ.time)}</button>
+              <span class="ep6-upv-slide-chip">${esc(modCode)} · Slide ${slide.id}/${TOTAL_SLIDES}</span>
+              ${nextHintTxt ? `<span class="ep6-upv-next-chip">${esc(nextHintTxt)}</span>` : ""}
+            </div>
+            <p class="ep6-upv-quote-text">“${esc(activeQ.text)}”</p>
+          `;
+          cardEl.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            seekToSecond(Number(activeQ.tSec) || slide.startSec, true);
+          });
+          cardEl.querySelector(".ep6-quote-time")?.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            seekToSecond(Number(activeQ.tSec) || slide.startSec, true);
+          });
+        } else {
+          cardEl.innerHTML = `<p class="ep6-upv-quote-text">กำลังบรรยาย ${esc(slide.title)}</p>`;
+        }
+
+        if (shouldAnimate) {
+          const prevCards = Array.from(upvStage.querySelectorAll(".ep6-upv-card"));
+          prevCards.forEach((oldEl) => {
+            oldEl.classList.remove("is-current", "is-enter-from-bottom", "is-enter-from-top");
+            oldEl.classList.add(goingForward ? "is-exit-up" : "is-exit-down");
+            setTimeout(() => {
+              if (oldEl.parentNode === upvStage) oldEl.remove();
+            }, 390);
+          });
+          upvStage.appendChild(cardEl);
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+              cardEl.classList.remove("is-enter-from-bottom", "is-enter-from-top");
+              cardEl.classList.add("is-current");
+            });
+          });
+        } else {
+          upvStage.replaceChildren(cardEl);
+        }
+      }
+
+      // 6B. Update Right Column: Conceptualized ONLY + Separate Bottom Logical Flow Card
       const liveCard = root.querySelector("#ep6LiveConceptCard");
-      if (
-        liveCard &&
-        (slideChanged || optsUpdate?.forceCard || liveCard.dataset.activeQuote !== String(activeQuoteIdx))
-      ) {
-        liveCard.dataset.activeQuote = String(activeQuoteIdx);
-        const prevSlide = slide.id > 1 ? getSlideById(DATA, slide.id - 1) : null;
-        const nextSlide = slide.id < TOTAL_SLIDES ? getSlideById(DATA, slide.id + 1) : null;
+      const bridgePanel = root.querySelector("#ep6LiveBridgePanel");
+      if ((liveCard || bridgePanel) && (slideChanged || optsUpdate?.forceCard || !liveCard?.dataset.renderedSlide)) {
+        if (liveCard) liveCard.dataset.renderedSlide = String(slide.id);
         const modIdx = availableCodes.indexOf(modCode);
         const prevModCode = modIdx > 0 ? availableCodes[modIdx - 1] : null;
         const nextModCode = modIdx >= 0 && modIdx < availableCodes.length - 1 ? availableCodes[modIdx + 1] : null;
@@ -922,97 +1064,87 @@
              </button>`
           : `<div class="ep6-bridge-step is-next">
                <div class="ep6-bridge-head">
-                 <span class="ep6-bridge-lbl">สรุปครบชุดบรรยายระบาดวิทยาคลินิก (EP6–EP9)</span>
+                 <span class="ep6-bridge-lbl">สรุปครบชุดบรรยายระบาดวิทยาคลินิก (EP4–EP9)</span>
                </div>
                <p>${esc(slide.logicalFlow?.toNext || "")}</p>
              </div>`;
 
-        liveCard.innerHTML = `
-          <div class="ep6-lc-head">
-            <div class="ep6-lc-kicker">${esc(modCode)} · ประเด็น Conceptualized ขณะกำลังบรรยาย (Slide ${slide.id}/${TOTAL_SLIDES} · หน้า ${slide.deckSlideNo})</div>
-            <h4 class="ep6-lc-title">${esc(slide.title)}</h4>
-            <div class="ep6-lc-entitle">${esc(slide.enTitle || "")}</div>
-            ${slide.revisitNotes ? `<div class="ep6-lc-revisit">🔄 ${esc(slide.revisitNotes)}</div>` : ""}
-          </div>
+        if (liveCard) {
+          liveCard.innerHTML = `
+            <div class="ep6-lc-head">
+              <div class="ep6-lc-kicker">${esc(modCode)} · ประเด็น Conceptualized ขณะกำลังบรรยาย (Slide ${slide.id}/${TOTAL_SLIDES} · หน้า ${slide.deckSlideNo})</div>
+              <h4 class="ep6-lc-title">${esc(slide.title)}</h4>
+              <div class="ep6-lc-entitle">${esc(slide.enTitle || "")}</div>
+              ${slide.revisitNotes ? `<div class="ep6-lc-revisit">🔄 ${esc(slide.revisitNotes)}</div>` : ""}
+            </div>
 
-          <div class="ep6-lc-thesis-box" id="ep6LiveThesisPanel" ${studioState.panels.concept ? "" : "hidden"}>
+            <div class="ep6-lc-thesis-box" id="ep6LiveThesisPanel">
+              <div class="ep6-sec-head-inline">
+                <div class="ep6-lc-sec-tag">💡 แก่นแนวคิดที่สังเคราะห์ได้ (Conceptualized Takeaway)</div>
+                <button type="button" class="ep6-inline-hide-btn" data-hide-panel="concept" title="ซ่อนส่วน Conceptualized">ซ่อน ✕</button>
+              </div>
+              <p class="ep6-lc-thesis">${esc(slide.conceptThesis)}</p>
+              ${slide.formula ? `<div class="ep6-lc-formula"><code>${esc(slide.formula)}</code></div>` : ""}
+              <ul class="ep6-lc-bullets">
+                ${(slide.conceptBullets || []).map((b) => `<li>${esc(b)}</li>`).join("")}
+              </ul>
+            </div>
+          `;
+          liveCard.querySelectorAll("[data-hide-panel]").forEach((btn) => {
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const key = btn.getAttribute("data-hide-panel");
+              if (key && key in studioState.panels) {
+                studioState.panels[key] = false;
+                applyWorkspaceLayout();
+              }
+            });
+          });
+        }
+
+        if (bridgePanel) {
+          bridgePanel.innerHTML = `
             <div class="ep6-sec-head-inline">
-              <div class="ep6-lc-sec-tag">💡 แก่นแนวคิดที่สังเคราะห์ได้ (Conceptualized Takeaway)</div>
-              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="concept" title="ซ่อนส่วน Conceptualized">ซ่อน ✕</button>
+              <div class="ep6-lc-sec-tag">🧭 การเชื่อมโยงตาม Logical Flow (คลิกปุ่มเพื่อข้ามสไลด์หรือเปลี่ยนคาบ)</div>
+              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="flow" title="ซ่อนส่วนการเชื่อมโยงตาม Logical Flow">ซ่อน ✕</button>
             </div>
-            <p class="ep6-lc-thesis">${esc(slide.conceptThesis)}</p>
-            ${slide.formula ? `<div class="ep6-lc-formula"><code>${esc(slide.formula)}</code></div>` : ""}
-            <ul class="ep6-lc-bullets">
-              ${(slide.conceptBullets || []).map((b) => `<li>${esc(b)}</li>`).join("")}
-            </ul>
-          </div>
-
-          <div class="ep6-lc-quotes-box" id="ep6LiveVerbatimPanel" ${studioState.panels.verbatim ? "" : "hidden"}>
-            <div class="ep6-sec-head-inline">
-              <div class="ep6-lc-sec-tag">🎙️ คำพูดอาจารย์ผู้สอนแบบคำต่อคำ (Verbatim Quotation · คลิกเวลาเพื่อฟังเสียงช่วงนั้นทันที)</div>
-              <button type="button" class="ep6-inline-hide-btn" data-hide-panel="verbatim" title="ซ่อนส่วนคำพูดต้นฉบับและ Logical Flow">ซ่อน ✕</button>
-            </div>
-            <div class="ep6-lc-quotes-list">
-              ${quotes
-                .map(
-                  (q, idx) => `
-                <blockquote class="ep6-quote-item ${idx === activeQuoteIdx ? "is-speaking" : idx < activeQuoteIdx ? "is-spoken-done" : ""}" data-seek-sec="${q.tSec}">
-                  <button type="button" class="ep6-quote-time" data-seek-sec="${q.tSec}">${idx < activeQuoteIdx ? "✓" : "▶"} ${esc(q.time)}</button>
-                  <span class="ep6-quote-text">“${esc(q.text)}”</span>
-                </blockquote>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-
-          <div class="ep6-lc-flow-bridge" id="ep6LiveBridgePanel" ${studioState.panels.verbatim ? "" : "hidden"}>
-            <div class="ep6-lc-sec-tag">🧭 การเชื่อมโยงตาม Logical Flow (คลิกปุ่มเพื่อข้ามสไลด์หรือเปลี่ยนคาบ)</div>
             <div class="ep6-bridge-grid">
               ${prevBridgeHtml}
               ${nextBridgeHtml}
             </div>
-          </div>
-        `;
+          `;
 
-        liveCard.querySelectorAll("[data-seek-sec]").forEach((el) => {
-          el.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            const target = Number(el.getAttribute("data-seek-sec")) || slide.startSec;
-            seekToSecond(target, true);
+          bridgePanel.querySelectorAll("[data-jump-slide]").forEach((btn) => {
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const targetId = Number(btn.getAttribute("data-jump-slide"));
+              if (targetId) {
+                jumpToSlide(targetId, studioState.isPlaying);
+              }
+            });
           });
-        });
 
-        liveCard.querySelectorAll("[data-jump-slide]").forEach((btn) => {
-          btn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            const targetId = Number(btn.getAttribute("data-jump-slide"));
-            if (targetId) {
-              jumpToSlide(targetId, studioState.isPlaying);
-            }
+          bridgePanel.querySelectorAll("[data-switch-ep-mod]").forEach((btn) => {
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const nextCode = btn.getAttribute("data-switch-ep-mod");
+              if (nextCode && modules[nextCode]) {
+                switchActiveModule(nextCode);
+              }
+            });
           });
-        });
 
-        liveCard.querySelectorAll("[data-switch-ep-mod]").forEach((btn) => {
-          btn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            const nextCode = btn.getAttribute("data-switch-ep-mod");
-            if (nextCode && modules[nextCode]) {
-              switchActiveModule(nextCode);
-            }
+          bridgePanel.querySelectorAll("[data-hide-panel]").forEach((btn) => {
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const key = btn.getAttribute("data-hide-panel");
+              if (key && key in studioState.panels) {
+                studioState.panels[key] = false;
+                applyWorkspaceLayout();
+              }
+            });
           });
-        });
-
-        liveCard.querySelectorAll("[data-hide-panel]").forEach((btn) => {
-          btn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            const key = btn.getAttribute("data-hide-panel");
-            if (key && key in studioState.panels) {
-              studioState.panels[key] = false;
-              applyWorkspaceLayout();
-            }
-          });
-        });
+        }
       }
 
       // 7. Sync Timeline Ticks (✓) & Active Highlight in Slide Atlas + Auto-Scroll when Timeline Sync is ON
@@ -1115,6 +1247,7 @@
       const p2 = root.querySelector("#ep6PlayPauseBtn");
       const dot1 = root.querySelector("#ep6LiveDot");
       const dot2 = root.querySelector("#ep6DockDot");
+      const dot3 = root.querySelector("#ep6UpvDot");
       const ccBtn = root.querySelector("#ep6CcToggleBtn");
       const ccBox = root.querySelector("#ep6CcOverlay");
       const ccSizeBtn = root.querySelector("#ep6CcSizeBtn");
@@ -1124,6 +1257,7 @@
       if (p2) p2.textContent = studioState.isPlaying ? "⏸ หยุดชั่วคราว" : "▶ เล่นวิดีโอ";
       if (dot1) dot1.classList.toggle("is-playing", studioState.isPlaying);
       if (dot2) dot2.classList.toggle("is-playing", studioState.isPlaying);
+      if (dot3) dot3.classList.toggle("is-playing", studioState.isPlaying);
       if (ccBtn) {
         ccBtn.classList.toggle("is-on", studioState.ccEnabled);
         ccBtn.setAttribute("aria-pressed", String(studioState.ccEnabled));
@@ -1286,6 +1420,63 @@
       });
     }
 
+    function showPipSizeFlash(wPx) {
+      const el = root.querySelector("#ep6SkipFlash");
+      if (!el) return;
+      const pct = Math.round((wPx / 400) * 100);
+      el.textContent = `🔍 ขนาด PiP ${pct}% (${Math.round(wPx)}px)`;
+      el.className = "ep6-skip-flash is-left";
+      el.hidden = false;
+      if (instance.flashTimer) clearTimeout(instance.flashTimer);
+      instance.flashTimer = setTimeout(() => {
+        el.hidden = true;
+      }, 750);
+    }
+
+    function clampPipWidth(wantedW) {
+      const vw = Math.max(320, window.innerWidth || 1280);
+      const minW = Math.min(250, vw - 16);
+      const maxW = Math.max(minW, Math.min(920, vw - 16));
+      return Math.round(Math.max(minW, Math.min(maxW, Number(wantedW) || 400)));
+    }
+
+    function clearPipInlineGeometry(dock) {
+      if (!dock) return;
+      dock.style.width = "";
+      dock.style.maxWidth = "";
+      dock.style.left = "";
+      dock.style.top = "";
+      dock.style.right = "";
+      dock.style.bottom = "";
+    }
+
+    function applyPipGeometry() {
+      const dock = root.querySelector("#ep6VideoDock");
+      if (!dock || !studioState.isPipActive) return;
+      const vw = Math.max(320, window.innerWidth || 1280);
+      const vh = Math.max(320, window.innerHeight || 800);
+      const cw = clampPipWidth(studioState.pipWidth);
+      studioState.pipWidth = cw;
+      dock.style.width = `${cw}px`;
+      dock.style.maxWidth = "calc(100vw - 16px)";
+
+      if (studioState.pipCustomPos && typeof studioState.pipCustomPos.x === "number") {
+        const estH = Math.min(vh - 16, Math.max(64, dock.offsetHeight || Math.round(cw * 0.68)));
+        const cx = Math.round(Math.max(8, Math.min(vw - cw - 8, studioState.pipCustomPos.x)));
+        const cy = Math.round(Math.max(8, Math.min(vh - estH - 8, studioState.pipCustomPos.y)));
+        studioState.pipCustomPos = { x: cx, y: cy };
+        dock.style.left = `${cx}px`;
+        dock.style.top = `${cy}px`;
+        dock.style.right = "auto";
+        dock.style.bottom = "auto";
+      } else {
+        dock.style.left = "";
+        dock.style.top = "";
+        dock.style.right = "";
+        dock.style.bottom = "";
+      }
+    }
+
     // Seamless Floating Picture-in-Picture (PiP) Controller — Never moves <video> in DOM!
     function applyPipMode(enablePip) {
       const slot = root.querySelector("#ep6VideoSlot");
@@ -1324,15 +1515,17 @@
           }
         }
         dock.classList.add("is-pip-floating");
-        dock.classList.toggle("is-pip-left", studioState.pipCorner === "left");
+        dock.classList.toggle("is-pip-left", !studioState.pipCustomPos && studioState.pipCorner === "left");
         dock.classList.toggle("is-pip-minimized", studioState.isPipMinimized);
+        applyPipGeometry();
         if (minBtn) minBtn.textContent = studioState.isPipMinimized ? "▢ ขยาย" : "—";
         if (ph) ph.hidden = false;
         if (restorePill) restorePill.hidden = true;
       } else {
         studioState.isPipActive = false;
         studioState.isPipMinimized = false;
-        dock.classList.remove("is-pip-floating", "is-pip-minimized");
+        dock.classList.remove("is-pip-floating", "is-pip-minimized", "is-pip-dragging");
+        clearPipInlineGeometry(dock);
         if (minBtn) minBtn.textContent = "—";
         slot.style.minHeight = "";
         if (ph) ph.hidden = true;
@@ -1613,9 +1806,12 @@
     root.querySelector("#ep6ResetWorkspaceBtn")?.addEventListener("click", () => {
       studioState.layoutMode = "balanced";
       studioState.timelineSync = true;
+      studioState.pipWidth = 400;
+      studioState.pipCustomPos = null;
       studioState.panels = { ...DEFAULT_PANELS };
       syncTimelineSyncControls();
       applyWorkspaceLayout();
+      if (studioState.isPipActive) applyPipGeometry();
     });
 
     root.querySelectorAll("[data-timeline-sync-btn]").forEach((btn) => {
@@ -1686,6 +1882,27 @@
       const nextId = Math.min(TOTAL_SLIDES, studioState.activeSlideId + 1);
       jumpToSlide(nextId, studioState.isPlaying);
     };
+
+    // Step across Verbatim Quotes (Under-Player ▲ / ▼ controls)
+    const stepVerbatimQuote = (dir) => {
+      const allQuotes = [];
+      (DATA.slides || []).forEach((sl) => {
+        (sl.verbatimQuotes || []).forEach((vq, qIdx) => {
+          allQuotes.push({ slideId: sl.id, qIdx, tSec: Number(vq.tSec) || sl.startSec });
+        });
+      });
+      if (!allQuotes.length) return;
+      let curFlatIdx = 0;
+      for (let i = 0; i < allQuotes.length; i++) {
+        if (studioState.currentSec >= allQuotes[i].tSec - 0.35) {
+          curFlatIdx = i;
+        }
+      }
+      const nextFlatIdx = Math.max(0, Math.min(allQuotes.length - 1, curFlatIdx + dir));
+      seekToSecond(allQuotes[nextFlatIdx].tSec + 0.1, true);
+    };
+    root.querySelector("#ep6UpvPrevBtn")?.addEventListener("click", () => stepVerbatimQuote(-1));
+    root.querySelector("#ep6UpvNextBtn")?.addEventListener("click", () => stepVerbatimQuote(1));
 
     root.querySelector("#ep6DockPlayBtn")?.addEventListener("click", togglePlayPause);
     root.querySelector("#ep6PlayPauseBtn")?.addEventListener("click", togglePlayPause);
@@ -1762,19 +1979,275 @@
     });
 
     root.querySelector("#ep6PipSideBtn")?.addEventListener("click", () => {
+      studioState.pipCustomPos = null;
       studioState.pipCorner = studioState.pipCorner === "left" ? "right" : "left";
       const dock = root.querySelector("#ep6VideoDock");
-      if (dock) dock.classList.toggle("is-pip-left", studioState.pipCorner === "left");
+      if (dock) {
+        dock.classList.toggle("is-pip-left", studioState.pipCorner === "left");
+        applyPipGeometry();
+      }
       savePersistedPrefs();
     });
+
+    const zoomPipByDelta = (deltaPx) => {
+      if (!studioState.isPipActive) return;
+      const dock = root.querySelector("#ep6VideoDock");
+      if (!dock) return;
+      const rect = dock.getBoundingClientRect();
+      const nextW = clampPipWidth((studioState.pipWidth || rect.width || 400) + deltaPx);
+      if (studioState.pipCustomPos) {
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const scale = nextW / Math.max(1, rect.width);
+        studioState.pipCustomPos = {
+          x: cx - nextW / 2,
+          y: cy - (rect.height * scale) / 2
+        };
+      }
+      studioState.pipWidth = nextW;
+      applyPipGeometry();
+      showPipSizeFlash(nextW);
+      savePersistedPrefs();
+    };
+    root.querySelector("#ep6PipZoomOutBtn")?.addEventListener("click", () => zoomPipByDelta(-60));
+    root.querySelector("#ep6PipZoomInBtn")?.addEventListener("click", () => zoomPipByDelta(60));
 
     root.querySelector("#ep6PipMinBtn")?.addEventListener("click", () => {
       studioState.isPipMinimized = !studioState.isPipMinimized;
       const dock = root.querySelector("#ep6VideoDock");
       const minBtn = root.querySelector("#ep6PipMinBtn");
-      if (dock) dock.classList.toggle("is-pip-minimized", studioState.isPipMinimized);
+      if (dock) {
+        dock.classList.toggle("is-pip-minimized", studioState.isPipMinimized);
+        applyPipGeometry();
+      }
       if (minBtn) minBtn.textContent = studioState.isPipMinimized ? "▢ ขยาย" : "—";
     });
+
+    // Free Drag-to-Move + 2-Finger Pinch-Out + Trackpad Pinch + 4-Corner Resize for Floating PiP
+    let cleanupPipDragListeners = null;
+    (function setupFloatingPipGestures() {
+      const dock = root.querySelector("#ep6VideoDock");
+      if (!dock) return;
+
+      let activeMode = null; // 'move' | 'resize' | 'pinch'
+      let startX = 0;
+      let startY = 0;
+      let startRect = null;
+      let resizeDir = "br";
+      let movedEnough = false;
+      let pinchDist0 = 0;
+      let pinchMidX0 = 0;
+      let pinchMidY0 = 0;
+      let pinchAnchorRx = 0.5;
+      let pinchAnchorRy = 0.5;
+
+      const endPointerGesture = () => {
+        if (activeMode === "move" || activeMode === "resize") {
+          activeMode = null;
+          dock.classList.remove("is-pip-dragging");
+          window.removeEventListener("pointermove", onWinPointerMove);
+          window.removeEventListener("pointerup", endPointerGesture);
+          window.removeEventListener("pointercancel", endPointerGesture);
+          savePersistedPrefs();
+        }
+      };
+
+      const onWinPointerMove = (ev) => {
+        if (!studioState.isPipActive || !startRect) {
+          endPointerGesture();
+          return;
+        }
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        if (!movedEnough && Math.hypot(dx, dy) < 3) return;
+        movedEnough = true;
+        dock.classList.add("is-pip-dragging");
+        dock.classList.remove("is-pip-left");
+
+        if (activeMode === "move") {
+          studioState.pipCustomPos = {
+            x: startRect.left + dx,
+            y: startRect.top + dy
+          };
+          applyPipGeometry();
+        } else if (activeMode === "resize") {
+          const signX = resizeDir.includes("l") ? -1 : 1;
+          const signY = resizeDir.includes("t") ? -1 : 1;
+          const deltaFromAspect = (signX * dx + signY * dy * (16 / 10)) * 0.65;
+          const nextW = clampPipWidth(startRect.width + deltaFromAspect);
+          const ratio = nextW / Math.max(1, startRect.width);
+          const nextH = startRect.height * ratio;
+          const nextLeft = resizeDir.includes("l") ? startRect.right - nextW : startRect.left;
+          const nextTop = resizeDir.includes("t") ? startRect.bottom - nextH : startRect.top;
+          studioState.pipWidth = nextW;
+          studioState.pipCustomPos = { x: nextLeft, y: nextTop };
+          applyPipGeometry();
+          showPipSizeFlash(nextW);
+        }
+      };
+
+      // 1) Corner Handle Drag-Resize
+      dock.querySelectorAll("[data-pip-resize]").forEach((handle) => {
+        handle.addEventListener("pointerdown", (ev) => {
+          if (!studioState.isPipActive) return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          activeMode = "resize";
+          resizeDir = handle.getAttribute("data-pip-resize") || "br";
+          startX = ev.clientX;
+          startY = ev.clientY;
+          startRect = dock.getBoundingClientRect();
+          movedEnough = true;
+          dock.classList.add("is-pip-dragging");
+          window.addEventListener("pointermove", onWinPointerMove);
+          window.addEventListener("pointerup", endPointerGesture);
+          window.addEventListener("pointercancel", endPointerGesture);
+        });
+      });
+
+      // 2) Header & CC Strip Free Drag-to-Move
+      const startMoveFromBar = (ev) => {
+        if (!studioState.isPipActive) return;
+        if (ev.pointerType === "mouse" && ev.button !== 0) return;
+        if (ev.target.closest("button, select, input, a, [data-pip-resize]")) return;
+        activeMode = "move";
+        startX = ev.clientX;
+        startY = ev.clientY;
+        startRect = dock.getBoundingClientRect();
+        movedEnough = false;
+        window.addEventListener("pointermove", onWinPointerMove);
+        window.addEventListener("pointerup", endPointerGesture);
+        window.addEventListener("pointercancel", endPointerGesture);
+      };
+      dock.querySelector("#ep6VdockHead")?.addEventListener("pointerdown", startMoveFromBar);
+      dock.querySelector("#ep6CcOverlay")?.addEventListener("pointerdown", startMoveFromBar);
+
+      // Double-click PiP header to reset size & snap back to corner
+      dock.querySelector("#ep6VdockHead")?.addEventListener("dblclick", (ev) => {
+        if (!studioState.isPipActive || ev.target.closest("button, select, input, a")) return;
+        studioState.pipWidth = 400;
+        studioState.pipCustomPos = null;
+        dock.classList.toggle("is-pip-left", studioState.pipCorner === "left");
+        applyPipGeometry();
+        showPipSizeFlash(400);
+        savePersistedPrefs();
+      });
+
+      // 3) True 2-Finger Touch Pinch-Out / Pinch-In + Simultaneous 2-Finger Pan
+      dock.addEventListener(
+        "touchstart",
+        (ev) => {
+          if (!studioState.isPipActive || ev.touches.length < 2) return;
+          endPointerGesture();
+          ev.preventDefault();
+          const t0 = ev.touches[0];
+          const t1 = ev.touches[1];
+          pinchDist0 = Math.max(24, Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY));
+          pinchMidX0 = (t0.clientX + t1.clientX) / 2;
+          pinchMidY0 = (t0.clientY + t1.clientY) / 2;
+          startRect = dock.getBoundingClientRect();
+          pinchAnchorRx = Math.max(0, Math.min(1, (pinchMidX0 - startRect.left) / Math.max(1, startRect.width)));
+          pinchAnchorRy = Math.max(0, Math.min(1, (pinchMidY0 - startRect.top) / Math.max(1, startRect.height)));
+          activeMode = "pinch";
+          dock.classList.add("is-pip-dragging");
+          dock.classList.remove("is-pip-left");
+        },
+        { passive: false }
+      );
+
+      dock.addEventListener(
+        "touchmove",
+        (ev) => {
+          if (!studioState.isPipActive || activeMode !== "pinch" || ev.touches.length < 2 || !startRect) return;
+          ev.preventDefault();
+          const t0 = ev.touches[0];
+          const t1 = ev.touches[1];
+          const distNow = Math.max(20, Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY));
+          const midXNow = (t0.clientX + t1.clientX) / 2;
+          const midYNow = (t0.clientY + t1.clientY) / 2;
+          const rawScale = distNow / pinchDist0;
+          const nextW = clampPipWidth(startRect.width * rawScale);
+          const effScale = nextW / Math.max(1, startRect.width);
+          const nextH = startRect.height * effScale;
+          studioState.pipWidth = nextW;
+          studioState.pipCustomPos = {
+            x: midXNow - pinchAnchorRx * nextW,
+            y: midYNow - pinchAnchorRy * nextH
+          };
+          applyPipGeometry();
+          showPipSizeFlash(nextW);
+        },
+        { passive: false }
+      );
+
+      const endPinch = (ev) => {
+        if (activeMode === "pinch" && (!ev.touches || ev.touches.length < 2)) {
+          activeMode = null;
+          dock.classList.remove("is-pip-dragging");
+          savePersistedPrefs();
+        }
+      };
+      dock.addEventListener("touchend", endPinch);
+      dock.addEventListener("touchcancel", endPinch);
+
+      // 4) Trackpad Pinch-Out / Pinch-In (Ctrl + Wheel on Chrome/Edge/Firefox & Safari GestureEvents)
+      dock.addEventListener(
+        "wheel",
+        (ev) => {
+          if (!studioState.isPipActive || !ev.ctrlKey) return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          const rect = dock.getBoundingClientRect();
+          const factor = Math.exp(-ev.deltaY * 0.0085);
+          const nextW = clampPipWidth(rect.width * factor);
+          const effScale = nextW / Math.max(1, rect.width);
+          const nextH = rect.height * effScale;
+          const rx = Math.max(0, Math.min(1, (ev.clientX - rect.left) / Math.max(1, rect.width)));
+          const ry = Math.max(0, Math.min(1, (ev.clientY - rect.top) / Math.max(1, rect.height)));
+          dock.classList.remove("is-pip-left");
+          studioState.pipWidth = nextW;
+          studioState.pipCustomPos = {
+            x: ev.clientX - rx * nextW,
+            y: ev.clientY - ry * nextH
+          };
+          applyPipGeometry();
+          showPipSizeFlash(nextW);
+          savePersistedPrefs();
+        },
+        { passive: false }
+      );
+
+      let safariStartRect = null;
+      dock.addEventListener("gesturestart", (ev) => {
+        if (!studioState.isPipActive) return;
+        ev.preventDefault();
+        safariStartRect = dock.getBoundingClientRect();
+        dock.classList.add("is-pip-dragging");
+      });
+      dock.addEventListener("gesturechange", (ev) => {
+        if (!studioState.isPipActive || !safariStartRect) return;
+        ev.preventDefault();
+        const nextW = clampPipWidth(safariStartRect.width * (Number(ev.scale) || 1));
+        const effScale = nextW / Math.max(1, safariStartRect.width);
+        const cx = safariStartRect.left + safariStartRect.width / 2;
+        const cy = safariStartRect.top + safariStartRect.height / 2;
+        dock.classList.remove("is-pip-left");
+        studioState.pipWidth = nextW;
+        studioState.pipCustomPos = {
+          x: cx - nextW / 2,
+          y: cy - (safariStartRect.height * effScale) / 2
+        };
+        applyPipGeometry();
+        showPipSizeFlash(nextW);
+      });
+      dock.addEventListener("gestureend", () => {
+        safariStartRect = null;
+        dock.classList.remove("is-pip-dragging");
+        savePersistedPrefs();
+      });
+
+      cleanupPipDragListeners = endPointerGesture;
+    })();
 
     root.querySelector("#ep6PipTopBtn")?.addEventListener("click", () => {
       studioState.manualPipPinned = false;
@@ -1904,13 +2377,16 @@
       });
     }
 
-    // Passive window scroll/resize listener for Auto-PiP
+    // Passive window scroll/resize listener for Auto-PiP & Viewport Clamping
     let scrollRaf = 0;
     const onScrollOrResize = () => {
       if (scrollRaf) return;
       scrollRaf = window.requestAnimationFrame(() => {
         scrollRaf = 0;
         evaluateScrollPiP();
+        if (studioState.isPipActive) {
+          applyPipGeometry();
+        }
       });
     };
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
@@ -1918,6 +2394,7 @@
     instance.cleanupListeners = () => {
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
+      if (cleanupPipDragListeners) cleanupPipDragListeners();
       if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
     };
 

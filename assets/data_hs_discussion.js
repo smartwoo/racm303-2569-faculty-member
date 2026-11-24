@@ -16,7 +16,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS1",
       "conciseDocId": "HS1-CONCISE",
       "wbDocId": "HS1-WB",
-      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health) สร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) เชื่อมสู่นิยามสุขภาพ 4 มิติในธรรมนูญสุขภาพแห่งชาติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับ (Primary – Quaternary Prevention) ของคนวัยทำงาน (เคสที่ 2)"
+      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health) สร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) เชื่อมสู่นิยามสุขภาพ 4 มิติในธรรมนูญสุขภาพแห่งชาติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับ (Primary – Quaternary Prevention) ของคนวัยทำงาน (เคสที่ 2)",
+      "unlockAfterIso": "2026-11-26T12:00:00+07:00",
+      "unlockAfterLabel": "วันพฤหัสบดีที่ 26 พฤศจิกายน 2569 เวลา 12.00 น.",
+      "unlockShortLabel": "พฤ. 26 พ.ย. · 12.00 น."
     },
     {
       "id": "HS2",
@@ -30,7 +33,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS2",
       "conciseDocId": "HS2-CONCISE",
       "wbDocId": "HS2-WB",
-      "summaryFocus": "ฝึกคิดเชิงระบบในฐานะผู้บริหารโรงพยาบาลชุมชนด้วยกรอบ WHO 6 Building Blocks และฝึกเปรียบเทียบการเลือกรูปแบบการดูแล (Models of Care: Acute vs Chronic/Ambulatory Care) ตามกรอบ WHAT–WHY–HOW (6W)"
+      "summaryFocus": "ฝึกคิดเชิงระบบในฐานะผู้บริหารโรงพยาบาลชุมชนด้วยกรอบ WHO 6 Building Blocks และฝึกเปรียบเทียบการเลือกรูปแบบการดูแล (Models of Care: Acute vs Chronic/Ambulatory Care) ตามกรอบ WHAT–WHY–HOW (6W)",
+      "unlockAfterIso": "2026-11-30T12:00:00+07:00",
+      "unlockAfterLabel": "วันจันทร์ที่ 30 พฤศจิกายน 2569 เวลา 12.00 น.",
+      "unlockShortLabel": "จ. 30 พ.ย. · 12.00 น."
     },
     {
       "id": "HS3",
@@ -44,7 +50,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS3",
       "conciseDocId": "HS3-CONCISE",
       "wbDocId": "",
-      "summaryFocus": "ประเมินจุดแข็งและช่องว่างของนโยบายสุขภาพระดับประเทศ (Cancer Anywhere และ Palliative Care) ด้วยกรอบคุณลักษณะอันพึงประสงค์ EQESaRR ทั้งองค์ประกอบหลักและองค์ประกอบย่อยอย่างมีหลักฐานรองรับ"
+      "summaryFocus": "ประเมินจุดแข็งและช่องว่างของนโยบายสุขภาพระดับประเทศ (Cancer Anywhere และ Palliative Care) ด้วยกรอบคุณลักษณะอันพึงประสงค์ EQESaRR ทั้งองค์ประกอบหลักและองค์ประกอบย่อยอย่างมีหลักฐานรองรับ",
+      "unlockAfterIso": "2026-11-30T16:40:00+07:00",
+      "unlockAfterLabel": "วันจันทร์ที่ 30 พฤศจิกายน 2569 เวลา 16.40 น.",
+      "unlockShortLabel": "จ. 30 พ.ย. · 16.40 น."
     },
     {
       "id": "HS4",
@@ -58,7 +67,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS4",
       "conciseDocId": "HS4-CONCISE",
       "wbDocId": "",
-      "summaryFocus": "ก้าวข้ามกับดักการสอนสุขศึกษาแบบให้ความรู้เพียงอย่างเดียว สู่การวิเคราะห์ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ (CDoH) กลไกพฤติกรรมตามตัวแบบ COM-B และกลยุทธ์การสร้างเสริมสุขภาพ 5 ด้านตามกฎบัตรออตตาวา"
+      "summaryFocus": "ก้าวข้ามกับดักการสอนสุขศึกษาแบบให้ความรู้เพียงอย่างเดียว สู่การวิเคราะห์ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ (CDoH) กลไกพฤติกรรมตามตัวแบบ COM-B และกลยุทธ์การสร้างเสริมสุขภาพ 5 ด้านตามกฎบัตรออตตาวา",
+      "unlockAfterIso": "2026-12-01T12:00:00+07:00",
+      "unlockAfterLabel": "วันอังคารที่ 1 ธันวาคม 2569 เวลา 12.00 น.",
+      "unlockShortLabel": "อ. 1 ธ.ค. · 12.00 น."
     },
     {
       "id": "HS5",
@@ -72,7 +84,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS5",
       "conciseDocId": "HS5-CONCISE",
       "wbDocId": "",
-      "summaryFocus": "แยกแยะระดับของ Primary Care (บริการด่านแรกรายบุคคล 5 คุณลักษณะ) ออกจาก Primary Health Care (ยุทธศาสตร์เชิงระบบทั้งสังคม 3 เสาหลักตามปฏิญญา Astana) ผ่านกรณีศึกษาจริงของโครงการ “สุขภาวะข้างถนน”"
+      "summaryFocus": "แยกแยะระดับของ Primary Care (บริการด่านแรกรายบุคคล 5 คุณลักษณะ) ออกจาก Primary Health Care (ยุทธศาสตร์เชิงระบบทั้งสังคม 3 เสาหลักตามปฏิญญา Astana) ผ่านกรณีศึกษาจริงของโครงการ “สุขภาวะข้างถนน”",
+      "unlockAfterIso": "2026-12-01T16:40:00+07:00",
+      "unlockAfterLabel": "วันอังคารที่ 1 ธันวาคม 2569 เวลา 16.40 น.",
+      "unlockShortLabel": "อ. 1 ธ.ค. · 16.40 น."
     },
     {
       "id": "HS6",
@@ -86,7 +101,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS6",
       "conciseDocId": "HS6-CONCISE",
       "wbDocId": "",
-      "summaryFocus": "วิเคราะห์ข้อมูลติดตาม UHC โลก (SDG 3.8.1 & 3.8.2) ใช้ทฤษฎีการประกันสุขภาพอธิบายช่องว่างความคุ้มครองในตลาดเอกชนและแรงงานนอกระบบ และเปรียบเทียบแรงจูงใจของ FFS, Capitation และ Pay for Performance (P4P)"
+      "summaryFocus": "วิเคราะห์ข้อมูลติดตาม UHC โลก (SDG 3.8.1 & 3.8.2) ใช้ทฤษฎีการประกันสุขภาพอธิบายช่องว่างความคุ้มครองในตลาดเอกชนและแรงงานนอกระบบ และเปรียบเทียบแรงจูงใจของ FFS, Capitation และ Pay for Performance (P4P)",
+      "unlockAfterIso": "2026-12-04T12:00:00+07:00",
+      "unlockAfterLabel": "วันศุกร์ที่ 4 ธันวาคม 2569 เวลา 12.00 น.",
+      "unlockShortLabel": "ศ. 4 ธ.ค. · 12.00 น."
     }
   ],
   "cases": [
