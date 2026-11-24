@@ -29030,10 +29030,26 @@
         code: c.module,
         title: ""
       };
+      const isTeacherDeck = ROLE === "faculty" && state.hsdFacultyMode !== "student";
+      if (
+        cfg.contentMode === "all-4-stages" &&
+        ((Array.isArray(c.scenarioBlocks) && c.scenarioBlocks.length > 0) || c.scenarioHtml)
+      ) {
+        out.push({
+          kind: "case-scenario",
+          pedStage: 0,
+          forceLayout: "case-scenario",
+          pedBadge: "เนื้อหาโจทย์ (Scenario Full Screen)",
+          pedShort: "เนื้อหาโจทย์",
+          mod,
+          caseObj: c,
+          qObj: (c.questions && c.questions[0]) || null,
+          shortNum: `กรณีที่ ${c.caseNumber}`
+        });
+      }
       (c.questions || []).forEach((qObj, qIdx) => {
         const shortNum = getShortQuestionNumLabel(qObj, qIdx);
         const cs = qObj && qObj.conceptSummarySlide ? qObj.conceptSummarySlide : null;
-        const isTeacherDeck = ROLE === "faculty" && state.hsdFacultyMode !== "student";
         const pushConceptSummary = () => {
           if (!cs) return;
           out.push({
@@ -29041,10 +29057,10 @@
             pedStage: 5,
             forceLayout: "concept-summary",
             pedBadge: isTeacherDeck
-              ? (cs.badge || "ขั้น ④ Key Takeaway #1")
+              ? (cs.badge || "ขั้น ⑤ Key Takeaway #1")
               : (cs.studentBadge || "Key Takeaway #1"),
             pedShort: isTeacherDeck
-              ? (cs.shortLabel || "④ Key Takeaway #1")
+              ? (cs.shortLabel || "⑤ Key Takeaway #1")
               : (cs.studentShortLabel || "Key Takeaway #1"),
             mod,
             caseObj: c,
@@ -29055,9 +29071,10 @@
         };
         if (isTeacherDeck && cfg.contentMode === "all-4-stages") {
           [
-            { st: 1, layout: "split-sheet", badge: "ขั้น ① โจทย์ + Answer Sheet", short: "① Sheet" },
-            { st: 2, layout: "split-key", badge: "ขั้น ② Key (Hide/Unhide)", short: "② Key" },
-            { st: 3, layout: "split-key-all", badge: "ขั้น ③ Unhide All (เฉลยครบ)", short: "③ Unhide All" }
+            { st: 1, layout: "sheet", badge: "① ประเด็นคำถาม & Answer Sheet (เต็มจอ)", short: "① Sheet เต็มจอ" },
+            { st: 2, layout: "split-sheet", badge: "② โจทย์ประกบกับ Answer Sheet", short: "② โจทย์+Sheet" },
+            { st: 3, layout: "key-full", badge: "③ Answer Key (เต็มจอ)", short: "③ Key เต็มจอ" },
+            { st: 4, layout: "split-key-all", badge: "④ Highlight เนื้อหาโจทย์ ประกบกับ Answer Key", short: "④ Highlight+Key" }
           ].forEach((stDef) => {
             out.push({
               pedStage: stDef.st,
@@ -29068,16 +29085,16 @@
               caseObj: c,
               qObj,
               shortNum,
-              blankWorksheet: stDef.st === 1
+              blankWorksheet: stDef.st <= 2
             });
           });
           pushConceptSummary();
         } else if (isTeacherDeck && cfg.contentMode === "key-unhide-all") {
           out.push({
-            pedStage: 3,
+            pedStage: 4,
             forceLayout: "split-key-all",
-            pedBadge: "ขั้น ③ เฉลย Unhide All + Supporting Evidence",
-            pedShort: "③ Unhide All",
+            pedBadge: "Highlight เนื้อหาโจทย์ ประกบกับ Answer Key",
+            pedShort: "④ Highlight+Key",
             mod,
             caseObj: c,
             qObj,
@@ -29086,10 +29103,10 @@
           pushConceptSummary();
         } else {
           out.push({
-            pedStage: 1,
+            pedStage: 2,
             forceLayout: "split-sheet",
             pedBadge: cfg.contentMode === "blank" ? "ใบงานเปล่า (Answer Sheet)" : "โจทย์ + กระดาษคำตอบ",
-            pedShort: "Sheet",
+            pedShort: "โจทย์+Sheet",
             mod,
             caseObj: c,
             qObj,
@@ -29792,6 +29809,15 @@
           `</div>` +
           `<div class="ppt-thumb-title">สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย</div>` +
           `<div class="ppt-thumb-wire"><span></span><span></span></div>`;
+      } else if (s.kind === "case-scenario") {
+        item.title = `Slide ${idx + 1}: [เนื้อหาโจทย์เต็มจอ] กรณีที่ ${s.caseObj.caseNumber} — ${s.caseObj.subtitle || s.caseObj.title}`;
+        tCard.innerHTML =
+          `<div class="ppt-thumb-top">` +
+          `<span class="ppt-thumb-mod">กรณีที่ ${s.caseObj.caseNumber} · เนื้อหาโจทย์</span>` +
+          `<span class="ppt-thumb-flag is-concept-summary">เต็มจอ</span>` +
+          `</div>` +
+          `<div class="ppt-thumb-title">${escapeHtml(s.caseObj.subtitle || s.caseObj.title)}</div>` +
+          `<div class="ppt-thumb-wire"><span></span></div>`;
       } else if (s.kind === "concept-summary") {
         if (s.isHiddenSlide) {
           const uShort = (s.unlockInfo && s.unlockInfo.shortLabel) || "จบคาบ Discussion";
@@ -37580,6 +37606,173 @@
     });
   }
 
+  function markHasConceptStep(markEl, stepNum) {
+    if (!markEl || !stepNum) return false;
+    const stepsCsv = markEl.dataset.conceptSteps || markEl.dataset.conceptStep || "";
+    return `,${stepsCsv},`.includes(`,${stepNum},`);
+  }
+
+  function highlightMultiStepScenarioCluesDOM(scenRoot, clueEntries, opts) {
+    if (!scenRoot || !Array.isArray(clueEntries) || !clueEntries.length) return;
+    const drawLines = Boolean(opts && opts.drawLines);
+    const justStep = (opts && opts.justStep) || 0;
+    const tagPrefix = opts && opts.compactTag ? "#" : drawLines ? "#" : "💬 #";
+
+    const HEX_PALETTE = ["#2563eb", "#0d9488", "#d97706", "#7c3aed", "#e11d48", "#059669"];
+    const BG_PALETTE = [
+      "rgba(37, 99, 235, 0.17)",
+      "rgba(13, 148, 136, 0.18)",
+      "rgba(217, 119, 6, 0.20)",
+      "rgba(124, 58, 237, 0.18)",
+      "rgba(225, 29, 72, 0.17)",
+      "rgba(5, 150, 105, 0.18)"
+    ];
+
+    const textNodes = [];
+    const walker = document.createTreeWalker(scenRoot, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p = node.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        if (p.closest(".hsd-scenario-label, .hsd-scen-question-inline, script, style, mark")) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+    const matchedOnce = new Set();
+    const nodeSpansMap = new Map();
+
+    clueEntries.forEach((ce) => {
+      const keySig = `${ce.step}::${ce.phrase}`;
+      if (matchedOnce.has(keySig)) return;
+      for (let i = 0; i < textNodes.length; i += 1) {
+        const tNode = textNodes[i];
+        const val = tNode.nodeValue || "";
+        const pos = val.indexOf(ce.phrase);
+        if (pos === -1) continue;
+        let arr = nodeSpansMap.get(tNode);
+        if (!arr) {
+          arr = [];
+          nodeSpansMap.set(tNode, arr);
+        }
+        arr.push({
+          start: pos,
+          end: pos + ce.phrase.length,
+          step: ce.step,
+          colorIdx: ce.colorIdx,
+          isPrimary: ce.isPrimary,
+          linkInfo: ce.linkInfo
+        });
+        matchedOnce.add(keySig);
+        break;
+      }
+    });
+
+    nodeSpansMap.forEach((spans, tNode) => {
+      if (!tNode.parentNode || !spans.length) return;
+      const val = tNode.nodeValue || "";
+      const cutSet = new Set([0, val.length]);
+      spans.forEach((sp) => {
+        cutSet.add(sp.start);
+        cutSet.add(sp.end);
+      });
+      const cuts = Array.from(cutSet).sort((a, b) => a - b);
+      const rawSegs = [];
+
+      for (let k = 0; k < cuts.length - 1; k += 1) {
+        const a = cuts[k];
+        const b = cuts[k + 1];
+        if (b <= a) continue;
+        const byStep = new Map();
+        spans.forEach((sp) => {
+          if (sp.start <= a && sp.end >= b) {
+            const prev = byStep.get(sp.step);
+            if (!prev || sp.start === a) byStep.set(sp.step, sp);
+          }
+        });
+        const activeList = Array.from(byStep.values()).sort((x, y) => x.step - y.step);
+        const startTags = activeList.filter((sp) => sp.start === a);
+        const stepsKey = activeList.map((sp) => sp.step).join(",");
+        const prevSeg = rawSegs[rawSegs.length - 1];
+        if (
+          prevSeg &&
+          prevSeg.stepsKey === stepsKey &&
+          startTags.length === 0
+        ) {
+          prevSeg.end = b;
+        } else {
+          rawSegs.push({
+            start: a,
+            end: b,
+            activeList,
+            startTags,
+            stepsKey
+          });
+        }
+      }
+
+      const frag = document.createDocumentFragment();
+      rawSegs.forEach((seg) => {
+        const chunkTxt = val.slice(seg.start, seg.end);
+        if (!seg.activeList.length) {
+          frag.appendChild(document.createTextNode(chunkTxt));
+          return;
+        }
+        const stepsArr = seg.activeList.map((sp) => sp.step);
+        const colorsArr = seg.activeList.map((sp) => sp.colorIdx);
+        const isMulti = stepsArr.length > 1;
+        const isJust = justStep > 0 && stepsArr.includes(justStep);
+
+        const mark = document.createElement("mark");
+        mark.className =
+          `hsd-clue-hl is-c${colorsArr[0]}` +
+          `${isMulti ? " is-multi-hl" : ""}` +
+          `${isJust ? " is-just-unhidden-clue" : ""}`;
+        mark.dataset.conceptStep = String(stepsArr[0]);
+        mark.dataset.conceptSteps = stepsArr.join(",");
+        mark.dataset.cluePrimary = seg.activeList.some((sp) => sp.isPrimary) ? "1" : "0";
+        mark.title = seg.activeList
+          .map((sp) => `หลักฐาน #${sp.step} → ${(sp.linkInfo && sp.linkInfo.logic) || ""}`)
+          .join("\n");
+
+        if (isMulti) {
+          const n = colorsArr.length;
+          const bgStops = colorsArr
+            .map((cIdx, idx) => {
+              const p0 = ((idx / n) * 100).toFixed(1);
+              const p1 = (((idx + 1) / n) * 100).toFixed(1);
+              const col = BG_PALETTE[(cIdx - 1) % 6];
+              return `${col} ${p0}%, ${col} ${p1}%`;
+            })
+            .join(", ");
+          const lineStops = colorsArr
+            .map((cIdx, idx) => {
+              const p0 = ((idx / n) * 100).toFixed(1);
+              const p1 = (((idx + 1) / n) * 100).toFixed(1);
+              const hex = HEX_PALETTE[(cIdx - 1) % 6];
+              return `${hex} ${p0}%, ${hex} ${p1}%`;
+            })
+            .join(", ");
+          mark.style.setProperty("--multi-hl-bg", `linear-gradient(90deg, ${bgStops})`);
+          mark.style.setProperty("--multi-hl-line", `linear-gradient(90deg, ${lineStops})`);
+        }
+
+        seg.startTags.forEach((sp) => {
+          const tag = make("span", `${tagPrefix}${sp.step}`, `hsd-clue-tag is-tag-c${sp.colorIdx}`);
+          tag.dataset.tagStep = String(sp.step);
+          mark.appendChild(tag);
+        });
+        mark.appendChild(document.createTextNode(chunkTxt));
+        frag.appendChild(mark);
+      });
+
+      tNode.parentNode.replaceChild(frag, tNode);
+    });
+  }
+
   function attachFacultyConceptStageEnhancements(
     sheet,
     stage,
@@ -37605,7 +37798,7 @@
     const CONCEPT_HEX = ["#2563eb", "#0d9488", "#d97706", "#7c3aed", "#e11d48", "#059669"];
     const rows = (tk.keyTable && tk.keyTable.rows) || [];
 
-    // 1. Highlight verbatim scenario clue phrases inside leftZoomBody (filtered by unhidden steps in Stage 2!)
+    // 1. Highlight verbatim scenario clue phrases inside leftZoomBody (supports multi-color interconnected quotes!)
     const clueEntries = [];
     links.forEach((lk, idx) => {
       const step = idx + 1;
@@ -37621,7 +37814,6 @@
     if (!clueEntries.length) return;
     clueEntries.sort((a, b) => b.phrase.length - a.phrase.length);
 
-    // Clean Answer Key mode: remove any legacy question-prompt hover hub if present
     const qHeadEl = rightZoomBody.querySelector(".hsd-q-head") || leftZoomBody.querySelector(".hsd-q-head");
     if (qHeadEl) {
       const legacyHub = qHeadEl.querySelector(".hsd-q-concept-hub");
@@ -37629,66 +37821,7 @@
     }
 
     const scenRoot = leftZoomBody.querySelector(".hsd-scenario-box") || leftZoomBody;
-    const textNodes = [];
-    const walker = document.createTreeWalker(scenRoot, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        const p = node.parentElement;
-        if (!p) return NodeFilter.FILTER_REJECT;
-        if (p.closest(".hsd-scenario-label, .hsd-scen-question-inline, script, style, mark")) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    });
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-
-    const matchedOnce = new Set();
-    clueEntries.forEach((ce) => {
-      const keySig = `${ce.step}::${ce.phrase}`;
-      if (matchedOnce.has(keySig)) return;
-      for (let i = 0; i < textNodes.length; i += 1) {
-        const tNode = textNodes[i];
-        if (!tNode.parentNode) continue;
-        const val = tNode.nodeValue || "";
-        const pos = val.indexOf(ce.phrase);
-        if (pos === -1) continue;
-
-        const before = val.slice(0, pos);
-        const matchStr = val.slice(pos, pos + ce.phrase.length);
-        const after = val.slice(pos + ce.phrase.length);
-
-        const mark = document.createElement("mark");
-        mark.className = `hsd-clue-hl is-c${ce.colorIdx}${justStep === ce.step ? " is-just-unhidden-clue" : ""}`;
-        mark.dataset.conceptStep = String(ce.step);
-        mark.dataset.cluePrimary = ce.isPrimary ? "1" : "0";
-        mark.title = `Supporting Evidence / Verbatim Quotation #${ce.step} → ${ce.linkInfo.logic || ""}`;
-
-        const tag = make("span", drawLines ? `#${ce.step}` : `💬 #${ce.step}`, "hsd-clue-tag");
-        mark.append(tag, document.createTextNode(matchStr));
-
-        const frag = document.createDocumentFragment();
-        let beforeNode = null;
-        let afterNode = null;
-        if (before) {
-          beforeNode = document.createTextNode(before);
-          frag.appendChild(beforeNode);
-        }
-        frag.appendChild(mark);
-        if (after) {
-          afterNode = document.createTextNode(after);
-          frag.appendChild(afterNode);
-        }
-
-        tNode.parentNode.replaceChild(frag, tNode);
-        const replaceList = [];
-        if (beforeNode) replaceList.push(beforeNode);
-        if (afterNode) replaceList.push(afterNode);
-        textNodes.splice(i, 1, ...replaceList);
-        matchedOnce.add(keySig);
-        break;
-      }
-    });
+    highlightMultiStepScenarioCluesDOM(scenRoot, clueEntries, { drawLines, justStep, compactTag: false });
 
     let activeStep = 0;
     state.hsdFocusedConceptStep = 0;
@@ -37856,7 +37989,9 @@
         const rowEl =
           rowCandidates.find((el) => !el.closest("[hidden]")) || rowCandidates[0] || null;
         if (!rowEl) return;
-        const marks = Array.from(leftZoomBody.querySelectorAll(`mark[data-concept-step="${step}"]`));
+        const marks = Array.from(leftZoomBody.querySelectorAll("mark.hsd-clue-hl")).filter((mEl) =>
+          markHasConceptStep(mEl, step)
+        );
         if (!marks.length) return;
 
         // Collect EVERY Answer Key highlight (mark.hsd-ans-hl) inside the Answer Key cells of this row!
@@ -38041,9 +38176,14 @@
       activeStep = nextStep || 0;
       if (drawLines) state.hsdFocusedConceptStep = activeStep;
       leftZoomBody.querySelectorAll("mark.hsd-clue-hl").forEach((m) => {
-        const s = Number(m.dataset.conceptStep) || 0;
-        m.classList.toggle("is-focused", activeStep > 0 && s === activeStep);
-        m.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
+        const hasStep = activeStep > 0 && markHasConceptStep(m, activeStep);
+        m.classList.toggle("is-focused", hasStep);
+        m.classList.toggle("is-dimmed", activeStep > 0 && !hasStep);
+        if (hasStep) {
+          m.dataset.activeFocusC = String(((activeStep - 1) % 6) + 1);
+        } else {
+          delete m.dataset.activeFocusC;
+        }
       });
       rightZoomBody.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
         const s = Number(tr.dataset.conceptRowStep) || 0;
@@ -38074,12 +38214,31 @@
 
     if (!isHandoutStatic) {
       leftZoomBody.querySelectorAll("mark.hsd-clue-hl").forEach((m) => {
-        const s = Number(m.dataset.conceptStep) || 0;
-        m.addEventListener("mouseenter", () => applyFocusState(s));
+        const stepsList = (m.dataset.conceptSteps || m.dataset.conceptStep || "")
+          .split(",")
+          .map((v) => Number(v) || 0)
+          .filter(Boolean);
+        const s0 = stepsList[0] || 0;
+        m.addEventListener("mouseenter", (ev) => {
+          const tagEl = ev.target && ev.target.closest ? ev.target.closest("[data-tag-step]") : null;
+          applyFocusState(tagEl ? Number(tagEl.dataset.tagStep) || s0 : s0);
+        });
         m.addEventListener("mouseleave", () => applyFocusState(0));
         m.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          applyFocusState(activeStep === s ? 0 : s);
+          const tagEl = ev.target && ev.target.closest ? ev.target.closest("[data-tag-step]") : null;
+          if (tagEl) {
+            const ts = Number(tagEl.dataset.tagStep) || s0;
+            applyFocusState(activeStep === ts ? 0 : ts);
+            return;
+          }
+          if (stepsList.length > 1) {
+            const curPos = stepsList.indexOf(activeStep);
+            const nextVal = curPos === -1 ? stepsList[0] : curPos + 1 < stepsList.length ? stepsList[curPos + 1] : 0;
+            applyFocusState(nextVal);
+          } else {
+            applyFocusState(activeStep === s0 ? 0 : s0);
+          }
         });
       });
 
@@ -38608,7 +38767,9 @@
         const rowEl =
           rowCandidates.find((el) => !el.closest("[hidden]")) || rowCandidates[0] || null;
         if (!rowEl) return;
-        const marks = Array.from(scenSticky.querySelectorAll(`mark[data-concept-step="${step}"]`));
+        const marks = Array.from(scenSticky.querySelectorAll("mark.hsd-clue-hl")).filter((mEl) =>
+          markHasConceptStep(mEl, step)
+        );
         if (!marks.length) return;
 
         const rawAnsMarks = Array.from(rowEl.querySelectorAll("mark.hsd-ans-hl"));
@@ -38782,9 +38943,14 @@
     const applyScrollFocusState = (nextStep) => {
       activeStep = nextStep || 0;
       scenSticky.querySelectorAll("mark.hsd-clue-hl").forEach((m) => {
-        const s = Number(m.dataset.conceptStep) || 0;
-        m.classList.toggle("is-focused", activeStep > 0 && s === activeStep);
-        m.classList.toggle("is-dimmed", activeStep > 0 && s !== activeStep);
+        const hasStep = activeStep > 0 && markHasConceptStep(m, activeStep);
+        m.classList.toggle("is-focused", hasStep);
+        m.classList.toggle("is-dimmed", activeStep > 0 && !hasStep);
+        if (hasStep) {
+          m.dataset.activeFocusC = String(((activeStep - 1) % 6) + 1);
+        } else {
+          delete m.dataset.activeFocusC;
+        }
       });
       if (activeQBlock) {
         activeQBlock.querySelectorAll("[data-concept-row-step]").forEach((tr) => {
@@ -38955,63 +39121,7 @@
       clueEntries.sort((a, b) => b.phrase.length - a.phrase.length);
 
       const scenRoot = scenContent.querySelector(".hsd-scenario-box") || scenContent;
-      const textNodes = [];
-      const walker = document.createTreeWalker(scenRoot, NodeFilter.SHOW_TEXT, {
-        acceptNode(node) {
-          if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-          const p = node.parentElement;
-          if (!p) return NodeFilter.FILTER_REJECT;
-          if (p.closest(".hsd-scenario-label, .hsd-scen-question-inline, script, style, mark")) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      });
-      while (walker.nextNode()) textNodes.push(walker.currentNode);
-
-      const matchedOnce = new Set();
-      clueEntries.forEach((ce) => {
-        const keySig = `${ce.step}::${ce.phrase}`;
-        if (matchedOnce.has(keySig)) return;
-        for (let i = 0; i < textNodes.length; i += 1) {
-          const tNode = textNodes[i];
-          if (!tNode.parentNode) continue;
-          const val = tNode.nodeValue || "";
-          const pos = val.indexOf(ce.phrase);
-          if (pos === -1) continue;
-
-          const before = val.slice(0, pos);
-          const matchStr = val.slice(pos, pos + ce.phrase.length);
-          const after = val.slice(pos + ce.phrase.length);
-
-          const mark = document.createElement("mark");
-          mark.className = `hsd-clue-hl is-c${ce.colorIdx}`;
-          mark.dataset.conceptStep = String(ce.step);
-          mark.dataset.cluePrimary = ce.isPrimary ? "1" : "0";
-          mark.title = `Supporting Evidence / Verbatim Quotation #${ce.step} → ${ce.linkInfo.logic || ""}`;
-
-          const tag = make("span", `#${ce.step}`, "hsd-clue-tag");
-          mark.append(tag, document.createTextNode(matchStr));
-
-          const frag = document.createDocumentFragment();
-          const replaceList = [];
-          if (before) {
-            const bN = document.createTextNode(before);
-            frag.appendChild(bN);
-            replaceList.push(bN);
-          }
-          frag.appendChild(mark);
-          if (after) {
-            const aN = document.createTextNode(after);
-            frag.appendChild(aN);
-            replaceList.push(aN);
-          }
-          tNode.parentNode.replaceChild(frag, tNode);
-          textNodes.splice(i, 1, ...replaceList);
-          matchedOnce.add(keySig);
-          break;
-        }
-      });
+      highlightMultiStepScenarioCluesDOM(scenRoot, clueEntries, { drawLines: true, justStep: 0, compactTag: true });
 
       // Populate .hsd-q-concept-hub inside activeQBlock's .hsd-q-head + .hsd-concept-bridge-bar in Answer Key rows
       const rows = (tk.keyTable && tk.keyTable.rows) || [];
