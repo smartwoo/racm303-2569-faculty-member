@@ -15461,7 +15461,7 @@
         docBtnRow.appendChild(dc);
       }
       if (sess.code === "ST1") {
-        const bs = make("button", "🖥️ ④ เปิด Slide ST1 (16 สไลด์ · 16:9)", "btn sm slide-ready-btn");
+        const bs = make("button", "🖥️ ④ เปิด Slide ST1 (31 สไลด์ Interactive · 16:9)", "btn sm slide-ready-btn");
         bs.type = "button";
         bs.addEventListener("click", () => {
           if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
@@ -34288,7 +34288,7 @@
       return {
         sessionId: "w1-d1-st",
         isBuiltInSt1Deck: true,
-        fileName: "Slide ST1: Systems & Systems Thinking (16 สไลด์ · 16:9)",
+        fileName: "Slide ST1: Systems & Systems Thinking (31 สไลด์ Interactive · 16:9)",
         pptxHref: "exports/pptx/RACM303_2569_ST1_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ · ผศ. นพ.บวรศม ลีระพันธ์",
