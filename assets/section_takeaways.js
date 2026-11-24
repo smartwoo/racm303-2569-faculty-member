@@ -1,120 +1,113 @@
 (function () {
   "use strict";
 
-  const GEMINI_KEY_STORAGE = "racm303_gemini_api_key_v1";
-  const LIVE_CACHE_STORAGE = "racm303_carbon_high_takeaways_v1";
   const LANG_PREF_STORAGE = "racm303_kt_lang_v1";
 
-  /* ---------- Gemini 4 Carbon · High Profile & Fallback Chain ---------- */
-  const CARBON_PROFILES = [
-    {
-      id: "carbon_high",
-      model: "gemini-4-carbon",
-      thinkingLevel: "HIGH",
-      maxOutputTokens: 8192,
-      timeoutMs: 55000,
-      badge: "Gemini 4 Carbon · High",
-      isGemini4: true,
-    },
-    {
-      id: "neon_high",
-      model: "gemini-4-neon",
-      thinkingLevel: "HIGH",
-      maxOutputTokens: 8192,
-      timeoutMs: 35000,
-      badge: "Gemini 4 Neon · High",
-      isGemini4: true,
-    },
-    {
-      id: "hydrogen_high",
-      model: "gemini-4-hydrogen",
-      thinkingLevel: "HIGH",
-      maxOutputTokens: 8192,
-      timeoutMs: 30000,
-      badge: "Gemini 4 Hydrogen · High",
-      isGemini4: true,
-    },
-    {
-      id: "flash_38",
-      model: "gemini-3.8-flash",
-      thinkingLevel: "MEDIUM",
-      maxOutputTokens: 6144,
-      timeoutMs: 25000,
-      badge: "Gemini 3.8 Flash",
-      isGemini4: false,
-    },
-  ];
-
-  /* ---------- Overarching Curriculum Spine (ST1 -> HS1 -> HS2 -> HS3 -> HS4 -> HS5 -> HS6) ---------- */
+  /* ---------- Official RACM 303 (2569) Table Specification & Curriculum Spine ---------- */
   const MODULE_META = {
     ST1: {
       code: "ST1",
       order: 0,
+      specWeight: "รากฐาน",
+      specPillTH: "รากฐานคิดเชิงระบบ · TH/EN",
+      specPillEN: "Systems Foundation · TH/EN",
+      specBadgeTH: "กรอบรายวิชา: รากฐานคิดเชิงระบบเชื่อม HS1–HS6 · ฟอร์ม 3A · SRN 1–2",
+      specBadgeEN: "Course Blueprint: Foundational Systems Lens for HS1–HS6 · Form 3A · SRN 1–2",
       shortTH: "การคิดเชิงระบบ",
       shortEN: "Systems Thinking",
-      arcTH: "กรอบคิดตั้งต้น: มองระบบสุขภาพเป็นระบบซับซ้อนที่ปรับตัวได้ (CAS) และค้นหาคานงัดใต้ภูเขาน้ำแข็ง",
-      arcEN: "Foundational Lens: Viewing health systems as Complex Adaptive Systems (CAS) and finding leverage beneath the iceberg",
+      arcTH: "สิ่งที่ควรรู้ระดับรากฐาน: มองระบบสุขภาพเป็นระบบซับซ้อนที่ปรับตัวได้ (CAS) อ่านวงจรป้อนกลับ และหาคานงัดใต้ภูเขาน้ำแข็ง",
+      arcEN: "Foundational Scope: Viewing health systems as Complex Adaptive Systems (CAS), reading feedback loops, and finding structural leverage",
       sections: ["1", "2", "3", "4", "sum"],
     },
     HS1: {
       code: "HS1",
       order: 1,
+      specWeight: "20%",
+      specPillTH: "Table Spec 20% · TH/EN",
+      specPillEN: "Table Spec 20% · TH/EN",
+      specBadgeTH: "Table Spec 20% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 20% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกัน 4 ระดับ",
       shortEN: "Health, Determinants & 4 Levels of Prevention",
-      arcTH: "เป้าหมายต้นทาง: นิยามสุขภาพองค์รวม เข้าใจรากเหง้าความเหลื่อมล้ำ (SDH) และเลือกจุดสกัดโรคครบ 4 ระดับ",
-      arcEN: "Upstream Purpose: Defining holistic health, tracing social determinants (SDH), and intervening across 4 prevention levels",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (20%): แยกมิติ Disease–Illness–Sickness เปรียบเทียบนิยามสุขภาพ วิเคราะห์กลไก SDH และจำแนกการป้องกันโรคครบทุกระดับ",
+      arcEN: "Table Spec Scope (20%): Distinguishing Disease–Illness–Sickness, comparing health definitions, tracing SDH inequity pathways, and applying 4 prevention levels",
       sections: ["1", "2", "3", "sum"],
     },
     HS2: {
       code: "HS2",
       order: 2,
+      specWeight: "15%",
+      specPillTH: "Table Spec 15% · TH/EN",
+      specPillEN: "Table Spec 15% · TH/EN",
+      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "หน้าที่ โครงสร้างระบบสุขภาพ และรูปแบบการดูแล",
       shortEN: "Health System Structure, Functions & Models of Care",
-      arcTH: "สถาปัตยกรรมระบบ: ประกอบ 6 Building Blocks และออกแบบรูปแบบการดูแลให้ส่งถึงประชาชนอย่างต่อเนื่อง",
-      arcEN: "System Architecture: Aligning 6 Building Blocks and Models of Care to translate resources into health outcomes",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): ขีดเส้นขอบเขตระบบสุขภาพ เชื่อมโยง 6 Building Blocks สู่เป้าหมาย Quintuple Aim และเลือกรูปแบบการดูแลตามกรอบ 6W",
+      arcEN: "Table Spec Scope (15%): Defining health system boundaries, linking 6 Building Blocks to Quintuple Aim goals, and designing 6W Models of Care",
       sections: ["1", "2", "3", "4", "5", "sum"],
     },
     HS3: {
       code: "HS3",
       order: 3,
+      specWeight: "15%",
+      specPillTH: "Table Spec 15% · TH/EN",
+      specPillEN: "Table Spec 15% · TH/EN",
+      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "คุณลักษณะที่พึงประสงค์ของระบบบริการสุขภาพ (EQESaRR)",
       shortEN: "Desirable Characteristics of Health Services (EQESaRR)",
-      arcTH: "เข็มทิศประเมินคุณค่า: ชั่งน้ำหนักความเป็นธรรม คุณภาพ ประสิทธิภาพ ธรรมาภิบาล ความสอดคล้อง และความยืดหยุ่น",
-      arcEN: "Evaluative Compass: Balancing Equity, Quality, Efficiency, Social Accountability, Relevance, and Resilience",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): ประเมินและชั่งน้ำหนักความเป็นธรรม คุณภาพ (STEP) ประสิทธิภาพ ภาระรับผิดชอบต่อสังคม ความสอดคล้องบริบท และความยืดหยุ่น",
+      arcEN: "Table Spec Scope (15%): Evaluating and balancing Equity, Quality (STEP), Efficiency, Social Accountability, Relevance, and Resilience",
       sections: ["1", "2", "3", "4", "5", "6", "7", "sum"],
     },
     HS4: {
       code: "HS4",
       order: 4,
+      specWeight: "15%",
+      specPillTH: "Table Spec 15% · TH/EN",
+      specPillEN: "Table Spec 15% · TH/EN",
+      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ",
       shortEN: "Health Behaviour, Behaviour Change & Health Promotion",
-      arcTH: "พลังฝั่งประชาชนและสิ่งแวดล้อม: เข้าใจพฤติกรรม 3 ระยะ ออกแบบมาตรการ (Nudge & BCW/COM-B) ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา–เจนีวา",
-      arcEN: "People & Environment: Health behaviour stages, Nudge & BCW/COM-B design, dual-level Health Literacy, and Ottawa–Geneva Health Promotion",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): จำแนกพฤติกรรมสุขภาพ 3 ประเภท ประยุกต์ทฤษฎีพฤติกรรม Nudge และวงล้อ COM-B ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา–เจนีวา",
+      arcEN: "Table Spec Scope (15%): Classifying 3 health behavior types, applying Nudge & BCW/COM-B, dual-level Health Literacy, and Ottawa–Geneva Health Promotion",
       sections: ["1", "2", "3", "4", "sum"],
     },
     HS5: {
       code: "HS5",
       order: 5,
+      specWeight: "15%",
+      specPillTH: "Table Spec 15% · TH/EN",
+      specPillEN: "Table Spec 15% · TH/EN",
+      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "ระบบบริการสุขภาพปฐมภูมิและบริการปฐมภูมิ",
       shortEN: "Primary Health Care (PHC) & Primary Care (PC)",
-      arcTH: "ฐานรากของการจัดบริการ: ยึดปฐมภูมิ 4Cs และ EPHFs เป็นแกนกลางเชื่อมคน ชุมชน และระบบหลักประกัน",
-      arcEN: "Delivery Backbone: Anchoring person-centered 4Cs Primary Care and population EPHFs at the heart of UHC",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): แยก Primary Health Care (3 เสาหลัก Astana) ออกจาก Primary Care (4Cs + ยึดคนเป็นศูนย์กลาง) และเชื่อม EPHFs สู่ UHC",
+      arcEN: "Table Spec Scope (15%): Distinguishing 3-pillar Astana PHC from person-centered 4Cs Primary Care and population EPHFs anchoring UHC",
       sections: ["1", "2", "3", "4", "5", "6", "7", "sum"],
     },
     HS6: {
       code: "HS6",
       order: 6,
+      specWeight: "20%",
+      specPillTH: "Table Spec 20% · TH/EN",
+      specPillEN: "Table Spec 20% · TH/EN",
+      specBadgeTH: "Table Spec 20% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
+      specBadgeEN: "Table Spec 20% · Health Systems Exam (Open Note · 1 Handwritten A4)",
       shortTH: "การประกันสุขภาพ หลักประกันสุขภาพถ้วนหน้า และกลไกการจ่ายเงิน",
       shortEN: "Health Insurance, UHC & Provider Payment Methods",
-      arcTH: "กลไกการคลังคุ้มครองทุกคน: รวมความเสี่ยงด้วยกองทุนภาคบังคับ และออกแบบการจ่ายเงินให้ยั่งยืนโดยไม่ทิ้งกลุ่มเปราะบาง",
-      arcEN: "Financing Engine: Pooling risks equitably, overcoming market failures, and aligning provider payment incentives",
+      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (20%): เข้าใจการรวมความเสี่ยง Adverse Selection เปรียบเทียบ 3 กองทุนไทย กลไกจ่ายเงิน (FFS, Capitation, DRG) และการจัดการ Moral Hazard",
+      arcEN: "Table Spec Scope (20%): Risk pooling, Adverse Selection, Thailand's 3 schemes, provider payment incentives (FFS, Capitation, DRG), and Moral Hazard",
       sections: ["1", "2", "3", "4", "5", "sum"],
     },
   };
 
   /* ==========================================================================
-   * GEMINI 4 CARBON · HIGH CONCEPTUALIZED KEY TAKEAWAYS BANK (ALL 44 SECTIONS)
-   * Grounded 100% in RACM 303 Teaching Handouts (ST1 & HS1–HS6)
+   * RACM 303 TABLE SPECIFICATION — WHAT YOU SHOULD KNOW BANK (ALL 44 SECTIONS)
+   * Grounded 100% in RACM 303 Teaching Handouts (ST1 & HS1–HS6) · Zero AI
    * ========================================================================== */
   const TAKEAWAYS_DB = {
     /* -------------------- ST1: Systems & Systems Thinking -------------------- */
@@ -1838,40 +1831,6 @@
     }
   }
 
-  function getGeminiKey() {
-    try {
-      return (localStorage.getItem(GEMINI_KEY_STORAGE) || "").trim();
-    } catch (_) {
-      return "";
-    }
-  }
-
-  function setGeminiKey(k) {
-    try {
-      if (k && k.trim()) localStorage.setItem(GEMINI_KEY_STORAGE, k.trim());
-      else localStorage.removeItem(GEMINI_KEY_STORAGE);
-    } catch (_) {
-      /* ignore */
-    }
-  }
-
-  function loadLiveCache() {
-    try {
-      const raw = localStorage.getItem(LIVE_CACHE_STORAGE);
-      return raw ? JSON.parse(raw) : {};
-    } catch (_) {
-      return {};
-    }
-  }
-
-  function saveLiveCache(cache) {
-    try {
-      localStorage.setItem(LIVE_CACHE_STORAGE, JSON.stringify(cache));
-    } catch (_) {
-      /* ignore */
-    }
-  }
-
   function parseModCodeFromDocId(docId) {
     const m = String(docId || "").trim().match(/^(ST1|HS[1-6])/i);
     return m ? m[1].toUpperCase() : "";
@@ -1923,205 +1882,45 @@
     return "";
   }
 
-  /* ---------- Extract Raw Section Prose for Live Gemini 4 Carbon · High ---------- */
-  function extractSectionProseFromDocs(ktKey) {
-    const [modCode, secId] = String(ktKey || "").split(":");
+  function resolveSectionAnchorInDoc(docId, modCode, secId) {
     const docs = (window.RACM_HS_DATA && window.RACM_HS_DATA.docs) || [];
-    const targetDoc =
-      docs.find((d) => d.id === modCode) || docs.find((d) => d.id === `${modCode}-CONCISE`);
-    if (!targetDoc || !targetDoc.html) return "";
+    const doc = docs.find((d) => d.id === docId);
+    if (!doc || !doc.html) return "";
+
+    // Special exact mapping for HS1-CONCISE (compressed 1.1–1.4 structure)
+    if (docId === "HS1-CONCISE") {
+      if (secId === "1") return "hs1c-h-1_1";
+      if (secId === "2") return "hs1c-h-1_2";
+      if (secId === "3") return "hs1c-h-1_4";
+      return "hs1c-sec-2";
+    }
 
     const tmp = document.createElement("div");
-    tmp.innerHTML = targetDoc.html;
-    const h2s = [...tmp.querySelectorAll("h2")];
-    for (let i = 0; i < h2s.length; i++) {
-      const h = h2s[i];
+    tmp.innerHTML = doc.html;
+    const h2s = [...tmp.querySelectorAll("h2, h3")];
+    for (const h of h2s) {
       if (h.classList && h.classList.contains("doc-h1")) continue;
-      const matched = matchHeadingToSectionKey(modCode, h.textContent || "");
-      if (matched === ktKey) {
-        const parts = [h.textContent.trim()];
-        let cur = h.nextElementSibling;
-        while (cur && cur.tagName !== "H2") {
-          const t = (cur.textContent || "").replace(/\s+/g, " ").trim();
-          if (t) parts.push(t);
-          cur = cur.nextElementSibling;
-        }
-        return parts.join("\n").slice(0, 6500);
+      if (h.tagName === "H2") {
+        const matched = matchHeadingToSectionKey(modCode, h.textContent || "");
+        if (matched === `${modCode}:${secId}` && h.id) return h.id;
+      }
+    }
+    for (const h of h2s) {
+      if (h.tagName === "H3" && secId !== "sum") {
+        const matchedSub = matchSubheadingToSectionKey(modCode, h.textContent || "");
+        if (matchedSub === `${modCode}:${secId}` && h.id) return h.id;
       }
     }
     return "";
   }
 
-  function extractTextFromGeminiJson(json) {
-    const cands = (json && json.candidates) || [];
-    if (!cands.length || !cands[0].content || !Array.isArray(cands[0].content.parts)) return "";
-    const nonThought = cands[0].content.parts
-      .filter((p) => !p.thought && typeof p.text === "string")
-      .map((p) => p.text)
-      .join("")
-      .trim();
-    if (nonThought) return nonThought;
-    return cands[0].content.parts
-      .map((p) => (typeof p.text === "string" ? p.text : ""))
-      .join("")
-      .trim();
-  }
-
-  async function callCarbonHighLive(ktKey, customFocusPrompt) {
-    const apiKey = getGeminiKey();
-    if (!apiKey) {
-      throw new Error("กรุณาใส่ Gemini API Key ก่อนเริ่มสังเคราะห์สดด้วย Gemini 4 Carbon · High");
-    }
-    const baseEntry = TAKEAWAYS_DB[ktKey];
-    const [modCode, secId] = ktKey.split(":");
-    const modMeta = MODULE_META[modCode];
-    const proseExcerpt = extractSectionProseFromDocs(ktKey);
-
-    const syllabusMap = Object.values(MODULE_META)
-      .map((m) => `- ${m.code} (${m.shortTH} / ${m.shortEN}): ${m.arcTH}`)
-      .join("\n");
-
-    const sysPrompt = [
-      "คุณคืออาจารย์แพทย์เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (RACM 303 คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล) ที่ใช้ Gemini 4 Carbon · High ในการสังเคราะห์แก่นความคิด (Conceptualized Key Takeaways for Lessons Learned)",
-      "เป้าหมาย: สังเคราะห์เนื้อหาของหัวข้อนี้ให้ย่อยง่าย (digestible) สร้างความเข้าใจเชิงมโนทัศน์ (conceptualized comprehension) และชี้ให้เห็นความสอดรับของลำดับตรรกะ (internal alignment of logical flow) ทั้งภายในบทเรียนเดียวกันและเชื่อมโยงข้ามบท ST1 & HS1–HS6",
-      "กฎเหล็กด้านน้ำเสียงและรูปแบบ:",
-      "1. Summary Statement (summaryTH และ summaryEN): ต้องกระชับ คมคาย จับประเด็นหลักได้ทันที ติดหู ติดหัว (catchy & memorable) แต่ต้องสุภาพ อบอุ่น ให้เกียรติ และไม่ประชดประชันเด็ดขาด (strictly polite, respectful, non-sarcastic) ความยาว 1–2 ประโยคสั้น",
-      "2. Key Takeaways (bullets): 3–4 ข้อ โดยแต่ละข้อแทน 1 บทเรียนสำคัญ (1 bullet = 1 complete take-home message) ขึ้นต้นด้วย **คำหลักตัวหนา:** ตามด้วยคำอธิบายกระชับเข้าใจง่าย ทั้งภาษาไทย (th) และภาษาอังกฤษ (en) ยึดโยงเนื้อหาคำสอน 100% ห้ามแต่งข้อเท็จจริงใหม่",
-      "3. Logical Flow (flowRoleTH และ flowRoleEN): อธิบายสั้นๆ 1 ประโยคว่าหัวข้อนี้รับไม้ต่อจากหัวข้อก่อนหน้าและส่งไม้ต่อสู่หัวข้อถัดไปในบทเรียนนี้อย่างไร",
-      "4. Keywords (keywords): 4–5 คำสำคัญหลัก คู่ภาษาไทย (th) และภาษาอังกฤษ (en)",
-      "ตอบเป็น JSON ตาม schema ที่กำหนดเท่านั้น",
-    ].join("\n");
-
-    const userPrompt = [
-      `บทเรียนปัจจุบัน: ${modCode} — ${modMeta.shortTH} (${modMeta.shortEN})`,
-      `หัวข้อปัจจุบัน: ${baseEntry.secLabelTH} — ${baseEntry.titleTH}`,
-      customFocusPrompt ? `ประเด็นที่ผู้เรียนต้องการเน้นเป็นพิเศษ: ${customFocusPrompt}` : "",
-      "",
-      "=== แผนที่ความเชื่อมโยงทั้งหลักสูตร (ST1 & HS1–HS6) ===",
-      syllabusMap,
-      "",
-      "=== เนื้อหาประกอบคำสอนของหัวข้อนี้ ===",
-      proseExcerpt || `${baseEntry.summaryTH}\n${baseEntry.bullets.map((b) => b.th).join("\n")}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const responseSchema = {
-      type: "OBJECT",
-      properties: {
-        summaryTH: { type: "STRING" },
-        summaryEN: { type: "STRING" },
-        bullets: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: {
-              th: { type: "STRING" },
-              en: { type: "STRING" },
-            },
-            required: ["th", "en"],
-          },
-        },
-        flowRoleTH: { type: "STRING" },
-        flowRoleEN: { type: "STRING" },
-        keywords: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: {
-              th: { type: "STRING" },
-              en: { type: "STRING" },
-            },
-            required: ["th", "en"],
-          },
-        },
-      },
-      required: ["summaryTH", "summaryEN", "bullets", "flowRoleTH", "flowRoleEN", "keywords"],
-    };
-
-    let lastErr = null;
-    for (let i = 0; i < CARBON_PROFILES.length; i++) {
-      const prof = CARBON_PROFILES[i];
-      const generationConfig = {
-        responseMimeType: "application/json",
-        responseSchema,
-        maxOutputTokens: prof.maxOutputTokens,
-        thinkingConfig: { thinkingLevel: prof.thinkingLevel },
-      };
-      if (!prof.isGemini4) generationConfig.temperature = 0.25;
-
-      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const timer = controller ? setTimeout(() => controller.abort(), prof.timeoutMs) : null;
-
-      try {
-        const resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(prof.model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            signal: controller ? controller.signal : undefined,
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: sysPrompt }] },
-              contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-              generationConfig,
-            }),
-          }
-        );
-        if (!resp.ok) {
-          let detail = `HTTP ${resp.status}`;
-          try {
-            const ej = await resp.json();
-            if (ej && ej.error && ej.error.message) detail = `${resp.status}: ${ej.error.message}`;
-          } catch (_) {
-            /* ignore */
-          }
-          const e = new Error(detail);
-          e.httpStatus = resp.status;
-          throw e;
-        }
-        const json = await resp.json();
-        const txt = extractTextFromGeminiJson(json);
-        const parsed = JSON.parse(txt);
-        if (!parsed.summaryTH || !Array.isArray(parsed.bullets) || !parsed.bullets.length) {
-          throw new Error("รูปแบบผลลัพธ์ JSON ไม่ครบถ้วน");
-        }
-        return {
-          summaryTH: parsed.summaryTH,
-          summaryEN: parsed.summaryEN,
-          bullets: parsed.bullets.map((b) => ({
-            th: formatSafeRich(b.th),
-            en: formatSafeRich(b.en),
-            isLiveFormatted: true,
-          })),
-          flowRoleTH: parsed.flowRoleTH || baseEntry.flowRoleTH,
-          flowRoleEN: parsed.flowRoleEN || baseEntry.flowRoleEN,
-          keywords:
-            Array.isArray(parsed.keywords) && parsed.keywords.length
-              ? parsed.keywords
-              : baseEntry.keywords,
-          modelBadge: prof.badge,
-          customFocus: customFocusPrompt || "",
-          updatedAt: new Date().toISOString(),
-        };
-      } catch (err) {
-        lastErr = err;
-        if (err && (err.httpStatus === 401 || /API key not valid|INVALID_ARGUMENT.*key/i.test(err.message || ""))) {
-          break;
-        }
-      } finally {
-        if (timer) clearTimeout(timer);
-      }
-    }
-    throw lastErr || new Error("ไม่สามารถเชื่อมต่อ Gemini API ได้ในขณะนี้");
-  }
-
   /* ==========================================================================
-   * POPUP MODAL CONTROLLER & INTERACTIVE LOGICAL FLOW VIEWER
+   * POPUP MODAL CONTROLLER — WHAT YOU SHOULD KNOW PER TABLE SPECIFICATION
    * ========================================================================== */
-  const SPARK_SVG =
+  const SPEC_SVG =
     '<svg class="kt-icon-svg" viewBox="0 0 20 20" fill="none" aria-hidden="true">' +
-    '<path d="M10 2.2L11.9 7.5L17.2 9.4L11.9 11.3L10 16.6L8.1 11.3L2.8 9.4L8.1 7.5L10 2.2Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>' +
-    '<circle cx="15.6" cy="4.4" r="1.15" fill="currentColor"/>' +
+    '<rect x="3.5" y="2.8" width="13" height="14.4" rx="2.2" stroke="currentColor" stroke-width="1.6"/>' +
+    '<path d="M6.8 7.2H13.2M6.8 10.4H13.2M6.8 13.6H10.8" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>' +
     "</svg>";
 
   const FLOW_SVG =
@@ -2135,10 +1934,6 @@
   let modalBackdrop = null;
   let activeKtKey = "HS6:1";
   let navHistoryStack = [];
-  let showApiPanel = false;
-  let isGeneratingLive = false;
-  let liveStatusMsg = "";
-  let liveErrorMsg = "";
 
   function ensureModalDOM() {
     if (modalBackdrop && document.body.contains(modalBackdrop)) return modalBackdrop;
@@ -2176,31 +1971,27 @@
     };
   }
 
-  function jumpToSectionInPortal(ktKey) {
+  function jumpToSectionInPortal(ktKey, preferFormat) {
     const [modCode, secId] = String(ktKey || "").split(":");
+    if (!modCode) return;
     closeTakeawayModal();
 
-    // Check if the current textbook reader already shows this module
-    const existingBar = document.querySelector(`#textbookProseContainer .sec-kt-bar[data-kt-key="${ktKey}"]`);
-    if (existingBar) {
-      const heading = existingBar.previousElementSibling || existingBar;
-      heading.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
+    const targetDocId = preferFormat === "concise" ? `${modCode}-CONCISE` : modCode;
+    const anchorId = resolveSectionAnchorInDoc(targetDocId, modCode, secId || "1");
+
+    // If no explicit format requested and the current textbook reader already shows this module, scroll directly
+    if (!preferFormat) {
+      const existingBar = document.querySelector(`#textbookProseContainer .sec-kt-bar[data-kt-key="${ktKey}"]`);
+      if (existingBar) {
+        const heading = existingBar.previousElementSibling || existingBar;
+        heading.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
     }
 
-    // Otherwise navigate to that module's doc via window.racmOpenTextbookDoc
     if (typeof window.racmOpenTextbookDoc === "function") {
-      window.racmOpenTextbookDoc(modCode);
-    } else {
-      const sel = document.getElementById("hsModuleSelect");
-      if (sel && modCode.startsWith("HS")) {
-        sel.value = modCode;
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
-      }
-      const modPill = document.querySelector(
-        `#textbookUnifiedBannerWrap [data-hs-mod="${modCode}"], .hs-unified-mod-pill[data-mod="${modCode}"]`
-      );
-      if (modPill) modPill.click();
+      window.racmOpenTextbookDoc(targetDocId, anchorId);
+      return;
     }
 
     setTimeout(() => {
@@ -2212,6 +2003,13 @@
     }, 180);
   }
 
+  function openSelfQuizFromModal(modCode) {
+    closeTakeawayModal();
+    if (window.RACM_PORTAL && typeof window.RACM_PORTAL.openSelfQuizForModule === "function") {
+      window.RACM_PORTAL.openSelfQuizForModule(modCode, "qa");
+    }
+  }
+
   function openTakeawayModal(ktKey, pushHistory) {
     if (!TAKEAWAYS_DB[ktKey]) return;
     if (pushHistory && activeKtKey && activeKtKey !== ktKey) {
@@ -2221,8 +2019,6 @@
       navHistoryStack = [];
     }
     activeKtKey = ktKey;
-    liveErrorMsg = "";
-    liveStatusMsg = "";
     ensureModalDOM();
     renderModalContents();
     modalBackdrop.hidden = false;
@@ -2231,14 +2027,10 @@
 
   function renderModalContents() {
     if (!modalBackdrop) return;
-    const base = TAKEAWAYS_DB[activeKtKey];
-    if (!base) return;
+    const activeData = TAKEAWAYS_DB[activeKtKey];
+    if (!activeData) return;
 
-    const liveCache = loadLiveCache();
-    const liveOverride = liveCache[activeKtKey] || null;
-    const activeData = liveOverride ? { ...base, ...liveOverride, crossLinks: base.crossLinks } : base;
-
-    const [modCode, secId] = activeKtKey.split(":");
+    const [modCode] = activeKtKey.split(":");
     const modMeta = MODULE_META[modCode];
     const lang = getLangPref();
     const showTH = lang === "both" || lang === "th";
@@ -2247,16 +2039,14 @@
     const prevEntry = prevKey ? TAKEAWAYS_DB[prevKey] : null;
     const nextEntry = nextKey ? TAKEAWAYS_DB[nextKey] : null;
 
-    const modelBadgeText = liveOverride && liveOverride.modelBadge
-      ? `${liveOverride.modelBadge} · Live`
-      : "Gemini 4 Carbon · High";
+    const specBadgeText = showTH ? modMeta.specBadgeTH : modMeta.specBadgeEN;
 
     // Build section stepper pills across the current module
     const stepperHtml = modMeta.sections
       .map((s) => {
         const k = `${modCode}:${s}`;
         const isAct = k === activeKtKey;
-        const lbl = s === "sum" ? (showTH ? "สรุป" : "Summary") : s;
+        const lbl = s === "sum" ? (showTH ? "สรุปทั้งบท" : "Summary") : s;
         const tEntry = TAKEAWAYS_DB[k];
         const tip = tEntry ? (showTH ? tEntry.titleTH : tEntry.titleEN) : k;
         return `<button type="button" class="kt-step-pill${isAct ? " is-active" : ""}" data-kt-switch="${escapeHtml(k)}" title="${escapeHtml(tip)}">${escapeHtml(lbl)}</button>`;
@@ -2269,7 +2059,8 @@
       .map((m) => {
         const isCurrentMod = m.code === modCode;
         const firstKey = `${m.code}:1`;
-        return `<button type="button" class="kt-mod-chip${isCurrentMod ? " is-current" : ""}" data-kt-switch-push="${escapeHtml(firstKey)}" title="${escapeHtml(m.shortTH)} (${escapeHtml(m.shortEN)})">${escapeHtml(m.code)}</button>`;
+        const wTxt = m.specWeight && m.specWeight !== "รากฐาน" ? ` (${m.specWeight})` : "";
+        return `<button type="button" class="kt-mod-chip${isCurrentMod ? " is-current" : ""}" data-kt-switch-push="${escapeHtml(firstKey)}" title="${escapeHtml(m.shortTH)} — ${escapeHtml(m.specBadgeTH)}">${escapeHtml(m.code + wTxt)}</button>`;
       })
       .join('<span class="kt-spine-sep" aria-hidden="true">·</span>');
 
@@ -2278,11 +2069,11 @@
       ? `<button type="button" class="kt-back-crumb" data-kt-pop-history="1">← กลับไป ${escapeHtml(navHistoryStack[navHistoryStack.length - 1].replace(":sum", " · สรุป").replace(":", " · หมวด "))}</button>`
       : "";
 
-    // Bullets HTML
+    // Bullets HTML — What You Should Know per Table Spec
     const bulletsHtml = (activeData.bullets || [])
       .map((b, idx) => {
-        const thLine = b.isLiveFormatted ? b.th : formatCuratedHtml(b.th);
-        const enLine = b.isLiveFormatted ? b.en : formatCuratedHtml(b.en);
+        const thLine = formatCuratedHtml(b.th);
+        const enLine = formatCuratedHtml(b.en);
         return `
           <li class="kt-bullet-item">
             <span class="kt-bullet-num">${String(idx + 1).padStart(2, "0")}</span>
@@ -2297,22 +2088,22 @@
     // Within-module 3-step alignment cards (Prev -> Current -> Next)
     const prevCardHtml = prevEntry
       ? `<button type="button" class="kt-flow-node is-neighbor" data-kt-switch="${escapeHtml(prevKey)}">
-           <span class="kt-flow-dir">← รับไม้ต่อจาก (${escapeHtml(prevKey.replace(":", " · "))})</span>
+           <span class="kt-flow-dir">← พื้นฐานก่อนหน้า (${escapeHtml(prevKey.replace(":", " · หมวด "))})</span>
            <strong class="kt-flow-node-title">${escapeHtml(showTH ? prevEntry.titleTH : prevEntry.titleEN)}</strong>
          </button>`
       : `<div class="kt-flow-node is-origin">
-           <span class="kt-flow-dir">จุดเริ่มต้นของบท ${escapeHtml(modCode)}</span>
+           <span class="kt-flow-dir">ขอบเขตรวมของบท ${escapeHtml(modCode)} ตาม Table Spec</span>
            <strong class="kt-flow-node-title">${escapeHtml(showTH ? modMeta.arcTH : modMeta.arcEN)}</strong>
          </div>`;
 
     const nextCardHtml = nextEntry
       ? `<button type="button" class="kt-flow-node is-neighbor" data-kt-switch="${escapeHtml(nextKey)}">
-           <span class="kt-flow-dir">ส่งไม้ต่อสู่ (${escapeHtml(nextKey.replace(":sum", " · สรุป").replace(":", " · "))}) →</span>
+           <span class="kt-flow-dir">เชื่อมต่อไปยัง (${escapeHtml(nextKey.replace(":sum", " · สรุปทั้งบท").replace(":", " · หมวด "))}) →</span>
            <strong class="kt-flow-node-title">${escapeHtml(showTH ? nextEntry.titleTH : nextEntry.titleEN)}</strong>
          </button>`
       : `<div class="kt-flow-node is-origin">
-           <span class="kt-flow-dir">จุดสังเคราะห์ท้ายบท ${escapeHtml(modCode)}</span>
-           <strong class="kt-flow-node-title">${escapeHtml(showTH ? "เชื่อมสู่การทำ Self-Quiz และอภิปรายกรณีศึกษาในชั้นเรียน" : "Connects to Self-Quiz & Classroom Case Discussion")}</strong>
+           <span class="kt-flow-dir">การนำไปประยุกต์ท้ายบท ${escapeHtml(modCode)}</span>
+           <strong class="kt-flow-node-title">${escapeHtml(showTH ? "เชื่อมสู่แบบฝึกหัด Self-Quiz การจดสรุป A4 Open Note และอภิปรายกรณีศึกษาในชั้นเรียน" : "Connects to Self-Quiz, A4 Open-Note synthesis & Classroom Case Discussion")}</strong>
          </div>`;
 
     // Cross-HS alignment cards
@@ -2324,8 +2115,11 @@
             <button type="button" class="kt-cross-pill" data-kt-switch-push="${escapeHtml(c.target)}">
               ${escapeHtml(showTH ? c.labelTH : c.labelEN)} →
             </button>
-            <button type="button" class="kt-cross-jump-doc" data-kt-jump-doc="${escapeHtml(c.target)}" title="เปิดอ่านเนื้อหาเต็มของหัวข้อนี้">
-              เปิดเอกสาร
+            <button type="button" class="kt-cross-jump-doc" data-kt-jump-concise="${escapeHtml(c.target)}" title="เปิดอ่านฉบับย่อของหัวข้อนี้">
+              ⚡ ฉบับย่อ
+            </button>
+            <button type="button" class="kt-cross-jump-doc" data-kt-jump-full="${escapeHtml(c.target)}" title="เปิดอ่านฉบับเต็มของหัวข้อนี้">
+              📘 ฉบับเต็ม
             </button>
           </div>
           ${showTH ? `<p class="kt-cross-why-th">${formatCuratedHtml(c.whyTH)}</p>` : ""}
@@ -2347,8 +2141,6 @@
       })
       .join("");
 
-    const savedKey = getGeminiKey();
-
     modalBackdrop.innerHTML = `
       <div class="kt-modal-sheet" role="document">
         <header class="kt-modal-head">
@@ -2356,7 +2148,7 @@
             <div class="kt-head-badges">
               <span class="kt-mod-badge">${escapeHtml(modCode)}</span>
               <span class="kt-sec-label">${escapeHtml(showTH ? activeData.secLabelTH : activeData.secLabelEN)}</span>
-              <span class="kt-carbon-badge" title="Conceptualized with Gemini 4 Carbon (High Thinking)">${SPARK_SVG}<span>${escapeHtml(modelBadgeText)}</span></span>
+              <span class="kt-carbon-badge" title="กรอบเนื้อหาตาม Table Specification รายวิชา RACM 303">${SPEC_SVG}<span>${escapeHtml(specBadgeText)}</span></span>
               ${backCrumbHtml}
             </div>
             <div class="kt-head-controls">
@@ -2376,30 +2168,35 @@
 
           <div class="kt-nav-bars">
             <div class="kt-stepper-row">
-              <span class="kt-bar-caption">ลำดับในบท ${escapeHtml(modCode)}:</span>
+              <span class="kt-bar-caption">หมวดในบท ${escapeHtml(modCode)}:</span>
               <div class="kt-stepper-pills">${stepperHtml}</div>
             </div>
             <div class="kt-spine-row">
-              <span class="kt-bar-caption">ข้ามบทเรียน:</span>
+              <span class="kt-bar-caption">Table Spec ทั้งชุด:</span>
               <div class="kt-spine-pills">${moduleSpineHtml}</div>
             </div>
           </div>
         </header>
 
         <div class="kt-modal-body">
-          <!-- 1. Catchy, Polite Summary Statement -->
-          <section class="kt-summary-box" aria-label="Summary Statement">
-            <div class="kt-section-kicker">SUMMARY STATEMENT · ประเด็นสื่อสารหลัก</div>
-            ${showTH ? `<p class="kt-summary-th">“${escapeHtml(activeData.summaryTH)}”</p>` : ""}
-            ${showEN ? `<p class="kt-summary-en">“${escapeHtml(activeData.summaryEN)}”</p>` : ""}
+          <!-- 1. Core Competency / Learning Objective Statement per Table Spec -->
+          <section class="kt-summary-box" aria-label="ขอบเขตวัตถุประสงค์ตาม Table Spec">
+            <div class="kt-section-kicker">LEARNING OBJECTIVE &amp; TABLE SPEC SCOPE · เป้าหมายความเข้าใจที่ต้องทำได้ในหมวดนี้</div>
+            ${showTH ? `<p class="kt-summary-th">${escapeHtml(activeData.summaryTH)}</p>` : ""}
+            ${showEN ? `<p class="kt-summary-en">${escapeHtml(activeData.summaryEN)}</p>` : ""}
           </section>
 
-          <!-- 2. Digestible Key Takeaways Bullets -->
-          <section class="kt-block" aria-label="Key Takeaways">
-            <div class="kt-section-kicker">KEY TAKEAWAYS FOR LESSONS LEARNED · บทเรียนสำคัญรายประเด็น</div>
+          <!-- 2. What You Should Know Bullets -->
+          <section class="kt-block" aria-label="ประเด็นสำคัญที่ควรรู้ตาม Table Spec">
+            <div class="kt-section-kicker">WHAT YOU SHOULD KNOW · ประเด็นสำคัญที่ควรรู้ แยกแยะ และนำไปใช้ได้จริง</div>
             <ul class="kt-bullet-list">
               ${bulletsHtml}
             </ul>
+            <div class="kt-study-jump-row">
+              <button type="button" class="kt-study-jump-btn is-concise" data-kt-jump-concise="${escapeHtml(activeKtKey)}">⚡ เปิดอ่านส่วนนี้ในฉบับย่อ (${escapeHtml(modCode)} Abridged) →</button>
+              <button type="button" class="kt-study-jump-btn is-full" data-kt-jump-full="${escapeHtml(activeKtKey)}">📘 เปิดอ่านขยายความในฉบับเต็ม (${escapeHtml(modCode)} Full) →</button>
+              <button type="button" class="kt-study-jump-btn is-quiz" data-kt-open-quiz="${escapeHtml(modCode)}">🧠 ลองทำโจทย์ทบทวนบท ${escapeHtml(modCode)} →</button>
+            </div>
           </section>
 
           ${
@@ -2409,14 +2206,14 @@
               : ""
           }
 
-          <!-- 3. Internal & Cross-HS Logical Flow Alignment -->
-          <section class="kt-block kt-flow-section" aria-label="Internal Alignment of Logical Flow">
-            <div class="kt-section-kicker">${FLOW_SVG}<span>INTERNAL &amp; CROSS-HS LOGICAL FLOW · ความสอดรับของลำดับความคิด</span></div>
+          <!-- 3. Curriculum & Table Spec Alignment -->
+          <section class="kt-block kt-flow-section" aria-label="ความเชื่อมโยงตามโครงสร้างหลักสูตร">
+            <div class="kt-section-kicker">${FLOW_SVG}<span>CURRICULUM &amp; TABLE SPEC ALIGNMENT · ความเชื่อมโยงในบทและข้ามบทเรียน</span></div>
 
             <div class="kt-within-flow-grid">
               ${prevCardHtml}
               <div class="kt-flow-node is-current">
-                <span class="kt-flow-dir">บทบาทของหัวข้อนี้ในสายตรรกะ (${escapeHtml(activeKtKey.replace(":sum", " · สรุป").replace(":", " · หมวด "))})</span>
+                <span class="kt-flow-dir">จุดเน้นของหมวดนี้ในโครงสร้างเนื้อหา (${escapeHtml(activeKtKey.replace(":sum", " · สรุปทั้งบท").replace(":", " · หมวด "))})</span>
                 ${showTH ? `<p class="kt-flow-role-th">${formatCuratedHtml(activeData.flowRoleTH)}</p>` : ""}
                 ${showEN ? `<p class="kt-flow-role-en">${formatCuratedHtml(activeData.flowRoleEN)}</p>` : ""}
               </div>
@@ -2426,16 +2223,16 @@
             ${
               crossHtml
                 ? `<div class="kt-cross-wrap">
-                     <div class="kt-cross-heading">ความเชื่อมโยงข้ามบทเรียน (ST1 &amp; HS1–HS6 Curriculum Alignment)</div>
+                     <div class="kt-cross-heading">ประเด็นเชื่อมโยงข้ามบทที่ออกสอบและใช้ร่วมกันในภาคสนาม (ST1 &amp; HS1–HS6)</div>
                      <div class="kt-cross-grid">${crossHtml}</div>
                    </div>`
                 : ""
             }
           </section>
 
-          <!-- 4. Ending with Keywords -->
-          <section class="kt-block kt-keywords-section" aria-label="Keywords">
-            <div class="kt-section-kicker">KEYWORDS · คำสำคัญหลัก</div>
+          <!-- 4. Core Terms for Open-Note A4 -->
+          <section class="kt-block kt-keywords-section" aria-label="คำสำคัญสำหรับทบทวนและเตรียมสอบ Open Note">
+            <div class="kt-section-kicker">CORE TERMS FOR OPEN NOTE (A4) · คำสำคัญและกรอบแนวคิดที่ควรแม่นยำ</div>
             <div class="kt-kw-row">${keywordsHtml}</div>
           </section>
         </div>
@@ -2443,46 +2240,28 @@
         <footer class="kt-modal-foot">
           <div class="kt-foot-main">
             <div class="kt-foot-nav">
-              <button type="button" class="btn sm" data-kt-switch="${escapeHtml(prevKey)}" ${prevKey ? "" : "disabled"}>← หัวข้อก่อนหน้า</button>
-              <button type="button" class="btn sm" data-kt-switch="${escapeHtml(nextKey)}" ${nextKey ? "" : "disabled"}>หัวข้อถัดไป →</button>
-              <button type="button" class="btn sm" data-kt-jump-doc="${escapeHtml(activeKtKey)}">ไปยังเนื้อหาส่วนนี้ในเอกสาร</button>
+              <button type="button" class="btn sm" data-kt-switch="${escapeHtml(prevKey)}" ${prevKey ? "" : "disabled"}>← หมวดก่อนหน้า</button>
+              <button type="button" class="btn sm" data-kt-switch="${escapeHtml(nextKey)}" ${nextKey ? "" : "disabled"}>หมวดถัดไป →</button>
+              <button type="button" class="btn sm" data-kt-jump-doc="${escapeHtml(activeKtKey)}">ไปยังหัวข้อนี้ในหน้าปัจจุบัน</button>
             </div>
             <div class="kt-foot-ai-btns">
-              ${
-                liveOverride
-                  ? `<button type="button" class="btn sm" data-kt-reset-live="1">คืนค่าต้นฉบับมาตรฐาน</button>`
-                  : ""
-              }
-              <button type="button" class="btn sm kt-ai-toggle-btn" data-kt-toggle-api="1">
-                ${SPARK_SVG}<span>สังเคราะห์สดด้วย Gemini 4 Carbon · High</span>
-              </button>
+              <button type="button" class="btn sm teal" data-kt-jump-concise="${escapeHtml(activeKtKey)}">⚡ อ่านฉบับย่อหมวดนี้</button>
+              <button type="button" class="btn sm primary" data-kt-jump-full="${escapeHtml(activeKtKey)}">📘 อ่านฉบับเต็มหมวดนี้</button>
             </div>
           </div>
-
-          ${
-            showApiPanel
-              ? `<div class="kt-api-drawer">
-                   <div class="kt-api-row">
-                     <input type="password" id="ktGeminiKeyInput" class="kt-api-input" placeholder="Gemini API Key (AIza... ใช้ร่วมกับระบบตรวจคำตอบอัตโนมัติ)" value="${escapeHtml(savedKey)}" autocomplete="off" />
-                     <input type="text" id="ktCustomFocusInput" class="kt-api-focus-input" placeholder="ประเด็นที่อยากให้เน้นเพิ่มเติม (เว้นว่างได้ เช่น เชื่อมมุมคลินิกเวชปฏิบัติ)" value="${escapeHtml((liveOverride && liveOverride.customFocus) || "")}" />
-                     <button type="button" class="btn sm primary" data-kt-run-live="1" ${isGeneratingLive ? "disabled" : ""}>
-                       ${isGeneratingLive ? "กำลังสังเคราะห์ด้วย Carbon High…" : "สังเคราะห์ใหม่"}
-                     </button>
-                   </div>
-                   ${liveStatusMsg ? `<div class="kt-api-status is-ok">${escapeHtml(liveStatusMsg)}</div>` : ""}
-                   ${liveErrorMsg ? `<div class="kt-api-status is-err">${escapeHtml(liveErrorMsg)}</div>` : ""}
-                 </div>`
-              : ""
-          }
         </footer>
       </div>
     `;
   }
 
-  /* ---------- Prose Enhancement: Inject Section Key Takeaways Trigger Buttons ---------- */
+  /* ---------- Prose Enhancement: Inject Section Table Spec Trigger Buttons ---------- */
   function createTriggerBar(ktKey, compactLabel) {
     const entry = TAKEAWAYS_DB[ktKey];
     if (!entry) return null;
+    const [modCode] = String(ktKey || "").split(":");
+    const modMeta = MODULE_META[modCode] || {};
+    const pillBadge = modMeta.specPillTH || "Table Spec · TH/EN";
+
     const bar = document.createElement("div");
     bar.className = "sec-kt-bar hsd-no-print";
     bar.setAttribute("data-kt-key", ktKey);
@@ -2492,9 +2271,9 @@
     btn.className = "sec-kt-btn";
     btn.setAttribute("data-kt-open", ktKey);
     btn.innerHTML =
-      `${SPARK_SVG}` +
-      `<span class="sec-kt-btn-main">${escapeHtml(compactLabel || "Key Takeaways · สรุปแก่นความคิดและสายตรรกะ")}</span>` +
-      `<span class="sec-kt-btn-model">Carbon High · TH/EN</span>`;
+      `${SPEC_SVG}` +
+      `<span class="sec-kt-btn-main">${escapeHtml(compactLabel || "ประเด็นที่ควรรู้ประจำหมวด · ตามกรอบ Table Spec")}</span>` +
+      `<span class="sec-kt-btn-model">${escapeHtml(pillBadge)}</span>`;
 
     bar.appendChild(btn);
     return bar;
@@ -2505,22 +2284,26 @@
     const modCode = detectModCodeFromContainer(proseContainer, explicitDocId);
     if (!modCode || !MODULE_META[modCode]) return;
 
-    // 1. Add overview Logical Flow & Key Takeaways bar beneath h2.doc-h1 if present (Scroll reader)
+    // 1. Add overview Table Specification Scope bar beneath h2.doc-h1 if present (Scroll reader)
     const docH1 = proseContainer.querySelector("h2.doc-h1, .doc-h1");
     if (docH1 && !proseContainer.querySelector(".doc-kt-overview-bar")) {
       const mod = MODULE_META[modCode];
       const firstKey = `${modCode}:1`;
       if (TAKEAWAYS_DB[firstKey]) {
+        const weightNote =
+          mod.specWeight && mod.specWeight !== "รากฐาน"
+            ? `สัดส่วนข้อสอบ ${mod.specWeight} · Open Note A4`
+            : "รากฐานคิดเชิงระบบเชื่อม HS1–HS6";
         const ov = document.createElement("div");
         ov.className = "doc-kt-overview-bar hsd-no-print";
         ov.innerHTML = `
           <div class="doc-kt-ov-copy">
-            <span class="doc-kt-ov-badge">${SPARK_SVG}<span>Conceptualized Flow · ${escapeHtml(modCode)}</span></span>
+            <span class="doc-kt-ov-badge">${SPEC_SVG}<span>กรอบสิ่งที่ควรรู้ตาม Table Specification · ${escapeHtml(modCode)} (${escapeHtml(weightNote)})</span></span>
             <span class="doc-kt-ov-text">${escapeHtml(mod.arcTH)}</span>
           </div>
           <button type="button" class="sec-kt-btn is-overview" data-kt-open="${escapeHtml(firstKey)}">
             ${FLOW_SVG}
-            <span class="sec-kt-btn-main">ดู Key Takeaways &amp; Logical Flow ทั้งบท (${mod.sections.length - 1} หมวด)</span>
+            <span class="sec-kt-btn-main">ดูประเด็นที่ควรรู้ครบทุกหมวด (${mod.sections.length - 1} หมวด)</span>
           </button>
         `;
         // Insert right after the author/date header paragraphs following doc-h1
@@ -2536,7 +2319,7 @@
       }
     }
 
-    // 2. Inject Key Takeaways button right after every numbered H2 and Conclusion H2
+    // 2. Inject Table Spec "ประเด็นที่ควรรู้" button right after every numbered H2 and Conclusion H2
     const h2List = [...proseContainer.querySelectorAll("h2")];
     let injectedAny = false;
     h2List.forEach((h2) => {
@@ -2551,8 +2334,8 @@
       const bar = createTriggerBar(
         ktKey,
         isSum
-          ? "Key Takeaways · สังเคราะห์บทเรียนทั้งบท & เชื่อมข้ามบท"
-          : "Key Takeaways · สรุปแก่นความคิดและสายตรรกะประจำหมวด"
+          ? "สรุปสิ่งที่ควรรู้ทั้งบท & ประเด็นเตรียมสอบ Open Note · ตาม Table Spec"
+          : "ประเด็นที่ควรรู้ประจำหมวด · ตามกรอบ Table Spec"
       );
       if (bar) {
         h2.insertAdjacentElement("afterend", bar);
@@ -2571,7 +2354,7 @@
       if (firstH3) {
         const ktKey = matchSubheadingToSectionKey(modCode, firstH3.textContent || "");
         if (ktKey) {
-          const bar = createTriggerBar(ktKey, "Key Takeaways ของหมวดหลักนี้ · สรุปแก่นความคิด & สายตรรกะ");
+          const bar = createTriggerBar(ktKey, "ประเด็นที่ควรรู้ของหมวดหลักนี้ · ตามกรอบ Table Spec");
           if (bar) firstH3.insertAdjacentElement("afterend", bar);
         }
       }
@@ -2579,7 +2362,7 @@
   }
 
   /* ---------- Global Delegated Event Listeners ---------- */
-  document.addEventListener("click", async (ev) => {
+  document.addEventListener("click", (ev) => {
     const target = ev.target && ev.target.closest ? ev.target : null;
     if (!target) return;
 
@@ -2612,8 +2395,6 @@
       const k = switchBtn.getAttribute("data-kt-switch");
       if (k && TAKEAWAYS_DB[k]) {
         activeKtKey = k;
-        liveErrorMsg = "";
-        liveStatusMsg = "";
         renderModalContents();
       }
       return;
@@ -2639,58 +2420,31 @@
       return;
     }
 
+    const jumpConciseBtn = target.closest("[data-kt-jump-concise]");
+    if (jumpConciseBtn) {
+      ev.preventDefault();
+      jumpToSectionInPortal(jumpConciseBtn.getAttribute("data-kt-jump-concise"), "concise");
+      return;
+    }
+
+    const jumpFullBtn = target.closest("[data-kt-jump-full]");
+    if (jumpFullBtn) {
+      ev.preventDefault();
+      jumpToSectionInPortal(jumpFullBtn.getAttribute("data-kt-jump-full"), "full");
+      return;
+    }
+
     const jumpBtn = target.closest("[data-kt-jump-doc]");
     if (jumpBtn) {
       ev.preventDefault();
-      jumpToSectionInPortal(jumpBtn.getAttribute("data-kt-jump-doc"));
+      jumpToSectionInPortal(jumpBtn.getAttribute("data-kt-jump-doc"), "");
       return;
     }
 
-    if (target.closest("[data-kt-toggle-api]")) {
+    const openQuizBtn = target.closest("[data-kt-open-quiz]");
+    if (openQuizBtn) {
       ev.preventDefault();
-      showApiPanel = !showApiPanel;
-      liveErrorMsg = "";
-      liveStatusMsg = "";
-      renderModalContents();
-      return;
-    }
-
-    if (target.closest("[data-kt-reset-live]")) {
-      ev.preventDefault();
-      const c = loadLiveCache();
-      delete c[activeKtKey];
-      saveLiveCache(c);
-      liveStatusMsg = "คืนค่าแก่นความคิดมาตรฐานเรียบร้อยแล้ว";
-      liveErrorMsg = "";
-      renderModalContents();
-      return;
-    }
-
-    if (target.closest("[data-kt-run-live]")) {
-      ev.preventDefault();
-      if (isGeneratingLive) return;
-      const keyInp = document.getElementById("ktGeminiKeyInput");
-      const focusInp = document.getElementById("ktCustomFocusInput");
-      if (keyInp) setGeminiKey(keyInp.value);
-      const customFocus = focusInp ? focusInp.value.trim() : "";
-
-      isGeneratingLive = true;
-      liveErrorMsg = "";
-      liveStatusMsg = "";
-      renderModalContents();
-
-      try {
-        const result = await callCarbonHighLive(activeKtKey, customFocus);
-        const c = loadLiveCache();
-        c[activeKtKey] = result;
-        saveLiveCache(c);
-        liveStatusMsg = `สังเคราะห์สำเร็จด้วย ${result.modelBadge}`;
-      } catch (err) {
-        liveErrorMsg = (err && err.message) || "เกิดข้อผิดพลาดในการเชื่อมต่อ Gemini API";
-      } finally {
-        isGeneratingLive = false;
-        renderModalContents();
-      }
+      openSelfQuizFromModal(openQuizBtn.getAttribute("data-kt-open-quiz"));
     }
   });
 

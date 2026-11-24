@@ -39538,3 +39538,874 @@ html[data-theme="dark"] .td-mentor-chip.is-staff {
   img[src*="advisor_wich."]      { --adv-z: 1.76; --adv-cz: 2.08; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
   img[src*="advisor_wichai"]     { --adv-z: 1.56; --adv-cz: 1.84; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
 }
+
+
+/* ==========================================================================
+   MULTI-PLATFORM FULLSCREEN SLIDE SHOW: PHONE (PORTRAIT/LANDSCAPE),
+   DUO/FOLDABLE, TABLET (PORTRAIT/LANDSCAPE), PINCH-ZOOM, IN-SLIDE SCROLL,
+   NON-CLIPPING PANE HEADER ("สถานการณ์"), & VIRTUAL KEYBOARD COMPATIBILITY
+   ========================================================================== */
+
+/* 0. Non-Clipping / Non-Overlapping Pane Header Bar (.hsd-pane-snap-bar — keeps "สถานการณ์..." 100% readable) */
+.hsd-pane-snap-bar,
+.ppt-slide-sheet .hsd-pane-snap-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  column-gap: 8px !important;
+  row-gap: 5px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.hsd-pane-snap-bar .hsd-pane-snap-title,
+.ppt-slide-sheet .hsd-pane-snap-bar .hsd-pane-snap-title {
+  flex: 1 1 auto !important;
+  min-width: min(100%, max-content) !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.44 !important;
+  padding: 1px 2px 1px 0;
+}
+
+.hsd-pane-snap-bar .hsd-pane-snap-title > span,
+.ppt-slide-sheet .hsd-pane-snap-bar .hsd-pane-snap-title > span {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: break-word;
+}
+
+.hsd-pane-snap-bar .hsd-pane-bar-actions,
+.ppt-slide-sheet .hsd-pane-snap-bar .hsd-pane-bar-actions {
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex: 0 1 auto !important;
+  max-width: 100% !important;
+  margin-left: auto;
+}
+
+@media (max-width: 1080px) {
+  .ppt-slide-sheet .hsd-pane-snap-bar .hsd-pane-vis-btn {
+    padding: 2px 7px !important;
+    font-size: 11px !important;
+    height: 22px !important;
+  }
+
+  .ppt-slide-sheet .hsd-pane-snap-bar .hsd-box-font-btn {
+    height: 20px !important;
+    min-width: 22px !important;
+    padding: 0 4px !important;
+    font-size: 10.4px !important;
+  }
+
+  .ppt-slide-sheet .hsd-pane-snap-bar .hsd-box-font-btn.is-pct {
+    min-width: 52px !important;
+  }
+}
+
+/* Prevent horizontal bleed between Bento cards & seal sticky header flush to card top in split mode */
+.ppt-slide-sheet .hsd-slide-left,
+.ppt-slide-sheet .hsd-slide-right {
+  overflow-x: clip;
+}
+
+html:not([data-theme="dark"]) .ppt-slide-sheet .ppt-slide-master-head {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #1d1d1f !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+html[data-theme="dark"] .ppt-slide-sheet .ppt-slide-master-head {
+  background: rgba(17, 19, 24, 0.96) !important;
+  color: #f5f5f7 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.ppt-slide-sheet:not(.is-responsive-flow) .hsd-slide-left > .hsd-pane-snap-bar,
+.ppt-slide-sheet:not(.is-responsive-flow) .hsd-slide-right > .hsd-pane-snap-bar {
+  top: calc(-1 * clamp(11px, calc(14px * var(--ppt-scale, 1)), 20px)) !important;
+  margin-top: calc(-1 * clamp(8px, calc(10px * var(--ppt-scale, 1)), 14px)) !important;
+  padding-top: clamp(8px, calc(10px * var(--ppt-scale, 1)), 14px) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="dark"] .ppt-slide-sheet:not(.is-responsive-flow) .hsd-slide-left > .hsd-pane-snap-bar,
+html[data-theme="dark"] .ppt-slide-sheet:not(.is-responsive-flow) .hsd-slide-right > .hsd-pane-snap-bar {
+  background: #16181e !important;
+}
+
+#pptPresentationOverlay .is-pinch-zoomed .hsd-pane-snap-bar,
+#hsdCasesContainer .is-pinch-zoomed .hsd-pane-snap-bar,
+#pptPresentationOverlay .ppt-slide-sheet.is-responsive-flow .hsd-pane-snap-bar,
+#hsdCasesContainer .ppt-slide-sheet.is-responsive-flow .hsd-pane-snap-bar,
+.ppt-slide-sheet.is-responsive-flow .hsd-pane-snap-bar {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+}
+
+/* 1. Dynamic Visual Viewport & Safe-Area Fit (tracks mobile browser bars & virtual keyboard) */
+.ppt-presentation-overlay {
+  top: var(--ppt-vv-top, 0px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  height: var(--ppt-vvh, 100vh) !important;
+  height: var(--ppt-vvh, 100dvh) !important;
+  max-height: var(--ppt-vvh, 100dvh) !important;
+  padding-top: env(safe-area-inset-top, 0px);
+  overscroll-behavior: contain;
+}
+
+/* 2. Pinch-Zoom Sizer & Stage Scroll Modes */
+.ppt-fs-zoom-sizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Full-Stage Bento Split (Unfolded Duo / Foldable & Horizontal Tablet — 0% black letterbox waste) */
+.ppt-fs-stage-wrap.is-stage-resp-split:not(.is-pinch-zoomed),
+.hsd-slide-shell .ppt-canvas-stage.is-stage-resp-split:not(.is-pinch-zoomed):not(.is-sorter-stage) {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.ppt-fs-stage-wrap.is-stage-resp-split:not(.is-pinch-zoomed) > .ppt-fs-zoom-sizer,
+.ppt-canvas-stage.is-stage-resp-split:not(.is-pinch-zoomed) > .ppt-fs-zoom-sizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* In-Slide Vertical Scroll Mode (Phones, Portrait Tablets, Short Landscape, & Virtual Keyboard Open) */
+.ppt-fs-stage-wrap.is-stage-resp-flow:not(.is-pinch-zoomed),
+.hsd-slide-shell .ppt-canvas-stage.is-stage-resp-flow:not(.is-pinch-zoomed):not(.is-sorter-stage) {
+  display: block !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scroll-behavior: smooth;
+}
+
+.ppt-fs-stage-wrap.is-stage-resp-flow {
+  background: #f5f5f7;
+}
+
+html[data-theme="dark"] .ppt-fs-stage-wrap.is-stage-resp-flow {
+  background: #0b0c10;
+}
+
+.ppt-fs-stage-wrap.is-stage-resp-flow:not(.is-pinch-zoomed) > .ppt-fs-zoom-sizer,
+.ppt-canvas-stage.is-stage-resp-flow:not(.is-pinch-zoomed) > .ppt-fs-zoom-sizer {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+  height: auto;
+}
+
+/* Active Pinch-Zoom State: smooth 1-finger 2D momentum pan + deterministic 2-finger focal pinch-zoom */
+.ppt-fs-stage-wrap.is-pinch-zoomed,
+.hsd-slide-shell .ppt-canvas-stage.is-pinch-zoomed:not(.is-sorter-stage) {
+  display: block !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+}
+
+.ppt-fs-stage-wrap.is-pinch-zoomed > .ppt-fs-zoom-sizer,
+.ppt-canvas-stage.is-pinch-zoomed > .ppt-fs-zoom-sizer {
+  display: block !important;
+  margin: 0 auto;
+}
+
+.ppt-fs-stage-wrap:not(.is-stage-resp-flow):not(.is-stage-resp-split):not(.is-pinch-zoomed) {
+  touch-action: none;
+}
+
+/* 3. Responsive Slide Sheet & Sticky/Adaptive Master Header */
+.ppt-slide-sheet.is-responsive-slide {
+  aspect-ratio: auto !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow {
+  height: auto !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.ppt-presentation-overlay:not(.is-kbd-open):not(.is-short-landscape)
+  .ppt-fs-stage-wrap:not(.is-pinch-zoomed)
+  .ppt-slide-sheet.is-responsive-flow
+  > .ppt-slide-master-head {
+  position: sticky;
+  top: 0;
+  z-index: 18;
+}
+
+#pptPresentationOverlay .ppt-presentation-overlay.is-kbd-open .ppt-slide-master-head,
+.ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-flow > .ppt-slide-master-head,
+.ppt-presentation-overlay.is-short-landscape .ppt-slide-sheet.is-responsive-flow > .ppt-slide-master-head,
+#pptPresentationOverlay .is-pinch-zoomed .ppt-slide-master-head,
+#hsdCasesContainer .is-pinch-zoomed .ppt-slide-master-head,
+.ppt-fs-stage-wrap.is-pinch-zoomed .ppt-slide-sheet > .ppt-slide-master-head {
+  position: relative !important;
+  top: auto !important;
+}
+
+/* Prevent Master Header title from collapsing to 0px on phones & portrait tablets */
+@media (max-width: 900px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-slide-master-head {
+    flex-wrap: wrap;
+    padding: 7px 12px !important;
+    gap: 6px 10px !important;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 13.8px !important;
+    line-height: 1.34;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-right {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1px;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-right::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 4. Unclip Inner Slide Stages & Cards in In-Slide Flow Mode (Single Unified Scroll Within Slide) */
+.ppt-slide-sheet.is-responsive-flow .hsd-slide-stage.is-16x9-canvas,
+.ppt-slide-sheet.is-responsive-flow .hsd-key-slide-stage.is-16x9-canvas {
+  flex: 1 0 auto !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding: 10px 12px 14px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .hsd-slide-left,
+.ppt-slide-sheet.is-responsive-flow .hsd-slide-right,
+.ppt-slide-sheet.is-responsive-flow .hsd-key-slide-stage.is-16x9-canvas > .hsd-box-zoom-body,
+.ppt-slide-sheet.is-responsive-flow .hsd-box-zoom-body {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow-y: visible !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-slide-master-foot {
+  margin-top: auto;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 7px 12px !important;
+  font-size: 11px !important;
+}
+
+/* 5. Opening Cover & Check-in Slide (.ppt-opening-kahoot-stage) in Responsive Flow */
+.ppt-ok-card {
+  flex-shrink: 0;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-opening-kahoot-stage {
+  container-type: inline-size !important;
+  flex: 1 0 auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 12px !important;
+  gap: 12px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-left,
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-right,
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-roster-card {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-mobile-stack .ppt-opening-kahoot-stage,
+#hsdCasesContainer .ppt-slide-sheet.is-mobile-stack .ppt-opening-kahoot-stage,
+.ppt-slide-sheet.is-mobile-stack .ppt-opening-kahoot-stage {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-card,
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-roster-card {
+  padding: 14px 15px !important;
+  border-radius: 14px !important;
+  gap: 9px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-kicker {
+  font-size: 12.5px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-summary {
+  font-size: 14px !important;
+  line-height: 1.52 !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-q-btn {
+  font-size: 13.4px !important;
+  padding: 9px 12px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-start-btn,
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-join-cta {
+  height: 36px !important;
+  font-size: 13.5px !important;
+  padding: 0 16px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-pin-code {
+  font-size: 24px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-ok-stu-chip {
+  font-size: 12.4px !important;
+  padding: 5px 9px !important;
+}
+
+/* 6. Stage ④ Key Takeaway Bento Slide (.ppt-concept-summary-stage) in Responsive Flow */
+.ppt-slide-sheet.is-responsive-flow .ppt-concept-summary-stage {
+  container-type: inline-size !important;
+  flex: 1 0 auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 14px 14px 18px !important;
+  gap: 14px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-dim-grid {
+  grid-template-rows: auto !important;
+  gap: 12px !important;
+}
+
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid,
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid.count-2,
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid.count-3,
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid.count-5,
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid.count-6 {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+}
+
+.ppt-slide-sheet.is-mobile-stack .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card,
+.ppt-slide-sheet.is-flow-two-col .ppt-cs-dim-grid.count-5 > .ppt-cs-dim-card {
+  grid-column: span 1 !important;
+}
+
+.ppt-slide-sheet.is-flow-two-col .ppt-cs-dim-grid,
+.ppt-slide-sheet.is-flow-two-col .ppt-cs-dim-grid.count-3,
+.ppt-slide-sheet.is-flow-two-col .ppt-cs-dim-grid.count-5,
+.ppt-slide-sheet.is-flow-two-col .ppt-cs-dim-grid.count-6 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: auto !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-kicker {
+  font-size: 13px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-source-note {
+  font-size: 12px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-core-def {
+  font-size: 16.5px !important;
+  line-height: 1.45 !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-dim-card {
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  gap: 8px !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-dim-th {
+  font-size: 16px !important;
+  line-height: 1.3 !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .ppt-cs-dim-def {
+  font-size: 14px !important;
+  line-height: 1.52 !important;
+}
+
+/* 7. Mobile Single-Column Stack (High-Specificity Grid Override), Quick-Jump Bar, & Two-Column Flow Split */
+.hsd-mobile-slide-jumpbar {
+  display: none !important;
+}
+
+.ppt-slide-sheet.is-mobile-stack .hsd-mobile-slide-jumpbar {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(245, 245, 247, 0.96);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.ppt-slide-sheet.is-mobile-stack .hsd-mobile-slide-jumpbar::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-theme="dark"] .ppt-slide-sheet.is-mobile-stack .hsd-mobile-slide-jumpbar {
+  background: rgba(15, 18, 25, 0.96);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.hsd-msj-btn {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  color: #1d1d1f;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.hsd-msj-btn.is-primary {
+  background: #0066cc;
+  border-color: #0066cc;
+  color: #ffffff;
+}
+
+html[data-role="faculty"] .hsd-msj-btn.is-primary {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #ffffff;
+}
+
+.hsd-msj-btn.is-fold-toggle {
+  margin-left: auto;
+  background: rgba(15, 23, 42, 0.055);
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #475569;
+}
+
+html[data-theme="dark"] .hsd-msj-btn {
+  background: #1c202b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .hsd-msj-btn.is-primary {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+html[data-role="faculty"][data-theme="dark"] .hsd-msj-btn.is-primary {
+  background: #dc2626;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .hsd-msj-btn.is-fold-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-mobile-stack .hsd-slide-stage.is-16x9-canvas,
+#hsdCasesContainer .ppt-slide-sheet.is-mobile-stack .hsd-slide-stage.is-16x9-canvas,
+.ppt-slide-sheet.is-responsive-slide.is-responsive-flow.is-mobile-stack .hsd-slide-stage.is-16x9-canvas:not(.is-never) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+  row-gap: 12px !important;
+  column-gap: 0 !important;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-mobile-stack .hsd-split-resizer,
+#hsdCasesContainer .ppt-slide-sheet.is-mobile-stack .hsd-split-resizer,
+.ppt-slide-sheet.is-mobile-stack .hsd-split-resizer {
+  display: none !important;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-mobile-stack.is-mobile-scen-folded .hsd-slide-left,
+#hsdCasesContainer .ppt-slide-sheet.is-mobile-stack.is-mobile-scen-folded .hsd-slide-left,
+.ppt-slide-sheet.is-mobile-stack.is-mobile-scen-folded .hsd-slide-left {
+  display: none !important;
+}
+
+/* Two-Column Flow Mode (Horizontal Phones ~844×390 & Landscape Foldables with Keyboard) */
+#pptPresentationOverlay .ppt-slide-sheet.is-flow-two-col .hsd-slide-stage.is-16x9-canvas:not(.is-no-resizer):not(.is-layout-scenario):not(.is-layout-sheet),
+#hsdCasesContainer .ppt-slide-sheet.is-flow-two-col .hsd-slide-stage.is-16x9-canvas:not(.is-no-resizer):not(.is-layout-scenario):not(.is-layout-sheet) {
+  grid-template-columns: minmax(0, var(--hsd-left-pct, 44%)) 12px minmax(0, calc(100% - var(--hsd-left-pct, 44%) - 12px)) !important;
+  grid-template-rows: auto !important;
+  align-items: start !important;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-flow-two-col .hsd-slide-stage.is-16x9-canvas.is-no-resizer:not(.is-layout-scenario):not(.is-layout-sheet),
+#hsdCasesContainer .ppt-slide-sheet.is-flow-two-col .hsd-slide-stage.is-16x9-canvas.is-no-resizer:not(.is-layout-scenario):not(.is-layout-sheet) {
+  grid-template-columns: minmax(0, var(--hsd-left-pct, 44%)) minmax(0, calc(100% - var(--hsd-left-pct, 44%))) !important;
+  grid-template-rows: auto !important;
+  column-gap: 12px !important;
+  align-items: start !important;
+}
+
+/* Explicit safety guard: NEVER allow .hsd-split-resizer to become display:none in 3-column vertical split! */
+.ppt-slide-sheet:not(.is-mobile-stack):not(.is-orient-horizontal) .hsd-split-resizer:not([hidden]) {
+  display: flex !important;
+}
+
+/* Readable Typography & Table Wrapping in Responsive Flow Mode */
+.ppt-slide-sheet.is-responsive-flow .hsd-scenario-box p,
+.ppt-slide-sheet.is-responsive-flow .hsd-dialogue-item p,
+.ppt-slide-sheet.is-responsive-flow .hsd-callout-case p,
+.ppt-slide-sheet.is-responsive-flow .hsd-q-prompt {
+  font-size: 14.8px !important;
+  line-height: 1.56 !important;
+}
+
+.ppt-slide-sheet.is-responsive-flow .hsd-q-title,
+.ppt-slide-sheet.is-responsive-flow .hsd-case-title {
+  font-size: 16.2px !important;
+  line-height: 1.38 !important;
+}
+
+@media (max-width: 620px) {
+  .ppt-slide-sheet.is-mobile-stack .clean-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ppt-slide-sheet.is-mobile-stack .hsd-tk-table {
+    min-width: 440px;
+  }
+}
+
+/* Preserve true 16:9 table columns when user explicitly selects [🖥 16:9] on narrow mobile */
+@media (max-width: 720px) {
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table colgroup {
+    display: table-column-group;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table thead {
+    display: table-header-group;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table {
+    display: table;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table tbody {
+    display: table-row-group;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table tr {
+    display: table-row;
+    padding: 0;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table td {
+    display: table-cell;
+    width: auto;
+  }
+  .ppt-slide-sheet:not(.is-mobile-stack) .hsd-ws-table td[data-col-label]::before {
+    display: none;
+  }
+}
+
+/* Prevent iOS Safari / Mobile Browser automatic zoom jump on input focus */
+@media (pointer: coarse) {
+  .ppt-slide-sheet textarea,
+  .ppt-slide-sheet input[type="text"],
+  .ppt-slide-sheet input[type="search"],
+  .ppt-slide-sheet select,
+  .ppt-presentation-overlay select {
+    font-size: 16px !important;
+  }
+}
+
+/* 8. Pinch-Zoom Pill, Canvas Mode Toggle, Adaptive Mobile Dock, & Virtual Keyboard Helper Bar */
+.ppt-fs-zoom-mode-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ppt-fs-zoom-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 34px;
+}
+
+.ppt-fs-zoom-mode-cluster.is-compact .ppt-fs-zoom-pill {
+  height: 32px;
+}
+
+.ppt-fs-collapsed-dock .ppt-fs-zoom-pill {
+  height: 24px;
+}
+
+.ppt-fs-zbtn {
+  border: 0;
+  background: transparent;
+  color: #f1f5f9;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  height: 100%;
+  padding: 0 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.14s ease;
+}
+
+.ppt-fs-zbtn:hover {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.ppt-fs-zbtn.is-pct {
+  font-size: 11.6px;
+  font-variant-numeric: tabular-nums;
+  padding: 0 7px;
+  min-width: 44px;
+  color: #93c5fd;
+  border-left: 1px solid rgba(148, 163, 184, 0.22);
+  border-right: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.ppt-fs-collapsed-dock .ppt-fs-zbtn {
+  font-size: 12px;
+  padding: 0 7px;
+}
+
+.ppt-fs-collapsed-dock .ppt-fs-zbtn.is-pct {
+  font-size: 10.8px;
+  min-width: 38px;
+  padding: 0 5px;
+}
+
+/* Desktop default: hide mobile-only bars & duplicate tools-row canvas toggle */
+.ppt-fs-kbd-bar,
+.ppt-fs-compact-primary-row,
+.ppt-fs-right-tools .hsd-layout-seg.is-canvas-mode-seg.is-in-tools,
+.ppt-fs-right-tools .ppt-fs-zoom-mode-cluster.is-in-tools-zoom,
+.ppt-fs-tool-btn.is-landscape-tools-toggle {
+  display: none !important;
+}
+
+/* Compact Fullscreen UI (Phones, Duo/Foldable, Portrait Tablets, Short Landscape) */
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-fs-control-bar {
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 6px !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-ribbon-clickers {
+  display: none !important;
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-fs-compact-primary-row {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ppt-fs-compact-primary-row .is-compact-fs-select {
+  flex: 1 1 95px;
+  min-width: 78px;
+  max-width: none !important;
+  height: 32px !important;
+  padding: 0 8px !important;
+  border-radius: 7px;
+  font-size: 12.6px !important;
+}
+
+.ppt-fs-compact-primary-row .ppt-fs-tool-btn {
+  height: 32px !important;
+  padding: 0 9px !important;
+  font-size: 12px !important;
+  flex-shrink: 0;
+}
+
+.ppt-fs-compact-primary-row .ppt-fs-tool-btn.is-compact-nav {
+  padding: 0 10px !important;
+}
+
+.ppt-fs-compact-primary-row .ppt-fs-tool-btn.is-compact-key {
+  background: rgba(120, 53, 15, 0.85);
+  border-color: rgba(251, 191, 36, 0.55);
+  color: #fde68a;
+}
+
+@media (max-width: 540px) {
+  .ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open):not(.is-short-landscape)
+    .ppt-fs-compact-primary-row
+    .ppt-fs-zoom-mode-cluster {
+    display: none !important;
+  }
+  .ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open)
+    .ppt-fs-right-tools
+    .ppt-fs-zoom-mode-cluster.is-in-tools-zoom {
+    display: inline-flex !important;
+  }
+  .ppt-fs-compact-primary-row .is-compact-fs-select {
+    flex: 1 1 80px;
+    min-width: 64px;
+  }
+  .ppt-fs-compact-primary-row .ppt-fs-tool-btn {
+    padding: 0 8px !important;
+  }
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-fs-right-tools {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 6px !important;
+  width: 100%;
+  padding-bottom: 1px;
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-fs-right-tools::-webkit-scrollbar {
+  display: none;
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open) .ppt-fs-right-tools > * {
+  flex-shrink: 0;
+}
+
+.ppt-presentation-overlay.is-compact-fs-ui:not(.is-kbd-open)
+  .ppt-fs-right-tools
+  .hsd-layout-seg.is-canvas-mode-seg.is-in-tools {
+  display: inline-flex !important;
+}
+
+/* Short Landscape Phone Mode (height < 520px): collapse 2nd row behind 🛠 เครื่องมือ toggle */
+.ppt-presentation-overlay.is-short-landscape:not(.is-kbd-open) .ppt-fs-tool-btn.is-landscape-tools-toggle {
+  display: inline-flex !important;
+}
+
+.ppt-presentation-overlay.is-short-landscape:not(.is-fs-tools-open):not(.is-kbd-open) .ppt-fs-right-tools {
+  display: none !important;
+}
+
+/* Virtual Keyboard Open State: ultra-slim 1-line helper bar right above the keyboard */
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-control-bar {
+  padding: 4px 8px !important;
+  gap: 0 !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .ppt-ribbon-clickers,
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-compact-primary-row,
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-right-tools,
+.ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .ppt-slide-master-foot {
+  display: none !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-kbd-bar {
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-kbd-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.ppt-fs-kbd-bar .ppt-fs-tool-btn.is-kbd-mini {
+  height: 30px !important;
+  padding: 0 7px !important;
+  font-size: 11.6px !important;
+  flex-shrink: 0;
+}
+
+.ppt-fs-kbd-badge {
+  font-family: var(--font-mono);
+  font-size: 11.4px;
+  font-weight: 700;
+  color: #cbd5e1;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.ppt-fs-kbd-bar .ppt-fs-tool-btn.is-kbd-done {
+  margin-left: auto;
+  height: 30px !important;
+  padding: 0 10px !important;
+  font-size: 11.8px !important;
+  background: #2563eb !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+  flex-shrink: 0;
+}
+
+/* 9. Normal In-Page Slide Studio Responsive Workspace Fix (< 960px) */
+@media (max-width: 960px) {
+  .hsd-slide-shell.is-ppt-app .ppt-workspace:not(.is-thumbs-collapsed):not(.is-sorter-mode) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .hsd-slide-shell.is-ppt-app:not(.is-ppt-window-max) .ppt-canvas-stage.is-stage-resp-flow {
+    height: clamp(460px, 68dvh, 720px) !important;
+    min-height: 420px !important;
+  }
+}

@@ -22005,10 +22005,17 @@
 
   function isCoarseTouchDevice() {
     try {
-      if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return true;
-      if (window.matchMedia && window.matchMedia("(any-pointer: coarse)").matches && window.innerWidth <= 1400) return true;
+      if (window.matchMedia) {
+        if (window.matchMedia("(pointer: coarse)").matches) return true;
+        if (
+          window.matchMedia("(hover: none)").matches &&
+          window.matchMedia("(any-pointer: coarse)").matches
+        ) {
+          return true;
+        }
+      }
     } catch (_) {}
-    return Boolean("ontouchstart" in window && (navigator.maxTouchPoints || 0) > 0 && window.innerWidth <= 1400);
+    return false;
   }
 
   function isEditableElementFocusedInOverlay() {
@@ -24346,6 +24353,10 @@
     const row = make("div", null, isFullscreen ? "ppt-fs-right-tools" : "ppt-ribbon-tools");
 
     if (isFullscreen && !state.isPptSlideSharePopup) {
+      const toolsZoom = buildFsZoomAndCanvasBarDOM(true);
+      toolsZoom.classList.add("is-in-tools-zoom");
+      row.appendChild(toolsZoom);
+
       const env = getPptViewportEnv();
       const canvasModeSeg = make("div", null, "hsd-layout-seg is-canvas-mode-seg is-in-tools");
       [

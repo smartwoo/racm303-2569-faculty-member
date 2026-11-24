@@ -847,7 +847,7 @@
         if (ch.ktKey) {
           ktBtn.hidden = false;
           ktBtn.setAttribute("data-he-open-kt", ch.ktKey);
-          ktBtn.textContent = `✨ Key Takeaways (${ch.ktKey})`;
+          ktBtn.textContent = `📋 ประเด็นที่ควรรู้ (${ch.ktKey})`;
         } else {
           ktBtn.hidden = true;
         }
@@ -952,7 +952,7 @@
             <div class="he-dock-slide-head">
               <span>🖼 สไลด์ประกอบช่วงเวลานี้ (ซิงค์อัตโนมัติตามเวลาคลิป)</span>
               <div class="he-dock-slide-acts">
-                <button type="button" class="he-slide-act-pill" data-he-open-kt="${esc((initCh && initCh.ktKey) || "HS6:1")}">✨ Key Takeaways</button>
+                <button type="button" class="he-slide-act-pill" data-he-open-kt="${esc((initCh && initCh.ktKey) || "HS6:1")}">📋 ประเด็นที่ควรรู้</button>
                 <button type="button" class="he-slide-act-pill" data-he-zoom-slide="${esc((initCh && initCh.slide) || v.poster)}" data-he-zoom-cap="">🔍 ขยายภาพ</button>
               </div>
             </div>
