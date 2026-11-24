@@ -818,7 +818,7 @@
     },
     {
       id: "s06-roadmap-6weeks",
-      num: "07",
+      num: "06",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
@@ -842,7 +842,7 @@
                 <h3 class="or-card-title is-s06-title">เปิดมุมมองระบบและระบาดฯ</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>25 พ.ย.:</strong> <code>ST1</code> และสุขภาพโลก</li>
+                <li><strong>25 พ.ย.:</strong> <code>ST1</code> และเสวนา <code>SBP</code></li>
                 <li><strong>26 พ.ย.:</strong> <code>HS1</code> ควบคู่ SG #1</li>
                 <li><strong>27 พ.ย.:</strong> <code>EP1–3</code> และ Ex Day 1</li>
               </ul>
@@ -851,7 +851,7 @@
             <div class="or-card is-white is-s06-card">
               <div>
                 <span class="or-card-kicker">W2 · 30 พ.ย.–4 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">เติมเต็ม HS2–6 และ EP4–9</h3>
+                <h3 class="or-card-title is-s06-title">ต่อยอดศาสตร์บริการและหลักฐาน</h3>
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>30 พ.ย.–1 ธ.ค.:</strong> <code>HS2–HS5</code></li>
@@ -863,7 +863,7 @@
             <div class="or-card is-amber-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W3 · 8–12 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">สอบระบาดฯ และเตรียมทีม</h3>
+                <h3 class="or-card-title is-s06-title">ประสานทีมสอบความรู้สู่ชุมชน</h3>
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>8 ธ.ค.:</strong> <strong>Epi Exam</strong>, SPSS, SG #3</li>
@@ -875,7 +875,7 @@
             <div class="or-card is-teal-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W4 · 9–20 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">โรงพยาบาลแหล่งฝึก 9 แห่ง</h3>
+                <h3 class="or-card-title is-s06-title">ลงฝึกฝนเรียนรู้คนเก้าพื้นที่</h3>
               </div>
               <ul class="or-list is-s06-list">
                 <li>เรียนรู้ในพื้นที่จริง <strong>7–9 คืน</strong></li>
@@ -887,7 +887,7 @@
             <div class="or-card is-navy-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W5 · 21–25 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">สอบระบบสุขภาพและฝึก CLD</h3>
+                <h3 class="or-card-title is-s06-title">เชื่อมทฤษฎีคลี่ระบบครบวงจร</h3>
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>21 ธ.ค.:</strong> เตรียมโน้ตสรุป A4</li>
@@ -899,7 +899,7 @@
             <div class="or-card is-rose-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W6 · 28–30 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">สังเคราะห์และนำเสนอทีม</h3>
+                <h3 class="or-card-title is-s06-title">ร่วมสะท้อนสังเคราะห์งานวันนำเสนอ</h3>
               </div>
               <ul class="or-list is-s06-list">
                 <li><strong>28 ธ.ค.:</strong> SG #9–10 เตรียมนำเสนอ</li>
@@ -913,7 +913,7 @@
     },
     {
       id: "s06b-schedule-w1-w3",
-      num: "08",
+      num: "07",
       section: "experience",
       sectionLabel: "Act II · Schedule W1–W3",
       actClass: "is-act-2",
@@ -1087,7 +1087,7 @@
     },
     {
       id: "s06c-schedule-w4-w6",
-      num: "09",
+      num: "08",
       section: "experience",
       sectionLabel: "Act II · Schedule W4–W6",
       actClass: "is-act-2",
@@ -1233,31 +1233,32 @@
     },
     {
       id: "s07-hs-guided-learning",
-      num: "10",
+      num: "09",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
       timeWindow: "09.03 – 09.06 น. (3 นาที)",
       kicker: "02 · HEALTH SYSTEMS SCIENCE ARCHITECTURE (ST1 & HS1–HS6)",
-      title: "การเรียนรู้หมวดระบบสุขภาพแบบนำทาง 5 ขั้นตอน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ",
+      title: "การเรียนรู้หมวดระบบสุขภาพแบบนำทาง 6 ขั้นตอน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ",
       keyTag: "การออกแบบการเรียนรู้",
       keyMessageHtml:
         "สร้างพื้นฐานความรู้สู่ <strong>โน้ตสรุป A4 สำหรับสอบข้อเขียน</strong> ควบคู่กับการฝึก <strong>การคิดเชิงระบบ</strong> เพื่อเชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอทีม (<code>ฟอร์ม 3A</code>)",
       notes:
-        "อธิบายเส้นทางเรียนรู้ 5 ขั้นตอนของ ST1 และ HS1–HS6 ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ (17.5 ชม.) ซึ่งช่วยบ่มเพาะสมรรถนะการคิดเชิงระบบเพื่อใช้เชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอผลงานทีมฟอร์ม 3A และงานสะท้อนคิด",
+        "อธิบายเส้นทางเรียนรู้ 6 ขั้นตอนของ ST1 และ HS1–HS6 ตั้งแต่เอกสารฉบับเต็มและฉบับย่อ แบบทดสอบและคำศัพท์ทบทวน บรรยายสรุป อภิปรายกลุ่มย่อย ไปจนถึงการดู VDO Lecture ทบทวน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ (18.5 ชม.) ซึ่งช่วยบ่มเพาะสมรรถนะการคิดเชิงระบบเพื่อใช้เชื่อมโยงทั้ง 5 วัตถุประสงค์ในการนำเสนอผลงานทีมฟอร์ม 3A และงานสะท้อนคิด",
       render: () => `
         <div class="or-top-fig-stack is-s07-stack">
-          ${figPlate("orient_s07_guided_flow.png", "5-Step Guided Learning Flow and Systems Thinking & Policy Panels", "")}
+          ${figPlate("orient_s07_guided_flow.png", "6-Step Guided Learning Flow including Subgroup Discussion and VDO Lecture Review", "")}
 
           <div class="or-infog-split is-even is-full-h">
             <div class="or-card is-navy-tint is-vcenter" data-fit-solo="1">
-              <span class="or-card-kicker">5-STEP GUIDED LEARNING (ST1 และ HS1–HS6)</span>
-              <h3 class="or-card-title">จากการอ่านเตรียมความพร้อมสู่การอภิปรายกรณีศึกษาเปรียบเทียบ</h3>
+              <span class="or-card-kicker">6-STEP GUIDED LEARNING (ST1 และ HS1–HS6)</span>
+              <h3 class="or-card-title">จากการอ่านเตรียมความพร้อมสู่อภิปรายกลุ่มย่อยและดู VDO ทบทวน</h3>
               <ul class="or-list is-s07-list">
                 <li><strong>ขั้นที่ 1–2 เอกสารฉบับเต็มและฉบับย่อ:</strong> ศึกษาแนวคิดหลักและตอบคำถามนำก่อนเข้าชั้นเรียน</li>
-                <li><strong>ขั้นที่ 3 แบบทดสอบทบทวน 66 ข้อและคำศัพท์ 125 คำ:</strong> ฝึกทบทวนความเข้าใจด้วยตนเองเพื่อพัฒนาการเรียนรู้</li>
-                <li><strong>ขั้นที่ 4–5 บรรยายสรุป 1 ชม. (<code>2C2-03</code>) และกลุ่มย่อย 6 ห้อง (<code>1C1-02..07</code>):</strong> วิเคราะห์กรณีศึกษาเชิงระบบ</li>
+                <li><strong>ขั้นที่ 3 แบบทดสอบและคำศัพท์ทบทวน:</strong> ฝึกทบทวนความเข้าใจด้วยตนเองเพื่อพัฒนาการเรียนรู้</li>
+                <li><strong>ขั้นที่ 4–5 บรรยายสรุป 1 ชม. (<code>2C2-03</code>) และอภิปรายกลุ่มย่อย 6 ห้อง (<code>1C1-02..07</code>):</strong> ร่วมอภิปรายกรณีศึกษาเชิงระบบ</li>
+                <li><strong>ขั้นที่ 6 ดู VDO Lecture ทบทวน:</strong> ทบทวนสาระสำคัญและประเด็นเชื่อมโยงได้ทุกที่ตามจังหวะการเรียนรู้</li>
               </ul>
             </div>
 
