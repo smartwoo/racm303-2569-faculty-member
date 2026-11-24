@@ -127,6 +127,7 @@
     stageFilter: 0,
     searchQuery: "",
     isPlaying: false,
+    timelineSync: true,
     playbackSpeed: 1,
     ccEnabled: true,
     ccLarge: false,
@@ -178,6 +179,9 @@
         if (typeof parsed.playbackSpeed === "number" && SPEEDS.includes(parsed.playbackSpeed)) {
           studioState.playbackSpeed = parsed.playbackSpeed;
         }
+        if (typeof parsed.timelineSync === "boolean") {
+          studioState.timelineSync = parsed.timelineSync;
+        }
         if (parsed.panels && typeof parsed.panels === "object") {
           Object.keys(DEFAULT_PANELS).forEach((k) => {
             if (typeof parsed.panels[k] === "boolean") {
@@ -201,6 +205,7 @@
           ccLarge: studioState.ccLarge,
           pipCorner: studioState.pipCorner,
           playbackSpeed: studioState.playbackSpeed,
+          timelineSync: studioState.timelineSync,
           panels: studioState.panels
         })
       );
@@ -434,7 +439,13 @@
             ).join("")}
           </div>
         </div>
-        <button type="button" class="ep6-reset-ws-btn" id="ep6ResetWorkspaceBtn" title="คืนค่า Layout มาตรฐาน (วิดีโอคู่เนื้อหา · ปิดสไลด์ซิงก์ไว้ก่อน)">↺ คืนค่าเริ่มต้น</button>
+        <div class="ep6-ws-right-actions">
+          <button type="button" class="ep6-sync-toggle-pill ${studioState.timelineSync ? "is-on" : ""}" data-timeline-sync-btn aria-pressed="${studioState.timelineSync}" title="ติ๊กเปิด/ปิด Timeline Sync เลื่อนสไลด์และคำพูดตามช่วงเวลาวิดีโออัตโนมัติ">
+            <span class="ep6-sync-box">${studioState.timelineSync ? "✓" : ""}</span>
+            <span>Timeline Sync ตาม VDO</span>
+          </button>
+          <button type="button" class="ep6-reset-ws-btn" id="ep6ResetWorkspaceBtn" title="คืนค่า Layout มาตรฐาน (วิดีโอคู่เนื้อหา · ปิดสไลด์ซิงก์ไว้ก่อน)">↺ คืนค่าเริ่มต้น</button>
+        </div>
       </div>
     `;
     root.appendChild(workspaceBar);
@@ -500,6 +511,7 @@
                   <button type="button" class="ep6-dock-icon-btn" id="ep6PinPipBtn" title="เปิด/ปิด โหมดหน้าต่างลอย (Picture-in-Picture)">⧉ PiP</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" id="ep6BrowserPipBtn" title="เปิดโหมดหน้าต่างลอยระดับเบราว์เซอร์ (OS Picture-in-Picture)">⧉ แยกจอ</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-hide-panel="video" title="ซ่อนส่วนวิดีโอ">ซ่อน</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-pip-only ${studioState.timelineSync ? "is-active" : ""}" data-timeline-sync-btn data-pip-sync-pill="1" aria-pressed="${studioState.timelineSync}" title="เปิด/ปิด Timeline Sync เลื่อนผังสไลด์ตามเวลา VDO อัตโนมัติ">${studioState.timelineSync ? "✓ Sync" : "☐ Sync"}</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipSideBtn" title="สลับตำแหน่งมุมซ้าย / ขวา">⇄ ซ้าย/ขวา</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipMinBtn" title="ย่อ/ขยาย หน้าต่าง PiP">—</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-pip-only" id="ep6PipTopBtn" title="เลื่อนกลับขึ้นด้านบนสุด">⬆ บนสุด</button>
@@ -631,7 +643,11 @@
             <span id="ep6LiveTimeRange" class="ep6-live-range-txt">Slide 1/${TOTAL_SLIDES}</span>
           </div>
           <div class="ep6-live-bar-acts">
-            <button type="button" class="ep6-jump-atlas-btn" id="ep6JumpToActiveCardBtn" title="คลิกเมื่อต้องการเลื่อนลงไปดูสไลด์นี้ในตารางด้านล่าง">
+            <button type="button" class="ep6-sync-toggle-pill is-compact ${studioState.timelineSync ? "is-on" : ""}" data-timeline-sync-btn aria-pressed="${studioState.timelineSync}" title="ติ๊กเปิด/ปิด Timeline Sync เลื่อนผังสไลด์ตามเวลาวิดีโออัตโนมัติ">
+              <span class="ep6-sync-box">${studioState.timelineSync ? "✓" : ""}</span>
+              <span>Timeline Sync</span>
+            </button>
+            <button type="button" class="ep6-jump-atlas-btn" id="ep6JumpToActiveCardBtn" title="คลิกเพื่อเลื่อนลงไปซิงก์อ่านผังสไลด์ด้านล่างตามเวลาวิดีโอ">
               ⬇ ดูในผัง ${TOTAL_SLIDES} สไลด์
             </button>
           </div>
@@ -662,6 +678,10 @@
           <button type="button" class="ep6-atlas-tab ${studioState.atlasView === "matrix" ? "is-active" : ""}" data-aview="matrix">⚡ ตารางสรุปสูตร &amp; ประเด็นออกสอบ (${(DATA.rapidReview || []).length} หัวข้อสำคัญ)</button>
         </div>
         <div class="ep6-atlas-filters" id="ep6AtlasFiltersRow">
+          <button type="button" class="ep6-sync-toggle-pill ${studioState.timelineSync ? "is-on" : ""}" data-timeline-sync-btn data-atlas-sync-trigger="1" aria-pressed="${studioState.timelineSync}" title="เมื่อติ๊กถูก (✓) ผังสไลด์ด้านล่างจะติ๊กผ่านและเลื่อนลงไปยัง Slide ถัดไปตามเวลา VDO อัตโนมัติ">
+            <span class="ep6-sync-box">${studioState.timelineSync ? "✓" : ""}</span>
+            <span>Timeline Sync (เลื่อนตาม VDO อัตโนมัติ)</span>
+          </button>
           <select id="ep6StageFilterSelect" class="ep6-select" aria-label="กรองตามองก์การเรียนรู้">
             <option value="0">แสดงครบทั้ง ${DATA.stages.length} องก์ (${TOTAL_SLIDES} สไลด์)</option>
             ${DATA.stages
@@ -809,10 +829,11 @@
           : `🎥 ${modCode} วิดีโอบรรยาย · Slide ${slide.id}/${TOTAL_SLIDES}`;
       }
 
-      // 4. Highlight active Stage in Stepper & Legend
+      // 4. Highlight active & completed Stages in Stepper & Legend
       root.querySelectorAll("[data-stage-jump]").forEach((btn) => {
         const sid = Number(btn.getAttribute("data-stage-jump"));
         btn.classList.toggle("is-active", sid === stage.id);
+        btn.classList.toggle("is-stage-done", sid < stage.id);
       });
 
       // 5. Update Synchronized Slide Image
@@ -935,8 +956,8 @@
               ${quotes
                 .map(
                   (q, idx) => `
-                <blockquote class="ep6-quote-item ${idx === activeQuoteIdx ? "is-speaking" : ""}" data-seek-sec="${q.tSec}">
-                  <button type="button" class="ep6-quote-time" data-seek-sec="${q.tSec}">▶ ${esc(q.time)}</button>
+                <blockquote class="ep6-quote-item ${idx === activeQuoteIdx ? "is-speaking" : idx < activeQuoteIdx ? "is-spoken-done" : ""}" data-seek-sec="${q.tSec}">
+                  <button type="button" class="ep6-quote-time" data-seek-sec="${q.tSec}">${idx < activeQuoteIdx ? "✓" : "▶"} ${esc(q.time)}</button>
                   <span class="ep6-quote-text">“${esc(q.text)}”</span>
                 </blockquote>
               `
@@ -994,13 +1015,99 @@
         });
       }
 
-      // 7. Highlight active card in the Slide Atlas below (NEVER auto-scrolls page!)
-      if (slideChanged || optsUpdate?.forceCard) {
-        root.querySelectorAll(".ep6-flow-slide-card").forEach((card) => {
-          const cid = Number(card.getAttribute("data-slide-card"));
-          card.classList.toggle("is-active-playing", cid === slide.id);
-        });
+      // 7. Sync Timeline Ticks (✓) & Active Highlight in Slide Atlas + Auto-Scroll when Timeline Sync is ON
+      syncAtlasTimelineTicks(clamped, slide.id, activeQuoteIdx);
+      if (slideChanged && !optsUpdate?.skipAutoScroll && studioState.timelineSync && isUserInAtlasZone()) {
+        scrollAtlasToSlide(slide.id, true);
       }
+    }
+
+    function isUserInAtlasZone() {
+      if (!studioState.panels.atlas || studioState.atlasView !== "flow") return false;
+      if (studioState.isPipActive || !studioState.panels.video) return true;
+      const slot = root.querySelector("#ep6VideoSlot");
+      if (!slot) return true;
+      return slot.getBoundingClientRect().bottom < 160;
+    }
+
+    function scrollAtlasToSlide(targetSlideId, smooth) {
+      if (!studioState.panels.atlas) {
+        studioState.panels.atlas = true;
+        applyWorkspaceLayout();
+      }
+      if (studioState.atlasView !== "flow") {
+        studioState.atlasView = "flow";
+        root.querySelectorAll("[data-aview]").forEach((b) =>
+          b.classList.toggle("is-active", b.getAttribute("data-aview") === "flow")
+        );
+        renderAtlasBody();
+      }
+      let card = root.querySelector(`#ep6AtlasSlideCard-${targetSlideId}`);
+      if (!card && (studioState.stageFilter !== 0 || studioState.searchQuery)) {
+        studioState.stageFilter = 0;
+        studioState.searchQuery = "";
+        const stSel = root.querySelector("#ep6StageFilterSelect");
+        const sIn = root.querySelector("#ep6SlideSearchInput");
+        if (stSel) stSel.value = "0";
+        if (sIn) sIn.value = "";
+        renderAtlasBody();
+        card = root.querySelector(`#ep6AtlasSlideCard-${targetSlideId}`);
+      }
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const offsetTop = Math.max(84, Math.round(window.innerHeight * 0.13));
+      const destY = Math.max(0, window.scrollY + rect.top - offsetTop);
+      window.scrollTo({ top: destY, behavior: smooth === false ? "auto" : "smooth" });
+    }
+
+    function syncAtlasTimelineTicks(sec, activeSlId, activeQIdx) {
+      root.querySelectorAll(".ep6-flow-slide-card").forEach((card) => {
+        const cid = Number(card.getAttribute("data-slide-card"));
+        const isCurrent = cid === activeSlId;
+        const isDone = cid < activeSlId;
+        card.classList.toggle("is-active-playing", isCurrent);
+        card.classList.toggle("is-completed-slide", isDone);
+        const badge = card.querySelector("[data-fsc-sync-badge]");
+        if (badge) {
+          if (isCurrent) {
+            badge.textContent = "▶ กำลังเล่นช่วงนี้";
+            badge.className = "ep6-fsc-sync-badge is-live";
+            badge.hidden = false;
+          } else if (isDone) {
+            badge.textContent = "✓ ผ่านแล้ว";
+            badge.className = "ep6-fsc-sync-badge is-done";
+            badge.hidden = false;
+          } else {
+            badge.hidden = true;
+          }
+        }
+        card.querySelectorAll(".ep6-fsc-qitem").forEach((qEl, qIdx) => {
+          const qBtn = qEl.querySelector(".ep6-qtime-mini");
+          const baseTime = qBtn ? qBtn.getAttribute("data-q-label") || "" : "";
+          const qSpeaking = isCurrent && qIdx === activeQIdx;
+          const qDone = isDone || (isCurrent && qIdx < activeQIdx);
+          qEl.classList.toggle("is-speaking", qSpeaking);
+          qEl.classList.toggle("is-spoken-done", qDone);
+          if (qBtn && baseTime) {
+            qBtn.textContent = `${qDone ? "✓" : "▶"} ${baseTime}`;
+          }
+        });
+      });
+    }
+
+    function syncTimelineSyncControls() {
+      const on = Boolean(studioState.timelineSync);
+      root.querySelectorAll("[data-timeline-sync-btn]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(on));
+        if (btn.hasAttribute("data-pip-sync-pill")) {
+          btn.classList.toggle("is-active", on);
+          btn.textContent = on ? "✓ Sync" : "☐ Sync";
+        } else {
+          btn.classList.toggle("is-on", on);
+          const box = btn.querySelector(".ep6-sync-box");
+          if (box) box.textContent = on ? "✓" : "";
+        }
+      });
     }
 
     function syncTransportButtons() {
@@ -1113,6 +1220,15 @@
         studioState.isPlaying = true;
         videoEl.playbackRate = studioState.playbackSpeed;
         syncTransportButtons();
+        if (studioState.timelineSync && isUserInAtlasZone()) {
+          const card = root.querySelector(`#ep6AtlasSlideCard-${studioState.activeSlideId}`);
+          if (card) {
+            const r = card.getBoundingClientRect();
+            if (r.top < 40 || r.top > window.innerHeight * 0.62) {
+              scrollAtlasToSlide(studioState.activeSlideId, true);
+            }
+          }
+        }
       });
       videoEl.addEventListener("pause", () => {
         if (instance.pendingAutoPlay) return;

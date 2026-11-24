@@ -2363,8 +2363,8 @@
             <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-next">สไลด์ถัดไป ▶</button>
           </div>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="13">🎮 ไป Slide 14 (Quiz)</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="14">⚖️ ไป Slide 15 (เกณฑ์ O/S/M/U)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="14">🎮 ไป Slide 15 (Quiz)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="15">⚖️ ไป Slide 16 (เกณฑ์ O/S/M/U)</button>
           </div>
           <div class="orl-m-lbl" style="margin-top:6px">ควบคุม Kahoot Quiz สด (${state.participants.size} คนในห้อง)</div>
           <button type="button" class="orl-m-join-btn" data-orl-mact="rcmd" data-rcmd="start-q0">⚡ เริ่มยิงคำถามข้อที่ 1</button>
