@@ -26593,11 +26593,26 @@
             { st: 2, lbl: "② โจทย์+Sheet", tip: "โจทย์ประกบกับ Answer Sheet" }
           ];
       if (isTeacherDeck && hasCs) {
-        stageDefs.push({
-          st: 5,
-          lbl: "⑤ Takeaway",
-          tip: "สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway)"
-        });
+        if (cur.qObj.conceptSummarySlide && cur.qObj.conceptSummarySlide.frameworkSynthesisSlide) {
+          stageDefs.push(
+            {
+              st: 5,
+              lbl: "⑤ ภาพ Framework",
+              tip: "Key Takeaway: ภาพแผนภาพ Framework สังเคราะห์"
+            },
+            {
+              st: 6,
+              lbl: "⑥ คำอธิบาย",
+              tip: "Key Takeaway: คำอธิบายสังเคราะห์รายหมวด (Slide ถัดไป)"
+            }
+          );
+        } else {
+          stageDefs.push({
+            st: 5,
+            lbl: "⑤ Takeaway",
+            tip: "สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway)"
+          });
+        }
       }
       stageDefs.forEach((sp) => {
         const curSt = isCaseScen ? 0 : cur.pedStage !== undefined ? cur.pedStage : 2;

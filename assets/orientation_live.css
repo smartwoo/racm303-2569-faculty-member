@@ -398,8 +398,9 @@ html[data-role="faculty"] .orl-cover-card {
   border: 0;
   background: #ffffff;
   border-radius: 0.62cqw;
-  padding: 0.34cqw;
-  width: min(100%, 13.6cqw);
+  padding: 0.36cqw;
+  width: min(100%, 15.8cqw);
+  max-height: calc(100% - 2.6cqw);
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -423,24 +424,24 @@ html[data-role="faculty"] .orl-cover-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.12cqw;
+  gap: 0.14cqw;
   text-align: center;
   width: 100%;
 }
 
 .orl-qr-scan-kicker {
   font-family: var(--font-display);
-  font-size: clamp(7.8px, 0.84cqw, 14px);
+  font-size: clamp(9.5px, 0.90cqw, 15.5px);
   font-weight: 800;
   color: #fde68a;
-  line-height: 1.2;
+  line-height: 1.24;
 }
 
 .orl-qr-url-code {
-  font-size: clamp(6.8px, 0.70cqw, 11.8px);
+  font-size: clamp(8.5px, 0.78cqw, 13.5px);
   color: #e2e8f0;
   background: rgba(15, 23, 42, 0.55);
-  padding: 0.14cqw 0.40cqw;
+  padding: 0.16cqw 0.48cqw;
   border-radius: 0.34cqw;
   max-width: 100%;
   overflow: hidden;
@@ -461,22 +462,22 @@ html[data-role="faculty"] .orl-cover-card {
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(16, 185, 129, 0.16) 100%);
   border: 1px solid rgba(253, 230, 138, 0.42);
   border-radius: 0.68cqw;
-  padding: 0.46cqw 0.70cqw;
+  padding: 0.50cqw 0.74cqw;
   display: flex;
   flex-direction: column;
-  gap: 0.12cqw;
+  gap: 0.14cqw;
   flex-shrink: 0;
 }
 
 .orl-count-nums {
   display: flex;
   align-items: baseline;
-  gap: 0.36cqw;
+  gap: 0.38cqw;
 }
 
 .orl-count-big {
   font-family: var(--font-display);
-  font-size: clamp(16px, 2.45cqw, 42px);
+  font-size: clamp(20px, 2.55cqw, 44px);
   font-weight: 800;
   line-height: 1;
   color: #fde68a;
@@ -484,30 +485,30 @@ html[data-role="faculty"] .orl-cover-card {
 
 .orl-count-denom {
   font-family: var(--font-display);
-  font-size: clamp(9px, 1.02cqw, 17.5px);
+  font-size: clamp(11px, 1.08cqw, 18.5px);
   font-weight: 700;
   color: rgba(255, 255, 255, 0.88);
 }
 
 .orl-count-caption {
-  font-size: clamp(7.8px, 0.84cqw, 14px);
+  font-size: clamp(9.5px, 0.90cqw, 15px);
   color: #f8fafc;
   font-weight: 700;
-  line-height: 1.24;
+  line-height: 1.28;
 }
 
 .orl-topic-tags {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.28cqw;
+  gap: 0.30cqw;
   flex-shrink: 0;
 }
 
 .orl-tag {
-  padding: 0.20cqw 0.44cqw;
+  padding: 0.24cqw 0.50cqw;
   border-radius: 0.42cqw;
   font-family: var(--font-display);
-  font-size: clamp(7.2px, 0.78cqw, 13px);
+  font-size: clamp(9px, 0.84cqw, 14px);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -528,18 +529,105 @@ html[data-role="faculty"] .orl-cover-card {
   background: rgba(2, 6, 23, 0.38);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 0.62cqw;
-  padding: 0.40cqw 0.50cqw;
+  padding: 0.52cqw 0.64cqw;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 0.28cqw;
+  gap: 0.30cqw;
   overflow-y: auto;
 }
 
 .orl-empty-wait {
-  font-size: clamp(7.8px, 0.84cqw, 14px);
-  color: rgba(226, 232, 240, 0.84);
-  line-height: 1.35;
+  font-size: clamp(10px, 0.92cqw, 15.5px);
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.42;
+}
+
+.orl-empty-onboard {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: clamp(5px, 0.42cqw, 9px);
+}
+
+.orl-empty-onboard.is-stage-wall {
+  align-items: center;
+  text-align: center;
+  padding: 0.8cqw 1.2cqw;
+}
+
+.orl-eo-kicker {
+  font-family: var(--font-display);
+  font-size: clamp(10.5px, 0.94cqw, 16px);
+  font-weight: 800;
+  color: #fde68a;
+  line-height: 1.28;
+}
+
+.orl-eo-steps {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.34cqw, 8px);
+}
+
+.orl-eo-step {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 0.42cqw, 9px);
+  padding: clamp(4px, 0.28cqw, 7px) clamp(7px, 0.48cqw, 11px);
+  border-radius: 0.50cqw;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: clamp(10px, 0.88cqw, 15px);
+  line-height: 1.32;
+  color: #e2e8f0;
+}
+
+.orl-eo-step strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.orl-eo-num {
+  width: clamp(17px, 1.32cqw, 23px);
+  height: clamp(17px, 1.32cqw, 23px);
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.28);
+  color: #93c5fd;
+  font-family: var(--font-display);
+  font-size: clamp(9.5px, 0.82cqw, 13.5px);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.orl-chips-sparse-wrap {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(6px, 0.42cqw, 10px);
+}
+
+.orl-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.30cqw;
+}
+
+.orl-eo-subhint {
+  font-size: clamp(9.8px, 0.86cqw, 14.5px);
+  line-height: 1.38;
+  color: rgba(226, 232, 240, 0.82);
+  padding: clamp(5px, 0.34cqw, 8px) clamp(8px, 0.52cqw, 12px);
+  border-radius: 0.50cqw;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(148, 163, 184, 0.32);
 }
 
 .orl-p-chip {
@@ -2217,15 +2305,15 @@ html.orl-keyboard-open .orl-m-body {
   padding-bottom: 24px;
 }
 
-/* B. Unfolded Foldable / Surface Duo & Vertical Tablet (e.g. 744x1133, 820x1180, 884x1104, 720x540)
-      Unlocks tiny letterboxed 16:9 into a crisp, Bounded Within-Slide Scrollable Stage! */
+/* B. Unfolded Foldable / Surface Duo & Tablet / Split-Screen (e.g. 744x1133, 820x840, 820x1180, 960x960, 1024x768)
+      Preserves Auto-Fit (--fit-scale) on Content Slides + Crisp Balanced Typography on Cover & Live Lobby! */
 @media (min-width: 701px) and (max-width: 1040px) and (max-aspect-ratio: 4/3) {
   #orDeckViewport {
     overflow-y: auto !important;
     overflow-x: auto !important;
     justify-content: flex-start !important;
     align-items: stretch !important;
-    padding: 12px 14px 24px !important;
+    padding: 10px 12px 16px !important;
   }
 
   .or-slide-frame-wrap,
@@ -2235,19 +2323,80 @@ html.orl-keyboard-open .orl-m-body {
     align-items: stretch !important;
   }
 
-  .or-slide-canvas,
-  .or-deck-shell.has-notes-open .or-slide-canvas,
-  .or-deck-backdrop.is-presentation-mode .or-slide-canvas {
+  /* Cover & Live/Quiz Stages scroll smoothly with balanced proportions */
+  .or-slide-canvas.is-cover-canvas,
+  .or-slide-canvas.is-live-canvas,
+  .or-slide-canvas.is-quiz-slide-canvas {
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: auto !important;
     height: auto !important;
-    min-height: calc(var(--orl-vvh, 100dvh) - 134px) !important;
+    min-height: calc(var(--orl-vvh, 100dvh) - 128px) !important;
     max-height: none !important;
     overflow: visible !important;
   }
 
-  .or-slide-canvas:not(.is-cover-canvas) .or-sld-inner,
+  /* Content Slides (02–14, 16–18) keep a bounded stage so --fit-scale optimizes every frame cleanly! */
+  .or-slide-canvas:not(.is-cover-canvas):not(.is-live-canvas):not(.is-quiz-slide-canvas),
+  .or-deck-shell.has-notes-open .or-slide-canvas:not(.is-cover-canvas):not(.is-live-canvas):not(.is-quiz-slide-canvas),
+  .or-deck-backdrop.is-presentation-mode .or-slide-canvas:not(.is-cover-canvas):not(.is-live-canvas):not(.is-quiz-slide-canvas) {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+    height: clamp(610px, calc(var(--orl-vvh, 100dvh) - 124px), 980px) !important;
+    min-height: 610px !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  .or-slide-canvas:not(.is-cover-canvas):not(.is-live-canvas):not(.is-quiz-slide-canvas) .or-sld-inner {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: 14px 18px 10px !important;
+    gap: 9px !important;
+  }
+
+  .or-slide-canvas:not(.is-cover-canvas) .or-sld-title {
+    font-size: clamp(19px, 2.35cqw, 26px) !important;
+    line-height: 1.22 !important;
+  }
+
+  .or-slide-canvas:not(.is-cover-canvas) .or-top-key-text {
+    font-size: clamp(13px, 1.48cqw, 16px) !important;
+    line-height: 1.38 !important;
+  }
+
+  /* Responsive Grid Proportions for Portrait / Near-Square Tablet Stages */
+  .or-s02-flow-card {
+    grid-template-rows: minmax(0, 0.82fr) minmax(0, 1.18fr) !important;
+  }
+
+  .or-grid-6.is-s06-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .or-grid-4.is-s08-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .or-infog-split.is-s09-split,
+  .or-infog-split.is-s10-split,
+  .or-infog-split.is-s11-split {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(0, 0.35fr) minmax(0, 0.65fr) !important;
+    gap: 8px !important;
+  }
+
+  .or-s09-left-col {
+    grid-template-columns: 1.15fr 0.85fr !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Cover Slide & Live Stage Balanced Typography on Tablet / Split-Screen */
   .or-cover-stage,
   .orl-stage {
     height: auto !important;
@@ -2264,27 +2413,89 @@ html.orl-keyboard-open .orl-m-body {
     gap: 14px !important;
   }
 
+  .or-slide-canvas.is-cover-canvas .or-cover-left-col {
+    height: auto !important;
+    gap: 11px !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-dept { font-size: 13px !important; }
+  .or-slide-canvas.is-cover-canvas .or-cover-code-chip { font-size: 12.5px !important; padding: 4px 12px !important; }
+  .or-slide-canvas.is-cover-canvas .or-cover-kicker { font-size: 14px !important; }
+  .or-slide-canvas.is-cover-canvas .or-cover-h1 { font-size: clamp(24px, 3.3cqw, 32px) !important; line-height: 1.16 !important; }
+  .or-slide-canvas.is-cover-canvas .or-top-key-text { font-size: 14.5px !important; line-height: 1.42 !important; }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-kpi-row,
+  .or-slide-canvas.is-cover-canvas .or-cover-acts-grid {
+    flex: 0 0 auto !important;
+    grid-auto-rows: auto !important;
+    gap: 9px !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-kpi {
+    padding: 11px 10px !important;
+    border-radius: 14px !important;
+    gap: 3px !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-kpi-val {
+    font-size: clamp(26px, 3.4cqw, 34px) !important;
+    line-height: 1.05 !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-kpi-lbl {
+    font-size: clamp(12.8px, 1.55cqw, 15px) !important;
+    line-height: 1.28 !important;
+    white-space: normal !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-act-chip {
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    font-size: clamp(13.2px, 1.6cqw, 15.5px) !important;
+    line-height: 1.38 !important;
+    gap: 2px !important;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-meta-lbl { font-size: 11.5px !important; }
+  .or-slide-canvas.is-cover-canvas .or-cover-meta-val { font-size: 13.8px !important; }
+
   .orl-cover-card {
     padding: 16px !important;
     gap: 12px !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
   }
+
+  .orl-live-pill { font-size: 12.2px !important; padding: 4px 11px !important; }
+  .orl-sync-sub { font-size: 12px !important; }
+  .orl-mini-switch { font-size: 12.2px !important; padding: 5px 11px !important; }
 
   .orl-qr-frame-btn,
   .orl-stage-qr-box {
-    width: 190px !important;
+    width: 186px !important;
+    max-height: none !important;
     padding: 10px !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
   }
+
+  .orl-qr-scan-kicker { font-size: 13.2px !important; }
+  .orl-qr-url-code { font-size: 12.2px !important; padding: 4px 10px !important; }
+  .orl-count-hero-box { padding: 10px 14px !important; border-radius: 12px !important; }
+  .orl-count-big { font-size: 30px !important; }
+  .orl-count-denom { font-size: 15px !important; }
+  .orl-count-caption { font-size: 13.2px !important; }
+  .orl-tag { font-size: 12.4px !important; padding: 5px 10px !important; }
+  .orl-chips-stream { padding: 10px 12px !important; border-radius: 12px !important; }
+  .orl-eo-kicker { font-size: 13.6px !important; }
+  .orl-eo-step { font-size: 13px !important; padding: 6px 10px !important; border-radius: 9px !important; }
+  .orl-eo-num { width: 21px !important; height: 21px !important; font-size: 12px !important; }
+  .orl-eo-subhint { font-size: 12.8px !important; padding: 8px 11px !important; border-radius: 9px !important; }
+  .orl-cta-btn { font-size: 13.8px !important; padding: 10px 14px !important; }
 
   .orl-area-Checkin-strip {
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     gap: 6px !important;
   }
 
-  .or-slide-canvas .or-card-title { font-size: 17px !important; }
-  .or-slide-canvas .or-card-text,
-  .or-slide-canvas .or-list { font-size: 14.5px !important; line-height: 1.44 !important; }
   .orl-q-stem-title { font-size: 20px !important; }
   .orl-choice-text { font-size: 15.5px !important; }
 }
@@ -2473,6 +2684,16 @@ html.orl-keyboard-open .orl-m-body {
     font-size: 12px !important;
     padding: 4px 10px !important;
   }
+
+  .orl-chips-stream {
+    padding: 10px 11px !important;
+    border-radius: 11px !important;
+  }
+
+  .orl-eo-kicker { font-size: 13px !important; }
+  .orl-eo-step { font-size: 12.6px !important; padding: 6px 9px !important; border-radius: 8px !important; }
+  .orl-eo-num { width: 20px !important; height: 20px !important; font-size: 11.5px !important; }
+  .orl-eo-subhint { font-size: 12.4px !important; padding: 7px 10px !important; border-radius: 8px !important; }
 
   .orl-cta-btn,
   .orl-big-btn {
@@ -3623,7 +3844,59 @@ html[data-role="faculty"] .or-deck-shell.is-io-deck[data-io-theme="dark"] .or-co
 }
 
 .or-slide-canvas.is-io-pitch .orl-empty-wait {
-  color: #6b7280 !important;
+  color: #4b5563 !important;
+}
+
+.or-slide-canvas.is-io-pitch .orl-eo-kicker {
+  color: #1d4ed8 !important;
+  font-family: var(--io-font-display) !important;
+  font-weight: 700 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .orl-eo-kicker {
+  color: #93c5fd !important;
+}
+
+.or-slide-canvas.is-io-pitch .orl-eo-step {
+  background: #f4f7fc !important;
+  border-color: #e4eaf4 !important;
+  color: #374151 !important;
+}
+
+.or-slide-canvas.is-io-pitch .orl-eo-step strong {
+  color: #111318 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .orl-eo-step {
+  background: #1a2233 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .orl-eo-step strong {
+  color: #f8fafc !important;
+}
+
+.or-slide-canvas.is-io-pitch .orl-eo-num {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .orl-eo-num {
+  background: rgba(59, 130, 246, 0.24) !important;
+  color: #93c5fd !important;
+}
+
+.or-slide-canvas.is-io-pitch .orl-eo-subhint {
+  background: #f8fafd !important;
+  border-color: #dbe3ee !important;
+  color: #4b5563 !important;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="dark"] .orl-eo-subhint {
+  background: #182030 !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  color: #94a3b8 !important;
 }
 
 .orl-cta-btn {

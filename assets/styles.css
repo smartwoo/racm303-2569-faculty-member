@@ -42886,3 +42886,80 @@ mark.hsd-clue-hl.is-focused[data-active-focus-c="4"] { box-shadow: 0 0 0 2px rgb
 mark.hsd-clue-hl.is-focused[data-active-focus-c="5"] { box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.55) !important; }
 mark.hsd-clue-hl.is-focused[data-active-focus-c="6"] { box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.55) !important; }
 
+/* 5. Key Takeaway Synthesized Framework Diagram Visual Stage (Preceding Narrative Takeaway Slide) */
+.ppt-concept-summary-stage.is-framework-visual-stage {
+  padding: clamp(10px, 1.8cqh, 20px) clamp(18px, 2.8cqw, 40px) clamp(10px, 1.8cqh, 18px) !important;
+  gap: clamp(8px, 1.4cqh, 14px) !important;
+}
+
+.ppt-cs-fw-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ppt-cs-fw-top-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ppt-cs-fw-title {
+  font-family: var(--font-display);
+  font-size: clamp(13.5px, min(1.5cqw, 2.7cqh), 22px);
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.28;
+}
+
+html[data-theme="dark"] .ppt-cs-fw-title {
+  color: #f8fafc;
+}
+
+.ppt-cs-fw-figure {
+  margin: 0;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 16px;
+  padding: clamp(4px, 0.8cqh, 10px) clamp(8px, 1.2cqw, 16px);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+html[data-theme="dark"] .ppt-cs-fw-figure {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.ppt-cs-fw-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  cursor: zoom-in;
+}
+
+@media (max-width: 759px) {
+  .ppt-concept-summary-stage.is-framework-visual-stage {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+  .ppt-cs-fw-top .ppt-cs-source-note {
+    display: none;
+  }
+}
+
+
