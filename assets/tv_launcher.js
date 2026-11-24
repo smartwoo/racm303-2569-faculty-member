@@ -1977,6 +1977,13 @@
     document.addEventListener("keydown", (ev) => {
       if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
 
+      const slideOrPreviewOpen =
+        ($("orientationDeckModal") && !$("orientationDeckModal").hidden) ||
+        ($("st1DeckModal") && !$("st1DeckModal").hidden) ||
+        ($("gdrivePdfPreviewModal") && !$("gdrivePdfPreviewModal").hidden) ||
+        ($("orientParticipantModal") && !$("orientParticipantModal").hidden);
+      if (slideOrPreviewOpen) return;
+
       const openModal = $("tvEpisodeModal") || $("tvProfileModal");
 
       if (ev.key === "Escape") {
