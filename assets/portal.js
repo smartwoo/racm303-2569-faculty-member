@@ -8559,6 +8559,352 @@
     renderMapInspectorContent();
   }
 
+  function mountSlideFieldworkSiteStage(hostEl, siteId, opts) {
+    if (!hostEl) return;
+    hostEl.replaceChildren();
+    const o = opts || {};
+    const onSelectSite = typeof o.onSelectSite === "function" ? o.onSelectSite : null;
+    const sites = SCHED.fieldworkSites || [];
+    if (!sites.length) return;
+    const curSite = sites.find((x) => Number(x.id) === Number(siteId)) || sites[0];
+    const geo = SITE_GEO_COORDS[curSite.id] || {};
+    const pinColor = SITE_PIN_COLORS[curSite.id] || "#007aff";
+    const rgbTuple = hexToRgbTuple(pinColor);
+    const provCoords = PROVINCE_POLYGONS_LATLON[geo.provKey];
+    const provText = state.lang === "en" && geo.provEn ? `${geo.provEn} Prov.` : curSite.province;
+
+    const split = make("div", null, "th-map-studio-grid is-slide-map-stage");
+    const mapCard = make("div", null, "th-map-canvas-card is-3d-map-card");
+    const inspector = make("div", null, "th-map-inspector-card");
+    inspector.style.padding = "0";
+    inspector.style.border = "0";
+    inspector.style.background = "transparent";
+    inspector.style.boxShadow = "none";
+
+    const mapHudPill = make("div", null, "th-active-prov-hud");
+    mapHudPill.style.setProperty("--prov-accent", pinColor);
+    mapHudPill.style.setProperty("--prov-rgb", rgbTuple);
+    mapHudPill.innerHTML =
+      `<span class="th-hud-dot"></span>` +
+      `<span class="th-hud-site">${curSite.id}. ${escapeHtml(curSite.shortName)}</span>` +
+      `<span class="th-hud-prov">${escapeHtml(provText)}</span>` +
+      `<span class="th-hud-hosp">· ${escapeHtml(curSite.hospital)}</span>`;
+    mapCard.appendChild(mapHudPill);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 440 680");
+    svg.setAttribute("class", "th-svg-map is-3d-stage");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `แผนที่ประเทศไทย 3 มิติ กลุ่มที่ ${curSite.id} ${curSite.shortName}`);
+
+    const seaGulf = document.createElementNS(svgNS, "text");
+    seaGulf.setAttribute("x", "252");
+    seaGulf.setAttribute("y", "445");
+    seaGulf.setAttribute("class", "th-sea-label");
+    seaGulf.textContent = tr("อ่าวไทย", "Gulf of Thailand");
+
+    const seaAndaman = document.createElementNS(svgNS, "text");
+    seaAndaman.setAttribute("x", "34");
+    seaAndaman.setAttribute("y", "492");
+    seaAndaman.setAttribute("class", "th-sea-label");
+    seaAndaman.textContent = tr("ทะเลอันดามัน", "Andaman Sea");
+
+    const ptsStr = THAILAND_OUTLINE_LATLON.map(([la, lo]) => projectThailandLatLon(la, lo).join(",")).join(" ");
+    const polyExtrude = document.createElementNS(svgNS, "polygon");
+    polyExtrude.setAttribute("points", ptsStr);
+    polyExtrude.setAttribute("transform", "translate(4, 7)");
+    polyExtrude.setAttribute("class", "th-land-extrude");
+
+    const poly = document.createElementNS(svgNS, "polygon");
+    poly.setAttribute("points", ptsStr);
+    poly.setAttribute("class", "th-land-poly");
+
+    const [pkx, pky] = projectThailandLatLon(7.92, 98.34);
+    const phuketEx = document.createElementNS(svgNS, "ellipse");
+    phuketEx.setAttribute("cx", String(pkx + 3));
+    phuketEx.setAttribute("cy", String(pky + 5));
+    phuketEx.setAttribute("rx", "4.5");
+    phuketEx.setAttribute("ry", "9");
+    phuketEx.setAttribute("class", "th-land-extrude");
+
+    const phuket = document.createElementNS(svgNS, "ellipse");
+    phuket.setAttribute("cx", String(pkx));
+    phuket.setAttribute("cy", String(pky));
+    phuket.setAttribute("rx", "4.5");
+    phuket.setAttribute("ry", "9");
+    phuket.setAttribute("class", "th-land-poly");
+
+    const [smx, smy] = projectThailandLatLon(9.52, 100.0);
+    const samuiEx = document.createElementNS(svgNS, "circle");
+    samuiEx.setAttribute("cx", String(smx + 3));
+    samuiEx.setAttribute("cy", String(smy + 5));
+    samuiEx.setAttribute("r", "4.5");
+    samuiEx.setAttribute("class", "th-land-extrude");
+
+    const samui = document.createElementNS(svgNS, "circle");
+    samui.setAttribute("cx", String(smx));
+    samui.setAttribute("cy", String(smy));
+    samui.setAttribute("r", "4.5");
+    samui.setAttribute("class", "th-land-poly");
+
+    const provBaseGroup = document.createElementNS(svgNS, "g");
+    provBaseGroup.setAttribute("class", "th-prov-base-group");
+    Object.keys(PROVINCE_POLYGONS_LATLON).forEach((pKey) => {
+      const pPts = PROVINCE_POLYGONS_LATLON[pKey].map(([la, lo]) => projectThailandLatLon(la, lo).join(",")).join(" ");
+      const baseP = document.createElementNS(svgNS, "polygon");
+      baseP.setAttribute("points", pPts);
+      baseP.setAttribute("class", "th-prov-base-poly");
+      provBaseGroup.appendChild(baseP);
+    });
+
+    const provRaisedGroup = document.createElementNS(svgNS, "g");
+    provRaisedGroup.setAttribute("class", "th-prov-raised-group");
+    if (provCoords && provCoords.length) {
+      const pPts = provCoords.map(([la, lo]) => projectThailandLatLon(la, lo).join(",")).join(" ");
+      const shadowP = document.createElementNS(svgNS, "polygon");
+      shadowP.setAttribute("points", pPts);
+      shadowP.setAttribute("transform", "translate(3, 5)");
+      shadowP.setAttribute("class", "th-prov-lift-shadow");
+
+      const wallP = document.createElementNS(svgNS, "polygon");
+      wallP.setAttribute("points", pPts);
+      wallP.setAttribute("transform", "translate(0.5, 1)");
+      wallP.setAttribute("class", "th-prov-lift-wall");
+      wallP.style.setProperty("--prov-color", pinColor);
+      wallP.style.setProperty("--prov-rgb", rgbTuple);
+
+      const topP = document.createElementNS(svgNS, "polygon");
+      topP.setAttribute("points", pPts);
+      topP.setAttribute("transform", "translate(-3, -6)");
+      topP.setAttribute("class", "th-prov-lift-top");
+      topP.style.setProperty("--prov-color", pinColor);
+      topP.style.setProperty("--prov-rgb", rgbTuple);
+      provRaisedGroup.append(shadowP, wallP, topP);
+    }
+
+    const provBadgeOverlayGroup = document.createElementNS(svgNS, "g");
+    provBadgeOverlayGroup.setAttribute("class", "th-prov-badge-overlay");
+    {
+      const [csx, csy] = projectThailandLatLon(geo.lat || 15.0, geo.lon || 101.0);
+      const anchor = geo.anchor || "start";
+      const labelX = csx + (geo.dx || 10);
+      const focusedBaselineY = csy + (geo.dy || 4) - 2.5;
+      const pillW = Math.max(82, provText.length * 7.8 + 26);
+      const pillH = 24;
+      let pillX = labelX;
+      if (anchor === "middle") pillX = labelX - pillW / 2;
+      else if (anchor === "end") pillX = labelX - pillW;
+      pillX = Math.max(8, Math.min(434 - pillW, pillX));
+      const pillY =
+        (geo.dy || 4) < -6
+          ? Math.max(6, focusedBaselineY - 19 - pillH)
+          : Math.min(674 - pillH, focusedBaselineY + 11.5);
+      const calloutG = document.createElementNS(svgNS, "g");
+      calloutG.setAttribute("class", "th-prov-callout-g");
+      calloutG.style.pointerEvents = "none";
+      const rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("x", pillX.toFixed(1));
+      rect.setAttribute("y", pillY.toFixed(1));
+      rect.setAttribute("width", pillW.toFixed(1));
+      rect.setAttribute("height", String(pillH));
+      rect.setAttribute("rx", "12");
+      rect.setAttribute("fill", pinColor);
+      rect.setAttribute("stroke", "#ffffff");
+      rect.setAttribute("stroke-width", "1.4");
+      const txt = document.createElementNS(svgNS, "text");
+      txt.setAttribute("x", (pillX + pillW / 2).toFixed(1));
+      txt.setAttribute("y", (pillY + 15.6).toFixed(1));
+      txt.setAttribute("text-anchor", "middle");
+      txt.setAttribute("class", "th-prov-callout-txt");
+      txt.textContent = `📍 ${provText}`;
+      calloutG.append(rect, txt);
+      provBadgeOverlayGroup.appendChild(calloutG);
+    }
+
+    svg.append(polyExtrude, phuketEx, samuiEx, poly, phuket, samui, provBaseGroup, provRaisedGroup, seaGulf, seaAndaman);
+
+    const [bx, by] = projectThailandLatLon(13.62, 100.62);
+    const routesGroup = document.createElementNS(svgNS, "g");
+    const pinsGroup = document.createElementNS(svgNS, "g");
+
+    const hubG = document.createElementNS(svgNS, "g");
+    hubG.setAttribute("class", "th-origin-hub");
+    const hubPulse = document.createElementNS(svgNS, "circle");
+    hubPulse.setAttribute("cx", String(bx));
+    hubPulse.setAttribute("cy", String(by));
+    hubPulse.setAttribute("r", "13");
+    hubPulse.setAttribute("class", "th-hub-pulse");
+    const hubCircle = document.createElementNS(svgNS, "circle");
+    hubCircle.setAttribute("cx", String(bx));
+    hubCircle.setAttribute("cy", String(by));
+    hubCircle.setAttribute("r", "5.8");
+    hubCircle.setAttribute("fill", "#002d72");
+    hubCircle.setAttribute("stroke", "#ffb81c");
+    hubCircle.setAttribute("stroke-width", "2.2");
+    const hubTxt = document.createElementNS(svgNS, "text");
+    hubTxt.setAttribute("x", String(bx + 10));
+    hubTxt.setAttribute("y", String(by + 4));
+    hubTxt.setAttribute("class", "th-hub-label");
+    hubTxt.textContent = tr("★ รามาฯ / CNMI", "★ Rama / CNMI");
+    hubG.append(hubPulse, hubCircle, hubTxt);
+
+    const SITE_3D_ARC_OFFSETS = {
+      1: { dx: -24, dy: -72, shDx: -4, shDy: 16, dur: 3.6 },
+      2: { dx: 52, dy: -36, shDx: 10, shDy: 12, dur: 3.2 },
+      3: { dx: -66, dy: -42, shDx: -10, shDy: 18, dur: 3.9 },
+      4: { dx: -74, dy: -38, shDx: -14, shDy: 14, dur: 4.1 },
+      5: { dx: -42, dy: -26, shDx: -8, shDy: 10, dur: 2.9 },
+      6: { dx: 40, dy: -24, shDx: 8, shDy: 10, dur: 2.8 },
+      7: { dx: -18, dy: -58, shDx: -3, shDy: 14, dur: 3.3 },
+      8: { dx: -38, dy: -64, shDx: -8, shDy: 15, dur: 3.7 },
+      9: { dx: -30, dy: -48, shDx: -6, shDy: 13, dur: 3.4 }
+    };
+
+    sites.forEach((site) => {
+      const sGeo = SITE_GEO_COORDS[site.id] || { lat: 15.0, lon: 101.0, dx: 10, dy: 4, anchor: "start" };
+      const [sx, sy] = projectThailandLatLon(sGeo.lat, sGeo.lon);
+      const sPinColor = SITE_PIN_COLORS[site.id] || "#007aff";
+      const arcOff = SITE_3D_ARC_OFFSETS[site.id] || { dx: -40, dy: -44, shDx: -6, shDy: 14, dur: 3.4 };
+      const midX = (bx + sx) / 2;
+      const midY = (by + sy) / 2;
+      appendSvg3DAnimatedArc(
+        svgNS,
+        routesGroup,
+        bx,
+        by,
+        (midX + arcOff.dx).toFixed(1),
+        (midY + arcOff.dy).toFixed(1),
+        (midX + arcOff.shDx).toFixed(1),
+        (midY + arcOff.shDy).toFixed(1),
+        sx,
+        sy,
+        sPinColor,
+        "mapSite",
+        site.shortName,
+        arcOff.dur
+      );
+
+      const pinG = document.createElementNS(svgNS, "g");
+      pinG.setAttribute("class", `th-map-pin-group${site.id === curSite.id ? " is-focused is-locked" : ""}`);
+      pinG.dataset.mapSite = site.shortName;
+      pinG.style.setProperty("--pin-color", sPinColor);
+      pinG.setAttribute("tabindex", "0");
+      pinG.setAttribute("role", "button");
+
+      const groundShadow = document.createElementNS(svgNS, "ellipse");
+      groundShadow.setAttribute("cx", String(sx + 1.5));
+      groundShadow.setAttribute("cy", String(sy + 9));
+      groundShadow.setAttribute("rx", "6.8");
+      groundShadow.setAttribute("ry", "2.6");
+      groundShadow.setAttribute("class", "th-pin-ground-shadow");
+
+      const halo = document.createElementNS(svgNS, "circle");
+      halo.setAttribute("cx", String(sx));
+      halo.setAttribute("cy", String(sy));
+      halo.setAttribute("r", "12");
+      halo.setAttribute("class", "th-pin-halo");
+
+      const dot = document.createElementNS(svgNS, "circle");
+      dot.setAttribute("cx", String(sx));
+      dot.setAttribute("cy", String(sy));
+      dot.setAttribute("r", "7.8");
+      dot.setAttribute("fill", sPinColor);
+      dot.setAttribute("stroke", "#ffffff");
+      dot.setAttribute("stroke-width", "2.2");
+      dot.setAttribute("class", "th-pin-dot");
+
+      const numTxt = document.createElementNS(svgNS, "text");
+      numTxt.setAttribute("x", String(sx));
+      numTxt.setAttribute("y", String(sy + 3.4));
+      numTxt.setAttribute("text-anchor", "middle");
+      numTxt.setAttribute("class", "th-pin-num");
+      numTxt.textContent = String(site.id);
+
+      const lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", String(sx + sGeo.dx));
+      lbl.setAttribute("y", String(sy + sGeo.dy));
+      lbl.setAttribute("text-anchor", sGeo.anchor || "start");
+      lbl.setAttribute("class", "th-pin-label");
+      lbl.textContent = site.shortName;
+
+      pinG.append(groundShadow, halo, dot, numTxt, lbl);
+      if (onSelectSite) {
+        pinG.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          onSelectSite(site.id);
+        });
+      }
+      pinsGroup.appendChild(pinG);
+    });
+
+    svg.querySelectorAll("[data-map-site]").forEach((el) => {
+      if (el.dataset.mapSite === curSite.shortName) {
+        el.classList.add("is-focused", "is-locked");
+      }
+    });
+
+    svg.append(routesGroup, hubG, pinsGroup, provBadgeOverlayGroup);
+    mapCard.appendChild(svg);
+
+    const mapFoot = make("div", null, "th-map-caption");
+    mapFoot.innerHTML =
+      `<span>★ คณะแพทยศาสตร์ รพ.รามาธิบดี / CNMI</span>` +
+      `<span>กลุ่ม ${curSite.id}/9 · กด Clicker ถัดไปหรือคลิกหมุด</span>`;
+    mapCard.appendChild(mapFoot);
+
+    const members = ROSTER.students
+      .filter((s) => s.area === curSite.shortName)
+      .sort((a, b) => a.disc - b.disc || compareTH(a.id, b.id));
+
+    const tabs = [
+      {
+        id: "__table__",
+        label: "≡ ตาราง 9 แห่ง",
+        color: "",
+        active: false,
+        onClick: () => onSelectSite && onSelectSite(0)
+      },
+      ...sites.map((st) => ({
+        id: st.shortName,
+        label: `${st.id}.${st.shortName}`,
+        color: SITE_PIN_COLORS[st.id] || "#007aff",
+        active: st.id === curSite.id,
+        onClick: () => onSelectSite && onSelectSite(st.id)
+      }))
+    ];
+
+    const friNote = curSite.hasFri11Dec ? "ศ. 11 ธ.ค. มีกลุ่มย่อย 5–6" : "เดินทาง พฤ. 10 / พ. 9 ธ.ค.";
+    const prevShowPhotos = state.showPhotos;
+    state.showPhotos = true;
+    const board = renderBroadcastFormationBoard({
+      mode: "fieldwork",
+      wide: false,
+      tabs,
+      crestKicker: "SITE",
+      crestNum: String(curSite.id).padStart(2, "0"),
+      teamColor: pinColor,
+      eyebrowText: `พื้นที่ที่ ${curSite.id} · ${geo.region || curSite.province}`,
+      titleText: `${curSite.hospital} (${curSite.province})`,
+      subText: `ห้อง ${curSite.room.split(" ")[0]} · ${curSite.datesTH} · ${friNote}`,
+      mentorLabel: tr("อาจารย์ที่ปรึกษา & ผู้ประสานงาน", "Site Advisors & Coordinator"),
+      mentorValue: formatAdvisorWithCoordinator(curSite),
+      staffSite: curSite,
+      members,
+      viewStyle: "formation",
+      onToggleStyle: null,
+      footerActions: null
+    });
+    state.showPhotos = prevShowPhotos;
+    board.querySelectorAll("img").forEach((img) => {
+      img.loading = "eager";
+    });
+    inspector.appendChild(board);
+
+    split.append(mapCard, inspector);
+    hostEl.appendChild(split);
+  }
+
   function renderFieldworkView() {
     const areaVal = ($("fieldAreaSelect") && $("fieldAreaSelect").value) || "";
     const q = (($("fieldSearchInput") && $("fieldSearchInput").value) || "").trim().toLocaleLowerCase("th");
@@ -33913,13 +34259,28 @@
       return Object.assign({ sessionId, isRepoCommitted: true }, repoMan[sessionId]);
     }
     if (sessionId === "w1-d1-orient") {
+      const orCount =
+        window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.getSlides === "function"
+          ? window.RACM_ORIENTATION_DECK.getSlides().length
+          : 30;
       return {
         sessionId,
         isBuiltInOrientation: true,
-        fileName: "Slide ปฐมนิเทศรายวิชา (20 สไลด์ · 16:9)",
+        fileName: `Slide ปฐมนิเทศรายวิชา (${orCount} สไลด์ · 16:9)`,
         pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+        uploadedAt: "ประจำรายวิชา 2569"
+      };
+    }
+    if (sessionId === "w3-d2-spss") {
+      return {
+        sessionId: "w3-d2-spss",
+        isBuiltInSpssDeck: true,
+        fileName: "Slide คาบ SPSS Workshop: การดาวน์โหลด ติดตั้ง IBM SPSS v31 ม.มหิดล & วิเคราะห์ Health Survey (10 สไลด์ · 16:9)",
+        pptxHref: "exports/pptx/RACM303_2569_SPSS_Workshop_Slides.pptx",
+        pdfHref: "exports/pdf/RACM303_2569_SPSS_Workshop_Slides.pdf",
+        uploadedBy: "อ. พญ.สวนีย์ ศรีเจริญธรรม · MUIT",
         uploadedAt: "ประจำรายวิชา 2569"
       };
     }
@@ -34150,6 +34511,22 @@
   async function openSessionSlide(sessionId, forceDownload) {
     const rec = getSessionSlideRecord(sessionId);
     if (!rec) return;
+    if (rec.isBuiltInSpssDeck) {
+      if (!forceDownload && window.RACM_SPSS_DECK) {
+        window.RACM_SPSS_DECK.open(0);
+        return;
+      }
+      const href = rec.pptxHref || rec.pdfHref;
+      if (href) {
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = href.split("/").pop() || "RACM303_2569_SPSS_Workshop_Slides.pptx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      return;
+    }
     if (rec.isBuiltInSt1Deck) {
       if (!forceDownload && window.RACM_ST1_DECK) {
         window.RACM_ST1_DECK.open(0);
@@ -34494,7 +34871,7 @@
       if (slideRec.pdfHref) {
         const aPdf = make("a", "⬇ PDF", "btn sm");
         aPdf.href = slideRec.pdfHref;
-        aPdf.download = "RACM303_2569_Orientation_Slides.pdf";
+        aPdf.download = slideRec.pdfHref.split("/").pop().split("?")[0] || "RACM303_2569_Slides.pdf";
         container.appendChild(aPdf);
       }
     } else if (session.id === "w2-d4-ep678") {
@@ -42267,6 +42644,39 @@
         spssSection.appendChild(spssLiveCard);
       }
 
+      const spssSetupCard = make("div", null, "ep-zoom-card is-spss");
+      spssSetupCard.style.marginTop = "12px";
+      spssSetupCard.innerHTML = `
+        <div class="ep-zoom-top">
+          <span class="ep-zoom-tag is-spss-tag">MUIT LICENSE GUIDE · IBM SPSS STATISTICS v31</span>
+          <span class="ep-zoom-time">${escapeHtml(tr("เตรียมติดตั้งล่วงหน้าก่อนคาบเรียน & ก่อนลงภาคสนาม 9 แห่ง", "Install & Activate Before Workshop & Fieldwork"))}</span>
+        </div>
+        <div class="ep-zoom-label">${escapeHtml(tr("การดาวน์โหลด ติดตั้ง & ผูกสิทธิ์ IBM SPSS Statistics v31 ลิขสิทธิ์มหาวิทยาลัยมหิดล (Windows & macOS)", "Mahidol University IBM SPSS Statistics v31 Download, VPN & License Activation"))}</div>
+        <div class="ep-zoom-creds" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:8px">
+          <span><strong>1. เครือข่ายบังคับ:</strong> ต่อ <code>MU-WiFi / LAN</code> หรือเชื่อมต่อ <strong>Mahidol VPN</strong> ทุกครั้ง (ทั้งตอนดาวน์โหลด Activate และ<strong>เปิดโปรแกรมใน รพ.ภาคสนาม</strong>)</span>
+          <span><strong>2. เว็บดาวน์โหลด (Intranet):</strong> <code>softwaredownload.mahidol.ac.th</code> (เลือก Windows 10/11 <code>Run as administrator</code> หรือ macOS 10.15+ <code>Stats 31_MAC.pkg</code>)</span>
+          <span><strong>3. License Wizard:</strong> เลือก <code>Concurrent user license</code> &rarr; ช่อง Server Name พิมพ์ <code>spss-mu.mahidol</code></span>
+          <span><strong>4. แก้ภาษาไทยเพี้ยน (Windows):</strong> คัดลอกโฟลเดอร์ <code>fallback</code> ไปวางใน <code>C:\\Program Files\\IBM\\SPSS Statistics\\JRE\\lib\\fonts</code></span>
+        </div>
+        <div class="ep-zoom-actions" style="margin-top:10px">
+          <button type="button" class="btn sm primary" id="epOpenBuiltInSpssDeckBtn">🖥️ ${escapeHtml(tr("เปิด Slide คาบ SPSS Workshop (10 สไลด์ · 16:9)", "Open SPSS Workshop Slide Deck (10 Slides)"))}</button>
+          <a class="btn sm teal" href="https://muit.mahidol.ac.th/docs/users-guide/manual-install-programs/manual-spss/" target="_blank" rel="noopener">📘 ${escapeHtml(tr("คู่มือติดตั้ง SPSS (MUIT) ↗", "MUIT SPSS Manual ↗"))}</a>
+          <a class="btn sm" href="https://softwaredownload.mahidol.ac.th/" target="_blank" rel="noopener">⬇ ${escapeHtml(tr("ดาวน์โหลดโปรแกรม (Intranet) ↗", "Mahidol Software Download ↗"))}</a>
+          <a class="btn sm" href="https://muit.mahidol.ac.th/docs/users-guide/manual-network-and-connectivity/manual-vpn/" target="_blank" rel="noopener">🔐 ${escapeHtml(tr("วิธีต่อ Mahidol VPN ↗", "Mahidol VPN Guide ↗"))}</a>
+        </div>
+      `;
+      const openSpssDeckBtn = spssSetupCard.querySelector("#epOpenBuiltInSpssDeckBtn");
+      if (openSpssDeckBtn) {
+        openSpssDeckBtn.addEventListener("click", () => {
+          if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.open === "function") {
+            window.RACM_SPSS_DECK.open(0);
+          } else {
+            openSessionSlide("w3-d2-spss", false);
+          }
+        });
+      }
+      spssSection.appendChild(spssSetupCard);
+
       const spssSteps = make("div", null, "ep-spss-grid");
       spssSteps.innerHTML = `
         <div class="ep-spss-step-card">
@@ -42757,7 +43167,9 @@
     openFacultyPrintoutHub: () => openFacultyPrintoutHub(),
     openOrientationDeck: (idx, opts) => window.RACM_ORIENTATION_DECK && window.RACM_ORIENTATION_DECK.open(idx, opts),
     openSt1Deck: (idx, opts) => window.RACM_ST1_DECK && window.RACM_ST1_DECK.open(idx, opts),
+    openSpssDeck: (idx, opts) => window.RACM_SPSS_DECK && window.RACM_SPSS_DECK.open(idx, opts),
     openPanelDeck: (id, idx, opts) => window.RACM_PANEL_DECK && window.RACM_PANEL_DECK.open(id, idx, opts),
+    mountSlideFieldworkSiteStage: (hostEl, siteId, opts) => mountSlideFieldworkSiteStage(hostEl, siteId, opts),
     openHsDiscussion,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),

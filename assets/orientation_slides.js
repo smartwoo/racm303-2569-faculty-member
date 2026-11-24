@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem9";
+  const ASSET_VER = "20261124spss1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -457,9 +457,10 @@
     s02Timer: 0,
     s02PendingTarget: null,
     heroReveal: 0, // Slides 06 & 09: 0 = full-stage diagram, 1 = diagram + bottom cards
-    pipeFocus: 0, // Slides 10 & 11: 0 = full-stage diagram, 1 = overview + 4 cards, 2..5 = cropped stage 1..4, 6 = final overview + 4 cards
+    pipeFocus: 0, // Slides 10 & 12: 0 = full-stage diagram, 1 = overview + 4 cards, 2..5 = cropped stage 1..4, 6 = final overview + 4 cards
     pipeTimer: 0,
     pipePendingTarget: null,
+    siteFocus: 0, // Slide 14 (s09-fieldwork-9sites): 0 = 9-sites overview table, 1..9 = live 3D map + broadcast formation board
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
     toolsMenuOpen: false,
     laserActive: false,
@@ -642,7 +643,129 @@
     more: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
-  /* ---------- Complete 19-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
+  const S09_SITE_META = [
+    { id: 1, shortName: "กุฉินารายณ์", hosp: "รพร.กุฉินารายณ์", prov: "จ.กาฬสินธุ์", color: "#007aff" },
+    { id: 2, shortName: "ด่านซ้าย", hosp: "รพร.ด่านซ้าย", prov: "จ.เลย", color: "#00a388" },
+    { id: 3, shortName: "ตะกั่วป่า", hosp: "รพ.ตะกั่วป่า", prov: "จ.พังงา", color: "#e66100" },
+    { id: 4, shortName: "ท่าวังผา", hosp: "รพ.ท่าวังผา", prov: "จ.น่าน", color: "#5e35b1" },
+    { id: 5, shortName: "เพชรบูรณ์ 1", hosp: "รพ.เพชรบูรณ์ (1)", prov: "จ.เพชรบูรณ์", color: "#d81b60" },
+    { id: 6, shortName: "เพชรบูรณ์ 2", hosp: "รพ.เพชรบูรณ์ (2)", prov: "จ.เพชรบูรณ์", color: "#ad1457" },
+    { id: 7, shortName: "อุบลรัตน์", hosp: "รพ.อุบลรัตน์", prov: "จ.ขอนแก่น", color: "#2e7d32" },
+    { id: 8, shortName: "ท่าสองยาง", hosp: "รพ.ท่าสองยาง", prov: "จ.ตาก", color: "#00838f" },
+    { id: 9, shortName: "อุ้มผาง", hosp: "รพ.อุ้มผาง", prov: "จ.ตาก", color: "#c62828" }
+  ];
+
+  function renderSegmented100BarHtml(titleLeft, sumLabel, segments) {
+    const segHtml = (segments || [])
+      .filter((s) => s.pct > 0)
+      .map(
+        (s) => `
+          <div class="or-100pct-seg" style="width:${s.pct}%;background:${s.color}" title="${esc(s.code)}: ${esc(s.label)} (${s.pctLabel || s.pct + "%"})">
+            <span>${esc(s.code)}</span>
+            <small>${esc(s.pctLabel || s.pct + "%")}</small>
+          </div>
+        `
+      )
+      .join("");
+    return `
+      <div class="or-100pct-wrap">
+        <div class="or-100pct-scale-head">
+          <span>${titleLeft}</span>
+          <span class="or-100pct-sum-pill">${sumLabel}</span>
+        </div>
+        <div class="or-100pct-track" role="img" aria-label="${esc(titleLeft)} รวม 100%">
+          ${segHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderKolbCycleSvgHtml() {
+    return `
+      <svg class="or-kolb-svg" viewBox="0 0 980 620" role="img" aria-label="การเรียนรู้ร่วมกันจากประสบการณ์ภาคสนาม Kolb's Experiential Learning Cycle">
+        <defs>
+          <marker id="kolbArrowBlue" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+            <path d="M1,1 L11,6 L1,11 Z" fill="#0284c7" />
+          </marker>
+          <marker id="kolbArrowTeal" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+            <path d="M1,1 L11,6 L1,11 Z" fill="#0d9488" />
+          </marker>
+          <marker id="kolbArrowAmber" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+            <path d="M1,1 L11,6 L1,11 Z" fill="#d97706" />
+          </marker>
+          <marker id="kolbArrowIndigo" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+            <path d="M1,1 L11,6 L1,11 Z" fill="#4f46e5" />
+          </marker>
+          <filter id="kolbSoftShadow" x="-12%" y="-12%" width="124%" height="128%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.12" />
+          </filter>
+        </defs>
+
+        <!-- Subtle outer orbit ring -->
+        <ellipse cx="490" cy="312" rx="255" ry="188" fill="none" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="7 6" opacity="0.78" />
+
+        <!-- Clockwise Curved Arrows Connecting the 4 Stages -->
+        <path d="M 598 158 C 690 176, 742 218, 756 260" fill="none" stroke="#0284c7" stroke-width="5.5" stroke-linecap="round" marker-end="url(#kolbArrowBlue)" />
+        <path d="M 754 366 C 734 418, 682 456, 602 472" fill="none" stroke="#0d9488" stroke-width="5.5" stroke-linecap="round" marker-end="url(#kolbArrowTeal)" />
+        <path d="M 378 472 C 298 456, 246 418, 226 366" fill="none" stroke="#d97706" stroke-width="5.5" stroke-linecap="round" marker-end="url(#kolbArrowAmber)" />
+        <path d="M 224 260 C 240 214, 294 176, 382 158" fill="none" stroke="#4f46e5" stroke-width="5.5" stroke-linecap="round" marker-end="url(#kolbArrowIndigo)" />
+
+        <!-- Center Core Emblem -->
+        <g filter="url(#kolbSoftShadow)">
+          <rect class="kolb-center-bg" x="352" y="256" width="276" height="112" rx="56" fill="#ffffff" stroke="#94a3b8" stroke-width="2" />
+          <text class="kolb-center-txt" x="490" y="294" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="16.5" font-weight="800" fill="#0f172a">การเรียนรู้ร่วมกัน</text>
+          <text class="kolb-center-txt" x="490" y="318" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="16.5" font-weight="800" fill="#0f172a">จากประสบการณ์ภาคสนาม</text>
+          <text x="490" y="344" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.5" font-weight="700" fill="#0284c7">Kolb&apos;s Experiential Learning Cycle</text>
+        </g>
+
+        <!-- TOP STAGE 1: Concrete Experience -->
+        <g filter="url(#kolbSoftShadow)">
+          <rect class="kolb-callout-bg" x="245" y="16" width="490" height="54" rx="27" fill="#eff6ff" stroke="#38bdf8" stroke-width="2.2" />
+          <text class="kolb-callout-th" x="490" y="50" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="20" font-weight="800" fill="#0c4a6e">“ทำกิจกรรมทั้งส่วนตัวและร่วมกันเป็นทีมในพื้นที่ต่างๆ”</text>
+
+          <rect x="372" y="92" width="236" height="92" rx="20" fill="#0284c7" />
+          <text x="490" y="128" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="18.5" font-weight="800" fill="#ffffff">Concrete Experience</text>
+          <text x="490" y="153" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600" fill="#e0f2fe">(doing / having an</text>
+          <text x="490" y="170" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600" fill="#e0f2fe">experience)</text>
+        </g>
+
+        <!-- RIGHT STAGE 2: Reflective Observation -->
+        <g filter="url(#kolbSoftShadow)">
+          <rect x="646" y="266" width="228" height="94" rx="20" fill="#0d9488" />
+          <text x="760" y="300" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#ffffff">Reflective Observation</text>
+          <text x="760" y="324" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#ccfbf1">(reviewing / reflecting</text>
+          <text x="760" y="342" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#ccfbf1">on the experience)</text>
+
+          <rect class="kolb-callout-bg" x="596" y="192" width="368" height="54" rx="27" fill="#ecfdf5" stroke="#2dd4bf" stroke-width="2.2" />
+          <text class="kolb-callout-th" x="780" y="226" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="18.5" font-weight="800" fill="#065f46">“สะท้อนคิด ตั้งคำถาม จากประสบการณ์จริง”</text>
+        </g>
+
+        <!-- BOTTOM STAGE 3: Abstract Conceptualisation -->
+        <g filter="url(#kolbSoftShadow)">
+          <rect x="364" y="438" width="252" height="92" rx="20" fill="#d97706" />
+          <text x="490" y="472" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="17.8" font-weight="800" fill="#ffffff">Abstract Conceptualisation</text>
+          <text x="490" y="496" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#fef3c7">(concluding / learning</text>
+          <text x="490" y="514" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#fef3c7">from the experience)</text>
+
+          <rect class="kolb-callout-bg" x="330" y="548" width="320" height="54" rx="27" fill="#fffbeb" stroke="#fbbf24" stroke-width="2.2" />
+          <text class="kolb-callout-th" x="490" y="582" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="20" font-weight="800" fill="#92400e">“ร่วมสรุปเป็นหลักการ”</text>
+        </g>
+
+        <!-- LEFT STAGE 4: Active Experimentation -->
+        <g filter="url(#kolbSoftShadow)">
+          <rect x="106" y="266" width="228" height="94" rx="20" fill="#4f46e5" />
+          <text x="220" y="300" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#ffffff">Active Experimentation</text>
+          <text x="220" y="324" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#e0e7ff">(planning / trying out</text>
+          <text x="220" y="342" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12.8" font-weight="600" fill="#e0e7ff">what you have learned)</text>
+
+          <rect class="kolb-callout-bg" x="16" y="192" width="372" height="54" rx="27" fill="#eef2ff" stroke="#818cf8" stroke-width="2.2" />
+          <text class="kolb-callout-th" x="202" y="226" text-anchor="middle" font-family="Anuphan, Sarabun, sans-serif" font-size="18.5" font-weight="800" fill="#312e81">“แลกเปลี่ยน เกิดการเรียนรู้อย่างต่อเนื่อง”</text>
+        </g>
+      </svg>
+    `;
+  }
+
+  /* ---------- Complete 30-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
   const SLIDES = [
     {
       id: "s01-cover",
@@ -1456,8 +1579,68 @@
         })
     },
     {
-      id: "s08b-hs-pipeline",
+      id: "s08a-spss-workshop",
       num: "11",
+      section: "experience",
+      sectionLabel: "Act II · SPSS Workshop",
+      actClass: "is-act-2",
+      actLabel: "ACT II · SPSS WORKSHOP & MUIT GUIDE",
+      timeWindow: "อ. 8 ธ.ค. 69 · 13.30–15.00 น.",
+      kicker: "02 · STATISTICAL SOFTWARE LAB · MAHIDOL IBM SPSS STATISTICS v31",
+      title: "คาบ SPSS Workshop & คู่มือการดาวน์โหลด–ติดตั้ง IBM SPSS v31 ลิขสิทธิ์ ม.มหิดล",
+      keyTag: "เตรียมเครื่องก่อนเรียน",
+      keyMessageHtml:
+        "ดาวน์โหลดล่วงหน้าผ่านเครือข่าย ม.มหิดล หรือต่อ <strong>Mahidol VPN</strong> (<code>softwaredownload.mahidol.ac.th</code>) · เลือก <strong><code>Concurrent user license</code></strong> ชี้เซิร์ฟเวอร์ <strong><code>spss-mu.mahidol</code></strong> · <strong>ในพื้นที่ภาคสนามต้องต่อ VPN ทุกครั้งก่อนเปิดใช้งาน</strong>",
+      notes:
+        "ชี้แจงการเตรียมความพร้อมสำหรับคาบ SPSS Workshop (วันอังคารที่ 8 ธันวาคม 2569 เวลา 13.30–15.00 น. ณ ห้อง 2C2-03 และ Zoom โดย อ. พญ.สวนีย์ ศรีเจริญธรรม) ตามคู่มือกองเทคโนโลยีสารสนเทศ ม.มหิดล (MUIT): ต้องเชื่อมต่อ MU-WiFi หรือ Mahidol VPN ทุกครั้งทั้งขณะดาวน์โหลดจาก softwaredownload.mahidol.ac.th ขณะ Activate ด้วย Concurrent user license -> spss-mu.mahidol และทุกครั้งที่เปิดโปรแกรมวิเคราะห์ข้อมูลใน รพ.ภาคสนามทั้ง 9 แห่ง พร้อมปุ่มเปิดชุดสไลด์ประจำคาบ SPSS Workshop ครบ 10 สไลด์",
+      render: () => `
+        <div class="or-infog-split is-even" style="height:100%">
+          <div class="or-card is-navy-tint" data-fit-solo="1" style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+            <div>
+              <span class="or-card-kicker">MUIT OFFICIAL GUIDE · การดาวน์โหลด ติดตั้ง &amp; ผูกสิทธิ์ IBM SPSS v31</span>
+              <h3 class="or-card-title">ขั้นตอนติดตั้งลิขสิทธิ์ ม.มหิดล (Windows 10/11 &amp; macOS 10.15+)</h3>
+              <ul class="or-list" style="margin-top:0.35cqw">
+                <li><strong>1. เครือข่ายบังคับ (MU-WiFi / Mahidol VPN):</strong> ต้องต่อเน็ตภายใน ม.มหิดล หรือเชื่อมต่อ <strong>Mahidol VPN</strong> ทุกครั้ง ทั้งตอนเข้าเว็บดาวน์โหลด <code>softwaredownload.mahidol.ac.th</code> ตอน Activate และ<strong>ทุกครั้งก่อนเปิดใช้งานในพื้นที่ภาคสนาม 9 แห่ง</strong></li>
+                <li><strong>2. Windows 10/11:</strong> แตกไฟล์ <code>.zip</code> &rarr; คลิกขวา <code>SPSSStatistics.exe</code> เลือก <strong><code>Run as administrator</code></strong> <em>(หากเมนู/ข้อมูลภาษาไทยเป็นสี่เหลี่ยม ให้คัดลอกโฟลเดอร์ <code>fallback</code> ไปวางที่ <code>C:\\Program Files\\IBM\\SPSS Statistics\\JRE\\lib\\fonts</code>)</em></li>
+                <li><strong>3. macOS (10.15+):</strong> แตกไฟล์ <code>.zip</code> &rarr; คลิกขวา <code>Stats 31_MAC.pkg</code> เลือก <strong><code>Open</code></strong> และทำตามขั้นตอนติดตั้ง</li>
+                <li><strong>4. การผูกสิทธิ์ (License Authorization Wizard):</strong> เลือก <strong><code>Concurrent user license</code></strong> &rarr; ช่อง <em>License Manager Server Name</em> พิมพ์ <strong><code>spss-mu.mahidol</code></strong> กด Next จนเสร็จสมบูรณ์</li>
+              </ul>
+            </div>
+            <div class="or-spss-cta-row">
+              <button type="button" class="or-spss-cta-btn is-primary" data-open-spss-deck="1">🖥️ เปิด Slide คาบ SPSS Workshop (10 สไลด์)</button>
+              <a class="or-spss-cta-btn" href="https://muit.mahidol.ac.th/docs/users-guide/manual-install-programs/manual-spss/" target="_blank" rel="noopener">📘 คู่มือติดตั้ง SPSS (MUIT) ↗</a>
+              <a class="or-spss-cta-btn" href="https://muit.mahidol.ac.th/docs/users-guide/manual-network-and-connectivity/manual-vpn/" target="_blank" rel="noopener">🔐 คู่มือต่อ Mahidol VPN ↗</a>
+            </div>
+          </div>
+
+          <div class="or-grid-2" data-fit-group="cards" style="height:100%;grid-template-rows:repeat(2,minmax(0,1fr))">
+            <div class="or-card is-white is-vcenter">
+              <span class="or-card-kicker">STEP 01 · VARIABLE VIEW &amp; CODEBOOK</span>
+              <h3 class="or-card-title">ออกแบบโครงสร้างฐานข้อมูลสำรวจ</h3>
+              <p class="or-card-text">กำหนด <code>Name</code>, <code>Type</code>, <code>Label</code>, <code>Values</code> (เช่น <code>0 = ไม่เสี่ยง, 1 = เสี่ยง</code>), รหัสข้อมูลสูญหาย <code>Missing (99/999)</code> และระดับการวัด (<code>Nominal / Ordinal / Scale</code>) ให้ตรงแบบสอบถามทีม</p>
+            </div>
+            <div class="or-card is-amber-tint is-vcenter">
+              <span class="or-card-kicker">STEP 02 · DATA CLEANING, RECODE &amp; COMPUTE</span>
+              <h3 class="or-card-title">ตรวจความถูกต้องและสร้างตัวแปรใหม่</h3>
+              <p class="or-card-text">เช็กค่าหลุดขอบด้วย <code>Frequencies (Min–Max)</code> · จัดกลุ่มช่วงอายุ/คะแนนด้วย <code>Recode into Different Variables</code> (ห้ามทับตัวแปรเดิม) และคำนวณค่าดัชนีด้วย <code>Compute Variable</code></p>
+            </div>
+            <div class="or-card is-teal-tint is-vcenter">
+              <span class="or-card-kicker">STEP 03 · DESCRIPTIVE STATISTICS</span>
+              <h3 class="or-card-title">สถิติเชิงพรรณนาอธิบายบริบทชุมชน</h3>
+              <p class="or-card-text">ตัวแปรกลุ่มใช้ <code>Frequencies</code> สรุปจำนวนและร้อยละ <code>n (%)</code> · ตัวแปรต่อเนื่องใช้ <code>Explore</code> ตรวจการแจกแจงเพื่อเลือกรายงาน <code>Mean &plusmn; SD</code> หรือ <code>Median (IQR)</code> อย่างถูกต้อง</p>
+            </div>
+            <div class="or-card is-white is-vcenter">
+              <span class="or-card-kicker">STEP 04 · ANALYTICAL TESTING สู่ฟอร์ม 4A</span>
+              <h3 class="or-card-title">วิเคราะห์ความสัมพันธ์และแปลผล</h3>
+              <p class="or-card-text">เปรียบเทียบสัดส่วนด้วย <code>Crosstabs</code> (ติ๊ก <code>Chi-square</code> + <code>Risk</code> + <code>Row %</code>) รายงานค่า <code>OR / PR, 95% CI, p-value</code> หรือเปรียบเทียบค่าเฉลี่ยด้วย <code>t-test / Mann-Whitney U</code></p>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s08b-hs-pipeline",
+      num: "12",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
@@ -1553,68 +1736,124 @@
         })
     },
     {
-      id: "s09-fieldwork-9sites",
-      num: "12",
+      id: "s09a-kolb-learning-guide",
+      num: "13",
       section: "experience",
-      sectionLabel: "Act II · Learning Journey",
+      sectionLabel: "Act II · แนวทางการเรียนรู้ (Kolb)",
       actClass: "is-act-2",
-      actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.10 – 09.13 น. (3 นาที)",
-      kicker: "02 · KOLB'S EXPERIENTIAL LEARNING & 9 FIELDWORK TRAINING HOSPITALS",
-      title: "การเรียนรู้จากประสบการณ์จริงตามวงจร Kolb ณ โรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง",
-      keyTag: "การเรียนรู้ร่วมกัน",
+      actLabel: "ACT II · EXPERIENTIAL LEARNING GUIDE",
+      timeWindow: "09.10 – 09.11 น. (แนวทางการเรียนรู้)",
+      kicker: "02 · KOLB'S EXPERIENTIAL LEARNING CYCLE · แนวทางการเรียนรู้ภาคสนาม",
+      title: "แนวทางการเรียนรู้: การเรียนรู้ร่วมกันจากประสบการณ์ภาคสนาม (Kolb's Experiential Learning)",
+      keyTag: "วงจรการเรียนรู้ 4 ขั้น",
       keyMessageHtml:
-        "เตรียมความพร้อมใน <code>SG 1–5</code> ก่อนลงเรียนรู้ในพื้นที่จริง ณ <strong>โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน)</strong> แล้วนำบทเรียนกลับมาแลกเปลี่ยนให้เห็นบริบทระบบสุขภาพไทยอย่างรอบด้าน",
+        "<strong>ทำกิจกรรมทั้งส่วนตัวและร่วมกันเป็นทีมในพื้นที่ต่างๆ</strong> &rarr; <strong>สะท้อนคิด ตั้งคำถาม จากประสบการณ์จริง</strong> &rarr; <strong>ร่วมสรุปเป็นหลักการ</strong> &rarr; <strong>แลกเปลี่ยน เกิดการเรียนรู้อย่างต่อเนื่อง</strong>",
       notes:
-        "แนะนำโรงพยาบาลแหล่งฝึกทั้ง 9 แห่งทั่วภูมิภาค อาจารย์ที่ปรึกษาประจำกลุ่ม ห้องกลุ่มย่อย และกำหนดการเดินทางของแต่ละกลุ่ม พร้อมเชื่อมโยงกับวงจรการเรียนรู้จากประสบการณ์จริงของ Kolb ทั้ง 4 ขั้นตอน",
+        "ปูแนวทางการเรียนรู้ก่อนเข้าสู่รายละเอียดโรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง ด้วยวงจรการเรียนรู้จากประสบการณ์จริงของ Kolb (Experiential Learning Cycle): (1) Concrete Experience — ลงมือทำกิจกรรมทั้งส่วนตัวและร่วมกันเป็นทีมในพื้นที่ต่างๆ (2) Reflective Observation — สะท้อนคิด ตั้งคำถาม จากประสบการณ์จริง (3) Abstract Conceptualisation — ร่วมสรุปเป็นหลักการเชื่อมโยงทฤษฎีระบบสุขภาพและระบาดวิทยา และ (4) Active Experimentation — แลกเปลี่ยนข้ามพื้นที่เพื่อให้เกิดการเรียนรู้อย่างต่อเนื่อง",
       render: () => `
-        <div class="or-infog-split is-s09-split">
-          <div class="or-s09-left-col">
-            <div class="or-s09-fig-grow">
-              ${figPlate(
-                "orient_s09_kolb_map.png",
-                "Kolb's Experiential Learning Cycle around Thailand's 9 Fieldwork Training Hospitals",
-                ""
-              )}
-            </div>
-            <div class="or-card is-white is-s09-legend" data-fit-solo="1">
-              <span class="or-card-kicker">4-COLOR REGIONAL PINS · โรงพยาบาลแหล่งฝึก 9 แห่ง</span>
-              <div class="or-s09-pins-grid">
-                <span><span style="color:#009e73">&#9679;</span> อีสาน: กาฬสินธุ์ · เลย · ขอนแก่น</span>
-                <span><span style="color:#0072b2">&#9679;</span> เหนือและตาก: น่าน · ท่าสองยาง · อุ้มผาง</span>
-                <span><span style="color:#d97706">&#9679;</span> เพชรบูรณ์: รพ.เพชรบูรณ์ (กลุ่ม 5, 6)</span>
-                <span><span style="color:#d55e00">&#9679;</span> ภาคใต้: รพ.ตะกั่วป่า จ.พังงา</span>
-              </div>
-            </div>
+        <div class="or-infog-split is-kolb-split">
+          <div class="or-kolb-diagram-card">
+            ${renderKolbCycleSvgHtml()}
           </div>
 
-          <div class="or-table-wrap is-s09-table" data-fit-table="1" data-mobile-scroll-hint="เลื่อนตารางซ้ายและขวาเพื่อดูห้องกลุ่มย่อยและกำหนดการครบทุกคอลัมน์">
-            <table class="or-table">
-              <thead>
-                <tr>
-                  <th style="width:5.5%">กลุ่ม</th>
-                  <th style="width:23.5%">โรงพยาบาลแหล่งฝึกและจังหวัด</th>
-                  <th style="width:7.5%">นศพ.</th>
-                  <th style="width:32%">อาจารย์ที่ปรึกษาประจำกลุ่ม</th>
-                  <th style="width:9.5%">ห้อง SG</th>
-                  <th style="width:22%">กำหนดการฝึกภาคสนาม</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td><strong>1</strong></td><td><strong>รพร.กุฉินารายณ์</strong> จ.กาฬสินธุ์</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์</span></span></span></td><td><code>3B1-01</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>2</strong></td><td><strong>รพร.ด่านซ้าย</strong> จ.เลย</td><td>19 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. พญ.ฉัฐญาณ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. พญ.วริษา</span></span></span></td><td><code>1C1-02</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
-                <tr><td><strong>3</strong></td><td><strong>รพ.ตะกั่วป่า</strong> จ.พังงา</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ฉัตรชัย อิ่มอารมย์</span></span></span></td><td><code>3B1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>4</strong></td><td><strong>รพ.ท่าวังผา</strong> จ.น่าน</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา</span></span></span></td><td><code>3B1-06</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
-                <tr><td><strong>5</strong></td><td><strong>รพ.เพชรบูรณ์ (1)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. นพ.สัมฤทธิ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_peerasit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>นพ.พีรสิชฌ์</span></span></span></td><td><code>1C1-04</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>6</strong></td><td><strong>รพ.เพชรบูรณ์ (2)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ปวินท์ ศรีวิเชียร</span></span></span></td><td><code>1C1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>7</strong></td><td><strong>รพ.อุบลรัตน์</strong> จ.ขอนแก่น</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ภูษิต ประคองสาย</span></span></span></td><td><code>1C1-03</code></td><td>12–20 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
-                <tr><td><strong>8</strong></td><td><strong>รพ.ท่าสองยาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. นพ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pharanyu.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>นพ.ภรัณยู</span></span></span></td><td><code>1C1-06</code></td><td>11–19 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
-                <tr><td><strong>9</strong></td><td><strong>รพ.อุ้มผาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_roengrudee.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>รศ. พญ.เริงฤดี ปธานวนิช</span></span></span></td><td><code>1C1-07</code></td><td>9–18 ธ.ค. 69 (ออกคืน 9 ธ.ค. 23.00)</td></tr>
-              </tbody>
-            </table>
+          <div class="or-stack-col" data-fit-group="cards" style="height:100%">
+            <div class="or-card is-white is-vcenter">
+              <span class="or-card-kicker">① CONCRETE EXPERIENCE · ลงมือมีประสบการณ์จริง</span>
+              <h3 class="or-card-title">ทำกิจกรรมทั้งส่วนตัวและร่วมกันเป็นทีมในพื้นที่ต่างๆ</h3>
+              <p class="or-card-text">ออกฝึกปฏิบัติงานจริง ณ รพ.ชุมชน รพ.สต. และหมู่บ้านเป้าหมายทั้ง 9 แห่ง ลงเดินสำรวจวิถีชีวิต พูดคุยรับฟังผู้ป่วย อสม. ผู้นำชุมชน และเก็บข้อมูล Health Survey ร่วมกัน</p>
+            </div>
+
+            <div class="or-card is-teal-tint is-vcenter">
+              <span class="or-card-kicker">② REFLECTIVE OBSERVATION · ทบทวนใคร่ครวญ</span>
+              <h3 class="or-card-title">สะท้อนคิด ตั้งคำถาม จากประสบการณ์จริง</h3>
+              <p class="or-card-text">ตั้งวงสนทนาสะท้อนคิดหลังลงพื้นที่ร่วมกับเพื่อนในทีมและอาจารย์ที่ปรึกษา (<code>SG</code>) ตั้งคำถามต่อสิ่งที่เห็นเทียบกับสมมติฐานเดิม และบันทึกพัฒนาการใน <code>SRN 1–2</code></p>
+            </div>
+
+            <div class="or-card is-amber-tint is-vcenter">
+              <span class="or-card-kicker">③ ABSTRACT CONCEPTUALISATION · สังเคราะห์หลักการ</span>
+              <h3 class="or-card-title">ร่วมสรุปเป็นหลักการเชื่อมโยงทฤษฎี</h3>
+              <p class="or-card-text">ร้อยเรียงข้อมูลเชิงประจักษ์จากพื้นที่เข้ากับกรอบคิดเชิงระบบ (<code>ST1–2, CLD</code>) วัตถุประสงค์ระบบสุขภาพทั้ง 5 ด้าน (<code>HS1–6</code>) และหลักระบาดวิทยา (<code>EP1–9</code>)</p>
+            </div>
+
+            <div class="or-card is-navy-tint is-vcenter">
+              <span class="or-card-kicker">④ ACTIVE EXPERIMENTATION · ต่อยอดสู่การปฏิบัติ</span>
+              <h3 class="or-card-title">แลกเปลี่ยน เกิดการเรียนรู้อย่างต่อเนื่อง</h3>
+              <p class="or-card-text">นำบทเรียนและข้อเสนอแนะจากทั้ง 9 บริบทพื้นที่มาแลกเปลี่ยนเรียนรู้ร่วมกันทั้งชั้นปีในวันนำเสนอ (<code>ฟอร์ม 3A &amp; 4A</code>) เพื่อต่อยอดสู่บทบาทแพทย์ในอนาคต</p>
+            </div>
           </div>
         </div>
       `
+    },
+    {
+      id: "s09-fieldwork-9sites",
+      num: "14",
+      section: "experience",
+      sectionLabel: "Act II · 9 กลุ่มพื้นที่ภาคสนาม",
+      actClass: "is-act-2",
+      actLabel: "ACT II · 9 SITES & LIVE TEAM FORMATIONS",
+      timeWindow: "09.11 – 09.13 น. (Clicker กลุ่ม 1–9)",
+      kicker: "02 · 9 FIELDWORK TRAINING HOSPITALS · INTERACTIVE 3D MAP & TEAM FORMATION",
+      title: "โรงพยาบาลแหล่งฝึกภาคสนามทั้ง 9 แห่ง — ตารางภาพรวมและผังทีมพร้อมแผนที่ 3 มิติ (กลุ่ม 1–9)",
+      keyTag: "กด Clicker เรียงกลุ่ม 1–9",
+      keyMessageHtml:
+        "แสดงตารางสรุปทั้ง <strong>9 กลุ่มพื้นที่ภาคสนาม</strong> แล้วกด <strong>Clicker ถัดไป (หรือคลิกชื่อกลุ่ม)</strong> เพื่อดู <strong>แผนที่ประเทศไทย 3 มิติ พร้อมผังทีม (<code>SITE 01–09</code>)</strong> เรียงลำดับจนครบทั้ง 9 กลุ่ม",
+      notes:
+        "จังหวะที่ 0 แสดงตารางภาพรวมโรงพยาบาลแหล่งฝึกทั้ง 9 แห่งทั่วภูมิภาค อาจารย์ที่ปรึกษา ห้องกลุ่มย่อย และวันเดินทาง จากนั้นเมื่อกด Clicker ถัดไป (Space / ลูกศรขวา / PageDown) สไลด์จะดึงสคริปต์ผังทีมและแผนที่ 3 มิติจากหน้า กลุ่ม & พื้นที่ มาแสดงเรียงตามลำดับตั้งแต่กลุ่มที่ 1 กุฉินารายณ์ จนครบกลุ่มที่ 9 อุ้มผาง แล้วจึงก้าวเข้าสู่สไลด์การประเมินผล",
+      render: () => {
+        const isStaticExport =
+          state.viewMode === "handout" ||
+          Boolean(window.__RACM_EXPORTING_DECK) ||
+          document.body.classList.contains("is-printing-orientation-deck");
+        const curSiteFocus = isStaticExport ? 0 : Number(state.siteFocus) || 0;
+        if (curSiteFocus >= 1 && curSiteFocus <= 9) {
+          return `
+            <div class="or-s09-stage-wrap" data-s09-site-focus="${curSiteFocus}">
+              <div class="or-s09-live-site-stage" data-s09-live-mount="${curSiteFocus}"></div>
+            </div>
+          `;
+        }
+        const pillsHtml = S09_SITE_META.map(
+          (m) =>
+            `<button type="button" class="or-s09-q-pill" data-s09-jump-site="${m.id}" title="เปิดผังทีมและแผนที่ 3D กลุ่มที่ ${m.id}: ${esc(m.hosp)}"><span class="or-s09-q-dot" style="background:${m.color}"></span><span>${m.id}.${esc(m.shortName)}</span></button>`
+        ).join("");
+        return `
+          <div class="or-s09-stage-wrap" data-s09-site-focus="0">
+            <div class="or-s09-quickbar">
+              <div class="or-s09-q-pills">
+                <button type="button" class="or-s09-q-pill is-active" data-s09-jump-site="0">≡ ตารางรวม 9 แห่ง</button>
+                ${pillsHtml}
+              </div>
+              <span class="or-s09-clicker-hint">🎛️ กดถัดไปเพื่อดูผังทีม + แผนที่ 3D กลุ่ม 1 &rarr; 9</span>
+            </div>
+
+            <div class="or-table-wrap is-s09-table is-s09-fulltable" data-fit-table="1" data-mobile-scroll-hint="แตะแถวกลุ่มเพื่อเปิดดูผังทีมและแผนที่ 3 มิติ">
+              <table class="or-table">
+                <thead>
+                  <tr>
+                    <th style="width:5.5%">กลุ่ม</th>
+                    <th style="width:23.5%">โรงพยาบาลแหล่งฝึกและจังหวัด</th>
+                    <th style="width:7.5%">นศพ.</th>
+                    <th style="width:32%">อาจารย์ที่ปรึกษาประจำกลุ่ม</th>
+                    <th style="width:9.5%">ห้อง SG</th>
+                    <th style="width:22%">กำหนดการฝึกภาคสนาม</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-s09-jump-site="1"><td><strong>1</strong></td><td><strong>รพร.กุฉินารายณ์</strong> จ.กาฬสินธุ์</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์</span></span></span></td><td><code>3B1-01</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                  <tr data-s09-jump-site="2"><td><strong>2</strong></td><td><strong>รพร.ด่านซ้าย</strong> จ.เลย</td><td>19 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. พญ.ฉัฐญาณ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. พญ.วริษา</span></span></span></td><td><code>1C1-02</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
+                  <tr data-s09-jump-site="3"><td><strong>3</strong></td><td><strong>รพ.ตะกั่วป่า</strong> จ.พังงา</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ฉัตรชัย อิ่มอารมย์</span></span></span></td><td><code>3B1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                  <tr data-s09-jump-site="4"><td><strong>4</strong></td><td><strong>รพ.ท่าวังผา</strong> จ.น่าน</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา</span></span></span></td><td><code>3B1-06</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
+                  <tr data-s09-jump-site="5"><td><strong>5</strong></td><td><strong>รพ.เพชรบูรณ์ (1)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. นพ.สัมฤทธิ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_peerasit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>นพ.พีรสิชฌ์</span></span></span></td><td><code>1C1-04</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                  <tr data-s09-jump-site="6"><td><strong>6</strong></td><td><strong>รพ.เพชรบูรณ์ (2)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ปวินท์ ศรีวิเชียร</span></span></span></td><td><code>1C1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                  <tr data-s09-jump-site="7"><td><strong>7</strong></td><td><strong>รพ.อุบลรัตน์</strong> จ.ขอนแก่น</td><td>18 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>อ. นพ.ภูษิต ประคองสาย</span></span></span></td><td><code>1C1-03</code></td><td>12–20 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
+                  <tr data-s09-jump-site="8"><td><strong>8</strong></td><td><strong>รพ.ท่าสองยาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>ผศ. นพ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pharanyu.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>นพ.ภรัณยู</span></span></span></td><td><code>1C1-06</code></td><td>11–19 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
+                  <tr data-s09-jump-site="9"><td><strong>9</strong></td><td><strong>รพ.อุ้มผาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_roengrudee.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /></span><span>รศ. พญ.เริงฤดี ปธานวนิช</span></span></span></td><td><code>1C1-07</code></td><td>9–18 ธ.ค. 69 (ออกคืน 9 ธ.ค. 23.00)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
     },
     {
       id: "s10-competency-blueprint",
@@ -1712,82 +1951,174 @@
     },
     {
       id: "s11-eval-written-exams",
-      num: "14",
+      num: "16",
       section: "evaluation",
-      sectionLabel: "Act III · Evaluation",
+      sectionLabel: "Act III · Table Spec 100%",
       actClass: "is-act-3",
-      actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.16 – 09.19 น. (3 นาที)",
-      kicker: "03 · COMPETENCY 1 DEEP DIVE · EPIDEMIOLOGY EXAM & HEALTH SYSTEMS EXAM",
-      title: "รายละเอียดการสอบภาคทฤษฎี หมวดระบาดวิทยาและหมวดระบบสุขภาพ",
-      keyTag: "แนวปฏิบัติการสอบ",
+      actLabel: "ACT III · TABLE SPECIFICATION (∑ = 100%)",
+      timeWindow: "09.15 – 09.17 น. (Table Spec)",
+      kicker: "03 · COMPETENCY 1 · WRITTEN EXAM TABLE SPECIFICATION (HEALTH SYSTEMS & EPIDEMIOLOGY)",
+      title: "สัดส่วนข้อสอบภาคทฤษฎี (Table Specification · รวม 100% ทั้ง 2 หมวดวิชา)",
+      keyTag: "Table Spec 100%",
       keyMessageHtml:
-        "ผ่านเกณฑ์แยกหมวดตั้งแต่ <strong>2.00 ขึ้นไป (ระดับ O &ge; 3.75)</strong> เข้าห้องสอบไม่เกิน <strong>15 นาทีหลังเริ่มสอบ</strong> และงดใช้อุปกรณ์อิเล็กทรอนิกส์หรือเอกสารพิมพ์",
+        "<strong>6.1 ระบบสุขภาพ (รวม 100% · 6 Discussions):</strong> <code>HS1 20%</code> · <code>HS2–5 บทละ 15%</code> · <code>HS6 20%</code> &nbsp;|&nbsp; <strong>6.2 ระบาดวิทยา (รวม 100% · 7 Exercises):</strong> <code>EP1 ไม่ออกสอบ</code> · <code>EP2,3,5,6,8 บทละ 15%</code> · <code>EP4 10%</code> · <code>EP7,9 บทละ 7.5%</code>",
       notes:
-        "ชี้แจงโครงสร้างข้อสอบทั้ง 2 วัน วันอังคาร 8 ธ.ค. สอบระบาดวิทยาแบบไม่เปิดตำรา และวันอังคาร 22 ธ.ค. สอบระบบสุขภาพโดยอนุญาตให้นำกระดาษ A4 เขียนสรุปด้วยลายมือตนเองเข้าห้องสอบได้ 1 แผ่น (หน้าและหลัง) ตามสัดส่วนเนื้อหาทั้ง 5 วัตถุประสงค์ของระบบสุขภาพ",
+        "ชี้แจงสัดส่วนข้อสอบภาคทฤษฎี (Table Specification) ฉบับถูกต้อง 100% ทั้งสองหมวดวิชา พร้อมแถบสัดส่วนสะสมครบ 100%: (6.1) ระบบสุขภาพ สอบวันอังคาร 22 ธ.ค. 69 แบบ Open Note A4 ประกอบด้วย HS1 20%, HS2 15%, HS3 15%, HS4 15%, HS5 15%, HS6 20% รวม 100% และมี 6 Discussions (6.2) ระบาดวิทยา สอบวันอังคาร 8 ธ.ค. 69 แบบ Closed-Book โดย EP1 ไม่ออกสอบ (-), EP2 15%, EP3 15%, EP4 (Study designs & AR, AR%, PAR, PAR%) 10%, EP5 15%, EP6 15%, EP7 7.5%, EP8 15%, EP9 7.5% รวม 100% และมี 7 Exercises เกณฑ์ผ่านแยกวิชาตั้งแต่ 2.00 ขึ้นไป (O >= 3.75)",
       render: () => `
-        <div class="or-infog-split is-s11-split">
-          ${figPlate(
-            "orient_s11_exam_vertical.png",
-            "Vertical Comparison of Epidemiology Exam (Closed-Book) and Health Systems Exam (Open-Note A4)",
-            ""
-          )}
-
-          <div class="or-grid-2 is-s11-grid" data-fit-group="cards">
-            <div class="or-card is-white is-s11-card">
-              <div>
-                <span class="or-card-kicker">SUMMATIVE 2.1 · อ. 8 ธ.ค. 69 (09.00–12.00 น.)</span>
-                <h3 class="or-card-title">Epidemiology Exam (Closed-Book)</h3>
-                <p class="or-card-text is-s11-sub">ห้อง <code>2C2-02, 2C2-03</code> · เนื้อหา <code>EP1–EP9</code> (รวม 100%)</p>
-              </div>
-              <div class="or-stat-bar-list is-s11-bars">
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><code>EP2</code> การตรวจวินิจฉัย และ <code>EP3</code> อคติ</span><span>อย่างละ 15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill" style="width:75%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><code>EP5</code> สอบสวนโรค และ <code>EP6</code> ภาระโรค</span><span>อย่างละ 15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill" style="width:75%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><code>EP8</code> การศึกษาเชิงทดลอง (RCT Appraisal)</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill" style="width:55%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><code>EP4</code> รูปแบบวิจัยและค่าผลกระทบ (AR, PAR)</span><span>10%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill" style="width:40%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><code>EP7</code> สำรวจชุมชน และ <code>EP9</code> เวชปฏิบัติอิงหลักฐาน</span><span>อย่างละ 7.5%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill" style="width:55%"></div></div></div>
-              </div>
-              <div class="or-s11-foot-badge is-blue">
-                ข้อสอบแบบปิดตำรา · ผ่านเกณฑ์เมื่อได้คะแนนตั้งแต่ 2.00 ขึ้นไป (ระดับ O &ge; 3.75)
-              </div>
+        <div class="or-grid-2" data-fit-group="cards" style="height:100%">
+          <div class="or-card is-navy-tint or-spec-card-shell">
+            <div>
+              <span class="or-card-kicker">6.1 ระบบสุขภาพ · อ. 22 ธ.ค. 69 (08.30–12.00 น. · ห้อง 2C2-01..03)</span>
+              <h3 class="or-card-title">Health Systems Exam (Open Note A4 · รวม 100%)</h3>
             </div>
 
-            <div class="or-card is-navy-tint is-s11-card">
-              <div>
-                <span class="or-card-kicker">SUMMATIVE 2.2 · อ. 22 ธ.ค. 69 (09.00–12.00 น.)</span>
-                <h3 class="or-card-title">Health Systems Exam (Open Note A4)</h3>
-                <p class="or-card-text is-s11-sub is-teal-sub">ห้อง <code>2C2-01..03</code> · ครอบคลุม <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> (รวม 100%)</p>
-              </div>
-              <div class="or-stat-bar-list is-s11-bars">
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>1.</strong>&nbsp;สุขภาพ</span> ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (<code>HS1</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>2.</strong>&nbsp;ระบบบริการสุขภาพ</span>และคุณลักษณะ <code>EQESaRR</code></span><span>25%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:94%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>3.</strong>&nbsp;ศักยภาพชุมชน</span>ในการร่วมพัฒนาสุขภาพ</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>4.</strong>&nbsp;การสร้างเสริมสุขภาพ</span>และกรอบ <code>COM-B</code> (<code>HS4</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>5.</strong>&nbsp;บทบาทแพทย์</span>ในการทำงานร่วมกับระบบสุขภาพ</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:58%"></div></div></div>
-              </div>
-              <div class="or-s11-foot-badge is-teal">
-                นำกระดาษ A4 เขียนสรุปด้วยลายมือตนเองเข้าห้องสอบได้ 1 แผ่น (หน้าและหลัง) งดสิ่งพิมพ์และสำเนา
-              </div>
+            ${renderSegmented100BarHtml("สัดส่วนสะสมตามโครงสร้างข้อสอบระบบสุขภาพ (0% → 100%)", "∑ = 100%", [
+              { code: "HS1", label: "สุขภาพ ปัจจัยกำหนดฯ & ป้องกันโรค", pct: 20, pctLabel: "20%", color: "#0284c7" },
+              { code: "HS2", label: "ระบบบริการสุขภาพ 1", pct: 15, pctLabel: "15%", color: "#0d9488" },
+              { code: "HS3", label: "ระบบบริการสุขภาพ 2", pct: 15, pctLabel: "15%", color: "#059669" },
+              { code: "HS4", label: "การสร้างเสริมสุขภาพ", pct: 15, pctLabel: "15%", color: "#d97706" },
+              { code: "HS5", label: "สาธารณสุขมูลฐาน & ปฐมภูมิ", pct: 15, pctLabel: "15%", color: "#7c3aed" },
+              { code: "HS6", label: "หลักประกันฯ & การคลังสุขภาพ", pct: 20, pctLabel: "20%", color: "#1d4ed8" }
+            ])}
+
+            <div class="or-spec-mini-table-wrap">
+              <table class="or-spec-mini-table">
+                <thead>
+                  <tr>
+                    <th style="width:14%">รหัส</th>
+                    <th>หัวข้อบทเรียนระบบสุขภาพ</th>
+                    <th style="width:24%;text-align:right">สัดส่วนข้อสอบ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>HS1</code></td><td>สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#0284c7"></span></span><strong>20%</strong></div></td></tr>
+                  <tr><td><code>HS2</code></td><td>ระบบบริการสุขภาพ 1 (Health Service System I · 6BB)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:75%;background:#0d9488"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>HS3</code></td><td>ระบบบริการสุขภาพ 2 (Health Service System II · EQESaRR)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:75%;background:#059669"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>HS4</code></td><td>การสร้างเสริมสุขภาพ (Health Promotion &amp; COM-B)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:75%;background:#d97706"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>HS5</code></td><td>การสาธารณสุขมูลฐานและบริการปฐมภูมิ (PHC &amp; PC)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:75%;background:#7c3aed"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>HS6</code></td><td>หลักประกันสุขภาพและการคลังสุขภาพ (Insurance &amp; Financing)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#1d4ed8"></span></span><strong>20%</strong></div></td></tr>
+                  <tr class="is-sum-row"><td colspan="2">รวมสัดส่วนข้อสอบภาคทฤษฎีระบบสุขภาพ</td><td style="text-align:right">100%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="or-s11-foot-badge is-teal">
+              <strong>ระบบสุขภาพมีทั้งสิ้น 6 Discussions</strong> · สอบผ่านเมื่อแต้ม <strong>&ge; 2.00</strong> (ระดับ <strong>O &ge; 3.75</strong>)
+            </div>
+          </div>
+
+          <div class="or-card is-white or-spec-card-shell">
+            <div>
+              <span class="or-card-kicker">6.2 ระบาดวิทยา · อ. 8 ธ.ค. 69 (08.30–12.00 น. · ห้อง 2C2-02..03)</span>
+              <h3 class="or-card-title">Epidemiology Exam (Closed-Book · รวม 100%)</h3>
+            </div>
+
+            ${renderSegmented100BarHtml("สัดส่วนสะสมข้อสอบระบาดวิทยา (EP1 ไม่ออกสอบ · EP2–EP9 = 100%)", "∑ = 100%", [
+              { code: "EP2", label: "Diagnostic test", pct: 15, pctLabel: "15%", color: "#1d4ed8" },
+              { code: "EP3", label: "Errors in epidemiology", pct: 15, pctLabel: "15%", color: "#0284c7" },
+              { code: "EP4", label: "Study designs & Impact", pct: 10, pctLabel: "10%", color: "#0d9488" },
+              { code: "EP5", label: "Surveillance & Outbreak", pct: 15, pctLabel: "15%", color: "#059669" },
+              { code: "EP6", label: "Burden of disease", pct: 15, pctLabel: "15%", color: "#d97706" },
+              { code: "EP7", label: "Health survey", pct: 7.5, pctLabel: "7.5%", color: "#ea580c" },
+              { code: "EP8", label: "Experimental study", pct: 15, pctLabel: "15%", color: "#7c3aed" },
+              { code: "EP9", label: "EBM", pct: 7.5, pctLabel: "7.5%", color: "#be185d" }
+            ])}
+
+            <div class="or-spec-mini-table-wrap">
+              <table class="or-spec-mini-table">
+                <thead>
+                  <tr>
+                    <th style="width:13%">รหัส</th>
+                    <th>หัวข้อบทเรียนระบาดวิทยา</th>
+                    <th style="width:24%;text-align:right">สัดส่วนข้อสอบ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="is-zero-row"><td><code>EP1</code></td><td>Introduction to epidemiology</td><td style="text-align:right"><strong>-</strong> <em>(ไม่ออกสอบ)</em></td></tr>
+                  <tr><td><code>EP2</code></td><td>Diagnostic test</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#1d4ed8"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>EP3</code></td><td>Errors in epidemiology</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#0284c7"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>EP4</code></td><td>Overview of study designs &amp; Measurement of impact (<code>AR, AR%, PAR, PAR%</code>)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:66.7%;background:#0d9488"></span></span><strong>10%</strong></div></td></tr>
+                  <tr><td><code>EP5</code></td><td>Disease surveillance &amp; Outbreak investigation</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#059669"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>EP6</code></td><td>Measure of burden of disease</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#d97706"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>EP7</code></td><td>Health survey</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:50%;background:#ea580c"></span></span><strong>7.5%</strong></div></td></tr>
+                  <tr><td><code>EP8</code></td><td>Experimental study</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:100%;background:#7c3aed"></span></span><strong>15%</strong></div></td></tr>
+                  <tr><td><code>EP9</code></td><td>Evidence-based medicine (<code>EBM</code>)</td><td><div class="or-spec-pct-cell"><span class="or-spec-inline-bar"><span style="width:50%;background:#be185d"></span></span><strong>7.5%</strong></div></td></tr>
+                  <tr class="is-sum-row"><td colspan="2">รวมสัดส่วนข้อสอบภาคทฤษฎีระบาดวิทยา</td><td style="text-align:right">100%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="or-s11-foot-badge is-blue">
+              <strong>ระบาดวิทยามีทั้งสิ้น 7 Exercises</strong> · สอบผ่านเมื่อแต้ม <strong>&ge; 2.00</strong> (ระดับ <strong>O &ge; 3.75</strong>)
             </div>
           </div>
         </div>
       `
     },
     {
+      id: "s11b-exam-regulations",
+      num: "17",
+      section: "evaluation",
+      sectionLabel: "Act III · ระเบียบการสอบ",
+      actClass: "is-act-3",
+      actLabel: "ACT III · WRITTEN EXAM REGULATIONS",
+      timeWindow: "09.17 – 09.18 น. (ระเบียบสอบ)",
+      kicker: "03 · OFFICIAL EXAM ROOM REGULATIONS & OPEN-NOTE A4 SPECIFICATION",
+      title: "ระเบียบการเข้าห้องสอบภาคทฤษฎี สิ่งของต้องห้าม และเกณฑ์กระดาษ Open Note A4",
+      keyTag: "กติกาห้องสอบสำคัญ",
+      keyMessageHtml:
+        "<strong>สายเกิน 15 นาที ไม่ให้เข้าห้องสอบ</strong> · แต่งกายถูกระเบียบและติดป้ายชื่อรูปชัดเจน · <strong>งดกระเป๋า มือถือ Smart Watch เครื่องคิดเลข อาหารเครื่องดื่ม</strong> · สอบระบบฯ นำ <strong>กระดาษ A4 ลายมือตนเอง 1 แผ่น (หน้า–หลัง)</strong> เข้าได้",
+      notes:
+        "ย้ำระเบียบการสอบภาคทฤษฎีทุกข้อตามคู่มือรายวิชาอย่างครบถ้วน: (1) มาสายเกิน 15 นาที ไม่ให้เข้าห้องสอบ (2) แต่งกายถูกต้องตามระเบียบของคณะฯ ติดเข็มกลัด สวมเข็มขัด และรองเท้าให้เรียบร้อย (3) ติดป้ายชื่อประจำตัวที่มีรูปให้เห็นชัดเจน (4) สิ่งของที่ห้ามนำเข้าห้องสอบทั้ง 4 หมวด ได้แก่ กระเป๋าทุกชนิด เครื่องมือสื่อสารและ Smart Watch เอกสาร/ตำรา/เครื่องคิดเลข/อุปกรณ์อิเล็กทรอนิกส์ และอาหารเครื่องดื่ม (5) สอบระบบสุขภาพแบบ Open Note นำกระดาษ A4 จำนวน 1 แผ่น จดเขียนด้วยลายมือตัวเอง ใช้ปากกาหรือดินสอ เขียนได้ทั้งหน้า-หลัง เข้าห้องสอบได้",
+      render: () => `
+        <div class="or-grid-3" data-fit-group="cards" style="height:100%">
+          <div class="or-card is-navy-tint is-vcenter">
+            <span class="or-card-kicker">1 · การเข้าห้องสอบและการแต่งกาย</span>
+            <h3 class="or-card-title">เวลาเข้าสอบ เครื่องแบบ &amp; ป้ายชื่อ</h3>
+            <ul class="or-list">
+              <li><strong>เวลาเข้าห้องสอบ:</strong> <strong>สายเกิน 15 นาที ไม่ให้เข้าห้องสอบ</strong>โดยเด็ดขาด</li>
+              <li><strong>การแต่งกาย:</strong> แต่งกายถูกต้องตามระเบียบของคณะฯ <strong>ติดเข็มกลัด สวมเข็มขัด และรองเท้าให้เรียบร้อย</strong></li>
+              <li><strong>การแสดงตัวตน:</strong> <strong>ติดป้ายชื่อประจำตัวที่มีรูปให้เห็นชัดเจน</strong>ตลอดเวลาที่อยู่ในห้องสอบ</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-rose-tint is-vcenter">
+            <span class="or-card-kicker">2 · ห้ามนำเข้าห้องสอบโดยเด็ดขาด</span>
+            <h3 class="or-card-title">สิ่งของต้องห้ามทั้ง 4 หมวด</h3>
+            <ul class="or-list">
+              <li>🚫 <strong>กระเป๋าบรรจุสิ่งของทุกชนิด</strong></li>
+              <li>🚫 <strong>เครื่องมือสื่อสาร และนาฬิกาข้อมือประเภท Smart Watch</strong> ทุกชนิด</li>
+              <li>🚫 <strong>เอกสาร ตำรา เครื่องคิดเลข และอุปกรณ์อิเล็กทรอนิกส์</strong>ทุกชนิด</li>
+              <li>🚫 <strong>อาหาร และเครื่องดื่ม</strong>ทุกชนิด</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-teal-tint is-vcenter">
+            <span class="or-card-kicker">3 · เงื่อนไขเฉพาะวิชาสอบ (OPEN NOTE vs CLOSED-BOOK)</span>
+            <h3 class="or-card-title">เกณฑ์กระดาษ A4 สำหรับสอบระบบสุขภาพ</h3>
+            <ul class="or-list">
+              <li><strong>สอบภาคทฤษฎีระบบสุขภาพ (อ. 22 ธ.ค. · แบบ Open Note):</strong> นำ <strong>กระดาษ A4 จำนวน 1 แผ่น</strong> เข้าห้องสอบได้ โดย<strong>จดเขียนด้วยลายมือตัวเอง ใช้ปากกาหรือดินสอ เขียนได้ทั้งหน้า–หลัง</strong> <em>(ห้ามพิมพ์ ห้ามถ่ายสำเนา และห้ามแปะกระดาษเพิ่ม)</em></li>
+              <li><strong>สอบภาคทฤษฎีระบาดวิทยา (อ. 8 ธ.ค. · Closed-Book):</strong> ไม่อนุญาตให้นำเอกสาร โน้ตย่อ หรือเครื่องคิดเลขเข้าห้องสอบ</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    {
       id: "s12-eval-practical-rubrics",
-      num: "15",
+      num: "18",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.19 – 09.22 น. (3 นาที)",
+      timeWindow: "09.18 – 09.19 น. (ภาพรวมภาคปฏิบัติ)",
       kicker: "03 · COMPETENCIES 2–5 · TEAM PRESENTATION, REFLECTION & INTEGRITY",
-      title: "การประเมินภาคปฏิบัติ การนำเสนอผลงานทีม งานสะท้อนคิด และเจตคติวิชาชีพ",
+      title: "ภาพรวมการประเมินภาคปฏิบัติ การนำเสนอผลงานทีม งานสะท้อนคิด และเจตคติวิชาชีพ",
       keyTag: "การสังเคราะห์ร่วมกัน",
       keyMessageHtml:
-        "การนำเสนอหมวดระบบสุขภาพ (<code>ฟอร์ม 3A</code>) มุ่งให้ทีมใช้ <strong>การคิดเชิงระบบเชื่อมโยงทั้ง 5 วัตถุประสงค์เข้าด้วยกัน</strong> แทนการแบ่งหัวข้อรายงานแยกส่วน",
+        "การนำเสนอหมวดระบบสุขภาพ (<code>ฟอร์ม 3A</code>) มุ่งให้ทีมใช้ <strong>การคิดเชิงระบบเชื่อมโยงทั้ง 5 วัตถุประสงค์เข้าด้วยกัน</strong> ควบคู่กับวิจัยระบาดวิทยา (<code>ฟอร์ม 4A</code>) งานสะท้อนคิด <code>SRN 1–2</code> และเจตคติ (<code>ฟอร์ม 1A, 2A</code>)",
       notes:
-        "ย้ำแนวทางการนำเสนอหมวดระบบสุขภาพ (ฟอร์ม 3A นำเสนอ 10 นาที แลกเปลี่ยน 20 นาที) ที่มุ่งให้ทีมใช้การคิดเชิงระบบร้อยเรียงทั้ง 5 วัตถุประสงค์ให้เห็นพลวัตของพื้นที่จริง ควบคู่กับการนำเสนอวิจัยระบาดวิทยา (ฟอร์ม 4A นำเสนอ 7 นาที แลกเปลี่ยน 18 นาที) งานสะท้อนคิด SRN 1–2 และการประเมินเจตคติวิชาชีพตามฟอร์ม 1A และ 2A",
+        "ปูภาพรวมการประเมินภาคปฏิบัติทั้ง 3 เสาหลัก ได้แก่ งานสะท้อนคิดรายบุคคล (SRN 1 และ 2) การนำเสนอผลงานทีม (ฟอร์ม 3A ระบบสุขภาพ และฟอร์ม 4A ระบาดวิทยา) และการประเมินพฤติกรรม-เจตคติ (ฟอร์ม 1A และ 2A) ก่อนเจาะลึกรายละเอียดเกณฑ์แต่ละฟอร์มในสไลด์ถัดไป",
       render: () => `
         <div class="or-grid-3 is-s12-grid" data-fit-group="pillars">
           <div class="or-card is-teal-tint or-visual-pillar-card">
@@ -1800,7 +2131,7 @@
               <ul class="or-list is-s12-list">
                 <li><strong><code>SRN 1</code> (เพื่อพัฒนา):</strong> ส่งพุธ <strong>9 ธ.ค. (ภายใน 17.00 น.)</strong> เพื่อรับคำแนะนำจากอาจารย์ที่ปรึกษา</li>
                 <li><strong><code>SRN 2</code> (ตัดสินผล):</strong> ส่งพุธ <strong>30 ธ.ค. (ภายใน 17.00 น.)</strong> ทาง E-learning</li>
-                <li><strong>รูปแบบไฟล์:</strong> PDF <strong>ไม่เกิน 5 หน้า A4</strong> อักษร <code>TH Sarabun New 16pt</code></li>
+                <li><strong>รูปแบบไฟล์:</strong> PDF <strong>ไม่เกิน 5 หน้า A4</strong> อักษร <code>TH Sarabun New 16pt</code> (<strong>No AI</strong>)</li>
               </ul>
             </div>
           </div>
@@ -1814,7 +2145,7 @@
               <h3 class="or-card-title">การนำเสนอเชื่อมโยงระบบสุขภาพและวิจัยชุมชน</h3>
               <ul class="or-list is-s12-list">
                 <li><strong>ระบบสุขภาพ (3A · 29 ธ.ค.):</strong> นำเสนอ 10 นาที แลกเปลี่ยน 20 นาที โดยใช้<strong>การคิดเชิงระบบเชื่อมทั้ง 5 วัตถุประสงค์</strong></li>
-                <li><strong>ระบาดวิทยา (4A · 30 ธ.ค.):</strong> นำเสนอสด 7 นาที แลกเปลี่ยน 18 นาที (งดใช้วิดีโอบันทึกล่วงหน้า)</li>
+                <li><strong>ระบาดวิทยา (4A · 30 ธ.ค.):</strong> นำเสนอสด 7 นาที แลกเปลี่ยน 18 นาที (<strong>ยกเว้นการถ่ายบันทึก VDO ล่วงหน้า</strong>)</li>
               </ul>
             </div>
           </div>
@@ -1827,8 +2158,8 @@
               <span class="or-card-kicker">3 · COMPETENCY 2 และ 5 · รายบุคคล</span>
               <h3 class="or-card-title">ความซื่อสัตย์และเจตคติวิชาชีพ (ฟอร์ม 1A, 2A)</h3>
               <ul class="or-list is-s12-list">
-                <li><strong>ฟอร์ม 1A:</strong> ความสุภาพอ่อนน้อม ใฝ่รู้ การทำงานร่วมกับผู้อื่น ความรับผิดชอบ น้ำใจ และ<strong>ความซื่อสัตย์ทางวิชาการ</strong> (เก็บข้อมูลจริง ไม่คัดลอกผลงาน และลงชื่อด้วยตนเอง)</li>
-                <li><strong>การประเมินเพื่อนร่วมกลุ่มและฟอร์ม 2A:</strong> สรุปผลภาพรวมระดับ <strong>O / S / U</strong></li>
+                <li><strong>ฟอร์ม 1A:</strong> การสื่อสาร ความใฝ่รู้ ภาวะผู้นำ/ทำงานทีม การมีส่วนร่วม ความรับผิดชอบ ความซื่อสัตย์ และน้ำใจ</li>
+                <li><strong>ฟอร์ม 2A (แจ้งผล นศพ.):</strong> สรุปผลภาคพฤติกรรม + เจตคติ สู่ภาพรวมระดับ <strong>O / S / U</strong></li>
               </ul>
             </div>
           </div>
@@ -1836,20 +2167,384 @@
       `
     },
     {
+      id: "s12b-hs-presentation-3a",
+      num: "19",
+      section: "evaluation",
+      sectionLabel: "Act III · นำเสนอระบบฯ (3A)",
+      actClass: "is-act-3",
+      actLabel: "ACT III · HEALTH SYSTEMS RUBRIC (FORM 3A)",
+      timeWindow: "อ. 29 ธ.ค. 69 · ฟอร์ม 3A (100 คะแนน)",
+      kicker: "03 · HEALTH SYSTEMS ORAL PRESENTATION GUIDELINES & FORM 3A RUBRIC",
+      title: "เกณฑ์การนำเสนอและแบบประเมินผลหมวดระบบสุขภาพ (ฟอร์ม 3A · เต็ม 100 คะแนน)",
+      keyTag: "ฟอร์ม 3A · ระบบสุขภาพ",
+      keyMessageHtml:
+        "บูรณาการวัตถุประสงค์ภาคสนามด้วยคิดเชิงระบบ · <strong>30 นาที/กลุ่ม</strong> (ตารางปี 69: <strong>นำเสนอ &le; 10 นาที + อภิปราย 20 นาที</strong>) · <strong>Formal presentation รูปแบบใดก็ได้ ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present</strong>",
+      notes:
+        "ชี้แจงเกณฑ์การนำเสนอระบบสุขภาพ (วันอังคาร 29 ธ.ค. 69 ห้อง 2C2-03 ลงทะเบียน 08.00 น.): บูรณาการเชื่อมโยงวัตถุประสงค์การเรียนรู้ภาคสนามระบบสุขภาพ เวลารวม 30 นาที/กลุ่ม (ตารางปี 2569 นำเสนอไม่เกิน 10 นาที + อภิปราย 20 นาที / เกณฑ์เดิมนำเสนอไม่เกิน 12 นาที + อภิปราย 18 นาที) รูปแบบ Formal presentation ใดก็ได้ ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present สัญญาณกริ่งเตือน: กดกริ่ง 1 ครั้งก่อนหมดเวลานำเสนอ 5 นาที, กดกริ่ง 2 ครั้งเมื่อครบเวลานำเสนอ และเมื่อหมดเวลา 30 นาที ยกป้ายและกดกริ่ง 2 ครั้ง พร้อมเกณฑ์คะแนนฟอร์ม 3A ทั้ง 5 ข้อ รวม 100 คะแนน",
+      render: () => `
+        <div class="or-pres-rubric-stack">
+          <div class="or-pres-rules-strip">
+            <div class="or-pres-rule-chip is-outline">
+              <span class="or-pres-rule-kicker">โจทย์บูรณาการ &amp; รูปแบบการนำเสนอ</span>
+              บูรณาการวัตถุประสงค์การเรียนรู้ภาคสนามระบบสุขภาพ (เชื่อมทั้ง <strong>5 วัตถุประสงค์</strong> ด้วยคิดเชิงระบบ / คู่มือเดิม 2–5 ข้อ) · <strong>Formal presentation รูปแบบใดก็ได้ ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present</strong>
+            </div>
+            <div class="or-pres-rule-chip">
+              <span class="or-pres-rule-kicker">การจัดสรรเวลา (รวม 30 นาที / กลุ่ม)</span>
+              ตารางปี 2569: <strong>นำเสนอไม่เกิน 10 นาที + อภิปราย 20 นาที</strong> <em>(เกณฑ์คู่มือเดิม: นำเสนอ &le; 12 นาที + อภิปราย 18 นาที)</em> · วันอังคารที่ 29 ธ.ค. 69 ณ ห้อง <code>2C2-03</code>
+            </div>
+            <div class="or-pres-rule-chip is-bell">
+              <span class="or-pres-rule-kicker">🔔 การเตือนหมดเวลา</span>
+              <strong>กริ่ง 1 ครั้ง:</strong> ก่อนหมดเวลานำเสนอ 5 นาที · <strong>กริ่ง 2 ครั้ง:</strong> ครบเวลานำเสนอ · <strong>หมดเวลา 30 นาที:</strong> ยกป้ายและกดกริ่ง 2 ครั้ง
+            </div>
+          </div>
+
+          ${renderSegmented100BarHtml("สัดส่วนคะแนนแบบประเมินการนำเสนอระบบสุขภาพ (ฟอร์ม 3A)", "รวมเต็ม 100 คะแนน", [
+            { code: "ข้อ 1 เนื้อหาบูรณาการ", label: "เนื้อหาบูรณาการวัตถุประสงค์", pct: 30, pctLabel: "30 คะแนน", color: "#0284c7" },
+            { code: "ข้อ 2 วิเคราะห์/สังเคราะห์", label: "คิดวิเคราะห์ สังเคราะห์ & ข้อจำกัด", pct: 20, pctLabel: "20 คะแนน", color: "#0d9488" },
+            { code: "ข้อ 3 บทบาทแพทย์ & ระบบ", label: "ประโยชน์ต่อบทบาทแพทย์และระบบ (Paradigm)", pct: 20, pctLabel: "20 คะแนน", color: "#d97706" },
+            { code: "ข้อ 4 ตอบคำถาม", label: "การอธิบายและตอบข้อซักถาม", pct: 20, pctLabel: "20 คะแนน", color: "#4f46e5" },
+            { code: "ข้อ 5 สื่อ & เวลา", label: "รูปแบบ สื่อ และการรักษาเวลา", pct: 10, pctLabel: "10 คะแนน", color: "#be185d" }
+          ])}
+
+          <div class="or-table-wrap is-rubric-matrix" data-fit-table="1">
+            <table class="or-table">
+              <colgroup>
+                <col style="width:23%" />
+                <col style="width:25%" />
+                <col style="width:25%" />
+                <col style="width:27%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>หัวข้อการประเมิน (ฟอร์ม 3A)</th>
+                  <th class="is-col-u">ไม่ผ่าน (U)</th>
+                  <th class="is-col-s">ผ่าน (S)</th>
+                  <th class="is-col-o">โดดเด่น (O)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. เนื้อหาบูรณาการวัตถุประสงค์ครอบคลุมประเด็นสำคัญ</strong> <span class="or-pts-pill">30 คะแนน</span></td>
+                  <td><strong>(0–14)</strong> ขาดข้อมูลสำคัญของประสบการณ์ภาคสนามทั้งเชิงปริมาณหรือคุณภาพ ทำให้ไม่สามารถวิเคราะห์เชื่อมกับบทเรียนได้</td>
+                  <td><strong>(15–23)</strong> ข้อมูลครอบคลุมเนื้อหาสำคัญในประเด็นที่เกี่ยวข้อง ตกหล่นเล็กน้อย เพียงพอที่จะประยุกต์กับวัตถุประสงค์การเรียนรู้</td>
+                  <td><strong>(24–30)</strong> เนื้อหาประสบการณ์ภาคสนามครอบคลุมวัตถุประสงค์เป็นอย่างดี พอเหมาะ ชัดเจน ถูกต้อง และสอดคล้องกับวัตถุประสงค์</td>
+                </tr>
+                <tr>
+                  <td><strong>2. คิดวิเคราะห์เชื่อมโยงปัจจัย (analytical) สังเคราะห์ (synthesis) &amp; รู้ข้อจำกัดข้อมูล (critical)</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> ไม่สามารถวิเคราะห์เชื่อมโยงบทเรียนกับภาคสนาม ผิดพลาดในจุดสำคัญ อ้างข้อมูลเกินจริงโดยไม่ตระหนักข้อจำกัดข้อมูล</td>
+                  <td><strong>(10–15)</strong> นำประสบการณ์ภาคสนามมาคิดวิเคราะห์เชื่อมโยงกับบทเรียนได้เป็นส่วนใหญ่ คลาดเคลื่อนเล็กน้อย และสังเคราะห์ได้บ้าง</td>
+                  <td><strong>(16–20)</strong> วิเคราะห์เชื่อมโยงบทเรียนเข้ากับประสบการณ์ภาคสนามได้อย่างดี ประเด็นชัดเจน นำไปสู่การสังเคราะห์ที่น่าสนใจและถูกหลักการ</td>
+                </tr>
+                <tr>
+                  <td><strong>3. ประโยชน์ต่อการพัฒนาบทบาทแพทย์ในอนาคตและระบบสุขภาพ</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> เรื่องที่นำเสนอไม่มีประโยชน์ต่อการพัฒนาระบบสุขภาพ อาจเป็นเพียงการพัฒนาระดับบุคคลหรือองค์กรเล็ก ๆ</td>
+                  <td><strong>(10–15)</strong> เกี่ยวข้องกับการพัฒนาระบบสุขภาพในมิติเดิม ทำให้เห็นแนวทางการพัฒนาภายใต้บริบทเดิม</td>
+                  <td><strong>(16–20)</strong> มีประโยชน์ต่อระบบสุขภาพในอนาคตอย่างยิ่ง เกิดแนวคิดพัฒนาระบบนอกเหนือบริบทเดิม (<strong>ปรับเปลี่ยนกระบวนทัศน์: Paradigm</strong>)</td>
+                </tr>
+                <tr>
+                  <td><strong>4. การอธิบายและตอบข้อซักถาม แสดงความเข้าใจอย่างเป็นระบบ</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> ตอบคำถามได้น้อย คลาดเคลื่อนจากหลักวิชาการมาก ข้อมูลที่ตอบไม่เป็นความจริง ไม่เป็นเหตุเป็นผล</td>
+                  <td><strong>(10–15)</strong> คลายข้อสงสัยได้เป็นส่วนมาก ใช้ความเห็นร่วมกับการอ้างอิงหลักวิชาการหรือหลักฐานเชิงประจักษ์เป็นส่วนมาก</td>
+                  <td><strong>(16–20)</strong> ใช้หลักการทางวิชาการและข้อมูลความจริง สามารถให้ทั้งความเห็นและหลักวิชาการได้อย่างชัดเจนและเหมาะสม</td>
+                </tr>
+                <tr>
+                  <td><strong>5. รูปแบบและวิธีการนำเสนอ สื่อที่ใช้ และการรักษาเวลา</strong> <span class="or-pts-pill">10 คะแนน</span></td>
+                  <td><strong>(0–4)</strong> ไม่รักษาเวลา ไม่หยุดนำเสนอแม้กรรมการเตือนหลายครั้ง สื่อไม่ช่วยให้ผู้ฟังเข้าใจ</td>
+                  <td><strong>(5–7)</strong> ใช้สื่อเหมาะสม ทำให้เข้าใจเนื้อหาที่ต้องการสื่อ พยายามรักษาเวลาตามกำหนด</td>
+                  <td><strong>(8–10)</strong> รูปแบบน่าสนใจ ทำให้ผู้ฟังติดตามเรื่องราวได้ตลอดการนำเสนอ ควบคุมเวลาได้เป็นอย่างดี</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s12c-epi-presentation-4a",
+      num: "20",
+      section: "evaluation",
+      sectionLabel: "Act III · นำเสนอระบาดฯ (4A)",
+      actClass: "is-act-3",
+      actLabel: "ACT III · EPIDEMIOLOGY RUBRIC (FORM 4A)",
+      timeWindow: "พ. 30 ธ.ค. 69 · ฟอร์ม 4A (100 คะแนน)",
+      kicker: "03 · EPIDEMIOLOGY ORAL PRESENTATION GUIDELINES & FORM 4A RUBRIC",
+      title: "เกณฑ์การนำเสนอและแบบประเมินผลหมวดระบาดวิทยา (ฟอร์ม 4A · เต็ม 100 คะแนน)",
+      keyTag: "ฟอร์ม 4A · ระบาดวิทยา",
+      keyMessageHtml:
+        "<strong>นำเสนอกลุ่มละไม่เกิน 7 นาที + อภิปรายไม่เกิน 18 นาที (25 นาที/กลุ่ม)</strong> · ครบ <strong>Outline 8 หัวข้อ</strong> · <strong>Formal presentation รูปแบบใดก็ได้ ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present</strong>",
+      notes:
+        "ชี้แจงเกณฑ์การนำเสนอระบาดวิทยา (วันพุธ 30 ธ.ค. 69 เวลา 08.30–12.00 น. ห้อง 2C2-03): นำเสนอกลุ่มละไม่เกิน 7 นาที และอภิปรายไม่เกิน 18 นาที (รวม 25 นาที/กลุ่ม) Formal presentation รูปแบบใดก็ได้ ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present โครงร่าง (Outline) ประกอบด้วย คำถามงานวิจัย ที่มาและความสำคัญ วัตถุประสงค์ ระเบียบวิธีวิจัย ผลการวิจัย อภิปรายผล สรุปผล และการนำไปใช้ประโยชน์ สัญญาณกริ่งเตือน: ครบ 7 นาที กดกริ่ง 1 ครั้ง และหมดเวลา 25 นาที ยกป้ายและกดกริ่ง 2 ครั้ง พร้อมเกณฑ์คะแนนฟอร์ม 4A (Quantitative study) ทั้ง 7 ข้อ รวม 100 คะแนน",
+      render: () => `
+        <div class="or-pres-rubric-stack">
+          <div class="or-pres-rules-strip">
+            <div class="or-pres-rule-chip is-outline">
+              <span class="or-pres-rule-kicker">OUTLINE การนำเสนอครบ 8 องค์ประกอบ</span>
+              <strong>คำถามงานวิจัย · ที่มาและความสำคัญ · วัตถุประสงค์ · ระเบียบวิธีวิจัย · ผลการวิจัย · อภิปรายผล · สรุปผล · และการนำไปใช้ประโยชน์</strong>
+            </div>
+            <div class="or-pres-rule-chip">
+              <span class="or-pres-rule-kicker">เวลา &amp; รูปแบบการนำเสนอ (25 นาที / กลุ่ม)</span>
+              <strong>นำเสนอไม่เกิน 7 นาที + อภิปรายไม่เกิน 18 นาที</strong> · Formal presentation รูปแบบใดก็ได้ <strong>ยกเว้นการถ่ายบันทึก VDO ล่วงหน้ามา Present</strong>
+            </div>
+            <div class="or-pres-rule-chip is-bell">
+              <span class="or-pres-rule-kicker">🔔 การเตือนหมดเวลา</span>
+              <strong>ครบ 7 นาที:</strong> กดกริ่ง 1 ครั้ง · <strong>หมดเวลา 25 นาที:</strong> ยกป้าย และกดกริ่ง 2 ครั้ง
+            </div>
+          </div>
+
+          ${renderSegmented100BarHtml("สัดส่วนคะแนนแบบประเมินการนำเสนอ Quantitative Study (ฟอร์ม 4A)", "รวมเต็ม 100 คะแนน", [
+            { code: "1. ที่มา/วัตถุประสงค์", label: "ที่มาความสำคัญและวัตถุประสงค์", pct: 20, pctLabel: "20", color: "#1d4ed8" },
+            { code: "2. วิธีวิจัย", label: "กรอบแนวคิดและระเบียบวิธี", pct: 20, pctLabel: "20", color: "#0284c7" },
+            { code: "3. สถิติ", label: "ผลและการวิเคราะห์สถิติ", pct: 10, pctLabel: "10", color: "#0d9488" },
+            { code: "4. สรุป/อภิปราย", label: "สรุป อภิปราย & ข้อจำกัด", pct: 20, pctLabel: "20", color: "#059669" },
+            { code: "5. ประโยชน์", label: "ประโยชน์จากงานวิจัย", pct: 10, pctLabel: "10", color: "#d97706" },
+            { code: "6. ตอบคำถาม", label: "การอธิบายและตอบซักถาม", pct: 10, pctLabel: "10", color: "#7c3aed" },
+            { code: "7. สื่อ/เวลา", label: "รูปแบบน่าสนใจและตรงเวลา", pct: 10, pctLabel: "10", color: "#be185d" }
+          ])}
+
+          <div class="or-table-wrap is-rubric-matrix" data-fit-table="1">
+            <table class="or-table">
+              <colgroup>
+                <col style="width:23.5%" />
+                <col style="width:24.5%" />
+                <col style="width:24.5%" />
+                <col style="width:27.5%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>หัวข้อการประเมิน (ฟอร์ม 4A · Quantitative)</th>
+                  <th class="is-col-u">ไม่ผ่าน (U)</th>
+                  <th class="is-col-s">ผ่าน (S)</th>
+                  <th class="is-col-o">โดดเด่น (O)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. ความชัดเจนของที่มา ความสำคัญของปัญหา และวัตถุประสงค์</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> ชี้แจงที่มาและความสำคัญของปัญหาไม่ได้ หรือไม่ชัดเจน ขาดข้อมูลสนับสนุน</td>
+                  <td><strong>(10–15)</strong> ระบุที่มาและความสำคัญของปัญหาได้ มีข้อมูลสนับสนุนชัดเจน</td>
+                  <td><strong>(16–20)</strong> ระบุที่มาและความสำคัญได้ชัดเจน มีข้อมูลสนับสนุนที่ผ่านการวิเคราะห์วิพากษ์ และเปรียบเทียบกลุ่มอ้างอิงชัดเจน</td>
+                </tr>
+                <tr>
+                  <td><strong>2. ความถูกต้องของกรอบแนวคิด และระเบียบวิธีการศึกษา</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> ไม่มีระเบียบวิธีวิจัยที่ชัดเจน ระบุไม่ได้ หรือระบุผิดไปจากข้อเท็จจริง</td>
+                  <td><strong>(10–15)</strong> กรอบแนวคิดสอดคล้องกับปัญหา มีระเบียบวิธีวิจัยชัดเจน อธิบายกระบวนการได้ถูกต้อง</td>
+                  <td><strong>(16–20)</strong> กรอบแนวคิดแหลมคม บูรณาการความรู้ได้ดี เลือกวิธีวิจัยเหมาะสมประณีตและ<strong>ลดอคติ (Bias) ต่าง ๆ ได้เป็นอย่างดี</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>3. ผลการศึกษา เลือกใช้สถิติวิเคราะห์และนำเสนอข้อมูลถูกต้อง</strong> <span class="or-pts-pill">10 คะแนน</span></td>
+                  <td><strong>(0–4)</strong> เลือกสถิติไม่สอดคล้องกับวัตถุประสงค์ กระบวนการวิเคราะห์ผิดพลาด หรือนำเสนอผิด</td>
+                  <td><strong>(5–7)</strong> เลือกสถิติวิเคราะห์ได้เหมาะสมกับวัตถุประสงค์ วิเคราะห์ถูกต้อง และนำเสนอเหมาะสม</td>
+                  <td><strong>(8–10)</strong> เลือกและวิเคราะห์สถิติถูกต้องเหมาะสมโดยตลอด อธิบายเหตุผลเปรียบเทียบวิธีวิเคราะห์ได้ นำเสนอกระชับเข้าใจง่าย</td>
+                </tr>
+                <tr>
+                  <td><strong>4. สรุปและอภิปรายผล สังเคราะห์ (synthesis) &amp; รู้ข้อจำกัดข้อมูล (critical)</strong> <span class="or-pts-pill">20 คะแนน</span></td>
+                  <td><strong>(0–9)</strong> ไม่สามารถสรุปหรือสังเคราะห์ข้อค้นพบได้ หรือสรุปไม่สอดคล้องกับผลการวิเคราะห์</td>
+                  <td><strong>(10–15)</strong> ได้ข้อสรุปและสังเคราะห์จากข้อค้นพบได้บ้าง โดยสอดคล้องกับวัตถุประสงค์การศึกษา</td>
+                  <td><strong>(16–20)</strong> ระบุข้อค้นพบชัดเจน สังเคราะห์ข้อค้นพบที่เป็นประโยชน์พร้อมอ้างอิงข้อมูลแหล่งอื่นและตระหนักข้อจำกัดข้อมูลอย่างรอบด้าน</td>
+                </tr>
+                <tr>
+                  <td><strong>5. ประโยชน์ที่ได้จากงานวิจัย</strong> <span class="or-pts-pill">10 คะแนน</span></td>
+                  <td><strong>(0–4)</strong> ไม่สามารถระบุประโยชน์จากการศึกษาของตนเองได้</td>
+                  <td><strong>(5–7)</strong> สามารถระบุประโยชน์ที่ได้จากการศึกษาได้ชัดเจน</td>
+                  <td><strong>(8–10)</strong> การศึกษาเกิดประโยชน์ต่อชุมชนและสังคมอย่างชัดเจน สมควรเป็นแบบอย่าง</td>
+                </tr>
+                <tr>
+                  <td><strong>6. การอธิบายและตอบข้อซักถามอย่างเป็นระบบ</strong> <span class="or-pts-pill">10 คะแนน</span></td>
+                  <td><strong>(0–4)</strong> ตอบคำถามไม่เป็นระบบ ผิดหลักวิชาการ หรือไม่ใช้ข้อมูลความจริงในการตอบ</td>
+                  <td><strong>(5–7)</strong> ตอบคำถามหรืออธิบายโดยใช้หลักวิชาการได้ถูกต้องเป็นส่วนใหญ่ อ้างอิงข้อมูลเหมาะสม</td>
+                  <td><strong>(8–10)</strong> ตอบตรงประเด็น ใช้หลักวิชาการถูกต้อง มีหลักฐานสนับสนุนชัดเจน อธิบายกระชับไม่อ้อมค้อม</td>
+                </tr>
+                <tr>
+                  <td><strong>7. รูปแบบการนำเสนอน่าสนใจ และตรงต่อเวลา (&le; 7 นาที)</strong> <span class="or-pts-pill">10 คะแนน</span></td>
+                  <td><strong>(0–4)</strong> รูปแบบไม่เหมาะสม ไม่บรรลุวัตถุประสงค์ ไม่รักษาเวลา ได้รับการตักเตือนหลายรอบ</td>
+                  <td><strong>(5–7)</strong> นำเสนอได้น่าสนใจ สื่อสารให้ผู้ฟังเข้าใจได้ และรักษาเวลาได้ดี</td>
+                  <td><strong>(8–10)</strong> การนำเสนอโดดเด่น ดึงดูดความสนใจผู้ฟังได้ตลอดการนำเสนอ และตรงต่อเวลาอย่างแม่นยำ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s12d-form-2a-1a-part1",
+      num: "21",
+      section: "evaluation",
+      sectionLabel: "Act III · ฟอร์ม 2A & 1A (ข้อ 1–3)",
+      actClass: "is-act-3",
+      actLabel: "ACT III · PRACTICAL & ATTITUDE (FORM 2A & 1A)",
+      timeWindow: "เกณฑ์ภาคปฏิบัติและเจตคติ (1/2)",
+      kicker: "03 · PRACTICAL & ATTITUDE EVALUATION STRUCTURE (FORM 2A) & BEHAVIOR RUBRIC (FORM 1A · ITEMS 1–3)",
+      title: "เกณฑ์การประเมินภาคปฏิบัติและเจตคติ (ฟอร์ม 2A) และเกณฑ์ประเมินพฤติกรรม (ฟอร์ม 1A · ข้อ 1–3)",
+      keyTag: "ฟอร์ม 2A & ฟอร์ม 1A",
+      keyMessageHtml:
+        "ผลที่จะแจ้ง นศพ. คือ <strong>ข้อ 3 ภาพรวมเจตคติและพฤติกรรม (<code>O / S / U</code>)</strong> โดยใช้ Input จาก <strong>ข้อ 1 ภาคพฤติกรรม</strong> + <strong>ข้อ 2 เจตคติ</strong> (ประเมินโดยเพื่อน นศพ. และอาจารย์ตามเกณฑ์ <strong>ฟอร์ม 1A</strong>)",
+      notes:
+        "แสดงโครงสร้างการให้คะแนนเกณฑ์การประเมินภาคปฏิบัติและเจตคติ หลักสูตรเวชศาสตร์ชุมชน สำหรับ นศพ. ชั้นปีที่ 3 (ฟอร์ม 2A) ทั้ง 3 หัวข้อ พร้อมหมายเหตุครบทั้ง 3 ข้อ (ที่มาของคะแนนจากแบบประเมินโดย นศพ. และอาจารย์, ข้อ 3 ส่งเป็นรายงานแจ้ง นศพ., และการใช้ Personal Judgement กรณีผลข้อ 1 และ 2 ไม่ตรงกัน) แขวนคู่กับเกณฑ์ในการประเมินผลพฤติกรรม นศพ. ชั้นปีที่ 3 (ฟอร์ม 1A) ข้อ 1 การสื่อสารและมนุษยสัมพันธ์, ข้อ 2 ความใฝ่รู้ และข้อ 3 ภาวะผู้นำและการทำงานเป็นทีม",
+      render: () => `
+        <div class="or-infog-split is-form2a-1a-split">
+          <div class="or-card is-navy-tint" data-fit-solo="1" style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+            <div>
+              <span class="or-card-kicker">โครงสร้างการให้คะแนน · หลักสูตรเวชศาสตร์ชุมชน ปีที่ 3</span>
+              <h3 class="or-card-title">เกณฑ์การประเมินภาคปฏิบัติและเจตคติ (ฟอร์ม 2A)</h3>
+            </div>
+
+            <div class="or-form2a-items-list">
+              <div class="or-form2a-item-row">
+                <span>1. การประเมินภาคพฤติกรรม</span>
+                <span class="or-osu-scale-pill">O / S / U</span>
+              </div>
+              <div class="or-form2a-item-row">
+                <span>2. การประเมินเจตคติ</span>
+                <span class="or-osu-scale-pill">O / S / U</span>
+              </div>
+              <div class="or-form2a-item-row is-final">
+                <span>3. การประเมินภาพรวมเจตคติและพฤติกรรม</span>
+                <span class="or-osu-scale-pill">O / S / U</span>
+              </div>
+            </div>
+
+            <div class="or-card is-amber-tint" style="padding:0.42cqw 0.56cqw">
+              <ul class="or-list" style="gap:0.22cqw">
+                <li><strong>*ที่มาของคะแนนข้อ 1 และ ข้อ 2:</strong> มาจากแบบประเมินผลพฤติกรรมและเจตคตินักศึกษา โดย <strong>นศพ. (เพื่อนร่วมกลุ่ม)</strong> และ<strong>อาจารย์ประจำกลุ่ม (ฟอร์ม 1A)</strong></li>
+                <li><strong>*การแจ้งผลในข้อ 3:</strong> ภาพรวมเจตคติและพฤติกรรมจะถูก<strong>ส่งเป็นรายงานให้นักศึกษาทราบ</strong> (ใช้ Input จากข้อ 1. ภาคพฤติกรรม/ปฏิบัติ และ ข้อ 2. เจตคติ)</li>
+                <li><strong>*กรณีผลข้อ 1 และ 2 ไม่ตรงกัน:</strong> อาจารย์สามารถใช้ดุลยพินิจ (<strong>Personal Judgement</strong>) เพื่อตัดสินผลในข้อ 3</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="or-table-wrap is-rubric-matrix" data-fit-table="1">
+            <table class="or-table">
+              <colgroup>
+                <col style="width:24%" />
+                <col style="width:25%" />
+                <col style="width:25%" />
+                <col style="width:26%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="is-col-u">ไม่ดี (U)</th>
+                  <th class="is-col-s">พอใช้ (S)</th>
+                  <th class="is-col-s">ดี (S)</th>
+                  <th class="is-col-o">ดีมาก (O)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="is-domain-divider"><td colspan="4">เกณฑ์ในการประเมินผลพฤติกรรม นศพ. ชั้นปีที่ 3 (ฟอร์ม 1A) — 1. การสื่อสารและมนุษยสัมพันธ์</td></tr>
+                <tr>
+                  <td>สื่อสารไม่อ่อนน้อม และไม่สุภาพ ไม่ตรงความจริง ไม่รู้กาลเทศะ ไม่มีประโยชน์ ขาดเมตตา ไม่เอาใจเขามาใส่ใจเรา ไม่รับฟังความเห็นของผู้อื่น ใช้ตัวเองเป็นตัวตั้งในการเกี่ยวข้องกับผู้อื่น</td>
+                  <td><strong>บางครั้ง</strong> สื่อสารไม่อ่อนน้อมและไม่สุภาพ ไม่ตรงความจริง ไม่รู้กาลเทศะ ไม่มีประโยชน์ ขาดเมตตา ไม่เอาใจเขามาใส่ใจเรา ไม่รับฟังความเห็นของผู้อื่น ใช้ตัวเองเป็นตัวตั้งในการเกี่ยวข้องกับผู้อื่น</td>
+                  <td><strong>ส่วนใหญ่</strong> สื่อสารอย่างอ่อนน้อมและสุภาพ ตรงความจริง รู้กาลเทศะ มีประโยชน์ กอปรด้วยเมตตา เอาใจเขามาใส่ใจเรา รับฟังความเห็นของผู้อื่น ใช้ประโยชน์ร่วมเป็นตัวตั้งในการเกี่ยวข้องกับผู้อื่น</td>
+                  <td><strong>กระทำสม่ำเสมอ</strong>ในเรื่องสื่อสารอย่างอ่อนน้อมและสุภาพ ตรงความจริง รู้กาลเทศะ มีประโยชน์ กอปรด้วยเมตตา เอาใจเขามาใส่ใจเรา รับฟังความเห็นของผู้อื่น ใช้ส่วนรวมเป็นตัวตั้งในการเกี่ยวข้องกับผู้อื่น</td>
+                </tr>
+                <tr class="is-domain-divider"><td colspan="4">2. ความใฝ่รู้</td></tr>
+                <tr>
+                  <td>- ไม่เคยมาแลกเปลี่ยน สอบถามเนื้อหาวิชาการกับอาจารย์<br>- ไม่มีการศึกษาหรือค้นคว้าเพิ่มเติม</td>
+                  <td>- มาแลกเปลี่ยนสอบถามเนื้อหาวิชาการกับอาจารย์สม่ำเสมอ<strong>เป็นบางครั้ง</strong><br>- ศึกษาค้นคว้าเพิ่มเติมสม่ำเสมอ<strong>เป็นบางครั้ง</strong></td>
+                  <td>- มาแลกเปลี่ยนสอบถามเนื้อหาวิชาการกับอาจารย์<strong>ค่อนข้างสม่ำเสมอ</strong><br>- ศึกษาค้นคว้าเพิ่มเติม<strong>ค่อนข้างสม่ำเสมอ</strong></td>
+                  <td>- มาแลกเปลี่ยนสอบถามเนื้อหาวิชาการกับอาจารย์<strong>สม่ำเสมอ</strong><br>- ศึกษาค้นคว้าเพิ่มเติม<strong>สม่ำเสมอ</strong></td>
+                </tr>
+                <tr class="is-domain-divider"><td colspan="4">3. ภาวะผู้นำและการทำงานเป็นทีม</td></tr>
+                <tr>
+                  <td><strong>ไม่เคยหรือแทบไม่เคย</strong>แสดงพฤติกรรมในเรื่อง:<br>- กล้าแสดงความคิดเห็น และโน้มนำกลุ่มให้ปฏิบัติตามในสิ่งที่เห็นว่าถูกว่าควร แม้ส่วนใหญ่จะไม่เห็นด้วย<br>- รับฟังความเห็นของกลุ่ม และพร้อมทำตามมติของส่วนใหญ่ แม้จะเห็นแตกต่าง<br>- ให้ความเห็นและความร่วมมือในการทำงาน</td>
+                  <td><strong>ปฏิบัติเป็นบางครั้ง</strong>ในเรื่อง:<br>- กล้าแสดงความคิดเห็น และโน้มนำกลุ่มให้ปฏิบัติตามในสิ่งที่เห็นว่าถูกว่าควร แม้ส่วนใหญ่จะไม่เห็นด้วย<br>- รับฟังความเห็นของกลุ่ม และพร้อมทำตามมติของส่วนใหญ่ แม้จะเห็นแตกต่าง<br>- ให้ความเห็นและความร่วมมือในการทำงาน</td>
+                  <td><strong>ปฏิบัติค่อนข้างสม่ำเสมอ</strong>ในเรื่อง:<br>- กล้าแสดงความคิดเห็น และโน้มนำกลุ่มให้ปฏิบัติตามในสิ่งที่เห็นว่าถูกว่าควร แม้ส่วนใหญ่จะไม่เห็นด้วย<br>- รับฟังความเห็นของกลุ่ม และพร้อมทำตามมติของส่วนใหญ่ แม้จะเห็นแตกต่าง<br>- ให้ความเห็นและความร่วมมือในการทำงาน</td>
+                  <td><strong>ปฏิบัติสม่ำเสมอ</strong>ในเรื่อง:<br>- กล้าแสดงความคิดเห็น และโน้มนำกลุ่มให้ปฏิบัติตามในสิ่งที่เห็นว่าถูกว่าควร แม้ส่วนใหญ่จะไม่เห็นด้วย<br>- รับฟังความเห็นของกลุ่ม และพร้อมทำตามมติของส่วนใหญ่ แม้จะเห็นแตกต่าง<br>- ให้ความเห็นและความร่วมมือในการทำงาน</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s12e-form-1a-part2",
+      num: "22",
+      section: "evaluation",
+      sectionLabel: "Act III · ฟอร์ม 1A (ข้อ 4 & ข้อ 6)",
+      actClass: "is-act-3",
+      actLabel: "ACT III · FORM 1A RUBRIC (ITEMS 4.1–4.3 & 6.1–6.3)",
+      timeWindow: "เกณฑ์ภาคปฏิบัติและเจตคติ (2/2)",
+      kicker: "03 · MEDICAL STUDENT BEHAVIOR & ATTITUDE GLOBAL RATING CRITERIA (FORM 1A · ITEMS 4.1–4.3 & 6.1–6.3)",
+      title: "เกณฑ์ในการประเมินผลพฤติกรรมนักศึกษาแพทย์ชั้นปีที่ 3 (ฟอร์ม 1A · ข้อ 4.1–4.3 และข้อ 6.1–6.3)",
+      keyTag: "ฟอร์ม 1A · ครบทุกข้อ",
+      keyMessageHtml:
+        "<strong>ข้อ 1–4.3</strong> สะท้อน <strong>การประเมินภาคพฤติกรรม (<code>O / S / U</code>)</strong> และ <strong>ข้อ 6.1–6.3 (ความรับผิดชอบ · ความซื่อสัตย์ · มีน้ำใจช่วยเหลือผู้อื่น)</strong> สะท้อน <strong>การประเมินเจตคติ (<code>O / S / U</code>)</strong> เพื่อสรุปเป็นภาพรวมใน <code>ฟอร์ม 2A</code>",
+      notes:
+        "แสดงตารางเกณฑ์ในการประเมินผลพฤติกรรมนักศึกษาแพทย์ชั้นปีที่ 3 (ฟอร์ม 1A) ส่วนที่ 2 ครบทุกช่องตามต้นฉบับ ได้แก่ ข้อ 4.1 การแสดงความเห็นในชั้นเรียน & 4.2 การออกความคิดเห็นในการทำงานกลุ่ม, ข้อ 4.3 การมีส่วนร่วมอื่น ๆ ในการทำงานกลุ่ม, ข้อ 6.1 ความรับผิดชอบ, ข้อ 6.2 ความซื่อสัตย์ (พูดความจริง ไม่บิดเบือนข้อมูล ไม่ลอกรายงาน ไม่เซ็นชื่อแทนกัน ทั้งต่อหน้าและลับหลัง) และข้อ 6.3 มีน้ำใจช่วยเหลือผู้อื่น",
+      render: () => `
+        <div class="or-table-wrap is-rubric-matrix" data-fit-table="1">
+          <table class="or-table">
+            <colgroup>
+              <col style="width:24%" />
+              <col style="width:25%" />
+              <col style="width:25%" />
+              <col style="width:26%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="is-col-u">ไม่ดี (U)</th>
+                <th class="is-col-s">พอใช้ (S)</th>
+                <th class="is-col-s">ดี (S)</th>
+                <th class="is-col-o">ดีมาก (O)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="is-domain-divider"><td colspan="4">4.1 การแสดงความเห็นในชั้นเรียน, 4.2 การออกความคิดเห็นในการทำงานกลุ่ม</td></tr>
+              <tr>
+                <td>- หลับหรือทำอย่างอื่นบ่อยครั้ง<br>- เงียบหรือไม่แสดงความเห็น เมื่อถูกกระตุ้น หรือแสดงความเห็นอย่างเสียไม่ได้ เสมือนไม่ได้สนใจในเรื่องนั้น หรือไม่คิดไม่ไตร่ตรอง</td>
+                <td>- หลับหรือทำอย่างอื่น เป็นบางครั้ง เช่น เล่นเกมส์<br>- แสดงความคิดเห็นต่อเมื่อถูกกระตุ้น ความเห็นนั้นธรรมดาหรือแสดงถึงความไม่ค่อยสนใจในเรื่องนั้น</td>
+                <td><strong>ส่วนใหญ่</strong><br>- สนใจฟัง ไม่หลับ ไม่ทำอย่างอื่น เช่น เล่นเกมส์ ให้ความคิดเห็น โดยไม่ต้องกระตุ้น และความเห็นนั้นดี มีคุณค่าแสดงถึง <code>critical thinking</code> หรือความใส่ใจในเรื่องนั้น</td>
+                <td>- <strong>สนใจฟังตลอดเวลา</strong> ไม่หลับ ไม่ทำอย่างอื่น เช่น เล่นเกมส์ ให้ความคิดเห็นโดยไม่ต้องกระตุ้น และความเห็นนั้นดีมีคุณค่า แสดงถึง <code>critical thinking</code> หรือความใส่ใจในเรื่องนั้น</td>
+              </tr>
+              <tr class="is-domain-divider"><td colspan="4">4.3 การมีส่วนร่วมอื่น ๆ ในการทำงานกลุ่ม</td></tr>
+              <tr>
+                <td>- ไม่สนใจช่วยเหลืองานกลุ่ม</td>
+                <td>- ช่วยเหลืองานกลุ่มบ้าง</td>
+                <td>- ส่วนใหญ่ช่วยเหลืองานกลุ่ม</td>
+                <td>- ช่วยเหลืองานกลุ่มอย่างสม่ำเสมอ</td>
+              </tr>
+              <tr class="is-domain-divider"><td colspan="4">6.1 ความรับผิดชอบ (หมวดเจตคติ)</td></tr>
+              <tr>
+                <td>- ไม่ทำงานที่ได้รับมอบหมาย หรือเสร็จไม่ทันเวลา คุณภาพใช้ไม่ได้ เนื่องจากไม่ใส่ใจหรือรับผิดชอบงานนั้น<br>- ไม่ยอมรับข้อผิดพลาดของตนเองและไม่ยอมแก้ไข</td>
+                <td><strong>บางครั้ง</strong><br>- ทำงานที่ได้รับมอบหมายเสร็จไม่ทันเวลา หรือคุณภาพพอใช้ เนื่องจากไม่ได้ใช้ความพยายามเต็มที่<br>- ยอมรับข้อบกพร่องของตนเองและยินดีแก้ไขเสมอ</td>
+                <td>- <strong>ส่วนใหญ่</strong>กระตือรือร้นในการทำงานที่ได้รับมอบหมายเสร็จทันเวลา และคุณภาพดี<br>- ส่วนใหญ่ยอมรับข้อบกพร่องของตนเองและยินดีแก้ไขเสมอ</td>
+                <td>- <strong>กระตือรือร้น</strong>ในการทำงานที่ได้รับมอบหมายให้เสร็จทันเวลา และมีคุณภาพดีเลิศอย่างสม่ำเสมอ<br>- ยอมรับข้อบกพร่องของตนเองและยินดีแก้ไขเสมอ</td>
+              </tr>
+              <tr class="is-domain-divider"><td colspan="4">6.2 ความซื่อสัตย์ (หมวดเจตคติ)</td></tr>
+              <tr>
+                <td>ประพฤติเป็นประจำในเรื่อง: <strong>พูดแต่ความเท็จ</strong> หรือ <strong>บิดเบือนข้อมูล</strong> หรือ <strong>เซ็นชื่อแทนกัน</strong> หรือ <strong>ลอกรายงาน</strong></td>
+                <td>- หลีกเลี่ยงการพูดความจริง หรือเจตนาให้เข้าใจผิด เมื่อมีข้อผิดพลาด<br>- ไม่บิดเบือนข้อมูล ไม่ลอกรายงาน ไม่เซ็นชื่อแทนกัน<br>- ประพฤติตนเช่นเดียวกัน ทั้งต่อหน้าและลับหลังผู้ที่สามารถให้คุณให้โทษได้</td>
+                <td>- <strong>ค่อนข้างชัดเจน</strong>ในการพูดแต่ความจริง แม้มีข้อผิดพลาด<br>- ไม่บิดเบือนข้อมูล ไม่ลอกรายงาน ไม่เซ็นชื่อแทนกัน<br>- ประพฤติตนเช่นเดียวกัน ทั้งต่อหน้าและลับหลังผู้ที่สามารถให้คุณให้โทษได้</td>
+                <td>- <strong>แสดงให้เห็นอย่างชัดเจน</strong>ในการให้ข้อมูลแต่ความจริง แม้จะมีข้อผิดพลาด<br>- ไม่บิดเบือนข้อมูล ไม่ลอกรายงาน ไม่เซ็นชื่อแทนกัน ประพฤติตนเช่นเดียวกันทั้งต่อหน้าและลับหลังผู้ที่สามารถให้คุณให้โทษได้</td>
+              </tr>
+              <tr class="is-domain-divider"><td colspan="4">6.3 มีน้ำใจช่วยเหลือผู้อื่น (หมวดเจตคติ)</td></tr>
+              <tr>
+                <td>- ไม่ช่วยเหลืองานส่วนรวม หรืองานผู้อื่น ทำแต่งานตนเอง</td>
+                <td>- ช่วยเหลืองานส่วนรวม งานผู้อื่น เป็นบางครั้ง</td>
+                <td>- ช่วยเหลืองานส่วนรวม งานผู้อื่น อย่างสม่ำเสมอ</td>
+                <td>- ช่วยเหลืออย่างเต็มที่ในงานส่วนรวม งานผู้อื่นอย่างสม่ำเสมอ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `
+    },
+    {
       id: "s13-attendance-safety",
-      num: "16",
+      num: "23",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
       actLabel: "ACT IV · CONDUCT & SAFETY",
-      timeWindow: "09.22 – 09.24 น. (2 นาที)",
+      timeWindow: "09.22 – 09.23 น. (เวลาเรียน & ภาคสนาม)",
       kicker: "04 · ATTENDANCE (≥ 80%), LEAVE QUOTAS (3d / 1.5d) & 6 SAFETY RULES",
       title: "เวลาเรียน สิทธิ์เข้าสอบ โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
       keyTag: "สิทธิ์เข้าสอบ & ความปลอดภัย",
       keyMessageHtml:
         "นักศึกษาจะมีสิทธิ์เข้าสอบเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong> (ลาไม่เกิน <strong>3 วัน</strong> ช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามลาได้ไม่เกิน <strong>1.5 วัน</strong>) พร้อมปฏิบัติตามระเบียบภาคสนาม 6 ข้อ",
       notes:
-        "ชี้แจงเกณฑ์เวลาเรียนไม่น้อยกว่าร้อยละ 80 จึงมีสิทธิ์เข้าสอบ โควตาการลาช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน ช่วงฝึกภาคสนามลาได้ไม่เกิน 1.5 วัน ช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ ก่อนเข้าสู่ช่วง Live Quiz ทดสอบความเข้าใจเกณฑ์ O/S/M/U ในสไลด์ถัดไป",
+        "ชี้แจงเกณฑ์เวลาเรียนไม่น้อยกว่าร้อยละ 80 จึงมีสิทธิ์เข้าสอบ โควตาการลาช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน ช่วงฝึกภาคสนามลาได้ไม่เกิน 1.5 วัน ช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ",
       render: () => `
         <div class="or-infog-split is-s14-split">
           <div class="or-schematic-box is-s14-left" data-fit-solo="1">
@@ -1890,8 +2585,177 @@
       `
     },
     {
+      id: "s13b-conduct-2567-c2a",
+      num: "24",
+      section: "evaluation",
+      sectionLabel: "Act IV · ประกาศเจตคติ 67 (ข้อ 2.1–2.2)",
+      actClass: "is-act-4",
+      actLabel: "RAMA ATTITUDE RULES 2567 · CLAUSE 2.1–2.2",
+      timeWindow: "ประกาศคณะฯ พ.ศ. 2567 (1/3)",
+      kicker: "04 · RAMATHIBODI UNDESIRABLE BEHAVIOR CRITERIA B.E. 2567 · ข้อ 2 (หมวด 2.1 – 2.2)",
+      title: "ประกาศคณะฯ พ.ศ. 2567 เรื่องพฤติกรรมที่ไม่พึงประสงค์: ข้อ 2.1 ความไม่ซื่อสัตย์ และ ข้อ 2.2 ขาดความเอาใจใส่",
+      keyTag: "ข้อ 2.1 – 2.2",
+      keyMessageHtml:
+        "ป้ายสีแดง <span class=\"or-mu-tag is-u\">U ร้ายแรง</span> คือข้อที่เข้าข่าย <strong>พิจารณาให้ <code>U</code> ได้ทันทีตั้งแต่ครั้งแรกตามข้อ 3.2.1</strong> ได้แก่ <strong>ข้อ 2.1 ทุกข้อย่อย (<code>2.1.1–2.1.9</code>)</strong>, <strong>ข้อ <code>2.2.3</code></strong> และ <strong>ข้อ <code>2.2.5</code></strong>",
+      notes:
+        "ไล่เรียงประกาศคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี เรื่อง หลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ของนักศึกษาแพทย์ พ.ศ. 2567 (ประกาศ ณ วันที่ 22 ต.ค. 2567) รายข้ออย่างครบถ้วน เริ่มจากข้อ 2.1 พฤติกรรมความไม่ซื่อสัตย์ (2.1.1–2.1.9 ซึ่งทุกข้อเป็นความผิดร้ายแรงพิจารณาให้ U ตามข้อ 3.2.1 รวมถึง 2.1.6 การฝากเช็คชื่อ/ทำกิจกรรมแทนกันทั้งผู้ฝากและผู้ทำแทน) และข้อ 2.2 พฤติกรรมที่ขาดความเอาใจใส่ในการเรียนรู้ (2.2.1–2.2.9 โดย 2.2.3 ลาป่วย >= 3 วันไม่ส่งใบรับรองแพทย์ และ 2.2.5 ขาดกิจกรรมห้ามขาดโดยไม่ขออนุญาต เป็นความผิดร้ายแรงพิจารณาให้ U)",
+      render: () => `
+        <div class="or-grid-2" data-fit-group="cards" style="height:100%">
+          <div class="or-card is-rose-tint" style="display:flex;flex-direction:column;gap:0.28cqw;height:100%">
+            <div>
+              <span class="or-card-kicker">ข้อ 2.1 · พฤติกรรมความไม่ซื่อสัตย์ (ทุกข้อย่อย = ร้ายแรง พิจารณาให้ U ตามข้อ 3.2.1)</span>
+              <h3 class="or-card-title">หมวด 2.1 ความไม่ซื่อสัตย์ (2.1.1 – 2.1.9)</h3>
+            </div>
+            <ul class="or-clause-list">
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.1</strong> เจตนากระทำการทุจริตในการสอบหรือการวัดผลการศึกษาทุกประเภทและทุกรูปแบบ</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.2</strong> ให้ข้อมูลอันเป็นเท็จหรือปกปิดข้อมูลอันพึงแจ้งให้ทราบ</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.3</strong> รายงานข้อมูลผู้ป่วยไม่ตรงตามความเป็นจริงในสาระสำคัญโดยไม่มีเหตุผลอันสมควร</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.4</strong> คัดลอกข้อมูลในการเขียนรายงานผู้ป่วย บันทึกประวัติผู้ป่วย หรืองานที่ได้รับมอบหมายจากแหล่งอื่นโดยมิชอบ</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.5</strong> ปลอมแปลงเอกสาร ลายมือชื่อ หรือลายมือชื่ออิเล็กทรอนิกส์ (รวมรหัสผ่าน/มาตรการยืนยันตัวตน) ของผู้อื่น</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.6</strong> ให้/รับประโยชน์ หรือกระทำการแทนกัน/ยินยอมให้ผู้อื่นทำแทนโดยมิชอบ เช่น อยู่เวร รับผู้ป่วย เขียนรายงาน หรือ<strong>ลงชื่อเข้าร่วมกิจกรรมแทนกัน (ได้ U ทั้งผู้ฝากและผู้ทำแทน)</strong></li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.7</strong> คัดลอกผลงานของผู้อื่น</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.8</strong> ไม่ปฏิบัติตนตามนโยบาย คำสั่ง กฎ ข้อบังคับ หรือข้อตกลงที่ได้มีการแจ้งหรือประกาศไว้แล้ว</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.1.9</strong> กระทำการอื่น ๆ โดยมีเจตนาอันไม่ซื่อสัตย์</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-amber-tint" style="display:flex;flex-direction:column;gap:0.28cqw;height:100%">
+            <div>
+              <span class="or-card-kicker">ข้อ 2.2 · ขาดความเอาใจใส่ในการเรียนรู้ (2.2.3 &amp; 2.2.5 = U ร้ายแรง · ข้ออื่นพิจารณาให้ M)</span>
+              <h3 class="or-card-title">หมวด 2.2 ขาดความเอาใจใส่ในการเรียนรู้ (2.2.1 – 2.2.9)</h3>
+            </div>
+            <ul class="or-clause-list">
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.1</strong> ลากิจส่วนตัวโดยไม่ได้รับอนุญาตล่วงหน้าและไม่มีเหตุผลอันสมควร</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.2</strong> ลาป่วยโดยไม่แจ้งหรือไม่ส่งใบลาภายในวันแรกที่กลับมาปฏิบัติงานโดยไม่มีเหตุผลอันสมควร</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.2.3</strong> <strong>ไม่ส่งใบรับรองแพทย์โดยไม่มีเหตุผลอันสมควร กรณีการลาป่วยตั้งแต่ 3 วันขึ้นไป</strong> <em>(ร้ายแรง ข้อ 3.2.1)</em></li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.4</strong> ขึ้นปฏิบัติงานหรือเข้าร่วมกิจกรรม<strong>สายเกิน 15 นาที</strong> ในงานผู้ป่วยหรือกิจกรรมการเรียนการสอนที่กำหนดว่าห้ามขาด โดยไม่ได้รับอนุญาต</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.2.5</strong> <strong>ขาดปฏิบัติงานผู้ป่วย หรือขาดกิจกรรมการเรียนการสอนที่กำหนดว่าห้ามขาด</strong> โดยไม่ได้รับอนุญาต/ไม่มีเหตุผลอันสมควร <em>(ร้ายแรง ข้อ 3.2.1)</em></li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.6</strong> ส่งงานที่ได้รับมอบหมายล่าช้ากว่ากำหนดโดยไม่มีเหตุผลอันสมควร</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.7</strong> ไม่ส่งงานที่ได้รับมอบหมายตามกำหนดโดยไม่มีเหตุผลอันสมควร</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.8</strong> ขาดความระมัดระวัง ไม่รอบคอบ ประมาทเลินเล่อ ไม่เป็นระเบียบ จนเป็นเหตุให้เกิดอันตรายหรือความเสียหาย</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.2.9</strong> เพิกเฉยไม่ให้ความร่วมมือทำกิจกรรมหรือการร่วมงานกับผู้อื่นในการทำงานที่ได้รับมอบหมาย</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s13c-conduct-2567-c2b",
+      num: "25",
+      section: "evaluation",
+      sectionLabel: "Act IV · ประกาศเจตคติ 67 (ข้อ 2.3–2.5)",
+      actClass: "is-act-4",
+      actLabel: "RAMA ATTITUDE RULES 2567 · CLAUSE 2.3–2.5",
+      timeWindow: "ประกาศคณะฯ พ.ศ. 2567 (2/3)",
+      kicker: "04 · RAMATHIBODI UNDESIRABLE BEHAVIOR CRITERIA B.E. 2567 · ข้อ 2 (หมวด 2.3 – 2.5)",
+      title: "ประกาศคณะฯ พ.ศ. 2567: ข้อ 2.3 ความไม่เคารพ/ไม่เหมาะสม, ข้อ 2.4 ไม่ตระหนักรู้ตน และ ข้อ 2.5",
+      keyTag: "ข้อ 2.3 – 2.5",
+      keyMessageHtml:
+        "ระวังสูงสุดในภาคสนามและสื่อออนไลน์: <strong>ข้อ <code>2.3.3</code> การเก็บ ใช้ หรือเปิดเผยข้อมูลส่วนบุคคลของผู้ป่วยในที่สาธารณะ/โซเชียลมีเดียโดยมิชอบ</strong> เป็นความผิดร้ายแรง <span class=\"or-mu-tag is-u\">U ทันที</span> ตามข้อ 3.2.1",
+      notes:
+        "ไล่เรียงประกาศคณะฯ พ.ศ. 2567 ต่อเนื่องครบถ้วน: ข้อ 2.3 พฤติกรรมที่แสดงถึงความไม่เคารพหรือไม่เหมาะสม (2.3.1–2.3.9 โดยเน้น 2.3.3 การละเมิดข้อมูลส่วนบุคคล/ความลับผู้ป่วยบนสื่อสาธารณะหรือโซเชียลมีเดีย ซึ่งเข้าข่ายความผิดร้ายแรงให้ U ทันทีตามข้อ 3.2.1), ข้อ 2.4 พฤติกรรมไม่ตระหนักรู้ตนเอง (2.4.1–2.4.5 เช่น หลีกเลี่ยงการรับ Feedback ต่อต้านไม่พัฒนาตนหลังได้รับคำเตือน หรือทำเกินขีดความสามารถจนเสี่ยงอันตราย) และข้อ 2.5 พฤติกรรมไม่พึงประสงค์อื่น ๆ ที่ผิดต่อคุณธรรม จริยธรรม หรือความเป็นมืออาชีพทางการแพทย์",
+      render: () => `
+        <div class="or-grid-2" data-fit-group="cards" style="height:100%">
+          <div class="or-card is-white" style="display:flex;flex-direction:column;gap:0.26cqw;height:100%">
+            <div>
+              <span class="or-card-kicker">ข้อ 2.3 · ความไม่เคารพหรือไม่เหมาะสม (2.3.3 = U ร้ายแรง · ข้ออื่นพิจารณาให้ M)</span>
+              <h3 class="or-card-title">หมวด 2.3 ความไม่เคารพหรือไม่เหมาะสม (2.3.1 – 2.3.9)</h3>
+            </div>
+            <ul class="or-clause-list">
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.1</strong> แต่งกายไม่สุภาพเรียบร้อยหรือผิดจากข้อบังคับ/ประกาศ/ระเบียบของ ม.มหิดล หรือคณะฯ</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.2</strong> นำเครื่องแบบ/ชุดปฏิบัติงานของ รพ. หรือ รพ.สมทบ ที่ห้ามไว้ออกไปสวมใส่นอกพื้นที่ที่กำหนด</li>
+              <li class="is-severe-u"><span class="or-mu-tag is-u">U</span><strong>2.3.3</strong> <strong>เก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคลของผู้ป่วย</strong> ในที่สาธารณะหรือสื่อสังคมออนไลน์โดยมิได้เป็นไปเพื่อการเรียนการสอน/ดูแลผู้ป่วย หรือละเมิดความลับผู้ป่วยโดยไม่รับความยินยอม <em>(ร้ายแรง ข้อ 3.2.1)</em></li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.4</strong> แสดงพฤติกรรมทางกายหรือวาจาไม่สุภาพ ส่อเสียด ดูถูก เหยียดหยาม ไม่ให้เกียรติผู้ป่วย เพื่อน หรือบุคลากร</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.5</strong> มีพฤติกรรมในลักษณะคุกคามทางเพศด้วยวิธีการอย่างใดอย่างหนึ่ง</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.6</strong> ใช้สื่อสังคมอย่างไม่เหมาะสม ไม่เคารพ คุกคามผู้อื่น หรืออาจทำให้เกิดความเสียหายต่อคณะฯ หรือ ม.มหิดล</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.7</strong> มีพฤติกรรมไม่เหมาะสม อันแสดงถึงการรบกวนการเรียนการสอน</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.8</strong> ล่วงละเมิดความเป็นส่วนตัว หรือสิทธิของผู้อื่น</li>
+              <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.3.9</strong> มีพฤติกรรมกลั่นแกล้ง รังแก หรือการเลือกปฏิบัติ</li>
+            </ul>
+          </div>
+
+          <div class="or-card is-navy-tint" style="display:flex;flex-direction:column;justify-content:space-between;gap:0.32cqw;height:100%">
+            <div>
+              <span class="or-card-kicker">ข้อ 2.4 · พฤติกรรมไม่ตระหนักรู้ตนเอง (2.4.1 – 2.4.5)</span>
+              <h3 class="or-card-title">หมวด 2.4 ไม่ตระหนักรู้ตนเอง &amp; หมวด 2.5 อื่น ๆ</h3>
+              <ul class="or-clause-list" style="margin-top:0.30cqw">
+                <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.4.1</strong> หลีกเลี่ยงการรับข้อมูลป้อนกลับจากอาจารย์ เช่น หลีกเลี่ยงไม่มาตามที่อาจารย์นัดหมายโดยไม่มีเหตุผลอันสมควร</li>
+                <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.4.2</strong> ขาดการตระหนักรู้ในพฤติกรรมไม่เหมาะสมของตนเอง</li>
+                <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.4.3</strong> เพิกเฉยไม่สนใจความจำเป็นหรือความต้องการของผู้อื่น</li>
+                <li class="is-warn-m"><span class="or-mu-tag is-m">M &rarr; U</span><strong>2.4.4</strong> ไม่ยอมรับ หรือต่อต้าน หรือไม่มีการพัฒนาตนเองหลังจากได้รับข้อมูลป้อนกลับหรือคำตักเตือน <em>(เข้าข่ายให้ U ตามข้อ 3.2.2!)</em></li>
+                <li class="is-warn-m"><span class="or-mu-tag is-m">M</span><strong>2.4.5</strong> ทำเกินขอบเขตความสามารถของตนเอง ไม่ตระหนักถึงขีดจำกัดความสามารถ จนเกิดความเสี่ยงให้เกิดอันตรายหรือความเสียหาย</li>
+              </ul>
+            </div>
+
+            <div class="or-card is-amber-tint" style="padding:0.44cqw 0.58cqw">
+              <span class="or-card-kicker">ข้อ 2.5 · พฤติกรรมไม่พึงประสงค์อื่น ๆ</span>
+              <p class="or-card-text"><strong>2.5</strong> พฤติกรรมไม่พึงประสงค์อื่น ๆ ที่<strong>คณะกรรมการรายวิชา หรือคณะกรรมการบริหารหลักสูตร</strong>เห็นสมควรว่าไม่เหมาะสม ผิดต่อคุณธรรม จริยธรรม หรือความเป็นมืออาชีพทางการแพทย์</p>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s13d-conduct-2567-mu-rules",
+      num: "26",
+      section: "evaluation",
+      sectionLabel: "Act IV · ข้อ 3–6 & สรุป M vs U",
+      actClass: "is-act-4",
+      actLabel: "RAMA ATTITUDE RULES 2567 · CLAUSES 3–6 & M vs U",
+      timeWindow: "ประกาศคณะฯ พ.ศ. 2567 (3/3)",
+      kicker: "04 · CLAUSES 3–6 & DECISION SYNTHESIS: WHEN DO YOU GET 'M' vs 'U'?",
+      title: "ประกาศคณะฯ พ.ศ. 2567 (ข้อ 3 – ข้อ 6) และสรุปชัด: จะได้ M เมื่อไหร่ · จะได้ U ก็ต่อเมื่ออะไรบ้าง",
+      keyTag: "สรุปเกณฑ์ M vs U",
+      keyMessageHtml:
+        "<strong>ได้ <code>M</code> (ข้อ 3.2.3):</strong> ผิดข้อ 2 (นอกกลุ่มร้ายแรง) ครั้งแรก &nbsp;|&nbsp; <strong>ได้ <code>U</code> (ต้องลงทะเบียนใหม่!):</strong> ① ผิดร้ายแรง <code>2.1, 2.2.3, 2.2.5, 2.3.3</code> · ② ตักเตือนแล้วไม่ปรับปรุง · ③ เคยได้ <code>M</code> จากวิชาใด ๆ แล้วผิดซ้ำในกลุ่มข้อ 2 เดียวกัน",
+      notes:
+        "สรุปข้อ 3 ถึงข้อ 6 ของประกาศคณะฯ พ.ศ. 2567 จนครบทุกข้อ ได้แก่ ข้อ 3.1 ความหมายสัญลักษณ์ M/U/S, ข้อ 3.2 กระบวนการสอบข้อเท็จจริงและเกณฑ์ตัดสิน 3.2.1–3.2.3, ข้อ 3.3 พฤติกรรมนอกสถานที่/นอกเวลา/ในอดีตที่เพิ่งพบหลักฐาน (แก้ไขผลการศึกษาได้), ข้อ 4 มาตรการแก้ไขเพิ่มเติม 4.1–4.3, ข้อ 5 การดำเนินการทางวินัย ม.มหิดล ควบคู่ และข้อ 6 การบังคับใช้ทุกหลักสูตร พร้อมตารางสังเคราะห์ชัดเจนว่า นักศึกษาจะได้ M เมื่อไหร่ และจะได้ U ก็ต่อเมื่อเข้าเงื่อนไขใดใน 3 กรณีหลัก",
+      render: () => `
+        <div class="or-infog-split is-even" style="height:100%">
+          <div class="or-card is-white" data-fit-solo="1" style="display:flex;flex-direction:column;justify-content:space-between;height:100%">
+            <div>
+              <span class="or-card-kicker">หลักเกณฑ์ข้อ 3 – ข้อ 6 ครบทุกข้อ (ประกาศคณะฯ 22 ต.ค. 2567)</span>
+              <h3 class="or-card-title">กระบวนการพิจารณา มาตรการแก้ไข และการบังคับใช้</h3>
+              <ul class="or-clause-list" style="margin-top:0.28cqw">
+                <li><strong>ข้อ 3.1 สัญลักษณ์:</strong> <code>M</code> = คาบเส้น (Marginal) · <code>U</code> = ไม่พอใจ (Unsatisfactory) · <code>S</code> = พอใจ (Satisfactory)</li>
+                <li><strong>ข้อ 3.2 ในรายวิชา:</strong> รายงานประธานรายวิชา &rarr; เรียกพบ นศพ. &rarr; ประชุมรายวิชาพิจารณาให้ <code>U</code> (<strong>3.2.1</strong> ร้ายแรง / <strong>3.2.2</strong> เตือนไม่แก้ หรือซ้ำกลุ่มเดิมหลังได้ M) หรือให้ <code>M</code> (<strong>3.2.3</strong> กรณีอื่น) แล้วเสนอมติต่อ<strong>คณะกรรมการบริหารหลักสูตร</strong>อนุมัติ</li>
+                <li><strong>ข้อ 3.3 นอกสถานที่ / นอกเวลา / ในอดีตที่เพิ่งพบหลักฐาน:</strong> รายงานประธานกรรมการบริหารหลักสูตร นำเข้าที่ประชุมหลักสูตรเพื่อตัดสินหรือ<strong>แก้ไขผลการศึกษาในรายวิชาที่เกี่ยวข้องย้อนหลังได้</strong></li>
+                <li><strong>ข้อ 4 มาตรการแก้ไขเพิ่มเติม:</strong> <strong>4.1</strong> ปฏิบัติงาน/ส่งงานเพิ่ม · <strong>4.2</strong> ชดเชยความเสียหาย/เยียวยา · <strong>4.3</strong> เข้ารับการอบรมปรับพฤติกรรม <em>(หากไม่ทำตาม &rarr; สอบสวนวินัย ม.มหิดล)</em></li>
+                <li><strong>ข้อ 5 วินัยและจรรยาบรรณ:</strong> หากเข้าข่ายผิดวินัย/จรรยาบรรณ ม.มหิดล ให้ดำเนินการสอบสวนและลงโทษควบคู่กัน</li>
+                <li><strong>ข้อ 6 การบังคับใช้:</strong> ใช้กับ นศพ. หลักสูตรแพทยศาสตรบัณฑิต รามาธิบดี <strong>ทุกหลักสูตรและโครงการร่วม</strong> (ตั้งแต่ปีการศึกษา 2568 เป็นต้นไป)</li>
+              </ul>
+            </div>
+            <div class="or-spss-cta-row">
+              <a class="or-spss-cta-btn is-primary" href="downloads/rama_attitude_criteria_2567.pdf" target="_blank" rel="noopener" data-open-attitude-pdf="1">📄 เปิดอ่านประกาศคณะฯ พ.ศ. 2567 ฉบับเต็ม (PDF)</a>
+            </div>
+          </div>
+
+          <div class="or-stack-col" data-fit-group="cards" style="height:100%">
+            <div class="or-card is-amber-tint is-vcenter">
+              <span class="or-card-kicker">สรุปจับประเด็นที่ 1 · จะได้สัญลักษณ์ M (คาบเส้น) เมื่อไหร่?</span>
+              <h3 class="or-card-title">ได้ <code>M</code> เมื่อทำผิดข้อ 2 (นอกกลุ่มร้ายแรง) ครั้งแรก [ข้อ 3.2.3]</h3>
+              <ul class="or-list">
+                <li>กระทำพฤติกรรมในข้อ 2 ที่<strong>ไม่ใช่ข้อร้ายแรง 3.2.1</strong> เป็นครั้งแรก เช่น <strong>ลากิจไม่ขออนุญาตล่วงหน้า (<code>2.2.1</code>)</strong>, <strong>ไม่ส่งใบลาป่วยวันแรกที่กลับ (<code>2.2.2</code>)</strong>, <strong>สายเกิน 15 นาที (<code>2.2.4</code>)</strong>, <strong>ส่งงานช้า/ไม่ส่งงาน (<code>2.2.6–2.2.7</code>)</strong>, <strong>เพิกเฉยงานกลุ่ม (<code>2.2.9</code>)</strong>, <strong>แต่งกาย/วาจา/โซเชียลไม่เหมาะสม (<code>2.3</code>)</strong> หรือ <strong>หลีกเลี่ยง Feedback (<code>2.4</code>)</strong></li>
+                <li><em>ผลสำคัญของ <code>M</code>:</em> ประวัติ <code>M</code> จะถูกบันทึกไว้ หากทำผิดซ้ำในกลุ่มข้อ 2 เดียวกันในรายวิชาใด ๆ ภายหลัง จะกลายเป็น <strong><code>U</code></strong>!</li>
+              </ul>
+            </div>
+
+            <div class="or-card is-rose-tint is-vcenter">
+              <span class="or-card-kicker">สรุปจับประเด็นที่ 2 · จะได้สัญลักษณ์ U (ลงทะเบียนเรียนใหม่!) ก็ต่อเมื่ออะไรบ้าง?</span>
+              <h3 class="or-card-title">ได้ <code>U</code> ทันทีเมื่อเข้าข้อใดข้อหนึ่งใน 3 กรณีนี้ [ข้อ 3.2.1 – 3.2.2]</h3>
+              <ul class="or-list">
+                <li><strong>1) ผิดร้ายแรงแม้ครั้งแรก (ข้อ 3.2.1):</strong> <strong>ข้อ <code>2.1</code> ไม่ซื่อสัตย์ทุกกรณี</strong> (ทุจริตสอบ, ข้อมูลเท็จ, เมคข้อมูลผู้ป่วย, ลอกงาน, ปลอมลายเซ็น, <strong>ฝากเช็คชื่อ/ทำแทนกันทั้งสองฝ่าย</strong>, ฝ่าฝืนกฎที่ประกาศแล้ว) · <strong><code>2.2.3</code></strong> ลาป่วย &ge; 3 วันไม่ส่งใบรับรองแพทย์ · <strong><code>2.2.5</code></strong> ขาดงานผู้ป่วย/คาบห้ามขาดโดยไม่ลา · <strong><code>2.3.3</code></strong> เปิดเผยข้อมูลผู้ป่วยในที่สาธารณะ/โซเชียล</li>
+                <li><strong>2) ตักเตือนแล้วไม่ปรับปรุง (ข้อ 3.2.2 วรรคหนึ่ง):</strong> ได้รับคำตักเตือนแล้วยังไม่พัฒนา ไม่ปรับปรุง หรือไม่ยอมรับ</li>
+                <li><strong>3) เคยได้ <code>M</code> แล้วผิดซ้ำกลุ่มเดิมข้ามวิชาได้ (ข้อ 3.2.2 วรรคสอง):</strong> เคยได้รับ <code>M</code> จาก<strong>รายวิชาใด ๆ</strong> แล้วทำผิดซ้ำใน<strong>พฤติกรรมกลุ่มเดียวกันตามข้อ 2</strong> (เช่น กลุ่ม <code>2.2</code> ซ้ำอีก)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    {
       id: "s14-quiz-osmu",
-      num: "17",
+      num: "27",
       section: "evaluation",
       sectionLabel: "Act IV · Live Quiz O/S/M/U",
       actClass: "is-act-4",
@@ -1903,7 +2767,7 @@
       keyMessageHtml:
         "ผู้ที่สแกน QR Code แล้วกดตอบคำถาม 4 สีบนมือถือ/แท็บเล็ตได้ทันที เพื่อ <strong>Recheck ความเข้าใจก่อนชี้แจงเกณฑ์ตัดสิน O · S · M · U ฉบับสมบูรณ์ในสไลด์ถัดไป</strong>",
       notes:
-        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (M/U) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่ แล้วกดไปสไลด์ถัดไปเพื่อสรุปเกณฑ์ O/S/M/U อย่างเป็นทางการ",
+        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (ข้อ 2 และข้อ 3.2.1–3.2.3) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่",
       isLiveQuizSlide: true,
       render: () => `
         <div class="orl-s14-quiz-wrap" data-orl-slide-mount="quiz">
@@ -1917,7 +2781,7 @@
     },
     {
       id: "s15-osmu-criteria",
-      num: "18",
+      num: "28",
       section: "evaluation",
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
@@ -1929,7 +2793,7 @@
       keyMessageHtml:
         "ผลการประเมินเจตคติและพฤติกรรมได้ <strong><code>U</code> ต้องลงทะเบียนเรียนใหม่</strong> · การสอบซ่อมแยกวิชา [แต้ม <strong>&lt; 2.00</strong>] ให้โอกาสแก้ตัว <strong>1 ครั้ง</strong> (ผ่านได้เกรด <strong><code>S</code></strong> และ<strong>มีผลต่อการได้รับเกียรตินิยม</strong>)",
       notes:
-        "ชี้แจงสรุปเกณฑ์ตามคู่มือรายวิชาหัวข้อเวลาเรียนและข้อ 13 การประเมินด้านเจตคติ: (1) เวลาเรียน ≥ ร้อยละ 80 จึงมีสิทธิ์เข้าสอบ ลาช่วงก่อน-หลังภาคสนาม ≤ 3 วัน ภาคสนาม ≤ 1.5 วัน (2) อ้างอิงประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 และใช้แบบประเมินจากเพื่อนในกลุ่มประกอบการพิจารณาของอาจารย์ (3) เกรดสุดท้ายได้ O มาจากเจตคติภาพรวม O + สอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม (4) แต้มต่ำกว่า 2.00 ต้องสอบซ่อมแยกวิชาระบบฯ/ระบาดฯ โอกาสแก้ตัว 1 ครั้ง ผ่านได้เกรด S มีผลต่อเกียรตินิยม หากไม่ผ่านหรือเจตคติได้ U ต้องลงทะเบียนเรียนใหม่",
+        "ชี้แจงสรุปเกณฑ์ตามคู่มือรายวิชาหัวข้อเวลาเรียนและข้อ 13 การประเมินด้านเจตคติ: (1) เวลาเรียน ≥ ร้อยละ 80 จึงมีสิทธิ์เข้าสอบ ลาช่วงก่อน-หลังภาคสนาม ≤ 3 วัน ภาคสนาม ≤ 1.5 วัน (2) อ้างอิงประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 (ข้อ 3.2.1–3.2.3) และใช้แบบประเมินจากเพื่อนในกลุ่มประกอบการพิจารณาของอาจารย์ (3) เกรดสุดท้ายได้ O มาจากเจตคติภาพรวม O + สอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม (4) แต้มต่ำกว่า 2.00 ต้องสอบซ่อมแยกวิชาระบบฯ/ระบาดฯ โอกาสแก้ตัว 1 ครั้ง ผ่านได้เกรด S มีผลต่อเกียรตินิยม หากไม่ผ่านหรือเจตคติได้ U ต้องลงทะเบียนเรียนใหม่",
       render: () => `
         <div class="or-grid-2 is-s15-osmu-grid" data-fit-group="cards">
           <div class="or-card is-teal-tint">
@@ -1944,11 +2808,11 @@
 
           <div class="or-card is-amber-tint">
             <span class="or-card-kicker">② ข้อ 13 การประเมินด้านเจตคติ · ประกาศคณะฯ พ.ศ. 2567</span>
-            <h3 class="or-card-title">พฤติกรรมไม่พึงประสงค์ (M / U) &amp; เพื่อนประเมิน</h3>
+            <h3 class="or-card-title">เกณฑ์ M / U ตามข้อ 3.2.1–3.2.3 &amp; เพื่อนประเมิน</h3>
             <ul class="or-list">
-              <li><strong>แบบประเมินจากเพื่อนในกลุ่ม:</strong> เป็นข้อมูลที่อาจารย์ใช้ประกอบการพิจารณาประเมินผลนักศึกษา</li>
-              <li><strong>ระดับ <code>M</code> (ควรปรับปรุง):</strong> <span class="or-subitem">สายเกิน 15&nbsp;นาที <strong>4&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ขาดเรียนไม่ลา <strong>&ge;&nbsp;2&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ส่งงานช้า <strong>2&nbsp;ครั้ง</strong></span> <em>(ได้ M &ge;&nbsp;2&nbsp;หมวด หรือซ้ำหมวดเดิม &rarr; ปรับเป็น <strong>U</strong>)</em></li>
-              <li><strong>ระดับ <code>U</code> (ไม่ผ่าน):</strong> <span class="or-subitem">สาย <strong>&ge;&nbsp;5&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ส่งงานช้า <strong>&ge;&nbsp;3&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ไม่ซื่อสัตย์ (เซ็นชื่อแทนกัน/เมคข้อมูล/ลอกงาน) หรือฝ่าฝืนระเบียบภาคสนาม</span></li>
+              <li><strong>แบบประเมินจากเพื่อนในกลุ่ม:</strong> เป็นข้อมูลประกอบการพิจารณาของอาจารย์ร่วมกับ <code>ฟอร์ม 1A &amp; 2A</code></li>
+              <li><strong>ระดับ <code>M</code> (ข้อ 3.2.3):</strong> พฤติกรรมไม่พึงประสงค์ข้อ 2 อื่น ๆ ครั้งแรก เช่น สายเกิน 15 นาที (<code>2.2.4</code>), ส่งงานช้า/ไม่ส่ง (<code>2.2.6–7</code>), ลากิจไม่ขออนุญาตล่วงหน้า (<code>2.2.1</code>)</li>
+              <li><strong>ระดับ <code>U</code> (ข้อ 3.2.1–3.2.2):</strong> ผิดร้ายแรง (<strong><code>2.1</code> ไม่ซื่อสัตย์ทุกข้อ · <code>2.2.3</code> ลาป่วย &ge; 3 วันไม่ส่งใบรับรองแพทย์ · <code>2.2.5</code> ขาดคาบห้ามขาดโดยไม่ลา · <code>2.3.3</code> เปิดเผยข้อมูลผู้ป่วย</strong>) หรือ<strong>ตักเตือนไม่ปรับปรุง</strong> หรือ<strong>เคยได้ <code>M</code> แล้วผิดซ้ำกลุ่มเดิม</strong></li>
             </ul>
           </div>
 
@@ -1975,7 +2839,7 @@
     },
     {
       id: "s16-grading-milestones",
-      num: "19",
+      num: "29",
       section: "evaluation",
       sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
       actClass: "is-act-3",
@@ -2021,11 +2885,11 @@
                   <tr><th>กำหนดการสอบและส่งงานสำคัญ 7 รายการ</th><th>วัน เวลา และช่องทางดำเนินการ</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><strong>1. สอบข้อเขียนระบาดวิทยา (EP1–9)</strong></td><td>อ. 8 ธ.ค. 69 (09.00–12.00 น.) · <code>2C2-02..03</code></td></tr>
+                  <tr><td><strong>1. สอบข้อเขียนระบาดวิทยา (EP1–9)</strong></td><td>อ. 8 ธ.ค. 69 (08.30–12.00 น.) · <code>2C2-02..03</code></td></tr>
                   <tr><td><strong>2. ส่งงานสะท้อนคิด SRN 1</strong> พร้อมประเมินภาคทฤษฎี</td><td>พ. 9 ธ.ค. 69 (ภายใน 17.00 น.) · E-learning</td></tr>
-                  <tr><td><strong>3. สอบข้อเขียนระบบสุขภาพ (โน้ต A4)</strong></td><td>อ. 22 ธ.ค. 69 (09.00–12.00 น.) · <code>2C2-01..03</code></td></tr>
+                  <tr><td><strong>3. สอบข้อเขียนระบบสุขภาพ (โน้ต A4)</strong></td><td>อ. 22 ธ.ค. 69 (08.30–12.00 น.) · <code>2C2-01..03</code></td></tr>
                   <tr><td><strong>4. นำเสนอผลงานทีม หมวดระบบสุขภาพ (3A)</strong></td><td>อ. 29 ธ.ค. 69 (08.30–15.30 น.) · <code>2C2-03</code></td></tr>
-                  <tr><td><strong>5. นำเสนอผลงานทีม หมวดระบาดวิทยา (4A)</strong></td><td>พ. 30 ธ.ค. 69 (08.30–13.00 น.) · <code>2C2-03</code></td></tr>
+                  <tr><td><strong>5. นำเสนอผลงานทีม หมวดระบาดวิทยา (4A)</strong></td><td>พ. 30 ธ.ค. 69 (08.30–12.00 น.) · <code>2C2-03</code></td></tr>
                   <tr><td><strong>6. ส่งงานสะท้อนคิด SRN 2</strong> พร้อมประเมินรายวิชา</td><td>พ. 30 ธ.ค. 69 (ภายใน 17.00 น.) · E-learning</td></tr>
                   <tr><td><strong>7. ส่งไฟล์สไลด์นำเสนอและรายงานสำรวจชุมชน</strong></td><td>พ. 30 ธ.ค. 69 (ภายใน 17.00 น.) · Google Form</td></tr>
                 </tbody>
@@ -2037,7 +2901,7 @@
     },
     {
       id: "s17-digital-launch",
-      num: "20",
+      num: "30",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -2075,15 +2939,15 @@
                 <p class="or-card-text"><strong>เรียนคาบแรก <code>ST1</code>: ระบบซับซ้อนและการคิดเชิงระบบในระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">② วันนี้ · 13.00 – 16.00 น. (ห้อง 2C2-03)</span>
+                <span class="or-card-kicker">② วันนี้ · 13.30 – 17.00 น. (ห้อง 2C2-03)</span>
                 <p class="or-card-text"><strong>ร่วมเสวนาจากข้างเตียงสู่ระบบสุขภาพ สุขภาพโลก และการวิจัยระบบสุขภาพ</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
                 <span class="or-card-kicker">③ เย็นวันนี้ · เตรียมตัวล่วงหน้าก่อนเข้าชั้นเรียนพรุ่งนี้</span>
-                <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 09.00 น. และกลุ่มย่อย 10.10 น.</strong></p>
+                <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 08.30 น. และกลุ่มย่อย 09.40 น.</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
-                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.00 – 16.30 น.</span>
+                <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.30 – 17.00 น.</span>
                 <p class="or-card-text"><strong>พบอาจารย์ที่ปรึกษาประจำกลุ่มโรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง ในชั่วโมงกลุ่มย่อยครั้งที่ 1</strong></p>
               </div>
             </div>
@@ -2093,13 +2957,21 @@
     }
   ];
 
+  SLIDES.forEach((s, i) => {
+    s.num = String(i + 1).padStart(2, "0");
+  });
+
+  function countSlidesInSection(secId) {
+    return SLIDES.filter((s) => s.section === secId).length;
+  }
+
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (20)", labelEn: "All Slides (20)" },
-    { id: "intro", labelTh: "เปิดเรื่องรายวิชา (1)", labelEn: "Course Opening (1)" },
-    { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (4)", labelEn: "Act I · Heritage & Why (4)" },
-    { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (7)", labelEn: "Act II · Schedule & Journey (7)" },
-    { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
-    { id: "action", labelTh: "Act IV · เวลาเรียน & ก้าวแรก (2)", labelEn: "Act IV · Conduct & Launch (2)" }
+    { id: "all", labelTh: `ทั้งหมด (${SLIDES.length})`, labelEn: `All Slides (${SLIDES.length})` },
+    { id: "intro", labelTh: `เปิดเรื่องรายวิชา (${countSlidesInSection("intro")})`, labelEn: `Course Opening (${countSlidesInSection("intro")})` },
+    { id: "objectives", labelTh: `Act I · รากฐานและเป้าหมาย (${countSlidesInSection("objectives")})`, labelEn: `Act I · Heritage & Why (${countSlidesInSection("objectives")})` },
+    { id: "experience", labelTh: `Act II · ตารางเรียน & เส้นทางเรียนรู้ (${countSlidesInSection("experience")})`, labelEn: `Act II · Schedule & Journey (${countSlidesInSection("experience")})` },
+    { id: "evaluation", labelTh: `Act III · วัดผล เกณฑ์ & Quiz O/S/M/U (${countSlidesInSection("evaluation")})`, labelEn: `Act III · Rubrics & O/S/M/U (${countSlidesInSection("evaluation")})` },
+    { id: "action", labelTh: `Act IV · เวลาเรียน & ก้าวแรก (${countSlidesInSection("action")})`, labelEn: `Act IV · Conduct & Launch (${countSlidesInSection("action")})` }
   ];
 
   /* ---------- Per-Frame Binary-Search Auto-Fit Typography & Multi-Device Reflow ---------- */
@@ -2218,6 +3090,10 @@
       if (kr.top < innerTop || kr.bottom > innerBot || kr.right > innerRight) {
         return false;
       }
+    }
+    const miniWrap = el.querySelector(".or-spec-mini-table-wrap");
+    if (miniWrap && (miniWrap.scrollHeight > miniWrap.clientHeight + 1 || miniWrap.scrollWidth > miniWrap.clientWidth + 1)) {
+      return false;
     }
     return true;
   }
@@ -2452,17 +3328,24 @@
     const s02Grid = canvas.querySelector(".or-s02-3fig-grid");
     const pipeStage = canvas.querySelector(".or-top-fig-stack.is-pipe-zoom-stage");
     const heroStage = canvas.querySelector(".or-top-fig-stack.is-hero-reveal-stage");
+    const s09Stage = canvas.querySelector(".or-s09-stage-wrap");
     const focusKey = s02Grid
       ? s02Grid.getAttribute("data-s02-focus") || "0"
       : pipeStage
         ? "pipe:" + (pipeStage.getAttribute("data-pipe-focus") || "0")
         : heroStage
           ? "hero:" + (heroStage.getAttribute("data-hero-reveal") || "1")
-          : "";
+          : s09Stage
+            ? "s09:" + (s09Stage.getAttribute("data-s09-site-focus") || "0")
+            : "";
     const printKey = document.body.classList.contains("is-printing-orientation-deck") ? "P" : "S";
     const fitSig = `${canvas.clientWidth}x${canvas.clientHeight}:${focusKey}:${printKey}`;
     if (canvas._lastFitSig === fitSig) return;
     canvas._lastFitSig = fitSig;
+
+    if (canvas.querySelector(".or-s09-live-site-stage")) {
+      return;
+    }
 
     canvas.setAttribute("data-measuring", "1");
 
@@ -2845,7 +3728,7 @@
           ev.target &&
           ev.target.closest &&
           ev.target.closest(
-            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl]"
+            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl], [data-map-site], [data-s09-jump-site], [data-open-spss-deck], [data-open-attitude-pdf], .fm-tab, .fm-token, .th-map-pin-group"
           );
         if (!inInteractive && !(curSlide && curSlide.isLiveQuizSlide)) {
           const vpRect = modal.getBoundingClientRect();
@@ -3796,6 +4679,125 @@
     return true;
   }
 
+  function updateS09HudCounters(canvas, clampedSite) {
+    const slideObj = SLIDES.find((s) => s.id === "s09-fieldwork-9sites");
+    const sNum = slideObj ? slideObj.num : "14";
+    const footNum = canvas && canvas.querySelector(".or-sld-foot-num");
+    const cchNum = document.querySelector("#orClickerCornerHud .or-cch-num");
+    if (clampedSite >= 1 && clampedSite <= 9) {
+      const meta = S09_SITE_META.find((m) => m.id === clampedSite);
+      if (footNum) {
+        footNum.textContent = `${sNum} / ${SLIDES.length} · กลุ่ม ${clampedSite}/9 (${meta ? meta.shortName : ""})`;
+      }
+      if (cchNum) {
+        cchNum.textContent = `${sNum} [G${clampedSite}/9] / ${SLIDES.length}`;
+      }
+    } else {
+      if (footNum) footNum.textContent = `${sNum} / ${SLIDES.length}`;
+      if (cchNum) cchNum.textContent = `${sNum} / ${SLIDES.length}`;
+    }
+  }
+
+  function mountActiveS09LiveStage(modal) {
+    if (!modal || modal.hidden) return;
+    const canvas = modal.querySelector('.or-slide-canvas[data-slide-id="s09-fieldwork-9sites"]');
+    const mountEl = canvas && canvas.querySelector("[data-s09-live-mount]");
+    if (!canvas || !mountEl) return;
+    const targetId = Math.max(1, Math.min(9, Number(state.siteFocus) || 1));
+    const api = window.RACM_PORTAL_API;
+    if (api && typeof api.mountSlideFieldworkSiteStage === "function") {
+      api.mountSlideFieldworkSiteStage(mountEl, targetId, {
+        onSelectSite: (nextId) => {
+          state.autoPlay = false;
+          applySiteFocusDom(Number(nextId) || 0);
+        }
+      });
+    }
+    updateS09HudCounters(canvas, targetId);
+  }
+
+  function wireSlideCustomActions(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll("[data-s09-jump-site]").forEach((el) => {
+      if (el._orWiredJumpSite) return;
+      el._orWiredJumpSite = true;
+      el.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        state.autoPlay = false;
+        applySiteFocusDom(Number(el.getAttribute("data-s09-jump-site")) || 0);
+      });
+    });
+    rootEl.querySelectorAll("[data-open-spss-deck]").forEach((btn) => {
+      if (btn._orWiredSpss) return;
+      btn._orWiredSpss = true;
+      btn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        state.autoPlay = false;
+        if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.open === "function") {
+          closeDeck();
+          window.RACM_SPSS_DECK.open(0);
+        } else if (window.RACM_PORTAL_API && typeof window.RACM_PORTAL_API.openSpssDeck === "function") {
+          closeDeck();
+          window.RACM_PORTAL_API.openSpssDeck(0);
+        }
+      });
+    });
+    rootEl.querySelectorAll("[data-open-attitude-pdf]").forEach((link) => {
+      if (link._orWiredAttPdf) return;
+      link._orWiredAttPdf = true;
+      link.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (window.RACM_PDF_PREVIEW && typeof window.RACM_PDF_PREVIEW.open === "function") {
+          ev.preventDefault();
+          window.RACM_PDF_PREVIEW.open("downloads/rama_attitude_criteria_2567.pdf", {
+            title: "ประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567.pdf",
+            downloadName: "rama_attitude_criteria_2567.pdf"
+          });
+        }
+      });
+    });
+  }
+
+  function applySiteFocusDom(targetSite) {
+    const clamped = Math.max(0, Math.min(9, Number(targetSite) || 0));
+    state.siteFocus = clamped;
+    const modal = document.getElementById("orientationDeckModal");
+    if (!modal || modal.hidden) return false;
+    const canvas = modal.querySelector('.or-slide-canvas[data-slide-id="s09-fieldwork-9sites"]');
+    const bodyEl = canvas && canvas.querySelector(".or-sld-body");
+    const slideObj = SLIDES.find((s) => s.id === "s09-fieldwork-9sites");
+    if (!canvas || !bodyEl || !slideObj) return false;
+
+    bodyEl.innerHTML = slideObj.render();
+    flashStepToast();
+
+    if (clamped >= 1) {
+      mountActiveS09LiveStage(modal);
+    } else {
+      updateS09HudCounters(canvas, 0);
+      canvas._lastFitSig = "";
+      wireSlideCustomActions(canvas);
+      wireImageLoadRefit(canvas);
+      fitSingleSlideCanvas(canvas);
+    }
+
+    const reduceMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion && !window.__RACM_EXPORTING_DECK && bodyEl.firstElementChild && typeof bodyEl.firstElementChild.animate === "function") {
+      try {
+        bodyEl.firstElementChild.animate(
+          [
+            { opacity: 0.35, transform: "translateY(6px)" },
+            { opacity: 1, transform: "translateY(0)" }
+          ],
+          { duration: 220, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+        );
+      } catch (_) {}
+    }
+    return true;
+  }
+
   function goToSlide(idx, opts) {
     const o = opts || {};
     clearS02Timer();
@@ -3806,6 +4808,7 @@
     state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
     state.heroReveal = typeof o.heroReveal === "number" ? o.heroReveal : 0;
     state.pipeFocus = typeof o.pipeFocus === "number" ? o.pipeFocus : 0;
+    state.siteFocus = typeof o.siteFocus === "number" ? o.siteFocus : 0;
     state.zoomScale = 1;
     state.toolsMenuOpen = false;
     clearJumpBuffer();
@@ -3841,6 +4844,24 @@
     }
 
     const cur = SLIDES[state.slideIdx];
+    if (state.viewMode === "deck" && cur && cur.id === "s09-fieldwork-9sites") {
+      if (d > 0) {
+        if (state.siteFocus < 9) {
+          applySiteFocusDom(state.siteFocus + 1);
+          return;
+        }
+        goToSlide(state.slideIdx + 1, { siteFocus: 0 });
+        return;
+      } else {
+        if (state.siteFocus > 0) {
+          applySiteFocusDom(state.siteFocus - 1);
+          return;
+        }
+        goToSlide(state.slideIdx - 1, { siteFocus: 0 });
+        return;
+      }
+    }
+
     if (state.viewMode === "deck" && cur && cur.id === "s02-third-pillar-why") {
       if (d > 0) {
         if (state.s02Focus === 0) {
@@ -4019,9 +5040,13 @@
       }
     }
 
-    // Stepping backward lands on final overview of Slide 03 (4), Slides 06/09 (heroReveal: 1), or Slides 10/11 (6)
+    // Stepping backward lands on final overview of Slide 03 (4), Slides 06/09 (heroReveal: 1), Slides 10/11 (6), or Slide 14 (siteFocus: 9)
     const targetIdx = state.slideIdx + d;
     if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx]) {
+      if (SLIDES[targetIdx].id === "s09-fieldwork-9sites") {
+        goToSlide(targetIdx, { siteFocus: 9 });
+        return;
+      }
       if (SLIDES[targetIdx].id === "s02-third-pillar-why") {
         goToSlide(targetIdx, { s02Focus: 4 });
         return;
@@ -4035,7 +5060,7 @@
         return;
       }
     }
-    goToSlide(targetIdx, { s02Focus: 0, heroReveal: 0, pipeFocus: 0 });
+    goToSlide(targetIdx, { s02Focus: 0, heroReveal: 0, pipeFocus: 0, siteFocus: 0 });
   }
 
   function goToSlideById(slideId) {
@@ -4056,6 +5081,7 @@
     if (safeIdx === state.slideIdx) return;
     state.transitionDir = safeIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = safeIdx;
+    state.siteFocus = 0;
     state.zoomScale = 1;
     flashStepToast();
     renderModal();
@@ -4093,7 +5119,7 @@
                 <div class="or-cg-krow"><kbd>PageUp</kbd> <kbd>&larr;</kbd> <kbd>Backspace</kbd><span>สไลด์ก่อนหน้า (Previous Slide)</span></div>
                 <div class="or-cg-krow"><kbd>F5</kbd> หรือ <kbd>C</kbd><span>เข้า/ออกโหมด <strong>Keynote Pitch Stage</strong> (ซ่อนแถบเมนูอัตโนมัติ)</span></div>
                 <div class="or-cg-krow"><kbd>.</kbd> หรือ <kbd>B</kbd><span>พักหน้าจอดำ <strong>Blackout Stage</strong> (รองรับปุ่มจอดำบน Clicker ทุกรุ่น)</span></div>
-                <div class="or-cg-krow"><kbd>1–20</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
+                <div class="or-cg-krow"><kbd>1–${SLIDES.length}</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
                 <div class="or-cg-krow"><kbd>L</kbd> เลเซอร์ · <kbd>H</kbd> ซ่อน/แสดงแถบ · <kbd>T</kbd> โทนสว่าง/มืด<span>ควบคุมเวทีครบมือโดยไม่ต้องจับเมาส์</span></div>
               </div>
               <div class="or-cg-actions">
@@ -4481,6 +5507,10 @@
         state.autoPlay = false;
         state.toolsMenuOpen = false;
         state.slideIdx = Number(btn.dataset.orJump) || 0;
+        state.s02Focus = 0;
+        state.heroReveal = 0;
+        state.pipeFocus = 0;
+        state.siteFocus = 0;
         state.viewMode = "deck";
         renderModal();
       });
@@ -4689,6 +5719,10 @@
     // Run Per-Frame Auto-Fit Typography synchronously before paint & re-verify on image decode!
     fitAllVisibleCanvases();
     applyZoomToCurrentSlide(1);
+    wireSlideCustomActions(modal);
+    if (state.viewMode === "deck" && cur && cur.id === "s09-fieldwork-9sites" && state.siteFocus >= 1) {
+      mountActiveS09LiveStage(modal);
+    }
     wireImageLoadRefit(modal);
     wireLaserIfActive(modal);
     if (cur.isCover) {
@@ -4854,6 +5888,9 @@
     state.blackoutActive = false;
     if (typeof initialSlideIdx === "number" && !Number.isNaN(initialSlideIdx)) {
       state.slideIdx = Math.max(0, Math.min(SLIDES.length - 1, initialSlideIdx));
+      state.siteFocus = typeof o.siteFocus === "number" ? o.siteFocus : 0;
+    } else if (typeof o.siteFocus === "number") {
+      state.siteFocus = o.siteFocus;
     }
     if (o.viewMode) state.viewMode = o.viewMode;
     if (o.presentationMode || o.clickerStage) {
@@ -4918,6 +5955,8 @@
     getS02Focus: () => state.s02Focus,
     getHeroReveal: () => state.heroReveal,
     getPipeFocus: () => state.pipeFocus,
+    getSiteFocus: () => state.siteFocus,
+    setSiteFocus: (n) => applySiteFocusDom(n),
     getSlides: () => SLIDES,
     pptxHref: PPTX_HREF,
     pdfHref: PDF_HREF

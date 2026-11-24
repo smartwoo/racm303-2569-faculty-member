@@ -3652,7 +3652,9 @@
           </div>
           <div class="tv-up-tracks">
             <button type="button" class="tv-hosp-chip" id="stuOpenSt1DeckQuickBtn">🖥️ เปิด Slide ST1 (16 สไลด์ · 16:9)</button>
+            <button type="button" class="tv-hosp-chip" id="stuOpenSpssDeckQuickBtn">💻 เปิด Slide SPSS Workshop (10 สไลด์ · 16:9)</button>
             <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_ST1_Slides.pdf" download="RACM303_2569_ST1_Slides.pdf" style="text-decoration:none">⬇ Slide ST1 (.pdf)</a>
+            <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_SPSS_Workshop_Slides.pdf" download="RACM303_2569_SPSS_Workshop_Slides.pdf" style="text-decoration:none">⬇ Slide SPSS (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/ST1.pdf" download="RACM303_ST1_Full.pdf" style="text-decoration:none">⬇ ST1 ฉบับเต็ม (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/ST1-CONCISE.pdf" download="RACM303_ST1_Abridged.pdf" style="text-decoration:none">⬇ ST1 ฉบับย่อ (.pdf)</a>
             <button type="button" class="tv-hosp-chip" id="stuOpenHsSlidesHubBtn">🖥️ ดูหน้ารวม Slide อาจารย์ (ST1 &amp; HS1–HS6) →</button>
@@ -3667,6 +3669,17 @@
           backdrop.remove();
           if (window.RACM_ST1_DECK && typeof window.RACM_ST1_DECK.open === "function") {
             window.RACM_ST1_DECK.open(0);
+          }
+        });
+      }
+      const spssQuickBtn = backdrop.querySelector("#stuOpenSpssDeckQuickBtn");
+      if (spssQuickBtn) {
+        spssQuickBtn.addEventListener("click", () => {
+          backdrop.remove();
+          if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.open === "function") {
+            window.RACM_SPSS_DECK.open(0);
+          } else if (api.openSessionSlide) {
+            api.openSessionSlide("w3-d2-spss", false);
           }
         });
       }
@@ -3930,7 +3943,13 @@
           openBtn.addEventListener("click", () => api.openSessionSlide(s.id, false));
           acts.appendChild(openBtn);
 
-          if (!rec.isBuiltInOrientation && !rec.isRepoCommitted) {
+          if (
+            !rec.isBuiltInOrientation &&
+            !rec.isBuiltInSt1Deck &&
+            !rec.isBuiltInSpssDeck &&
+            !rec.isBuiltInPanelDeck &&
+            !rec.isRepoCommitted
+          ) {
             const delBtn = document.createElement("button");
             delBtn.type = "button";
             delBtn.className = "btn sm";
