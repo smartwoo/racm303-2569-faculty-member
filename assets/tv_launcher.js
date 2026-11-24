@@ -839,17 +839,18 @@
                 const cleanStaff = String(s.staffRef || "")
                   .replace(/\s*\[[^\]]*\]/g, "")
                   .trim();
-                const advThumbsHtml = Array.isArray(s.advisorList) && s.advisorList.length
-                  ? `<span style="display:inline-flex;align-items:center;flex-shrink:0">${s.advisorList
-                      .map((a, ai) =>
-                        a.localPhoto
-                          ? `<img src="${esc(a.localPhoto)}" alt="" loading="lazy" style="width:28px;height:36px;object-fit:cover;object-position:center 14%;border-radius:6px;border:1.5px solid rgba(255,215,102,0.92);box-shadow:0 2px 6px rgba(15,23,42,0.20);flex-shrink:0${ai > 0 ? ";margin-left:-5px" : ""}">`
-                          : ""
-                      )
-                      .join("")}</span>`
-                  : "";
+                const advPairsHtml = Array.isArray(s.advisorList) && s.advisorList.length
+                  ? s.advisorList
+                      .map((a) => {
+                        const frame = a.localPhoto
+                          ? `<span class="tv-adv-frame is-adv"><img class="tv-adv-av" src="${esc(a.localPhoto)}" alt="" loading="lazy"></span>`
+                          : "";
+                        return `<span class="tv-person-unit is-adv">${frame}<span>${esc(a.name)}</span></span>`;
+                      })
+                      .join("")
+                  : `<span>${esc(s.advisors || "-")}</span>`;
                 const staffThumbHtml = s.staffHasLocalPhoto
-                  ? `<img src="assets/photos/staff_${s.id}.jpg" alt="" loading="lazy" style="width:28px;height:36px;object-fit:cover;border-radius:6px;border:1.5px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(15,23,42,0.18);flex-shrink:0">`
+                  ? `<span class="tv-adv-frame is-staff"><img class="tv-adv-av" src="assets/photos/staff_${s.id}.jpg" alt="" loading="lazy"></span>`
                   : `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:36px;border-radius:6px;background:rgba(15,23,42,0.12);font-size:11px;font-weight:800;flex-shrink:0">${esc(s.staffInitials || "จนท")}</span>`;
                 return `
               <button type="button" class="tv-site-card" id="tvSiteCard-${s.id}" data-site-short="${esc(s.shortName)}" data-tv-focus data-tv-row="4">
@@ -862,9 +863,9 @@
                   <span class="tv-site-prov">${esc(s.province)}</span>
                 </span>
                 <span class="tv-site-mentor">
-                  <span style="display:flex;align-items:center;gap:8px">${advThumbsHtml}<span><strong>${esc(t("อ.ประจำกลุ่ม:", "Advisor:"))}</strong> ${esc(s.advisors || "-")}</span></span>${
+                  <span class="tv-mentor-group is-adv-group"><span class="tv-mentor-role-lbl">${esc(t("อาจารย์ที่ปรึกษา", "Advisor"))}</span><span class="tv-mentor-units">${advPairsHtml}</span></span>${
                   cleanStaff
-                    ? `<span style="display:flex;align-items:center;gap:8px;margin-top:6px">${staffThumbHtml}<span><strong>${esc(t("ผู้ประสานงาน:", "Coordinator:"))}</strong> ${esc(cleanStaff)}</span></span>`
+                    ? `<span class="tv-mentor-group is-staff-group"><span class="tv-mentor-role-lbl is-staff">${esc(t("ผู้ประสานงาน", "Coordinator"))}</span><span class="tv-person-unit is-staff">${staffThumbHtml}<span>${esc(cleanStaff)}</span></span></span>`
                     : ""
                 }
                 </span>

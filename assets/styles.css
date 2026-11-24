@@ -39139,3 +39139,402 @@ html[data-theme="dark"] .doh-live-diagram-readonly .doh-node-live-text {
     page-break-inside: avoid;
   }
 }
+
+
+/* ==========================================================================
+   Separated Photo-Attached Mentor Plaques & Calibrated HTML Face Zoom
+   Matches Faculty & Student portrait head scale to Staff Coordinator portraits
+   ========================================================================== */
+.fm-mentor-plaques-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.fm-mentor-role-cluster {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.fm-mentor-plaques-sep {
+  width: 1.5px;
+  align-self: stretch;
+  margin: 4px 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06));
+  border-radius: 99px;
+}
+
+.fm-mentor-plaque.is-advisor-plaque {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.52) 0%, rgba(15, 23, 42, 0.66) 100%);
+  border: 1px solid rgba(250, 204, 21, 0.48);
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.24);
+  max-width: none;
+  padding: 5px 11px 5px 7px;
+  border-radius: 10px;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.fm-mentor-plaque.is-staff-plaque {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.34) 0%, rgba(15, 23, 42, 0.66) 100%);
+  border: 1px solid rgba(94, 234, 212, 0.45);
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.24);
+  max-width: none;
+  padding: 5px 11px 5px 7px;
+  border-radius: 10px;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.fm-mentor-plaque.is-zoomable {
+  cursor: zoom-in;
+}
+
+.fm-mentor-plaque.is-zoomable:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.fm-mentor-lbl.is-staff-lbl {
+  color: #5eead4;
+}
+
+.mentors-role-sep {
+  display: inline-block;
+  width: 1.5px;
+  height: 30px;
+  margin: 0 4px;
+  background: rgba(100, 116, 139, 0.28);
+  border-radius: 99px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .mentors-role-sep {
+  background: rgba(148, 163, 184, 0.32);
+}
+
+/* Paired Instructor [Photo + Name] Chips in Discussion & Faculty Binders */
+.inst-person-pairs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.inst-pair-sep {
+  color: var(--muted, #64748b);
+  font-weight: 700;
+  margin: 0 1px;
+}
+
+.inst-person-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 3px;
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.88);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  line-height: 1.2;
+}
+
+.inst-person-chip.is-staff-pair {
+  background: rgba(240, 253, 250, 0.92);
+  border-color: rgba(13, 148, 136, 0.28);
+}
+
+.inst-person-chip.is-zoomable {
+  cursor: zoom-in;
+}
+
+.inst-person-chip.is-zoomable:hover {
+  border-color: rgba(37, 99, 235, 0.52);
+  background: #ffffff;
+}
+
+html[data-theme="dark"] .inst-person-chip {
+  background: rgba(30, 58, 138, 0.32);
+  border-color: rgba(96, 165, 250, 0.32);
+}
+
+html[data-theme="dark"] .inst-person-chip.is-staff-pair {
+  background: rgba(15, 118, 110, 0.3);
+  border-color: rgba(45, 212, 191, 0.34);
+}
+
+.fm-coach-cell .inst-person-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+}
+
+.fapc-coord-row {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.32);
+}
+
+.fapc-role-tag {
+  font-size: 11.5px;
+  color: var(--ink-strong, #1e293b);
+  margin-right: 2px;
+}
+
+.fapc-role-tag.is-coord {
+  color: #0f766e;
+}
+
+/* Sortable Roster Table Separated Photo+Name Mentor Chips */
+.td-mentors-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.td-mentor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 3px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.td-mentor-chip.is-adv {
+  background: rgba(239, 246, 255, 0.95);
+  border: 1px solid rgba(30, 64, 175, 0.24);
+  color: #1e3a8a;
+}
+
+.td-mentor-chip.is-staff {
+  background: rgba(240, 253, 250, 0.95);
+  border: 1px solid rgba(13, 148, 136, 0.28);
+  color: #115e59;
+}
+
+.td-mentor-chip.is-zoomable {
+  cursor: zoom-in;
+}
+
+html[data-theme="dark"] .td-mentor-chip.is-adv {
+  background: rgba(30, 58, 138, 0.34);
+  border-color: rgba(96, 165, 250, 0.35);
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .td-mentor-chip.is-staff {
+  background: rgba(15, 118, 110, 0.3);
+  border-color: rgba(45, 212, 191, 0.35);
+  color: #ccfbf1;
+}
+
+.td-mentor-av {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  font-size: 9.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.td-mentor-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Orientation Slides & TV Launcher Framed Advisor/Staff Units */
+.or-adv-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28cqw;
+  padding: 0.06cqw 0.36cqw 0.06cqw 0.10cqw;
+  border-radius: 0.32cqw;
+  background: rgba(241, 245, 249, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  white-space: nowrap;
+}
+
+.or-s08-inst-row {
+  flex-wrap: wrap;
+  gap: 0.28cqw;
+}
+
+.or-s09-adv-cell {
+  flex-wrap: wrap;
+  gap: 0.28cqw;
+}
+
+.or-s09-adv-frame {
+  width: 1.48cqw;
+  height: 1.92cqw;
+  min-width: 16px;
+  min-height: 21px;
+  border-radius: 0.26cqw;
+  overflow: hidden;
+  border: 1px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.or-s09-adv-frame .or-s09-adv-av {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.tv-mentor-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px 7px;
+  border-radius: 8px;
+}
+
+.tv-mentor-group.is-adv-group {
+  background: rgba(30, 58, 138, 0.14);
+  border: 1px solid rgba(250, 204, 21, 0.28);
+}
+
+.tv-mentor-group.is-staff-group {
+  margin-top: 5px;
+  background: rgba(13, 148, 136, 0.14);
+  border: 1px solid rgba(94, 234, 212, 0.28);
+}
+
+.tv-mentor-role-lbl {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.tv-mentor-role-lbl.is-staff {
+  color: #2dd4bf;
+}
+
+.tv-mentor-units {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tv-person-unit {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.2px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.tv-adv-frame {
+  width: 28px;
+  height: 37px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+}
+
+.tv-adv-frame.is-adv {
+  border: 1.5px solid rgba(255, 215, 102, 0.92);
+}
+
+.tv-adv-frame.is-staff {
+  border: 1.5px solid rgba(94, 234, 212, 0.9);
+}
+
+.tv-adv-frame .tv-adv-av {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- Calibrated HTML Face Zoom (Matches Staff Coordinator Head Scale) ---------- */
+@media screen {
+  /* 1. 3:4 Portrait Frames (Roster Cards, Advisor Cards, Header Badges, Map Plaques, Slides, TV) */
+  .student-portrait img[src*="assets/photos/6"]:not(#lightboxImg),
+  .student-portrait img[src*="drive.google.com/thumbnail"]:not(#lightboxImg) {
+    object-position: 50% 6% !important;
+    transform: scale(1.36);
+    transform-origin: 50% 6%;
+  }
+
+  .student-portrait img[src*="staff_"]:not(#lightboxImg),
+  .tv-adv-frame img[src*="staff_"]:not(#lightboxImg) {
+    object-position: 50% 0% !important;
+    transform: none !important;
+  }
+
+  .student-portrait img[src*="advisor_"]:not(#lightboxImg),
+  .or-s09-adv-frame img[src*="advisor_"],
+  .tv-adv-frame img[src*="advisor_"] {
+    object-position: var(--adv-ox, 50%) var(--adv-oy, 5%) !important;
+    transform: scale(var(--adv-z, 1.60));
+    transform-origin: var(--adv-ox, 50%) var(--adv-oy, 5%);
+  }
+
+  /* 2. 1:1 Circular Avatars (Formation Pitch, Sorter Chips, Hover Popover, Discussion, Table) */
+  .fm-avatar-ring img[src*="assets/photos/6"]:not(#lightboxImg),
+  .gsorter-chip-avatar img[src*="assets/photos/6"]:not(#lightboxImg),
+  .ghp-avatar img[src*="assets/photos/6"]:not(#lightboxImg),
+  .fm-avatar-ring img[src*="drive.google.com/thumbnail"]:not(#lightboxImg),
+  .gsorter-chip-avatar img[src*="drive.google.com/thumbnail"]:not(#lightboxImg),
+  .ghp-avatar img[src*="drive.google.com/thumbnail"]:not(#lightboxImg) {
+    object-position: 50% 10% !important;
+    transform: scale(1.22);
+    transform-origin: 50% 10%;
+  }
+
+  .gsorter-chip-avatar img[src*="staff_"]:not(#lightboxImg),
+  .ghp-avatar img[src*="staff_"]:not(#lightboxImg),
+  .inst-mini-av img[src*="staff_"]:not(#lightboxImg),
+  .td-mentor-av img[src*="staff_"]:not(#lightboxImg) {
+    object-position: 50% 6% !important;
+    transform: none !important;
+  }
+
+  .gsorter-chip-avatar img[src*="advisor_"]:not(#lightboxImg),
+  .ghp-avatar img[src*="advisor_"]:not(#lightboxImg),
+  .inst-mini-av img[src*="advisor_"]:not(#lightboxImg),
+  .td-mentor-av img[src*="advisor_"]:not(#lightboxImg) {
+    object-position: var(--adv-ox, 50%) var(--adv-coy, 10%) !important;
+    transform: scale(var(--adv-cz, 1.88));
+    transform-origin: var(--adv-ox, 50%) var(--adv-coy, 10%);
+  }
+
+  /* 3. Per-Advisor Face-Calibrated Variables (All 14 Faculty Advisors) */
+  img[src*="advisor_chatchai"]   { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 50%; --adv-oy: 5%; --adv-coy: 10%; }
+  img[src*="advisor_chathaya"]   { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 49%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_jakkrit"]    { --adv-z: 1.58; --adv-cz: 1.86; --adv-ox: 50%; --adv-oy: 7%; --adv-coy: 12%; }
+  img[src*="advisor_nuttawut"]   { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 48%; --adv-oy: 5%; --adv-coy: 10%; }
+  img[src*="advisor_pawin"]      { --adv-z: 1.70; --adv-cz: 2.00; --adv-ox: 65%; --adv-oy: 7%; --adv-coy: 12%; }
+  img[src*="advisor_peerasit"]   { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 53%; --adv-oy: 3%; --adv-coy: 8%;  }
+  img[src*="advisor_pharanyu"]   { --adv-z: 1.68; --adv-cz: 1.98; --adv-ox: 51%; --adv-oy: 3%; --adv-coy: 8%;  }
+  img[src*="advisor_phusit"]     { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 50%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_roengrudee"] { --adv-z: 1.58; --adv-cz: 1.86; --adv-ox: 51%; --adv-oy: 5%; --adv-coy: 10%; }
+  img[src*="advisor_samrit"]     { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_sawanee"]    { --adv-z: 1.56; --adv-cz: 1.84; --adv-ox: 53%; --adv-oy: 4%; --adv-coy: 9%;  }
+  img[src*="advisor_warisa"]     { --adv-z: 1.44; --adv-cz: 1.72; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
+  img[src*="advisor_wich."]      { --adv-z: 1.76; --adv-cz: 2.08; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_wichai"]     { --adv-z: 1.56; --adv-cz: 1.84; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
+}

@@ -1017,9 +1017,51 @@
     return `<span class="inst-avatar-stack${matched.length > 1 ? " is-pair" : ""}">${thumbs}</span>`;
   }
 
+  function renderInstructorPersonPairsHtml(instructorStr, ctxNote) {
+    const raw = String(instructorStr || "").trim();
+    if (!raw || raw === "-") return `<span>-</span>`;
+    const matched = resolveInstructorsFromText(raw);
+    if (!matched.length) return `<span>${escapeHtml(raw)}</span>`;
+    const noteAttr = ctxNote ? ` data-zoom-advisor-ctx="${escapeHtml(ctxNote)}"` : "";
+    if (matched.length === 1) {
+      const adv = matched[0];
+      const av = adv.localSrc
+        ? `<span class="inst-mini-av"><img src="${escapeHtml(adv.localSrc)}" alt="${escapeHtml(adv.shortName)}" loading="lazy" decoding="async" /></span>`
+        : `<span class="inst-mini-av">${escapeHtml(adv.initials)}</span>`;
+      return `<span class="inst-person-chip${adv.hasPhoto ? " is-zoomable" : ""}" data-zoom-advisor-key="${escapeHtml(adv.key)}"${noteAttr} title="${escapeHtml(adv.name + " (คลิกขยายรูป)")}">${av}<span class="inst-person-name">${escapeHtml(raw)}</span></span>`;
+    }
+    const rawParts = raw.split(/\s*(?:และ|,|·|\/|\+|&)\s*/).map((x) => x.trim()).filter(Boolean);
+    const chips = matched.map((adv, i) => {
+      let label = adv.name;
+      if (rawParts.length === matched.length) {
+        const hit = rawParts.find((seg) => seg.includes(adv.key)) || rawParts[i];
+        if (hit) label = hit;
+      }
+      const av = adv.localSrc
+        ? `<span class="inst-mini-av"><img src="${escapeHtml(adv.localSrc)}" alt="${escapeHtml(adv.shortName)}" loading="lazy" decoding="async" /></span>`
+        : `<span class="inst-mini-av">${escapeHtml(adv.initials)}</span>`;
+      return `<span class="inst-person-chip${adv.hasPhoto ? " is-zoomable" : ""}" data-zoom-advisor-key="${escapeHtml(adv.key)}"${noteAttr} title="${escapeHtml(adv.name + " (คลิกขยายรูป)")}">${av}<span class="inst-person-name">${escapeHtml(label)}</span></span>`;
+    });
+    return `<span class="inst-person-pairs">${chips.join('<span class="inst-pair-sep" aria-hidden="true">·</span>')}</span>`;
+  }
+
+  function makeMentorsRoleDivider() {
+    const sep = document.createElement("span");
+    sep.className = "mentors-role-sep";
+    sep.setAttribute("aria-hidden", "true");
+    return sep;
+  }
+
   if (typeof document !== "undefined" && !window.__racmAdvisorZoomDelegated) {
     window.__racmAdvisorZoomDelegated = true;
     document.addEventListener("click", (ev) => {
+      const stBtn = ev.target && ev.target.closest ? ev.target.closest("[data-zoom-staff-site]") : null;
+      if (stBtn) {
+        ev.stopPropagation();
+        const sArea = stBtn.getAttribute("data-zoom-staff-site") || "";
+        if (sArea) zoomStaffPhoto(sArea);
+        return;
+      }
       const btn = ev.target && ev.target.closest ? ev.target.closest("[data-zoom-advisor-key]") : null;
       if (!btn) return;
       ev.stopPropagation();
@@ -4427,7 +4469,8 @@
       </div>
       <div class="stu-quick-meta-lines">
         <p><strong>โรงพยาบาล:</strong> ${escapeHtml(site.hospital || s.area)} (${escapeHtml(site.province || "")})</p>
-        <p><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site, s.advisor))}</p>
+        <p><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(site.advisors || s.advisor || "-")}</p>
+        ${cleanCoordinatorName(site.staffRef) ? `<p><strong>ผู้ประสานงานพื้นที่:</strong> ${escapeHtml(cleanCoordinatorName(site.staffRef))}</p>` : ""}
         <p><strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room || "-")}</p>
         <p><strong>ช่วงฝึกภาคสนาม:</strong> ${escapeHtml(site.datesTH || "-")}</p>
         ${site.travelNote ? `<p class="muted-line">${escapeHtml(site.travelNote)}</p>` : ""}
@@ -4440,6 +4483,7 @@
     const advBadgesInModal = renderAdvisorHeaderBadges(site);
     const staffBadgeInModal = renderStaffHeaderBadge(site);
     if (advBadgesInModal) modalBadgesRow.appendChild(advBadgesInModal);
+    if (advBadgesInModal && staffBadgeInModal) modalBadgesRow.appendChild(makeMentorsRoleDivider());
     if (staffBadgeInModal) modalBadgesRow.appendChild(staffBadgeInModal);
     if (modalBadgesRow.childNodes.length) fieldBox.appendChild(modalBadgesRow);
     const jumpFieldBtn = make("button", `ไปที่รายชื่อกลุ่มพื้นที่ ${s.area} →`, "btn sm");
@@ -5413,8 +5457,8 @@
         <div class="disc-rot-slots" style="margin-top:10px">
           ${HS_SLOTS_META.map((m) => {
             const c = rot[m.mod] || {};
-            const avHtml = renderInstructorAvatarStackHtml(c.instructor, `กลุ่ม Discussion ที่ ${curGroupObj.id} · ${m.label}`);
-            return `<div class="disc-rot-slot"><span class="slot-code">${escapeHtml(m.label)}</span><span class="slot-inst">${avHtml}<span>${escapeHtml(c.instructor || "-")}</span></span><span class="slot-room${c.highlightRoom ? " room-changed" : ""}">ห้อง ${escapeHtml(c.room || rot.room || "-")}</span></div>`;
+            const pairedHtml = renderInstructorPersonPairsHtml(c.instructor, `กลุ่ม Discussion ที่ ${curGroupObj.id} · ${m.label}`);
+            return `<div class="disc-rot-slot"><span class="slot-code">${escapeHtml(m.label)}</span><span class="slot-inst">${pairedHtml}</span><span class="slot-room${c.highlightRoom ? " room-changed" : ""}">ห้อง ${escapeHtml(c.room || rot.room || "-")}</span></div>`;
           }).join("")}
         </div>
       `;
@@ -5449,7 +5493,7 @@
           <div>
             <span class="deck-slide-eyebrow">พื้นที่ที่ ${idx + 1} จาก ${groups.length} · กดปุ่มลูกศร ← / → เพื่อเลื่อนพื้นที่</span>
             <h3><span class="area-sub-pill area-site-${site.id}" style="font-size:15px;padding:4px 12px"><i class="area-dot"></i>${site.id}. ${escapeHtml(site.shortName)}</span> ${escapeHtml(site.hospital)} (${escapeHtml(site.province)}) · ${members.length}/${groupAll.length} คน</h3>
-            <p style="margin:6px 0 0;font-size:13.8px;color:var(--ink-body)"><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site))} · <strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room)} · <strong>ช่วงฝึก:</strong> ${escapeHtml(site.datesTH)}</p>
+            <p style="margin:6px 0 0;font-size:13.8px;color:var(--ink-body)"><strong>อาจารย์ที่ปรึกษา:</strong> ${escapeHtml(site.advisors || "-")}${cleanCoordinatorName(site.staffRef) ? ` · <strong>ผู้ประสานงาน:</strong> ${escapeHtml(cleanCoordinatorName(site.staffRef))}` : ""} · <strong>ห้องกลุ่มย่อย:</strong> ${escapeHtml(site.room)} · <strong>ช่วงฝึก:</strong> ${escapeHtml(site.datesTH)}</p>
             <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">${escapeHtml(site.travelNote || "")}</p>
           </div>
           <div class="header-actions">
@@ -5462,6 +5506,7 @@
       const deckStaffBadge = renderStaffHeaderBadge(site);
       if (deckActs) {
         if (deckStaffBadge) deckActs.prepend(deckStaffBadge);
+        if (deckAdvBadges && deckStaffBadge) deckActs.prepend(makeMentorsRoleDivider());
         if (deckAdvBadges) deckActs.prepend(deckAdvBadges);
       }
       slideCard.appendChild(banner);
@@ -5520,6 +5565,11 @@
       else if (field === "area") {
         cmp = (siteOrder.get(a.area) ?? 99) - (siteOrder.get(b.area) ?? 99) || compareTH(a.id, b.id);
       } else if (field === "advisor") cmp = compareTH(a.advisor || "", b.advisor || "");
+      else if (field === "coordinator") {
+        const sa = getStaffCoordinatorInfo(a.area);
+        const sb = getStaffCoordinatorInfo(b.area);
+        cmp = compareTH(sa ? sa.displayFull : "", sb ? sb.displayFull : "") || compareTH(a.id, b.id);
+      }
       return cmp * dir;
     });
 
@@ -5537,7 +5587,8 @@
       { key: "program", label: "หลักสูตร" },
       { key: "disc", label: "Discussion" },
       { key: "area", label: "กลุ่มพื้นที่ภาคสนาม" },
-      { key: "advisor", label: "อาจารย์ที่ปรึกษา & ผู้ประสานงาน" },
+      { key: "advisor", label: "อาจารย์ที่ปรึกษา" },
+      { key: "coordinator", label: "ผู้ประสานงาน" },
       { key: null, label: "ทางลัด" }
     ];
 
@@ -5641,7 +5692,44 @@
       });
       tdArea.appendChild(areaBtn);
 
-      const tdAdv = make("td", formatAdvisorWithCoordinator(s.area, s.advisor), "td-advisor");
+      const tdAdv = make("td", null, "td-advisor");
+      const advInfosForRow = getSiteAdvisorsInfo(s.area);
+      if (advInfosForRow.length) {
+        const advWrap = make("div", null, "td-mentors-stack");
+        advInfosForRow.forEach((adv) => {
+          const pill = make("span", null, `td-mentor-chip is-adv${adv.hasPhoto ? " is-zoomable" : ""}`);
+          if (adv.hasPhoto) {
+            pill.setAttribute("data-zoom-advisor-key", adv.key);
+            pill.setAttribute("data-zoom-advisor-ctx", `อาจารย์ที่ปรึกษากลุ่มพื้นที่ ${s.area}`);
+            pill.title = `คลิกขยายรูปถ่าย ${adv.name}`;
+          }
+          const avHtml = adv.localSrc
+            ? `<span class="td-mentor-av"><img src="${escapeHtml(adv.localSrc)}" alt="" loading="lazy" decoding="async" /></span>`
+            : `<span class="td-mentor-av">${escapeHtml(adv.initials)}</span>`;
+          pill.innerHTML = `${avHtml}<span class="td-mentor-name">${escapeHtml(adv.shortName)}</span>`;
+          advWrap.appendChild(pill);
+        });
+        tdAdv.appendChild(advWrap);
+      } else {
+        tdAdv.textContent = s.advisor || "-";
+      }
+
+      const tdCoord = make("td", null, "td-coordinator");
+      const stInfoForRow = getStaffCoordinatorInfo(s.area);
+      if (stInfoForRow) {
+        const stPill = make("span", null, `td-mentor-chip is-staff${stInfoForRow.hasPhoto ? " is-zoomable" : ""}`);
+        if (stInfoForRow.hasPhoto) {
+          stPill.setAttribute("data-zoom-staff-site", s.area);
+          stPill.title = `คลิกขยายรูปถ่าย ${stInfoForRow.displayFull}`;
+        }
+        const stAvHtml = stInfoForRow.localSrc
+          ? `<span class="td-mentor-av"><img src="${escapeHtml(stInfoForRow.localSrc)}" alt="" loading="lazy" decoding="async" /></span>`
+          : `<span class="td-mentor-av">${escapeHtml(stInfoForRow.initials)}</span>`;
+        stPill.innerHTML = `${stAvHtml}<span class="td-mentor-name">${escapeHtml(stInfoForRow.nickname)} (${escapeHtml(stInfoForRow.firstName)})</span>`;
+        tdCoord.appendChild(stPill);
+      } else {
+        tdCoord.textContent = "-";
+      }
 
       const tdAct = document.createElement("td");
       const openBtn = make("button", "ดูข้อมูล ↗", "btn sm");
@@ -5652,8 +5740,8 @@
       });
       tdAct.appendChild(openBtn);
 
-      if (tdPhone) tr.append(tdNum, tdId, tdName, tdNick, tdPhone, tdProg, tdDisc, tdArea, tdAdv, tdAct);
-      else tr.append(tdNum, tdId, tdName, tdNick, tdProg, tdDisc, tdArea, tdAdv, tdAct);
+      if (tdPhone) tr.append(tdNum, tdId, tdName, tdNick, tdPhone, tdProg, tdDisc, tdArea, tdAdv, tdCoord, tdAct);
+      else tr.append(tdNum, tdId, tdName, tdNick, tdProg, tdDisc, tdArea, tdAdv, tdCoord, tdAct);
       tr.addEventListener("click", () => openStudentQuickModal(s));
       tbody.appendChild(tr);
     });
@@ -5918,29 +6006,43 @@
 
     const hRight = make("div", null, "fm-head-right");
     if (mentorValue) {
-      const plaque = make("div", null, "fm-mentor-plaque");
       const stInfo = staffSite ? getStaffCoordinatorInfo(staffSite) : null;
       const advList = staffSite ? getSiteAdvisorsInfo(staffSite) : [];
       if (stInfo || advList.length) {
-        plaque.classList.add("has-staff-avatar");
-        const avGroup = make("div", null, "fm-mentor-avatars-group");
-        advList.forEach((adv) => {
-          const advAv = make("div", null, `fm-advisor-avatar student-portrait${adv.hasPhoto ? " is-zoomable" : ""}`);
-          if (adv.localSrc) advAv.dataset.localPhoto = adv.localSrc;
-          advAv.dataset.initials = adv.initials;
-          advAv.dataset.studentName = adv.name;
-          advAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(adv.initials)}</span>`;
-          if (adv.hasPhoto) {
-            mountStudentPhoto(advAv);
-            advAv.title = tr(`คลิกขยายรูปถ่าย ${adv.name} (อาจารย์ที่ปรึกษา)`, `Zoom photo of ${adv.name}`);
-            advAv.addEventListener("click", (ev) => {
-              ev.stopPropagation();
-              zoomAdvisorPhoto(adv, `อาจารย์ที่ปรึกษากลุ่ม ${staffSite.id}. ${staffSite.shortName} (${staffSite.hospital})`);
-            });
-          }
-          avGroup.appendChild(advAv);
-        });
+        const plaquesRow = make("div", null, "fm-mentor-plaques-row");
+        if (advList.length) {
+          const advGroupWrap = make("div", null, "fm-mentor-role-cluster is-advisor-cluster");
+          advList.forEach((adv) => {
+            const advPlaque = make("div", null, `fm-mentor-plaque is-advisor-plaque has-staff-avatar${adv.hasPhoto ? " is-zoomable" : ""}`);
+            const advAv = make("div", null, `fm-advisor-avatar student-portrait${adv.hasPhoto ? " is-zoomable" : ""}`);
+            if (adv.localSrc) advAv.dataset.localPhoto = adv.localSrc;
+            advAv.dataset.initials = adv.initials;
+            advAv.dataset.studentName = adv.name;
+            advAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(adv.initials)}</span>`;
+            if (adv.hasPhoto) {
+              mountStudentPhoto(advAv);
+              advPlaque.title = tr(`คลิกขยายรูปถ่าย ${adv.name} (อาจารย์ที่ปรึกษา)`, `Zoom photo of ${adv.name}`);
+              advPlaque.addEventListener("click", (ev) => {
+                ev.stopPropagation();
+                zoomAdvisorPhoto(adv, `อาจารย์ที่ปรึกษากลุ่ม ${staffSite.id}. ${staffSite.shortName} (${staffSite.hospital})`);
+              });
+            }
+            const advTxt = make("div", null, "fm-mentor-text-col");
+            advTxt.innerHTML =
+              `<span class="fm-mentor-lbl">${escapeHtml(tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
+              `<span class="fm-mentor-val">${escapeHtml(adv.name)}</span>`;
+            advPlaque.append(advAv, advTxt);
+            advGroupWrap.appendChild(advPlaque);
+          });
+          plaquesRow.appendChild(advGroupWrap);
+        }
+        if (advList.length && stInfo) {
+          const sep = make("span", null, "fm-mentor-plaques-sep");
+          sep.setAttribute("aria-hidden", "true");
+          plaquesRow.appendChild(sep);
+        }
         if (stInfo) {
+          const stPlaque = make("div", null, `fm-mentor-plaque is-staff-plaque has-staff-avatar${stInfo.hasPhoto ? " is-zoomable" : ""}`);
           const stAv = make("div", null, `fm-staff-avatar student-portrait${stInfo.hasPhoto ? " is-zoomable" : ""}`);
           if (stInfo.localSrc) stAv.dataset.localPhoto = stInfo.localSrc;
           if (stInfo.photoId) stAv.dataset.photoId = stInfo.photoId;
@@ -5949,25 +6051,28 @@
           stAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(stInfo.initials)}</span>`;
           if (stInfo.hasPhoto) {
             mountStudentPhoto(stAv);
-            stAv.title = tr(`คลิกขยายรูปถ่าย ${stInfo.displayFull} (ผู้ประสานงาน)`, `Zoom photo of ${stInfo.displayFull}`);
-            stAv.addEventListener("click", (ev) => {
+            stPlaque.title = tr(`คลิกขยายรูปถ่าย ${stInfo.displayFull} (ผู้ประสานงาน)`, `Zoom photo of ${stInfo.displayFull}`);
+            stPlaque.addEventListener("click", (ev) => {
               ev.stopPropagation();
               zoomStaffPhoto(staffSite);
             });
           }
-          avGroup.appendChild(stAv);
+          const stTxt = make("div", null, "fm-mentor-text-col");
+          const coordDisplay = cleanCoordinatorName(staffSite.staffRef) || `${stInfo.firstName} (${stInfo.nickname})`;
+          stTxt.innerHTML =
+            `<span class="fm-mentor-lbl is-staff-lbl">${escapeHtml(tr("ผู้ประสานงานพื้นที่", "Coordinator"))}</span>` +
+            `<span class="fm-mentor-val">${escapeHtml(coordDisplay)}</span>`;
+          stPlaque.append(stAv, stTxt);
+          plaquesRow.appendChild(stPlaque);
         }
-        const txtCol = make("div", null, "fm-mentor-text-col");
-        txtCol.innerHTML =
-          `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
-          `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
-        plaque.append(avGroup, txtCol);
+        hRight.appendChild(plaquesRow);
       } else {
+        const plaque = make("div", null, "fm-mentor-plaque");
         plaque.innerHTML =
           `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
           `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
+        hRight.appendChild(plaque);
       }
-      hRight.appendChild(plaque);
     }
 
     if (typeof onToggleStyle === "function") {
@@ -5993,8 +6098,8 @@
       ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].forEach((mod) => {
         const cell = coachesRot[mod] || {};
         const item = make("div", null, "fm-coach-cell");
-        const avHtml = renderInstructorAvatarStackHtml(cell.instructor, `Discussion กลุ่มที่ ${coachesRot.group || ""} · คาบ ${mod}`);
-        item.innerHTML = `<strong>${mod} · ${escapeHtml(cell.room || coachesRot.room || "")}</strong><span>${avHtml}<span>${escapeHtml(cell.instructor || "-")}</span></span>`;
+        const pairedHtml = renderInstructorPersonPairsHtml(cell.instructor, `Discussion กลุ่มที่ ${coachesRot.group || ""} · คาบ ${mod}`);
+        item.innerHTML = `<strong>${mod} · ${escapeHtml(cell.room || coachesRot.room || "")}</strong><span class="fm-coach-pairs">${pairedHtml}</span>`;
         cStrip.appendChild(item);
       });
       board.appendChild(cStrip);
@@ -6014,6 +6119,7 @@
             const stWrap = make("div", null, "gsorter-staff-row");
             stWrap.style.marginBottom = "8px";
             advChips.forEach((ch) => stWrap.appendChild(ch));
+            if (advChips.length && stChip) stWrap.appendChild(makeMentorsRoleDivider());
             if (stChip) stWrap.appendChild(stChip);
             chipBody.appendChild(stWrap);
           }
@@ -6332,12 +6438,11 @@
     const r = rot || {};
     const items = ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((mod) => {
       const cell = r[mod] || {};
-      const inst = escapeHtml(cell.instructor || "-");
-      const avHtml = renderInstructorAvatarStackHtml(cell.instructor, `Discussion กลุ่มที่ ${r.group || ""} · คาบ ${mod}`);
+      const pairedHtml = renderInstructorPersonPairsHtml(cell.instructor, `Discussion กลุ่มที่ ${r.group || ""} · คาบ ${mod}`);
       const roomChangedBadge = cell.highlightRoom
         ? ` <span class="disc-bullet-room-flag">ห้อง ${escapeHtml(cell.room)}</span>`
         : "";
-      return `<li><span class="disc-hs-code">${mod}</span><span class="disc-hs-inst">${avHtml}<span>${inst}</span>${roomChangedBadge}</span></li>`;
+      return `<li><span class="disc-hs-code">${mod}</span><span class="disc-hs-inst">${pairedHtml}${roomChangedBadge}</span></li>`;
     });
     return `<ul class="disc-hs-bullets">${items.join("")}</ul>`;
   }
@@ -7293,7 +7398,7 @@
       const slot = make("div", null, "disc-rot-slot");
       slot.appendChild(make("span", slotMeta.label, "slot-code"));
       const instSpan = make("span", null, "slot-inst");
-      instSpan.innerHTML = `${renderInstructorAvatarStackHtml(cell.instructor, `กลุ่มอภิปรายที่ ${rot.group} · ${slotMeta.label}`)}<span>${escapeHtml(cell.instructor || "-")}</span>`;
+      instSpan.innerHTML = renderInstructorPersonPairsHtml(cell.instructor, `กลุ่มอภิปรายที่ ${rot.group} · ${slotMeta.label}`);
       slot.appendChild(instSpan);
       slot.appendChild(
         make("span", `ห้อง ${cell.room || rot.room}`, `slot-room${cell.highlightRoom ? " room-changed" : ""}`)
@@ -7667,15 +7772,18 @@
             <span class="badge cat-SG">${site.count} คน</span>
           </div>
           <p class="site-meta"><strong>${escapeHtml(site.hospital)}</strong> (${escapeHtml(site.province)})</p>
-          <p class="site-meta"><strong>อ.ที่ปรึกษา:</strong> ${escapeHtml(formatAdvisorWithCoordinator(site))}</p>
+          <p class="site-meta"><strong>อ.ที่ปรึกษา:</strong> ${escapeHtml(site.advisors || "-")}</p>
+          ${cleanCoordinatorName(site.staffRef) ? `<p class="site-meta"><strong>ผู้ประสานงาน:</strong> ${escapeHtml(cleanCoordinatorName(site.staffRef))}</p>` : ""}
           <p class="site-meta"><strong>ห้องประชุมกลุ่มย่อย:</strong> ${escapeHtml(site.room)}</p>
           <p class="site-meta"><strong>ช่วงฝึกภาคสนาม:</strong> ${escapeHtml(site.datesTH)}</p>
           <p class="site-meta">${escapeHtml(site.travelNote)}</p>
           <div style="margin-top:6px">${friBadge}</div>
         `;
         const peopleRow = make("div", null, "site-card-people-row");
-        renderAdvisorMiniChips(site).forEach((ch) => peopleRow.appendChild(ch));
+        const advSiteChips = renderAdvisorMiniChips(site);
+        advSiteChips.forEach((ch) => peopleRow.appendChild(ch));
         const stChipCard = renderStaffMiniChip(site);
+        if (advSiteChips.length && stChipCard) peopleRow.appendChild(makeMentorsRoleDivider());
         if (stChipCard) peopleRow.appendChild(stChipCard);
         if (peopleRow.childNodes.length) c.appendChild(peopleRow);
 
@@ -8256,6 +8364,7 @@
         const pAdvBadges = renderAdvisorHeaderBadges(activeSiteObj, true);
         const pBadge = renderStaffHeaderBadge(activeSiteObj, true);
         if (pAdvBadges) pCluster.appendChild(pAdvBadges);
+        if (pAdvBadges && pBadge) pCluster.appendChild(makeMentorsRoleDivider());
         if (pBadge) pCluster.appendChild(pBadge);
         if (pCluster.childNodes.length) printHeading.appendChild(pCluster);
       }
@@ -8280,9 +8389,10 @@
           const siteObj = (SCHED.fieldworkSites || []).find((x) => x.shortName === s.area);
           const h = make("div", null, "area-group-header has-staff-badge");
           const hTextCol = make("div", null, "area-group-title-col");
+          const coordLbl = siteObj ? cleanCoordinatorName(siteObj.staffRef) : "";
           hTextCol.append(
             make("h3", `${siteObj ? siteObj.id + ". " : ""}กลุ่มพื้นที่ ${s.area}${siteObj ? " (" + siteObj.hospital + " " + siteObj.province + " · " + siteObj.count + " คน)" : ""}`),
-            make("p", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(siteObj, s.advisor)}${siteObj ? " · ห้อง " + siteObj.room + " · " + siteObj.datesTH : ""}`)
+            make("p", `อาจารย์ที่ปรึกษา: ${(siteObj && siteObj.advisors) || s.advisor || "-"}${coordLbl ? " · ผู้ประสานงาน: " + coordLbl : ""}${siteObj ? " · ห้อง " + siteObj.room + " · " + siteObj.datesTH : ""}`)
           );
           h.appendChild(hTextCol);
           if (siteObj) {
@@ -8290,6 +8400,7 @@
             const hAdvBadges = renderAdvisorHeaderBadges(siteObj);
             const hBadge = renderStaffHeaderBadge(siteObj);
             if (hAdvBadges) badgesRow.appendChild(hAdvBadges);
+            if (hAdvBadges && hBadge) badgesRow.appendChild(makeMentorsRoleDivider());
             if (hBadge) badgesRow.appendChild(hBadge);
             if (badgesRow.childNodes.length) h.appendChild(badgesRow);
           }
@@ -30463,7 +30574,7 @@
           row.innerHTML =
             `<span class="cq-slot-mod">${mod}</span>` +
             `<strong class="cq-slot-rm${cell.highlightRoom ? " is-changed" : ""}">ห้อง ${escapeHtml(cell.room || rotObj.room)}</strong>` +
-            `<span class="cq-slot-inst">${renderInstructorAvatarStackHtml(cell.instructor, `กลุ่มที่ ${s.disc} · คาบ ${mod}`)}<span>${escapeHtml(cell.instructor || "-")}</span></span>`;
+            `<span class="cq-slot-inst">${renderInstructorPersonPairsHtml(cell.instructor, `กลุ่มที่ ${s.disc} · คาบ ${mod}`)}</span>`;
           slotGrid.appendChild(row);
         });
         stage.appendChild(slotGrid);
@@ -38894,7 +39005,7 @@
                           <span class="fapc-meta">${s.count} คน · ${totalPages} หน้า · <a class="fapc-preview-lk" href="${escapeHtml(pdfHref)}" target="_blank" rel="noopener">เปิดดู ↗</a></span>
                         </div>
                         <div class="fapc-title">${escapeHtml(s.hospital)} <span class="fapc-prov">(${escapeHtml(s.province)})</span></div>
-                        <div class="fapc-adv fapc-adv-row">${renderInstructorAvatarStackHtml(s.advisors, `แฟ้มอาจารย์ที่ปรึกษากลุ่ม ${s.id} ${s.shortName}`)}<span>อ.ที่ปรึกษา: ${escapeHtml(s.advisors)}</span></div>
+                        <div class="fapc-adv fapc-adv-row"><strong class="fapc-role-tag">อ.ที่ปรึกษา:</strong> ${renderInstructorPersonPairsHtml(s.advisors, `แฟ้มอาจารย์ที่ปรึกษากลุ่ม ${s.id} ${s.shortName}`)}</div>${cleanCoordinatorName(s.staffRef) ? `<div class="fapc-adv fapc-coord-row"><strong class="fapc-role-tag is-coord">ผู้ประสานงาน:</strong> <span class="inst-person-chip is-staff-pair is-zoomable" data-zoom-staff-site="${escapeHtml(s.shortName)}" title="คลิกขยายรูปผู้ประสานงาน"><span class="inst-mini-av"><img src="assets/photos/staff_${s.id}.jpg" alt="" loading="lazy" decoding="async" /></span><span class="inst-person-name">${escapeHtml(cleanCoordinatorName(s.staffRef))}</span></span></div>` : ""}
                         <div class="fapc-actions">
                           <a class="btn sm pdf-red" href="${escapeHtml(pdfHref)}" download="${escapeHtml(pdfDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ PDF">${pdfIco}Export as PDF</a>
                           <a class="btn sm docx-blue" href="${escapeHtml(docxHref)}" download="${escapeHtml(docxDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ Microsoft Word (.docx)">${docxIco}Export as .docx</a>
