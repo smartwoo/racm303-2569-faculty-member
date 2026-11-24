@@ -1,9 +1,12 @@
 /* ==========================================================================
-   RACM 303 (2569) — Live Orientation Waiting Lobby & Kahoot Recheck Styles
-   Cover Slide QR Lobby · 16:9 Kahoot Stage · Mobile Participant Pad (#live)
+   RACM 303 (2569) — Live Orientation Lobby, Synced Slides & Kahoot Recheck v2
+   Compatible Across:
+   - Vertical & Horizontal Phone · Unfolded Foldable / Surface Duo
+   - Vertical & Horizontal Tablet · Desktop / Classroom Projector
+   - Pinch-Zoom In/Out + Bounded Within-Slide Scroll + Virtual Keyboard Safe
    ========================================================================== */
 
-/* ---------- 1. Orientation Topbar Live Mode Tab ---------- */
+/* ---------- 1. Orientation Topbar Live Tab & Bottom Zoom / Sync Cluster ---------- */
 .or-mode-btn.is-live-tab {
   gap: 6px;
   border: 1px solid rgba(16, 185, 129, 0.38);
@@ -56,35 +59,212 @@ html[data-theme="dark"] .or-mode-btn.is-live-tab.is-active,
   50% { transform: scale(1.22); opacity: 0.72; }
 }
 
-/* ---------- 2. Cover Slide 01 & Slide 16 Right-Column QR Live Lobby Card ---------- */
+.or-film-dot.is-quiz-dot:not(.is-active) {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+html[data-theme="dark"] .or-film-dot.is-quiz-dot:not(.is-active),
+.or-deck-backdrop.is-presentation-mode .or-film-dot.is-quiz-dot:not(.is-active) {
+  border-color: #34d399;
+  color: #6ee7b7;
+}
+
+/* Pinch-Zoom & Synced Slide Controls in Bottom Bar */
+.or-zoom-sync-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.or-follow-pill {
+  appearance: none;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 999px;
+  height: 30px;
+  padding: 0 10px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.or-follow-pill.is-on {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.48);
+  color: #047857;
+}
+
+html[data-theme="dark"] .or-follow-pill,
+.or-deck-backdrop.is-presentation-mode .or-follow-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .or-follow-pill.is-on,
+.or-deck-backdrop.is-presentation-mode .or-follow-pill.is-on {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #34d399;
+  color: #6ee7b7;
+}
+
+.or-zoom-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  overflow: hidden;
+  height: 30px;
+}
+
+html[data-theme="dark"] .or-zoom-pill,
+.or-deck-backdrop.is-presentation-mode .or-zoom-pill {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.or-zoom-btn,
+.or-zoom-lbl {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.or-zoom-btn {
+  width: 28px;
+  font-size: 15px;
+}
+
+.or-zoom-lbl {
+  padding: 0 6px;
+  min-width: 44px;
+  border-left: 1px solid rgba(148, 163, 184, 0.28);
+  border-right: 1px solid rgba(148, 163, 184, 0.28);
+  font-size: 11.2px;
+}
+
+.or-zoom-btn:hover,
+.or-zoom-lbl:hover {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Bounded Slide Viewport with Smooth Scroll & Pinch-Zoom Sizer */
+#orDeckViewport {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.or-slide-zoom-sizer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#orDeckViewport.is-zoomed {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+#orDeckViewport.is-zoomed .or-slide-frame-wrap {
+  width: max-content !important;
+  height: max-content !important;
+  min-width: 100%;
+  min-height: 100%;
+  flex: 0 0 auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#orDeckViewport.is-zoomed .or-slide-zoom-sizer {
+  flex: 0 0 auto !important;
+  display: block;
+}
+
+/* ---------- 2. Cover Slide 01 & Slide 14 Embedded Quiz ---------- */
 .or-slide-canvas.is-cover-canvas .or-cover-split {
   grid-template-columns: 1.04fr 0.96fr;
   gap: 1.45cqw;
 }
 
-.or-infog-split.is-s16-recheck {
-  grid-template-columns: 1.06fr 0.94fr;
-  gap: 0.85cqw;
+.orl-s14-quiz-wrap,
+.orl-slide-quiz-host {
+  flex: 1;
+  width: 100%;
   height: 100%;
   min-height: 0;
-}
-
-.orl-s16-live-col {
   display: flex;
   flex-direction: column;
+}
+
+.orl-slide-quiz-host {
+  border-radius: 0.82cqw;
+  background: radial-gradient(circle at 18% 14%, #1d4ed8 0%, #0f172a 60%, #070b14 100%);
+  color: #f8fafc;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+}
+
+html[data-role="faculty"] .orl-slide-quiz-host {
+  background: radial-gradient(circle at 18% 14%, #991b1b 0%, #1e1b4b 58%, #090d16 100%);
+}
+
+.orl-stage.is-embedded-slide-stage {
+  padding: 0.92cqw 1.25cqw;
+  gap: 0.56cqw;
+}
+
+.orl-stage.is-embedded-slide-stage .orl-stage-qr-box {
+  width: min(100%, 14.5cqw);
+  padding: 0.38cqw;
+}
+
+.orl-stage.is-embedded-slide-stage .orl-q-stem-card {
+  padding: 0.85cqw 1.25cqw;
+  min-height: 6.2cqw;
+}
+
+.orl-stage.is-embedded-slide-stage .orl-q-stem-title {
+  font-size: clamp(12px, 1.48cqw, 26px);
+}
+
+.orl-stage.is-embedded-slide-stage .orl-choice-tile {
+  padding: 0.68cqw 0.96cqw;
+}
+
+.orl-stage.is-embedded-slide-stage .orl-choice-text {
+  font-size: clamp(10px, 1.12cqw, 19.5px);
+}
+
+.or-grid-2.is-s15-osmu-grid {
   height: 100%;
   min-height: 0;
-  border-radius: 0.86cqw;
-  background: linear-gradient(140deg, #001e4d 0%, #002d72 55%, #0b46a6 100%);
-  padding: 0;
-  overflow: hidden;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.68cqw;
 }
 
-html[data-role="faculty"] .orl-s16-live-col {
-  background: linear-gradient(140deg, #450a0a 0%, #7f1d1d 55%, #991b1b 100%);
-}
-
+/* Cover Card */
 .orl-cover-card {
   width: 100%;
   height: 100%;
@@ -92,8 +272,8 @@ html[data-role="faculty"] .orl-s16-live-col {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.52cqw;
-  padding: 0.78cqw 0.92cqw;
+  gap: 0.50cqw;
+  padding: 0.76cqw 0.90cqw;
   border-radius: 0.86cqw;
   background: rgba(8, 15, 32, 0.56);
   border: 1.5px solid rgba(147, 197, 253, 0.38);
@@ -120,7 +300,7 @@ html[data-role="faculty"] .orl-cover-card {
 .orl-cover-head-left {
   display: flex;
   align-items: center;
-  gap: 0.48cqw;
+  gap: 0.45cqw;
   min-width: 0;
   flex-wrap: wrap;
 }
@@ -129,21 +309,21 @@ html[data-role="faculty"] .orl-cover-card {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 0.20cqw 0.62cqw;
+  padding: 0.20cqw 0.60cqw;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.20);
-  border: 1px solid rgba(52, 211, 153, 0.52);
+  background: rgba(16, 185, 129, 0.22);
+  border: 1px solid rgba(52, 211, 153, 0.55);
   color: #ecfdf5;
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.84cqw, 14px);
+  font-size: clamp(8px, 0.82cqw, 14px);
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
 .orl-live-pill.is-lg {
-  font-size: clamp(9.5px, 0.98cqw, 16.5px);
-  padding: 0.26cqw 0.78cqw;
+  font-size: clamp(9.5px, 0.96cqw, 16px);
+  padding: 0.24cqw 0.74cqw;
 }
 
 .orl-dot {
@@ -161,7 +341,7 @@ html[data-role="faculty"] .orl-cover-card {
 }
 
 .orl-sync-sub {
-  font-size: clamp(7.5px, 0.78cqw, 13px);
+  font-size: clamp(7.5px, 0.76cqw, 12.8px);
   color: rgba(226, 232, 240, 0.84);
   white-space: nowrap;
 }
@@ -169,7 +349,7 @@ html[data-role="faculty"] .orl-cover-card {
 .orl-cover-head-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.32cqw;
+  gap: 0.30cqw;
   flex-shrink: 0;
 }
 
@@ -179,13 +359,12 @@ html[data-role="faculty"] .orl-cover-card {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border-radius: 0.44cqw;
-  padding: 0.20cqw 0.54cqw;
+  padding: 0.20cqw 0.52cqw;
   font-family: var(--font-display);
-  font-size: clamp(7.5px, 0.80cqw, 13.5px);
+  font-size: clamp(7.5px, 0.78cqw, 13px);
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.14s ease, transform 0.14s ease;
 }
 
 .orl-mini-switch:hover {
@@ -197,7 +376,7 @@ html[data-role="faculty"] .orl-cover-card {
   min-height: 0;
   display: grid;
   grid-template-columns: 0.44fr 0.56fr;
-  gap: 0.76cqw;
+  gap: 0.72cqw;
   align-items: stretch;
 }
 
@@ -206,11 +385,11 @@ html[data-role="faculty"] .orl-cover-card {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.42cqw;
+  gap: 0.40cqw;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0.72cqw;
-  padding: 0.56cqw;
+  padding: 0.52cqw;
   min-height: 0;
 }
 
@@ -227,12 +406,11 @@ html[data-role="faculty"] .orl-cover-card {
   justify-content: center;
   cursor: zoom-in;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.16s ease;
 }
 
 .orl-qr-frame-btn:hover {
   transform: scale(1.03);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
 }
 
 .orl-qr-svg {
@@ -252,7 +430,7 @@ html[data-role="faculty"] .orl-cover-card {
 
 .orl-qr-scan-kicker {
   font-family: var(--font-display);
-  font-size: clamp(7.8px, 0.86cqw, 14.5px);
+  font-size: clamp(7.8px, 0.84cqw, 14px);
   font-weight: 800;
   color: #fde68a;
   line-height: 1.2;
@@ -274,7 +452,7 @@ html[data-role="faculty"] .orl-cover-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.46cqw;
+  gap: 0.44cqw;
   min-width: 0;
   min-height: 0;
 }
@@ -283,7 +461,7 @@ html[data-role="faculty"] .orl-cover-card {
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(16, 185, 129, 0.16) 100%);
   border: 1px solid rgba(253, 230, 138, 0.42);
   border-radius: 0.68cqw;
-  padding: 0.48cqw 0.72cqw;
+  padding: 0.46cqw 0.70cqw;
   display: flex;
   flex-direction: column;
   gap: 0.12cqw;
@@ -298,7 +476,7 @@ html[data-role="faculty"] .orl-cover-card {
 
 .orl-count-big {
   font-family: var(--font-display);
-  font-size: clamp(16px, 2.55cqw, 44px);
+  font-size: clamp(16px, 2.45cqw, 42px);
   font-weight: 800;
   line-height: 1;
   color: #fde68a;
@@ -306,15 +484,15 @@ html[data-role="faculty"] .orl-cover-card {
 
 .orl-count-denom {
   font-family: var(--font-display);
-  font-size: clamp(9px, 1.08cqw, 18.5px);
+  font-size: clamp(9px, 1.02cqw, 17.5px);
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .orl-count-caption {
-  font-size: clamp(7.8px, 0.86cqw, 14.5px);
+  font-size: clamp(7.8px, 0.84cqw, 14px);
   color: #f8fafc;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.24;
 }
 
@@ -326,10 +504,10 @@ html[data-role="faculty"] .orl-cover-card {
 }
 
 .orl-tag {
-  padding: 0.22cqw 0.46cqw;
+  padding: 0.20cqw 0.44cqw;
   border-radius: 0.42cqw;
   font-family: var(--font-display);
-  font-size: clamp(7.2px, 0.80cqw, 13.5px);
+  font-size: clamp(7.2px, 0.78cqw, 13px);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -350,7 +528,7 @@ html[data-role="faculty"] .orl-cover-card {
   background: rgba(2, 6, 23, 0.38);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 0.62cqw;
-  padding: 0.42cqw 0.52cqw;
+  padding: 0.40cqw 0.50cqw;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
@@ -359,8 +537,8 @@ html[data-role="faculty"] .orl-cover-card {
 }
 
 .orl-empty-wait {
-  font-size: clamp(7.8px, 0.86cqw, 14.5px);
-  color: rgba(226, 232, 240, 0.82);
+  font-size: clamp(7.8px, 0.84cqw, 14px);
+  color: rgba(226, 232, 240, 0.84);
   line-height: 1.35;
 }
 
@@ -378,6 +556,12 @@ html[data-role="faculty"] .orl-cover-card {
   line-height: 1.2;
   max-width: 100%;
   animation: orlChipPop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.orl-p-chip.is-fac-chip {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.28) 0%, rgba(217, 119, 6, 0.24) 100%);
+  border-color: #fde68a;
+  color: #fef3c7;
 }
 
 .orl-p-chip em {
@@ -400,7 +584,7 @@ html[data-role="faculty"] .orl-cover-card {
 
 .orl-cover-foot {
   display: grid;
-  grid-template-columns: 1.28fr 0.72fr;
+  grid-template-columns: 1.24fr 0.76fr;
   gap: 0.44cqw;
   flex-shrink: 0;
 }
@@ -408,9 +592,9 @@ html[data-role="faculty"] .orl-cover-card {
 .orl-cta-btn {
   appearance: none;
   border-radius: 0.56cqw;
-  padding: 0.46cqw 0.68cqw;
+  padding: 0.44cqw 0.64cqw;
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(8px, 0.86cqw, 14.8px);
   font-weight: 800;
   cursor: pointer;
   text-align: center;
@@ -436,7 +620,7 @@ html[data-role="faculty"] .orl-cover-card {
   box-shadow: 0 6px 18px rgba(245, 158, 11, 0.34);
 }
 
-/* ---------- 3. Full 16:9 Kahoot Stage Inside Orientation Deck ---------- */
+/* ---------- 3. Full 16:9 Kahoot Stage ---------- */
 .or-slide-canvas.is-live-canvas {
   background: radial-gradient(circle at 18% 14%, #1d4ed8 0%, #0f172a 58%, #070b14 100%);
   color: #f8fafc;
@@ -456,11 +640,11 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 1.35cqw 1.85cqw;
+  padding: 1.25cqw 1.75cqw;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.85cqw;
+  gap: 0.78cqw;
   box-sizing: border-box;
 }
 
@@ -469,9 +653,9 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.8cqw;
+  gap: 0.7cqw;
   flex-shrink: 0;
-  padding-bottom: 0.58cqw;
+  padding-bottom: 0.50cqw;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 
@@ -479,14 +663,14 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
 .orl-q-meta {
   display: flex;
   align-items: center;
-  gap: 0.56cqw;
+  gap: 0.52cqw;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .orl-st-sub,
 .orl-source-cite {
-  font-size: clamp(8.5px, 0.94cqw, 16px);
+  font-size: clamp(8.2px, 0.90cqw, 15.5px);
   color: rgba(226, 232, 240, 0.88);
   font-weight: 600;
 }
@@ -495,7 +679,7 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
 .orl-q-stats-right {
   display: flex;
   align-items: center;
-  gap: 0.45cqw;
+  gap: 0.42cqw;
   flex-shrink: 0;
   flex-wrap: wrap;
 }
@@ -505,14 +689,13 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border-radius: 0.52cqw;
-  padding: 0.36cqw 0.76cqw;
+  border-radius: 0.50cqw;
+  padding: 0.34cqw 0.70cqw;
   font-family: var(--font-display);
-  font-size: clamp(8.5px, 0.92cqw, 15.5px);
+  font-size: clamp(8.2px, 0.88cqw, 15px);
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.14s ease;
 }
 
 .orl-bar-btn:hover {
@@ -527,26 +710,25 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   font-weight: 800;
 }
 
-/* Lobby Stage Grid */
 .orl-lobby-grid {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 0.34fr 0.66fr;
-  gap: 1.15cqw;
+  gap: 1.05cqw;
   align-items: stretch;
 }
 
 .orl-lobby-qr-panel {
   background: rgba(15, 23, 42, 0.62);
   border: 1px solid rgba(255, 255, 255, 0.20);
-  border-radius: 0.92cqw;
-  padding: 0.92cqw;
+  border-radius: 0.88cqw;
+  padding: 0.82cqw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  gap: 0.58cqw;
+  gap: 0.48cqw;
   min-height: 0;
 }
 
@@ -554,9 +736,9 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   appearance: none;
   border: 0;
   background: #ffffff;
-  border-radius: 0.78cqw;
-  padding: 0.52cqw;
-  width: min(100%, 18.2cqw);
+  border-radius: 0.74cqw;
+  padding: 0.48cqw;
+  width: min(100%, 17.4cqw);
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -569,12 +751,12 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.28cqw;
+  gap: 0.24cqw;
   text-align: center;
 }
 
 .orl-step-badge {
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(7.8px, 0.84cqw, 14.5px);
   color: #e2e8f0;
   font-weight: 600;
 }
@@ -588,13 +770,13 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
 
 .orl-url-pill {
   font-family: monospace;
-  font-size: clamp(7.8px, 0.84cqw, 14px);
+  font-size: clamp(7.5px, 0.80cqw, 13.5px);
   font-weight: 700;
   color: #fde68a;
   background: rgba(2, 6, 23, 0.65);
   border: 1px solid rgba(253, 230, 138, 0.38);
-  border-radius: 0.46cqw;
-  padding: 0.24cqw 0.48cqw;
+  border-radius: 0.44cqw;
+  padding: 0.22cqw 0.44cqw;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -603,10 +785,10 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
 .orl-host-config-box {
   width: 100%;
   border-top: 1px solid rgba(255, 255, 255, 0.14);
-  padding-top: 0.48cqw;
+  padding-top: 0.42cqw;
   display: flex;
   flex-direction: column;
-  gap: 0.34cqw;
+  gap: 0.30cqw;
 }
 
 .orl-cfg-row {
@@ -614,10 +796,11 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   align-items: center;
   justify-content: space-between;
   gap: 0.4cqw;
+  flex-wrap: wrap;
 }
 
 .orl-cfg-lbl {
-  font-size: clamp(7.8px, 0.84cqw, 14px);
+  font-size: clamp(7.5px, 0.82cqw, 13.8px);
   color: #cbd5e1;
   font-weight: 700;
 }
@@ -636,12 +819,13 @@ html[data-role="faculty"] .or-slide-canvas.is-live-canvas {
   border: 0;
   background: transparent;
   color: #cbd5e1;
-  padding: 0.20cqw 0.52cqw;
-  border-radius: 0.36cqw;
+  padding: 4px 8px;
+  border-radius: 6px;
   font-family: var(--font-display);
-  font-size: clamp(7.5px, 0.80cqw, 13.5px);
+  font-size: clamp(7.5px, 0.78cqw, 13px);
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .orl-seg-btn.is-active {
@@ -656,12 +840,12 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-lobby-players-panel {
   background: rgba(15, 23, 42, 0.56);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0.92cqw;
-  padding: 0.92cqw 1.08cqw;
+  border-radius: 0.88cqw;
+  padding: 0.84cqw 1.02cqw;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.62cqw;
+  gap: 0.56cqw;
   min-height: 0;
 }
 
@@ -669,58 +853,58 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.8cqw;
+  gap: 0.7cqw;
   flex-shrink: 0;
 }
 
 .orl-players-counter {
   display: flex;
   align-items: center;
-  gap: 0.78cqw;
+  gap: 0.72cqw;
 }
 
 .orl-players-num {
   font-family: var(--font-display);
-  font-size: clamp(22px, 3.2cqw, 56px);
+  font-size: clamp(20px, 2.9cqw, 50px);
   font-weight: 800;
   line-height: 1;
   color: #fde68a;
   background: rgba(251, 191, 36, 0.16);
   border: 1.5px solid rgba(253, 230, 138, 0.45);
-  border-radius: 0.68cqw;
-  padding: 0.28cqw 0.68cqw;
-  min-width: 4.4cqw;
+  border-radius: 0.64cqw;
+  padding: 0.24cqw 0.62cqw;
+  min-width: 4.0cqw;
   text-align: center;
 }
 
 .orl-players-title {
   font-family: var(--font-display);
-  font-size: clamp(11px, 1.32cqw, 23px);
+  font-size: clamp(10.5px, 1.20cqw, 21px);
   font-weight: 800;
   color: #ffffff;
 }
 
 .orl-players-sub {
-  font-size: clamp(8.5px, 0.94cqw, 16px);
+  font-size: clamp(8px, 0.90cqw, 15.5px);
   color: #cbd5e1;
 }
 
 .orl-area-Checkin-strip {
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 0.34cqw;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.30cqw;
   flex-shrink: 0;
 }
 
 .orl-area-pill {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.46cqw;
-  padding: 0.24cqw 0.32cqw;
+  border-radius: 0.44cqw;
+  padding: 0.22cqw 0.28cqw;
   text-align: center;
   font-family: var(--font-display);
-  font-size: clamp(6.8px, 0.76cqw, 13px);
-  color: rgba(226, 232, 240, 0.72);
+  font-size: clamp(6.6px, 0.72cqw, 12.5px);
+  color: rgba(226, 232, 240, 0.74);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -732,6 +916,12 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   color: #ecfdf5;
 }
 
+.orl-area-pill.is-fac-area.has-joined {
+  background: rgba(251, 191, 36, 0.24);
+  border-color: #fde68a;
+  color: #fef3c7;
+}
+
 .orl-area-pill strong {
   color: #fde68a;
 }
@@ -741,46 +931,46 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   min-height: 0;
   background: rgba(2, 6, 23, 0.44);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.72cqw;
-  padding: 0.64cqw 0.74cqw;
+  border-radius: 0.68cqw;
+  padding: 0.56cqw 0.68cqw;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 0.38cqw;
+  gap: 0.36cqw;
   overflow-y: auto;
 }
 
 .orl-players-wall .orl-p-chip {
-  font-size: clamp(8.5px, 0.92cqw, 15.5px);
-  padding: 0.26cqw 0.62cqw;
+  font-size: clamp(8.2px, 0.88cqw, 15px);
+  padding: 0.24cqw 0.58cqw;
 }
 
 .orl-lobby-action-bar {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.68cqw;
+  gap: 0.62cqw;
   flex-shrink: 0;
 }
 
 .orl-big-btn {
   appearance: none;
-  border-radius: 0.68cqw;
-  padding: 0.62cqw 0.92cqw;
+  border-radius: 0.64cqw;
+  padding: 0.56cqw 0.84cqw;
   font-family: var(--font-display);
-  font-size: clamp(9.5px, 1.08cqw, 18.5px);
+  font-size: clamp(9px, 1.02cqw, 17.5px);
   font-weight: 800;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.14cqw;
+  gap: 0.12cqw;
   text-align: center;
   transition: transform 0.14s ease, filter 0.14s ease;
 }
 
 .orl-big-btn small {
-  font-size: clamp(7.5px, 0.80cqw, 13.5px);
+  font-size: clamp(7.2px, 0.78cqw, 13px);
   font-weight: 600;
   opacity: 0.88;
 }
@@ -805,62 +995,62 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
 /* ---------- 4. Question Stage (4-Color Kahoot Tiles & Timer) ---------- */
 .orl-q-num-pill {
-  padding: 0.22cqw 0.66cqw;
-  border-radius: 0.46cqw;
+  padding: 0.22cqw 0.64cqw;
+  border-radius: 0.44cqw;
   background: #fde68a;
   color: #0f172a;
   font-family: var(--font-display);
-  font-size: clamp(8.5px, 0.94cqw, 16px);
+  font-size: clamp(8.5px, 0.92cqw, 15.5px);
   font-weight: 800;
 }
 
 .orl-q-cat-pill {
-  padding: 0.22cqw 0.68cqw;
-  border-radius: 0.46cqw;
+  padding: 0.22cqw 0.64cqw;
+  border-radius: 0.44cqw;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #f8fafc;
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.90cqw, 15.5px);
+  font-size: clamp(8px, 0.88cqw, 15px);
   font-weight: 700;
 }
 
 .orl-q-impact-pill {
-  padding: 0.22cqw 0.68cqw;
-  border-radius: 0.46cqw;
+  padding: 0.22cqw 0.64cqw;
+  border-radius: 0.44cqw;
   background: rgba(244, 63, 94, 0.24);
   border: 1px solid rgba(253, 164, 175, 0.52);
   color: #ffe4e6;
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(8px, 0.86cqw, 14.5px);
   font-weight: 700;
 }
 
 .orl-ans-counter-box {
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 0.52cqw;
-  padding: 0.28cqw 0.72cqw;
+  border-radius: 0.50cqw;
+  padding: 0.26cqw 0.68cqw;
   font-family: var(--font-display);
-  font-size: clamp(8.5px, 0.94cqw, 16px);
+  font-size: clamp(8.5px, 0.92cqw, 15.5px);
   color: #e2e8f0;
 }
 
 .orl-ans-counter-box strong {
   color: #34d399;
-  font-size: 1.18em;
+  font-size: 1.16em;
 }
 
 .orl-timer-badge {
-  min-width: 3.8cqw;
+  min-width: 3.6cqw;
   text-align: center;
-  padding: 0.28cqw 0.68cqw;
+  padding: 0.26cqw 0.64cqw;
   border-radius: 999px;
   background: #2563eb;
   border: 2px solid #93c5fd;
   color: #ffffff;
   font-family: var(--font-display);
-  font-size: clamp(11px, 1.32cqw, 23px);
+  font-size: clamp(11px, 1.26cqw, 22px);
   font-weight: 800;
 }
 
@@ -872,7 +1062,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
 .orl-timer-progress-track {
   width: 100%;
-  height: 0.54cqw;
+  height: 0.50cqw;
   min-height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
@@ -889,20 +1079,20 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-q-stem-card {
   background: #ffffff;
   color: #0f172a;
-  border-radius: 0.92cqw;
-  padding: 1.25cqw 1.65cqw;
+  border-radius: 0.88cqw;
+  padding: 1.12cqw 1.50cqw;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 8.6cqw;
+  min-height: 7.8cqw;
 }
 
 .orl-q-stem-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(13px, 1.72cqw, 31px);
+  font-size: clamp(12.5px, 1.64cqw, 29px);
   font-weight: 800;
   line-height: 1.32;
   color: #0f172a;
@@ -914,17 +1104,17 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 0.78cqw;
+  gap: 0.70cqw;
 }
 
 .orl-choice-tile {
-  border-radius: 0.82cqw;
-  padding: 0.92cqw 1.18cqw;
+  border-radius: 0.78cqw;
+  padding: 0.84cqw 1.08cqw;
   display: flex;
   align-items: center;
-  gap: 0.88cqw;
+  gap: 0.82cqw;
   color: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), inset 0 -0.28cqw 0 rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), inset 0 -0.26cqw 0 rgba(0, 0, 0, 0.22);
 }
 
 .orl-choice-tile.is-red,
@@ -948,23 +1138,23 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-m-locked-chip.is-green { background: #26890c; }
 
 .orl-choice-shape {
-  width: 3.1cqw;
-  height: 3.1cqw;
+  width: 2.9cqw;
+  height: 2.9cqw;
   min-width: 28px;
   min-height: 28px;
-  border-radius: 0.52cqw;
+  border-radius: 0.48cqw;
   background: rgba(0, 0, 0, 0.20);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(13px, 1.58cqw, 28px);
+  font-size: clamp(13px, 1.50cqw, 26px);
   font-weight: 900;
   flex-shrink: 0;
 }
 
 .orl-choice-text {
   font-family: var(--font-display);
-  font-size: clamp(10.5px, 1.24cqw, 22px);
+  font-size: clamp(10.5px, 1.18cqw, 21px);
   font-weight: 700;
   line-height: 1.30;
 }
@@ -973,32 +1163,31 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-reveal-stem {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(11px, 1.32cqw, 23.5px);
+  font-size: clamp(10.5px, 1.24cqw, 22px);
   font-weight: 800;
   line-height: 1.26;
   color: #ffffff;
   background: rgba(255, 255, 255, 0.09);
-  border-radius: 0.62cqw;
-  padding: 0.54cqw 0.88cqw;
+  border-radius: 0.58cqw;
+  padding: 0.48cqw 0.82cqw;
   flex-shrink: 0;
 }
 
 .orl-reveal-bars-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.56cqw;
+  gap: 0.50cqw;
   flex-shrink: 0;
 }
 
 .orl-rev-card {
-  border-radius: 0.68cqw;
-  padding: 0.56cqw 0.78cqw;
+  border-radius: 0.64cqw;
+  padding: 0.50cqw 0.72cqw;
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 0.26cqw;
+  gap: 0.22cqw;
   border: 2px solid transparent;
-  transition: opacity 0.2s ease;
 }
 
 .orl-rev-card.is-dimmed {
@@ -1014,17 +1203,17 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-rev-bar-row {
   display: flex;
   align-items: center;
-  gap: 0.46cqw;
+  gap: 0.44cqw;
 }
 
 .orl-rev-shape {
-  font-size: clamp(10px, 1.12cqw, 19px);
+  font-size: clamp(10px, 1.08cqw, 18.5px);
   font-weight: 900;
 }
 
 .orl-rev-bar-track {
   flex: 1;
-  height: 0.68cqw;
+  height: 0.64cqw;
   min-height: 7px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.28);
@@ -1039,7 +1228,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
 .orl-rev-count {
   font-family: var(--font-display);
-  font-size: clamp(8.5px, 0.92cqw, 16px);
+  font-size: clamp(8.2px, 0.88cqw, 15.5px);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1047,25 +1236,25 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-rev-correct-badge {
   background: #ffffff;
   color: #065f46;
-  padding: 0.12cqw 0.48cqw;
+  padding: 0.10cqw 0.44cqw;
   border-radius: 999px;
   font-family: var(--font-display);
-  font-size: clamp(7.5px, 0.82cqw, 14px);
+  font-size: clamp(7.2px, 0.78cqw, 13.5px);
   font-weight: 800;
   white-space: nowrap;
 }
 
 .orl-rev-choice-txt {
-  font-size: clamp(8.5px, 0.96cqw, 16.5px);
+  font-size: clamp(8.2px, 0.92cqw, 16px);
   font-weight: 700;
   line-height: 1.26;
 }
 
 .orl-insight-banner {
-  border-radius: 0.62cqw;
-  padding: 0.48cqw 0.82cqw;
-  font-size: clamp(8.5px, 0.96cqw, 16.5px);
-  line-height: 1.30;
+  border-radius: 0.58cqw;
+  padding: 0.44cqw 0.78cqw;
+  font-size: clamp(8.2px, 0.92cqw, 16px);
+  line-height: 1.28;
   flex-shrink: 0;
 }
 
@@ -1092,50 +1281,49 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.64cqw;
+  gap: 0.58cqw;
 }
 
 .orl-rc-box {
-  border-radius: 0.72cqw;
-  padding: 0.62cqw 0.78cqw;
+  border-radius: 0.68cqw;
+  padding: 0.54cqw 0.72cqw;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.22cqw;
+  gap: 0.18cqw;
   min-height: 0;
   overflow: hidden;
 }
 
 .orl-rc-box.is-do {
   background: #ecfdf5;
-  border-left: 0.34cqw solid #059669;
+  border-left: 0.32cqw solid #059669;
   color: #064e3b;
 }
 
 .orl-rc-box.is-dont {
   background: #fff1f2;
-  border-left: 0.34cqw solid #e11d48;
+  border-left: 0.32cqw solid #e11d48;
   color: #881337;
 }
 
 .orl-rc-box.is-osmu {
   background: #fffbeb;
-  border-left: 0.34cqw solid #d97706;
+  border-left: 0.32cqw solid #d97706;
   color: #78350f;
 }
 
 .orl-rc-kicker {
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(7.8px, 0.84cqw, 14.5px);
   font-weight: 800;
-  letter-spacing: 0.03em;
 }
 
 .orl-rc-box p {
   margin: 0;
-  font-size: clamp(8.2px, 0.94cqw, 16px);
+  font-size: clamp(8px, 0.88cqw, 15px);
   font-weight: 600;
-  line-height: 1.30;
+  line-height: 1.28;
 }
 
 .orl-picker-wrap {
@@ -1146,8 +1334,8 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  width: min(360px, 82vw);
-  max-height: 300px;
+  width: min(360px, 84vw);
+  max-height: 280px;
   overflow-y: auto;
   background: #0f172a;
   border: 1px solid #475569;
@@ -1184,18 +1372,18 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   min-height: 0;
   display: grid;
   grid-template-columns: 1.08fr 0.92fr;
-  gap: 1.05cqw;
+  gap: 0.96cqw;
 }
 
 .orl-diagnostic-panel,
 .orl-leaderboard-panel {
   background: rgba(15, 23, 42, 0.60);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0.88cqw;
-  padding: 0.85cqw 1.02cqw;
+  border-radius: 0.84cqw;
+  padding: 0.78cqw 0.96cqw;
   display: flex;
   flex-direction: column;
-  gap: 0.56cqw;
+  gap: 0.50cqw;
   min-height: 0;
   overflow: hidden;
 }
@@ -1203,7 +1391,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-panel-h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(10.5px, 1.18cqw, 20.5px);
+  font-size: clamp(10px, 1.12cqw, 19.5px);
   font-weight: 800;
   color: #fde68a;
   flex-shrink: 0;
@@ -1215,18 +1403,18 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.36cqw;
+  gap: 0.34cqw;
 }
 
 .orl-diag-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6cqw;
-  padding: 0.42cqw 0.64cqw;
-  border-radius: 0.52cqw;
+  gap: 0.56cqw;
+  padding: 0.38cqw 0.60cqw;
+  border-radius: 0.50cqw;
   background: rgba(255, 255, 255, 0.07);
-  border-left: 0.30cqw solid #64748b;
+  border-left: 0.28cqw solid #64748b;
 }
 
 .orl-diag-row.is-good { border-left-color: #10b981; background: rgba(16, 185, 129, 0.14); }
@@ -1240,25 +1428,25 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-diag-info strong {
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(7.8px, 0.86cqw, 14.5px);
   color: #ffffff;
 }
 
 .orl-diag-info span {
-  font-size: clamp(7.2px, 0.78cqw, 13.5px);
+  font-size: clamp(7px, 0.76cqw, 13px);
   color: #cbd5e1;
 }
 
 .orl-diag-right {
   display: flex;
   align-items: center;
-  gap: 0.42cqw;
+  gap: 0.40cqw;
   flex-shrink: 0;
 }
 
 .orl-diag-pct {
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.88cqw, 15px);
+  font-size: clamp(7.8px, 0.86cqw, 14.5px);
   font-weight: 800;
   color: #fde68a;
 }
@@ -1269,8 +1457,8 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border-radius: 0.38cqw;
-  padding: 0.16cqw 0.48cqw;
-  font-size: clamp(7px, 0.76cqw, 13px);
+  padding: 0.16cqw 0.46cqw;
+  font-size: clamp(7px, 0.74cqw, 12.5px);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1278,9 +1466,9 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-podium-top3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.56cqw;
+  gap: 0.52cqw;
   align-items: end;
-  padding-top: 0.4cqw;
+  padding-top: 0.32cqw;
   flex-shrink: 0;
 }
 
@@ -1289,16 +1477,14 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.16cqw;
+  gap: 0.14cqw;
 }
 
-.orl-pod-ava {
-  font-size: clamp(18px, 2.2cqw, 38px);
-}
+.orl-pod-ava { font-size: clamp(16px, 2.0cqw, 34px); }
 
 .orl-pod-name {
   font-family: var(--font-display);
-  font-size: clamp(8.5px, 0.96cqw, 16.5px);
+  font-size: clamp(8px, 0.92cqw, 16px);
   color: #ffffff;
   max-width: 100%;
   overflow: hidden;
@@ -1307,40 +1493,40 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-pod-area {
-  font-size: clamp(7px, 0.76cqw, 13px);
+  font-size: clamp(7px, 0.74cqw, 12.5px);
   color: #cbd5e1;
 }
 
 .orl-pod-pedestal {
   width: 100%;
-  border-radius: 0.58cqw 0.58cqw 0.28cqw 0.28cqw;
-  padding: 0.52cqw 0.42cqw;
+  border-radius: 0.54cqw 0.54cqw 0.24cqw 0.24cqw;
+  padding: 0.46cqw 0.38cqw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.12cqw;
+  gap: 0.10cqw;
   color: #0f172a;
   font-family: var(--font-display);
 }
 
 .orl-podium-col.is-rank-1 .orl-pod-pedestal {
-  min-height: 7.4cqw;
+  min-height: 6.6cqw;
   background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
 }
 
 .orl-podium-col.is-rank-2 .orl-pod-pedestal {
-  min-height: 5.8cqw;
+  min-height: 5.2cqw;
   background: linear-gradient(180deg, #f1f5f9 0%, #94a3b8 100%);
 }
 
 .orl-podium-col.is-rank-3 .orl-pod-pedestal {
-  min-height: 4.8cqw;
+  min-height: 4.4cqw;
   background: linear-gradient(180deg, #fed7aa 0%, #d97706 100%);
 }
 
-.orl-pod-medal { font-size: clamp(8px, 0.88cqw, 15px); font-weight: 800; }
-.orl-pod-pts { font-size: clamp(9px, 1.02cqw, 17.5px); font-weight: 900; }
+.orl-pod-medal { font-size: clamp(7.8px, 0.84cqw, 14.5px); font-weight: 800; }
+.orl-pod-pts { font-size: clamp(8.8px, 0.98cqw, 17px); font-weight: 900; }
 
 .orl-runners-list {
   flex: 1;
@@ -1348,17 +1534,17 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.28cqw;
+  gap: 0.26cqw;
 }
 
 .orl-runner-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.30cqw 0.58cqw;
-  border-radius: 0.44cqw;
+  padding: 0.28cqw 0.54cqw;
+  border-radius: 0.42cqw;
   background: rgba(255, 255, 255, 0.08);
-  font-size: clamp(7.8px, 0.86cqw, 14.5px);
+  font-size: clamp(7.6px, 0.84cqw, 14px);
 }
 
 .orl-runner-row em {
@@ -1366,11 +1552,15 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   color: #93c5fd;
 }
 
-/* ---------- 7. Mobile Participant Pad (#orientParticipantModal) & Floating Pill ---------- */
+/* ---------- 7. Mobile / Tablet / Foldable Participant Modal (#live) & Keyboard Safety ---------- */
 .orl-mobile-backdrop,
 .orl-aux-backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--orl-vvh, 100dvh);
+  max-height: var(--orl-vvh, 100dvh);
   z-index: 12500;
   background: rgba(5, 10, 22, 0.86);
   backdrop-filter: blur(12px);
@@ -1378,7 +1568,10 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .orl-aux-backdrop {
@@ -1392,8 +1585,8 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-m-shell {
-  width: min(500px, 100%);
-  max-height: min(860px, 94dvh);
+  width: min(520px, 100%);
+  max-height: calc(var(--orl-vvh, 100dvh) - 24px);
   background: linear-gradient(165deg, #0f172a 0%, #172554 100%);
   border: 1px solid rgba(147, 197, 253, 0.32);
   border-radius: 22px;
@@ -1404,14 +1597,20 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   overflow: hidden;
 }
 
+html[data-role="faculty"] .orl-m-shell {
+  background: linear-gradient(165deg, #1f0a10 0%, #3b0d18 52%, #0f172a 100%);
+  border-color: rgba(252, 165, 165, 0.35);
+}
+
 .orl-m-topbar {
-  padding: 12px 16px;
+  flex-shrink: 0;
+  padding: max(10px, env(safe-area-inset-top)) 14px 10px;
   background: rgba(2, 6, 23, 0.55);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .orl-m-score-pill {
@@ -1436,13 +1635,16 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .orl-m-body {
   flex: 1;
   min-height: 0;
-  padding: 16px;
+  padding: 14px 16px max(18px, env(safe-area-inset-bottom));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
 }
@@ -1453,10 +1655,16 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   gap: 10px;
 }
 
+.orl-m-head-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .orl-m-card.is-centered {
   align-items: center;
   text-align: center;
-  padding: 10px 4px;
+  padding: 6px 4px;
 }
 
 .orl-m-badge {
@@ -1477,16 +1685,74 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 .orl-m-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: #ffffff;
 }
 
 .orl-m-desc {
   margin: 0;
-  font-size: 13.8px;
-  line-height: 1.45;
+  font-size: 13.4px;
+  line-height: 1.42;
   color: #cbd5e1;
+}
+
+/* Role Switcher Tabs (Student vs Faculty) */
+.orl-role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: rgba(2, 6, 23, 0.52);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.orl-role-tab {
+  appearance: none;
+  border: 0;
+  border-radius: 9px;
+  padding: 9px 8px;
+  background: transparent;
+  color: #cbd5e1;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.orl-role-tab.is-active {
+  background: linear-gradient(135deg, #2563eb 0%, #0b46a6 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.orl-fac-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 196px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.orl-fac-chip-btn {
+  appearance: none;
+  border: 1px solid rgba(253, 230, 138, 0.35);
+  background: rgba(251, 191, 36, 0.12);
+  color: #fef3c7;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.orl-fac-chip-btn:hover {
+  background: rgba(251, 191, 36, 0.26);
+  border-color: #fde68a;
 }
 
 .orl-m-lbl {
@@ -1503,7 +1769,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   border: 1.5px solid rgba(148, 163, 184, 0.42);
   background: rgba(2, 6, 23, 0.65);
   color: #ffffff;
-  font-size: 15px;
+  font-size: 16px; /* >= 16px prevents iOS Safari forced auto-zoom jump on input focus! */
   box-sizing: border-box;
 }
 
@@ -1514,19 +1780,19 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-m-selected-stu {
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: 10px;
   background: rgba(16, 185, 129, 0.22);
   border: 1px solid rgba(52, 211, 153, 0.52);
   color: #ecfdf5;
-  font-size: 13.2px;
+  font-size: 13px;
 }
 
 .orl-sug-list {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  max-height: 168px;
+  max-height: 160px;
   overflow-y: auto;
 }
 
@@ -1552,8 +1818,14 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-sug-item span {
-  font-size: 12px;
+  font-size: 11.8px;
   color: #cbd5e1;
+}
+
+.orl-ava-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .orl-ava-picker {
@@ -1567,15 +1839,15 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   border: 1.5px solid rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  height: 40px;
-  font-size: 20px;
+  height: 38px;
+  font-size: 19px;
   cursor: pointer;
 }
 
 .orl-ava-btn.is-picked {
   background: rgba(251, 191, 36, 0.28);
   border-color: #fde68a;
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .orl-m-join-btn {
@@ -1586,10 +1858,11 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: #0f172a;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(245, 158, 11, 0.35);
+  flex-shrink: 0;
 }
 
 .orl-m-you-in {
@@ -1609,27 +1882,22 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   gap: 12px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 12px 18px;
+  padding: 11px 16px;
   width: 100%;
   box-sizing: border-box;
   text-align: left;
 }
 
-.orl-m-big-ava {
-  font-size: 38px;
-}
+.orl-m-big-ava { font-size: 36px; }
 
 .orl-m-pname {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 800;
   color: #ffffff;
 }
 
-.orl-m-parea {
-  font-size: 13px;
-  color: #fde68a;
-}
+.orl-m-parea { font-size: 13px; color: #fde68a; }
 
 .orl-m-wait-box {
   width: 100%;
@@ -1637,16 +1905,16 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   background: rgba(2, 6, 23, 0.48);
   border: 1px dashed rgba(147, 197, 253, 0.38);
   border-radius: 16px;
-  padding: 18px 14px;
+  padding: 14px 13px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .orl-m-spinner {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   border: 3px solid rgba(147, 197, 253, 0.25);
   border-top-color: #38bdf8;
@@ -1659,18 +1927,18 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
 .orl-m-wait-box p {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.8px;
   color: #cbd5e1;
-  line-height: 1.45;
+  line-height: 1.44;
 }
 
 .orl-m-slide-tracker {
-  margin-top: 4px;
+  margin-top: 2px;
   padding: 6px 12px;
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.20);
   color: #dbeafe;
-  font-size: 12.2px;
+  font-size: 12px;
 }
 
 .orl-m-foot-btns {
@@ -1713,7 +1981,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   border-radius: 14px;
   padding: 12px 14px;
   font-family: var(--font-display);
-  font-size: 15.5px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1.36;
 }
@@ -1722,7 +1990,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-auto-rows: minmax(122px, 1fr);
+  grid-auto-rows: minmax(112px, 1fr);
   gap: 10px;
 }
 
@@ -1736,11 +2004,10 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   text-align: center;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32), inset 0 -4px 0 rgba(0, 0, 0, 0.24);
-  transition: transform 0.1s ease;
 }
 
 .orl-m-pad-btn:active {
@@ -1748,14 +2015,14 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-m-pad-shape {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1;
 }
 
 .orl-m-pad-txt {
   font-family: var(--font-display);
-  font-size: 13.5px;
+  font-size: 13.2px;
   font-weight: 700;
   line-height: 1.28;
 }
@@ -1777,30 +2044,23 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 }
 
 .orl-m-verdict-banner {
-  padding: 12px 14px;
+  padding: 11px 14px;
   border-radius: 12px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 16.5px;
   font-weight: 800;
   text-align: center;
 }
 
-.orl-m-verdict-banner.is-ok {
-  background: #059669;
-  color: #ffffff;
-}
-
-.orl-m-verdict-banner.is-miss {
-  background: #e11d48;
-  color: #ffffff;
-}
+.orl-m-verdict-banner.is-ok { background: #059669; color: #ffffff; }
+.orl-m-verdict-banner.is-miss { background: #e11d48; color: #ffffff; }
 
 .orl-m-correct-ans-box {
   background: rgba(16, 185, 129, 0.18);
   border: 1px solid rgba(52, 211, 153, 0.5);
   border-radius: 12px;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 13.8px;
   line-height: 1.4;
 }
 
@@ -1808,11 +2068,11 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   background: rgba(2, 6, 23, 0.52);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
-  padding: 11px 13px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 13.2px;
+  gap: 7px;
+  font-size: 13px;
   line-height: 1.42;
 }
 
@@ -1820,45 +2080,52 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.08);
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
-/* Floating Join Pill on Student Portal */
+/* Floating Join Pill */
 .orl-floating-join-pill {
   position: fixed;
-  right: 16px;
-  bottom: 18px;
+  right: 14px;
+  bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 1450;
   appearance: none;
   border: 2px solid #fde68a;
   border-radius: 999px;
-  padding: 11px 18px;
+  padding: 10px 16px;
   background: linear-gradient(135deg, #059669 0%, #0b46a6 100%);
   color: #ffffff;
   font-family: var(--font-display);
-  font-size: 13.8px;
+  font-size: 13.2px;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 12px 30px rgba(2, 8, 23, 0.42);
-  animation: orlChipPop 0.3s ease both;
+  max-width: calc(100vw - 28px);
+}
+
+html[data-role="faculty"] .orl-floating-join-pill {
+  background: linear-gradient(135deg, #059669 0%, #991b1b 100%);
 }
 
 /* Zoomed QR & Custom Poll Cards */
 .orl-qr-zoom-card,
 .orl-custom-form-card {
   width: min(540px, 95vw);
+  max-height: calc(var(--orl-vvh, 100dvh) - 24px);
+  overflow-y: auto;
   background: #0f172a;
   border: 1.5px solid rgba(147, 197, 253, 0.38);
   border-radius: 22px;
-  padding: 20px 22px;
+  padding: 18px 20px;
   color: #f8fafc;
   box-shadow: 0 28px 72px rgba(0, 0, 0, 0.68);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  box-sizing: border-box;
 }
 
 .orl-qz-top {
@@ -1870,17 +2137,17 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
 .orl-qz-svg-wrap {
   align-self: center;
-  width: min(360px, 74vw);
+  width: min(340px, 70vw, 48vh);
   aspect-ratio: 1 / 1;
   background: #ffffff;
-  padding: 14px;
+  padding: 12px;
   border-radius: 18px;
 }
 
 .orl-qz-url {
   text-align: center;
   font-family: monospace;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #fde68a;
   word-break: break-all;
@@ -1892,7 +2159,7 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .orl-cf-grid {
@@ -1907,10 +2174,226 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   gap: 10px;
 }
 
-/* ---------- 8. Portrait Phone & Print Adaptations ---------- */
-@media (max-width: 700px) {
+/* ==========================================================================
+   8. Multi-Platform & On-Screen Keyboard Adaptations:
+      - Virtual Keyboard Pop-up (html.orl-keyboard-open)
+      - Vertical Tablet & Unfolded Foldable / Surface Duo (701px - 1040px, aspect < 4/3)
+      - Horizontal Phone (max-height: 540px landscape)
+      - Vertical Phone & Foldable Cover (max-width: 760px)
+   ========================================================================== */
+
+/* A. Virtual Keyboard Pop-Up Protection (Phones & Tablets) */
+.or-deck-backdrop {
+  height: var(--orl-vvh, 100dvh);
+  max-height: var(--orl-vvh, 100dvh);
+}
+
+html.orl-keyboard-open .or-deck-shell {
+  height: var(--orl-vvh, 100dvh) !important;
+  max-height: var(--orl-vvh, 100dvh) !important;
+}
+
+html.orl-keyboard-open .orl-mobile-backdrop,
+html.orl-keyboard-open .orl-aux-backdrop {
+  align-items: flex-start;
+  padding: 0;
+}
+
+html.orl-keyboard-open .orl-m-shell {
+  width: 100%;
+  height: var(--orl-vvh, 100dvh);
+  max-height: var(--orl-vvh, 100dvh);
+  border-radius: 0;
+  border: 0;
+}
+
+html.orl-keyboard-open .orl-m-head-compact .orl-m-desc,
+html.orl-keyboard-open .orl-ava-section {
+  display: none;
+}
+
+html.orl-keyboard-open .orl-m-body {
+  padding-top: 10px;
+  padding-bottom: 24px;
+}
+
+/* B. Unfolded Foldable / Surface Duo & Vertical Tablet (e.g. 744x1133, 820x1180, 884x1104, 720x540)
+      Unlocks tiny letterboxed 16:9 into a crisp, Bounded Within-Slide Scrollable Stage! */
+@media (min-width: 701px) and (max-width: 1040px) and (max-aspect-ratio: 4/3) {
+  #orDeckViewport {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    padding: 12px 14px 24px !important;
+  }
+
+  .or-slide-frame-wrap,
+  .or-slide-zoom-sizer {
+    height: auto !important;
+    min-height: auto !important;
+    align-items: stretch !important;
+  }
+
+  .or-slide-canvas,
+  .or-deck-shell.has-notes-open .or-slide-canvas,
+  .or-deck-backdrop.is-presentation-mode .or-slide-canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    min-height: calc(var(--orl-vvh, 100dvh) - 134px) !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .or-slide-canvas:not(.is-cover-canvas) .or-sld-inner,
+  .or-cover-stage,
+  .orl-stage {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    padding: 18px 20px !important;
+    gap: 14px !important;
+  }
+
   .or-slide-canvas.is-cover-canvas .or-cover-split,
-  .or-infog-split.is-s16-recheck,
+  .orl-lobby-grid,
+  .orl-podium-split {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .orl-cover-card {
+    padding: 16px !important;
+    gap: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .orl-qr-frame-btn,
+  .orl-stage-qr-box {
+    width: 190px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .orl-area-Checkin-strip {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .or-slide-canvas .or-card-title { font-size: 17px !important; }
+  .or-slide-canvas .or-card-text,
+  .or-slide-canvas .or-list { font-size: 14.5px !important; line-height: 1.44 !important; }
+  .orl-q-stem-title { font-size: 20px !important; }
+  .orl-choice-text { font-size: 15.5px !important; }
+}
+
+/* Dual-Screen Surface Duo / Spanned Hinge Protection */
+@media (horizontal-viewport-segments: 2) {
+  .orl-cover-body,
+  .orl-lobby-grid {
+    gap: 32px !important;
+  }
+}
+
+/* C. Horizontal Phone (Landscape <= 540px height, e.g. 844x390, 667x375):
+      Allows Smooth Up/Down Scroll Within the Current Slide so nothing clips! */
+@media (max-height: 540px) and (orientation: landscape) {
+  #orDeckViewport {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 6px 10px 14px !important;
+  }
+
+  .or-slide-frame-wrap,
+  .or-slide-zoom-sizer {
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  .or-slide-canvas,
+  .or-slide-canvas.is-live-canvas,
+  .or-deck-backdrop.is-presentation-mode .or-slide-canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    min-height: calc(var(--orl-vvh, 100dvh) - 86px) !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .or-slide-canvas:not(.is-cover-canvas) .or-sld-inner,
+  .or-cover-stage,
+  .orl-stage {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    padding: 12px 16px !important;
+    gap: 10px !important;
+  }
+
+  .orl-qr-frame-btn,
+  .orl-stage-qr-box {
+    width: 136px !important;
+    padding: 6px !important;
+  }
+
+  .orl-mobile-backdrop {
+    padding: 0;
+  }
+
+  .orl-m-shell {
+    width: 100%;
+    max-width: 100%;
+    height: var(--orl-vvh, 100dvh);
+    max-height: var(--orl-vvh, 100dvh);
+    border-radius: 0;
+    border: 0;
+  }
+
+  .orl-m-pad-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(84px, 1fr);
+  }
+}
+
+/* D. Vertical Phone & Foldable Cover Screen (<= 760px) */
+@media (max-width: 760px) {
+  .or-nav-cluster {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .or-zoom-sync-cluster {
+    gap: 4px;
+  }
+
+  .or-follow-pill {
+    padding: 0 7px;
+    font-size: 10.5px;
+    height: 28px;
+  }
+
+  .or-zoom-pill {
+    height: 28px;
+  }
+
+  .or-zoom-btn {
+    width: 24px;
+  }
+
+  .or-zoom-lbl {
+    min-width: 38px;
+    font-size: 10.5px;
+    padding: 0 4px;
+  }
+
+  .or-slide-canvas.is-cover-canvas .or-cover-split,
+  .or-grid-2.is-s15-osmu-grid,
   .orl-cover-body,
   .orl-cover-foot,
   .orl-lobby-grid,
@@ -1921,29 +2404,119 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
   .orl-podium-split,
   .orl-cf-grid {
     grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
   }
 
-  .or-slide-canvas.is-live-canvas {
+  .or-slide-canvas.is-live-canvas,
+  .orl-slide-quiz-host {
     aspect-ratio: auto !important;
     width: 100% !important;
+    height: auto !important;
     max-height: none !important;
     overflow: visible !important;
+    border-radius: 14px !important;
   }
 
-  .orl-stage {
+  .orl-stage,
+  .orl-stage.is-embedded-slide-stage {
     padding: 14px !important;
     gap: 12px !important;
     height: auto !important;
   }
 
-  .orl-qr-frame-btn,
-  .orl-stage-qr-box {
-    width: 176px !important;
+  .orl-cover-card {
+    padding: 14px !important;
+    gap: 12px !important;
+    border-radius: 14px !important;
   }
 
-  .orl-area-Checkin-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .orl-live-pill {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
   }
+
+  .orl-mini-switch,
+  .orl-bar-btn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+  }
+
+  .orl-qr-frame-btn,
+  .orl-stage-qr-box {
+    width: 184px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .orl-qr-scan-kicker { font-size: 13px !important; }
+  .orl-qr-url-code,
+  .orl-url-pill { font-size: 11.5px !important; padding: 4px 8px !important; }
+
+  .orl-count-hero-box {
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .orl-count-big { font-size: 28px !important; }
+  .orl-count-denom { font-size: 14px !important; }
+  .orl-count-caption { font-size: 12.8px !important; }
+
+  .orl-tag {
+    font-size: 11.8px !important;
+    padding: 5px 8px !important;
+    border-radius: 7px !important;
+  }
+
+  .orl-p-chip,
+  .orl-players-wall .orl-p-chip {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+  }
+
+  .orl-cta-btn,
+  .orl-big-btn {
+    font-size: 13.8px !important;
+    padding: 11px 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .orl-big-btn small { font-size: 11.5px !important; }
+
+  .orl-area-Checkin-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .orl-area-pill {
+    font-size: 11.5px !important;
+    padding: 4px 6px !important;
+    border-radius: 7px !important;
+  }
+
+  .orl-q-stem-card {
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .orl-q-stem-title { font-size: 16.5px !important; }
+
+  .orl-choice-tile {
+    padding: 12px !important;
+    border-radius: 12px !important;
+    gap: 10px !important;
+  }
+
+  .orl-choice-text { font-size: 14px !important; }
+
+  .orl-rc-box {
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    border-left-width: 4px !important;
+  }
+
+  .orl-rc-kicker { font-size: 12px !important; }
+  .orl-rc-box p { font-size: 13px !important; line-height: 1.4 !important; }
 
   .orl-mobile-backdrop {
     padding: 0;
@@ -1951,8 +2524,8 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 
   .orl-m-shell {
     width: 100%;
-    height: 100dvh;
-    max-height: 100dvh;
+    height: var(--orl-vvh, 100dvh);
+    max-height: var(--orl-vvh, 100dvh);
     border-radius: 0;
     border: 0;
   }
@@ -1961,7 +2534,8 @@ html[data-role="faculty"] .orl-seg-btn.is-active {
 @media print {
   .orl-mobile-backdrop,
   .orl-aux-backdrop,
-  .orl-floating-join-pill {
+  .orl-floating-join-pill,
+  .or-zoom-sync-cluster {
     display: none !important;
   }
 }
