@@ -141,7 +141,8 @@
   }
 
   /* ==========================================================================
-   * LAYER 1: TEACHING-MATERIAL GROUNDING ENGINE (ยึดโยงเนื้อหาประกอบคำสอน HS1–HS6)
+   * LAYER 1: DUAL-DOCUMENT TEACHING GROUNDING & DEEP-LINK ENGINE
+   * Maps every question to ② ฉบับย่อ (Abridged) + ① ฉบับเต็ม (Full) with anchors
    * ========================================================================== */
   const docSectionsCache = new Map();
 
@@ -150,13 +151,16 @@
     if (docSectionsCache.has(doc.id)) return docSectionsCache.get(doc.id);
 
     const html = doc.html;
-    const headingRe = /<h([1-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+    const headingRe = /<h([1-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi;
     const heads = [];
     let m;
     while ((m = headingRe.exec(html)) !== null) {
+      const attrs = m[2] || "";
+      const idMatch = attrs.match(/\bid="([^"]+)"/i);
       heads.push({
         level: Number(m[1]),
-        title: stripTags(m[2]),
+        anchorId: idMatch ? idMatch[1] : "",
+        title: stripTags(m[3]),
         start: m.index,
         bodyStart: m.index + m[0].length,
       });
@@ -167,17 +171,46 @@
       const h = heads[i];
       const end = i + 1 < heads.length ? heads[i + 1].start : html.length;
       const bodyHtml = html.slice(h.bodyStart, end);
-      // Skip archive/bulk answer sections when searching teaching prose
-      if (/เฉลยท้ายเล่ม|แนวคำตอบ|เอกสารอ้างอิง/.test(h.title)) continue;
-      // Extract clean instructional prose (strip interactive question widgets/tables if huge)
-      const prosePlain = stripTags(bodyHtml);
-      const numMatch = h.title.match(/^(\d+(?:\.\d+)*)\b/);
+      if (/เฉลยท้ายเล่ม|แนวคำตอบ|เอกสารอ้างอิง|วัตถุประสงค์การเรียนรู้และคำถามนำ/.test(h.title)) continue;
+
+      let summaryNote = "";
+      const bqMatches = [...bodyHtml.matchAll(/<blockquote\b([^>]*)>([\s\S]*?)<\/blockquote>/gi)];
+      for (const bqm of bqMatches) {
+        if (/data-qa-id=/i.test(bqm[1] || "")) continue;
+        const bqTxt = stripTags(bqm[2]);
+        if (bqTxt.length >= 25) {
+          summaryNote = bqTxt.replace(/^ประเด็นสำคัญของหัวข้อ(?:ย่อย)?นี้คือ\s*/, "").trim();
+          break;
+        }
+      }
+
+      const cleanBodyHtml = bodyHtml
+        .replace(/<blockquote[^>]*data-qa-id=[\s\S]*?<\/blockquote>/gi, " ")
+        .replace(/<details\b[\s\S]*?<\/details>/gi, " ");
+      const liBullets = [];
+      const liRe = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;
+      let lm;
+      while ((lm = liRe.exec(cleanBodyHtml)) !== null && liBullets.length < 4) {
+        const liPlain = stripTags(lm[1])
+          .replace(/\([A-Z][a-zA-Z\s&.,;0-9\-]+\d{4}[a-z]?\)/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (liPlain.length >= 20) liBullets.push(clipText(liPlain, 220));
+      }
+
+      const prosePlain = stripTags(cleanBodyHtml);
+      const numMatch = h.title.match(/^\(?(\d+(?:\.\d+)*)\)?(?:\s|[.)]|$)/);
       sections.push({
+        docId: doc.id,
         level: h.level,
+        anchorId: h.anchorId,
         num: numMatch ? numMatch[1] : "",
         title: h.title,
+        shortTitle: clipText(h.title.replace(/\s*\([^)]+\)\s*$/, ""), 76),
         start: h.start,
         end,
+        summaryNote: summaryNote ? clipText(summaryNote, 260) : "",
+        bullets: liBullets,
         plain: prosePlain,
       });
     }
@@ -186,12 +219,19 @@
     return sections;
   }
 
-  function getCompanionTextbookDoc(docId) {
-    const docs = getDocs();
+  function getDocById(docId) {
+    return getDocs().find((d) => d.id === docId) || null;
+  }
+
+  function getModuleDocsPair(docId) {
     const baseMatch = String(docId || "").match(/^(HS[1-6]|ST1)/i);
-    if (!baseMatch) return null;
-    const baseId = baseMatch[1].toUpperCase();
-    return docs.find((d) => d.id === baseId) || null;
+    if (!baseMatch) return { moduleCode: "", fullDoc: null, conciseDoc: null };
+    const moduleCode = baseMatch[1].toUpperCase();
+    return {
+      moduleCode,
+      fullDoc: getDocById(moduleCode),
+      conciseDoc: getDocById(`${moduleCode}-CONCISE`),
+    };
   }
 
   function scoreOverlap(queryText, candidateText) {
@@ -200,13 +240,11 @@
     const cLow = candidateText.toLowerCase();
     let score = 0;
 
-    // English words (length >= 3)
-    const enWords = [...new Set((qLow.match(/[a-z][a-z0-9\-]{2,}/g) || []))];
+    const enWords = [...new Set(qLow.match(/[a-z][a-z0-9\-]{2,}/g) || [])];
     for (const w of enWords) {
       if (cLow.includes(w)) score += 3;
     }
 
-    // Thai 4-char shingles from meaningful Thai runs
     const thRuns = qLow.match(/[ก-๙]{4,}/g) || [];
     const seen = new Set();
     for (const run of thRuns) {
@@ -221,26 +259,78 @@
     return score;
   }
 
+  function pickBestConciseSection(moduleCode, conciseSections, fullSectionNum, queryBlob) {
+    if (!conciseSections || !conciseSections.length) return null;
+
+    if (moduleCode === "HS1") {
+      const fn = String(fullSectionNum || "");
+      const qLow = String(queryBlob || "").toLowerCase();
+      if (fn.startsWith("1.1") || /disease|illness|sickness|ใบรับรองแพทย์|สามมิติ/.test(qLow)) {
+        const s13 = conciseSections.find((s) => s.num === "1.3");
+        if (s13 && !/องค์การอนามัยโลก|bircher|huber|well-being|wellness/.test(qLow)) return s13;
+      }
+      if (fn.startsWith("1.2") || fn.startsWith("1.3") || /นิยามสุขภาพ|องค์การอนามัยโลก|สมบูรณ์|bircher|huber|well-being|wellness/.test(qLow)) {
+        const s11 = conciseSections.find((s) => s.num === "1.1");
+        if (s11) return s11;
+      }
+      if (fn.startsWith("2") || /ปัจจัยกำหนด|diderichsen|bishai|เหลื่อมล้ำ|สภาพการทำงาน|เด็กคนที่สอง/.test(qLow)) {
+        const s12 = conciseSections.find((s) => s.num === "1.2");
+        if (s12) return s12;
+      }
+      if (fn.startsWith("3") || /การป้องกัน|คัดกรอง|ผลบวกลวง|ผลลบลวง|primordial|quaternary|psa/.test(qLow)) {
+        const s14 = conciseSections.find((s) => s.num === "1.4");
+        if (s14) return s14;
+      }
+    }
+
+    if (fullSectionNum) {
+      const exact = conciseSections.find((s) => s.num === fullSectionNum);
+      if (exact) return exact;
+      const parts = fullSectionNum.split(".");
+      if (parts.length >= 2) {
+        const twoLvl = `${parts[0]}.${parts[1]}`;
+        const m2 = conciseSections.find((s) => s.num === twoLvl);
+        if (m2) return m2;
+      }
+      const m1 = conciseSections.find((s) => s.num === parts[0] || (s.num && s.num.startsWith(parts[0] + ".")));
+      if (m1) return m1;
+    }
+
+    let best = null;
+    let topScore = 0;
+    for (const s of conciseSections) {
+      if (s.level === 2 && s.plain.length < 30 && conciseSections.length > 3) continue;
+      const sc = scoreOverlap(queryBlob, `${s.title} ${s.plain.slice(0, 1400)}`);
+      if (sc > topScore) {
+        topScore = sc;
+        best = s;
+      }
+    }
+    return best || conciseSections[0] || null;
+  }
+
+  function buildDocDeepLinkHtml(docId, anchorId, labelText, variantClass) {
+    const cls = variantClass ? `iq-doc-deep-link ${variantClass}` : "iq-doc-deep-link";
+    const href = anchorId ? `#${escapeHtml(anchorId)}` : `#${escapeHtml(docId)}`;
+    return `<a href="${href}" class="${cls}" data-racm-doc="${escapeHtml(docId)}" data-racm-anchor="${escapeHtml(anchorId || "")}">${escapeHtml(labelText)}</a>`;
+  }
+
   const rubricContextCache = new Map();
 
   function extractTeachingContext(rubric) {
     if (rubric && rubric.id && rubricContextCache.has(rubric.id)) {
       return rubricContextCache.get(rubric.id);
     }
-    const docs = getDocs();
     const docId = (rubric && rubric.docId) || "";
-    const moduleMatch = String(docId).match(/^(HS[1-6]|ST1)/i);
-    const moduleCode = moduleMatch ? moduleMatch[1].toUpperCase() : "";
-    const curDoc = docs.find((d) => d.id === docId) || getCompanionTextbookDoc(docId);
-    const companionDoc = getCompanionTextbookDoc(docId);
+    const { moduleCode, fullDoc, conciseDoc } = getModuleDocsPair(docId);
+    const curDoc = getDocById(docId) || fullDoc;
 
     let headingPath = (rubric && rubric.sectionTitle) || "";
+    let enclosingAnchorId = "";
+    let enclosingNum = "";
     let caseVignette = "";
     let followingProse = "";
-    let companionHeading = "";
-    let companionExcerpt = "";
 
-    // 1. Locate exact element position inside curDoc.html
     if (curDoc && curDoc.html && rubric && rubric.id) {
       const html = curDoc.html;
       let pos = html.indexOf(`"${rubric.id}"`);
@@ -250,13 +340,21 @@
       }
 
       if (pos >= 0) {
-        // Find nearest preceding headings (h2, h3, h4)
         const beforeHtml = html.slice(Math.max(0, pos - 9000), pos);
-        const hRe = /<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+        const hRe = /<h([2-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi;
         const foundHeads = [];
         let hm;
         while ((hm = hRe.exec(beforeHtml)) !== null) {
-          foundHeads.push({ level: Number(hm[1]), title: stripTags(hm[2]), relEnd: hm.index + hm[0].length });
+          const idM = (hm[2] || "").match(/\bid="([^"]+)"/i);
+          const tClean = stripTags(hm[3]);
+          const nM = tClean.match(/^\(?(\d+(?:\.\d+)*)\)?(?:\s|[.)]|$)/);
+          foundHeads.push({
+            level: Number(hm[1]),
+            anchorId: idM ? idM[1] : "",
+            num: nM ? nM[1] : "",
+            title: tClean,
+            relEnd: hm.index + hm[0].length,
+          });
         }
 
         if (foundHeads.length > 0) {
@@ -270,6 +368,9 @@
             headingPath = builtPath;
           }
           const lastHead = foundHeads[foundHeads.length - 1];
+          enclosingAnchorId = lastHead.anchorId || "";
+          enclosingNum = lastHead.num || (stack[0] && stack[0].num) || "";
+
           const prevSectionHead = foundHeads.length >= 2 ? foundHeads[foundHeads.length - 2] : lastHead;
           const sliceStart = Math.max(0, prevSectionHead.relEnd);
           const rawBefore = beforeHtml.slice(sliceStart);
@@ -279,7 +380,6 @@
           }
         }
 
-        // Following teaching prose
         const afterHtml = html.slice(pos, Math.min(html.length, pos + 3600));
         const tagEnd = afterHtml.search(/<\/(?:blockquote|li|p|table|ul)>/i);
         if (tagEnd > 0) {
@@ -297,53 +397,70 @@
       }
     }
 
-    // 2. Locate exact matching section inside companion full textbook (HS1..HS6)
-    if (companionDoc) {
-      const sections = parseDocSections(companionDoc);
-      const searchHint = `${(rubric && rubric.prompt) || ""} ${headingPath} ${stripTags((rubric && rubric.answerHtml) || "")}`;
-      const secNumMatches = [...searchHint.matchAll(/หัวข้อ(?:ย่อย)?(?:ที่)?\s*(\d+(?:\.\d+)*)/g)].map((x) => x[1]);
-      let bestSec = null;
+    const fullSections = fullDoc ? parseDocSections(fullDoc) : [];
+    const conciseSections = conciseDoc ? parseDocSections(conciseDoc) : [];
+    const queryBlob = `${(rubric && rubric.prompt) || ""} ${stripTags((rubric && rubric.answerHtml) || "")} ${headingPath}`;
 
-      for (const targetNum of secNumMatches) {
-        bestSec = sections.find((s) => s.num === targetNum);
-        if (bestSec) break;
+    let bestFullSec = null;
+    if (fullSections.length > 0) {
+      if (docId === (fullDoc && fullDoc.id) && enclosingAnchorId) {
+        bestFullSec = fullSections.find((s) => s.anchorId === enclosingAnchorId) || null;
       }
-      if (!bestSec && secNumMatches.length > 0) {
-        const prefix = secNumMatches[0] + ".";
-        bestSec = sections.find((s) => s.num && s.num.startsWith(prefix));
+      if (!bestFullSec) {
+        const secNumMatches = [...queryBlob.matchAll(/หัวข้อ(?:ย่อย)?(?:ที่)?\s*(\d+(?:\.\d+)*)/g)].map((x) => x[1]);
+        for (const targetNum of secNumMatches) {
+          bestFullSec = fullSections.find((s) => s.num === targetNum);
+          if (bestFullSec) break;
+        }
+        if (!bestFullSec && secNumMatches.length > 0) {
+          const prefix = secNumMatches[0] + ".";
+          bestFullSec = fullSections.find((s) => s.num && s.num.startsWith(prefix));
+        }
       }
-
-      if (!bestSec && sections.length > 0) {
-        const query = `${(rubric && rubric.prompt) || ""} ${stripTags((rubric && rubric.answerHtml) || "")} ${headingPath}`;
+      if (!bestFullSec && enclosingNum && docId.includes("-CONCISE")) {
+        bestFullSec = fullSections.find((s) => s.num === enclosingNum) || null;
+      }
+      if (!bestFullSec) {
         let topScore = 0;
-        for (const s of sections) {
-          if (s.plain.length < 80) continue;
-          const sc = scoreOverlap(query, `${s.title} ${s.plain.slice(0, 1400)}`);
+        for (const s of fullSections) {
+          if (s.plain.length < 50 && fullSections.length > 4) continue;
+          const sc = scoreOverlap(queryBlob, `${s.title} ${s.plain.slice(0, 1500)}`);
           if (sc > topScore) {
             topScore = sc;
-            bestSec = s;
+            bestFullSec = s;
           }
         }
-        if (topScore < 4) bestSec = null;
       }
+      if (!bestFullSec) bestFullSec = fullSections[0];
+    }
 
-      if (bestSec) {
-        companionHeading = bestSec.title;
-        companionExcerpt = clipText(bestSec.plain, 1500);
+    let bestConciseSec = null;
+    if (conciseSections.length > 0) {
+      if (docId === (conciseDoc && conciseDoc.id) && enclosingAnchorId) {
+        bestConciseSec = conciseSections.find((s) => s.anchorId === enclosingAnchorId) || null;
+      }
+      if (!bestConciseSec) {
+        bestConciseSec = pickBestConciseSection(
+          moduleCode,
+          conciseSections,
+          (bestFullSec && bestFullSec.num) || enclosingNum,
+          queryBlob
+        );
       }
     }
 
-    // Clean crisp grounding label without nested clipped parentheses
+    const companionHeading = bestFullSec ? bestFullSec.title : "";
+    const companionExcerpt = bestFullSec ? clipText(bestFullSec.plain, 1500) : "";
+
     const cleanHeading = headingPath.replace(/\s*\([^)]*เชื่อมโยง[^)]*\)\s*$/g, "").trim();
-    const shortCompanion = companionHeading
-      ? clipText(companionHeading.replace(/\s*\([^)]+\)\s*$/, ""), 82)
-      : "";
+    const shortCompanion = bestFullSec ? bestFullSec.shortTitle : "";
+    const shortConcise = bestConciseSec ? bestConciseSec.shortTitle : "";
     const shortHeading = cleanHeading ? clipText(cleanHeading, 78) : "";
 
     let groundingLabel = "";
     if (docId && docId.includes("-WB")) {
       groundingLabel = shortCompanion
-        ? `${docId}${shortHeading ? ` · ${shortHeading}` : ""} — อ้างอิง ${moduleCode} หัวข้อ ${shortCompanion}`
+        ? `${docId}${shortHeading ? ` · ${shortHeading}` : ""} — เชื่อมโยง ${moduleCode} หัวข้อ ${shortCompanion}`
         : `${docId}${shortHeading ? ` · ${shortHeading}` : ""}`;
     } else if (shortCompanion) {
       groundingLabel = `${moduleCode || docId} · ${shortCompanion}`;
@@ -368,9 +485,36 @@
       companionExcerpt,
       teachingExcerpt: teachingExcerptParts.join("\n\n"),
       groundingLabel,
+      fullSec: bestFullSec,
+      conciseSec: bestConciseSec,
+      fullSections,
+      conciseSections,
+      shortConcise,
+      shortCompanion,
     };
     if (rubric && rubric.id) rubricContextCache.set(rubric.id, result);
     return result;
+  }
+
+  function findSectionForConcept(concept, sections, fallbackSec) {
+    if (!sections || !sections.length) return fallbackSec || null;
+    if (!concept || !concept.tokens || !concept.tokens.length) return fallbackSec || sections[0];
+    let best = null;
+    let bestScore = 0;
+    for (const sec of sections) {
+      const hay = `${sec.title} ${sec.summaryNote || ""} ${sec.plain.slice(0, 1800)}`.toLowerCase();
+      let sc = 0;
+      for (const tok of concept.tokens) {
+        if (tok.length >= 3 && hay.includes(tok)) {
+          sc += sec.title.toLowerCase().includes(tok) ? 5 : 2;
+        }
+      }
+      if (sc > bestScore) {
+        bestScore = sc;
+        best = sec;
+      }
+    }
+    return bestScore > 0 ? best : fallbackSec || sections[0];
   }
 
   /* ==========================================================================
