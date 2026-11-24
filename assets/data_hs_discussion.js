@@ -45,15 +45,15 @@ window.RACM_HS_DISCUSSION_DATA = {
       "enTitle": "Functions of Health Systems and Desirable Characteristics of Health Services Systems",
       "scheduleDate": "วันจันทร์ที่ 30 พฤศจิกายน 2569",
       "lectureTime": "13.30 – 14.30 น.",
-      "discTime": "14.40 – 16.40 น.",
+      "discTime": "14.40 – 17.00 น.",
       "examWeight": "15%",
       "docId": "HS3",
       "conciseDocId": "HS3-CONCISE",
       "wbDocId": "",
       "summaryFocus": "ประเมินจุดแข็งและช่องว่างของนโยบายสุขภาพระดับประเทศ (Cancer Anywhere และ Palliative Care) ด้วยกรอบคุณลักษณะอันพึงประสงค์ EQESaRR ทั้งองค์ประกอบหลักและองค์ประกอบย่อยอย่างมีหลักฐานรองรับ",
-      "unlockAfterIso": "2026-11-30T16:40:00+07:00",
-      "unlockAfterLabel": "วันจันทร์ที่ 30 พฤศจิกายน 2569 เวลา 16.40 น.",
-      "unlockShortLabel": "จ. 30 พ.ย. · 16.40 น."
+      "unlockAfterIso": "2026-11-30T17:00:00+07:00",
+      "unlockAfterLabel": "วันจันทร์ที่ 30 พฤศจิกายน 2569 เวลา 17.00 น.",
+      "unlockShortLabel": "จ. 30 พ.ย. · 17.00 น."
     },
     {
       "id": "HS4",
@@ -79,15 +79,15 @@ window.RACM_HS_DISCUSSION_DATA = {
       "enTitle": "Primary Health Care and Primary Care",
       "scheduleDate": "วันอังคารที่ 1 ธันวาคม 2569",
       "lectureTime": "13.30 – 14.30 น.",
-      "discTime": "14.40 – 16.40 น.",
+      "discTime": "14.40 – 17.00 น.",
       "examWeight": "15%",
       "docId": "HS5",
       "conciseDocId": "HS5-CONCISE",
       "wbDocId": "",
       "summaryFocus": "แยกแยะระดับของ Primary Care (บริการด่านแรกรายบุคคล 5 คุณลักษณะ) ออกจาก Primary Health Care (ยุทธศาสตร์เชิงระบบทั้งสังคม 3 เสาหลักตามปฏิญญา Astana) ผ่านกรณีศึกษาจริงของโครงการ “สุขภาวะข้างถนน”",
-      "unlockAfterIso": "2026-12-01T16:40:00+07:00",
-      "unlockAfterLabel": "วันอังคารที่ 1 ธันวาคม 2569 เวลา 16.40 น.",
-      "unlockShortLabel": "อ. 1 ธ.ค. · 16.40 น."
+      "unlockAfterIso": "2026-12-01T17:00:00+07:00",
+      "unlockAfterLabel": "วันอังคารที่ 1 ธันวาคม 2569 เวลา 17.00 น.",
+      "unlockShortLabel": "อ. 1 ธ.ค. · 17.00 น."
     },
     {
       "id": "HS6",

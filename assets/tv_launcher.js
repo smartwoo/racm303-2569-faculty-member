@@ -2118,6 +2118,7 @@
         isPending: !mSlideInf.uploaded,
         icoCls: mSlideInf.icoCls || "is-pptx is-muted-pptx",
         icoTxt: mSlideInf.uploaded ? (mSlideInf.icoTxt || "④") : "④",
+        ...(m.code === "ST1" ? { pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf" } : {}),
         onOpen: openFileAction(() => {
           if (api && api.openHsLectureSlides) api.openHsLectureSlides(m.code);
         })
@@ -2225,6 +2226,21 @@
             pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
             onOpen: () => {
               if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+            }
+          },
+          {
+            id: "sched:st1-slides",
+            folderPath: ["schedule"],
+            name: "01_RACM303_2569_ST1_Slides_(คิดเชิงระบบ_16x9).pptx",
+            title: "Slide คาบ ST1: Systems & Systems Thinking (16 สไลด์ · 16:9 + Concept Check 5 ข้อ)",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (09.30–12.00 น. · ห้อง 2C2-03) — 16 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
+            meta: "16 สไลด์ · 16:9",
+            badge: "▶ เปิดสไลด์ ST1",
+            icoCls: "is-pptx",
+            icoTxt: "P",
+            pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
+            onOpen: () => {
+              if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
             }
           },
           {
@@ -2593,6 +2609,21 @@
             pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
             onOpen: () => {
               if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+            }
+          },
+          {
+            id: "man:st1-slides",
+            folderPath: ["manuals"],
+            name: "01_RACM303_2569_ST1_Slides_(คิดเชิงระบบ_16x9).pptx",
+            title: "Slide คาบ ST1: Systems & Systems Thinking (CAS, CLD, Iceberg Model & Realist HPSR)",
+            sub: "สไลด์คาบ ST1 16 หน้า (16:9) พร้อม Live Concept Check 5 ข้อ และดาวน์โหลด .pptx / PDF",
+            meta: "16 สไลด์ · 16:9",
+            badge: "▶ เปิดสไลด์ ST1",
+            icoCls: "is-pptx",
+            icoTxt: "P",
+            pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
+            onOpen: () => {
+              if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
             }
           },
           {
@@ -3398,6 +3429,8 @@
             <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
           </div>
           <div class="tv-up-tracks">
+            <button type="button" class="tv-hosp-chip" id="stuOpenSt1DeckQuickBtn">🖥️ เปิด Slide ST1 (16 สไลด์ · 16:9)</button>
+            <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_ST1_Slides.pdf" download="RACM303_2569_ST1_Slides.pdf" style="text-decoration:none">⬇ Slide ST1 (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/ST1.pdf" download="RACM303_ST1_Full.pdf" style="text-decoration:none">⬇ ST1 ฉบับเต็ม (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/ST1-CONCISE.pdf" download="RACM303_ST1_Abridged.pdf" style="text-decoration:none">⬇ ST1 ฉบับย่อ (.pdf)</a>
             <button type="button" class="tv-hosp-chip" id="stuOpenHsSlidesHubBtn">🖥️ ดูหน้ารวม Slide อาจารย์ (ST1 &amp; HS1–HS6) →</button>
@@ -3406,6 +3439,15 @@
         </div>
       `;
       document.body.appendChild(backdrop);
+      const st1QuickBtn = backdrop.querySelector("#stuOpenSt1DeckQuickBtn");
+      if (st1QuickBtn) {
+        st1QuickBtn.addEventListener("click", () => {
+          backdrop.remove();
+          if (window.RACM_ST1_DECK && typeof window.RACM_ST1_DECK.open === "function") {
+            window.RACM_ST1_DECK.open(0);
+          }
+        });
+      }
       const listEl = backdrop.querySelector("#stuUploadedSlidesList");
       uploadedRows.forEach(({ s, rec }) => {
         const extMeta = api.detectSlideExtMeta ? api.detectSlideExtMeta(rec) : { extBadge: "SLIDE" };

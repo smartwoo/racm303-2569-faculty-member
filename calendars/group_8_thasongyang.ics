@@ -56,8 +56,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d1-global@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261125T130000
-DTEND;TZID=Asia/Bangkok:20261125T160000
+DTSTART;TZID=Asia/Bangkok:20261125T133000
+DTEND;TZID=Asia/Bangkok:20261125T170000
 SUMMARY:[RACM 303] Bedside to Systems-Based Practice: Global/Planetary Health & HPSR
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) อธิบายภาพรวมบทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems) และเส้นทางวิชาชีพแพทย์ (Physician Career Paths) เชิงวิทยาศาสตร์ระบบสุขภาพ (Health Systems Science: HSS) ที่ต่อยอดจากการดูแลผู้ป่วยข้างเตียงสู่เวชปฏิบัติอิงระบบ (Systems-Based Practice: SBP) | 2) วิเคราะห์การบูรณาการบทบาทแพทย์ในฐานะผู้นำการเปลี่ยนแปลง (Change Agent) นักวิจัยนโยบายและระบบสุขภาพ (HPSR) และผู้ขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพ (From Bedside to Health Public Policy) เชื่อมโยงผู้ป่วย ครอบครัว ชุมชน สู่สุขภาพโลกและสุขภาพดาวเคราะห์ (Global & Planetary Health) | 3) สะท้อนคิดแนวทางการพัฒนาสมรรถนะ HSS & SBP และเส้นทางอาชีพแพทย์ในการทำงานร่วมกับทีมสหวิชาชีพและสังคม\nอาจารย์ผู้สอน: วิทยากร: นพ.ทักษพล ธรรมรังสี\, นพ.วิรุฬ ลิ้มสวาท | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -70,8 +70,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d2-hs1-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261126T090000
-DTEND;TZID=Asia/Bangkok:20261126T100000
+DTSTART;TZID=Asia/Bangkok:20261126T083000
+DTEND;TZID=Asia/Bangkok:20261126T093000
 SUMMARY:[RACM 303] *HS1: สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) แยกแยะโรค (Disease) ความเจ็บป่วย (Illness) และภาวะที่สังคมยอมรับว่าป่วย (Sickness) พร้อมเปรียบเทียบนิยามสุขภาพเชิงชีวการแพทย์และองค์รวม | 2) วิเคราะห์อิทธิพลของ SDH สภาพการทำงาน/สิ่งแวดล้อม และ CDH ต่อความไม่เป็นธรรมทางสุขภาพ | 3) จำแนกและเลือกใช้มาตรการป้องกันโรคทั้ง 4 ระดับ (รวม Quaternary Prevention)\nอาจารย์ผู้สอน: อ. พญ.วริษา สุนทรวินิต\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -84,7 +84,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d2-hs1-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261126T101000
+DTSTART;TZID=Asia/Bangkok:20261126T094000
 DTEND;TZID=Asia/Bangkok:20261126T120000
 SUMMARY:[RACM 303] Discussion (HS1): สุขภาพ (Health) ปัจจัยกำหนดสุขภาพ (Determinants of Health) และระดับการป้องกันโรค (Level of Disease Prevention)
 LOCATION:กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก
@@ -98,8 +98,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d2-sg1@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261126T130000
-DTEND;TZID=Asia/Bangkok:20261126T163000
+DTSTART;TZID=Asia/Bangkok:20261126T133000
+DTEND;TZID=Asia/Bangkok:20261126T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 1: การทำความรู้จักกันและชี้แจงภารกิจการทำงานกลุ่มก่อนและระหว่างออกภาคสนาม [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: กระบวนการกลุ่มเพื่อละลายพฤติกรรม เข้าใจกันและกัน ทราบความคาดหวังของนักศึกษาจากหลักสูตร | ทำความเข้าใจวัตถุประสงค์ของการเรียน การเตรียมตัวในการเรียน\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
@@ -112,7 +112,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d3-ep123@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261127T090000
+DTSTART;TZID=Asia/Bangkok:20261127T083000
 DTEND;TZID=Asia/Bangkok:20261127T110000
 SUMMARY:[RACM 303] EP1: Introduction to epidemiology · EP2: Diagnostic Test & Errors in epidemiology · EP3: Errors in epidemiology
 LOCATION:ห้อง Auditorium ชั้น 2 อาคารศูนย์การเรียนรู้ | Zoom: https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1
@@ -144,8 +144,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w1-d3-exday1@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261127T130000
-DTEND;TZID=Asia/Bangkok:20261127T163000
+DTSTART;TZID=Asia/Bangkok:20261127T133000
+DTEND;TZID=Asia/Bangkok:20261127T170000
 SUMMARY:[RACM 303] Exercise Day 1
 LOCATION:Online (Zoom / E-learning)
 DESCRIPTION:🔗 ทำแบบฝึกหัดใน E-learning: https://elearning.ra.mahidol.ac.th/ramed/course/view.php?id=398\n\nวัตถุประสงค์: ทบทวนและทำโจทย์แบบฝึกหัด EP1–EP3 ด้วยตนเองในระบบ E-learning เพื่อเตรียมประเด็นซักถามในช่วง Q&A วันพุธที่ 2 ธ.ค. 2569\nอาจารย์ผู้สอน: นักศึกษาทำแบบฝึกหัดออนไลน์ (Online)\nสถานที่/ห้องเรียน: Online (Zoom / E-learning)\nรูปแบบ: Online (ไม่เช็คชื่อ)
@@ -159,8 +159,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d1-hs2-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261130T090000
-DTEND;TZID=Asia/Bangkok:20261130T100000
+DTSTART;TZID=Asia/Bangkok:20261130T083000
+DTEND;TZID=Asia/Bangkok:20261130T093000
 SUMMARY:[RACM 303] *HS2: โครงสร้างของระบบสุขภาพ (Structure of Health Systems) และรูปแบบการดูแล (Models of Care) [Health services I]
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) จำแนกขอบเขตของระบบสุขภาพตามนิยาม WHO (Primary intent) และ พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 | 2) เปรียบเทียบเป้าหมายระบบสุขภาพตามกรอบ WHO และ Triple/Quadruple/Quintuple Aim | 3) วิเคราะห์ระบบบริการด้วย Six Building Blocks\, CAS และ Results Chain | 4) ประยุกต์ใช้กรอบ 6W เลือกรูปแบบการดูแล (7 Models of Care)\nอาจารย์ผู้สอน: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -173,7 +173,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d1-hs2-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261130T101000
+DTSTART;TZID=Asia/Bangkok:20261130T094000
 DTEND;TZID=Asia/Bangkok:20261130T120000
 SUMMARY:[RACM 303] Discussion (HS2): โครงสร้างของระบบสุขภาพ (Structure of Health Systems) และรูปแบบการดูแล (Models of Care) [Health services I]
 LOCATION:กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก
@@ -187,8 +187,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d1-hs3-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261130T130000
-DTEND;TZID=Asia/Bangkok:20261130T140000
+DTSTART;TZID=Asia/Bangkok:20261130T133000
+DTEND;TZID=Asia/Bangkok:20261130T143000
 SUMMARY:[RACM 303] *HS3: หน้าที่ของระบบสุขภาพ (Functions of Health Systems) และคุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems) [Health services II]
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) อธิบายกรอบ EQESaRR ในฐานะสัญญาณเตือนล่วงหน้าของกระบวนการที่เชื่อมโครงสร้างสู่เป้าหมายระบบสุขภาพ | 2) วิเคราะห์ Equity vs Equality มิติการเข้าถึง คุณภาพตามกรอบ STEP และ Effective Coverage (Need–Use–Quality) | 3) เปรียบเทียบประสิทธิภาพ 3 ระดับและบทบาท HTA | 4) วิเคราะห์ธรรมาภิบาล ภาระรับผิดชอบต่อสังคม ความสอดคล้องกับบริบท และความยืดหยุ่นของระบบ (Resilience)\nอาจารย์ผู้สอน: อ. นพ.ภูษิต ประคองสาย\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -201,8 +201,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d1-hs3-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261130T141000
-DTEND;TZID=Asia/Bangkok:20261130T163000
+DTSTART;TZID=Asia/Bangkok:20261130T144000
+DTEND;TZID=Asia/Bangkok:20261130T170000
 SUMMARY:[RACM 303] Discussion (HS3): หน้าที่ของระบบสุขภาพ (Functions of Health Systems) และคุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ [Health services II]
 LOCATION:กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: ประยุกต์ใช้กรอบ EQESaRR วิเคราะห์กรณีศึกษาและชั่งน้ำหนักแลกเปลี่ยน (Trade-offs) เมื่อประเมินระบบบริการสุขภาพจริง\nอาจารย์ผู้สอน: คณาจารย์ประจำกลุ่มอภิปราย HS ทั้ง 6 กลุ่มย่อย\nสถานที่/ห้องเรียน: กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · Discussion กลุ่มที่ 1–6 (เช็คชื่อ)
@@ -215,8 +215,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d2-hs4-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261201T090000
-DTEND;TZID=Asia/Bangkok:20261201T100000
+DTSTART;TZID=Asia/Bangkok:20261201T083000
+DTEND;TZID=Asia/Bangkok:20261201T093000
 SUMMARY:[RACM 303] *HS4: พฤติกรรมสุขภาพ (Health Behavior) การปรับเปลี่ยนพฤติกรรม (Behavior Change) และการสร้างเสริมสุขภาพ (Health Promotion & COM-B)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) อธิบายกลยุทธ์ 5 ด้านของกฎบัตรออตตาวา (Ottawa Charter) บทบาทแพทย์ (Advocate\, Mediate\, Enable) และการเปลี่ยนผ่านสู่โรค NCDs | 2) เปรียบเทียบทฤษฎี KAP\, HBM\, Stages of Change กับเศรษฐศาสตร์พฤติกรรมและ Nudge | 3) ประยุกต์ใช้ Behaviour Change Wheel และตัวแบบ COM-B | 4) วิเคราะห์ความรอบรู้ด้านสุขภาพระดับบุคคลและองค์กร\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -229,7 +229,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d2-hs4-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261201T101000
+DTSTART;TZID=Asia/Bangkok:20261201T094000
 DTEND;TZID=Asia/Bangkok:20261201T120000
 SUMMARY:[RACM 303] Discussion (HS4): พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ (Health promotion & COM-B)
 LOCATION:กลุ่ม 1–5: ห้อง 1C1-02 ถึง 1C1-06 ชั้น 1 | กลุ่มที่ 6 (ผศ.วิชช์): 2C2-03 ชั้น 2 อาคารพรีคลินิก
@@ -243,8 +243,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d2-hs5-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261201T130000
-DTEND;TZID=Asia/Bangkok:20261201T140000
+DTSTART;TZID=Asia/Bangkok:20261201T133000
+DTEND;TZID=Asia/Bangkok:20261201T143000
 SUMMARY:[RACM 303] *HS5: ระบบสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) แยกแยะระบบสุขภาพปฐมภูมิ (PHC) ออกจากบริการปฐมภูมิ (Primary Care) เชื่อมโยง Alma-Ata (1978)\, WHR (2008) และ Astana (2018) | 2) อธิบายคุณลักษณะหลักของบริการปฐมภูมิที่ดี 5 ประการ และหน้าที่สาธารณสุขที่จำเป็น (EPHFs) | 3) วิเคราะห์ความเชื่อมโยง PHC กับ UHC/SDGs พ.ร.บ.ระบบสุขภาพปฐมภูมิ พ.ศ. 2562 และการถ่ายโอน รพ.สต. สู่ อบจ.\nอาจารย์ผู้สอน: อ. นพ.ฉัตรชัย อิ่มอารมย์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -257,8 +257,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d2-hs5-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261201T141000
-DTEND;TZID=Asia/Bangkok:20261201T163000
+DTSTART;TZID=Asia/Bangkok:20261201T144000
+DTEND;TZID=Asia/Bangkok:20261201T170000
 SUMMARY:[RACM 303] Discussion (HS5): ระบบสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 LOCATION:กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์กรณีศึกษาการจัดบริการปฐมภูมิ การทำงานข้ามภาคส่วน การเสริมพลังชุมชน และความท้าทายของระบบสุขภาพปฐมภูมิไทยในปัจจุบัน\nอาจารย์ผู้สอน: คณาจารย์ประจำกลุ่มอภิปราย HS ทั้ง 6 กลุ่มย่อย\nสถานที่/ห้องเรียน: กลุ่ม 1–6: ห้อง 1C1-02 ถึง 1C1-07 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · Discussion กลุ่มที่ 1–6 (เช็คชื่อ)
@@ -271,7 +271,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d3-ep45@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261202T090000
+DTSTART;TZID=Asia/Bangkok:20261202T083000
 DTEND;TZID=Asia/Bangkok:20261202T120000
 SUMMARY:[RACM 303] EP4: Overview study designs and Measurement of impact (AR\, AR%\, PAR\, PAR%) · EP5: Disease surveillance & Outbreak investigation
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก | Zoom: https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1
@@ -287,9 +287,9 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d3-ex34@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261202T130000
-DTEND;TZID=Asia/Bangkok:20261202T163000
-SUMMARY:[RACM 303] EXERCISE 4: Study designs and Measurement of impact · EXERCISE 5: Disease surveillance & Outbreak investigation (13.00–16.00 น.) + Q&A Exercise Day 1\, 2 (16.00–16.30 น.)
+DTSTART;TZID=Asia/Bangkok:20261202T133000
+DTEND;TZID=Asia/Bangkok:20261202T170000
+SUMMARY:[RACM 303] EXERCISE 4: Study designs and Measurement of impact · EXERCISE 5: Disease surveillance & Outbreak investigation (13.30–16.30 น.) + Q&A Exercise Day 1\, 2 (16.30–17.00 น.)
 LOCATION:Online (Zoom) | Zoom: https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1
 DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1\nMeeting ID: 943 1762 6613 | Passcode: 547989\n\nวัตถุประสงค์: ฝึกวิเคราะห์รูปแบบการวิจัย คำนวณค่าผลกระทบทางระบาดวิทยา แก้โจทย์สอบสวนการระบาด และสรุปตอบข้อซักถามแบบฝึกหัดวันที่ 1–2\nอาจารย์ผู้สอน: อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา\, อ. พญ.สวนีย์ ศรีเจริญธรรม\nสถานที่/ห้องเรียน: Online (Zoom)\nรูปแบบ: Online (จำนวน นศพ. 169 คน) (ไม่เช็คชื่อ)
 URL:https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1
@@ -303,7 +303,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d4-ep678@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261203T090000
+DTSTART;TZID=Asia/Bangkok:20261203T083000
 DTEND;TZID=Asia/Bangkok:20261203T120000
 SUMMARY:[RACM 303] EP6: Measure of burden of disease (อ. นพ.ปวินท์) · EP7: Health survey (ศ. นพ.วิชัย) · EP8: Experimental study (ผศ. พญ.ฉัฐญาณ์)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก | Zoom: https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1
@@ -319,9 +319,9 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d4-ep9-ex56@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261203T130000
-DTEND;TZID=Asia/Bangkok:20261203T163000
-SUMMARY:[RACM 303] EP9: Evidence-Based Medicine (EBM · 13.00–14.00 น.) · EXERCISE 6: Measure of burden of disease & EXERCISE 7: Experimental Study & EBM (14.00–16.00 น.) · Q&A Exercise Day 3 (16.00–16.30 น.)
+DTSTART;TZID=Asia/Bangkok:20261203T133000
+DTEND;TZID=Asia/Bangkok:20261203T170000
+SUMMARY:[RACM 303] EP9: Evidence-Based Medicine (EBM · 13.30–14.30 น.) · EXERCISE 6: Measure of burden of disease & EXERCISE 7: Experimental Study & EBM (14.30–16.30 น.) · Q&A Exercise Day 3 (16.30–17.00 น.)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก & Online (Zoom) | Zoom: https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1
 DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1\nMeeting ID: 929 4095 3542 | Passcode: 165796\n\nวัตถุประสงค์: ตั้งคำถามทางคลินิกตามกรอบ PICO ประเมินความน่าเชื่อถือของหลักฐานเชิงประจักษ์ และฝึกทำโจทย์ภาระโรค การออกแบบ Health Survey และการประเมินงานวิจัย RCT\nอาจารย์ผู้สอน: ผศ. พญ.ฉัฐญาณ์ วงศ์รัฐนันท์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก & Online (Zoom)\nรูปแบบ: EP9 Onsite + Online (Hybrid) · Ex 6–7 & Q&A Online (เช็คชื่อคาบ 13.00 น. (Q&A ไม่เช็คชื่อ))
 URL:https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1
@@ -335,8 +335,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d5-hs6-lec@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261204T090000
-DTEND;TZID=Asia/Bangkok:20261204T100000
+DTSTART;TZID=Asia/Bangkok:20261204T083000
+DTEND;TZID=Asia/Bangkok:20261204T093000
 SUMMARY:[RACM 303] *HS6: การประกันสุขภาพ (Health Insurance & Payment) หลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage) และกลไกการจ่ายเงินแก่ผู้ให้บริการ (Provider Payment Methods)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 1) อธิบายหลัก Prepayment & Pooling การเฉลี่ยความเสี่ยง และการเกลี่ยรายได้ | 2) วิเคราะห์บทบาท Third-party Payer การซื้อบริการเชิงกลยุทธ์ Adverse Selection และเปรียบเทียบกองทุนไทย (UCS\, SSS\, CSMBS) | 3) เปรียบเทียบวิธีจ่ายเงิน (FFS\, Capitation\, DRGs\, Global Budget) | 4) วิเคราะห์ Moral Hazard\, Supplier-Induced Demand และมาตรการควบคุมค่าใช้จ่ายควบคู่กับการคุ้มครองคุณภาพ\nอาจารย์ผู้สอน: ผศ. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ / นพ.พีรสิชฌ์ สิทธิรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -349,7 +349,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d5-hs6-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261204T101000
+DTSTART;TZID=Asia/Bangkok:20261204T094000
 DTEND;TZID=Asia/Bangkok:20261204T120000
 SUMMARY:[RACM 303] Discussion (HS6): การประกันสุขภาพ (Health Insurance & Payment) หลักประกันสุขภาพถ้วนหน้า และกลไกการจ่ายเงินแก่ผู้ให้บริการ
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
@@ -363,8 +363,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w2-d5-sg2@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261204T130000
-DTEND;TZID=Asia/Bangkok:20261204T163000
+DTSTART;TZID=Asia/Bangkok:20261204T133000
+DTEND;TZID=Asia/Bangkok:20261204T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 2: การทำความรู้จักกันและชี้แจงภารกิจการทำงานกลุ่มก่อนและระหว่างออกภาคสนาม [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: กระบวนการกลุ่มเพื่อละลายพฤติกรรม เข้าใจกันและกัน ทราบความคาดหวังของนักศึกษาจากหลักสูตร | ทำความเข้าใจวัตถุประสงค์ของการเรียน การเตรียมตัวในการเรียน และศึกษาบริบทพื้นที่ภาคสนาม\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
@@ -386,7 +386,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d2-ep-exam@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261208T090000
+DTSTART;TZID=Asia/Bangkok:20261208T083000
 DTEND;TZID=Asia/Bangkok:20261208T120000
 SUMMARY:[RACM 303] สอบภาคทฤษฎีระบาด (EP1–EP9)
 LOCATION:2C2_02-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก
@@ -400,8 +400,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d2-spss@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261208T130000
-DTEND;TZID=Asia/Bangkok:20261208T143000
+DTSTART;TZID=Asia/Bangkok:20261208T133000
+DTEND;TZID=Asia/Bangkok:20261208T150000
 SUMMARY:[RACM 303] โปรแกรมวิเคราะห์ข้อมูล SPSS
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก | Zoom: https://zoom.us/j/95270544175?pwd=B7iFJGrjOcvFM4uzwtBfgic83Hse2q.1
 DESCRIPTION:🎥 ลิงก์เข้าห้องเรียน Zoom: https://zoom.us/j/95270544175?pwd=B7iFJGrjOcvFM4uzwtBfgic83Hse2q.1\nMeeting ID: 952 7054 4175 | Passcode: 756928\n\nวัตถุประสงค์: สร้างโครงสร้างฐานข้อมูล ลงรหัสข้อมูล และวิเคราะห์สถิติเชิงพรรณนาและสถิติวิเคราะห์พื้นฐานด้วยโปรแกรม SPSS เพื่อใช้ในภาคสนาม\nอาจารย์ผู้สอน: อ. พญ.สวนีย์ ศรีเจริญธรรม\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite + Online (Hybrid · จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -416,8 +416,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d2-sg3@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261208T143000
-DTEND;TZID=Asia/Bangkok:20261208T163000
+DTSTART;TZID=Asia/Bangkok:20261208T150000
+DTEND;TZID=Asia/Bangkok:20261208T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 3: การทำความเข้าใจข้อมูลพื้นฐานและเตรียมเครื่องมือศึกษาชุมชน ระบบบริการสุขภาพ (ครั้งที่ 1) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: การทำความเข้าใจข้อมูลพื้นฐาน เพื่อใช้ในการเตรียมเครื่องมือ | การเตรียมเครื่องมือเพื่อศึกษาชุมชน ศักยภาพชุมชน ระบบบริการสุขภาพ บทบาทแพทย์ สุขภาพกับปัจจัยที่เกี่ยวข้อง การสร้างเสริมสุขภาพ ครั้งที่ 1\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
@@ -430,7 +430,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d3-dhs-panel@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261209T090000
+DTSTART;TZID=Asia/Bangkok:20261209T083000
 DTEND;TZID=Asia/Bangkok:20261209T120000
 SUMMARY:[RACM 303] Panel Discussion: District Health Systems – Six Building Blocks Plus One
 LOCATION:2C2_02-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก
@@ -444,8 +444,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d3-sg4@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261209T143000
-DTEND;TZID=Asia/Bangkok:20261209T163000
+DTSTART;TZID=Asia/Bangkok:20261209T133000
+DTEND;TZID=Asia/Bangkok:20261209T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 4: การทำความเข้าใจข้อมูลพื้นฐานและเตรียมเครื่องมือศึกษาชุมชน ระบบบริการสุขภาพ (ครั้งที่ 2) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: การทำความเข้าใจข้อมูลพื้นฐาน เพื่อใช้ในการเตรียมเครื่องมือ | การเตรียมเครื่องมือเพื่อศึกษาชุมชน ศักยภาพชุมชน ระบบบริการสุขภาพ บทบาทแพทย์ สุขภาพกับปัจจัยที่เกี่ยวข้อง การสร้างเสริมสุขภาพ ครั้งที่ 2\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
@@ -496,8 +496,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w3-d5-sg6@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261211T130000
-DTEND;TZID=Asia/Bangkok:20261211T163000
+DTSTART;TZID=Asia/Bangkok:20261211T133000
+DTEND;TZID=Asia/Bangkok:20261211T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 5: ภาคปฏิบัติ 7 เครื่องมือ + การเตรียมการออกพื้นที่ ครั้งที่ 2 (เฉพาะ 4 กลุ่ม: ด่านซ้าย\, ท่าวังผา\, อุบลรัตน์\, ท่าสองยาง) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: การทำความเข้าใจข้อมูลพื้นฐาน เพื่อใช้ในการเตรียมเครื่องมือ | ภาคปฏิบัติ 7 เครื่องมือศึกษาชุมชน และการเตรียมเครื่องมือเพื่อศึกษาชุมชน ศักยภาพชุมชน ระบบบริการสุขภาพ บทบาทแพทย์ สุขภาพกับปัจจัยที่เกี่ยวข้อง การสร้างเสริมสุขภาพ ครั้งที่ 3\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · เฉพาะ 4 กลุ่ม (75 คน) (เช็คชื่อ)
@@ -548,8 +548,22 @@ BEGIN:VEVENT
 UID:w5-d1-sdl@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
 DTSTART;TZID=Asia/Bangkok:20261221T090000
-DTEND;TZID=Asia/Bangkok:20261221T163000
-SUMMARY:[RACM 303] เตรียมสอบ (ศึกษาด้วยตนเองและจัดทำโน้ต A4 ลายมือ 1 แผ่น)
+DTEND;TZID=Asia/Bangkok:20261221T120000
+SUMMARY:[RACM 303] เตรียมสอบช่วงเช้า (ศึกษาด้วยตนเองและจัดทำโน้ต A4 ลายมือ 1 แผ่น)
+LOCATION:ห้องประจำกลุ่มย่อยทั้ง 9 ห้อง (3B1-01\, 3B1-05\, 3B1-06 และ 1C1-02 ถึง 1C1-07)
+DESCRIPTION:วัตถุประสงค์: ทบทวนเนื้อหา HS1–HS6 เชื่อมโยงกับประสบการณ์ภาคสนาม และจัดทำกระดาษโน้ตสรุปด้วยลายมือตนเอง 1 แผ่น A4 (หน้า-หลัง) สำหรับเข้าห้องสอบแบบ Open Note\nอาจารย์ผู้สอน: อาจารย์ที่ปรึกษาประจำกลุ่ม / นักศึกษาศึกษาด้วยตนเอง\nสถานที่/ห้องเรียน: ห้องประจำกลุ่มย่อยทั้ง 9 ห้อง (3B1-01\, 3B1-05\, 3B1-06 และ 1C1-02 ถึง 1C1-07)\nรูปแบบ: Self-Directed Learning (SDL) (ไม่เช็คชื่อ)
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] เตรียมสอบ (ศึกษาด้วยตนเองและจัดทำโน้ต A4 ลายมือ 1 แผ่น)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:w5-d1-sdl-pm@racm303-2569.mahidol.ac.th
+DTSTAMP:20261124T050000Z
+DTSTART;TZID=Asia/Bangkok:20261221T133000
+DTEND;TZID=Asia/Bangkok:20261221T170000
+SUMMARY:[RACM 303] เตรียมสอบช่วงบ่าย (ศึกษาด้วยตนเองและจัดทำโน้ต A4 ลายมือ 1 แผ่น)
 LOCATION:ห้องประจำกลุ่มย่อยทั้ง 9 ห้อง (3B1-01\, 3B1-05\, 3B1-06 และ 1C1-02 ถึง 1C1-07)
 DESCRIPTION:วัตถุประสงค์: ทบทวนเนื้อหา HS1–HS6 เชื่อมโยงกับประสบการณ์ภาคสนาม และจัดทำกระดาษโน้ตสรุปด้วยลายมือตนเอง 1 แผ่น A4 (หน้า-หลัง) สำหรับเข้าห้องสอบแบบ Open Note\nอาจารย์ผู้สอน: อาจารย์ที่ปรึกษาประจำกลุ่ม / นักศึกษาศึกษาด้วยตนเอง\nสถานที่/ห้องเรียน: ห้องประจำกลุ่มย่อยทั้ง 9 ห้อง (3B1-01\, 3B1-05\, 3B1-06 และ 1C1-02 ถึง 1C1-07)\nรูปแบบ: Self-Directed Learning (SDL) (ไม่เช็คชื่อ)
 BEGIN:VALARM
@@ -561,7 +575,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w5-d2-hs-exam@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261222T090000
+DTSTART;TZID=Asia/Bangkok:20261222T083000
 DTEND;TZID=Asia/Bangkok:20261222T120000
 SUMMARY:[RACM 303] สอบภาคทฤษฎีระบบ (HS1–HS6 · Open Note A4 ลายมือ 1 แผ่น)
 LOCATION:2C2 × 3 ห้อง ชั้น 2 อาคารพรีคลินิก
@@ -575,8 +589,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w5-d2-cld-ws@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261222T130000
-DTEND;TZID=Asia/Bangkok:20261222T163000
+DTSTART;TZID=Asia/Bangkok:20261222T133000
+DTEND;TZID=Asia/Bangkok:20261222T170000
 SUMMARY:[RACM 303] Workshop: Systems Thinking in Actions – CLD / System Archetypes (Synthesis & Wrap-up)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: สังเคราะห์ข้อมูลและปัญหาซับซ้อนที่พบจากภาคสนามด้วยแผนผังวงจรเหตุปัจจัย (CLD) และแม่แบบเชิงระบบ (System Archetypes) พร้อมระบุจุดคานงัด (Leverage Points) ในการออกแบบข้อเสนอพัฒนาระบบ\nอาจารย์ผู้สอน: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -603,8 +617,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w5-d3-sg7@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261223T130000
-DTEND;TZID=Asia/Bangkok:20261223T163000
+DTSTART;TZID=Asia/Bangkok:20261223T133000
+DTEND;TZID=Asia/Bangkok:20261223T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 6: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามี) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์รายวิชาทั้ง 5 ข้อ และวิเคราะห์ผลการศึกษา Health Survey (ถ้ามี)\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
@@ -631,8 +645,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w5-d4-policy@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261224T130000
-DTEND;TZID=Asia/Bangkok:20261224T163000
+DTSTART;TZID=Asia/Bangkok:20261224T133000
+DTEND;TZID=Asia/Bangkok:20261224T170000
 SUMMARY:[RACM 303] Panel Discussion: Young-Gen Systems-based Practitioner การขับเคลื่อนข้อเสนอเชิงนโยบายภายใต้บริบทเศรษฐศาสตร์การเมือง
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: แลกเปลี่ยนเรียนรู้บทบาทแพทย์รุ่นใหม่ในฐานะผู้ปฏิบัติการเชิงระบบ (Young-Gen Systems-based Practitioner) และการขับเคลื่อนข้อเสนอเชิงนโยบายสุขภาพภายใต้บริบทเศรษฐศาสตร์การเมือง\nอาจารย์ผู้สอน: วิทยากรและผู้ดำเนินการอภิปรายประจำรายวิชา RACM 303\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
@@ -649,7 +663,7 @@ DTSTART;TZID=Asia/Bangkok:20261225T090000
 DTEND;TZID=Asia/Bangkok:20261225T120000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 7: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ)\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
+DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ)\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (ไม่เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
@@ -659,11 +673,11 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w5-d5-sg10@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261225T130000
-DTEND;TZID=Asia/Bangkok:20261225T163000
+DTSTART;TZID=Asia/Bangkok:20261225T133000
+DTEND;TZID=Asia/Bangkok:20261225T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 8: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ)\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
+DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ)\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (ไม่เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
@@ -677,7 +691,7 @@ DTSTART;TZID=Asia/Bangkok:20261228T090000
 DTEND;TZID=Asia/Bangkok:20261228T120000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 9: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามี) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามี) พร้อมเตรียมสไลด์นำเสนอ\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
+DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามี) พร้อมเตรียมสไลด์นำเสนอ\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (ไม่เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
@@ -687,11 +701,11 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w6-d1-sg12@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261228T130000
-DTEND;TZID=Asia/Bangkok:20261228T163000
+DTSTART;TZID=Asia/Bangkok:20261228T133000
+DTEND;TZID=Asia/Bangkok:20261228T170000
 SUMMARY:[RACM 303] กิจกรรมกลุ่มย่อย ครั้งที่ 10: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ) และซ้อมการนำเสนอแลกเปลี่ยนเรียนรู้\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (เช็คชื่อ)
+DESCRIPTION:วัตถุประสงค์: สรุปข้อมูลภาคสนามตามวัตถุประสงค์ และ Health Survey (ถ้ามีต่อ) และซ้อมการนำเสนอแลกเปลี่ยนเรียนรู้\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (ไม่เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
@@ -715,7 +729,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w6-d2-pres-hs-pm@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261229T130000
+DTSTART;TZID=Asia/Bangkok:20261229T133000
 DTEND;TZID=Asia/Bangkok:20261229T153000
 SUMMARY:[RACM 303] นำเสนอการเรียนรู้ภาคสนาม ระบบบริการสุขภาพ (ต่อ)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
@@ -730,7 +744,7 @@ BEGIN:VEVENT
 UID:w6-d2-sg13@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
 DTSTART;TZID=Asia/Bangkok:20261229T153000
-DTEND;TZID=Asia/Bangkok:20261229T173000
+DTEND;TZID=Asia/Bangkok:20261229T170000
 SUMMARY:[RACM 303] เตรียมการนำเสนอ (ระบาดวิทยา) [กลุ่มท่าสองยาง · ห้อง 1C1-06]
 LOCATION:1C1-06 ชั้น 1 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: ซักซ้อมและเตรียมไฟล์ข้อมูลสำหรับการนำเสนอการเรียนรู้ภาคสนามด้านระบาดวิทยาในวันพุธที่ 30 ธ.ค. 2569\nอาจารย์ผู้สอน: ผศ. นพ.วิชช์ เกษมทรัพย์ / นพ.ภรัณยู โอสถธนากร · ผู้ประสานงาน: คุณมงคล (พี่หมง)\nสถานที่/ห้องเรียน: 1C1-06 ชั้น 1 อาคารพรีคลินิก\nรูปแบบ: Onsite · แยก 9 กลุ่มพื้นที่ภาคสนาม (ไม่เช็คชื่อ)
@@ -744,7 +758,7 @@ BEGIN:VEVENT
 UID:w6-d3-pres-ep@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
 DTSTART;TZID=Asia/Bangkok:20261230T083000
-DTEND;TZID=Asia/Bangkok:20261230T130000
+DTEND;TZID=Asia/Bangkok:20261230T120000
 SUMMARY:[RACM 303] นำเสนอการเรียนรู้ภาคสนาม ระบาดวิทยา กลุ่มละ 1 เรื่อง เชื่อมโยงเรื่องเด่นตามวัตถุประสงค์ (บูรณาการได้)
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
 DESCRIPTION:วัตถุประสงค์: 08.00–08.30 น. ลงทะเบียน/ส่งไฟล์นำเสนอ ณ ห้อง 2C2-03 | นำเสนอกลุ่มละไม่เกิน 7 นาที อภิปรายไม่เกิน 18 นาที (25 นาที/กลุ่ม)\nอาจารย์ผู้สอน: อ.ที่ปรึกษา / นศพ. (จำนวน นศพ. 169 คน · อาจารย์ 12 คน · จนท.ภาควิชาฯ 5 คน)\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (เช็คชื่อ)
@@ -757,7 +771,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:w6-d3-srn2@racm303-2569.mahidol.ac.th
 DTSTAMP:20261124T050000Z
-DTSTART;TZID=Asia/Bangkok:20261230T130000
+DTSTART;TZID=Asia/Bangkok:20261230T133000
 DTEND;TZID=Asia/Bangkok:20261230T170000
 SUMMARY:[RACM 303] SDL · ทำแบบประเมินผลพฤติกรรมและเจตคตินักศึกษา (โดย นศพ.) · ส่ง SRN 2 และไฟล์นำเสนอ + แบบสอบถาม Health Survey (ภายใน 17.00 น.)
 LOCATION:E-learning & Google Form (forms.gle/1Gsg2SmSfuuEwmcE9)
