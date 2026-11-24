@@ -31886,6 +31886,56 @@ html[data-theme="dark"] .ep6-quote-item.is-spoken-done .ep6-quote-time {
   background: #d97706;
 }
 
+.ep6-upv-dots.is-dense {
+  gap: 3px;
+}
+
+.ep6-upv-dots.is-dense .ep6-upv-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.ep6-upv-dots.is-dense .ep6-upv-dot.is-active {
+  width: 12px;
+}
+
+.ep6-fsc-quotes.is-scrollable-vq {
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ep6-fsc-quotes.is-scrollable-vq.is-expanded {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.ep6-fsc-expand-vq-btn {
+  margin-top: 6px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #0f766e;
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 11.4px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.ep6-fsc-expand-vq-btn:hover {
+  background: #f0fdfa;
+  border-color: #0d9488;
+}
+
+html[data-theme="dark"] .ep6-fsc-expand-vq-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #5eead4;
+}
+
 .ep6-upv-counter {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11.2px;
@@ -39150,7 +39200,7 @@ html[data-theme="dark"] .doh-toolbar-hint {
 .doh-diagram-shell {
   position: relative;
   border-radius: 0;
-  padding: 18px 6.2% 24px;
+  padding: 20px 6.5% 24px;
   background: transparent;
   border: none;
   isolation: isolate;
@@ -39166,14 +39216,16 @@ html[data-theme="dark"] .doh-toolbar-hint {
   overflow: visible;
 }
 
+.doh-oval-bg-svg.is-outer-svg path,
 .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: #fcf7f1;
-  stroke: rgba(197, 90, 17, 0.34);
+  stroke: rgba(197, 90, 17, 0.36);
   stroke-width: 1.9px;
   stroke-dasharray: 7 5;
   transition: fill 0.22s ease, stroke 0.22s ease;
 }
 
+.doh-diagram-shell.is-outer-oval-on > .doh-oval-bg-svg.is-outer-svg path,
 .doh-diagram-shell.is-outer-oval-on > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: #fae4d2;
   stroke: #c55a11;
@@ -39181,22 +39233,26 @@ html[data-theme="dark"] .doh-toolbar-hint {
   stroke-dasharray: none;
 }
 
+.doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg path,
 .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: #fdf8f2;
   stroke: transparent;
 }
 
+html[data-theme="dark"] .doh-oval-bg-svg.is-outer-svg path,
 html[data-theme="dark"] .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: rgba(24, 24, 32, 0.72);
   stroke: rgba(251, 146, 60, 0.34);
 }
 
+html[data-theme="dark"] .doh-diagram-shell.is-outer-oval-on > .doh-oval-bg-svg.is-outer-svg path,
 html[data-theme="dark"] .doh-diagram-shell.is-outer-oval-on > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: rgba(154, 52, 18, 0.24);
   stroke: #fb923c;
   stroke-dasharray: none;
 }
 
+html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg path,
 html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: rgba(15, 23, 42, 0.45);
   stroke: transparent;
@@ -39207,7 +39263,7 @@ html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-
   flex-direction: column;
   align-items: center;
   margin: 0 auto 8px;
-  max-width: 64%;
+  max-width: 62%;
   position: relative;
   z-index: 2;
 }
@@ -39215,19 +39271,21 @@ html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-
 .doh-inner-oval {
   position: relative;
   border-radius: 0;
-  padding: 24px 8.2% 22px;
+  padding: 26px 8.6% 24px;
   background: transparent;
   border: none;
 }
 
+.doh-oval-bg-svg.is-inner-svg path,
 .doh-oval-bg-svg.is-inner-svg ellipse {
   fill: rgba(255, 255, 255, 0.56);
-  stroke: rgba(43, 84, 126, 0.30);
+  stroke: rgba(43, 84, 126, 0.32);
   stroke-width: 1.8px;
   stroke-dasharray: 6 5;
   transition: fill 0.22s ease, stroke 0.22s ease;
 }
 
+.doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-inner-svg path,
 .doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-inner-svg ellipse {
   fill: #e5edda;
   stroke: #2b547e;
@@ -39235,16 +39293,19 @@ html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-
   stroke-dasharray: none;
 }
 
+.doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg path,
 .doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg ellipse {
   fill: transparent;
   stroke: transparent;
 }
 
+html[data-theme="dark"] .doh-oval-bg-svg.is-inner-svg path,
 html[data-theme="dark"] .doh-oval-bg-svg.is-inner-svg ellipse {
   fill: rgba(15, 23, 42, 0.45);
   stroke: rgba(56, 189, 248, 0.30);
 }
 
+html[data-theme="dark"] .doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-inner-svg path,
 html[data-theme="dark"] .doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-inner-svg ellipse {
   fill: rgba(21, 128, 61, 0.20);
   stroke: #38bdf8;
@@ -41262,4 +41323,896 @@ html[data-theme="dark"] .iq-concept-links-bar {
 
 html[data-theme="dark"] .iq-concept-links-label {
   color: #cbd5e1;
+}
+
+/* ==========================================================================
+   PowerPoint Scheduled Hide Slide -> Auto-Unhide After Discussion Ends
+   & Clean Unboxed Filled-in Diagram Bullet Highlights
+   ========================================================================== */
+.doh-key-bullets li {
+  margin-bottom: 3px;
+}
+
+.doh-key-bullets mark.hsd-ans-hl {
+  cursor: default;
+  padding: 0.5px 5px;
+  border-radius: 5px;
+}
+
+mark.hsd-ans-hl {
+  cursor: default;
+}
+
+.ppt-thumb-item.is-hidden-slide-thumb .ppt-thumb-num {
+  position: relative;
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 4px;
+  padding: 1px 4px;
+  text-decoration: line-through;
+}
+
+.ppt-thumb-item.is-hidden-slide-thumb .ppt-thumb-card,
+.ppt-sorter-card.is-hidden-slide-card {
+  opacity: 0.76;
+  border-style: dashed !important;
+  border-color: #94a3b8 !important;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(241, 245, 249, 0.92),
+    rgba(241, 245, 249, 0.92) 7px,
+    rgba(226, 232, 240, 0.72) 7px,
+    rgba(226, 232, 240, 0.72) 14px
+  ) !important;
+}
+
+html[data-theme="dark"] .ppt-thumb-item.is-hidden-slide-thumb .ppt-thumb-card,
+html[data-theme="dark"] .ppt-sorter-card.is-hidden-slide-card {
+  border-color: #475569 !important;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(15, 23, 42, 0.88),
+    rgba(15, 23, 42, 0.88) 7px,
+    rgba(30, 41, 59, 0.78) 7px,
+    rgba(30, 41, 59, 0.78) 14px
+  ) !important;
+}
+
+.ppt-thumb-flag.is-hidden-flag {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .ppt-thumb-flag.is-hidden-flag {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+
+.ppt-hidden-slide-gate {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 28px;
+}
+
+.ppt-hsg-card {
+  max-width: 680px;
+  width: 100%;
+  text-align: center;
+  padding: 28px 32px;
+  border-radius: 20px;
+  border: 2px dashed #94a3b8;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(241, 245, 249, 0.94) 100%);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+html[data-theme="dark"] .ppt-hsg-card {
+  border-color: #475569;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.ppt-hsg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  background: #e2e8f0;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+html[data-theme="dark"] .ppt-hsg-badge {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+.ppt-hsg-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(37, 99, 235, 0.10);
+  color: #1d4ed8;
+  margin-bottom: 2px;
+}
+
+html[data-theme="dark"] .ppt-hsg-icon {
+  background: rgba(96, 165, 250, 0.16);
+  color: #93c5fd;
+}
+
+.ppt-hsg-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.32;
+}
+
+.ppt-hsg-desc {
+  margin: 0;
+  font-size: 14.2px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 560px;
+}
+
+.ppt-hsg-schedule-pill {
+  margin-top: 4px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  font-family: var(--font-display);
+  font-size: 13.6px;
+  font-weight: 700;
+}
+
+html[data-theme="dark"] .ppt-hsg-schedule-pill {
+  background: rgba(30, 58, 138, 0.28);
+  border-color: rgba(96, 165, 250, 0.38);
+  color: #bfdbfe;
+}
+
+.ppt-hsg-countdown {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+  font-size: 12.2px;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .ppt-hsg-countdown {
+  background: rgba(96, 165, 250, 0.22);
+  color: #93c5fd;
+}
+
+.ppt-cs-schedule-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 11.6px;
+  font-weight: 700;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.ppt-cs-schedule-tag.is-unhidden {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+html[data-theme="dark"] .ppt-cs-schedule-tag {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .ppt-cs-schedule-tag.is-unhidden {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(52, 211, 153, 0.42);
+  color: #6ee7b7;
+}
+
+.hsd-scroll-hidden-slide-bar {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13.2px;
+}
+
+.hsd-scroll-hidden-slide-bar.is-locked {
+  border: 1.5px dashed #94a3b8;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.hsd-scroll-hidden-slide-bar.is-unlocked {
+  border: 1.5px solid #6ee7b7;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+html[data-theme="dark"] .hsd-scroll-hidden-slide-bar.is-locked {
+  border-color: #475569;
+  background: rgba(15, 23, 42, 0.65);
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .hsd-scroll-hidden-slide-bar.is-unlocked {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(16, 185, 129, 0.14);
+  color: #a7f3d0;
+}
+
+
+/* ==========================================================================
+   MICROSOFT POWERPOINT FAMILIAR COLOR HEAD, BUTTON POSITIONS,
+   CLEAN SLIDE SHOW FULLSCREEN & NEW-TAB READING VIEW
+   ========================================================================== */
+
+/* 1. Authentic Microsoft PowerPoint Crimson-Terracotta App Title Bar ("Color Head") */
+.hsd-slide-shell.is-ppt-app {
+  border-radius: 12px;
+  border: 1px solid rgba(155, 53, 27, 0.24);
+  background: #f3f2f1;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app {
+  background: #14161b;
+  border-color: rgba(255, 140, 105, 0.22);
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar {
+  background: linear-gradient(90deg, #b7472a 0%, #c43e1c 50%, #9e351a 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
+  padding: 5px 10px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar {
+  background: linear-gradient(90deg, #8e331b 0%, #782914 54%, #521d0f 100%) !important;
+  color: #ffffff !important;
+  border-bottom-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-app-badge,
+.ppt-reading-topbar .ppt-app-badge {
+  background: #ffffff !important;
+  color: #b7472a !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  font-family: var(--font-display);
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24) !important;
+  flex-shrink: 0;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-autosave-pill {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #fff5f0 !important;
+  font-weight: 600 !important;
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-qat-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  border-radius: 5px !important;
+  width: 26px;
+  height: 26px;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-qat-btn:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+  border-color: rgba(255, 255, 255, 0.44) !important;
+  color: #ffffff !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-title-btn {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  border-radius: 5px !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-title-btn:hover {
+  background: rgba(255, 255, 255, 0.26) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-win-ctrl-btn {
+  background: transparent !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  width: 32px;
+  height: 26px;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-win-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-win-ctrl-btn.is-close:hover {
+  background: #e81123 !important;
+  color: #ffffff !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-doc-filename {
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.ppt-titlebar .ppt-theme-seg-pill,
+.ppt-reading-topbar .ppt-theme-seg-pill,
+.ppt-slide-sheet .ppt-slide-master-head .ppt-theme-seg-pill {
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+}
+
+.ppt-titlebar .ppt-theme-seg-opt,
+.ppt-reading-topbar .ppt-theme-seg-opt,
+.ppt-slide-sheet .ppt-slide-master-head .ppt-theme-seg-opt {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ppt-titlebar .ppt-theme-seg-opt.is-active,
+.ppt-reading-topbar .ppt-theme-seg-opt.is-active,
+.ppt-slide-sheet .ppt-slide-master-head .ppt-theme-seg-opt.is-active {
+  background: #ffffff !important;
+  color: #9a3118 !important;
+  font-weight: 800 !important;
+}
+
+/* 2. Authentic Microsoft PowerPoint Menu Bar, Ribbon & Top-Right Present Cluster */
+.hsd-slide-shell.is-ppt-app .ppt-menubar {
+  background: #faf9f8 !important;
+  border-bottom: 1px solid #e1dfdd !important;
+  padding: 3px 10px !important;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-menubar {
+  background: #181a20 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-file-tab {
+  background: #b7472a !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-file-tab:hover,
+.hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-file-tab.is-active {
+  background: #9b351b !important;
+  color: #ffffff !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-active:not(.is-file-tab) {
+  color: #b7472a !important;
+  border-bottom-color: #b7472a !important;
+  font-weight: 800 !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-active:not(.is-file-tab)::after {
+  background: #b7472a !important;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-active:not(.is-file-tab) {
+  color: #ff8c69 !important;
+  border-bottom-color: #ff8c69 !important;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-menu-tab.is-active:not(.is-file-tab)::after {
+  background: #ff8c69 !important;
+}
+
+.ppt-menubar-present-btn {
+  height: 25px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid #9b351b;
+  background: #b7472a;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 11.4px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4.5px;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+
+.ppt-menubar-present-btn:hover {
+  background: #9b351b;
+}
+
+.ppt-menubar-reading-btn {
+  height: 25px;
+  padding: 0 9px;
+  border-radius: 5px;
+  border: 1px solid #e07a5f;
+  background: #fff4f0;
+  color: #9b351b;
+  font-family: var(--font-display);
+  font-size: 11.3px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4.5px;
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.ppt-menubar-reading-btn:hover {
+  background: #ffe5dc;
+  border-color: #b7472a;
+}
+
+.ppt-menubar-reading-btn.is-sharing-live {
+  background: #059669;
+  border-color: #047857;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .ppt-menubar-reading-btn:not(.is-sharing-live) {
+  background: rgba(183, 71, 42, 0.2);
+  border-color: rgba(255, 140, 105, 0.42);
+  color: #ffb49e;
+}
+
+/* 3. PowerPoint Active Slide Thumbnail, Sorter & Bottom Status Bar */
+.hsd-slide-shell.is-ppt-app .ppt-thumb-item.is-active .ppt-thumb-card,
+.ppt-sorter-card.is-active {
+  border-color: #b7472a !important;
+  box-shadow: 0 0 0 2.5px rgba(183, 71, 42, 0.22), 0 6px 16px rgba(15, 23, 42, 0.08) !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-thumb-item.is-active .ppt-thumb-num {
+  color: #b7472a !important;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-thumb-item.is-active .ppt-thumb-num {
+  color: #ff8c69 !important;
+}
+
+.ppt-sorter-card:hover {
+  border-color: rgba(183, 71, 42, 0.55) !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-statusbar.is-authentic-ppt-bar {
+  background: #f3f2f1 !important;
+  color: #323130 !important;
+  border-top: 1px solid #d2d0ce !important;
+}
+
+html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-statusbar.is-authentic-ppt-bar {
+  background: #181a20 !important;
+  color: #cbd5e1 !important;
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 4. Familiar PowerPoint Slide Master "Color Head" Inside Every Slide */
+.ppt-slide-sheet .ppt-slide-master-head {
+  background: linear-gradient(90deg, #9a3118 0%, #b7472a 54%, #8c2a14 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 2px solid rgba(253, 186, 116, 0.38) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="dark"] .ppt-slide-sheet .ppt-slide-master-head {
+  background: linear-gradient(90deg, #6e2310 0%, #8a2f18 54%, #541a0c 100%) !important;
+  color: #ffffff !important;
+  border-bottom-color: rgba(251, 146, 60, 0.34) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-mod {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.34) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-title {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.ppt-slide-sheet .ppt-sm-stage-pills {
+  background: rgba(0, 0, 0, 0.24) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-stage-btn {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-stage-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.ppt-slide-sheet .ppt-sm-stage-btn.is-active,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-stage-btn.is-active {
+  background: #ffffff !important;
+  color: #9a3118 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+.ppt-slide-sheet .ppt-sm-qpill,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-qpill {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.ppt-slide-sheet .ppt-sm-qpill:hover,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-qpill:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+}
+
+.ppt-slide-sheet .ppt-sm-qpill.is-current,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-qpill.is-current {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #9a3118 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.ppt-slide-sheet .ppt-sm-timer-cluster,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-timer-cluster {
+  background: rgba(0, 0, 0, 0.24) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-tbtn,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-tbtn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+.ppt-slide-sheet .ppt-sm-tbtn:hover,
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-tbtn:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+}
+
+.ppt-slide-sheet .ppt-sm-timer-btn:not(.is-running):not(.is-warning):not(.is-urgent):not(.is-timeup),
+html[data-theme="dark"] .ppt-slide-sheet .ppt-sm-timer-btn:not(.is-running):not(.is-warning):not(.is-urgent):not(.is-timeup) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.ppt-slide-sheet .ppt-sm-timer-btn:not(.is-running):not(.is-warning):not(.is-urgent):not(.is-timeup):hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* 5. PowerPoint Reading View (Open in New Tab · Share Slide) */
+.ppt-presentation-overlay.is-reading-view-tab {
+  background: #1f1f1f;
+}
+
+.ppt-presentation-overlay.is-reading-view-tab .ppt-fs-stage-wrap {
+  background: #252423;
+}
+
+html[data-theme="dark"] .ppt-presentation-overlay.is-reading-view-tab .ppt-fs-stage-wrap {
+  background: #0d0f14;
+}
+
+.ppt-reading-topbar {
+  background: linear-gradient(90deg, #b7472a 0%, #c43e1c 52%, #9e351a 100%);
+  color: #ffffff;
+  padding: 5px 12px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.24);
+  z-index: 30;
+}
+
+html[data-theme="dark"] .ppt-reading-topbar {
+  background: linear-gradient(90deg, #8e331b 0%, #782914 54%, #521d0f 100%);
+}
+
+/* Cut out Reading Mode top heading bar completely whenever native Slide Show Full Screen is active! */
+:fullscreen .ppt-reading-topbar,
+:-webkit-full-screen .ppt-reading-topbar,
+.ppt-presentation-overlay.is-reading-native-fs .ppt-reading-topbar {
+  display: none !important;
+}
+
+.ppt-reading-top-left,
+.ppt-reading-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ppt-reading-doc-title {
+  font-family: var(--font-display);
+  font-size: 12.8px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 54vw;
+}
+
+.ppt-reading-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(220, 252, 231, 0.95);
+  color: #14532d;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ppt-reading-top-btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 11.6px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.ppt-reading-top-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.ppt-reading-top-btn.is-slideshow-cta {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #9a3118;
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ppt-reading-top-btn.is-slideshow-cta:hover {
+  background: #fff4ef;
+}
+
+/* Authentic PowerPoint Reading View Bottom Status Bar */
+.ppt-reading-statusbar {
+  background: #f3f2f1;
+  color: #323130;
+  border-top: 1px solid #d2d0ce;
+  padding: 4px 12px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 11.8px;
+  z-index: 30;
+}
+
+.ppt-reading-statusbar::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-theme="dark"] .ppt-reading-statusbar {
+  background: #181a20;
+  color: #e2e8f0;
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.ppt-reading-status-left,
+.ppt-reading-status-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.ppt-reading-nav-btn {
+  height: 27px;
+  padding: 0 9px;
+  border-radius: 4px;
+  border: 1px solid #c8c6c4;
+  background: #ffffff;
+  color: #201f1e;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.ppt-reading-nav-btn:hover:not(:disabled) {
+  background: #edebe9;
+  border-color: #8a8886;
+}
+
+.ppt-reading-nav-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.ppt-reading-nav-btn.is-active {
+  background: #fff4f0;
+  border-color: #b7472a;
+  color: #b7472a;
+}
+
+.ppt-reading-nav-btn.is-key-cta {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  border-color: #92400e;
+  color: #ffffff;
+}
+
+.ppt-reading-nav-btn.is-slideshow-launch {
+  background: #b7472a;
+  border-color: #9b351b;
+  color: #ffffff;
+  font-weight: 800;
+  padding: 0 11px;
+}
+
+.ppt-reading-nav-btn.is-slideshow-launch:hover {
+  background: #9b351b;
+}
+
+html[data-theme="dark"] .ppt-reading-nav-btn:not(.is-key-cta):not(.is-slideshow-launch) {
+  background: #222630;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .ppt-reading-nav-btn.is-active:not(.is-key-cta):not(.is-slideshow-launch) {
+  background: rgba(183, 71, 42, 0.26);
+  border-color: #ff8c69;
+  color: #ffb49e;
+}
+
+.ppt-reading-select {
+  height: 27px;
+  max-width: 240px;
+  padding: 0 7px;
+  border-radius: 4px;
+  border: 1px solid #c8c6c4;
+  background: #ffffff;
+  color: #201f1e;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .ppt-reading-select {
+  background: #222630;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f1f5f9;
+}
+
+/* 6. Teacher Lecture Slide PDF Full Screen — Cut Out Heading Bar & Open-New-Window Button! */
+.hs-inline-pdf-preview-card:fullscreen,
+.hs-inline-pdf-preview-card:-webkit-full-screen {
+  background: #000000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.hs-inline-pdf-preview-card:fullscreen .hs-inline-pdf-head,
+.hs-inline-pdf-preview-card:-webkit-full-screen .hs-inline-pdf-head {
+  display: none !important;
+}
+
+.hs-inline-pdf-preview-card:fullscreen .hs-inline-pdf-frame,
+.hs-inline-pdf-preview-card:-webkit-full-screen .hs-inline-pdf-frame {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100vh !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .ppt-reading-topbar {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .ppt-reading-sync-pill {
+    display: none;
+  }
+  .ppt-reading-doc-title {
+    max-width: 46vw;
+    font-size: 11.8px;
+  }
 }

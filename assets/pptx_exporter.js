@@ -396,14 +396,21 @@
       );
     };
 
+    const nodeFill = isBlank ? (isDark ? "1E222D" : "FFFDFB") : null;
+    const structBorder = isBlank ? (isDark ? "FB923C" : "E2B08A") : null;
+    const innerNodeFill = isBlank ? (isDark ? "1A2230" : "F9FBF7") : null;
+    const innerNodeBorder = isBlank ? (isDark ? "334155" : "BFD0B8") : null;
+    const outNodeFill = isBlank ? (isDark ? "3B1812" : "FFF9F2") : null;
+    const outNodeBorder = isBlank ? (isDark ? "F59E0B" : "B45309") : null;
+
     outShapes.push(
       buildCustomGeomShapeXml(
         nextId++,
         "DohNode_Structural",
         { x: sx, y: sy, w: sw, h: sh },
         "roundRect",
-        isDark ? "1E222D" : "FFFDFB",
-        isDark ? "FB923C" : "E2B08A",
+        nodeFill,
+        structBorder,
         buildNodeParas(nodes.structural, isDark ? "FB923C" : "C55A11", true, 8.6),
         { radiusAdj: 6500, lineW: 11000, padEmu: { l: 72000, r: 72000, t: 36000, b: 36000 } }
       )
@@ -428,17 +435,17 @@
       )
     );
 
-    // 4. Four Non-Overlapping Inner Nodes
+    // 4. Four Non-Overlapping Inner Nodes (Unboxed floating text inside filled ovals!)
     const indBox = {
-      x: ix + Math.round(iw * 0.055),
-      y: iy + Math.round(ih * 0.08),
-      w: Math.round(iw * 0.31),
+      x: ix + Math.round(iw * 0.065),
+      y: iy + Math.round(ih * 0.09),
+      w: Math.round(iw * 0.305),
       h: Math.round(ih * 0.50)
     };
     const socBox = {
-      x: ix + iw - Math.round(iw * 0.335) - Math.round(iw * 0.055),
-      y: iy + Math.round(ih * 0.07),
-      w: Math.round(iw * 0.335),
+      x: ix + iw - Math.round(iw * 0.33) - Math.round(iw * 0.065),
+      y: iy + Math.round(ih * 0.08),
+      w: Math.round(iw * 0.33),
       h: Math.round(ih * 0.54)
     };
     const outBox = {
@@ -462,10 +469,10 @@
         "DohNode_Individual",
         indBox,
         "roundRect",
-        isDark ? "1A2230" : "F9FBF7",
-        isDark ? "334155" : "BFD0B8",
+        innerNodeFill,
+        innerNodeBorder,
         buildNodeParas(nodes.individual, tealHead, false, 8.6),
-        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 36000, b: 36000 } }
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 54000, r: 54000, t: 32000, b: 32000 } }
       )
     );
     outShapes.push(
@@ -474,10 +481,10 @@
         "DohNode_SocEnv",
         socBox,
         "roundRect",
-        isDark ? "1A2230" : "F9FBF7",
-        isDark ? "334155" : "BFD0B8",
+        innerNodeFill,
+        innerNodeBorder,
         buildNodeParas(nodes.soc_env, tealHead, false, 8.3),
-        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 34000, b: 34000 } }
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 54000, r: 54000, t: 30000, b: 30000 } }
       )
     );
     outShapes.push(
@@ -486,10 +493,10 @@
         "DohNode_HealthSys",
         hsBox,
         "roundRect",
-        isDark ? "1A2230" : "F9FBF7",
-        isDark ? "334155" : "BFD0B8",
+        innerNodeFill,
+        innerNodeBorder,
         buildNodeParas(nodes.health_sys, tealHead, false, 8.5),
-        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 64000, r: 64000, t: 34000, b: 34000 } }
+        { radiusAdj: 6500, lineW: 10500, padEmu: { l: 54000, r: 54000, t: 30000, b: 30000 } }
       )
     );
 
@@ -498,7 +505,7 @@
     const outParas =
       `<a:p><a:pPr algn="ctr"/>` +
       buildRunXml(outTitle, {
-        pt: 11.4,
+        pt: 12.2,
         bold: true,
         color: isDark ? "FDA4AF" : "9A3B2E"
       }) +
@@ -514,10 +521,10 @@
         "DohNode_Outcome",
         outBox,
         "roundRect",
-        isDark ? "3B1812" : "FFF9F2",
-        isDark ? "F59E0B" : "B45309",
+        outNodeFill,
+        outNodeBorder,
         outParas,
-        { radiusAdj: 8500, lineW: 18000, padEmu: { l: 45000, r: 45000, t: 30000, b: 30000 } }
+        { radiusAdj: 8500, lineW: 18000, padEmu: { l: 40000, r: 40000, t: 26000, b: 26000 } }
       )
     );
 
