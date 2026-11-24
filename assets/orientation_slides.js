@@ -1282,7 +1282,7 @@
     },
     {
       id: "s08-epidemiology",
-      num: "11",
+      num: "10",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
@@ -1341,7 +1341,7 @@
     },
     {
       id: "s09-fieldwork-9sites",
-      num: "12",
+      num: "11",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
@@ -1405,7 +1405,7 @@
     },
     {
       id: "s10-competency-blueprint",
-      num: "13",
+      num: "12",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1441,7 +1441,7 @@
                 <tr>
                   <td><strong>1. Knowledge base</strong><br><span class="or-td-sub">ระบบสุขภาพและระบาดวิทยา</span></td>
                   <td>
-                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา แบบทดสอบทบทวน 66 ข้อ (<code>ST1, HS1–6</code>) แบบฝึกหัด <code>EP</code> และ <code>SRN 1</code></div>
+                    <div><span class="or-tag-inline is-formative">Formative</span> แบบฝึกกรณีศึกษา แบบทดสอบทบทวนด้วยตนเอง (<code>ST1, HS1–6</code>) แบบฝึกหัด <code>EP</code> และ <code>SRN 1</code></div>
                     <div class="or-td-gap"><span class="or-tag-inline is-summative">Summative</span> <strong>Epi Exam</strong> (8 ธ.ค.) และ <strong>Health Systems Exam</strong> (โน้ต A4 · 22 ธ.ค.)</div>
                   </td>
                   <td>คณาจารย์</td>
@@ -1493,7 +1493,7 @@
     },
     {
       id: "s11-eval-written-exams",
-      num: "14",
+      num: "13",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1556,7 +1556,7 @@
     },
     {
       id: "s12-eval-practical-rubrics",
-      num: "15",
+      num: "14",
       section: "evaluation",
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
@@ -1618,7 +1618,7 @@
     },
     {
       id: "s13-attendance-safety",
-      num: "16",
+      num: "15",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -1672,7 +1672,7 @@
     },
     {
       id: "s14-quiz-osmu",
-      num: "17",
+      num: "16",
       section: "evaluation",
       sectionLabel: "Act IV · Live Quiz O/S/M/U",
       actClass: "is-act-4",
@@ -1698,7 +1698,7 @@
     },
     {
       id: "s15-osmu-criteria",
-      num: "18",
+      num: "17",
       section: "evaluation",
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
@@ -1756,7 +1756,7 @@
     },
     {
       id: "s16-grading-milestones",
-      num: "19",
+      num: "18",
       section: "evaluation",
       sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
       actClass: "is-act-3",
@@ -1818,7 +1818,7 @@
     },
     {
       id: "s17-digital-launch",
-      num: "20",
+      num: "19",
       section: "action",
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
@@ -1837,7 +1837,7 @@
             ${figPlate("orient_s15_digital_hub.png", "RACM 303 Connected Digital Learning Hub", "")}
             <div class="or-card is-navy-tint is-s15-hub-note" data-fit-solo="1">
               <p class="or-card-text">
-                <strong>1. Smart Portal:</strong> ตารางเรียนเฉพาะกลุ่ม ปฏิทิน <code>.ics</code> บทเรียนนำทาง 5 ขั้น ลิงก์ Zoom และระบบใบลา<br>
+                <strong>1. Smart Portal:</strong> ตารางเรียนเฉพาะกลุ่ม ปฏิทิน <code>.ics</code> บทเรียนนำทาง 6 ขั้น ลิงก์ Zoom และระบบใบลา<br>
                 <strong>2. RAMA E-learning (<code>id=398</code>):</strong> ทำแบบฝึกหัดระบาดวิทยาและส่งงานสะท้อนคิด <code>SRN 1–2</code><br>
                 <strong>3. Google Form ประจำปี 2569:</strong> ส่งไฟล์สไลด์นำเสนอทีม (<code>3A, 4A</code>) และรายงานการสำรวจชุมชน
               </p>
@@ -1875,9 +1875,9 @@
   ];
 
   const SECTION_FILTERS = [
-    { id: "all", labelTh: "ทั้งหมด (20)", labelEn: "All Slides (20)" },
+    { id: "all", labelTh: "ทั้งหมด (19)", labelEn: "All Slides (19)" },
     { id: "intro", labelTh: "เปิดเรื่อง & QR Lobby (1)", labelEn: "Opening & Lobby (1)" },
-    { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (5)", labelEn: "Act I · Heritage & Why (5)" },
+    { id: "objectives", labelTh: "Act I · รากฐานและเป้าหมาย (4)", labelEn: "Act I · Heritage & Why (4)" },
     { id: "experience", labelTh: "Act II · ตารางเรียน & เส้นทางเรียนรู้ (6)", labelEn: "Act II · Schedule & Journey (6)" },
     { id: "evaluation", labelTh: "Act III · วัดผล & Quiz O/S/M/U (6)", labelEn: "Act III · Evaluation & O/S/M/U (6)" },
     { id: "action", labelTh: "Act IV · เวลาเรียน & ก้าวแรก (2)", labelEn: "Act IV · Conduct & Launch (2)" }
