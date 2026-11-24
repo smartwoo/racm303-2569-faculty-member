@@ -9242,10 +9242,10 @@ body.is-hsd-theater .hsd-slide-shell {
     height: auto;
     max-height: none;
   }
-  .hsd-slide-stage {
+  .hsd-slide-stage:not(.is-16x9-canvas) {
     grid-template-columns: 1fr;
   }
-  .hsd-slide-left {
+  .hsd-slide-stage:not(.is-16x9-canvas) > .hsd-slide-left {
     border-right: 0;
     border-bottom: 1px solid var(--line);
     max-height: 280px;
@@ -13240,12 +13240,12 @@ html[data-theme="dark"] .disc-site-subband {
   .hsd-rg-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .hsd-slide-stage.is-16x9-canvas {
+  :not(.ppt-slide-sheet) > .hsd-slide-stage.is-16x9-canvas {
     aspect-ratio: auto;
     max-height: none;
     grid-template-columns: 1fr !important;
   }
-  .hsd-split-resizer {
+  :not(.ppt-slide-sheet) > .hsd-slide-stage > .hsd-split-resizer {
     display: none;
   }
 }

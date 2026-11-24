@@ -22237,6 +22237,7 @@
         if (ev.touches.length === 2) {
           const d = getTouchDist(ev.touches[0], ev.touches[1]);
           if (d < 12) return;
+          if (ev.cancelable) ev.preventDefault();
           pinching = true;
           startDist = d;
           startScale = state.hsdFsZoomScale || 1;
@@ -22309,6 +22310,8 @@
     };
     stageWrap.addEventListener("touchend", endPinch, { passive: true });
     stageWrap.addEventListener("touchcancel", endPinch, { passive: true });
+    stageWrap.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
+    stageWrap.addEventListener("gesturechange", (ev) => ev.preventDefault(), { passive: false });
 
     // Trackpad / Ctrl+Wheel pinch-zoom support
     stageWrap.addEventListener(
@@ -26105,6 +26108,16 @@
       )
     );
     const modeSig = `${useRespSlide ? 1 : 0}:${useRespFlow ? 1 : 0}:${isMobileStack ? 1 : 0}`;
+
+    if (
+      !forceRefit &&
+      stageEl.classList.contains("is-pinch-zoomed") &&
+      sheetEl._lastStageW !== undefined &&
+      Math.abs(stageW - sheetEl._lastStageW) <= 28 &&
+      Math.abs(stageH - sheetEl._lastStageH) <= 28
+    ) {
+      return;
+    }
 
     if (
       !forceRefit &&
