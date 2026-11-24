@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124gio2";
+  const ASSET_VER = "20261124fit1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -1181,23 +1181,28 @@
   ];
 
   /* ---------- Per-Frame Binary-Search Auto-Fit Typography & Multi-Device Reflow ---------- */
-  function isScrollReflowDevice() {
+  function isPhoneReflowMode() {
     const w = window.innerWidth || 1024;
     const h = window.innerHeight || 768;
-    if (w <= 760) return true;
-    if (h <= 520) return true;
-    if (w <= 1040 && w / Math.max(1, h) < 1.32) return true;
+    if (w <= 700 && w <= h) return true;
+    if (h <= 540 && w > h) return true;
     return false;
   }
 
-  function isPortraitMobileMode() {
-    return isScrollReflowDevice();
+  function isAutoHeightBox(el) {
+    if (!el || el.clientHeight <= 0) return true;
+    el.style.setProperty("--fit-scale", "0.72");
+    const h1 = el.clientHeight;
+    el.style.setProperty("--fit-scale", "1.32");
+    const h2 = el.clientHeight;
+    el.style.removeProperty("--fit-scale");
+    return Math.abs(h2 - h1) > 2;
   }
 
   function findMaxScaleForBox(el, checkFn, minS, maxS, safetyFactor) {
     let lo = minS;
     let hi = maxS;
-    for (let step = 0; step < 12; step++) {
+    for (let step = 0; step < 14; step++) {
       const mid = (lo + hi) * 0.5;
       el.style.setProperty("--fit-scale", mid.toFixed(4));
       if (checkFn([el])) {
@@ -1210,42 +1215,80 @@
   }
 
   function binarySearchUniformScale(els, checkFn, minS, maxS, safetyFactor) {
+    const bounded = els.filter((el) => !isAutoHeightBox(el));
+    els.forEach((el) => {
+      if (bounded.indexOf(el) === -1) el.style.removeProperty("--fit-scale");
+    });
+    if (!bounded.length) return;
     let lo = minS;
     let hi = maxS;
-    for (let step = 0; step < 12; step++) {
+    for (let step = 0; step < 14; step++) {
       const mid = (lo + hi) * 0.5;
-      for (let i = 0; i < els.length; i++) {
-        els[i].style.setProperty("--fit-scale", mid.toFixed(4));
+      for (let i = 0; i < bounded.length; i++) {
+        bounded[i].style.setProperty("--fit-scale", mid.toFixed(4));
       }
-      if (checkFn(els)) {
+      if (checkFn(bounded)) {
         lo = mid;
       } else {
         hi = mid;
       }
     }
     const finalScale = Math.max(minS, lo * safetyFactor);
-    for (let i = 0; i < els.length; i++) {
-      els[i].style.setProperty("--fit-scale", finalScale.toFixed(4));
+    for (let i = 0; i < bounded.length; i++) {
+      bounded[i].style.setProperty("--fit-scale", finalScale.toFixed(4));
     }
   }
 
   function fitHarmonizedCardGroup(els, minS, maxS, safetyFactor, maxSiblingSpread) {
     if (!els.length) return;
-    const rawScales = els.map((el) => findMaxScaleForBox(el, boxesFitCleanly, minS, maxS, safetyFactor));
+    const bounded = els.filter((el) => !isAutoHeightBox(el));
+    els.forEach((el) => {
+      if (bounded.indexOf(el) === -1) el.style.removeProperty("--fit-scale");
+    });
+    if (!bounded.length) return;
+    const rawScales = bounded.map((el) => findMaxScaleForBox(el, boxesFitCleanly, minS, maxS, safetyFactor));
     const minGroupScale = Math.min.apply(null, rawScales);
-    const cap = minGroupScale * (maxSiblingSpread || 1.24);
-    for (let i = 0; i < els.length; i++) {
+    const cap = minGroupScale * (maxSiblingSpread || 1.28);
+    for (let i = 0; i < bounded.length; i++) {
       const s = Math.min(rawScales[i], cap);
-      els[i].style.setProperty("--fit-scale", s.toFixed(4));
+      bounded[i].style.setProperty("--fit-scale", s.toFixed(4));
     }
+  }
+
+  function singleBoxFitsCleanly(el) {
+    if (el.clientHeight <= 0 || el.clientWidth <= 0) return true;
+    if (el.scrollHeight > el.clientHeight + 1) return false;
+    if (el.scrollWidth > el.clientWidth + 1) return false;
+
+    const cs = window.getComputedStyle(el);
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const padB = parseFloat(cs.paddingBottom) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const bT = parseFloat(cs.borderTopWidth) || 0;
+    const bB = parseFloat(cs.borderBottomWidth) || 0;
+    const bR = parseFloat(cs.borderRightWidth) || 0;
+    const r = el.getBoundingClientRect();
+    const innerTop = r.top + bT + padT - 1.0;
+    const innerBot = r.bottom - bB - padB + 1.0;
+    const innerRight = r.right - bR - padR + 1.5;
+
+    const kids = el.children;
+    for (let k = 0; k < kids.length; k++) {
+      const kid = kids[k];
+      const kcs = window.getComputedStyle(kid);
+      if (kcs.display === "none" || kcs.position === "absolute") continue;
+      const kr = kid.getBoundingClientRect();
+      if (kr.height <= 0 && kr.width <= 0) continue;
+      if (kr.top < innerTop || kr.bottom > innerBot || kr.right > innerRight) {
+        return false;
+      }
+    }
+    return true;
   }
 
   function boxesFitCleanly(els) {
     for (let i = 0; i < els.length; i++) {
-      const el = els[i];
-      if (el.clientHeight <= 0 || el.clientWidth <= 0) continue;
-      if (el.scrollHeight > el.clientHeight + 1) return false;
-      if (el.scrollWidth > el.clientWidth + 1) return false;
+      if (!singleBoxFitsCleanly(els[i])) return false;
     }
     return true;
   }
@@ -1262,6 +1305,21 @@
     return true;
   }
 
+  function verifyPostMeasureFit(els, checkSingleFn, minS) {
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      const curStr = el.style.getPropertyValue("--fit-scale");
+      if (!curStr) continue;
+      let s = parseFloat(curStr);
+      if (!Number.isFinite(s)) continue;
+      for (let guard = 0; guard < 4; guard++) {
+        if (checkSingleFn(el)) break;
+        s = Math.max(minS, s * 0.96);
+        el.style.setProperty("--fit-scale", s.toFixed(4));
+      }
+    }
+  }
+
   function fitSingleSlideCanvas(canvas) {
     if (
       !canvas ||
@@ -1270,10 +1328,12 @@
     ) {
       return;
     }
-    const allScaled = canvas.querySelectorAll(
-      ".or-card, .or-visual-pillar-copy, .or-table-wrap, .or-schematic-box, .or-cover-kpi, .or-cover-act-chip"
+    const allScaled = Array.from(
+      canvas.querySelectorAll(
+        ".or-card, .or-visual-pillar-copy, .or-table-wrap, .or-schematic-box, .or-cover-kpi, .or-cover-act-chip"
+      )
     );
-    if (isPortraitMobileMode() && !document.body.classList.contains("is-printing-orientation-deck")) {
+    if (isPhoneReflowMode() && !document.body.classList.contains("is-printing-orientation-deck")) {
       allScaled.forEach((el) => el.style.removeProperty("--fit-scale"));
       return;
     }
@@ -1284,46 +1344,61 @@
     // 1. Cover Slide KPI tiles & Act chips
     if (canvas.classList.contains("is-cover-canvas")) {
       const kpis = Array.from(canvas.querySelectorAll(".or-cover-kpi"));
-      if (kpis.length) binarySearchUniformScale(kpis, boxesFitCleanly, 0.58, 1.55, 0.96);
+      if (kpis.length) binarySearchUniformScale(kpis, boxesFitCleanly, 0.48, 1.85, 0.95);
       const acts = Array.from(canvas.querySelectorAll(".or-cover-act-chip"));
-      if (acts.length) fitHarmonizedCardGroup(acts, 0.58, 1.75, 0.96, 1.16);
+      if (acts.length) fitHarmonizedCardGroup(acts, 0.48, 1.95, 0.95, 1.18);
       canvas.removeAttribute("data-measuring");
+      verifyPostMeasureFit(kpis.concat(acts), singleBoxFitsCleanly, 0.45);
       return;
     }
 
-    // 2. Harmonized Card Groups (fills each frame ~93%-96% while keeping sibling fonts cohesive!)
+    // 2. Harmonized Card Groups (fills each frame ~88%-95% while keeping sibling fonts cohesive!)
     canvas.querySelectorAll("[data-fit-group]").forEach((grp) => {
       const kind = grp.getAttribute("data-fit-group");
       let targets = [];
-      let spread = 1.24;
+      let spread = 1.28;
       if (kind === "pillars") {
         targets = Array.from(grp.querySelectorAll(":scope > .or-visual-pillar-card > .or-visual-pillar-copy"));
-        spread = 1.24;
+        spread = 1.28;
       } else if (kind === "s02-takeaways") {
         targets = Array.from(grp.querySelectorAll(":scope > .or-s02-flow-card > .or-s02-takeaway-box"));
-        spread = 1.32;
+        spread = 1.34;
       } else {
         targets = Array.from(grp.querySelectorAll(":scope > .or-card"));
-        spread = 1.24;
+        spread = 1.28;
       }
       if (targets.length) {
-        fitHarmonizedCardGroup(targets, 0.58, 2.20, 0.965, spread);
+        fitHarmonizedCardGroup(targets, 0.45, 2.50, 0.96, spread);
       }
     });
 
     // 3. Standalone Fixed-Track Boxes
     canvas.querySelectorAll("[data-fit-solo]").forEach((box) => {
-      const s = findMaxScaleForBox(box, boxesFitCleanly, 0.58, 2.05, 0.95);
+      if (isAutoHeightBox(box)) {
+        box.style.removeProperty("--fit-scale");
+        return;
+      }
+      const s = findMaxScaleForBox(box, boxesFitCleanly, 0.45, 2.45, 0.95);
       box.style.setProperty("--fit-scale", s.toFixed(4));
     });
 
     // 4. Full-Space Tables (Slides 09, 10, 13)
-    canvas.querySelectorAll("[data-fit-table]").forEach((tw) => {
-      const s = findMaxScaleForBox(tw, tablesFitCleanly, 0.56, 1.85, 0.968);
+    const tableWraps = Array.from(canvas.querySelectorAll("[data-fit-table]"));
+    tableWraps.forEach((tw) => {
+      if (isAutoHeightBox(tw)) {
+        tw.style.removeProperty("--fit-scale");
+        return;
+      }
+      const s = findMaxScaleForBox(tw, tablesFitCleanly, 0.45, 2.15, 0.965);
       tw.style.setProperty("--fit-scale", s.toFixed(4));
     });
 
     canvas.removeAttribute("data-measuring");
+
+    // 5. Post-layout subpixel safety check after centering / space-between is restored
+    const nonTableBoxes = allScaled.filter((el) => !el.hasAttribute("data-fit-table"));
+    verifyPostMeasureFit(nonTableBoxes, singleBoxFitsCleanly, 0.44);
+    verifyPostMeasureFit(tableWraps, (tw) => tablesFitCleanly([tw]), 0.44);
   }
 
   function fitAllVisibleCanvases() {
@@ -1481,10 +1556,10 @@
             </div>
 
             <div class="or-cover-acts-grid">
-              <div class="or-cover-act-chip"><strong>Act I · Why HSS</strong> เสาหลักที่ 3 และวัตถุประสงค์ระบบสุขภาพทั้ง 5 ด้าน</div>
-              <div class="or-cover-act-chip"><strong>Act II · Journey</strong> เส้นทางเรียนรู้ 6 สัปดาห์ ณ โรงพยาบาลแหล่งฝึก 9 แห่ง</div>
-              <div class="or-cover-act-chip"><strong>Act III · Mastery</strong> การประเมินผลตามสมรรถนะหลัก 5 ด้าน</div>
-              <div class="or-cover-act-chip"><strong>Act IV · Launch</strong> แนวปฏิบัติความปลอดภัย 6 ข้อ และก้าวแรกสัปดาห์ที่ 1</div>
+              <div class="or-cover-act-chip"><strong>Act I · Why HSS</strong><span>เสาหลักที่ 3 และวัตถุประสงค์ระบบสุขภาพทั้ง 5 ด้าน</span></div>
+              <div class="or-cover-act-chip"><strong>Act II · Journey</strong><span>เส้นทางเรียนรู้ 6 สัปดาห์ ณ โรงพยาบาลแหล่งฝึก 9 แห่ง</span></div>
+              <div class="or-cover-act-chip"><strong>Act III · Mastery</strong><span>การประเมินผลตามสมรรถนะหลัก 5 ด้าน</span></div>
+              <div class="or-cover-act-chip"><strong>Act IV · Launch</strong><span>แนวปฏิบัติความปลอดภัย 6 ข้อ และก้าวแรกสัปดาห์ที่ 1</span></div>
             </div>
           </div>
 
