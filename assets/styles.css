@@ -40159,6 +40159,7 @@ html[data-theme="dark"] .td-mentor-chip.is-staff {
   img[src*="staff_5"] { --stf-ox: 50%; --stf-oy: 10%; --stf-coy: 18%; }
   img[src*="staff_6"] { --stf-ox: 50%; --stf-oy: 6%;  --stf-coy: 12%; }
   img[src*="staff_7"] { --stf-ox: 50%; --stf-oy: 8%;  --stf-coy: 16%; }
+  img[src*="staff_8"] { --stf-ox: 50%; --stf-oy: 6%;  --stf-coy: 13%; }
   img[src*="staff_9"] { --stf-ox: 50%; --stf-oy: 10%; --stf-coy: 18%; }
 
   /* 4. Per-Advisor Face-Calibrated Variables (All 14 Faculty Advisors) */
