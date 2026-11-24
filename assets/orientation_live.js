@@ -1050,12 +1050,16 @@
     }
 
     if (msg.type === "remote_cmd" && !isRetained) {
-      if (state.role === "faculty" && window.RACM_ORIENTATION_DECK) {
+      const deckModal = document.getElementById("orientationDeckModal");
+      const isHostScreen = state.role === "faculty" || Boolean(deckModal && !deckModal.hidden && window.innerWidth >= 900);
+      if (isHostScreen && window.RACM_ORIENTATION_DECK) {
         const cmd = String(msg.cmd || "");
         if (cmd === "slide-next") {
           window.RACM_ORIENTATION_DECK.stepSlide(1);
         } else if (cmd === "slide-prev") {
           window.RACM_ORIENTATION_DECK.stepSlide(-1);
+        } else if (cmd === "toggle-blackout" && typeof window.RACM_ORIENTATION_DECK.toggleBlackout === "function") {
+          window.RACM_ORIENTATION_DECK.toggleBlackout();
         } else if (cmd === "goto-slide" && typeof msg.slideIdx === "number") {
           window.RACM_ORIENTATION_DECK.goToSlide(msg.slideIdx);
         } else if (cmd === "start-q0") {
@@ -1556,7 +1560,9 @@
     if (window.RACM_ORIENTATION_DECK) {
       if (cmd === "slide-next") window.RACM_ORIENTATION_DECK.stepSlide(1);
       else if (cmd === "slide-prev") window.RACM_ORIENTATION_DECK.stepSlide(-1);
-      else if (cmd === "goto-slide" && extra && typeof extra.slideIdx === "number") {
+      else if (cmd === "toggle-blackout" && typeof window.RACM_ORIENTATION_DECK.toggleBlackout === "function") {
+        window.RACM_ORIENTATION_DECK.toggleBlackout();
+      } else if (cmd === "goto-slide" && extra && typeof extra.slideIdx === "number") {
         window.RACM_ORIENTATION_DECK.goToSlide(extra.slideIdx);
       }
     }
@@ -1565,6 +1571,23 @@
       else if (cmd === "reveal-now") hostRevealAnswer();
       else if (cmd === "next-question") hostNextStep();
     }
+  }
+
+  function stepQuizWithClicker(allowStartFromLobby) {
+    if (state.session.phase === "lobby") {
+      if (!allowStartFromLobby) return false;
+      hostStartQuestionAt(0);
+      return true;
+    }
+    if (state.session.phase === "question") {
+      hostRevealAnswer();
+      return true;
+    }
+    if (state.session.phase === "reveal") {
+      hostNextStep();
+      return true;
+    }
+    return false;
   }
 
   /* ---------- 8. Answer Submission ---------- */
@@ -2394,14 +2417,17 @@
       const quizSlideNum = deckSlides[quizIdx] ? deckSlides[quizIdx].num : "17";
       const critSlideNum = deckSlides[critIdx] ? deckSlides[critIdx].num : "18";
       bodyHtml = `
-        <div class="orl-m-card">
-          <div class="orl-m-badge">🎛️ PRESENTER REMOTE · ควบคุมสไลด์และคำถามสด</div>
+        <div class="orl-m-card is-appletv-remote-card">
+          <div class="orl-m-badge">🎛️ KEYNOTE CLICKER · รีโมตไร้สายควบคุมสไลด์</div>
           <div class="orl-m-slide-tracker" style="text-align:center">
             สไลด์ปัจจุบัน: <strong>Slide ${esc(state.session.hostSlideNum || "01")}</strong> · ${esc(state.session.hostSlideTitle || "Orientation")}
           </div>
+          <button type="button" class="orl-m-join-btn is-clicker-giant-next" data-orl-mact="rcmd" data-rcmd="slide-next" style="min-height:84px;font-size:18px;border-radius:22px">
+            สไลด์ถัดไป · NEXT SLIDE ▶
+          </button>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-prev">◀ สไลด์ก่อนหน้า</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-next">สไลด์ถัดไป ▶</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="slide-prev">◀ ก่อนหน้า (Prev)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="toggle-blackout">⬛ พักจอดำ (Blackout)</button>
           </div>
           <div class="orl-m-foot-btns">
             <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${quizIdx || 16}">🎮 ไป Slide ${quizSlideNum} (Quiz)</button>
@@ -3033,6 +3059,8 @@
     },
     getParticipantCount: () => state.participants.size,
     getPhase: () => state.session.phase,
+    stepQuizWithClicker,
+    getJoinUrl,
     buildQrSvg
   };
 })();

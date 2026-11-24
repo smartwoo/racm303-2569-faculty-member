@@ -1968,16 +1968,31 @@
     const prevMode = state.viewMode;
     state.viewMode = "handout";
     document.body.classList.add("is-printing-st1-deck");
+    let pageRule = document.getElementById("st1WidescreenPrintRule");
+    if (!pageRule) {
+      pageRule = document.createElement("style");
+      pageRule.id = "st1WidescreenPrintRule";
+      document.head.appendChild(pageRule);
+    }
+    pageRule.textContent = `
+      @page { size: 13.333in 7.5in !important; margin: 0 !important; }
+      @media print {
+        html, body { width: 13.333in !important; height: 7.5in !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body.is-printing-st1-deck .or-slide-canvas { width: 13.333in !important; height: 7.5in !important; max-width: 13.333in !important; max-height: 7.5in !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; break-after: page; page-break-after: always; }
+        body.is-printing-st1-deck .or-slide-canvas:last-child { break-after: auto; page-break-after: auto; }
+      }
+    `;
     renderModal();
     setTimeout(() => {
       fitAllVisibleCanvases();
       window.print();
       setTimeout(() => {
         document.body.classList.remove("is-printing-st1-deck");
+        if (pageRule && pageRule.parentNode) pageRule.parentNode.removeChild(pageRule);
         state.viewMode = prevMode;
         renderModal();
       }, 300);
-    }, 140);
+    }, 160);
   }
 
   function togglePresentationMode() {

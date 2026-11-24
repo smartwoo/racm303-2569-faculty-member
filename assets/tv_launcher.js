@@ -1657,7 +1657,8 @@
       const pdfSchedBtn = document.createElement("a");
       pdfSchedBtn.className = "tv-pill-action-btn is-pdf-pill";
       pdfSchedBtn.id = "tvQuickSchedulePdfBtn";
-      pdfSchedBtn.href = "exports/pdf/RACM303_2569_Schedule.pdf?v=20261124pdf24";
+      const origPdfBtn = document.getElementById("exportSchedulePdfBtn");
+      pdfSchedBtn.href = (origPdfBtn && origPdfBtn.getAttribute("href")) || "exports/pdf/RACM303_2569_Schedule.pdf?v=20261124pdf27";
       pdfSchedBtn.setAttribute("download", "ตารางการเรียนการสอน_RACM303_2569.pdf");
       pdfSchedBtn.setAttribute("data-pdf-preview-title", "ตารางการเรียนการสอน รายวิชา RACM 303 ปีการศึกษา 2569 (24 หน้า).pdf");
       pdfSchedBtn.title = t("ดูตัวอย่างและดาวน์โหลดตารางเรียน PDF ต้นฉบับ (24 หน้า)", "Preview & Download Official 24-Page Schedule PDF");
