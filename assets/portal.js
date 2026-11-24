@@ -11760,11 +11760,11 @@
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
       title: "จากการดูแลผู้ป่วยรายบุคคลสู่เวชปฏิบัติฐานระบบ: เรียนรู้บทบาทและเส้นทางวิชาชีพจากแพทย์ผู้มีประสบการณ์ในการสร้างเสริมระบบสุขภาพ เพื่อลดความเหลื่อมล้ำและเอื้อให้สังคมเติบโตได้อย่างปลอดภัย ท่ามกลางสิ่งแวดล้อมที่เกื้อกูลชีวิตอย่างยั่งยืน",
       titleThSub: "From Bedside to Systems-Based Practice: Learning Roles and Career Pathways from Experienced Physicians in Strengthening Health Systems to Reduce Inequity and Foster Safe, Thriving Communities Within a Sustainable, Life-Supporting Environment",
-      speakers: "วิทยากรร่วมเสวนา (Panelists): นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) · นพ.วิรุฬ ลิ้มสวาท — หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข · ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ — รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) | ผู้ดำเนินรายการ (Moderator): อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ — ภาควิชาเวชศาสตร์ชุมชน รพ.รามาธิบดี ม.มหิดล",
+      speakers: "วิทยากรร่วมเสวนา (Panelists): นพ.ทักษพล ธรรมรังสี — ผู้อำนวยการมูลนิธิการแพทย์แห่งประเทศจีน (China Medical Board: CMB Foundation) · นพ.วิรุฬ ลิ้มสวาท — หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข · ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ — รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) | ผู้ดำเนินรายการ (Moderator): อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ — ภาควิชาเวชศาสตร์ชุมชน รพ.รามาธิบดี ม.มหิดล",
       examBadge: "เชื่อมตรงวัตถุประสงค์ที่ 5 · Physician Roles, HSS & SBP",
       whyImportant: "จากการรับฟังและแลกเปลี่ยนมุมมองร่วมกับวิทยากรทั้ง 3 ท่านในเวทีเสวนา (Panel Discussion) นักศึกษาแพทย์สามารถ เพื่อเรียนรู้บทบาทและเส้นทางวิชาชีพจากแพทย์ผู้มีประสบการณ์ในการสร้างเสริมระบบสุขภาพ ลดความเหลื่อมล้ำ และเอื้อให้สังคมเติบโตได้อย่างปลอดภัย ท่ามกลางสิ่งแวดล้อมที่เกื้อกูลชีวิตอย่างยั่งยืน",
       objectives: [
-        "ถอดบทเรียนบทบาทและเส้นทางวิชาชีพแพทย์ต่อผู้ป่วยและสังคมจากประสบการณ์การทำงานจริงของวิทยากร เพื่อเข้าใจการขยับขยายมุมมองจากการดูแลผู้ป่วยรายบุคคลอย่างองค์รวม มาสู่เวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) และศาสตร์วิทยาระบบสุขภาพ (Health Systems Science: HSS)",
+        "ถอดบทเรียนบทบาทและเส้นทางวิชาชีพแพทย์ต่อผู้ป่วยและสังคมจากประสบการณ์การทำงานจริงของวิทยากร เพื่อเข้าใจการขยับขยายมุมมองจากการดูแลผู้ป่วยรายบุคคลอย่างองค์รวม มาสู่เวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) และวิทยาระบบสุขภาพ (Health Systems Science: HSS)",
         "วิเคราะห์บทบาทแพทย์ในฐานะผู้เสริมพลังชุมชน ผู้ชี้นำสุขภาพ (Health Advocate) และนักวิจัยนโยบายและระบบสุขภาพ (Health Policy and Systems Researcher: HPSR) ที่ไม่หยุดอยู่เพียงการรักษาเฉพาะราย แต่นำปัญหาสุขภาพที่พบในคลินิก ครอบครัว และชุมชน มาทำความเข้าใจปัจจัยเชิงโครงสร้างและบริบททางสังคม ตลอดจนสร้างและจัดการความรู้ เพื่อกล้าชี้นำสังคมและขับเคลื่อนนโยบายสาธารณะบนพื้นฐานทางวิชาการ",
         "สังเคราะห์บทบาทแพทย์ในฐานะผู้นำการเปลี่ยนแปลง (Change Agent) ที่ประสานความร่วมมือกับทีมสหวิชาชีพและภาคส่วนต่าง ๆ ทั้งในและนอกระบบสุขภาพ เพื่อยกระดับสุขภาวะตั้งแต่ระดับพื้นที่และประเทศ (เช่น การสร้างเสริมสุขภาพและการชี้นำสังคมในการรณรงค์ไม่สูบบุหรี่และบุหรี่ไฟฟ้า) เชื่อมต่อไปยังสุขภาพโลก (Global Health) ที่มุ่งแก้ปัญหาสุขภาพประชากรข้ามพรมแดนและลดความเหลื่อมล้ำผ่านความร่วมมือระหว่างประเทศ ตลอดจนสุขภาพของพิภพโลก (Planetary Health) ที่ให้ความสำคัญกับความยั่งยืนทางสิ่งแวดล้อม โดยมองลึกถึงความเชื่อมโยงระหว่างสุขภาพของมนุษย์กับระบบนิเวศของโลกซึ่งมนุษย์กำลังเปลี่ยนแปลงไป",
         "สะท้อนคิดมุมมองและแรงบันดาลใจจากการแลกเปลี่ยนกับวิทยากร เพื่อวางแนวทางพัฒนาตนเองทั้งด้าน HSS และ SBP ควบคู่กับการบ่มเพาะคุณสมบัติสำคัญของแพทย์ (อาทิ การมององค์รวมและการคิดเชิงระบบ ความใฝ่รู้ตลอดชีวิต การสื่อสารและทำงานร่วมกับผู้อื่น คุณธรรมจริยธรรม และจิตสาธารณะเพื่อชุมชนและสังคม) บนเส้นทางวิชาชีพในอนาคต"
@@ -14964,7 +14964,9 @@
     }
 
     const sfExtMeta = detectSlideExtMeta(slideRec);
-    const isBuiltInInteractiveDeck = Boolean(slideRec && (slideRec.isBuiltInOrientation || slideRec.isBuiltInSt1Deck));
+    const isBuiltInInteractiveDeck = Boolean(
+      slideRec && (slideRec.isBuiltInOrientation || slideRec.isBuiltInSt1Deck || slideRec.isBuiltInPanelDeck)
+    );
     const isDirectDl =
       !isBuiltInInteractiveDeck &&
       (sfExtMeta.extKind === "pptx" || sfExtMeta.extKind === "key" || sfExtMeta.extKind === "docx");
@@ -14974,6 +14976,8 @@
         "button",
         isDirectDl
           ? `⬇ ดาวน์โหลดไฟล์ ${sfExtMeta.extBadge} (${sess.code})`
+          : slideRec.isBuiltInPanelDeck
+          ? `🎬 เปิด Slide เสวนา ${sess.code} (${sfExtMeta.extBadge} · Apple TV Screensaver)`
           : isBuiltInInteractiveDeck
           ? `🖥️ ④ เปิด Slide ${sess.code} (${sfExtMeta.extBadge} · 16:9)`
           : `📊 เปิด Slide / ไฟล์สอน (${sess.code} · ${sfExtMeta.extBadge})`,
@@ -14982,6 +14986,12 @@
       openSlBtn.type = "button";
       openSlBtn.addEventListener("click", () => openSessionSlide(sess.id, isDirectDl));
       heroActions.appendChild(openSlBtn);
+      if (slideRec.isBuiltInPanelDeck && slideRec.pptxHref) {
+        const dlPptxBtn = make("a", "⬇ ดาวน์โหลด .pptx", "tv-hero-btn is-glass");
+        dlPptxBtn.href = slideRec.pptxHref;
+        dlPptxBtn.setAttribute("download", slideRec.pptxHref.split("/").pop().split("?")[0]);
+        heroActions.appendChild(dlPptxBtn);
+      }
     } else if (ROLE === "faculty") {
       const upSlBtn = make(
         "button",
@@ -15655,7 +15665,11 @@
         pills.appendChild(openBtn);
 
         if (slideRec) {
-          const sBtn = make("button", "📊 เปิด Slide", "hs-atv-ep-pill");
+          const sBtn = make(
+            "button",
+            slideRec.isBuiltInPanelDeck ? "🎬 เปิด Slide (Screensaver)" : "📊 เปิด Slide",
+            `hs-atv-ep-pill${slideRec.isBuiltInPanelDeck ? " is-slide-uploaded-pill" : ""}`
+          );
           sBtn.type = "button";
           sBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
@@ -33774,6 +33788,9 @@
     if (rec.isBuiltInSt1Deck) {
       return { extKind: "pptx", extBadge: "16 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
     }
+    if (rec.isBuiltInPanelDeck) {
+      return { extKind: "pptx", extBadge: rec.slideCountBadge || "SCREENSAVER", icoCls: "is-pptx", icoTxt: "🎬" };
+    }
     const fn = String(rec.fileName || rec.repoPath || "").toLowerCase();
     const mt = String(rec.mime || "").toLowerCase();
     const url = String(rec.externalUrl || "").toLowerCase();
@@ -33887,6 +33904,42 @@
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ · ผศ. นพ.บวรศม ลีระพันธ์",
         uploadedAt: "ประจำรายวิชา 2569"
       };
+    }
+    const PANEL_BUILT_IN_MAP = {
+      "w1-d1-global": {
+        panelDeckId: "w1-d1-global",
+        slideCountBadge: "15 SLIDES",
+        fileName: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (15 สไลด์ · Apple TV / Netflix Screensaver)",
+        pptxHref: "exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx",
+        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
+      },
+      "w3-d3-dhs-panel": {
+        panelDeckId: "w3-d3-dhs-panel",
+        slideCountBadge: "SCREENSAVER",
+        fileName: "Slide เวทีเสวนา PANEL-DHS: ระบบสุขภาพอำเภอ 6BB+1 (Apple TV / Netflix Screensaver)",
+        pptxHref: "",
+        uploadedBy: "รศ. นพ.สุรเกียรติ อาชานานุภาพ · ทีมรายวิชา"
+      },
+      "w5-d3-panel-homeless": {
+        panelDeckId: "w5-d3-panel-homeless",
+        slideCountBadge: "SCREENSAVER",
+        fileName: "Slide เวทีเสวนา PANEL-6BB: สุขภาวะข้างถนน & ความเป็นธรรม (Apple TV / Netflix Screensaver)",
+        pptxHref: "",
+        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
+      },
+      "w5-d4-policy": {
+        panelDeckId: "w5-d4-policy",
+        slideCountBadge: "SCREENSAVER",
+        fileName: "Slide เวทีเสวนา PANEL-HP: Young-Gen Systems-based Practitioner (Apple TV / Netflix Screensaver)",
+        pptxHref: "",
+        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
+      }
+    };
+    if (PANEL_BUILT_IN_MAP[sessionId]) {
+      return Object.assign(
+        { sessionId, isBuiltInPanelDeck: true, uploadedAt: "ประจำรายวิชา 2569" },
+        PANEL_BUILT_IN_MAP[sessionId]
+      );
     }
     const s = (SCHED.sessions || []).find((x) => x.id === sessionId);
     if (s && s.slideUrl) {
@@ -34099,6 +34152,21 @@
         const a = document.createElement("a");
         a.href = href;
         a.download = href.split("/").pop() || "RACM303_2569_ST1_Slides.pptx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      return;
+    }
+    if (rec.isBuiltInPanelDeck) {
+      if (!forceDownload && window.RACM_PANEL_DECK) {
+        window.RACM_PANEL_DECK.open(rec.panelDeckId || sessionId, 0);
+        return;
+      }
+      if (rec.pptxHref) {
+        const a = document.createElement("a");
+        a.href = rec.pptxHref;
+        a.download = rec.pptxHref.split("/").pop() || "RACM303_2569_Physician_Roles_Moderator.pptx";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -42368,6 +42436,7 @@
     openFacultyPrintoutHub: () => openFacultyPrintoutHub(),
     openOrientationDeck: (idx, opts) => window.RACM_ORIENTATION_DECK && window.RACM_ORIENTATION_DECK.open(idx, opts),
     openSt1Deck: (idx, opts) => window.RACM_ST1_DECK && window.RACM_ST1_DECK.open(idx, opts),
+    openPanelDeck: (id, idx, opts) => window.RACM_PANEL_DECK && window.RACM_PANEL_DECK.open(id, idx, opts),
     openHsDiscussion,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),

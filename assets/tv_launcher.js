@@ -890,6 +890,7 @@
               <span class="tv-shelf-sub">${esc(t("เริ่มจากคาบปูรากฐาน ST1 (Systems Thinking · Full/Abridged/Self-Quiz/Slide/VDO) และเวทีเสวนาสดรวม 17.5 ชม. เชื่อมสู่ภาคสนาม ฟอร์ม 3A และ SRN 1–2", "Starts with foundational ST1 (Systems Thinking 6-step hub) & live panels (17.5 hrs) powering Fieldwork, Form 3A & SRN 1–2"))}</span>
             </div>
             <div class="tv-shelf-controls">
+              <button type="button" class="tv-pill-action-btn" id="tvOpenGlobalPanelScreensaverBtn">${esc(t("🎬 เปิด Slide เสวนา GLOBAL", "🎬 Launch GLOBAL Panel Slides"))}</button>
               <button type="button" class="tv-pill-action-btn" id="tvOpenAllSystemsForumBtn">${esc(t("ดูครบ 6 คาบ →", "View All 6 →"))}</button>
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvBeyondTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvBeyondTrack" data-scroll-dir="1" aria-label="เลื่อนขวา">›</button>
@@ -902,7 +903,7 @@
               <button type="button" class="tv-episode-card ${esc(s.tone)}" id="tvSfCard-${esc(s.id)}" data-sf-id="${esc(s.id)}" data-ep-num="0${s.order}" data-tv-focus data-tv-row="4">
                 <span class="tv-ep-top">
                   <span class="tv-ep-code">${esc(s.code)}</span>
-                  <span class="tv-ep-weight">${esc(s.kind === "systems" ? "Systems Thinking" : "Panel / Workshop")}</span>
+                  <span class="tv-ep-weight">${esc(s.id === "w1-d1-global" ? "🎬 14 Slides · Screensaver" : s.kind === "panel" ? "🎬 Screensaver · Panel" : s.code === "ST1" ? "🖥️ 16 Slides · Systems" : "Systems Workshop")}</span>
                 </span>
                 <span class="tv-ep-bottom">
                   <span class="tv-ep-title">${esc(s.title)}</span>
@@ -1114,6 +1115,14 @@
         openEpisodeModal(card.dataset.epCode);
       });
     });
+
+    const openGlobalPsvBtn = $("tvOpenGlobalPanelScreensaverBtn");
+    if (openGlobalPsvBtn) {
+      openGlobalPsvBtn.addEventListener("click", () => {
+        if (window.RACM_PANEL_DECK) window.RACM_PANEL_DECK.open("w1-d1-global", 0);
+        else if (api && api.openSystemsForum) api.openSystemsForum("w1-d1-global");
+      });
+    }
 
     const openAllSfBtn = $("tvOpenAllSystemsForumBtn");
     if (openAllSfBtn) {
@@ -2393,8 +2402,8 @@
             folderPath: ["schedule"],
             name: "00_RACM303_2569_Orientation_Slides_(ปฐมนิเทศรายวิชา_16x9).pptx",
             title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Objectives, Learning Experience & 5-Competency Evaluation)",
-            sub: "วันพุธที่ 25 พ.ย. 2569 (08.30–09.30 น. · ห้อง 2C2-03) — 14 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
-            meta: "14 สไลด์ · 16:9",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (08.30–09.30 น. · ห้อง 2C2-03) — 15 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
+            meta: "15 สไลด์ · 16:9",
             badge: "▶ เปิดสไลด์ปฐมนิเทศ",
             icoCls: "is-pptx",
             icoTxt: "P",
@@ -2416,6 +2425,20 @@
             pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
             onOpen: () => {
               if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
+            }
+          },
+          {
+            id: "sched:global-panel-slides",
+            folderPath: ["schedule"],
+            name: "02_RACM303_2569_GLOBAL_Panel_Screensaver_Slides_(บทบาทแพทย์และเส้นทางอาชีพ_16x9).pptx",
+            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (15 สไลด์ · Apple TV / Netflix Screensaver)",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (13.00–16.00 น. · ห้อง 2C2-03) — นพ.ทักษพล, นพ.วิรุฬ, ศ.เกียรติคุณ พญ.สุวรรณา",
+            meta: "15 สไลด์ · Screensaver",
+            badge: "🎬 เปิดสไลด์เสวนา",
+            icoCls: "is-pptx",
+            icoTxt: "🎬",
+            onOpen: () => {
+              if (window.RACM_PANEL_DECK) window.RACM_PANEL_DECK.open("w1-d1-global", 0);
             }
           },
           {
@@ -2777,7 +2800,7 @@
             name: "00_RACM303_2569_Orientation_Slides_(ปฐมนิเทศรายวิชา_16x9).pptx",
             title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Objectives, Learning Experience & 5-Competency Evaluation)",
             sub: "สไลด์ปฐมนิเทศ 14 หน้า (16:9) พร้อมตารางการวัดผลสัมฤทธิ์ 5 สมรรถนะ (Formative & Summative)",
-            meta: "14 สไลด์ · 16:9",
+            meta: "15 สไลด์ · 16:9",
             badge: "▶ เปิดสไลด์ปฐมนิเทศ",
             icoCls: "is-pptx",
             icoTxt: "P",
@@ -2799,6 +2822,20 @@
             pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
             onOpen: () => {
               if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
+            }
+          },
+          {
+            id: "man:global-panel-slides",
+            folderPath: ["manuals"],
+            name: "02_RACM303_2569_GLOBAL_Panel_Screensaver_Slides_(บทบาทแพทย์และเส้นทางอาชีพ_16x9).pptx",
+            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (15 สไลด์ · Apple TV / Netflix Screensaver)",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (13.00–16.00 น. · ห้อง 2C2-03) — นพ.ทักษพล, นพ.วิรุฬ, ศ.เกียรติคุณ พญ.สุวรรณา",
+            meta: "15 สไลด์ · Screensaver",
+            badge: "🎬 เปิดสไลด์เสวนา",
+            icoCls: "is-pptx",
+            icoTxt: "🎬",
+            onOpen: () => {
+              if (window.RACM_PANEL_DECK) window.RACM_PANEL_DECK.open("w1-d1-global", 0);
             }
           },
           {

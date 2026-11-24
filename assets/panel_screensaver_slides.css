@@ -1,0 +1,1424 @@
+/* ==========================================================================
+   RACM 303 (2569) — Apple TV Aerial & Netflix Idle Screensaver Slide Engine
+   Designed for Live Panel Discussions (Room 2C2-03 Projector & Multi-Device)
+   - Full-bleed 16:9 Cinema Canvas + Dual-Buffered Ken Burns Slow Drift
+   - Toggleable Minimalist Dark Ambient Aurora Mode
+   - tvOS "Zero Persistent Chrome" Auto-Hide HUD (fades after 3.6s idle)
+   - Bidirectional Auto-Fit (--psv-fit-scale) + Manual A- / A+ (--psv-font-scale)
+   ========================================================================== */
+
+body.psv-deck-open {
+  overflow: hidden !important;
+}
+
+.psv-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10950;
+  background: #04060b;
+  color: #f8fafc;
+  font-family: "Anuphan", "Plus Jakarta Sans", "Sarabun", -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  --psv-font-scale: 1;
+  --psv-fit-scale: 1;
+  --psv-eff-scale: calc(var(--psv-font-scale, 1) * var(--psv-fit-scale, 1));
+  --psv-accent: #e50914;
+  --psv-accent-soft: rgba(229, 9, 20, 0.22);
+  --psv-gold: #f59e0b;
+  --psv-glass-bg: rgba(10, 14, 24, 0.56);
+  --psv-glass-border: rgba(255, 255, 255, 0.14);
+}
+
+.psv-modal[hidden] {
+  display: none !important;
+}
+
+.psv-modal[data-role="student"] {
+  --psv-accent: #38bdf8;
+  --psv-accent-soft: rgba(56, 189, 248, 0.22);
+}
+
+/* Idle Cinema State (Apple TV Aerial / Netflix Screensaver Zero Chrome) */
+.psv-modal.is-idle-clean {
+  cursor: none;
+}
+
+.psv-modal.is-idle-clean .psv-hud-top,
+.psv-modal.is-idle-clean .psv-hud-bottom,
+.psv-modal.is-idle-clean .psv-edge-nav {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.psv-modal.is-idle-clean .psv-hud-top {
+  transform: translateY(-14px);
+}
+
+.psv-modal.is-idle-clean .psv-hud-bottom {
+  transform: translateY(16px);
+}
+
+/* ---------- Layer 1: Ambient Backdrop Stage (Cinema Photo + Aurora) ---------- */
+.psv-backdrop-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #050811;
+}
+
+.psv-bg-slot {
+  position: absolute;
+  inset: -3%;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.75s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+  filter: saturate(1.06) contrast(1.04) brightness(0.84);
+}
+
+.psv-bg-slot.is-active {
+  opacity: 1;
+}
+
+.psv-bg-slot.kb-a {
+  animation: psvKenBurnsA 34s ease-in-out infinite alternate;
+}
+.psv-bg-slot.kb-b {
+  animation: psvKenBurnsB 36s ease-in-out infinite alternate;
+}
+.psv-bg-slot.kb-c {
+  animation: psvKenBurnsC 32s ease-in-out infinite alternate;
+}
+.psv-bg-slot.kb-d {
+  animation: psvKenBurnsD 38s ease-in-out infinite alternate;
+}
+
+@keyframes psvKenBurnsA {
+  0% { transform: scale(1.02) translate3d(0%, 0%, 0); }
+  100% { transform: scale(1.10) translate3d(-2.2%, -1.4%, 0); }
+}
+@keyframes psvKenBurnsB {
+  0% { transform: scale(1.09) translate3d(-1.8%, 1.2%, 0); }
+  100% { transform: scale(1.02) translate3d(1.5%, -1.0%, 0); }
+}
+@keyframes psvKenBurnsC {
+  0% { transform: scale(1.02) translate3d(1.4%, 0.8%, 0); }
+  100% { transform: scale(1.095) translate3d(-1.6%, -1.6%, 0); }
+}
+@keyframes psvKenBurnsD {
+  0% { transform: scale(1.085) translate3d(1.2%, -1.2%, 0); }
+  100% { transform: scale(1.015) translate3d(-1.4%, 1.0%, 0); }
+}
+
+/* Minimalist Apple TV Dark Ambient Aurora Mode */
+.psv-aurora-layer {
+  position: absolute;
+  inset: -15%;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+  background:
+    radial-gradient(54% 48% at 76% 28%, var(--psv-orb-1, rgba(56, 189, 248, 0.28)) 0%, transparent 72%),
+    radial-gradient(48% 52% at 26% 72%, var(--psv-orb-2, rgba(217, 119, 6, 0.22)) 0%, transparent 74%),
+    radial-gradient(60% 56% at 62% 78%, var(--psv-orb-3, rgba(99, 102, 241, 0.22)) 0%, transparent 76%),
+    linear-gradient(135deg, #04060c 0%, #090e1a 52%, #050811 100%);
+  filter: blur(28px);
+  animation: psvAuroraDrift 26s ease-in-out infinite alternate;
+}
+
+@keyframes psvAuroraDrift {
+  0% { transform: scale(1) rotate(0deg) translate3d(0, 0, 0); }
+  50% { transform: scale(1.07) rotate(1.5deg) translate3d(-1.8%, 1.4%, 0); }
+  100% { transform: scale(1.04) rotate(-1.2deg) translate3d(1.6%, -1.2%, 0); }
+}
+
+.psv-modal[data-backdrop="aurora"] .psv-bg-slot {
+  opacity: 0 !important;
+}
+
+.psv-modal[data-backdrop="aurora"] .psv-aurora-layer {
+  opacity: 1;
+}
+
+/* Multi-Stop Atmospheric Scrims (Protects Stage Speakers + Guarantees 10-ft Legibility) */
+.psv-scrim-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 96% at 68% 36%, rgba(4, 7, 14, 0.10) 0%, rgba(4, 7, 14, 0.48) 56%, rgba(3, 5, 10, 0.88) 100%),
+    linear-gradient(16deg, rgba(3, 5, 11, 0.94) 0%, rgba(5, 8, 16, 0.78) 34%, rgba(6, 10, 19, 0.34) 64%, rgba(6, 10, 19, 0.14) 100%),
+    linear-gradient(180deg, rgba(3, 5, 10, 0.62) 0%, transparent 22%, transparent 74%, rgba(3, 5, 10, 0.88) 100%);
+}
+
+/* ---------- Persistent Ambient Watermark (Stays subtly visible in Idle Cinema) ---------- */
+.psv-ambient-watermark {
+  position: absolute;
+  top: clamp(16px, 2.5vh, 32px);
+  left: clamp(20px, 3.8vw, 60px);
+  right: clamp(20px, 3.8vw, 60px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.psv-modal.is-idle-clean .psv-ambient-watermark {
+  opacity: 0.78;
+}
+
+.psv-wm-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(11px, 0.95vw, 15px);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(241, 245, 249, 0.78);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
+.psv-wm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--psv-accent);
+  box-shadow: 0 0 12px var(--psv-accent);
+}
+
+.psv-wm-clock {
+  font-family: "Plus Jakarta Sans", "JetBrains Mono", monospace;
+  font-size: clamp(13px, 1.15vw, 19px);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(248, 250, 252, 0.82);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- Layer 2: Auto-Hiding Top HUD ---------- */
+.psv-hud-top {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(10px, 1.5vh, 18px) clamp(16px, 2.8vw, 44px);
+  background: linear-gradient(180deg, rgba(4, 6, 12, 0.84) 0%, rgba(4, 6, 12, 0.36) 72%, transparent 100%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  flex-wrap: wrap;
+}
+
+.psv-hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.psv-series-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f8fafc;
+  white-space: nowrap;
+}
+
+.psv-series-pill .psv-n-bar {
+  display: inline-block;
+  width: 3.5px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--psv-accent);
+}
+
+.psv-deck-picker {
+  background-color: rgba(15, 23, 42, 0.68);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: min(56vw, 560px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.psv-deck-picker::-ms-expand {
+  display: none;
+}
+
+.psv-hud-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.psv-pill-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(15, 23, 42, 0.62);
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease, color 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.psv-pill-btn:hover {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+}
+
+.psv-pill-btn.is-active {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: #ffffff;
+  color: #090d16;
+}
+
+.psv-pill-btn.is-ambient-on {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(251, 191, 36, 0.65);
+  color: #fde68a;
+}
+
+.psv-pill-btn.is-close {
+  background: rgba(220, 38, 38, 0.24);
+  border-color: rgba(248, 113, 113, 0.42);
+  color: #fecaca;
+}
+
+.psv-pill-btn.is-close:hover {
+  background: rgba(220, 38, 38, 0.55);
+  color: #ffffff;
+}
+
+/* Font Size Control Strip (A- / 100% / A+) */
+.psv-font-seg {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.psv-font-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #e2e8f0;
+  padding: 5px 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.psv-font-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.psv-font-readout {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: #cbd5e1;
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+/* ---------- Layer 3: Main Cinema Slide Stage & Chyron ---------- */
+.psv-stage-viewport {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(14px, 2.4vh, 34px) clamp(64px, 5.6vw, 88px) clamp(18px, 3.2vh, 44px);
+  overflow: hidden;
+}
+
+.psv-slide-body {
+  width: 100%;
+  max-width: min(1480px, 94vw);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: calc(clamp(10px, 1.5vh, 20px) * var(--psv-eff-scale));
+  animation: psvChyronEnter 0.82s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: text;
+}
+
+.psv-slide-body[data-measuring="1"] {
+  animation: none !important;
+  max-height: none !important;
+}
+
+@keyframes psvChyronEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+/* Kicker / Episode Metadata Badge Row */
+.psv-kicker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.psv-kicker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(5px * var(--psv-eff-scale)) calc(13px * var(--psv-eff-scale));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font-size: calc(clamp(11.5px, 1.02vw, 16px) * var(--psv-eff-scale));
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+}
+
+.psv-kicker-badge .psv-k-bar {
+  width: 4px;
+  height: 1em;
+  border-radius: 2px;
+  background: var(--psv-accent);
+}
+
+.psv-kicker-sub {
+  font-size: calc(clamp(12px, 1.05vw, 16.5px) * var(--psv-eff-scale));
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.86);
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
+}
+
+/* 10-Foot Display Headline & Prompt Typography */
+.psv-hero-title {
+  margin: 0;
+  font-family: "Anuphan", "Plus Jakarta Sans", sans-serif;
+  font-size: calc(clamp(28px, 4.1vw, 68px) * var(--psv-eff-scale));
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.76);
+  max-width: 22ch;
+}
+
+.psv-hero-title.is-prompt-quote {
+  font-size: calc(clamp(26px, 3.65vw, 60px) * var(--psv-eff-scale));
+  line-height: 1.24;
+  max-width: 27ch;
+}
+
+.psv-hero-title.is-compact-title {
+  font-size: calc(clamp(22px, 2.75vw, 44px) * var(--psv-eff-scale));
+  line-height: 1.2;
+  max-width: 34ch;
+}
+
+.psv-hero-title.is-bilingual-cover {
+  font-size: calc(clamp(19px, 2.28vw, 35px) * var(--psv-eff-scale));
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  max-width: 52ch;
+}
+
+.psv-en-subtitle {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Anuphan", sans-serif;
+  font-size: calc(clamp(12px, 1.08vw, 17px) * var(--psv-eff-scale));
+  font-weight: 500;
+  line-height: 1.44;
+  color: rgba(203, 213, 225, 0.9);
+  max-width: 82ch;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.82);
+}
+
+.psv-cast-tag {
+  font-size: calc(clamp(9.5px, 0.72vw, 11.5px) * var(--psv-eff-scale));
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.psv-cast-chip.is-moderator .psv-cast-tag {
+  color: #7dd3fc;
+}
+
+/* ---------- Learning Objectives 2x2 Cinema Bento Grid (Slide 02) ---------- */
+.psv-lo-stem {
+  margin: 0;
+  font-size: calc(clamp(13px, 1.18vw, 18.5px) * var(--psv-eff-scale));
+  font-weight: 600;
+  line-height: 1.42;
+  color: #fde68a;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.82);
+}
+
+.psv-lo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(clamp(9px, 1.05vw, 15px) * var(--psv-eff-scale));
+  width: 100%;
+}
+
+.psv-lo-card {
+  padding: calc(clamp(11px, 1.18vw, 17px) * var(--psv-eff-scale)) calc(clamp(13px, 1.35vw, 20px) * var(--psv-eff-scale));
+  border-radius: 16px;
+  background: rgba(9, 14, 26, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--psv-eff-scale));
+}
+
+.psv-lo-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.psv-lo-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(2px * var(--psv-eff-scale)) calc(8px * var(--psv-eff-scale));
+  border-radius: 999px;
+  background: var(--psv-accent);
+  color: #ffffff;
+  font-family: "Plus Jakarta Sans", "JetBrains Mono", sans-serif;
+  font-size: calc(clamp(10.5px, 0.86vw, 13px) * var(--psv-eff-scale));
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.psv-lo-tag {
+  font-family: "Plus Jakarta Sans", "Anuphan", sans-serif;
+  font-size: calc(clamp(11px, 0.92vw, 14px) * var(--psv-eff-scale));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fde68a;
+}
+
+.psv-lo-text {
+  margin: 0;
+  font-size: calc(clamp(12px, 1.02vw, 15.5px) * var(--psv-eff-scale));
+  line-height: 1.46;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+/* ---------- Netflix Pause Screensaver "UP NEXT" Preview Tile ---------- */
+.psv-upnext-card {
+  position: absolute;
+  top: 118px;
+  right: clamp(20px, 3.6vw, 60px);
+  z-index: 4;
+  width: clamp(190px, 18vw, 268px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(9, 13, 24, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.56);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.45s ease, transform 0.35s ease, top 0.45s ease, border-color 0.2s ease;
+}
+
+.psv-modal.is-ambient-cycling .psv-upnext-card {
+  opacity: 0.92;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.psv-modal.is-ambient-cycling.is-idle-clean .psv-upnext-card {
+  top: clamp(54px, 7vh, 78px);
+}
+
+.psv-upnext-card:hover {
+  border-color: rgba(253, 230, 138, 0.65);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.psv-upnext-thumb {
+  height: 68px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.psv-upnext-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.12) 0%, rgba(5, 8, 16, 0.88) 100%);
+}
+
+.psv-upnext-meta {
+  padding: 7px 11px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.psv-upnext-kicker {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fde68a;
+}
+
+.psv-upnext-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.psv-logline {
+  margin: 0;
+  font-size: calc(clamp(14.5px, 1.38vw, 23px) * var(--psv-eff-scale));
+  font-weight: 500;
+  line-height: 1.5;
+  color: rgba(241, 245, 249, 0.9);
+  max-width: 62ch;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
+}
+
+/* Cover Slide Layout: Left Chyron + Optional Discrete QR Glass Plaque */
+.psv-cover-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(18px, 3vw, 44px);
+  width: 100%;
+}
+
+.psv-cast-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(9px * var(--psv-eff-scale));
+  margin-top: calc(4px * var(--psv-eff-scale));
+}
+
+.psv-cast-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: calc(7px * var(--psv-eff-scale)) calc(14px * var(--psv-eff-scale));
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.psv-cast-avatar {
+  width: calc(32px * var(--psv-eff-scale));
+  height: calc(32px * var(--psv-eff-scale));
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(12px * var(--psv-eff-scale));
+  font-weight: 700;
+  color: #fde68a;
+  flex-shrink: 0;
+}
+
+.psv-cast-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.psv-cast-name {
+  font-size: calc(clamp(12.5px, 1.05vw, 16.5px) * var(--psv-eff-scale));
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.psv-cast-role {
+  font-size: calc(clamp(10.5px, 0.86vw, 13.5px) * var(--psv-eff-scale));
+  color: rgba(203, 213, 225, 0.86);
+}
+
+.psv-qr-plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(10, 15, 26, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.52);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.psv-qr-plaque:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.psv-qr-box {
+  width: clamp(92px, 8.8vw, 136px);
+  height: clamp(92px, 8.8vw, 136px);
+  padding: 7px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.psv-qr-box svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.psv-qr-caption {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #e2e8f0;
+  text-align: center;
+}
+
+/* ---------- Speaker Career Timeline Arc (Slides 02–04) ---------- */
+.psv-timeline-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: calc(clamp(8px, 1vw, 14px) * var(--psv-eff-scale));
+  width: 100%;
+  margin-top: calc(4px * var(--psv-eff-scale));
+}
+
+.psv-tl-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: calc(5px * var(--psv-eff-scale));
+  padding: calc(clamp(11px, 1.2vw, 17px) * var(--psv-eff-scale)) calc(clamp(12px, 1.3vw, 18px) * var(--psv-eff-scale));
+  border-radius: 16px;
+  background: rgba(10, 15, 26, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36);
+}
+
+.psv-tl-year {
+  font-family: "Plus Jakarta Sans", "JetBrains Mono", sans-serif;
+  font-size: calc(clamp(12px, 1.05vw, 16.5px) * var(--psv-eff-scale));
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.03em;
+}
+
+.psv-tl-text {
+  margin: 0;
+  font-size: calc(clamp(12.5px, 1.06vw, 16.5px) * var(--psv-eff-scale));
+  line-height: 1.42;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.psv-footnote-whisper {
+  font-size: calc(clamp(11px, 0.9vw, 13.5px) * var(--psv-eff-scale));
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* ---------- 150-Min Pacing Rail (Slide 05) ---------- */
+.psv-pacing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(clamp(9px, 1.1vw, 16px) * var(--psv-eff-scale));
+  width: 100%;
+}
+
+.psv-pace-card {
+  padding: calc(clamp(13px, 1.4vw, 20px) * var(--psv-eff-scale));
+  border-radius: 18px;
+  background: rgba(10, 15, 26, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--psv-eff-scale));
+}
+
+.psv-pace-card.is-featured {
+  border-color: rgba(251, 191, 36, 0.48);
+  background: rgba(24, 20, 14, 0.68);
+}
+
+.psv-pace-min {
+  font-family: "JetBrains Mono", "Plus Jakarta Sans", monospace;
+  font-size: calc(clamp(11.5px, 0.98vw, 15px) * var(--psv-eff-scale));
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.psv-pace-card.is-featured .psv-pace-min {
+  color: #fbbf24;
+}
+
+.psv-pace-title {
+  margin: 0;
+  font-size: calc(clamp(14px, 1.28vw, 20px) * var(--psv-eff-scale));
+  font-weight: 700;
+  line-height: 1.32;
+  color: #ffffff;
+}
+
+.psv-pace-desc {
+  margin: 0;
+  font-size: calc(clamp(11.5px, 0.96vw, 14.5px) * var(--psv-eff-scale));
+  line-height: 1.42;
+  color: rgba(203, 213, 225, 0.88);
+}
+
+/* ---------- Prompt Slide Step Dots & Reflection Stem Pill ---------- */
+.psv-q-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: calc(2px * var(--psv-eff-scale));
+}
+
+.psv-q-pip {
+  width: calc(28px * var(--psv-eff-scale));
+  height: calc(5px * var(--psv-eff-scale));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.psv-q-pip.is-done {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.psv-q-pip.is-current {
+  width: calc(48px * var(--psv-eff-scale));
+  background: #fbbf24;
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.55);
+}
+
+.psv-stem-callout {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(12px * var(--psv-eff-scale)) calc(20px * var(--psv-eff-scale));
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-size: calc(clamp(15px, 1.45vw, 24px) * var(--psv-eff-scale));
+  font-weight: 700;
+  color: #fef3c7;
+  max-width: fit-content;
+}
+
+/* Student Interactive Reflection / Question Scratchpad (Hidden in Idle Clean) */
+.psv-student-pad {
+  margin-top: 6px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(10, 16, 29, 0.72);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  max-width: 720px;
+  transition: opacity 0.45s ease;
+}
+
+.psv-modal.is-idle-clean .psv-student-pad {
+  opacity: 0.12;
+}
+
+.psv-student-pad:focus-within {
+  opacity: 1 !important;
+}
+
+.psv-pad-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.psv-pad-input {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+}
+
+.psv-pad-input::placeholder {
+  color: rgba(203, 213, 225, 0.62);
+}
+
+/* ---------- Evidence & Framework Archive Bento (Slides 13–14) ---------- */
+.psv-sources-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(clamp(10px, 1.15vw, 18px) * var(--psv-eff-scale));
+  width: 100%;
+}
+
+.psv-source-col {
+  padding: calc(clamp(12px, 1.25vw, 18px) * var(--psv-eff-scale));
+  border-radius: 18px;
+  background: rgba(10, 15, 26, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  display: flex;
+  flex-direction: column;
+  gap: calc(7px * var(--psv-eff-scale));
+}
+
+.psv-source-col-head {
+  font-size: calc(clamp(13.5px, 1.18vw, 18px) * var(--psv-eff-scale));
+  font-weight: 700;
+  color: #fbbf24;
+  margin: 0 0 2px;
+}
+
+.psv-source-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(6px * var(--psv-eff-scale)) calc(10px * var(--psv-eff-scale));
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: calc(clamp(11.5px, 0.96vw, 14.5px) * var(--psv-eff-scale));
+  line-height: 1.35;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.psv-source-link:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.36);
+  color: #ffffff;
+}
+
+/* ---------- Layer 4: Subtle Edge Paddle Nav & Bottom Chapter Dock ---------- */
+.psv-edge-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 64px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 15, 26, 0.48);
+  color: #f8fafc;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: opacity 0.45s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.psv-edge-nav:hover {
+  background: rgba(30, 41, 59, 0.85);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.psv-edge-nav.is-prev { left: 12px; }
+.psv-edge-nav.is-next { right: 12px; }
+
+.psv-hud-bottom {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px clamp(16px, 2.8vw, 44px) clamp(12px, 1.8vh, 20px);
+  background: linear-gradient(0deg, rgba(4, 6, 12, 0.88) 0%, rgba(4, 6, 12, 0.42) 68%, transparent 100%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  flex-wrap: wrap;
+}
+
+.psv-chapter-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 3px 0;
+  scrollbar-width: none;
+}
+
+.psv-chapter-dots::-webkit-scrollbar {
+  display: none;
+}
+
+.psv-ch-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(15, 23, 42, 0.58);
+  color: rgba(226, 232, 240, 0.82);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.psv-ch-btn:hover {
+  background: rgba(51, 65, 85, 0.82);
+  color: #ffffff;
+}
+
+.psv-ch-btn.is-active {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #090d16;
+  font-weight: 700;
+}
+
+.psv-hud-foot-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(203, 213, 225, 0.86);
+}
+
+/* Whisper-thin Ambient Cycle Progress Bar at Bottom Edge */
+.psv-ambient-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.5px;
+  z-index: 7;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.psv-modal.is-ambient-cycling .psv-ambient-progress {
+  opacity: 0.85;
+}
+
+.psv-ambient-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--psv-accent), #fbbf24);
+  transform-origin: left center;
+  animation: psvCycleLinear var(--psv-cycle-ms, 18000ms) linear infinite;
+}
+
+@keyframes psvCycleLinear {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* ---------- Faculty-Only Moderator Cue Drawer (Strictly Role-Isolated) ---------- */
+.psv-mod-drawer {
+  position: absolute;
+  top: 64px;
+  right: clamp(16px, 2.8vw, 44px);
+  bottom: 66px;
+  width: min(440px, 90vw);
+  z-index: 8;
+  border-radius: 22px;
+  background: rgba(9, 13, 24, 0.88);
+  border: 1px solid rgba(251, 191, 36, 0.34);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.72);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: text;
+}
+
+.psv-mod-drawer[hidden] {
+  display: none !important;
+}
+
+.psv-mod-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.psv-mod-head strong {
+  font-size: 13.5px;
+  color: #fde68a;
+}
+
+.psv-mod-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.psv-mod-sec {
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.psv-mod-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fbbf24;
+  margin-bottom: 5px;
+}
+
+.psv-mod-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.psv-mod-refs {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.psv-mod-ref-link {
+  color: #93c5fd;
+  font-size: 12.5px;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.psv-mod-ref-link:hover {
+  text-decoration: underline;
+}
+
+/* Enlarged QR Lightbox Overlay */
+.psv-qr-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: rgba(4, 6, 12, 0.86);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.psv-qr-modal[hidden] {
+  display: none !important;
+}
+
+.psv-qr-modal-card {
+  padding: 28px 34px;
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 440px;
+  text-align: center;
+}
+
+.psv-qr-big {
+  width: min(280px, 66vw);
+  height: min(280px, 66vw);
+  padding: 14px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.psv-qr-big svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Student Companion Notes & Reflection Drawer (Available on Every Slide) */
+.psv-stu-drawer {
+  border-color: rgba(56, 189, 248, 0.36);
+}
+
+.psv-stu-drawer .psv-mod-head {
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.psv-stu-drawer .psv-mod-head strong {
+  color: #bae6fd;
+}
+
+.psv-stu-drawer .psv-mod-kicker {
+  color: #7dd3fc;
+}
+
+.psv-stu-textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.psv-stu-textarea:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.7);
+}
+
+/* ---------- Responsive Adaptations (Mobile, Portrait Tablet, Surface Duo) ---------- */
+@media (max-width: 960px) {
+  .psv-pacing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .psv-lo-grid,
+  .psv-sources-grid {
+    grid-template-columns: 1fr;
+  }
+  .psv-upnext-card {
+    display: none;
+  }
+  .psv-cover-split {
+    grid-template-columns: 1fr;
+  }
+  .psv-qr-plaque {
+    flex-direction: row;
+    width: fit-content;
+  }
+  .psv-qr-box {
+    width: 72px;
+    height: 72px;
+  }
+  .psv-edge-nav {
+    display: none;
+  }
+  .psv-stage-viewport {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    justify-content: flex-start;
+    padding: 14px 18px 22px;
+  }
+  .psv-slide-body {
+    margin-top: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .psv-hud-top {
+    padding: 8px 12px 6px;
+    gap: 6px;
+  }
+  .psv-series-pill {
+    display: none;
+  }
+  .psv-hud-brand {
+    width: 100%;
+  }
+  .psv-deck-picker {
+    max-width: 100%;
+    width: 100%;
+    font-size: 12px;
+    padding: 5px 28px 5px 12px;
+  }
+  .psv-hud-controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .psv-hud-controls::-webkit-scrollbar {
+    display: none;
+  }
+  .psv-pill-btn {
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+  .psv-hero-title {
+    font-size: calc(clamp(22px, 6.2vw, 30px) * var(--psv-font-scale, 1));
+  }
+  .psv-hero-title.is-prompt-quote {
+    font-size: calc(clamp(20px, 5.6vw, 28px) * var(--psv-font-scale, 1));
+  }
+  .psv-hero-title.is-compact-title {
+    font-size: calc(clamp(18px, 5vw, 24px) * var(--psv-font-scale, 1));
+  }
+  .psv-timeline-rail {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .psv-tl-card {
+    padding: 7px 11px;
+    gap: 2px;
+    border-radius: 12px;
+  }
+  .psv-tl-year {
+    font-size: 11.5px;
+  }
+  .psv-tl-text {
+    font-size: 12px;
+    line-height: 1.32;
+  }
+  .psv-kicker-sub {
+    font-size: 11px;
+  }
+  .psv-footnote-whisper {
+    font-size: 10.5px;
+  }
+  .psv-pacing-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .psv-hud-bottom {
+    padding: 6px 12px 10px;
+    gap: 6px;
+  }
+  .psv-hud-foot-right {
+    font-size: 11px;
+  }
+  .psv-mod-drawer {
+    top: 84px;
+    left: 10px;
+    right: 10px;
+    bottom: 58px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .psv-bg-slot,
+  .psv-aurora-layer,
+  .psv-slide-body {
+    animation: none !important;
+    transition: opacity 0.4s ease !important;
+  }
+}

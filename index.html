@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="assets/tv_ui.css?v=20261124epishelf1">
   <link rel="stylesheet" href="assets/orientation_live.css?v=20261124prem6">
   <link rel="stylesheet" href="assets/st1_slides.css?v=20261124st1deck1">
+  <link rel="stylesheet" href="assets/panel_screensaver_slides.css?v=20261124psv5">
   <link rel="stylesheet" href="assets/gdrive_pdf_preview.css?v=20261124pdf24">
 </head>
 <body class="role-faculty">
@@ -636,8 +637,9 @@
         </div>
       </div>
 
-      <p class="hsd-no-print">
-        <a class="btn" href="exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx" download>สไลด์คำถามสำหรับผู้ดำเนินการอภิปราย บทบาทแพทย์และเส้นทางอาชีพ (.pptx)</a>
+      <p class="hsd-no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn primary" type="button" onclick="window.RACM_PANEL_DECK && window.RACM_PANEL_DECK.open('w1-d1-global', 0)">🎬 เปิดสไลด์เวทีเสวนา GLOBAL (Apple TV / Netflix Screensaver · 14 สไลด์)</button>
+        <a class="btn" href="exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx" download>⬇ ดาวน์โหลดสไลด์ผู้ดำเนินการอภิปราย บทบาทแพทย์และเส้นทางอาชีพ (.pptx)</a>
       </p>
 
       <div class="subnav" role="group" aria-label="หมวดเอกสารสำหรับคณาจารย์">
@@ -863,9 +865,9 @@
   <script src="assets/vendor/mqtt.min.js?v=20261122tv7"></script>
   <script src="assets/vendor/peerjs.min.js?v=20261122tv7"></script>
   <script src="assets/live_classroom.js?v=20261123grp3"></script>
-  <script src="assets/data_schedule.js?v=20261124prem6"></script>
+  <script src="assets/data_schedule.js?v=20261124psv5"></script>
   <script src="assets/data_roster.js?v=20261124sbp1"></script>
-  <script src="assets/data_manual.js?v=20261124prem6"></script>
+  <script src="assets/data_manual.js?v=20261124psv5"></script>
   <script src="assets/data_hs_docs.js?v=20261124pdf24"></script>
   <script src="assets/data_hs_discussion.js?v=20261124prev44"></script>
   <script src="assets/data_hs_discussion_key.js?v=20261124prev44"></script>
@@ -890,8 +892,9 @@
   <script src="assets/orientation_live.js?v=20261124tv3"></script>
   <script src="assets/orientation_slides.js?v=20261124prem6"></script>
   <script src="assets/st1_slides.js?v=20261124prem6"></script>
-  <script src="assets/portal.js?v=20261124prem6"></script>
-  <script src="assets/tv_launcher.js?v=20261124tv3"></script>
+  <script src="assets/panel_screensaver_slides.js?v=20261124psv5"></script>
+  <script src="assets/portal.js?v=20261124psv5"></script>
+  <script src="assets/tv_launcher.js?v=20261124psv5"></script>
   <script src="assets/gdrive_pdf_preview.js?v=20261124pdf24"></script>
 </body>
 </html>
