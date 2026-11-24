@@ -441,8 +441,8 @@
     }
 
     // 1. Header Banner
-    const pdfFilename = (DATA.meta.pdfDownloadPath || "").split("/").pop() || `${modCode}_Slides.pdf`;
-    const masterPdfFilename = (DATA.meta.masterPdfDownloadPath || "").split("/").pop() || `${standaloneCode || modCode}_Complete_Slides.pdf`;
+    const pdfFilename = ((DATA.meta.pdfDownloadPath || "").split("?")[0]).split("/").pop() || `${modCode}_Slides.pdf`;
+    const masterPdfFilename = ((DATA.meta.masterPdfDownloadPath || "").split("?")[0]).split("/").pop() || `${standaloneCode || modCode}_Complete_Slides.pdf`;
     const badgeRightTxt = DATA.meta.examWeight
       ? `สอบ ${DATA.meta.examWeight}`
       : DATA.meta.sessionTag || "STEP 06 · VDO Lecture";

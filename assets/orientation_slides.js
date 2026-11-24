@@ -1,13 +1,13 @@
 /* ==========================================================================
    RACM 303 (2569) — Orientation to Community Medicine & Health Systems Science
-   19-Slide Interactive 16:9 Widescreen Apple-Keynote Slide Deck
+   20-Slide Interactive 16:9 Widescreen Apple-Keynote Slide Deck
    Constructive Policy-Brief Prose · Source-Validated HSS · Auto-Fit Typography
    ========================================================================== */
 (function () {
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem4";
+  const ASSET_VER = "20261124prem6";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -825,12 +825,12 @@
       actLabel: "ACT II · THE JOURNEY",
       timeWindow: "08.54 – 08.57 น. (3 นาที)",
       kicker: "02 · 6-WEEK LEARNING JOURNEY (25 NOV – 30 DEC 2569)",
-      title: "เส้นทางการเรียนรู้ 6 สัปดาห์ จากการปูกรอบคิดสู่โรงพยาบาลแหล่งฝึกและการสังเคราะห์ทีม",
+      title: "เส้นทางการเรียนรู้ 6 สัปดาห์ จากการปูความรู้สู่การฝึกภาคสนามและการนำเสนอบูรณาการ",
       keyTag: "ลำดับการเรียนรู้",
       keyMessageHtml:
-        "จัดสอบ <strong>ระบาดวิทยา</strong> ก่อนลงสำรวจจริง และจัดสอบ <strong>ระบบสุขภาพ</strong> หลังเห็นการทำงานในพื้นที่ เพื่อต่อยอดสู่ <strong>การนำเสนอผลงานร่วมกันเป็นทีม</strong>",
+        "<strong>เรียนความรู้ระบบและระบาดฯ จนครบ</strong> &rarr; <strong>สอบระบาดฯ</strong> &rarr; <strong>ลงฝึกภาคสนามและทำ Health Survey</strong> &rarr; <strong>กลับมาสอบระบบฯ ภาคทฤษฎี</strong> &rarr; <strong>สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบและระบาดฯ</strong>",
       notes:
-        "พากวาดสายตาภาพรวม 6 สัปดาห์ ช่วงที่ 1 (สัปดาห์ 1–3) ปูพื้นฐานทฤษฎี สอบระบาดวิทยา 8 ธ.ค. ฝึก SPSS และส่ง SRN 1 ก่อนเดินทาง ช่วงที่ 2 (สัปดาห์ 4) เรียนรู้ภาคสนาม ณ โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน) และช่วงที่ 3 (สัปดาห์ 5–6) สอบระบบสุขภาพ 22 ธ.ค. ฝึกเขียนแผนผังความคิดเชิงระบบ และนำเสนอผลงานทีมวันที่ 29–30 ธ.ค.",
+        "สรุปเส้นทางการเรียนรู้ 6 สัปดาห์แบบเข้าใจง่ายตามลำดับขั้น: สัปดาห์ที่ 1–2 เรียนเนื้อหาระบบสุขภาพและระบาดวิทยาจนครบ สัปดาห์ที่ 3 สอบทฤษฎีระบาดวิทยา (8 ธ.ค.) และเตรียมพร้อมก่อนเดินทาง สัปดาห์ที่ 4 ลงฝึกภาคสนาม ณ โรงพยาบาลแหล่งฝึก 9 แห่ง (7–9 คืน) พร้อมทำ Health Survey ในชุมชน สัปดาห์ที่ 5 กลับมาสอบทฤษฎีระบบสุขภาพ (22 ธ.ค.) และฝึกวาดผังคิดเชิงระบบ (CLD) ก่อนเข้าสู่สัปดาห์ที่ 6 สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้อย่างบูรณาการผ่านการนำเสนองานทั้งระบบสุขภาพ (29 ธ.ค.) และระบาดวิทยา (30 ธ.ค.)",
       render: () => `
         <div class="or-top-fig-stack is-s06-stack">
           ${figPlate("orient_s06_roadmap.png", "6-Week Learning Journey across Classroom Preparation, 9 Training Hospitals, and Team Synthesis", "")}
@@ -842,69 +842,69 @@
                 <h3 class="or-card-title is-s06-title">เปิดมุมมองระบบและระบาดฯ</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>25 พ.ย.:</strong> <code>ST1</code> และเสวนา <code>SBP</code></li>
-                <li><strong>26 พ.ย.:</strong> <code>HS1</code> ควบคู่ SG #1</li>
-                <li><strong>27 พ.ย.:</strong> <code>EP1–3</code> และ Ex Day 1</li>
+                <li>ปูพื้นฐานคิดเชิงระบบ (<code>ST1</code>) และบทบาท <code>SBP</code></li>
+                <li>เริ่มเรียนระบบสุขภาพ (<code>HS1</code>) และระบาดฯ (<code>EP1–3</code>)</li>
+                <li>พบอาจารย์ที่ปรึกษาเตรียมทีม (<code>SG #1</code>)</li>
               </ul>
             </div>
 
             <div class="or-card is-white is-s06-card">
               <div>
                 <span class="or-card-kicker">W2 · 30 พ.ย.–4 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">ต่อยอดศาสตร์บริการและหลักฐาน</h3>
+                <h3 class="or-card-title is-s06-title">เรียนความรู้ระบบ–ระบาดฯ จนครบ</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>30 พ.ย.–1 ธ.ค.:</strong> <code>HS2–HS5</code></li>
-                <li><strong>2–3 ธ.ค.:</strong> <code>EP4–9</code> รูปแบบผสมผสาน</li>
-                <li><strong>4 ธ.ค.:</strong> <code>HS6</code> ควบคู่ SG #2</li>
+                <li>เรียนระบบบริการ ปฐมภูมิ และหลักประกันฯ (<code>HS2–6</code>)</li>
+                <li>เรียนวิจัย สอบสวนโรค สำรวจ และ EBM (<code>EP4–9</code>)</li>
+                <li>วางแผนสำรวจสุขภาพชุมชนร่วมกัน (<code>SG #2</code>)</li>
               </ul>
             </div>
 
             <div class="or-card is-amber-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W3 · 8–12 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">ประสานทีมสอบความรู้สู่ชุมชน</h3>
+                <h3 class="or-card-title is-s06-title">สอบระบาดฯ ก่อนลงภาคสนาม</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>8 ธ.ค.:</strong> <strong>Epi Exam</strong>, SPSS, SG #3</li>
-                <li><strong>9 ธ.ค.:</strong> ระบบสุขภาพอำเภอและ <strong>SRN 1</strong></li>
-                <li><strong>9–11 ธ.ค.:</strong> SG #4–5 ก่อนออกเดินทาง</li>
+                <li><strong>สอบทฤษฎีระบาดฯ (8 ธ.ค.)</strong> และฝึก <code>SPSS</code></li>
+                <li>เรียนรู้ระบบสุขภาพอำเภอ และส่ง <code>SRN 1</code></li>
+                <li>เตรียมเครื่องมือพร้อมเดินทาง (<code>SG #3–5</code>)</li>
               </ul>
             </div>
 
             <div class="or-card is-teal-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W4 · 9–20 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">ลงฝึกฝนเรียนรู้คนเก้าพื้นที่</h3>
+                <h3 class="or-card-title is-s06-title">ฝึกภาคสนามและทำ Health Survey</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li>เรียนรู้ในพื้นที่จริง <strong>7–9 คืน</strong></li>
-                <li>เชื่อมโยงทั้ง 5 วัตถุประสงค์ระบบฯ</li>
-                <li>สำรวจชุมชนและรับคำแนะนำ SRN 1</li>
+                <li>เรียนรู้ รพ. และชุมชนจริง <strong>9 แห่ง (7–9 คืน)</strong></li>
+                <li>เก็บข้อมูลสำรวจสุขภาพ (<strong>Health Survey</strong>)</li>
+                <li>สังเกตการเชื่อมโยงระบบสุขภาพในพื้นที่จริง</li>
               </ul>
             </div>
 
             <div class="or-card is-navy-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W5 · 21–25 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">เชื่อมทฤษฎีคลี่ระบบครบวงจร</h3>
+                <h3 class="or-card-title is-s06-title">กลับมาสอบระบบฯ ภาคทฤษฎี</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>21 ธ.ค.:</strong> เตรียมโน้ตสรุป A4</li>
-                <li><strong>22 ธ.ค.:</strong> <strong>HS Exam</strong> และฝึก CLD</li>
-                <li><strong>23–25 ธ.ค.:</strong> เสวนานโยบายและ SG #6–8</li>
+                <li><strong>สอบทฤษฎีระบบสุขภาพ (22 ธ.ค. · โน้ต A4)</strong></li>
+                <li>ฝึกผังคิดเชิงระบบ (<code>CLD</code>) และเสวนานโยบาย</li>
+                <li>วิเคราะห์ข้อมูลและถอดบทเรียน (<code>SG #6–8</code>)</li>
               </ul>
             </div>
 
             <div class="or-card is-rose-tint is-s06-card">
               <div>
                 <span class="or-card-kicker">W6 · 28–30 ธ.ค.</span>
-                <h3 class="or-card-title is-s06-title">ร่วมสะท้อนสังเคราะห์งานวันนำเสนอ</h3>
+                <h3 class="or-card-title is-s06-title">นำเสนอบูรณาการระบบและระบาดฯ</h3>
               </div>
               <ul class="or-list is-s06-list">
-                <li><strong>28 ธ.ค.:</strong> SG #9–10 เตรียมนำเสนอ</li>
-                <li><strong>29 ธ.ค.:</strong> <strong>นำเสนอระบบสุขภาพ (3A)</strong></li>
-                <li><strong>30 ธ.ค.:</strong> <strong>นำเสนอระบาดฯ และ SRN 2</strong></li>
+                <li>สะท้อนการคิดเชิงระบบเชื่อมโยงองค์ความรู้</li>
+                <li><strong>นำเสนองานระบบฯ (29 ธ.ค.) และระบาดฯ (30 ธ.ค.)</strong></li>
+                <li>สรุปบทเรียนพัฒนาตนในงานเขียน <code>SRN 2</code></li>
               </ul>
             </div>
           </div>
@@ -918,7 +918,7 @@
       sectionLabel: "Act II · Schedule W1–W3",
       actClass: "is-act-2",
       actLabel: "ACT II · RACM 303 SCHEDULE (W1–W3)",
-      timeWindow: "08.57 – 09.00 น. (3 นาที)",
+      timeWindow: "08.57 – 08.59 น. (2 นาที)",
       kicker: "02 · RACM 303 SCHEDULE · WEEKS 1–3 (25 NOV – 12 DEC 2569)",
       title: "RACM 303 Schedule · ตารางเรียนรายสัปดาห์ ปีการศึกษา 2569 (สัปดาห์ที่ 1 – 3)",
       keyTag: "ตารางสัปดาห์ 1–3",
@@ -1092,7 +1092,7 @@
       sectionLabel: "Act II · Schedule W4–W6",
       actClass: "is-act-2",
       actLabel: "ACT II · RACM 303 SCHEDULE (W4–W6)",
-      timeWindow: "09.00 – 09.03 น. (3 นาที)",
+      timeWindow: "08.59 – 09.01 น. (2 นาที)",
       kicker: "02 · RACM 303 SCHEDULE · WEEKS 4–6 (13 – 30 DEC 2569)",
       title: "RACM 303 Schedule · ตารางเรียนรายสัปดาห์ ปีการศึกษา 2569 (สัปดาห์ที่ 4 – 6)",
       keyTag: "ตารางสัปดาห์ 4–6",
@@ -1238,7 +1238,7 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.03 – 09.06 น. (3 นาที)",
+      timeWindow: "09.01 – 09.04 น. (3 นาที)",
       kicker: "02 · HEALTH SYSTEMS SCIENCE ARCHITECTURE (ST1 & HS1–HS6)",
       title: "การเรียนรู้หมวดระบบสุขภาพแบบนำทาง 6 ขั้นตอน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ",
       keyTag: "การออกแบบการเรียนรู้",
@@ -1287,53 +1287,107 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.06 – 09.09 น. (3 นาที)",
+      timeWindow: "09.04 – 09.07 น. (3 นาที)",
       kicker: "02 · CLINICAL & COMMUNITY EPIDEMIOLOGY PIPELINE (EP1–EP9)",
-      title: "หมวดระบาดวิทยาคลินิกและชุมชน (EP1–EP9) จากหลักฐานวิชาการสู่การสำรวจจริง",
+      title: "หมวดระบาดวิทยาคลินิกและชุมชน (EP1–EP9): จากภาคทฤษฎี สอบ และ SPSS สู่การสำรวจจริงและนำเสนอวิจัย",
       keyTag: "จากหลักฐานสู่การปฏิบัติ",
       keyMessageHtml:
-        "การประเมินความแม่นยำของการตรวจและการจัดการอคติ (<strong>Selection Bias, Information Bias และ Confounding</strong>) ช่วยให้ผลสำรวจสุขภาพชุมชนน่าเชื่อถือและนำไปใช้ได้จริง",
+        "<strong>เรียนครบ EP1–EP9</strong> &rarr; <strong>สอบระบาดฯ และฝึก SPSS Workshop</strong> &rarr; <strong>ออกแบบ Study Design &amp; Data Collection ในภาคสนาม</strong> &rarr; <strong>กลับมา Analysis</strong> &rarr; <strong>นำเสนอเชื่อมโยง Problem Identification &middot; Research Questions &middot; Study Design &middot; Data Collection &middot; Data Analysis/Synthesis และ Flip Up สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
       notes:
-        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 09.00–11.00 น. (ห้อง Auditorium และ Zoom) ต่อด้วยแบบฝึกหัดที่ 2–3 ในระบบออนไลน์ วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 09.00 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
+        "ไล่เรียงเส้นทางหมวดระบาดวิทยาครบทั้ง 8 จังหวะตามลำดับเวลาจริง: (1–3) เรียนภาคทฤษฎีครบ EP1–EP9 วันที่ 27 พ.ย. และ 2–3 ธ.ค. (4) สอบภาคทฤษฎีระบาดวิทยาเช้าวันอังคารที่ 8 ธ.ค. แยกจากคาบเรียนชัดเจน (5) บ่ายวันเดียวกันฝึก SPSS Workshop เตรียมพร้อมก่อนลงพื้นที่ (6) ออกแบบ Study Design และเก็บข้อมูลจริง (Data Collection) ในภาคสนาม 9 พื้นที่ (7) กลับมาทำ Data Analysis & Synthesis และ (8) นำเสนอผลงานวิจัยทีม (ฟอร์ม 4A · 30 ธ.ค.) เชื่อมโยงตั้งแต่ Problem Identification, Research Questions, Study Design, Data Collection, Data Analysis/Synthesis แล้วปิดจบ Flip Up สู่ Implications for Body of Knowledge, Policy and Practices",
       render: () => `
         <div class="or-top-fig-stack is-s08-stack">
-          ${figPlate("orient_s08_epi_pipeline.png", "4-Stage Clinical and Community Epidemiology Pipeline", "")}
+          ${figPlate("orient_s08_epi_pipeline.png", "8-Stage Epidemiology Pipeline from EP1–EP9, Epi Exam, and SPSS Workshop to Fieldwork, Analysis, and Flip-Up Presentation", "")}
 
           <div class="or-grid-4 is-s08-grid" data-fit-group="cards">
             <div class="or-card is-white is-s08-card">
               <div>
-                <span class="or-card-kicker">STAGE 1 · ศ. 27 พ.ย. 69</span>
-                <h3 class="or-card-title">EP1–EP3 · การวินิจฉัยและอคติ</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ. นพ.จักรกฤษณ์</span></span></div>
+                <span class="or-card-kicker">STAGE 1–3 · ทฤษฎีครบ EP1–EP9 (27 พ.ย. &amp; 2–3 ธ.ค.)</span>
+                <h3 class="or-card-title">เรียนพื้นฐาน วินิจฉัย วิจัย ภาระโรค สำรวจ และ EBM</h3>
+                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>09.00–11.00 น.</strong> (<code>Auditorium</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 2–3 หลัง 11.00 น.</strong></p>
+              <p class="or-card-text"><code>EP1</code> แนวคิดระบาดฯ · <code>EP2</code> การตรวจวินิจฉัย · <code>EP3</code> อคติ · <code>EP4</code> รูปแบบวิจัย · <code>EP5</code> สอบสวนโรค · <code>EP6</code> ภาระโรค · <code>EP7</code> สำรวจสุขภาพ · <code>EP8</code> <code>RCT</code> · <code>EP9</code> <code>EBM</code></p>
             </div>
 
-            <div class="or-card is-white is-s08-card">
+            <div class="or-card is-amber-tint is-s08-card">
               <div>
-                <span class="or-card-kicker">STAGE 2 · พ. 2 ธ.ค. 69</span>
-                <h3 class="or-card-title">EP4–EP5 · รูปแบบวิจัยและสอบสวนโรค</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ. พญ.สวนีย์</span></span></div>
+                <span class="or-card-kicker">STAGE 4–5 · อ. 8 ธ.ค. 69 (ก่อนออกภาคสนาม)</span>
+                <h3 class="or-card-title">สอบทฤษฎีระบาดฯ และฝึก SPSS Workshop</h3>
+                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์ และทีม</span></span></div>
               </div>
-              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 4–5</strong></p>
+              <p class="or-card-text"><strong>เช้า (09.00–12.00 น.):</strong> สอบภาคทฤษฎีระบาดวิทยา (<code>Closed-Book</code>) แยกหลังเรียนจบครบ <code>EP1–9</code> · <strong>บ่าย (13.30–15.00 น.):</strong> ฝึกปฏิบัติการ <strong>SPSS Workshop</strong> ก่อนลงพื้นที่จริง</p>
             </div>
 
             <div class="or-card is-teal-tint is-s08-card">
               <div>
-                <span class="or-card-kicker">STAGE 3 · พฤ. 3 ธ.ค. 69</span>
-                <h3 class="or-card-title">EP6–EP9 · ภาระโรคและเวชปฏิบัติอิงหลักฐาน</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
+                <span class="or-card-kicker">STAGE 6 · ภาคสนาม 9 พื้นที่ (9–20 ธ.ค. 69)</span>
+                <h3 class="or-card-title">ออกแบบ Study Design &amp; Data Collection</h3>
               </div>
-              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย <strong>EP9 &amp; แบบฝึกหัด 6–7</strong></p>
+              <p class="or-card-text">ระบุปัญหาสุขภาพและคำถามวิจัยร่วมกับพื้นที่จริง <strong>ออกแบบระเบียบวิธีวิจัย (<code>Study Design</code>) การสุ่มตัวอย่าง และเครื่องมือ</strong> แล้วลงมือเก็บข้อมูลสำรวจสุขภาพชุมชน (<code>Data Collection</code>)</p>
             </div>
 
             <div class="or-card is-navy-tint is-s08-card">
               <div>
-                <span class="or-card-kicker">STAGE 4 · 8 ถึง 30 ธ.ค. 69</span>
-                <h3 class="or-card-title">สอบทฤษฎี ฝึก SPSS และนำเสนอวิจัย</h3>
-                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ.สวนีย์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ.จักรกฤษณ์ และทีม</span></span></div>
+                <span class="or-card-kicker">STAGE 7–8 · 21–30 ธ.ค. 69 (ฟอร์ม 4A)</span>
+                <h3 class="or-card-title">กลับมา Analysis สู่นำเสนอและ Flip Up</h3>
               </div>
-              <p class="or-card-text"><strong>8 ธ.ค.:</strong> เช้าสอบ <strong>Epi Exam</strong> บ่ายฝึก <strong>SPSS</strong> เพื่อเตรียมเก็บข้อมูลในพื้นที่จริงและนำเสนอผลงานวิจัยทีม (<code>ฟอร์ม 4A</code>) วันที่ 30 ธ.ค.</p>
+              <p class="or-card-text">วิเคราะห์และสังเคราะห์ผลเชื่อมโยง <code>Problem Identification</code> &rarr; <code>Research Questions</code> &rarr; <code>Study Design</code> &rarr; <code>Data Collection</code> &rarr; <code>Data Analysis/Synthesis</code> แล้วปิดจบ <strong>Flip Up สู่ <code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong></p>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "s08b-hs-pipeline",
+      num: "11",
+      section: "experience",
+      sectionLabel: "Act II · Learning Journey",
+      actClass: "is-act-2",
+      actLabel: "ACT II · THE JOURNEY",
+      timeWindow: "09.07 – 09.10 น. (3 นาที)",
+      kicker: "02 · HEALTH SYSTEMS SCIENCE PIPELINE (ST1 & HS1–HS6)",
+      title: "หมวดระบบสุขภาพ (ST1 และ HS1–HS6): จากกรอบทฤษฎีสู่การสังเกตระบบจริง สอบ และนำเสนอบูรณาการ",
+      keyTag: "จากกรอบคิดสู่ระบบจริง",
+      keyMessageHtml:
+        "<strong>เรียนครบ ST1 และ HS1–HS6</strong> &rarr; <strong>เตรียมมุมมอง DHS &amp; SRN 1</strong> &rarr; <strong>ลงสังเกตระบบจริงในภาคสนาม</strong> &rarr; <strong>กลับมาสอบทฤษฎีระบบฯ (โน้ต A4) และวาดผัง CLD</strong> &rarr; <strong>นำเสนอเชื่อมโยง 5 วัตถุประสงค์ด้วยคิดเชิงระบบ และ Flip Up สู่ Implications (Body of Knowledge, Policy &amp; Practices)</strong>",
+      notes:
+        "อธิบายเส้นทางหมวดระบบสุขภาพตามหลักคิดคู่ขนานกับหมวดระบาดวิทยา: (1–3) เรียนภาคทฤษฎีครบ ST1 และ HS1–HS6 ในสัปดาห์ที่ 1–2 (4) เตรียมมุมมองระบบสุขภาพอำเภอ (DHS 6BB+1) และส่ง SRN 1 วันที่ 9 ธ.ค. ก่อนออกเดินทาง (5) ลงสังเกตการทำงานของระบบบริการและชุมชนจริงในภาคสนาม 9 พื้นที่ (6) กลับมาสอบภาคทฤษฎีระบบสุขภาพเช้าวันอังคารที่ 22 ธ.ค. แบบ Open Note A4 (7) บ่ายฝึกวาดผังวงจรเหตุผล (CLD) และร่วมเสวนานโยบาย 23–24 ธ.ค. ก่อน (8) นำเสนอผลงานทีม (ฟอร์ม 3A · 29 ธ.ค.) สะท้อนการคิดเชิงระบบเชื่อมโยงครบทั้ง 5 วัตถุประสงค์ และปิดจบ Flip Up สู่จุดคานงัดและ Implications for Body of Knowledge, Policy and Practices",
+      render: () => `
+        <div class="or-top-fig-stack is-s08-stack">
+          ${figPlate("orient_s08b_hs_pipeline.png", "8-Stage Health Systems Science Pipeline from ST1 and HS1–HS6 to Fieldwork, Open-Note Exam, CLD, and Flip-Up Presentation", "")}
+
+          <div class="or-grid-4 is-s08-grid" data-fit-group="cards">
+            <div class="or-card is-white is-s08-card">
+              <div>
+                <span class="or-card-kicker">STAGE 1–3 · ทฤษฎีครบ ST1 &amp; HS1–6 (25 พ.ย.–4 ธ.ค.)</span>
+                <h3 class="or-card-title">คิดเชิงระบบ ปัจจัยสุขภาพ บริการ ปฐมภูมิ และ UHC</h3>
+                <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="อ.ณัฐวุฒิ" loading="eager" decoding="async" /></span><span>อ.ณัฐวุฒิ</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="อ.วริษา" loading="eager" decoding="async" /></span><span>อ.วริษา</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="อ.ภูษิต" loading="eager" decoding="async" /></span><span>อ.ภูษิต</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="ผศ.วิชช์" loading="eager" decoding="async" /></span><span>ผศ.วิชช์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="อ.ฉัตรชัย" loading="eager" decoding="async" /></span><span>อ.ฉัตรชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="ผศ.สัมฤทธิ์" loading="eager" decoding="async" /></span><span>ผศ.สัมฤทธิ์</span></span></div>
+              </div>
+              <p class="or-card-text"><code>ST1</code> คิดเชิงระบบ · <code>HS1</code> สุขภาพ <code>SDH/CDoH</code> · <code>HS2</code> บริการ <code>6BB</code> · <code>HS3</code> คุณลักษณะ <code>EQESaRR</code> · <code>HS4</code> สร้างเสริมสุขภาพ <code>COM-B</code> · <code>HS5</code> ปฐมภูมิ <code>PHC</code> · <code>HS6</code> <code>UHC</code></p>
+            </div>
+
+            <div class="or-card is-teal-tint is-s08-card">
+              <div>
+                <span class="or-card-kicker">STAGE 4–5 · เตรียม DHS &amp; ภาคสนาม (9–20 ธ.ค.)</span>
+                <h3 class="or-card-title">เตรียมมุมมองอำเภอ สู่การสังเกตระบบจริง 9 พื้นที่</h3>
+              </div>
+              <p class="or-card-text"><strong>9 ธ.ค.:</strong> เรียนรู้ระบบสุขภาพอำเภอ (<code>DHS 6BB+1</code>) และส่ง <code>SRN 1</code> ก่อนลงเรียนรู้การทำงานเชื่อมโยงของ <strong>รพ. · รพ.สต. · อสม. · ท้องถิ่น · ชุมชน</strong> ในพื้นที่จริง</p>
+            </div>
+
+            <div class="or-card is-amber-tint is-s08-card">
+              <div>
+                <span class="or-card-kicker">STAGE 6–7 · อ. 22 – ศ. 25 ธ.ค. 69 (หลังกลับพื้นที่)</span>
+                <h3 class="or-card-title">กลับมาสอบระบบฯ ภาคทฤษฎี และวาดผัง CLD</h3>
+              </div>
+              <p class="or-card-text"><strong>เช้า 22 ธ.ค.:</strong> สอบทฤษฎีระบบสุขภาพ (<code>Open Note A4</code>) แยกชัดเจนหลังเห็นภาพจริง · <strong>บ่าย 22–25 ธ.ค.:</strong> ฝึกวาดผังวงจรเหตุผล (<code>CLD</code>) และเสวนานโยบายสุขภาพ</p>
+            </div>
+
+            <div class="or-card is-navy-tint is-s08-card">
+              <div>
+                <span class="or-card-kicker">STAGE 8 · อ. 29 ธ.ค. 69 (ฟอร์ม 3A)</span>
+                <h3 class="or-card-title">นำเสนอบูรณาการ 5 วัตถุประสงค์และ Flip Up</h3>
+              </div>
+              <p class="or-card-text">สะท้อนการคิดเชิงระบบเชื่อมโยงทั้ง <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> เข้าด้วยกันอย่างบูรณาการ แล้วปิดจบ <strong>Flip Up สู่จุดคานงัดและ <code>Implications for Body of Knowledge, Policy &amp; Practices</code></strong></p>
             </div>
           </div>
         </div>
@@ -1341,12 +1395,12 @@
     },
     {
       id: "s09-fieldwork-9sites",
-      num: "11",
+      num: "12",
       section: "experience",
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.09 – 09.13 น. (4 นาที)",
+      timeWindow: "09.10 – 09.13 น. (3 นาที)",
       kicker: "02 · KOLB'S EXPERIENTIAL LEARNING & 9 FIELDWORK TRAINING HOSPITALS",
       title: "การเรียนรู้จากประสบการณ์จริงตามวงจร Kolb ณ โรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง",
       keyTag: "การเรียนรู้ร่วมกัน",

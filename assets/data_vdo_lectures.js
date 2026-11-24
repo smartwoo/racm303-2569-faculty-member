@@ -57,7 +57,7 @@
       statusEn: "Interactive Studio Ready",
       stylePreset: "vdo-studio-ready",
       studioGlobalKey: "RACM303_HS2_VDO_STUDIO",
-      videoUrl: "assets/videos/hs2a_structure_models.mp4",
+      videoUrl: "assets/videos/hs2a_structure_models.mp4?v=20261124hs2v2",
       externalUrl: "https://drive.google.com/file/d/1Bwd8lwEZAO2qfWRSnicZgzEtL6-Uh8Dw/view?usp=sharing",
       durationLabel: "79:33 · 47 สไลด์",
       lecturer: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
