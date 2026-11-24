@@ -7,12 +7,389 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124tv3";
+  const ASSET_VER = "20261124prem2";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
+  const PREM_BURI_DIR = "assets/images/orientation/prem_buri";
+  const PREM_SCREENSAVER_MS = 6000;
   const AUTOPLAY_MS = 9000;
   const CLICKER_HUD_IDLE_MS = 2300;
+
+  /* ---------- Netflix Pause Screensaver × Apple TV Photo Grid Catalog (Slide 02: Prem Buri) ---------- */
+  const PREM_BURI_REEL_ITEMS = [
+    {
+      id: "pb_01",
+      file: "pb_01_smiling_portrait.webp",
+      orient: "portrait",
+      pos: "50% 22%",
+      badge: "FEATURED #1 · FOUNDING FATHER",
+      era: "พ.ศ. 2461 – 2558",
+      shortTag: "รอยยิ้มครูแพทย์ผู้บุกเบิก",
+      title: "ศ.เกียรติคุณ นพ.เปรม บุรี — รอยยิ้มและจิตวิญญาณครูแพทย์รามาธิบดี",
+      desc: "จากเสรีไทยสายอังกฤษและหัวหน้าภาควิชาศัลยศาสตร์ท่านแรก สู่ผู้บุกเบิกเวชศาสตร์ชุมชนที่พาแพทย์เรียนรู้ชีวิตจริงของประชาชน"
+    },
+    {
+      id: "pb_02",
+      file: "pb_02_cmc_disciples_2551.webp",
+      orient: "wide",
+      preserveFrame: true,
+      pos: "50% 46%",
+      badge: "COMMUNITY MEDICINE CENTER · 28 ต.ค. 2551",
+      era: "สำนักงานศูนย์เวชศาสตร์ชุมชน",
+      shortTag: "ท่ามกลางลูกศิษย์ (2551)",
+      title: "ท่ามกลางลูกศิษย์ลูกหา ณ สำนักงานศูนย์เวชศาสตร์ชุมชน",
+      desc: "ภาพถ่ายประวัติศาสตร์วันที่ 28 ตุลาคม 2551 ร่วมกับคณาจารย์และบุคลากรผู้สืบสานพันธกิจเวชศาสตร์ชุมชน รามาธิบดี"
+    },
+    {
+      id: "pb_03",
+      file: "pb_03_pipe_map_vision.webp",
+      orient: "portrait",
+      pos: "50% 26%",
+      badge: "SYSTEMS VISIONARY · พ.ศ. 2509 – 2514",
+      era: "จากข้างเตียงสู่แผนที่ชุมชน",
+      shortTag: "เข็มทิศสู่ชนบทไทย",
+      title: "จากศัลยแพทย์หัวใจและหลอดเลือด สู่การวางแผนระบบสุขภาพชนบท",
+      desc: "แรงบันดาลใจจากหน่วยแพทย์เคลื่อนที่ จ.อุดรธานี จุดประกายการออกแบบหลักสูตรให้แพทย์เข้าใจบริบทพื้นที่จริงนอกโรงพยาบาล"
+    },
+    {
+      id: "pb_04",
+      file: "pb_04_field_pha_khao_ma.webp",
+      orient: "portrait",
+      pos: "55% 18%",
+      badge: "RURAL FIELDWORK · BEYOND THE IVORY TOWER",
+      era: "ห้องเรียนกลางหมู่บ้าน",
+      shortTag: "ผ้าขาวม้าและไม้เท้าลงพื้นที่",
+      title: "เคียงข้างชุมชนด้วยความถ่อมตน — ต้นแบบการลงพื้นที่จริง",
+      desc: "ภาพจำของอาจารย์เปรมในชุดเรียบง่ายโพกผ้าขาวม้าถือไม้เท้า นั่งรับฟังและทำงานร่วมกับทีมและชาวบ้านในพื้นที่ชนบท"
+    },
+    {
+      id: "pb_05",
+      file: "pb_05_tree_planting_community.webp",
+      orient: "portrait",
+      pos: "55% 50%",
+      badge: "GROWING ROOTS · LIVING LEGACY",
+      era: "หยั่งรากสร้างคน สร้างระบบ",
+      shortTag: "ร่วมปลูกต้นไม้กับศิษย์",
+      title: "หยั่งรากเมล็ดพันธุ์เวชศาสตร์ชุมชนร่วมกับลูกศิษย์และชุมชน",
+      desc: "การสร้างบัณฑิตแพทย์เปรียบเสมือนการปลูกต้นไม้ที่ต้องอาศัยความเข้าใจบริบทของพื้นที่และการลงมือทำร่วมกัน"
+    },
+    {
+      id: "pb_06",
+      file: "pb_06_multidisciplinary_dialogue.webp",
+      orient: "wide",
+      pos: "48% 30%",
+      badge: "MULTIDISCIPLINARY UNIT · สหสาขาวิชาชีพ",
+      era: "บูรณาการข้ามภาควิชา",
+      shortTag: "วงสนทนาสหสาขาวิชา",
+      title: "เวชศาสตร์ชุมชนคือความร่วมมือข้ามศาสตร์ ไม่แยกส่วนเป็นเกาะเดี่ยว",
+      desc: "แนวคิดหลักของ อ.เปรม ในการประสานความร่วมมือระหว่างคลินิกทุกสาขา พยาบาล และทีมสาธารณสุขในพื้นที่"
+    },
+    {
+      id: "pb_07",
+      file: "pb_07_seminar_warm_smile.webp",
+      orient: "wide",
+      pos: "48% 36%",
+      badge: "OUT OF THE IVORY TOWER · กัลยาณมิตร",
+      era: "ก้าวออกจากหอคอยงาช้าง",
+      shortTag: "ก้าวออกจากหอคอยงาช้าง",
+      title: "พาอาจารย์แพทย์ พยาบาล และนักศึกษาออกจาก “หอคอยงาช้าง”",
+      desc: "บรรยากาศการแลกเปลี่ยนเรียนรู้อย่างอบอุ่นเป็นกันเอง เปิดพื้นที่ให้ทุกคนตั้งคำถามและวิเคราะห์ปัญหาสุขภาพร่วมกัน"
+    },
+    {
+      id: "pb_08",
+      file: "pb_08_academic_panel_mic.webp",
+      orient: "wide",
+      preserveFrame: true,
+      pos: "50% 32%",
+      badge: "CURRICULUM PIONEER · MEDICAL EDUCATION",
+      era: "ปฏิรูปแพทยศาสตรศึกษา",
+      shortTag: "เวทีอภิปรายหลักสูตร",
+      title: "บรรจุเวชศาสตร์ชุมชนในชั่วโมงหลักสูตรหลักของคณะแพทยศาสตร์",
+      desc: "ผลักดันให้การเรียนรู้ชุมชนเป็นแกนหลักของหลักสูตรแพทยศาสตรบัณฑิต ไม่ใช่เพียงกิจกรรมดูงานระยะสั้นนอกเวลา"
+    },
+    {
+      id: "pb_09",
+      file: "pb_09_village_walk_field.webp",
+      orient: "wide",
+      pos: "50% 20%",
+      badge: "COMMUNITY WALK · EXPERIENTIAL LEARNING",
+      era: "เดินสำรวจวิถีชุมชน",
+      shortTag: "เดินเท้าเยี่ยมชุมชน",
+      title: "เดินเท้าเรียนรู้วิถีชีวิต ปัจจัยกำหนดสุขภาพ และภูมิปัญญาท้องถิ่น",
+      desc: "นำทีมคณาจารย์และนักศึกษาเดินสำรวจชุมชนด้วยตนเอง เพื่อเห็นความเชื่อมโยงระหว่างความเป็นอยู่ อาชีพ และสุขภาพ"
+    },
+    {
+      id: "pb_10",
+      file: "pb_10_campus_community_sport.webp",
+      orient: "wide",
+      pos: "52% 40%",
+      badge: "TEAM SPIRIT · HOLISTIC WELLBEING",
+      era: "พลังทีมและความผูกพัน",
+      shortTag: "กิจกรรมเชื่อมพลังทีม",
+      title: "สร้างพลังทีมและความสุขในการทำงานร่วมกับชุมชนและสหวิชาชีพ",
+      desc: "ความเรียบง่ายและเปี่ยมพลังของ อ.เปรม ในกิจกรรมร่วมกับพยาบาล เจ้าหน้าที่ และนักศึกษาอย่างไม่ถือตัว"
+    },
+    {
+      id: "pb_11",
+      file: "pb_11_cmc_monk_blessing_2526.webp",
+      orient: "wide",
+      pos: "50% 32%",
+      badge: "ARCHIVAL MILESTONE · พ.ศ. 2526",
+      era: "ก่อตั้งศูนย์เวชศาสตร์ชุมชน",
+      shortTag: "เจิมป้ายศูนย์เวชศาสตร์ชุมชน",
+      title: "พิธีเจิมป้าย “ศูนย์เวชศาสตร์ชุมชน” คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี",
+      desc: "หมุดหมายสำคัญในการยกระดับหน่วยทำงานสหวิชาชีพสู่ศูนย์เวชศาสตร์ชุมชน ก่อนพัฒนาเป็นภาควิชาเวชศาสตร์ชุมชน"
+    },
+    {
+      id: "pb_12",
+      file: "pb_12_founding_committee_table.webp",
+      orient: "wide",
+      preserveFrame: true,
+      pos: "50% 45%",
+      badge: "FOUNDING ERA · พ.ศ. 2512 – 2520",
+      era: "โครงการบางปะอิน จ.อยุธยา",
+      shortTag: "ประชุมวางรากฐานยุคบุกเบิก",
+      title: "ประชุมวางรากฐานโครงการเวชศาสตร์ชุมชน ร่วมกับกระทรวงสาธารณสุข",
+      desc: "เชื่อมโรงเรียนแพทย์เข้ากับระบบบริการสาธารณสุขระดับอำเภอ ณ อ.บางปะอิน จ.พระนครศรีอยุธยา เป็นแห่งแรก"
+    },
+    {
+      id: "pb_13",
+      file: "pb_13_evening_mentorship_table.webp",
+      orient: "portrait",
+      pos: "54% 26%",
+      badge: "REFLECTIVE MENTORSHIP · สะท้อนคิดยามค่ำ",
+      era: "ครูผู้รับฟังอย่างลึกซึ้ง",
+      shortTag: "วงสนทนาสะท้อนคิดยามค่ำ",
+      title: "วงสนทนาสะท้อนคิดหลังลงพื้นที่ — ต้นกำเนิดจิตวิญญาณ Small Group",
+      desc: "อาจารย์เปรมนั่งรับฟังประสบการณ์ของทีมแพทย์รุ่นใหม่และลูกศิษย์อย่างตั้งใจ ชวนคิดต่อยอดจากสิ่งที่พบเห็นในชุมชน"
+    },
+    {
+      id: "pb_15",
+      file: "pb_15_small_group_teaching.webp",
+      orient: "wide",
+      pos: "50% 38%",
+      badge: "STUDENT-CENTERED · ห้องเรียนคิดวิเคราะห์",
+      era: "การสอนที่เน้นผู้เรียนเป็นสำคัญ",
+      shortTag: "ชั่วโมงอภิปรายกับ นศพ.",
+      title: "ห้องเรียนที่ชวนนักศึกษาแพทย์ตั้งคำถามและคิดเชิงระบบจากโจทย์จริง",
+      desc: "เปลี่ยนการเรียนการสอนจากการท่องจำหน้าชั้น สู่การอภิปรายแลกเปลี่ยนเพื่อแก้ปัญหาสุขภาพของประชากร"
+    },
+    {
+      id: "pb_16",
+      file: "pb_16_student_circle_harmony.webp",
+      orient: "wide",
+      preserveFrame: true,
+      pos: "50% 40%",
+      badge: "SHARED RESPONSIBILITY · พลังกลุ่ม",
+      era: "เรียนรู้ร่วมกันเป็นทีม",
+      shortTag: "วงล้อมความสามัคคี นศพ.",
+      title: "วงล้อมแห่งความไว้วางใจและการทำงานร่วมกันของนักศึกษาแพทย์",
+      desc: "รากฐานของการเรียนรู้ภาคสนามเป็นกลุ่มที่ช่วยเหลือเกื้อกูลกัน ซึ่งเป็นหัวใจสำคัญของ RACM 303 จนถึงวันนี้"
+    },
+    {
+      id: "pb_17",
+      file: "pb_17_curriculum_seminar_2527.webp",
+      orient: "wide",
+      preserveFrame: true,
+      pos: "50% 48%",
+      badge: "CURRICULUM SEMINAR · 17–19 ก.พ. 2527",
+      era: "สัมมนาหลักสูตรเวชศาสตร์ชุมชน",
+      shortTag: "สัมมนาหลักสูตร ปี 2527",
+      title: "สัมมนาผลการเรียนการสอนหลักสูตรเวชศาสตร์ชุมชน พ.ศ. 2527",
+      desc: "การทบทวนและพัฒนาหลักสูตรอย่างต่อเนื่องจากข้อมูลสะท้อนกลับของนักศึกษา คณาจารย์ และโรงพยาบาลแหล่งฝึก"
+    },
+    {
+      id: "pb_18",
+      file: "pb_18_colleagues_laughter.webp",
+      orient: "portrait",
+      pos: "50% 22%",
+      badge: "COLLEGIALITY · มิตรภาพผู้ร่วมบุกเบิก",
+      era: "รอยยิ้มกัลยาณมิตร",
+      shortTag: "รอยยิ้มกับเพื่อนคณาจารย์",
+      title: "พลังกัลยาณมิตรผู้ร่วมบุกเบิกคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี",
+      desc: "ความสุขและเสียงหัวเราะในการทำงานร่วมกันของคณาจารย์ผู้วางรากฐานการแพทย์และระบบสาธารณสุขไทย"
+    },
+    {
+      id: "pb_19",
+      file: "pb_19_field_jacket_portrait.webp",
+      orient: "portrait",
+      pos: "50% 16%",
+      badge: "ROLE MODEL · CHANGE AGENT",
+      era: "ความสมถะและมุ่งมั่น",
+      shortTag: "ความสมถะของครูแพทย์",
+      title: "ความสมถะ มุ่งมั่น และยืนหยัดเพื่อสุขภาพของประชาชน",
+      desc: "ต้นแบบของแพทย์ผู้มองไกลกว่าโรคเฉพาะหน้า สู่การพัฒนาศักยภาพชุมชนและระบบบริการสุขภาพที่ยั่งยืน"
+    }
+  ];
+
+  const PREM_ICO = {
+    pause: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`,
+    play: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>`,
+    shuffle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>`,
+    expand: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+    split: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="13" y1="4" x2="13" y2="20"/></svg>`
+  };
+
+  function premToggleBtnHtml(isPaused) {
+    return isPaused ? `${PREM_ICO.play}<span>เล่นต่อ</span>` : `${PREM_ICO.pause}<span>6s</span>`;
+  }
+
+  function premExpandBtnHtml(isExpanded) {
+    return isExpanded ? `${PREM_ICO.split}<span>คู่เนื้อหา</span>` : `${PREM_ICO.expand}<span>เต็มกรอบ</span>`;
+  }
+
+  function buildPremShuffledOrder() {
+    const first = PREM_BURI_REEL_ITEMS[0];
+    const rest = PREM_BURI_REEL_ITEMS.slice(1);
+    for (let i = rest.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = rest[i];
+      rest[i] = rest[j];
+      rest[j] = tmp;
+    }
+    return [first].concat(rest);
+  }
+
+  const premReelState = {
+    order: buildPremShuffledOrder(),
+    cursor: 0,
+    paused: false,
+    expanded: false,
+    timerId: 0,
+    kbFlip: false,
+    wasOnSlide: false
+  };
+
+  function premImgHref(item) {
+    return `${PREM_BURI_DIR}/${item.file}?v=${ASSET_VER}`;
+  }
+
+  function clearPremScreensaverTimer() {
+    if (premReelState.timerId) {
+      clearTimeout(premReelState.timerId);
+      premReelState.timerId = 0;
+    }
+  }
+
+  function preloadPremUpcoming() {
+    if (typeof Image === "undefined" || !premReelState.order.length) return;
+    const n = premReelState.order.length;
+    for (let k = 1; k <= 6; k += 1) {
+      const item = premReelState.order[(premReelState.cursor + k) % n];
+      if (item && !item._preloaded) {
+        const im = new Image();
+        im.src = premImgHref(item);
+        item._preloaded = true;
+      }
+    }
+  }
+
+  function buildPremGridLayerInnerHtml(isStaticPrint) {
+    const order = isStaticPrint ? PREM_BURI_REEL_ITEMS : premReelState.order;
+    const n = order.length;
+    const curIdx = isStaticPrint ? 0 : ((premReelState.cursor % n) + n) % n;
+    const hero = order[curIdx] || PREM_BURI_REEL_ITEMS[0];
+    const mosaicCount = !isStaticPrint && premReelState.expanded ? 4 : 3;
+    const mosaics = [];
+    if (isStaticPrint) {
+      mosaics.push(PREM_BURI_REEL_ITEMS[5], PREM_BURI_REEL_ITEMS[1], PREM_BURI_REEL_ITEMS[10]);
+    } else {
+      for (let m = 1; m <= mosaicCount; m += 1) {
+        mosaics.push(order[(curIdx + m) % n]);
+      }
+    }
+
+    const layoutCls =
+      !isStaticPrint && premReelState.expanded
+        ? "is-wall-5"
+        : hero.orient === "wide"
+          ? "is-hero-wide"
+          : "is-hero-portrait";
+
+    const kbHero = premReelState.kbFlip ? "is-kb-b" : "is-kb-a";
+    const preserveCls = hero.preserveFrame ? " is-preserve-frame" : "";
+
+    const heroHtml = `
+      <div class="or-prem-tile is-hero ${kbHero}${preserveCls}" data-prem-tile-hero="${esc(hero.id)}" style="--prem-pos:${esc(hero.pos || "50% 24%")}">
+        <img class="or-prem-tile-amb" src="${esc(premImgHref(hero))}" alt="" aria-hidden="true" decoding="async" />
+        <img class="or-prem-img" src="${esc(premImgHref(hero))}" alt="${esc(hero.title)}" loading="eager" decoding="async" />
+        <div class="or-prem-hero-overlay">
+          <div class="or-prem-hero-meta">
+            <span class="or-prem-ep-badge">${esc(hero.badge)}</span>
+            <span class="or-prem-era-tag">${esc(hero.era)}</span>
+          </div>
+          <h4 class="or-prem-hero-title">${esc(hero.title)}</h4>
+          <p class="or-prem-hero-desc">${esc(hero.desc)}</p>
+          <div class="or-prem-progress-rail" aria-hidden="true">
+            <div class="or-prem-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const mosaicHtml = mosaics
+      .map((item, idx) => {
+        const kbCls = (idx + (premReelState.kbFlip ? 1 : 0)) % 2 === 0 ? "is-kb-b" : "is-kb-a";
+        return `
+          <div class="or-prem-tile is-mosaic ${kbCls}" data-prem-jump-id="${esc(item.id)}" title="คลิกเพื่อแสดงภาพนี้เป็นภาพหลัก: ${esc(item.title)}" style="--prem-pos:${esc(item.pos || "50% 26%")}">
+            <img class="or-prem-tile-amb" src="${esc(premImgHref(item))}" alt="" aria-hidden="true" decoding="async" />
+            <img class="or-prem-img" src="${esc(premImgHref(item))}" alt="${esc(item.title)}" loading="eager" decoding="async" />
+            <div class="or-prem-mosaic-overlay">
+              <span class="or-prem-mosaic-kicker">${idx === 0 ? "UP NEXT · ถัดไป" : "ARCHIVAL MOMENT"}</span>
+              <span class="or-prem-mosaic-title">${esc(item.shortTag || item.title)}</span>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    return {
+      layoutCls,
+      hero,
+      curIdx,
+      total: n,
+      innerHtml: heroHtml + mosaicHtml
+    };
+  }
+
+  function renderPremScreensaverStageHtml() {
+    const isStatic =
+      state.viewMode === "handout" ||
+      Boolean(window.__RACM_EXPORTING_DECK) ||
+      document.body.classList.contains("is-printing-orientation-deck");
+    const built = buildPremGridLayerInnerHtml(isStatic);
+    const numStr = `${String(built.curIdx + 1).padStart(2, "0")} / ${String(built.total).padStart(2, "0")}`;
+    const pausedCls = premReelState.paused ? " is-screensaver-paused" : "";
+    const staticCls = isStatic ? " is-static-mode" : "";
+    return `
+      <div class="or-prem-tv-stage${pausedCls}${staticCls}" data-prem-stage>
+        <div class="or-prem-ambient-bg" data-prem-amb style="background-image:url('${esc(premImgHref(built.hero))}')"></div>
+        <div class="or-prem-ambient-scrim" aria-hidden="true"></div>
+
+        <div class="or-prem-topbar">
+          <div class="or-prem-top-left">
+            <span class="or-prem-brand-mark">ARCHIVE</span>
+            <span class="or-prem-series-kicker">PREM BURI · PHOTO GRID SCREENSAVER</span>
+            <span class="or-prem-counter-pill" data-prem-counter>${numStr}</span>
+          </div>
+          <div class="or-prem-ctrls">
+            <button type="button" class="or-prem-ctrl-btn is-icon-only" data-prem-ctrl="prev" title="ภาพก่อนหน้า" aria-label="ภาพก่อนหน้า">&lsaquo;</button>
+            <button type="button" class="or-prem-ctrl-btn${premReelState.paused ? " is-paused" : ""}" data-prem-ctrl="toggle" title="พักหรือเล่น Screensaver เปลี่ยนภาพอัตโนมัติทุก 6 วินาที">${premToggleBtnHtml(premReelState.paused)}</button>
+            <button type="button" class="or-prem-ctrl-btn is-icon-only" data-prem-ctrl="next" title="ภาพถัดไป" aria-label="ภาพถัดไป">&rsaquo;</button>
+            <button type="button" class="or-prem-ctrl-btn" data-prem-ctrl="shuffle" title="สุ่มลำดับชุดภาพใหม่ (โดยเริ่มจากภาพแรกของ อ.เปรม เสมอ)">${PREM_ICO.shuffle}<span>Shuffle</span></button>
+            <button type="button" class="or-prem-ctrl-btn is-hide-mobile${premReelState.expanded ? " is-expanded-on" : ""}" data-prem-ctrl="expand" title="ขยาย Photo Grid เต็มสไลด์แบบ Apple TV Screensaver">${premExpandBtnHtml(premReelState.expanded)}</button>
+          </div>
+        </div>
+
+        <div class="or-prem-grid-viewport" data-prem-viewport>
+          <div class="or-prem-grid-layer ${built.layoutCls}" data-prem-layer>
+            ${built.innerHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   function loadIoStageTheme() {
     try {
@@ -164,7 +541,7 @@
     more: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
-  /* ---------- Complete 15-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
+  /* ---------- Complete 20-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
   const SLIDES = [
     {
       id: "s01-cover",
@@ -197,16 +574,12 @@
       keyMessageHtml:
         "<strong>Prof. Dr. Prem Buri</strong>, our founding father and our role model of teaching community medicine in Ramathibodi",
       notes:
-        "รำลึกถึงศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี หัวหน้าภาควิชาศัลยศาสตร์ท่านแรก และผู้อำนวยการโครงการเวชศาสตร์ชุมชนท่านแรกของคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี (พ.ศ. 2512–2520) ผู้วางรากฐานการจัดการเรียนการสอนเวชศาสตร์ชุมชนแบบสหสาขาวิชาชีพ ณ อำเภอบางปะอิน จังหวัดพระนครศรีอยุธยา ร่วมกับกระทรวงสาธารณสุข เพื่อให้บัณฑิตแพทย์เข้าใจชีวิตจริงของประชาชนและเป็นผู้นำการเปลี่ยนแปลงในระบบสุขภาพ",
+        "รำลึกถึงศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี หัวหน้าภาควิชาศัลยศาสตร์ท่านแรก และผู้อำนวยการโครงการเวชศาสตร์ชุมชนท่านแรกของคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี (พ.ศ. 2512–2520) ผู้วางรากฐานการจัดการเรียนการสอนเวชศาสตร์ชุมชนแบบสหสาขาวิชาชีพ ณ อำเภอบางปะอิน จังหวัดพระนครศรีอยุธยา ร่วมกับกระทรวงสาธารณสุข เพื่อให้บัณฑิตแพทย์เข้าใจชีวิตจริงของประชาชนและเป็นผู้นำการเปลี่ยนแปลงในระบบสุขภาพ (Photo Grid Screensaver เปลี่ยนภาพอัตโนมัติทุก 6 วินาที เริ่มจากภาพรอยยิ้มของ อ.เปรม บุรี เป็นภาพแรก และสุ่มลำดับภาพจดหมายเหตุที่เหลือ)",
       render: () => `
-        <div class="or-infog-split is-fig-left">
-          ${figPlate(
-            "orient_s02_prem_buri.png",
-            "Prof. Dr. Prem Buri — กตเวทิตาคารวะ ๑๐๐ ปี ศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี",
-            "<strong>กตเวทิตาคารวะ ๑๐๐ ปี เปรม บุรี</strong> · ศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี"
-          )}
+        <div class="or-infog-split is-prem-tv-split${premReelState.expanded ? " is-cinema-expanded" : ""}" data-prem-split>
+          ${renderPremScreensaverStageHtml()}
 
-          <div class="or-stack-col is-s03-stack" data-fit-group="cards">
+          <div class="or-stack-col is-s03-stack or-prem-right-cards" data-fit-group="cards">
             <div class="or-card is-navy-tint">
               <span class="or-card-kicker">FOUNDING DIRECTOR · พ.ศ. 2512 – 2520</span>
               <h3 class="or-card-title">ผู้อำนวยการโครงการเวชศาสตร์ชุมชนท่านแรก</h3>
@@ -2199,7 +2572,7 @@
           ev.target &&
           ev.target.closest &&
           ev.target.closest(
-            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap"
+            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl]"
           );
         if (!inInteractive && !(curSlide && curSlide.isLiveQuizSlide)) {
           const vpRect = modal.getBoundingClientRect();
@@ -3196,6 +3569,8 @@
     const modal = ensureModalElement();
     if (!state.isOpen) {
       clearAutoPlayTimer();
+      clearPremScreensaverTimer();
+      premReelState.wasOnSlide = false;
       document.body.classList.remove("orient-deck-open");
       modal.hidden = true;
       return;
@@ -3207,6 +3582,22 @@
     modal.classList.toggle("is-hud-idle", Boolean((state.clickerStage || state.presentationMode) && state.hudIdle));
 
     const cur = SLIDES[state.slideIdx] || SLIDES[0];
+    const onPremSlideNow =
+      state.viewMode === "deck" &&
+      !document.body.classList.contains("is-printing-orientation-deck") &&
+      !window.__RACM_EXPORTING_DECK &&
+      cur.id === "s02-prem-buri-founder";
+    if (onPremSlideNow && !premReelState.wasOnSlide) {
+      premReelState.order = buildPremShuffledOrder();
+      premReelState.cursor = 0;
+      premReelState.paused = false;
+      premReelState.kbFlip = false;
+    }
+    premReelState.wasOnSlide = onPremSlideNow;
+    if (!onPremSlideNow || state.blackoutActive) {
+      clearPremScreensaverTimer();
+    }
+
     const progressPct = (((state.slideIdx + 1) / Math.max(1, SLIDES.length)) * 100).toFixed(1);
     const showNotesNow = state.viewMode === "deck" && state.showNotes;
     const notesLabel = ROLE === "faculty" ? t("โน้ตผู้สอน", "Presenter Notes") : t("คำอธิบายสไลด์", "Slide Notes");
@@ -3661,10 +4052,155 @@
     wireImageLoadRefit(modal);
     wireLaserIfActive(modal);
     if (cur.isCover) animateCoverKpis(modal);
+    if (onPremSlideNow) wirePremScreensaver(modal);
     scheduleAutoPlayTick();
     if (state.clickerStage || state.presentationMode) {
       armHudIdleTimer();
     }
+  }
+
+  function crossfadePremStageTo(modal, nextCursor) {
+    if (!modal) return;
+    const stageEl = modal.querySelector("[data-prem-stage]");
+    const vpEl = stageEl && stageEl.querySelector("[data-prem-viewport]");
+    if (!stageEl || !vpEl) return;
+
+    const n = premReelState.order.length || 1;
+    premReelState.cursor = ((nextCursor % n) + n) % n;
+    premReelState.kbFlip = !premReelState.kbFlip;
+
+    const built = buildPremGridLayerInnerHtml(false);
+    const numStr = `${String(built.curIdx + 1).padStart(2, "0")} / ${String(built.total).padStart(2, "0")}`;
+
+    const counterEl = stageEl.querySelector("[data-prem-counter]");
+    if (counterEl) counterEl.textContent = numStr;
+
+    const ambEl = stageEl.querySelector("[data-prem-amb]");
+    if (ambEl) {
+      ambEl.style.backgroundImage = `url('${premImgHref(built.hero)}')`;
+    }
+
+    const oldLayers = Array.from(vpEl.querySelectorAll("[data-prem-layer]:not(.is-outgoing)"));
+    oldLayers.forEach((old) => {
+      old.classList.add("is-outgoing");
+      setTimeout(() => {
+        if (old.parentNode) old.parentNode.removeChild(old);
+      }, 940);
+    });
+
+    const nextLayer = document.createElement("div");
+    nextLayer.className = `or-prem-grid-layer ${built.layoutCls} is-entering-start`;
+    nextLayer.setAttribute("data-prem-layer", "");
+    nextLayer.innerHTML = built.innerHtml;
+    vpEl.appendChild(nextLayer);
+
+    void nextLayer.offsetWidth;
+    requestAnimationFrame(() => {
+      nextLayer.classList.remove("is-entering-start");
+    });
+
+    preloadPremUpcoming();
+  }
+
+  function schedulePremScreensaverTick(modal) {
+    clearPremScreensaverTimer();
+    if (!state.isOpen || state.viewMode !== "deck" || state.blackoutActive || premReelState.paused) return;
+    const cur = SLIDES[state.slideIdx];
+    if (!cur || cur.id !== "s02-prem-buri-founder") return;
+    if (document.body.classList.contains("is-printing-orientation-deck") || window.__RACM_EXPORTING_DECK) return;
+
+    premReelState.timerId = setTimeout(() => {
+      premReelState.timerId = 0;
+      if (!state.isOpen || state.viewMode !== "deck" || state.blackoutActive || premReelState.paused) return;
+      const activeSlide = SLIDES[state.slideIdx];
+      if (!activeSlide || activeSlide.id !== "s02-prem-buri-founder") return;
+      crossfadePremStageTo(modal, premReelState.cursor + 1);
+      schedulePremScreensaverTick(modal);
+    }, PREM_SCREENSAVER_MS);
+  }
+
+  function wirePremScreensaver(modal) {
+    const stageEl = modal && modal.querySelector("[data-prem-stage]");
+    if (!stageEl || stageEl.classList.contains("is-static-mode")) return;
+
+    preloadPremUpcoming();
+    if (!state.blackoutActive && !premReelState.paused) {
+      schedulePremScreensaverTick(modal);
+    }
+
+    stageEl.addEventListener("click", (ev) => {
+      const ctrlBtn = ev.target && ev.target.closest && ev.target.closest("[data-prem-ctrl]");
+      if (ctrlBtn) {
+        ev.stopPropagation();
+        const action = ctrlBtn.getAttribute("data-prem-ctrl");
+        if (action === "prev") {
+          crossfadePremStageTo(modal, premReelState.cursor - 1);
+          if (!premReelState.paused) schedulePremScreensaverTick(modal);
+        } else if (action === "next") {
+          crossfadePremStageTo(modal, premReelState.cursor + 1);
+          if (!premReelState.paused) schedulePremScreensaverTick(modal);
+        } else if (action === "toggle") {
+          premReelState.paused = !premReelState.paused;
+          stageEl.classList.toggle("is-screensaver-paused", premReelState.paused);
+          ctrlBtn.classList.toggle("is-paused", premReelState.paused);
+          ctrlBtn.innerHTML = premToggleBtnHtml(premReelState.paused);
+          if (premReelState.paused) {
+            clearPremScreensaverTimer();
+          } else {
+            const prog = stageEl.querySelector(".or-prem-progress-fill");
+            if (prog) {
+              prog.style.animation = "none";
+              void prog.offsetWidth;
+              prog.style.animation = "";
+            }
+            schedulePremScreensaverTick(modal);
+          }
+        } else if (action === "shuffle") {
+          premReelState.order = buildPremShuffledOrder();
+          premReelState.paused = false;
+          stageEl.classList.remove("is-screensaver-paused");
+          const tBtn = stageEl.querySelector('[data-prem-ctrl="toggle"]');
+          if (tBtn) {
+            tBtn.classList.remove("is-paused");
+            tBtn.innerHTML = premToggleBtnHtml(false);
+          }
+          crossfadePremStageTo(modal, 0);
+          schedulePremScreensaverTick(modal);
+        } else if (action === "expand") {
+          premReelState.expanded = !premReelState.expanded;
+          const splitEl = modal.querySelector("[data-prem-split]");
+          if (splitEl) splitEl.classList.toggle("is-cinema-expanded", premReelState.expanded);
+          ctrlBtn.classList.toggle("is-expanded-on", premReelState.expanded);
+          ctrlBtn.innerHTML = premExpandBtnHtml(premReelState.expanded);
+          crossfadePremStageTo(modal, premReelState.cursor);
+          if (!premReelState.expanded) {
+            requestAnimationFrame(() => fitAllVisibleCanvases());
+          }
+          if (!premReelState.paused) schedulePremScreensaverTick(modal);
+        }
+        if (typeof ctrlBtn.blur === "function") ctrlBtn.blur();
+        return;
+      }
+
+      const mosaicTile = ev.target && ev.target.closest && ev.target.closest("[data-prem-jump-id]");
+      if (mosaicTile) {
+        ev.stopPropagation();
+        const jumpId = mosaicTile.getAttribute("data-prem-jump-id");
+        const foundIdx = premReelState.order.findIndex((x) => x.id === jumpId);
+        if (foundIdx >= 0) {
+          crossfadePremStageTo(modal, foundIdx);
+          if (!premReelState.paused) schedulePremScreensaverTick(modal);
+        }
+        return;
+      }
+
+      const heroTile = ev.target && ev.target.closest && ev.target.closest("[data-prem-tile-hero]");
+      if (heroTile) {
+        ev.stopPropagation();
+        crossfadePremStageTo(modal, premReelState.cursor + 1);
+        if (!premReelState.paused) schedulePremScreensaverTick(modal);
+      }
+    });
   }
 
   function openDeck(initialSlideIdx, opts) {
@@ -3696,6 +4232,8 @@
     state.clickerGuideOpen = false;
     state.blackoutActive = false;
     state.hudIdle = false;
+    premReelState.wasOnSlide = false;
+    clearPremScreensaverTimer();
     clearJumpBuffer();
     clearHudIdleTimer();
     clearAutoPlayTimer();
