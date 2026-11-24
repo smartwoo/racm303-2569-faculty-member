@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124psv6";
+  const ASSET_VER = "20261124psv8";
   const IMG_DIR = "assets/images/panel_screensaver";
   const MODERATOR_PPTX_HREF =
     ROLE === "faculty" ? `exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx?v=${ASSET_VER}` : "";
@@ -305,7 +305,7 @@
             {
               num: "LO 1",
               tag: "Bedside → SBP & HSS",
-              text: "ถอดบทเรียนบทบาทและเส้นทางวิชาชีพแพทย์ต่อผู้ป่วยและสังคมจากประสบการณ์การทำงานจริงของวิทยากร เพื่อเข้าใจการขยับขยายมุมมองจากการดูแลผู้ป่วยรายบุคคลอย่างองค์รวม มาสู่เวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) และศาสตร์วิทยาระบบสุขภาพ (Health Systems Science: HSS)"
+              text: "ถอดบทเรียนบทบาทและเส้นทางวิชาชีพแพทย์ต่อผู้ป่วยและสังคมจากประสบการณ์การทำงานจริงของวิทยากร เพื่อเข้าใจการขยับขยายมุมมองจากการดูแลผู้ป่วยรายบุคคลอย่างองค์รวม มาสู่เวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) และวิทยาระบบสุขภาพ (Health Systems Science: HSS)"
             },
             {
               num: "LO 2",
@@ -344,85 +344,120 @@
           roleSubtitle: "ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation",
           bg: "bg_02_nahwa_to_world.jpg",
           kb: "kb-b",
-          orbs: ["rgba(245,158,11,0.34)", "rgba(14,165,233,0.24)", "rgba(16,185,129,0.18)"],
-          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 1",
+          orbs: ["rgba(245,158,11,0.36)", "rgba(14,165,233,0.24)", "rgba(16,185,129,0.20)"],
+          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 1 · ครบทั้ง 6 สถานี",
           kickerSub: "จากโรงพยาบาลชุมชนริมฝั่งโขง สู่นโยบายสุขภาพระดับประเทศ องค์การอนามัยโลก และมูลนิธิไชน่าเมดิคอลบอร์ด",
           title: "นพ.ทักษพล ธรรมรังสี",
+          haloLogos: [
+            { key: "moph", logo: "logo_moph.png", label: "รพ.นาหว้า · สธ." },
+            { key: "siriraj", logo: "logo_siriraj.png", label: "ศิริราชพยาบาล" },
+            { key: "massey", logo: "logo_massey.png", label: "Massey Univ." },
+            { key: "thaihealth", logo: "logo_thaihealth.png", label: "ศวส. · สสส." },
+            { key: "ihpp", logo: "logo_ihpp.png", label: "IHPP" },
+            { key: "who", logo: "logo_who.png", label: "WHO SEARO" },
+            { key: "cmb", logo: "logo_cmb.png", label: "CMB Foundation" }
+          ],
+          wallPhotos: [
+            { img: "bg_02_nahwa_to_world.jpg", label: "01 · รพ.นาหว้า นครพนม", pinIdx: 0 },
+            { img: "st_thak_02_massey.jpg", label: "02 · Massey Ph.D.", pinIdx: 1 },
+            { img: "bg_05_compass_crossroads.jpg", label: "03 · ผอ.ศวส. (CAS)", pinIdx: 2 },
+            { img: "st_thak_05_who.jpg", label: "04 · ผอ.IHPP & WHO", pinIdx: 3 },
+            { img: "st_suw_05_assembly.jpg", label: "05 · DPM · WHO SEARO", pinIdx: 4 },
+            { img: "st_thak_06_cmb.jpg", label: "06 · ผอ.CMB Foundation", pinIdx: 5 }
+          ],
           milestones: [
             {
               year: "2539–2547",
               shortStop: "รพ.นาหว้า",
+              orgKey: "moph",
+              logo: "logo_moph.png",
+              logoLabel: "สธ. / ศิริราช",
               roleTag: "Bedside & Rural Hospital",
               sceneLabel: "📍 รพ.นาหว้า จ.นครพนม · ลุ่มน้ำโขง",
               bg: "bg_02_nahwa_to_world.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(245,158,11,0.34)", "rgba(14,165,233,0.22)", "rgba(16,185,129,0.18)"],
-              headline: "แพทย์โรงพยาบาลชุมชนริมฝั่งโขง — รพ.นาหว้า จ.นครพนม",
-              text: "จบแพทยศาสตรบัณฑิต ศิริราชพยาบาล (2539) ปฏิบัติงานดูแลผู้ป่วยและชุมชนที่ รพ.นาหว้า จ.นครพนม พร้อมศึกษาสาธารณสุขศาสตรมหาบัณฑิต ม.มหิดล (2544) และเริ่มเชื่อมงานคลินิกเข้ากับงานวิจัยระบบสุขภาพที่ IHPP (2546)"
+              headline: "แพทย์ รพ.ชุมชนริมฝั่งโขง — รพ.นาหว้า จ.นครพนม",
+              text: "จบแพทยศาสตร์ศิริราช (2539) ปฏิบัติงานดูแลผู้ป่วยและชุมชนที่ รพ.นาหว้า ต่อสาธารณสุขศาสตรมหาบัณฑิต ม.มหิดล (2544) และเริ่มงานวิจัยระบบสุขภาพที่ IHPP (2546)",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "คนไข้ซ้ำเดิมหน้าห้องตรวจ ชี้ให้เห็นว่าลำพังการรักษาเฉพาะรายไม่พอ ต้องขยับไปแก้ที่ระบบสุขภาพชุมชน"
             },
             {
               year: "2551",
               shortStop: "Massey Ph.D.",
+              orgKey: "massey",
+              logo: "logo_massey.png",
+              logoLabel: "Massey Univ.",
               roleTag: "Health Policy Research",
               sceneLabel: "📍 Massey University · New Zealand",
               bg: "st_thak_02_massey.jpg",
-              kb: "kb-b",
-              orbs: ["rgba(16,185,129,0.32)", "rgba(56,189,248,0.24)", "rgba(245,158,11,0.18)"],
               headline: "ปริญญาเอกนโยบายสุขภาพ — Massey University นิวซีแลนด์",
-              text: "ศึกษาวิจัยเชิงลึกระดับปริญญาเอกด้านกระบวนการกำหนดนโยบายแอลกอฮอล์ของประเทศไทย (Alcohol Policy Process in Thailand) ถอดรหัสกลไกเศรษฐศาสตร์การเมือง ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ และการขับเคลื่อนนโยบายสาธารณะบนฐานหลักฐานวิชาการ"
+              text: "วิจัยดุษฎีนิพนธ์กระบวนการกำหนดนโยบายแอลกอฮอล์ไทย ถอดรหัสกลไกเศรษฐศาสตร์การเมืองและปัจจัยกำหนดสุขภาพเชิงพาณิชย์",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "นโยบายสุขภาพไม่ได้ขับเคลื่อนด้วยหลักฐานการแพทย์ลำพัง แต่ต้องเข้าใจบริบทสังคมและการเมืองของนโยบาย"
             },
             {
               year: "2552–2556",
               shortStop: "ผอ.ศวส.",
+              orgKey: "thaihealth",
+              logo: "logo_thaihealth.png",
+              logoLabel: "ศวส. · สสส.",
               roleTag: "Evidence-to-Policy",
               sceneLabel: "📍 ศูนย์วิจัยปัญหาสุรา (ศวส.)",
               bg: "bg_05_compass_crossroads.jpg",
-              kb: "kb-c",
-              orbs: ["rgba(245,158,11,0.34)", "rgba(239,68,68,0.20)", "rgba(56,189,248,0.22)"],
               headline: "ผู้อำนวยการศูนย์วิจัยปัญหาสุรา (ศวส. / CAS)",
-              text: "สร้างและจัดการความรู้เชิงระบบเพื่อคุ้มครองสังคมจากผลกระทบของเครื่องดื่มแอลกอฮอล์และโรคไม่ติดต่อเรื้อรัง (NCDs) เชื่อมโยงข้อมูลระบาดวิทยาเข้ากับการชี้นำสังคมและมาตรการทางกฎหมายระดับประเทศ"
+              text: "สร้างและจัดการความรู้เชิงระบบเพื่อคุ้มครองสังคมจากผลกระทบแอลกอฮอล์และโรคไม่ติดต่อเรื้อรัง (NCDs) สู่มาตรการกฎหมายระดับประเทศ",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "แปลงงานวิจัยระบาดวิทยาให้เป็น ‘ปัญญาปฏิบัติ’ เพื่อชี้นำสังคมและลดความสูญเสียเชิงโครงสร้าง"
             },
             {
               year: "2558 / 2565",
               shortStop: "ผอ.IHPP · WHO",
+              orgKey: "ihpp",
+              logo: "logo_ihpp.png",
+              logoLabel: "IHPP",
               roleTag: "National HPSR & Regional NCDs",
               sceneLabel: "📍 สำนักงานพัฒนานโยบายสุขภาพระหว่างประเทศ (IHPP) & WHO SEARO",
               bg: "st_thak_05_who.jpg",
-              kb: "kb-d",
-              orbs: ["rgba(56,189,248,0.34)", "rgba(99,102,241,0.24)", "rgba(245,158,11,0.20)"],
-              headline: "ผู้อำนวยการ IHPP และผอ.ฝ่ายโรคไม่ติดต่อฯ WHO SEARO",
-              text: "ดำรงตำแหน่งผู้อำนวยการสำนักงานพัฒนานโยบายสุขภาพระหว่างประเทศ (IHPP · ม.ค. 2558 และกลับมาดำรงตำแหน่งอีกครั้ง ม.ค. 2565) ควบคู่กับบทบาท Director, Noncommunicable Diseases and Environmental Health ณ องค์การอนามัยโลกภูมิภาคเอเชียตะวันออกเฉียงใต้ (ก.ค. 2558)"
+              headline: "ผู้อำนวยการ IHPP และ ผอ.ฝ่ายโรคไม่ติดต่อฯ WHO SEARO",
+              text: "นำทีมวิจัยระบบสุขภาพระดับชาติ (IHPP · 2558, 2565) ควบคู่บทบาท Director, NCDs & Environmental Health ณ WHO SEARO (ก.ค. 2558)",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "เชื่อมหลักฐานวิชาการ พลังสังคม และกลไกนโยบายสาธารณะ ขยายผลจากประเทศไทยสู่ระดับภูมิภาค"
             },
             {
               year: "2567–2568",
               shortStop: "DPM · WHO SEARO",
+              orgKey: "who",
+              logo: "logo_who.png",
+              logoLabel: "WHO SEARO",
               roleTag: "Global Health Governance",
               sceneLabel: "📍 WHO South-East Asia Regional Office",
               bg: "st_suw_05_assembly.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(14,165,233,0.36)", "rgba(245,158,11,0.24)", "rgba(99,102,241,0.22)"],
-              headline: "ผู้อำนวยการฝ่ายบริหารแผนงาน (Director of Programme Management) WHO SEARO",
-              text: "กำกับยุทธศาสตร์และบริหารแผนงานความร่วมมือด้านระบบสุขภาพของประเทศสมาชิกในภูมิภาคเอเชียตะวันออกเฉียงใต้ รวมถึงการเชื่อมความร่วมมือด้านการป้องกันการบาดเจ็บและระบบบริการสุขภาพที่ยั่งยืน"
+              headline: "Director of Programme Management — WHO SEARO",
+              text: "กำกับยุทธศาสตร์และบริหารแผนงานความร่วมมือระบบสุขภาพของประเทศสมาชิกในภูมิภาค รวมถึงงานป้องกันการบาดเจ็บและระบบบริการยั่งยืน",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "Global Health คือการประสานความร่วมมือข้ามพรมแดนเพื่อลดความเหลื่อมล้ำและเสริมระบบสุขภาพให้ยั่งยืน"
             },
             {
               year: "2569",
               shortStop: "ผอ.CMB",
+              orgKey: "cmb",
+              logo: "logo_cmb.png",
+              logoLabel: "CMB Foundation",
               roleTag: "Regional Health Systems Leadership",
               sceneLabel: "📍 มูลนิธิไชน่าเมดิคอลบอร์ด (CMB Foundation · กรุงเทพฯ)",
               bg: "st_thak_06_cmb.jpg",
-              kb: "kb-b",
-              orbs: ["rgba(251,191,36,0.36)", "rgba(56,189,248,0.24)", "rgba(239,68,68,0.18)"],
               headline: "ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation",
-              text: "เริ่มดำรงตำแหน่งตั้งแต่ 1 ม.ค. 2569 ขับเคลื่อนความร่วมมือกับสถาบันการแพทย์และสาธารณสุขทั่วเอเชีย เพื่อพัฒนาศักยภาพผู้นำวิชาชีพสุขภาพ ยกระดับเวชปฏิบัติฐานระบบ (SBP) และลดความเหลื่อมล้ำทางสุขภาพ"
+              text: "เริ่มดำรงตำแหน่ง ม.ค. 2569 ขับเคลื่อนความร่วมมือสถาบันการแพทย์ทั่วเอเชียเพื่อพัฒนาศักยภาพผู้นำวิชาชีพสุขภาพและเวชปฏิบัติฐานระบบ (SBP)",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "บ่มเพาะแพทย์รุ่นใหม่ให้มองเห็นทั้งคนไข้ตรงหน้าและโครงสร้างระบบสุขภาพที่โอบอุ้มสังคม"
             }
           ],
-          footnote: "กดลูกศร → / Space หรือคลิกที่สถานีบนรางรถไฟเพื่อเลื่อนดูแต่ละบทบาท · เอกสารอ้างอิงฉบับเต็มอยู่ในหน้า 14",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 14",
           moderatorNotes: {
-            lead: "กล่าวแนะนำ: นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) — กด Clicker ไล่ตามสถานี 1 ถึง 6",
+            lead: "กล่าวแนะนำ: นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) — แสดงครบทั้ง 6 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
               "2544 สาธารณสุขศาสตรมหาบัณฑิต ม.มหิดล · เริ่มงานวิจัยที่ IHPP ปี 2546 ระหว่างช่วงงานโรงพยาบาล",
               "2558 Director, NCD and Environmental Health, WHO SEARO · ส.ค. 2567 Director of Programme Management, WHO SEARO",
-              "ม.ค. 2568 ผลักดันความร่วมมือ WHO–ศิริราชด้านการป้องกันการบาดเจ็บและการหกล้ม"
+              "ม.ค. 2568 ผลักดันความร่วมมือ WHO–ศิริราชด้านการป้องกันการบาดเจ็บและการหกล้ม · ม.ค. 2569 ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด"
             ],
             refs: [
               { label: "IHPP • Move That Mountain (2565), น. 132–133", url: "https://thaincd.com/document/file/download/knowledge/Movethat_MountainFinal65.pdf" },
@@ -440,79 +475,132 @@
           roleSubtitle: "หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข",
           bg: "st_wirun_01_south.jpg",
           kb: "kb-c",
-          orbs: ["rgba(16,185,129,0.34)", "rgba(56,189,248,0.24)", "rgba(245,158,11,0.18)"],
-          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 2",
-          kickerSub: "จากผู้อำนวยการโรงพยาบาลชุมชนภาคใต้ สู่มานุษยวิทยาการแพทย์ พรมแดนสุขภาพ และสิทธิอากาศสะอาด",
+          orbs: ["rgba(16,185,129,0.36)", "rgba(56,189,248,0.26)", "rgba(245,158,11,0.22)"],
+          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 2 · ครบทั้ง 5 สถานี",
+          kickerSub: "จากผู้รอดชีวิตผ่าตัดสมองและ ผอ.รพ.ชุมชนภาคใต้ สู่ดุษฎีบัณฑิต Harvard พรมแดนสุขภาพ คลองเตยโมเดล และอากาศสะอาด",
           title: "นพ.วิรุฬ ลิ้มสวาท",
+          haloLogos: [
+            { key: "siriraj", logo: "logo_siriraj.png", label: "ศิริราชพยาบาล" },
+            { key: "moph", logo: "logo_moph.png", label: "รพ.ชุมชน · สธ." },
+            { key: "who", logo: "logo_who.png", label: "ทุน WHO" },
+            { key: "harvard", logo: "logo_harvard.png", label: "Harvard Ph.D." },
+            { key: "hsri", logo: "logo_hsri.png", label: "สวรส. (HSRI)" },
+            { key: "nhco", logo: "logo_nhco.png", label: "สช. · เวทีสาธารณะ" }
+          ],
+          wallPhotos: [
+            { img: "wirun_voa_02_surgery1.jpg", label: "VOA · หลังผ่าตัดสมองครั้งแรก", pinIdx: 0 },
+            { img: "wirun_voa_05_family_swing.jpg", label: "VOA · ครอบครัวที่สหรัฐฯ", pinIdx: 1 },
+            { img: "wirun_voa_07_radiation.jpg", label: "VOA · รักษาซ้ำปี 2556", pinIdx: 1 },
+            { img: "wirun_voa_08_bedside_son.jpg", label: "VOA · กำลังใจข้างเตียง", pinIdx: 1 },
+            { img: "wirun_voa_03_harvard_gown.jpg", label: "VOA · ดุษฎีบัณฑิต Harvard", pinIdx: 2 },
+            { img: "wirun_voa_09_border_mirror.jpg", label: "VOA · วิจัยชายแดน 14 เดือน", pinIdx: 2 },
+            { img: "wirun_news_khlongtoei.jpg", label: "Active Talk · คลองเตยโมเดล", pinIdx: 3 },
+            { img: "wirun_news_cleanair.jpg", label: "เวทีสาธารณะ · อากาศสะอาด", pinIdx: 4 }
+          ],
           milestones: [
             {
-              year: "2544–2551",
-              shortStop: "รพ.ชุมชนใต้",
-              roleTag: "Community Hospital Director",
-              sceneLabel: "📍 รพ.ถ้ำพรรณรา & รพร.ฉวาง จ.นครศรีธรรมราช",
-              bg: "st_wirun_01_south.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(16,185,129,0.34)", "rgba(56,189,248,0.22)", "rgba(245,158,11,0.18)"],
-              headline: "แพทย์และผู้บริหารโรงพยาบาลชุมชนภาคใต้ — จ.นครศรีธรรมราช",
-              text: "จบแพทยศาสตรบัณฑิต ศิริราชพยาบาล ปฏิบัติงานและบริหารโรงพยาบาลถ้ำพรรณรา (2545–2551) และโรงพยาบาลสมเด็จพระยุพราชฉวาง (2548–2551) สัมผัสความซับซ้อนของชีวิตผู้ป่วยจริง ระบบราชการ และบริบทชุมชนท้องถิ่น"
+              year: "2543–2551",
+              shortStop: "ผ่าตัดสมอง · รพ.ใต้",
+              orgKey: "moph",
+              logo: "logo_moph.png",
+              logoLabel: "ศิริราช · สธ.",
+              roleTag: "Doctor, Patient & Caregiver",
+              sceneLabel: "📍 ศิริราช → รพ.ถ้ำพรรณรา & รพร.ฉวาง จ.นครศรีธรรมราช",
+              bg: "wirun_voa_02_surgery1.jpg",
+              photos: [
+                { src: "wirun_voa_02_surgery1.jpg", cap: "VOA · หลังผ่าตัดสมองครั้งแรกกับคุณบุหงา" },
+                { src: "wirun_voa_10_desk_son.jpg", cap: "VOA · อ่านตำราเคียงข้างลูกชาย" }
+              ],
+              headline: "ผ่าตัดเนื้องอกสมองปีสุดท้ายศิริราช สู่ ผอ.รพ.ถ้ำพรรณรา & รพร.ฉวาง",
+              text: "ชักหมดสติบนรถเมล์ก่อนจบแพทย์ 3 เดือน ผ่าตัดเนื้องอกสมองรอดชีวิต กลับไปบริหาร รพ.ชุมชนนครศรีธรรมราช และดูแลภรรยาที่ป่วยติดเตียง 2–3 ปี",
+              quoteLabel: "💬 VOA Thai:",
+              quote: "“เมื่อได้เป็นทั้งหมอ คนไข้ และญาติคนไข้ จึงเห็นว่าโจทย์ใหญ่คือ ‘วัฒนธรรมการแพทย์’ (Medical Culture)”"
             },
             {
-              year: "2555 / 2561",
-              shortStop: "Harvard Ph.D.",
-              roleTag: "Medical & Social Anthropology",
-              sceneLabel: "📍 Harvard University · Cambridge",
-              bg: "st_wirun_02_harvard.jpg",
-              kb: "kb-b",
-              orbs: ["rgba(245,158,11,0.34)", "rgba(239,68,68,0.22)", "rgba(56,189,248,0.20)"],
-              headline: "ปริญญาโทและเอกมานุษยวิทยาการแพทย์และสังคม — Harvard University",
-              text: "ขยายกรอบคิดจากชีวเวชศาสตร์สู่มานุษยวิทยาการแพทย์ (A.M. 2555) และมานุษยวิทยาสังคม (Ph.D. 2561) ณ มหาวิทยาลัยฮาร์วาร์ด เพื่อตั้งคำถามต่อโครงสร้างทางสังคม วัฒนธรรมของระบบบริการ และความทุกข์ของผู้คนอย่างลึกซึ้ง"
+              year: "2555–2556",
+              shortStop: "ทุน WHO · สู้โรคซ้ำ",
+              orgKey: "who",
+              logo: "logo_who.png",
+              logoLabel: "WHO · Harvard",
+              roleTag: "WHO Scholar & Resilience",
+              sceneLabel: "📍 Harvard University · ก้อนเนื้อสมองงอกซ้ำปี 2556",
+              bg: "wirun_voa_07_radiation.jpg",
+              photos: [
+                { src: "wirun_voa_07_radiation.jpg", cap: "VOA · ผ่าตัด/ฉายแสงครั้งที่ 2 (2556)" },
+                { src: "wirun_voa_08_bedside_son.jpg", cap: "VOA · ลูกชายจับมือให้กำลังใจ" }
+              ],
+              headline: "ทุน WHO เรียนมานุษยวิทยาการแพทย์ Harvard & ฝ่าวิกฤตผ่าตัดสมองครั้งที่ 2",
+              text: "รับทุน WHO เรียน A.M. มานุษยวิทยาการแพทย์ (2555) ก่อนเนื้องอกสมองกลับมาโตซ้ำช่วงซัมเมอร์ปี 2556 ต้องผ่าตัดและฉายแสงอีกครั้งพร้อมดูแลครอบครัว",
+              quoteLabel: "💬 VOA Thai:",
+              quote: "“ยึดคำสอนพระราชบิดา True Success is in its application to the benefit of mankind — ถ้าหยุดก็สูญเปล่า!”"
             },
             {
               year: "2561",
-              shortStop: "พรมแดนวัณโรค",
-              roleTag: "Cross-Border Health Equity",
-              sceneLabel: "📍 พื้นที่ชายแดนไทย–เมียนมา",
-              bg: "bg_03_border_anthropology.jpg",
-              kb: "kb-c",
-              orbs: ["rgba(20,184,166,0.34)", "rgba(56,189,248,0.24)", "rgba(245,158,11,0.18)"],
-              headline: "ฝังตัววิจัยภาคสนาม 14 เดือน — การดูแลและควบคุมวัณโรคชายแดน",
-              text: "ศึกษาปฏิสัมพันธ์ระหว่างระบบหลักประกันสุขภาพ การทำงานของบุคลากรด่านหน้า และการควบคุมวัณโรคข้ามพรมแดน ชี้ให้เห็นว่าโรคติดเชื้อและสิทธิสุขภาพไม่อาจแยกขาดจากพรมแดนทางสังคมและชีวิตของแรงงานข้ามชาติ"
+              shortStop: "Ph.D. · ชายแดน TB",
+              orgKey: "harvard",
+              logo: "logo_harvard.png",
+              logoLabel: "Harvard Ph.D.",
+              roleTag: "Medical Anthropology & Border TB",
+              sceneLabel: "📍 Harvard Ph.D. & พรมแดนไทย–เมียนมา 14 เดือน",
+              bg: "wirun_voa_03_harvard_gown.jpg",
+              photos: [
+                { src: "wirun_voa_03_harvard_gown.jpg", cap: "VOA · พิชิตชุดครุย Ph.D. Harvard" },
+                { src: "wirun_voa_09_border_mirror.jpg", cap: "VOA · ฝังตัววิจัยชายแดน 14 เดือน" }
+              ],
+              headline: "พิชิต Ph.D. มานุษยวิทยาสังคม Harvard & วิจัยวัณโรคชายแดน 14 เดือน",
+              text: "ศึกษาระบบราชการ การดูแลด่านหน้า และการควบคุมวัณโรคข้ามพรมแดนไทย–เมียนมา จน Prof. Arthur Kleinman ชื่นชมจิตวิญญาณนักสู้เพื่อคนชนบท",
+              quoteLabel: "💬 VOA Thai:",
+              quote: "“สิ่งสำคัญไม่ใช่แค่รู้กว้างขวาง แต่คือความกล้าตั้งคำถามและรับฟังเสียงที่ระบบเคยมองข้าม”"
             },
             {
-              year: "2562 / 2568",
-              shortStop: "อากาศสะอาด",
-              roleTag: "Planetary Health & Civic Forum",
-              sceneLabel: "📍 เวทีสาธารณะสิทธิอากาศสะอาดและสุขภาพแรงงาน",
-              bg: "st_wirun_04_cleanair.jpg",
-              kb: "kb-d",
-              orbs: ["rgba(56,189,248,0.34)", "rgba(16,185,129,0.26)", "rgba(251,191,36,0.20)"],
-              headline: "วิจัยการเตรียมแพทย์สู่ รพ.ชุมชน & ขับเคลื่อนสิทธิอากาศสะอาด",
-              text: "ร่วมวิจัยระบบการศึกษาแพทย์เพื่อชนบท และดำเนินเวทีสาธารณะเชื่อมโยงปัญหาฝุ่นพิษ สิ่งแวดล้อม และความเปราะบางของคนทำงาน สู่การขับเคลื่อนสิทธิอากาศสะอาดและสุขภาพของพิภพโลก (Planetary Health)"
+              year: "2564",
+              shortStop: "คลองเตยโมเดล",
+              orgKey: "hsri",
+              logo: "logo_hsri.png",
+              logoLabel: "วิจัยสังคม · สวรส.",
+              roleTag: "Urban Crisis & Community Power",
+              sceneLabel: "📍 Active Talk · “คลองเตยโมเดล” หยุดระบาดชุมชนแออัด",
+              bg: "wirun_news_khlongtoei.jpg",
+              photos: [
+                { src: "wirun_news_khlongtoei.jpg", cap: "ThaiPBS · Active Talk คลองเตยโมเดล" },
+                { src: "wirun_voa_04_seminar.jpg", cap: "VOA · แลกเปลี่ยนวิชาการเชิงระบบ" }
+              ],
+              headline: "ผอ.สำนักวิจัยสังคมและสุขภาพฯ — ถอดบทเรียน “คลองเตยโมเดล” หยุดระบาดชุมชนแออัด",
+              text: "เชื่อมงานวิจัยสังคมศาสตร์การแพทย์เข้ากับพลังชุมชนเมืองรับมือวิกฤตโควิด-19 ในชุมชนแออัด ควบคู่งานวิจัยการเตรียมแพทย์สู่ รพ.ชุมชน",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "การหยุดโรคระบาดในชุมชนเปราะบาง ต้องเริ่มจากการเข้าใจบริบทชีวิตจริงและเสริมพลังคนในพื้นที่"
             },
             {
-              year: "2569",
-              shortStop: "วิจัยสังคม สธ.",
-              roleTag: "Society & Health Systems Research",
-              sceneLabel: "📍 กลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข",
-              bg: "bg_06_ripples_perspective.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(14,165,233,0.34)", "rgba(16,185,129,0.26)", "rgba(139,92,246,0.22)"],
-              headline: "หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข",
-              text: "นำมุมมองสังคมศาสตร์และมานุษยวิทยาการแพทย์มาสังเคราะห์ข้อเสนอเชิงระบบและรายงานสถานการณ์ระบบสุขภาพไทย เพื่อให้ระบบสาธารณสุขรับฟังเสียงของประชาชนและกลุ่มเปราะบางอย่างเป็นธรรม"
+              year: "2568–2569",
+              shortStop: "อากาศสะอาด · สธ.",
+              orgKey: "nhco",
+              logo: "logo_nhco.png",
+              logoLabel: "สช. · วิจัยสังคม สธ.",
+              roleTag: "Planetary Health & Health Equity",
+              sceneLabel: "📍 เวทีสาธารณะอากาศสะอาด & กลุ่มงานวิจัยสังคมและสุขภาพ สธ.",
+              bg: "wirun_news_cleanair.jpg",
+              photos: [
+                { src: "wirun_news_cleanair.jpg", cap: "รัฐสภา · ร่วมคิด ร่วมสร้าง อากาศสะอาด" },
+                { src: "wirun_voa_01_smile.jpg", cap: "VOA · ความหวังและการลงมือทำ" }
+              ],
+              headline: "เวทีสาธารณะสิทธิอากาศสะอาด & หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ สธ.",
+              text: "ร่วมขับเคลื่อนเวทีสาธารณะคืนลมหายใจบริสุทธิ์ให้ประชาชนและแรงงาน พร้อมสังเคราะห์รายงานสถานการณ์ระบบสุขภาพไทยให้รับฟังเสียงกลุ่มเปราะบาง",
+              quoteLabel: "💬 VOA Thai:",
+              quote: "“We have no choice but to be hopeful — แต่ความหวังอย่างเดียวไม่พอ ต้องกล้าลงมือทำ”"
             }
           ],
-          footnote: "กดลูกศร → / Space หรือคลิกที่สถานีบนรางรถไฟเพื่อเลื่อนดูแต่ละบทบาท · เอกสารอ้างอิงฉบับเต็มอยู่ในหน้า 14",
+          footnote: "คลิกที่ภาพข่าว VOA / เวทีสาธารณะเพื่อขยายใหญ่ · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 14",
           moderatorNotes: {
-            lead: "กล่าวแนะนำ: นพ.วิรุฬ ลิ้มสวาท หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข — กด Clicker ไล่ตามสถานี 1 ถึง 5",
+            lead: "กล่าวแนะนำ: นพ.วิรุฬ ลิ้มสวาท หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข — รวมภาพชุด VOA Thai ทั้งผ่าตัดสมอง 2 ครั้ง ชุดครุย Harvard วิจัยชายแดน คลองเตยโมเดล และเวทีอากาศสะอาดครบในคลิกเดียว",
             bullets: [
-              "ทำงานบริหาร รพ.ถ้ำพรรณรา (2545–2551) และ รพร.ฉวาง (2548–2551)",
-              "บทสัมภาษณ์ Harvard Gazette สะท้อนแรงจูงใจจากข้อขัดแย้งทางการแพทย์และชีวิตผู้ป่วยจริง · ลงพื้นที่ชายแดน 14 เดือนศึกษาระบบราชการ การดูแล และวัณโรค",
-              "ธ.ค. 2568 ดำเนินวงเสวนาสาธารณะว่าด้วยสิทธิสุขภาพและการสัมผัสฝุ่นของแรงงาน"
+              "จุดเปลี่ยนชีวิตจาก VOA Thai: ป่วยเนื้องอกสมองก่อนจบศิริราช 3 เดือน + ดูแลภรรยาป่วยติดเตียง 2–3 ปี ทำให้เข้าใจทั้งมุมหมอ คนไข้ และญาติคนไข้",
+              "รับทุน WHO เรียน Harvard A.M. (2555) & Ph.D. (2561) ฝ่าการผ่าตัดสมองครั้งที่ 2 ปี 2556 · ฝังตัวชายแดน 14 เดือนศึกษาวัณโรค",
+              "พ.ค. 2564 ร่วมเวที Active Talk 'คลองเตยโมเดล' หยุดระบาดชุมชนแออัด · เวทีสาธารณะรัฐสภา 'ร่วมคิด ร่วมสร้าง อากาศสะอาด'"
             ],
             refs: [
-              { label: "Harvard Gazette • บทสัมภาษณ์ นพ.วิรุฬ (2561)", url: "https://news.harvard.edu/gazette/story/2018/05/doctor-gets-a-doctorate-and-takes-it-home-to-thailand/" },
-              { label: "Harvard DASH • วิทยานิพนธ์วัณโรคชายแดน (2561)", url: "https://dash.harvard.edu/entities/publication/dd0c41a2-e964-4bdc-a8d4-5e0c376fbefb" },
-              { label: "HITAP • ประวัติผู้ร่วมวิจัย (2567), น. 88–89", url: "https://www.hitap.net/wp-content/uploads/2024/06/FINAL-HSRI-proposal_KRT-policy-TH_13Mar24-1.pdf" }
+              { label: "VOA Thai (ตอน 1) • ป่วยกายใจไม่แพ้! เปิดใจ นพ.วิรุฬ ลิ้มสวาท", url: "https://www.voathai.com/a/wirun-limsawart-meeting-part-1/4478824.html" },
+              { label: "VOA Thai (ตอน 2) • คุณหมอไทยผู้พิชิตดุษฎีบัณฑิต ม.ฮาร์วาร์ด", url: "https://www.voathai.com/a/wirun-limsawart-interview-part-2/4486443.html" },
+              { label: "Harvard Gazette • บทสัมภาษณ์ นพ.วิรุฬ (2561)", url: "https://news.harvard.edu/gazette/story/2018/05/doctor-gets-a-doctorate-and-takes-it-home-to-thailand/" }
             ]
           }
         },
@@ -525,70 +613,101 @@
           roleSubtitle: "รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.)",
           bg: "st_suw_01_rama.jpg",
           kb: "kb-d",
-          orbs: ["rgba(168,85,247,0.32)", "rgba(56,189,248,0.26)", "rgba(245,158,11,0.22)"],
-          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 3",
+          orbs: ["rgba(168,85,247,0.34)", "rgba(56,189,248,0.26)", "rgba(245,158,11,0.22)"],
+          kicker: "เส้นทางรถไฟสายวิชาชีพ · วิทยากรท่านที่ 3 · ครบทั้ง 5 สถานี",
           kickerSub: "จากกุมารเวชศาสตร์และระบาดวิทยาคลินิก สู่มหิดลโมเดลและการคุ้มครองเยาวชนจากบุหรี่และบุหรี่ไฟฟ้าระดับชาติ",
           title: "ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์",
+          haloLogos: [
+            { key: "siriraj", logo: "logo_siriraj.png", label: "ศิริราชพยาบาล" },
+            { key: "moph", logo: "logo_moph.png", label: "รพ.อุดรธานี · สธ." },
+            { key: "rama", logo: "logo_ramathibodi.png", label: "กุมารฯ รามาธิบดี" },
+            { key: "mahidol", logo: "logo_mahidol.png", label: "ม.มหิดล" },
+            { key: "trc", logo: "logo_trc.png", label: "ศจย. (TRC)" },
+            { key: "thaihealth", logo: "logo_thaihealth.png", label: "สสส." },
+            { key: "nhco", logo: "logo_nhco.png", label: "สช. · สมัชชาสุขภาพ" }
+          ],
+          wallPhotos: [
+            { img: "st_suw_01_rama.jpg", label: "01 · กุมารแพทย์ รามาธิบดี", pinIdx: 0 },
+            { img: "bg_01_bedside_horizon.jpg", label: "02 · ระบาดวิทยาเด็ก & วัยรุ่น", pinIdx: 1 },
+            { img: "st_suw_03_mahidol.jpg", label: "03 · รองอธิการบดี & มหิดลโมเดล", pinIdx: 2 },
+            { img: "bg_07_lantern_purpose.jpg", label: "04 · รอง ผอ.ศจย. (TRC)", pinIdx: 3 },
+            { img: "bg_04_youth_city_canopy.jpg", label: "05 · สมัชชาควบคุมบุหรี่ไฟฟ้า", pinIdx: 4 }
+          ],
           milestones: [
             {
               year: "2520–2527",
               shortStop: "กุมารแพทย์ รามาฯ",
+              orgKey: "rama",
+              logo: "logo_ramathibodi.png",
+              logoLabel: "รามาธิบดี",
               roleTag: "Pediatrics & Academic Medicine",
               sceneLabel: "📍 รพ.อุดรธานี → คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี",
               bg: "st_suw_01_rama.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(56,189,248,0.34)", "rgba(168,85,247,0.24)", "rgba(245,158,11,0.18)"],
               headline: "จากแพทย์ภูมิภาค รพ.อุดรธานี สู่กุมารแพทย์และอาจารย์แพทย์รามาธิบดี",
-              text: "จบแพทยศาสตรบัณฑิต ศิริราชพยาบาล ปฏิบัติงานที่ รพ.อุดรธานี ได้รับวุฒิบัตรกุมารเวชศาสตร์ (2526) และเข้ารับตำแหน่งอาจารย์ภาควิชากุมารเวชศาสตร์ คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี (2527)"
+              text: "จบแพทยศาสตร์ศิริราช ปฏิบัติงานที่ รพ.อุดรธานี ได้รับวุฒิบัตรกุมารเวชศาสตร์ (2526) และเข้ารับตำแหน่งอาจารย์ภาควิชากุมารเวชศาสตร์ รามาธิบดี (2527)",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "การรักษาเด็กป่วยข้างเตียงจุดคำถามสำคัญว่า สภาพแวดล้อมนอกโรงพยาบาลกำลังทำร้ายเด็กไทยอีกกี่แสนคน"
             },
             {
               year: "2534 / 2548",
               shortStop: "ระบาดวิทยาวัยรุ่น",
+              orgKey: "rama",
+              logo: "logo_ramathibodi.png",
+              logoLabel: "Clinical Epi",
               roleTag: "Clinical Epidemiology & Youth Health",
               sceneLabel: "📍 ระบาดวิทยาคลินิก & สุขภาวะวัยรุ่นกรุงเทพมหานคร",
               bg: "bg_01_bedside_horizon.jpg",
-              kb: "kb-b",
-              orbs: ["rgba(245,158,11,0.32)", "rgba(56,189,248,0.26)", "rgba(16,185,129,0.20)"],
-              headline: "ระบาดวิทยาคลินิก พิษวิทยาเด็ก และงานสำรวจพฤติกรรมเสี่ยงวัยรุ่น",
-              text: "ต่อยอดองค์ความรู้ Clinical Epidemiology สู่การวิจัยระดับสารตะกั่วในเด็กไทยที่ร่วมผลักดันนโยบายน้ำมันไร้สารตะกั่ว และริเริ่มงานสำรวจ Bangkok Youth Risk Behavior Survey (ตีพิมพ์ 2548) เพื่อให้เห็นรากเหง้าปัญหาสุขภาพวัยรุ่นเชิงประชากร"
+              headline: "ระบาดวิทยาคลินิก พิษวิทยาตะกั่วในเด็ก และสำรวจพฤติกรรมเสี่ยงวัยรุ่น",
+              text: "วิจัยระดับสารตะกั่วในเด็กไทยร่วมผลักดันนโยบายน้ำมันไร้สารตะกั่ว และริเริ่ม Bangkok Youth Risk Behavior Survey (2548) มองรากเหง้าปัญหาสุขภาพวัยรุ่นเชิงประชากร",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "ข้อมูลระบาดวิทยาที่แม่นยำ เปลี่ยนประสบการณ์หน้าห้องตรวจให้เป็นนโยบายสาธารณะที่ปกป้องเด็กทั้งประเทศ"
             },
             {
               year: "2554–2563",
               shortStop: "มหิดลโมเดล",
+              orgKey: "mahidol",
+              logo: "logo_mahidol.png",
+              logoLabel: "ม.มหิดล",
               roleTag: "University-School-Community System",
               sceneLabel: "📍 มหาวิทยาลัยมหิดล · ระบบนิเวศโรงเรียน–ครอบครัว–ชุมชน",
               bg: "st_suw_03_mahidol.jpg",
-              kb: "kb-c",
-              orbs: ["rgba(16,185,129,0.34)", "rgba(56,189,248,0.24)", "rgba(245,158,11,0.20)"],
               headline: "รองอธิการบดี ม.มหิดล & การสังเคราะห์ “มหิดลโมเดล” (2563)",
-              text: "บริหารงานระดับมหาวิทยาลัยและพัฒนา “มหิดลโมเดล” เชื่อมโยงระบบเฝ้าระวังและดูแลวัยรุ่นแบบบูรณาการระหว่างโรงเรียน ครอบครัว ชุมชน และโรงพยาบาล ไม่ปล่อยให้เด็กต้องเผชิญความเสี่ยงตามลำพัง"
+              text: "บริหารงานระดับมหาวิทยาลัยและพัฒนา “มหิดลโมเดล” เชื่อมโยงระบบเฝ้าระวังและดูแลวัยรุ่นแบบบูรณาการระหว่างโรงเรียน ครอบครัว ชุมชน และโรงพยาบาล",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "ระบบนิเวศที่ปลอดภัยต้องเชื่อมบ้าน–โรงเรียน–ชุมชนเป็นตาข่ายรองรับ ไม่ปล่อยให้วัยรุ่นเผชิญความเสี่ยงลำพัง"
             },
             {
               year: "2565",
               shortStop: "รอง ผอ.ศจย.",
+              orgKey: "trc",
+              logo: "logo_trc.png",
+              logoLabel: "ศจย. (TRC)",
               roleTag: "Tobacco Control Knowledge Hub",
               sceneLabel: "📍 ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.)",
               bg: "bg_07_lantern_purpose.jpg",
-              kb: "kb-d",
-              orbs: ["rgba(251,191,36,0.34)", "rgba(168,85,247,0.24)", "rgba(56,189,248,0.22)"],
               headline: "รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.)",
-              text: "ขับเคลื่อนคลังหลักฐานวิชาการและการจัดการความรู้ระดับประเทศ เพื่อเปิดโปงกลยุทธ์อุตสาหกรรมยาสูบ สร้างเสริมสุขภาพ และปกป้องประชากรไทยจากพิษภัยของบุหรี่และผลิตภัณฑ์ยาสูบรูปแบบใหม่"
+              text: "ขับเคลื่อนคลังหลักฐานวิชาการและการจัดการความรู้ระดับประเทศ เปิดโปงกลยุทธ์อุตสาหกรรมยาสูบและปกป้องสังคมจากผลิตภัณฑ์ยาสูบรูปแบบใหม่",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "การจัดการความรู้เชิงประจักษ์ คือหัวใจของการชี้นำสังคมให้รู้เท่าทันภัยสุขภาพเชิงพาณิชย์"
             },
             {
               year: "2566–2567",
               shortStop: "สมัชชาบุหรี่ไฟฟ้า",
+              orgKey: "nhco",
+              logo: "logo_nhco.png",
+              logoLabel: "สช. · สมัชชาสุขภาพ",
               roleTag: "National Health Advocate & Change Agent",
               sceneLabel: "📍 เวทีสมัชชาสุขภาพเฉพาะประเด็น · คุ้มครองเด็กและเยาวชน",
               bg: "bg_04_youth_city_canopy.jpg",
-              kb: "kb-a",
-              orbs: ["rgba(168,85,247,0.34)", "rgba(245,158,11,0.26)", "rgba(16,185,129,0.22)"],
               headline: "ประธานคณะพัฒนานโยบายสาธารณะควบคุมบุหรี่ไฟฟ้า — สมัชชาสุขภาพเฉพาะประเด็น",
-              text: "ประสานพลังสหวิชาชีพ เครือข่ายครู ผู้ปกครอง เยาวชน และหน่วยงานรัฐ ขับเคลื่อนมติสมัชชาสุขภาพเฉพาะประเด็นเพื่อปกป้องเด็กและเยาวชนไทยจากการระบาดของบุหรี่ไฟฟ้าอย่างเป็นระบบ"
+              text: "ประสานพลังสหวิชาชีพ เครือข่ายครู ผู้ปกครอง เยาวชน และภาครัฐ ขับเคลื่อนมติสมัชชาสุขภาพเฉพาะประเด็นเพื่อปกป้องเด็กและเยาวชนไทยอย่างเป็นระบบ",
+              quoteLabel: "💡 มุมมองเชิงระบบ:",
+              quote: "แพทย์ในฐานะ Change Agent ต้องสานพลังทุกภาคส่วนทั้งในและนอกระบบสุขภาพ เพื่อปกป้องอนาคตของเยาวชนร่วมกัน"
             }
           ],
-          footnote: "กดลูกศร → / Space หรือคลิกที่สถานีบนรางรถไฟเพื่อเลื่อนดูแต่ละบทบาท · เอกสารอ้างอิงฉบับเต็มอยู่ในหน้า 14",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังสไลด์ถัดไป · อ้างอิงหน้า 14",
           moderatorNotes: {
-            lead: "กล่าวแนะนำ: ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) — กด Clicker ไล่ตามสถานี 1 ถึง 5",
+            lead: "กล่าวแนะนำ: ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) — แสดงครบทั้ง 5 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
               "2521 รพ.อุดรธานี · 2526 วุฒิบัตรกุมารเวชศาสตร์ · 2527 อาจารย์ภาควิชากุมารเวชศาสตร์ รามาฯ · 2551 ศาสตราจารย์ · 2554–2557 รองอธิการบดี ม.มหิดล",
               "เริ่มวิจัยพฤติกรรมวัยรุ่นตั้งแต่ปี 2541 (เก็บข้อมูล Bangkok Youth Risk Behavior Survey ปี 2544 ตีพิมพ์ 2548)",
@@ -837,10 +956,11 @@
             {
               heading: "นพ.วิรุฬ ลิ้มสวาท",
               items: [
-                { label: "HITAP • ประวัติผู้ร่วมวิจัย (2567), น. 88–89", url: "https://www.hitap.net/wp-content/uploads/2024/06/FINAL-HSRI-proposal_KRT-policy-TH_13Mar24-1.pdf" },
+                { label: "VOA Thai • ป่วยกายใจไม่แพ้! เปิดใจ นพ.วิรุฬ (ตอน 1–2)", url: "https://www.voathai.com/a/wirun-limsawart-interview-part-2/4486443.html" },
+                { label: "Sanook / VOA • เส้นทางคุณหมอไทยพิชิตดุษฎีบัณฑิต ม.ฮาร์วาร์ด", url: "https://www.sanook.com/men/37825/" },
                 { label: "Harvard Gazette • บทสัมภาษณ์ นพ.วิรุฬ (2561)", url: "https://news.harvard.edu/gazette/story/2018/05/doctor-gets-a-doctorate-and-takes-it-home-to-thailand/" },
                 { label: "Harvard DASH • วิทยานิพนธ์วัณโรคชายแดน (2561)", url: "https://dash.harvard.edu/entities/publication/dd0c41a2-e964-4bdc-a8d4-5e0c376fbefb" },
-                { label: "สช. • รายงานสถานการณ์ระบบสุขภาพไทย (2569)", url: "https://www.nationalhealth.or.th/storage/ebooks_attach/NHSIR_2026.pdf" }
+                { label: "HITAP & สช. • ประวัติผู้ร่วมวิจัยและรายงานระบบสุขภาพไทย", url: "https://www.nationalhealth.or.th/storage/ebooks_attach/NHSIR_2026.pdf" }
               ]
             },
             {
@@ -1123,8 +1243,21 @@
     deck.slides.forEach((sl) => {
       preloadImageOnce(sl.bg);
       preloadImageOnce(sl.dicutImg);
+      if (Array.isArray(sl.haloLogos)) {
+        sl.haloLogos.forEach((hl) => preloadImageOnce(hl && hl.logo));
+      }
+      if (Array.isArray(sl.wallPhotos)) {
+        sl.wallPhotos.forEach((wp) => preloadImageOnce(wp && wp.img));
+      }
       if (Array.isArray(sl.milestones)) {
-        sl.milestones.forEach((m) => preloadImageOnce(m && m.bg));
+        sl.milestones.forEach((m) => {
+          if (!m) return;
+          preloadImageOnce(m.bg);
+          preloadImageOnce(m.logo);
+          if (Array.isArray(m.photos)) {
+            m.photos.forEach((ph) => preloadImageOnce(ph && ph.src));
+          }
+        });
       }
     });
   }
@@ -1311,9 +1444,7 @@
   function scheduleNextAmbientTick() {
     clearCycleTimer();
     const modal = document.getElementById("panelDeckModal");
-    const curSlide = getCurrentSlide();
-    const isTimeline = curSlide && curSlide.type === "timeline" && Array.isArray(curSlide.milestones) && curSlide.milestones.length > 1;
-    const tickMs = isTimeline ? STATION_CYCLE_MS : AMBIENT_CYCLE_MS;
+    const tickMs = AMBIENT_CYCLE_MS;
     if (modal) {
       modal.classList.toggle("is-ambient-cycling", Boolean(state.isOpen && state.ambientCycle));
       modal.style.setProperty("--psv-cycle-ms", `${tickMs}ms`);
@@ -1328,12 +1459,6 @@
     state.cycleTimer = setTimeout(() => {
       if (!state.isOpen || !state.ambientCycle) return;
       const deck = getCurrentDeck();
-      const sl = getCurrentSlide();
-      if (!state.qaLoopOnly && sl && sl.type === "timeline" && Array.isArray(sl.milestones) && state.stationIdx < sl.milestones.length - 1) {
-        state.stationIdx += 1;
-        updateStageView();
-        return;
-      }
       if (state.qaLoopOnly && deck.qaLoopRange) {
         const [startIdx, endIdx] = deck.qaLoopRange;
         const next = state.slideIdx < startIdx || state.slideIdx >= endIdx ? startIdx : state.slideIdx + 1;
@@ -1379,26 +1504,27 @@
     const body = document.getElementById("psvSlideBody");
     if (!modal || modal.hidden || !viewport || !body) return;
 
-    if (window.innerWidth <= 720) {
+    if (window.innerWidth <= 960) {
       modal.style.setProperty("--psv-fit-scale", "1");
       return;
     }
 
-    const availH = viewport.clientHeight - 28;
-    const availW = viewport.clientWidth - 48;
+    const isRail = body.classList.contains("is-railway-mode");
+    const availH = viewport.clientHeight - (isRail ? 18 : 28);
+    const availW = isRail ? body.clientWidth + 2 : viewport.clientWidth - 48;
     if (availH < 120 || availW < 200) return;
 
     body.setAttribute("data-measuring", "1");
-    let lo = 0.52;
-    let hi = 1.24;
+    let lo = 0.50;
+    let hi = isRail ? 1.12 : 1.24;
     for (let i = 0; i < 12; i += 1) {
       const mid = (lo + hi) * 0.5;
       modal.style.setProperty("--psv-fit-scale", mid.toFixed(4));
-      const fits = body.scrollHeight <= availH && body.scrollWidth <= availW;
+      const fits = body.scrollHeight <= availH && body.scrollWidth <= (isRail ? body.clientWidth + 4 : availW);
       if (fits) lo = mid;
       else hi = mid;
     }
-    const safeScale = Math.max(0.52, Math.min(1.22, lo * 0.96));
+    const safeScale = Math.max(0.50, Math.min(isRail ? 1.10 : 1.22, lo * 0.965));
     modal.style.setProperty("--psv-fit-scale", safeScale.toFixed(4));
     body.removeAttribute("data-measuring");
   }
@@ -1411,30 +1537,58 @@
     });
   }
 
-  /* ---------- Crossfade Backdrop & Speaker Die-Cut Updater ---------- */
-  function getActiveStationMilestone(slide) {
-    if (!slide || slide.type !== "timeline" || !Array.isArray(slide.milestones) || !slide.milestones.length) {
-      return null;
-    }
-    const idx = Math.max(0, Math.min(slide.milestones.length - 1, state.stationIdx || 0));
-    return slide.milestones[idx] || slide.milestones[0];
-  }
-
+  /* ---------- Crossfade Backdrop, Panoramic Wall & Speaker Die-Cut Logo Halo ---------- */
   function updateBackdropForSlide(slide) {
     const modal = document.getElementById("panelDeckModal");
     if (!modal || !slide) return;
     modal.setAttribute("data-backdrop", state.backdropMode);
 
-    const activeMs = getActiveStationMilestone(slide);
-    const orbs = (activeMs && activeMs.orbs) || slide.orbs;
+    const orbs = slide.orbs;
     if (orbs && orbs.length === 3) {
       modal.style.setProperty("--psv-orb-1", orbs[0]);
       modal.style.setProperty("--psv-orb-2", orbs[1]);
       modal.style.setProperty("--psv-orb-3", orbs[2]);
     }
 
-    const bgFile = (activeMs && activeMs.bg) || slide.bg || "bg_01_bedside_horizon.jpg";
-    const kbCls = (activeMs && activeMs.kb) || slide.kb || "kb-a";
+    const isTimelineAll = Boolean(slide.type === "timeline" && Array.isArray(slide.milestones) && slide.milestones.length);
+    modal.classList.toggle("is-multi-station-bg", isTimelineAll);
+
+    const multiWall = document.getElementById("psvMultiBgWall");
+    if (multiWall) {
+      if (isTimelineAll) {
+        const wallItems =
+          Array.isArray(slide.wallPhotos) && slide.wallPhotos.length
+            ? slide.wallPhotos
+            : slide.milestones.map((m, idx) => ({
+                img: m.bg || slide.bg,
+                label: `0${idx + 1} · ${m.shortStop || m.year}`,
+                pinIdx: idx
+              }));
+        const wallSig = `${slide.id}:${wallItems.length}`;
+        multiWall.hidden = false;
+        multiWall.removeAttribute("data-focus-col");
+        multiWall.style.setProperty("--psv-wall-cols", String(wallItems.length));
+        if (multiWall.getAttribute("data-wall-sig") !== wallSig) {
+          multiWall.setAttribute("data-wall-sig", wallSig);
+          multiWall.innerHTML = wallItems
+            .map(
+              (wp, wIdx) => `
+              <div class="psv-mbg-col" data-wall-col="${wIdx}" data-wall-pin="${typeof wp.pinIdx === "number" ? wp.pinIdx : wIdx}">
+                <div class="psv-mbg-photo" style="background-image:url('${IMG_DIR}/${esc(wp.img)}?v=${ASSET_VER}')"></div>
+                ${wp.label ? `<span class="psv-mbg-cap">${esc(wp.label)}</span>` : ""}
+              </div>
+            `
+            )
+            .join("");
+        }
+      } else {
+        multiWall.hidden = true;
+        multiWall.removeAttribute("data-focus-col");
+      }
+    }
+
+    const bgFile = slide.bg || "bg_01_bedside_horizon.jpg";
+    const kbCls = slide.kb || "kb-a";
     const nextUrl = `${IMG_DIR}/${bgFile}?v=${ASSET_VER}`;
     const slot0 = document.getElementById("psvBgSlot0");
     const slot1 = document.getElementById("psvBgSlot1");
@@ -1456,10 +1610,12 @@
 
     const dicutStage = document.getElementById("psvDicutStage");
     const dicutImgEl = document.getElementById("psvDicutImg");
+    const dicutHaloEl = document.getElementById("psvDicutLogoHalo");
     if (dicutStage && dicutImgEl) {
       if (slide.dicutImg) {
         const dicutUrl = `${IMG_DIR}/${slide.dicutImg}?v=${ASSET_VER}`;
         dicutStage.hidden = false;
+        dicutStage.style.transform = "";
         if (state.currentDicutUrl !== dicutUrl) {
           state.currentDicutUrl = dicutUrl;
           dicutImgEl.src = dicutUrl;
@@ -1468,11 +1624,23 @@
           void dicutImgEl.offsetWidth;
           dicutImgEl.style.animation = "";
         }
-        const stShift = Math.max(0, state.stationIdx || 0) * -4;
-        dicutStage.style.transform = `translate3d(${stShift}px, 0, 0)`;
+        if (dicutHaloEl) {
+          const haloList = Array.isArray(slide.haloLogos) ? slide.haloLogos.slice(0, 7) : [];
+          dicutHaloEl.innerHTML = haloList
+            .map(
+              (hl, hIdx) => `
+              <div class="psv-halo-plaque" data-halo-slot="${hIdx}" data-org-key="${esc(hl.key || "")}" title="${esc(hl.label || "")}">
+                <img class="psv-halo-logo-img" src="${IMG_DIR}/${esc(hl.logo)}?v=${ASSET_VER}" alt="${esc(hl.label || "")}" />
+                <span class="psv-halo-logo-lbl">${esc(hl.label || "")}</span>
+              </div>
+            `
+            )
+            .join("");
+        }
       } else {
         dicutStage.hidden = true;
         state.currentDicutUrl = "";
+        if (dicutHaloEl) dicutHaloEl.innerHTML = "";
       }
     }
   }
@@ -1570,24 +1738,21 @@
     if (slide.type === "timeline") {
       const milestones = slide.milestones || [];
       const totalSt = Math.max(1, milestones.length);
-      const curStIdx = Math.max(0, Math.min(totalSt - 1, state.stationIdx || 0));
-      const curSt = milestones[curStIdx] || milestones[0] || {};
-      const nextSt = curStIdx < totalSt - 1 ? milestones[curStIdx + 1] : null;
-      const railPct = totalSt > 1 ? ((curStIdx / (totalSt - 1)) * 100).toFixed(2) : "100";
+      const zzCols = totalSt === 5 ? 15 : totalSt === 6 ? 13 : totalSt * 2 + 1;
+      const pinCols5 = [2, 5, 8, 11, 14];
+      const cardSpans5 = ["1 / span 5", "3 / span 5", "6 / span 5", "9 / span 5", "11 / span 5"];
+      const pinCols6 = [2, 4, 6, 8, 10, 12];
+      const cardSpans6 = ["1 / span 4", "2 / span 4", "5 / span 4", "6 / span 4", "9 / span 4", "10 / span 4"];
 
-      const stopsHtml = milestones
-        .map((m, i) => {
-          const stStateCls = i < curStIdx ? " is-passed" : i === curStIdx ? " is-active" : " is-upcoming";
-          const dotInner = i < curStIdx ? "✓" : String(i + 1);
-          const stopShort = m.shortStop || m.year;
-          return `
-            <button type="button" class="psv-rail-stop${stStateCls}" data-psv-station="${i}" title="คลิกเพื่อไปยังสถานีที่ ${i + 1}: ${esc(m.headline || m.text)}">
-              <span class="psv-rail-stop-yr">${esc(m.year)}</span>
-              <span class="psv-rail-stop-dot">${esc(dotInner)}</span>
-              <span class="psv-rail-stop-lbl">${esc(stopShort)}</span>
-            </button>
-          `;
-        })
+      const orgChipsHtml = (slide.haloLogos || [])
+        .map(
+          (hl) => `
+          <span class="psv-org-mini-chip" data-org-chip="${esc(hl.key || "")}">
+            <img src="${IMG_DIR}/${esc(hl.logo)}?v=${ASSET_VER}" alt="${esc(hl.label || "")}" />
+            <span>${esc(hl.label || "")}</span>
+          </span>
+        `
+        )
         .join("");
 
       const mobDicutHtml = slide.dicutImg
@@ -1602,53 +1767,92 @@
         `
         : "";
 
-      const deskTitleHtml = slide.dicutImg
-        ? `
-          <div class="psv-desk-spk-head" style="display:flex;flex-direction:column;gap:calc(4px * var(--psv-eff-scale))">
+      const deskHeadHtml = `
+        <div class="psv-spk-head-bar">
+          <div class="psv-desk-spk-head">
             <h2 class="psv-hero-title is-compact-title">${esc(slide.title)}</h2>
             ${slide.roleSubtitle ? `<p class="psv-spk-role-sub">${esc(slide.roleSubtitle)}</p>` : ""}
           </div>
-        `
-        : `<h2 class="psv-hero-title is-compact-title">${esc(slide.title)}</h2>`;
+          ${orgChipsHtml ? `<div class="psv-spk-org-strip">${orgChipsHtml}</div>` : ""}
+        </div>
+      `;
 
-      const hintTxt = nextSt
-        ? `🖱️ Clicker / ปุ่ม → สถานีถัดไป (${curStIdx + 2}/${totalSt}): ${nextSt.shortStop || nextSt.year}`
-        : "✨ ถึงสถานีปัจจุบันแล้ว · กด → อีกครั้งเพื่อไปสไลด์ถัดไป";
+      let pinCellsHtml = "";
+      let cardsHtml = "";
+
+      milestones.forEach((m, i) => {
+        const isTop = i % 2 === 0;
+        const posCls = isTop ? "is-top" : "is-bottom";
+        const pinCol = totalSt === 5 ? pinCols5[i] : totalSt === 6 ? pinCols6[i] : i * 2 + 2;
+        const cardSpan =
+          totalSt === 5
+            ? cardSpans5[i]
+            : totalSt === 6
+            ? cardSpans6[i]
+            : `${Math.max(1, pinCol - 1)} / span 4`;
+        const numStr = String(i + 1).padStart(2, "0");
+
+        pinCellsHtml += `
+          <div class="psv-zz-pin-cell ${posCls}" data-pin-cell="${i}" style="--pin-col:${pinCol}">
+            <div class="psv-zz-stem" aria-hidden="true"></div>
+            <button type="button" class="psv-zz-node" data-psv-zoom-pin="${i}" title="คลิกเพื่อขยายรายละเอียดสถานี ${numStr}">
+              📍 ${numStr}
+            </button>
+          </div>
+        `;
+
+        const logoBadge = m.logo
+          ? `<span class="psv-pin-logo-pill" title="${esc(m.logoLabel || "")}"><img src="${IMG_DIR}/${esc(m.logo)}?v=${ASSET_VER}" alt="${esc(m.logoLabel || "")}" /></span>`
+          : "";
+
+        const photosArr = Array.isArray(m.photos) ? m.photos : [];
+        const photosHtml = photosArr.length
+          ? `
+            <div class="psv-pin-photos" style="--pin-photo-cols:${Math.min(2, photosArr.length)}">
+              ${photosArr
+                .map(
+                  (ph) => `
+                  <div class="psv-pin-photo-wrap">
+                    <img src="${IMG_DIR}/${esc(ph.src)}?v=${ASSET_VER}" alt="${esc(ph.cap || m.headline || "")}" loading="eager" />
+                    ${ph.cap ? `<span class="psv-pin-photo-tag">${esc(ph.cap)}</span>` : ""}
+                  </div>
+                `
+                )
+                .join("")}
+            </div>
+          `
+          : "";
+
+        const quoteHtml = m.quote
+          ? `<blockquote class="psv-pin-quote">${m.quoteLabel ? `<span class="psv-pin-quote-lbl">${esc(m.quoteLabel)}</span>` : ""}${esc(m.quote)}</blockquote>`
+          : "";
+
+        cardsHtml += `
+          <article class="psv-pin-card ${posCls}" data-psv-zoom-pin="${i}" data-pin-org="${esc(m.orgKey || "")}" style="--card-col:${cardSpan};--mob-order:${i}">
+            <div class="psv-pin-head">
+              <span class="psv-pin-yr-badge">📍 ${numStr} · ${esc(m.year || "")}${m.shortStop ? ` · ${esc(m.shortStop)}` : ""}</span>
+              ${logoBadge}
+            </div>
+            ${photosHtml}
+            ${m.headline ? `<h3 class="psv-pin-headline">${esc(m.headline)}</h3>` : ""}
+            <p class="psv-pin-text">${esc(m.text || "")}</p>
+            ${quoteHtml}
+          </article>
+        `;
+      });
 
       return `
         <div class="psv-kicker-row">
-          <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)} · สถานี ${curStIdx + 1}/${totalSt}</span>
+          <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
           ${slide.kickerSub ? `<span class="psv-kicker-sub">${esc(slide.kickerSub)}</span>` : ""}
         </div>
         ${mobDicutHtml}
-        ${deskTitleHtml}
-        <div class="psv-rail-map" style="--psv-station-count:${totalSt};--psv-rail-pct:${railPct}%">
-          <div class="psv-rail-nodes">
-            <div class="psv-rail-track-line" aria-hidden="true">
-              <div class="psv-rail-track-fill"></div>
-            </div>
-            ${stopsHtml}
-          </div>
+        ${deskHeadHtml}
+        <div class="psv-pin-zigzag" style="--psv-zz-cols:${zzCols}">
+          <div class="psv-zz-track-bar" aria-hidden="true"></div>
+          ${pinCellsHtml}
+          ${cardsHtml}
         </div>
-        <article class="psv-station-spotlight">
-          <div class="psv-station-top">
-            <div class="psv-station-badges">
-              <span class="psv-station-pill">🚉 สถานี ${curStIdx + 1} / ${totalSt} · พ.ศ. ${esc(curSt.year || "")}</span>
-              ${curSt.roleTag ? `<span class="psv-station-role-tag">${esc(curSt.roleTag)}</span>` : ""}
-            </div>
-            ${curSt.sceneLabel ? `<span class="psv-station-scene-loc">${esc(curSt.sceneLabel)}</span>` : ""}
-          </div>
-          ${curSt.headline ? `<h3 class="psv-station-headline">${esc(curSt.headline)}</h3>` : ""}
-          <p class="psv-station-body">${esc(curSt.text || "")}</p>
-          <div class="psv-station-clicker-bar">
-            <span class="psv-station-hint">${esc(hintTxt)}</span>
-            <div class="psv-station-btns">
-              <button type="button" class="psv-st-btn" data-psv-act="station-prev"${curStIdx === 0 ? " disabled" : ""}>◀ สถานีก่อน</button>
-              <button type="button" class="psv-st-btn is-primary-next" data-psv-act="next">${nextSt ? "สถานีถัดไป ▶" : "สไลด์ถัดไป ▶"}</button>
-              ${nextSt ? `<button type="button" class="psv-st-btn" data-psv-act="skip-slide" title="ข้ามสถานีที่เหลือไปยังสไลด์ถัดไป">⏭ ข้ามสไลด์</button>` : ""}
-            </div>
-          </div>
-        </article>
         ${slide.footnote ? `<div class="psv-footnote-whisper">${esc(slide.footnote)}</div>` : ""}
       `;
     }
@@ -1838,12 +2042,14 @@
       <div class="psv-backdrop-stage" aria-hidden="true">
         <div class="psv-bg-slot kb-a" id="psvBgSlot0"></div>
         <div class="psv-bg-slot kb-b" id="psvBgSlot1"></div>
+        <div class="psv-multi-bg-wall" id="psvMultiBgWall" hidden></div>
         <div class="psv-aurora-layer" id="psvAuroraLayer"></div>
         <div class="psv-scrim-vignette"></div>
       </div>
 
       <div class="psv-dicut-stage" id="psvDicutStage" hidden aria-hidden="true">
         <div class="psv-dicut-aura"></div>
+        <div class="psv-dicut-logo-halo" id="psvDicutLogoHalo"></div>
         <img class="psv-dicut-img" id="psvDicutImg" alt="" />
       </div>
 
@@ -1905,6 +2111,10 @@
           <p style="margin:0;font-size:13px;color:#cbd5e1">นักศึกษาสามารถสแกนเพื่อดูไทม์ไลน์ คำถามเสวนา ลิงก์หลักฐาน และบันทึกสะท้อนคิดบนไอแพดหรือมือถือ</p>
           <button type="button" class="psv-pill-btn is-active" data-psv-act="close-qr-modal">ปิดหน้าต่าง QR (Esc)</button>
         </div>
+      </div>
+
+      <div class="psv-pin-zoom-modal" id="psvPinZoomModal" hidden>
+        <div class="psv-pin-zoom-card" id="psvPinZoomCard"></div>
       </div>
 
       <footer class="psv-hud-bottom" id="psvHudBottom">
@@ -2116,50 +2326,142 @@
     }
   }
 
-  function goToSlide(idx, fromAutoCycle, targetStationIdx) {
+  function openPinZoomLightbox(pinIdx) {
+    const sl = getCurrentSlide();
+    const zoomModal = document.getElementById("psvPinZoomModal");
+    const zoomCard = document.getElementById("psvPinZoomCard");
+    if (!sl || !Array.isArray(sl.milestones) || !zoomModal || !zoomCard) return;
+    const m = sl.milestones[pinIdx];
+    if (!m) return;
+
+    const numStr = String(pinIdx + 1).padStart(2, "0");
+    const galleryItems =
+      Array.isArray(m.photos) && m.photos.length
+        ? m.photos
+        : m.bg
+        ? [{ src: m.bg, cap: m.sceneLabel || m.shortStop || m.year }]
+        : [];
+
+    const galHtml = galleryItems.length
+      ? `
+        <div class="psv-pin-zoom-gallery">
+          ${galleryItems
+            .map(
+              (ph) => `
+              <div class="psv-pin-zoom-img-box">
+                <img src="${IMG_DIR}/${esc(ph.src)}?v=${ASSET_VER}" alt="${esc(ph.cap || m.headline || "")}" />
+                ${ph.cap ? `<div class="psv-pin-zoom-img-cap">${esc(ph.cap)}</div>` : ""}
+              </div>
+            `
+            )
+            .join("")}
+        </div>
+      `
+      : "";
+
+    const logoHtml = m.logo
+      ? `<span class="psv-pin-logo-pill"><img src="${IMG_DIR}/${esc(m.logo)}?v=${ASSET_VER}" alt="${esc(m.logoLabel || "")}" style="height:22px;max-width:64px" /></span>`
+      : "";
+
+    zoomCard.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="psv-station-pill">📍 สถานี ${numStr} · พ.ศ. ${esc(m.year || "")}</span>
+          ${m.roleTag ? `<span class="psv-station-role-tag">${esc(m.roleTag)}</span>` : ""}
+          ${logoHtml}
+        </div>
+        <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิด (Esc)</button>
+      </div>
+      ${m.sceneLabel ? `<div style="font-size:13px;font-weight:600;color:#cbd5e1">${esc(m.sceneLabel)}</div>` : ""}
+      <h3 style="margin:0;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:#fff;line-height:1.28">${esc(m.headline || "")}</h3>
+      ${galHtml}
+      <p style="margin:0;font-size:16px;line-height:1.58;color:#f1f5f9">${esc(m.text || "")}</p>
+      ${
+        m.quote
+          ? `<blockquote class="psv-pin-quote" style="font-size:15px;padding:10px 14px">${
+              m.quoteLabel ? `<span class="psv-pin-quote-lbl">${esc(m.quoteLabel)}</span>` : ""
+            }${esc(m.quote)}</blockquote>`
+          : ""
+      }
+    `;
+    clearIdleTimer();
+    zoomModal.hidden = false;
+  }
+
+  function closePinZoomLightbox() {
+    const zoomModal = document.getElementById("psvPinZoomModal");
+    if (zoomModal && !zoomModal.hidden) {
+      zoomModal.hidden = true;
+      resetIdleActivity();
+      return true;
+    }
+    return false;
+  }
+
+  function goToSlide(idx, fromAutoCycle) {
     const deck = getCurrentDeck();
     const clean = Math.max(0, Math.min(deck.slides.length - 1, idx));
     state.slideIdx = clean;
-    const targetSlide = deck.slides[clean];
-    if (typeof targetStationIdx === "number" && targetSlide && Array.isArray(targetSlide.milestones)) {
-      state.stationIdx = Math.max(0, Math.min(targetSlide.milestones.length - 1, targetStationIdx));
-    } else {
-      state.stationIdx = 0;
-    }
+    state.stationIdx = 0;
+    closePinZoomLightbox();
     if (!fromAutoCycle) resetIdleActivity();
     updateStageView();
   }
 
   function stepSlide(delta) {
     const deck = getCurrentDeck();
-    const curSlide = getCurrentSlide();
-    if (curSlide && curSlide.type === "timeline" && Array.isArray(curSlide.milestones) && curSlide.milestones.length > 1) {
-      if (delta > 0 && state.stationIdx < curSlide.milestones.length - 1) {
-        state.stationIdx += 1;
-        resetIdleActivity();
-        updateStageView();
-        return;
-      }
-      if (delta < 0 && state.stationIdx > 0) {
-        state.stationIdx -= 1;
-        resetIdleActivity();
-        updateStageView();
-        return;
+    const next = (state.slideIdx + delta + deck.slides.length) % deck.slides.length;
+    goToSlide(next, false);
+  }
+
+  function applyPinHoverHighlight(modal, pinIdx, orgKey) {
+    const wall = document.getElementById("psvMultiBgWall");
+    const halo = document.getElementById("psvDicutLogoHalo");
+    modal.querySelectorAll(".psv-zz-pin-cell.is-hovered").forEach((el) => el.classList.remove("is-hovered"));
+    if (halo) halo.querySelectorAll(".psv-halo-plaque.is-highlighted").forEach((el) => el.classList.remove("is-highlighted"));
+    if (wall) wall.querySelectorAll(".psv-mbg-col.is-col-focused").forEach((el) => el.classList.remove("is-col-focused"));
+
+    if (typeof pinIdx !== "number" || pinIdx < 0) {
+      if (wall) wall.removeAttribute("data-focus-col");
+      return;
+    }
+    const cell = modal.querySelector(`.psv-zz-pin-cell[data-pin-cell="${pinIdx}"]`);
+    if (cell) cell.classList.add("is-hovered");
+
+    if (halo && orgKey) {
+      halo.querySelectorAll(`.psv-halo-plaque[data-org-key="${orgKey}"]`).forEach((el) => el.classList.add("is-highlighted"));
+    }
+    if (wall) {
+      const cols = wall.querySelectorAll(`.psv-mbg-col[data-wall-pin="${pinIdx}"]`);
+      if (cols.length) {
+        wall.setAttribute("data-focus-col", String(pinIdx));
+        cols.forEach((c) => c.classList.add("is-col-focused"));
+      } else {
+        wall.removeAttribute("data-focus-col");
       }
     }
-    const next = (state.slideIdx + delta + deck.slides.length) % deck.slides.length;
-    const nextSlide = deck.slides[next];
-    const initialStation =
-      delta < 0 && nextSlide && nextSlide.type === "timeline" && Array.isArray(nextSlide.milestones)
-        ? Math.max(0, nextSlide.milestones.length - 1)
-        : 0;
-    goToSlide(next, false, initialStation);
   }
 
   /* ---------- Event Delegation & Keyboard / Touch Navigation ---------- */
   function bindModalEvents(modal) {
     ["mousemove", "mousedown", "touchstart", " wheel"].forEach((evName) => {
       modal.addEventListener(evName.trim(), () => resetIdleActivity(), { passive: true });
+    });
+
+    modal.addEventListener("mouseover", (ev) => {
+      const card = ev.target.closest(".psv-pin-card[data-psv-zoom-pin]");
+      if (card) {
+        const pIdx = parseInt(card.getAttribute("data-psv-zoom-pin"), 10);
+        const oKey = card.getAttribute("data-pin-org") || "";
+        applyPinHoverHighlight(modal, pIdx, oKey);
+      }
+    });
+
+    modal.addEventListener("mouseout", (ev) => {
+      const card = ev.target.closest(".psv-pin-card[data-psv-zoom-pin]");
+      if (card && !card.contains(ev.relatedTarget)) {
+        applyPinHoverHighlight(modal, -1, "");
+      }
     });
 
     modal.addEventListener("change", (ev) => {
@@ -2175,20 +2477,29 @@
     });
 
     modal.addEventListener("click", (ev) => {
-      const stBtn = ev.target.closest("[data-psv-station]");
-      if (stBtn) {
-        const stIdx = parseInt(stBtn.getAttribute("data-psv-station"), 10) || 0;
+      if (ev.target && ev.target.id === "psvPinZoomModal") {
+        closePinZoomLightbox();
+        return;
+      }
+      const zoomTrig = ev.target.closest("[data-psv-zoom-pin]");
+      if (zoomTrig) {
+        const pIdx = parseInt(zoomTrig.getAttribute("data-psv-zoom-pin"), 10) || 0;
+        openPinZoomLightbox(pIdx);
+        return;
+      }
+      const haloPlaque = ev.target.closest(".psv-halo-plaque[data-org-key]");
+      if (haloPlaque) {
+        const ok = haloPlaque.getAttribute("data-org-key") || "";
         const sl = getCurrentSlide();
         if (sl && Array.isArray(sl.milestones)) {
-          state.stationIdx = Math.max(0, Math.min(sl.milestones.length - 1, stIdx));
-          resetIdleActivity();
-          updateStageView();
+          const mIdx = sl.milestones.findIndex((m) => m && m.orgKey === ok);
+          if (mIdx >= 0) openPinZoomLightbox(mIdx);
         }
         return;
       }
       const idxBtn = ev.target.closest("[data-psv-idx]");
       if (idxBtn) {
-        goToSlide(parseInt(idxBtn.getAttribute("data-psv-idx"), 10) || 0, false, 0);
+        goToSlide(parseInt(idxBtn.getAttribute("data-psv-idx"), 10) || 0, false);
         return;
       }
       const actEl = ev.target.closest("[data-psv-act]");
@@ -2196,16 +2507,8 @@
       const act = actEl.getAttribute("data-psv-act");
       if (act === "prev") stepSlide(-1);
       else if (act === "next") stepSlide(1);
-      else if (act === "station-prev") {
-        if (state.stationIdx > 0) {
-          state.stationIdx -= 1;
-          resetIdleActivity();
-          updateStageView();
-        }
-      } else if (act === "skip-slide") {
-        const deck = getCurrentDeck();
-        const next = (state.slideIdx + 1) % deck.slides.length;
-        goToSlide(next, false, 0);
+      else if (act === "close-pin-zoom") {
+        closePinZoomLightbox();
       }
       else if (act === "toggle-ambient") toggleAmbientCycle(false);
       else if (act === "toggle-qa-loop") toggleAmbientCycle(true);
@@ -2302,6 +2605,9 @@
         return;
       }
       if (ev.key === "Escape") {
+        if (closePinZoomLightbox()) {
+          return;
+        }
         if (state.qrLightboxOpen) {
           state.qrLightboxOpen = false;
           resetIdleActivity();
