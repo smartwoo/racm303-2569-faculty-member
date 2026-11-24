@@ -1,8 +1,8 @@
 window.RACM_HS_DISCUSSION_DATA = {
   "updatedAt": "2026-11-24",
   "totalModules": 6,
-  "totalCases": 11,
-  "totalSubQuestions": 21,
+  "totalCases": 12,
+  "totalSubQuestions": 23,
   "modules": [
     {
       "id": "HS1",
@@ -16,7 +16,7 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS1",
       "conciseDocId": "HS1-CONCISE",
       "wbDocId": "HS1-WB",
-      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health) สร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) เชื่อมสู่นิยามสุขภาพ 4 มิติในธรรมนูญสุขภาพแห่งชาติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับ (Primary – Quaternary Prevention) ของคนวัยทำงาน (เคสที่ 2)",
+      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพสร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) วิเคราะห์ระดับการป้องกันโรคและปัจจัยกำหนดสุขภาพทางสังคมตามกรอบ WHO CSDH จากกรณีการคัดกรองสารเสพติดในคลินิกฝากครรภ์ (เคสที่ 2) และเชื่อมสู่นิยามสุขภาพ 4 มิติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับของคนวัยทำงาน (เคสที่ 3)",
       "unlockAfterIso": "2026-11-26T12:00:00+07:00",
       "unlockAfterLabel": "วันพฤหัสบดีที่ 26 พฤศจิกายน 2569 เวลา 12.00 น.",
       "unlockShortLabel": "พฤ. 26 พ.ย. · 12.00 น."
@@ -358,7 +358,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "anchor": "เป็นวงล้อมชั้นนอกที่กำหนดว่าทำไมสภาพแวดล้อมและโอกาสสุขภาพในชีวิตประจำวันจึงเป็นเช่นนั้น"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 · เด็กชายโมโน",
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 1 · เด็กชายโมโน",
             "caseBridge": "การแก้ภาวะอ้วนในเด็กจึงไม่อาจหยุดที่การสั่งให้เด็กลดขนมหรือออกกำลังกายเพียงลำพัง แต่ต้องปรับสิ่งแวดล้อมโรงเรียน ชุมชน บริการเชิงรุก และนโยบายโครงสร้างไปพร้อมกัน",
             "docId": "HS1-CONCISE",
             "docSec": "1.2",
@@ -368,10 +368,252 @@ window.RACM_HS_DISCUSSION_DATA = {
       ]
     },
     {
-      "id": "case-1",
+      "id": "case-hs1-anc",
       "caseNumber": 2,
       "module": "HS1",
-      "title": "กรณีศึกษาที่ 2: สุขภาวะของคนทำงานในโรงงานอุตสาหกรรม การวิเคราะห์ปัจจัยกำหนดสุขภาพ และระดับของการป้องกันโรค",
+      "title": "กรณีศึกษาที่ 2: การคัดกรองสารเสพติดในคลินิกฝากครรภ์ (ANC) และการวิเคราะห์ปัจจัยกำหนดสุขภาพทางสังคม (Social Determinants of Health)",
+      "subtitle": "หญิงตั้งครรภ์วัยรุ่น (อายุ 15–18 ปี) ที่มีผลตรวจคัดกรอง Urine Amphetamine Positive ณ โรงพยาบาลชุมชน",
+      "frameworks": [
+        "ระดับของการป้องกันโรค (Levels of Disease Prevention — Secondary Prevention / Early Detection)",
+        "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (Conceptual Framework for Action on the Social Determinants of Health: WHO CSDH)",
+        "การจำแนกปัจจัยเชิงโครงสร้าง (Structural Determinants) และปัจจัยทางสังคม/ตัวกลาง (Social / Intermediary Determinants)"
+      ],
+      "scenarioBlocks": [
+        {
+          "type": "p",
+          "text": "ที่โรงพยาบาลชุมชนแห่งหนึ่ง ที่แผนกฝากครรภ์ (ANC) มีขั้นตอนในการคัดกรอง urine amphetamine ทุกราย เพื่อการ detection การใช้สาร amphetamine และให้การบำบัดเลิกยาทันที เพื่อไม่ให้เกิดความเสี่ยงต่อภาวะแทรกซ้อนขณะตั้งครรภ์ หรือผลต่อทารกในครรภ์ ที่เนื่องมาจากการใช้สาร amphetamine ของมารดา"
+        },
+        {
+          "type": "p",
+          "text": "จากการคัดกรอง พบว่ามีหญิงตั้งครรภ์ที่ผล positive บ่อยครั้งขึ้นจากในอดีต เจ้าหน้าที่ได้รวบรวมข้อมูลเพิ่มเติม พบว่า ลักษณะร่วมกันของหญิงตั้งครรภ์ที่มี urine amphetamine positive ได้แก่ มีอายุ 15-18 ปี เป็นผู้ไม่มีงานประจำ การศึกษาสูงสุดระดับชั้นมัธยมศึกษาปีที่ 3 มีคู่สมรสหรือสมาชิกในครอบครัวที่ใช้สารเสพติด amphetamine"
+        },
+        {
+          "type": "p",
+          "text": "บางรายให้ข้อมูลว่า ใช้สารดังกล่าวเพื่อให้ทำงานได้มีประสิทธิภาพดีขึ้น (กรีดยางช่วงเช้ามืด และทำงานรับจ้างช่วงกลางวันต่อ) ซึ่งในผู้ที่ทำงานแบบเดียวกันก็ใช้กันเป็นส่วนใหญ่ และการซื้อสารเสพติด amphetamine มาเพื่อใช้ มีแหล่งซื้อหลายแห่งในชุมชน"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q-hs1-anc-1",
+          "label": "ประเด็นอภิปรายที่ 2.1",
+          "shortLabel": "2.1",
+          "headingLabel": "คำถามข้อที่ 2.1",
+          "enHeadingLabel": "Question 2.1",
+          "title": "การจำแนกระดับของการป้องกันโรค (Level of Disease Prevention) ของการคัดกรอง Urine Amphetamine ในหญิงที่มาฝากครรภ์",
+          "prompt": "การคัดกรอง urine amphetamine ในหญิงที่มาฝากครรภ์ทุกราย จัดเป็น level of disease prevention ในระดับใด เพราะเหตุใด",
+          "worksheet": {
+            "type": "table",
+            "headers": [
+              "ประเด็นวิเคราะห์ (Analytical Point)",
+              "คำตอบและเหตุผลประกอบจากสถานการณ์ (Answer & Rationale)"
+            ],
+            "rows": [
+              {
+                "rowId": "r1",
+                "cells": [
+                  {
+                    "static": "1. ระดับของการป้องกันโรค (Level of disease prevention)"
+                  },
+                  {
+                    "inputId": "c1_anc_q1_level",
+                    "placeholder": "ระบุระดับของการป้องกันโรค (เช่น Primary / Secondary / Tertiary / Quaternary prevention)…",
+                    "compact": true,
+                    "maxWords": 25,
+                    "maxChars": 140,
+                    "maxLines": 2,
+                    "a4BoxLabel": "ระบุระดับการป้องกันโรค (≤25 คำ)"
+                  }
+                ]
+              },
+              {
+                "rowId": "r2",
+                "cells": [
+                  {
+                    "static": "2. เหตุผลประกอบ (เพราะเหตุใด / Rationale)"
+                  },
+                  {
+                    "inputId": "c1_anc_q1_reason",
+                    "placeholder": "อธิบายเหตุผลตามวัตถุประสงค์ของการคัดกรอง (early detection) และการให้การบำบัดตั้งแต่ระยะแรกเพื่อลดภาวะแทรกซ้อนต่อมารดาและทารก…",
+                    "compact": false,
+                    "maxWords": 55,
+                    "maxChars": 280,
+                    "maxLines": 4,
+                    "a4BoxLabel": "อธิบายเหตุผลประกอบ (≤55 คำ)"
+                  }
+                ]
+              }
+            ],
+            "colWidths": [
+              "28%",
+              "72%"
+            ]
+          },
+          "conceptSummarySlide": {
+            "id": "cs-hs1-anc-1",
+            "takeawayNumber": 2,
+            "badge": "ขั้น ④ Key Takeaway #2",
+            "studentBadge": "Key Takeaway #2",
+            "shortLabel": "④ Key Takeaway #2",
+            "studentShortLabel": "Key Takeaway #2",
+            "kicker": "Key Takeaway #2",
+            "title": "การคัดกรองในคลินิกฝากครรภ์และการป้องกันขั้นที่สอง (Secondary Prevention)",
+            "enTitle": "ANC Screening & Secondary Prevention",
+            "sourceNote": "Leavell & Clark (1958) · WHO Antenatal Care Guidelines",
+            "coreTerm": "“การป้องกันขั้นที่สอง” (secondary prevention)",
+            "coreDefinitionLead": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ",
+            "coreDefinitionQualifier": "เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
+            "coreDefinition": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
+            "dimensions": [
+              {
+                "num": "01",
+                "thTitle": "การค้นหาระยะแรกเริ่ม",
+                "enTitle": "Early Detection / Screening",
+                "definition": "การตรวจคัดกรอง urine amphetamine ในหญิงตั้งครรภ์ทุกรายที่มา ANC เพื่อค้นหาผู้ใช้สารตั้งแต่ก่อนเกิดภาวะแทรกซ้อนทางคลินิก",
+                "anchor": "จุดต่างสำคัญจาก Primary คือผู้ใช้สารเกิดพฤติกรรม/ภาวะเสี่ยงขึ้นแล้ว แต่ยังไม่เกิดภาวะแทรกซ้อนรุนแรง"
+              },
+              {
+                "num": "02",
+                "thTitle": "การบำบัดดูแลทันท่วงที",
+                "enTitle": "Prompt Intervention",
+                "definition": "การคัดกรองจะมีคุณค่าทางสุขภาพก็ต่อเมื่อเชื่อมสู่ระบบการบำบัดเลิกยาทันทีโดยไม่ตีตราผู้รับบริการ",
+                "anchor": "หากคัดกรองแล้วลงโทษหรือผลักไส หญิงตั้งครรภ์จะหลุดออกจากระบบฝากครรภ์และเกิดผลเสียหนักกว่าเดิม"
+              },
+              {
+                "num": "03",
+                "thTitle": "การปกป้องสุขภาพสองชีวิต",
+                "enTitle": "Maternal & Fetal Protection",
+                "definition": "ลดความเสี่ยงภาวะแทรกซ้อนขณะตั้งครรภ์ (เช่น คลอดก่อนกำหนด รกลอกตัวก่อนกำหนด) และผลกระทบต่อทารกในครรภ์",
+                "anchor": "การหยุดยั้งผลกระทบตั้งแต่ระยะฝากครรภ์เป็นการตัดวงจรความเสี่ยงข้ามรุ่นสู่ทารกแรกเกิด"
+              },
+              {
+                "num": "04",
+                "thTitle": "การต่อยอดสู่ต้นน้ำในชุมชน",
+                "enTitle": "Upstream Surveillance Signal",
+                "definition": "เมื่อคลินิกพบผลบวกบ่อยขึ้น ข้อมูลจาก Secondary prevention ต้องถูกใช้เป็นสัญญาณเตือนเพื่อสืบค้นปัจจัยต้นน้ำในชุมชนต่อ",
+                "anchor": "เชื่อมงานบริการในโรงพยาบาลเข้ากับการวิเคราะห์ Social Determinants of Health ในคำถามข้อถัดไป"
+              }
+            ],
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.1 · คลินิกฝากครรภ์ รพช.",
+            "caseBridge": "การคัดกรองในคลินิกช่วยค้นหาและดูแลผู้ป่วยรายบุคคลได้ทันเวลา แต่เมื่อพบผู้ป่วยเพิ่มขึ้นต่อเนื่อง แพทย์ต้องมองทะลุผลตรวจปัสสาวะไปให้เห็นรากเหง้าทางสังคมในชุมชน",
+            "docId": "HS1-CONCISE",
+            "docSec": "1.4",
+            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)"
+          }
+        },
+        {
+          "id": "q-hs1-anc-2",
+          "label": "ประเด็นอภิปรายที่ 2.2",
+          "shortLabel": "2.2",
+          "headingLabel": "คำถามข้อที่ 2.2",
+          "enHeadingLabel": "Question 2.2",
+          "title": "การวิเคราะห์ปัจจัยกำหนดสุขภาพตามกรอบแนวคิด Social Determinants of Health (WHO CSDH)",
+          "prompt": "จาก conceptual framework for action on the social determinants of health ปัจจัยกำหนดสุขภาพของหญิงตั้งครรภ์ที่มี urine amphetamine positive ในโจทย์นี้ มีอะไรบ้าง",
+          "worksheet": {
+            "type": "table",
+            "headers": [
+              "หมวดปัจจัยตามกรอบแนวคิด WHO CSDH (Determinant Category)",
+              "ปัจจัยกำหนดสุขภาพและข้อมูลสนับสนุนจากโจทย์ (Determinants & Evidence from Scenario)"
+            ],
+            "rows": [
+              {
+                "rowId": "r1",
+                "cells": [
+                  {
+                    "static": "1. ปัจจัยเชิงโครงสร้าง (Structural determinants)"
+                  },
+                  {
+                    "inputId": "c1_anc_q2_structural",
+                    "placeholder": "ระบุปัจจัยระดับโครงสร้าง เช่น ระบบการศึกษา ลักษณะการประกอบอาชีพนอกระบบ ประเด็นทางการเมือง/การปราบปรามยาเสพติด และความเชื่อ/ค่านิยมในการทำงาน…",
+                    "compact": false,
+                    "maxWords": 70,
+                    "maxChars": 360,
+                    "maxLines": 5,
+                    "a4BoxLabel": "หมวดปัจจัยเชิงโครงสร้าง (≤70 คำ)"
+                  }
+                ]
+              },
+              {
+                "rowId": "r2",
+                "cells": [
+                  {
+                    "static": "2. ปัจจัยทางสังคม / ปัจจัยตัวกลาง (Social / Intermediary determinants)"
+                  },
+                  {
+                    "inputId": "c1_anc_q2_social",
+                    "placeholder": "ระบุปัจจัยทางสังคมและบริบทใกล้ตัว เช่น คนใกล้ตัว/ครอบครัว ช่วงอายุการตั้งครรภ์วัยรุ่น (teenage pregnancy) และความไม่มั่นคงของการไม่มีงานประจำ…",
+                    "compact": false,
+                    "maxWords": 70,
+                    "maxChars": 360,
+                    "maxLines": 5,
+                    "a4BoxLabel": "หมวดปัจจัยทางสังคม (≤70 คำ)"
+                  }
+                ]
+              }
+            ],
+            "colWidths": [
+              "26%",
+              "74%"
+            ]
+          },
+          "conceptSummarySlide": {
+            "id": "cs-hs1-anc-2",
+            "takeawayNumber": 3,
+            "badge": "ขั้น ④ Key Takeaway #3",
+            "studentBadge": "Key Takeaway #3",
+            "shortLabel": "④ Key Takeaway #3",
+            "studentShortLabel": "Key Takeaway #3",
+            "kicker": "Key Takeaway #3",
+            "title": "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (WHO CSDH Conceptual Framework)",
+            "enTitle": "Structural & Social Determinants of Health",
+            "sourceNote": "Solar & Irwin / WHO Commission on Social Determinants of Health (2010)",
+            "coreTerm": "“กรอบแนวคิด WHO CSDH”",
+            "coreDefinitionLead": "แยกแยะกลไกต้นน้ำระดับโครงสร้างสังคม เศรษฐกิจ การเมือง และค่านิยม ที่จัดสรรสถานะทางสังคมของบุคคล",
+            "coreDefinitionQualifier": "ซึ่งส่งผลต่อเนื่องผ่านเงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย ไปสู่ความเปราะบางทางสุขภาพ",
+            "coreDefinition": "แยกแยะกลไกต้นน้ำระดับโครงสร้างสังคม เศรษฐกิจ การเมือง และค่านิยม ที่จัดสรรสถานะทางสังคมของบุคคล ซึ่งส่งผลต่อเนื่องผ่านเงื่อนไขการดำรงชีวิต การทำงาน ครอบครัว และช่วงวัย ไปสู่ความเปราะบางทางสุขภาพ",
+            "dimensions": [
+              {
+                "num": "01",
+                "thTitle": "ระบบการศึกษาและความรู้เท่าทัน",
+                "enTitle": "Education System",
+                "definition": "โอกาสทางการศึกษาที่จำกัดเพียงระดับ ม.3 อาจยังไม่สร้างความตระหนักรู้เท่าทันต่อพิษภัยของการใช้สารเสพติดและการดูแลครรภ์",
+                "anchor": "เป็นปัจจัยเชิงโครงสร้างที่กำหนดทั้งโอกาสทางอาชีพและทักษะความรอบรู้ด้านสุขภาพ"
+              },
+              {
+                "num": "02",
+                "thTitle": "โครงสร้างอาชีพแรงงานนอกระบบ",
+                "enTitle": "Informal Labor & Employment",
+                "definition": "การประกอบอาชีพที่ไม่มีนายจ้างและไม่มีหลักประกันคุ้มครองความปลอดภัย บีบให้ผู้ทำงานเร่งโหมงานหนักหลายกะเพื่อเพิ่มรายได้",
+                "anchor": "เชื่อมโยงกรีดยางเช้ามืดและรับจ้างกลางวันเข้ากับแรงกดดันให้พึ่งพาสารกระตุ้น"
+              },
+              {
+                "num": "03",
+                "thTitle": "การเมือง กฎหมาย และความเชื่อทางสังคม",
+                "enTitle": "Governance & Societal Norms",
+                "definition": "ช่องว่างการควบคุมแหล่งจำหน่ายยาเสพติดในชุมชน ร่วมกับความเชื่อในกลุ่มคนทำงานว่าการใช้ยาช่วยให้ทำงานได้เต็มประสิทธิภาพ",
+                "anchor": "ทำให้สารเสพติดทั้งเข้าถึงง่ายในเชิงกายภาพและได้รับการยอมรับในกลุ่มอาชีพเดียวกัน"
+              },
+              {
+                "num": "04",
+                "thTitle": "ปัจจัยทางสังคมใกล้ตัวและวัยรุ่นตั้งครรภ์",
+                "enTitle": "Social Context & Teenage Pregnancy",
+                "definition": "คู่สมรส/คนในครอบครัวใช้สารเสพติด ภาวะตั้งครรภ์วัยรุ่น (15–18 ปี) ที่ยังขาดความพร้อมด้าน self-care และแรงกดดันจากการไม่มีงานประจำ",
+                "anchor": "เป็นปัจจัยตัวกลาง (intermediary determinants) ที่สัมผัสตัวผู้ป่วยโดยตรงในชีวิตประจำวัน"
+              }
+            ],
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.2 · หญิงตั้งครรภ์ในชุมชน",
+            "caseBridge": "การบำบัดเลิกยาในคลินิกฝากครรภ์จะได้ผลยั่งยืนเมื่อเข้าใจบริบทงานกรีดยาง ครอบครัว วัยรุ่นตั้งครรภ์ และการควบคุมแหล่งกระจายยาในชุมชนควบคู่กัน",
+            "docId": "HS1-CONCISE",
+            "docSec": "1.2",
+            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.2)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "case-1",
+      "caseNumber": 3,
+      "module": "HS1",
+      "title": "กรณีศึกษาที่ 3: สุขภาวะของคนทำงานในโรงงานอุตสาหกรรม การวิเคราะห์ปัจจัยกำหนดสุขภาพ และระดับของการป้องกันโรค",
       "subtitle": "นายสมชาย อายุ 40 ปี ผู้จัดการฝ่ายผลิตโรงงานประกอบฮาร์ดดิสก์",
       "frameworks": [
         "นิยามสุขภาพ 4 มิติ (ธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ พ.ศ. 2552)",
@@ -407,7 +649,10 @@ window.RACM_HS_DISCUSSION_DATA = {
       "questions": [
         {
           "id": "q-1-1",
-          "label": "ประเด็นอภิปรายที่ 2.1",
+          "label": "ประเด็นอภิปรายที่ 3.1",
+          "shortLabel": "3.1",
+          "headingLabel": "คำถามข้อที่ 3.1",
+          "enHeadingLabel": "Question 3.1",
           "title": "การประเมินสุขภาวะ 4 มิติ ตามธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ พ.ศ. 2552",
           "prompt": "อิงตามนิยาม “สุขภาพ” ในธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ พ.ศ. 2552 จงระบุภาวะสุขภาพ (health status) ของนายสมชายตามที่ปรากฏในสถานการณ์สมมติ พร้อมทั้งวิเคราะห์พฤติกรรมหรือเหตุการณ์ในสถานการณ์ที่ส่งผลต่อสุขภาวะของนายสมชาย (ซึ่งมีได้ทั้งผลทางบวกและผลทางลบ) ลงในตารางให้ครบถ้วน",
           "worksheet": {
@@ -531,12 +776,12 @@ window.RACM_HS_DISCUSSION_DATA = {
           },
           "conceptSummarySlide": {
             "id": "cs-1-1",
-            "takeawayNumber": 2,
-            "badge": "ขั้น ④ Key Takeaway #2",
-            "studentBadge": "Key Takeaway #2",
-            "shortLabel": "④ Key Takeaway #2",
-            "studentShortLabel": "Key Takeaway #2",
-            "kicker": "Key Takeaway #2",
+            "takeawayNumber": 4,
+            "badge": "ขั้น ④ Key Takeaway #4",
+            "studentBadge": "Key Takeaway #4",
+            "shortLabel": "④ Key Takeaway #4",
+            "studentShortLabel": "Key Takeaway #4",
+            "kicker": "Key Takeaway #4",
             "title": "นิยามของสุขภาพ",
             "enTitle": "Definition of Health",
             "sourceNote": "องค์การอนามัยโลก (WHO) · พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550",
@@ -578,7 +823,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "anchor": "เชื่อมโยงบทบาท ความสัมพันธ์เกื้อกูล และสภาพแวดล้อมทางสังคมรอบตัว"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 1.1 · นายสมชาย",
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 3 ข้อ 3.1 · นายสมชาย",
             "caseBridge": "สุขภาพไม่ได้หยุดที่ผลตรวจโรคหรือการรักษาพยาบาล แต่ต้องแยกแยะทั้งภาวะสุขภาพและพฤติกรรมที่ส่งผลกระทบครบทั้ง 4 มิติอย่างเชื่อมโยงกัน",
             "docId": "HS1-CONCISE",
             "docSec": "1.1",
@@ -587,7 +832,10 @@ window.RACM_HS_DISCUSSION_DATA = {
         },
         {
           "id": "q-1-2",
-          "label": "ประเด็นอภิปรายที่ 2.2",
+          "label": "ประเด็นอภิปรายที่ 3.2",
+          "shortLabel": "3.2",
+          "headingLabel": "คำถามข้อที่ 3.2",
+          "enHeadingLabel": "Question 3.2",
           "title": "การวิเคราะห์ปัจจัยกำหนดสุขภาพ (Determinants of Health)",
           "prompt": "จงวิเคราะห์ปัจจัยที่มีผลต่อภาวะสุขภาพของนายสมชายจากสถานการณ์ข้างต้น โดยจำแนกตามกรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health) ทั้ง 4 หมวดให้ครบถ้วน พร้อมระบุข้อมูลหลักฐานจากสถานการณ์มาสนับสนุนการวิเคราะห์",
           "worksheet": {
@@ -673,12 +921,12 @@ window.RACM_HS_DISCUSSION_DATA = {
           },
           "conceptSummarySlide": {
             "id": "cs-1-2",
-            "takeawayNumber": 3,
-            "badge": "ขั้น ④ Key Takeaway #3",
-            "studentBadge": "Key Takeaway #3",
-            "shortLabel": "④ Key Takeaway #3",
-            "studentShortLabel": "Key Takeaway #3",
-            "kicker": "Key Takeaway #3",
+            "takeawayNumber": 5,
+            "badge": "ขั้น ④ Key Takeaway #5",
+            "studentBadge": "Key Takeaway #5",
+            "shortLabel": "④ Key Takeaway #5",
+            "studentShortLabel": "Key Takeaway #5",
+            "kicker": "Key Takeaway #5",
             "title": "ปัจจัยกำหนดสุขภาพ",
             "enTitle": "Determinants of Health",
             "sourceNote": "Dahlgren & Whitehead (1991) · WHO CSDH (2008)",
@@ -716,7 +964,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "anchor": "เป็นปัจจัยต้นน้ำที่กำหนดชั่วโมงการทำงาน สวัสดิการ และทางเลือกสุขภาพของคนทำงาน"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 1.2 · ปัจจัยหลายระดับ",
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 3 ข้อ 3.2 · ปัจจัยหลายระดับ",
             "caseBridge": "ภาวะสุขภาพของคนวัยทำงานไม่ได้เกิดจากความตั้งใจส่วนบุคคลเพียงลำพัง แต่ถูกกำหนดร่วมกันโดยสภาพแวดล้อมการทำงาน ระบบบริการ และนโยบายองค์กร",
             "docId": "HS1-CONCISE",
             "docSec": "1.2",
@@ -725,7 +973,10 @@ window.RACM_HS_DISCUSSION_DATA = {
         },
         {
           "id": "q-1-3",
-          "label": "ประเด็นอภิปรายที่ 2.3",
+          "label": "ประเด็นอภิปรายที่ 3.3",
+          "shortLabel": "3.3",
+          "headingLabel": "คำถามข้อที่ 3.3",
+          "enHeadingLabel": "Question 3.3",
           "title": "การจำแนกระดับของการป้องกันโรคทั้ง 4 ระดับ (Levels of Disease Prevention)",
           "prompt": "จงวิเคราะห์และจำแนกกิจกรรมหรือการดำเนินการที่ปรากฏในสถานการณ์สมมติ ลงในตารางตามระดับของการป้องกันโรค (Levels of Disease Prevention) ทั้ง 4 ระดับ พร้อมระบุเหตุผลประกอบจากสถานการณ์ (เช่น ลักษณะกิจกรรม โครงการ และกลุ่มเป้าหมาย) มาสนับสนุนให้สอดคล้องกัน",
           "worksheet": {
@@ -811,12 +1062,12 @@ window.RACM_HS_DISCUSSION_DATA = {
           },
           "conceptSummarySlide": {
             "id": "cs-1-3",
-            "takeawayNumber": 4,
-            "badge": "ขั้น ④ Key Takeaway #4",
-            "studentBadge": "Key Takeaway #4",
-            "shortLabel": "④ Key Takeaway #4",
-            "studentShortLabel": "Key Takeaway #4",
-            "kicker": "Key Takeaway #4",
+            "takeawayNumber": 6,
+            "badge": "ขั้น ④ Key Takeaway #6",
+            "studentBadge": "Key Takeaway #6",
+            "shortLabel": "④ Key Takeaway #6",
+            "studentShortLabel": "Key Takeaway #6",
+            "kicker": "Key Takeaway #6",
             "title": "ระดับของการป้องกันโรค",
             "enTitle": "Levels of Disease Prevention",
             "sourceNote": "Leavell & Clark (1958) · Jamoulle (1986)",
@@ -854,7 +1105,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "anchor": "เตือนให้แพทย์ชั่งน้ำหนักผลบวกลวง การวินิจฉัยเกินจริง และอันตรายจากการแทรกแซงทางการแพทย์"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 1.3 · มาตรการในโรงงาน",
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 3 ข้อ 3.3 · มาตรการในโรงงาน",
             "caseBridge": "จำแนกมาตรการแต่ละข้อจากระยะของโรคในกลุ่มเป้าหมาย และตรวจสอบเสมอว่ามาตรการใดช่วยปกป้องผู้รับบริการจากการตรวจคัดกรองที่ไม่เหมาะสม",
             "docId": "HS1-CONCISE",
             "docSec": "1.4",
