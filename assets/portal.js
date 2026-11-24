@@ -11790,8 +11790,11 @@
         "จุดประกายอัตลักษณ์วิชาชีพและบทบาทแพทย์ Change Agent สำหรับบันทึกสะท้อนคิด SRN 1–2 และเกณฑ์ฟอร์ม 3A"
       ],
       guidingQuestions: [
-        "จากประสบการณ์ของวิทยากรทั้ง 3 ท่าน จุดเปลี่ยนใดที่ทำให้แพทย์ขยายบทบาทจากการรักษาผู้ป่วยรายบุคคลข้างเตียง (Bedside) สู่การตั้งคำถามและขับเคลื่อนการเปลี่ยนแปลงระดับระบบและนโยบายสาธารณะ (Systems-Based Practice)?",
-        "สมรรถนะด้าน Health Systems Science (HSS) และการวิจัยระบบสุขภาพ (HPSR) เปิดเส้นทางอาชีพ (Career Paths) และเพิ่มคุณค่าให้แพทย์ในศตวรรษที่ 21 ได้อย่างไร ไม่ว่าจะปฏิบัติงานในคลินิก โรงพยาบาลชุมชน หรือองค์กรระดับประเทศและนานาชาติ?"
+        "สำรวจเส้นทางวิชาชีพและจุดเปลี่ยนสำคัญ (Career Path Exploration & Turning Points) — ขอเชิญอาจารย์ร่วมแบ่งปันเรื่องราวเส้นทางวิชาชีพ นับตั้งแต่เริ่มต้นดูแลรักษาผู้ป่วยรายบุคคล จนขยับขยายบทบาทมาสู่การทำงานในระดับเวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) ในปัจจุบัน · ตลอดเส้นทางที่ผ่านมา มีเหตุการณ์หรือประสบการณ์ใดที่เป็น \"จุดเปลี่ยนสำคัญ\" ซึ่งทำให้อาจารย์เริ่มขยายมุมมองจากการรักษาเฉพาะรายมาสู่การทำงานเชื่อมโยงระบบสุขภาพ?",
+        "มุมมองที่เปลี่ยนไปจากการทำงานเชิงระบบสู่สังคม โลก และสิ่งแวดล้อม (Understanding Shifts in Viewpoints through Systems-Based Work) — การได้เข้าไปทำงานในภาพใหญ่ของระบบ—ทั้งในมิติสังคมและสุขภาพ การวิจัยนโยบายและระบบสุขภาพ (HPSR) การจัดการความรู้เพื่อชี้นำและขับเคลื่อนนโยบายสาธารณะ ตลอดจนงานด้านสุขภาพโลก (Global Health) และสุขภาพของพิภพโลก (Planetary Health)—ได้เปลี่ยนมุมมองของอาจารย์ต่อผู้ป่วย ปัญหาสุขภาพ และบทบาทของแพทย์ไปอย่างไรบ้าง? · พอจะมีกรณีตัวอย่างหรือเหตุการณ์จริงที่สะท้อนการเปลี่ยนมุมมองดังกล่าวอย่างเป็นรูปธรรมหรือไม่?",
+        "สมรรถนะและทักษะสำคัญที่บ่มเพาะขึ้นระหว่างทาง (Competencies Developed Through Evolving Perspectives) — ในการขยับขยายมุมมองมาทำงานเชิงระบบร่วมกับทีมสหวิชาชีพและภาคส่วนต่าง ๆ ทั้งในและนอกระบบสุขภาพ ทักษะ สมรรถนะ หรือคุณสมบัติสำคัญใดที่อาจารย์พบว่าจำเป็นอย่างยิ่งต่อการขับเคลื่อนงานให้เกิดผลจริง? · อาจารย์มีแนวทางฝึกฝน เรียนรู้ และบ่มเพาะทักษะเหล่านั้นขึ้นมาอย่างไรตลอดเส้นทางการทำงานที่ผ่านมา?",
+        "คำแนะนำ ความท้าทาย และโอกาสสำหรับแพทย์รุ่นใหม่ (Advice for Aspiring Professionals: Challenges & Opportunities) — สำหรับนักศึกษาแพทย์และแพทย์รุ่นใหม่ที่ต้องการนำมุมมองเวชปฏิบัติฐานระบบ (SBP) และวิทยาระบบสุขภาพ (HSS) ไปใช้—ไม่ว่าจะเติบโตในสายคลินิกเฉพาะทาง สายชุมชน สายวิชาการ หรือสายพัฒนาระบบและนโยบาย—อาจารย์มีคำแนะนำในการเตรียมตัวและเริ่มต้นอย่างไร? · บนเส้นทางดังกล่าวมีความท้าทายใดที่ควรรู้เท่าทัน และมีโอกาสใหม่ ๆ ด้านใดบ้างที่กำลังเปิดกว้างให้ค้นพบ?",
+        "ข้อคิดและบทเรียนสำคัญฝากถึงแพทย์รุ่นอนาคต (Wisdom for Future Generations) — เมื่อมองย้อนกลับไปตลอดเส้นทางการทำงานและการเติบโตทางความคิดที่ผ่านมา อะไรคือ \"บทเรียนสำคัญ\" หรือข้อคิดหลัก ที่อาจารย์อยากฝากไว้ให้แก่นักศึกษาแพทย์รุ่นใหม่ เพื่อเป็นเข็มทิศในการดูแลผู้ป่วยและร่วมสร้างสรรค์สังคมด้วยจิตสาธารณะต่อไปในอนาคต?"
       ],
       facultyNote:
         "เวทีเสวนาบ่ายวันแรกที่เชื่อมตรงกับวัตถุประสงค์รายวิชาข้อที่ 5 (Physician Roles in Health Systems) ช่วยให้นักศึกษาเห็นต้นแบบเส้นทางอาชีพแพทย์ด้าน HSS, Systems-Based Practice, HPSR และการขับเคลื่อนนโยบายสาธารณะก่อนเข้าสู่ HS1–HS6",
@@ -14983,7 +14986,7 @@
         isDirectDl
           ? `⬇ ดาวน์โหลดไฟล์ ${sfExtMeta.extBadge} (${sess.code})`
           : slideRec.isBuiltInPanelDeck
-          ? `🎬 เปิด Slide เสวนา ${sess.code} (${sfExtMeta.extBadge} · Apple TV Screensaver)`
+          ? `🎬 เปิด Slide ประกอบคาบ ${sess.code} (${sfExtMeta.extBadge} · 16:9)`
           : isBuiltInInteractiveDeck
           ? `🖥️ ④ เปิด Slide ${sess.code} (${sfExtMeta.extBadge} · 16:9)`
           : `📊 เปิด Slide / ไฟล์สอน (${sess.code} · ${sfExtMeta.extBadge})`,
@@ -15045,6 +15048,15 @@
 
     hero.append(heroTop, heroBody, heroActions);
     wrap.appendChild(hero);
+
+    if (slideRec && slideRec.isBuiltInPanelDeck) {
+      const panelShelf = make("section", null, "sf-detail-card is-accent-card psv-inline-shelf-card");
+      panelShelf.style.marginBottom = "18px";
+      wrap.appendChild(panelShelf);
+      if (window.RACM_PANEL_DECK && typeof window.RACM_PANEL_DECK.mountInlineShelf === "function") {
+        window.RACM_PANEL_DECK.mountInlineShelf(panelShelf, sess.id);
+      }
+    }
 
     if (sessFullDoc || sessConciseDoc) {
       const docShelf = make("div", null, "sf-detail-card is-accent-card");
@@ -33926,29 +33938,8 @@
       "w1-d1-global": {
         panelDeckId: "w1-d1-global",
         slideCountBadge: "15 SLIDES",
-        fileName: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (15 สไลด์ · Apple TV / Netflix Screensaver)",
+        fileName: "Slide เวทีเสวนา GLOBAL: จากการดูแลผู้ป่วยรายบุคคลสู่เวชปฏิบัติฐานระบบ (15 สไลด์ · 16:9)",
         pptxHref: "exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx",
-        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
-      },
-      "w3-d3-dhs-panel": {
-        panelDeckId: "w3-d3-dhs-panel",
-        slideCountBadge: "SCREENSAVER",
-        fileName: "Slide Workshop: Learning How to Learn (Apple TV / Netflix Screensaver)",
-        pptxHref: "",
-        uploadedBy: "รศ. นพ.สุรเกียรติ อาชานานุภาพ · ทีมรายวิชา"
-      },
-      "w5-d3-panel-homeless": {
-        panelDeckId: "w5-d3-panel-homeless",
-        slideCountBadge: "SCREENSAVER",
-        fileName: "Slide เวทีเสวนา PANEL-6BB: สุขภาวะข้างถนน & ความเป็นธรรม (Apple TV / Netflix Screensaver)",
-        pptxHref: "",
-        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
-      },
-      "w5-d4-policy": {
-        panelDeckId: "w5-d4-policy",
-        slideCountBadge: "SCREENSAVER",
-        fileName: "Slide เวทีเสวนา PANEL-HP: Young-Gen Systems-based Practitioner (Apple TV / Netflix Screensaver)",
-        pptxHref: "",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์"
       }
     };

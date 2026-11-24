@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124psv8";
+  const ASSET_VER = "20261125global10";
   const IMG_DIR = "assets/images/panel_screensaver";
   const MODERATOR_PPTX_HREF =
     ROLE === "faculty" ? `exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx?v=${ASSET_VER}` : "";
@@ -729,49 +729,49 @@
           kb: "kb-a",
           orbs: ["rgba(56,189,248,0.26)", "rgba(251,191,36,0.22)", "rgba(99,102,241,0.22)"],
           kicker: "โครงสร้างวงเสวนา · รวม 150 นาที",
-          kickerSub: "ใช้เหตุการณ์จริงที่วิทยากรแต่ละท่านเลือก เป็นแกนร่วมของคำถามทั้ง 5 ข้อ",
+          kickerSub: "แนวคำถามกึ่งโครงสร้าง (Semi-Structured Panel Questions · Q1–Q5) เชื่อมสู่ช่วงแลกเปลี่ยนกับนักศึกษา",
           title: "ลำดับจังหวะการสนทนาและแลกเปลี่ยน",
           phases: [
-            { min: "00 – 15 นาที", title: "เปิดวงและเส้นทางวิทยากร", desc: "ทำความรู้จักหมุดหมายสำคัญบนเส้นทางอาชีพของวิทยากรทั้ง 3 ท่าน" },
-            { min: "15 – 85 นาที", title: "เสวนาด้วยคำถามหลัก 5 ข้อ", desc: "สำรวจจุดตัดสินใจ ผลลัพธ์ มุมมองผู้อื่น ความหมายของแพทย์ และก้าวแรก", featured: true },
-            { min: "85 – 145 นาที", title: "Q&A จากนักศึกษา (60 นาที)", desc: "เปิดฟลอร์ให้นักศึกษาแพทย์ปี 3 ถามต่อยอดและเชื่อมคำถามของตนเองเต็มเวลา", featured: true },
-            { min: "145 – 150 นาที", title: "สะท้อนคิดและปิดวง", desc: "ตกผลึก 1 ประโยคสิ่งที่จะนำไปลองทำและรับฟังในก้าวถัดไป" }
+            { min: "00 – 15 นาที", title: "เปิดวงและเส้นทางวิทยากร", desc: "แนะนำหัวข้อ วัตถุประสงค์ LO 1–4 และเส้นทางอาชีพวิทยากรทั้ง 3 ท่าน" },
+            { min: "15 – 85 นาที", title: "เสวนาด้วยแนวคำถาม Q1–Q5", desc: "สำรวจจุดเปลี่ยน มุมมองเชิงระบบ–โลก สมรรถนะ คำแนะนำ และบทเรียนฝากแพทย์รุ่นใหม่", featured: true },
+            { min: "85 – 145 นาที", title: "Q&A จากนักศึกษา (60 นาที)", desc: "เปิดฟลอร์ให้นักศึกษาแพทย์ปี 3 ถามต่อยอดและแลกเปลี่ยนมุมมองเต็มเวลา", featured: true },
+            { min: "145 – 150 นาที", title: "สะท้อนคิดและปิดวง", desc: "ตกผลึกแนวทางพัฒนาตนเองด้าน HSS & SBP และสิ่งที่จะนำไปลองทำในก้าวถัดไป" }
           ],
           moderatorNotes: {
-            lead: "เปิดประมาณ 3 นาที ใช้ไทม์ไลน์ท่านละ ~4 นาที จากนั้นใช้คำถามหลักข้อละ ~14 นาที แล้วเริ่ม Q&A ที่นาที 85 ให้ครบ 60 นาที จบด้วยสะท้อนคิดนาที 145",
+            lead: "เปิดประมาณ 3 นาที แนะนำไทม์ไลน์วิทยากรท่านละ ~4 นาที จากนั้นเดินแนวคำถามกึ่งโครงสร้าง Q1–Q5 ข้อละ ~14 นาที แล้วเริ่ม Q&A ที่นาที 85 ให้ครบ 60 นาที จบด้วยสะท้อนคิดนาที 145",
             bullets: [
-              "สลับผู้ตอบคนแรกในแต่ละข้อ และเชิญทุกท่านเติมมุมมองตามเวลา",
-              "ข้อ 1 ให้วิทยากรเลือกเหตุการณ์จริงของตนเอง → ข้อ 2–4 กลับไปขุดลึกในเรื่องนั้น → ข้อ 5 ส่งต่อบทเรียนสู่นักศึกษาปี 3",
-              "โครงสะท้อนคิด: What? (ข้อ 1–2) → So what? (ข้อ 3–4) → Now what? (ข้อ 5) คู่กับ Single / Double / Triple Loop และ 5 Whys",
+              "สลับผู้ตอบคนแรกในแต่ละข้อ และเชิญทุกท่านเติมมุมมองตามความถนัดและประสบการณ์จริง",
+              "Q1 เส้นทาง & จุดเปลี่ยน → Q2 มุมมองเชิงระบบ/สังคม/โลก/สิ่งแวดล้อม → Q3 สมรรถนะ & การบ่มเพาะ → Q4 คำแนะนำ ความท้าทาย & โอกาส → Q5 ข้อคิดเข็มทิศวิชาชีพ",
               "หากเข้าใกล้นาที 85 ให้รวบคำถามต่อยอดเพื่อรักษาเวลา Q&A 60 นาทีให้นักศึกษา"
             ],
             refs: [
-              { label: "Argyris (1977) • Double-Loop Learning in Organizations", url: "https://hbr.org/1977/09/double-loop-learning-in-organizations" },
-              { label: "Peschl (2007) • Triple-loop learning", url: "https://constructivist.info/2/2-3/136" },
-              { label: "IHI • 5 Whys: Finding the Root Cause", url: "https://www.ihi.org/library/tools/5-whys-finding-root-cause" }
+              { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" },
+              { label: "AMEE • Planetary health & sustainable healthcare education", url: "https://pubmed.ncbi.nlm.nih.gov/33602043/" }
             ]
           }
         },
         {
           id: "g-s06",
           num: "07",
-          navLabel: "07 · คำถาม 1/5",
+          navLabel: "07 · Q1 จุดเปลี่ยนสำคัญ",
           type: "prompt",
           qStep: 1,
           bg: "bg_05_compass_crossroads.jpg",
           kb: "kb-b",
           orbs: ["rgba(245,158,11,0.28)", "rgba(56,189,248,0.22)", "rgba(30,64,175,0.28)"],
-          kicker: "คำถาม 1 จาก 5 · นาทีที่ 15–29",
-          kickerSub: "จุดตัดสินใจบนเส้นทางอาชีพ (Turning Point · What?)",
-          title: "“จากเส้นทางนี้ อาจารย์อยากพาเรากลับไปดูเหตุการณ์ไหนที่ต้องตัดสินใจครั้งสำคัญครับ?”",
-          logline: "ฟังเรื่องเล่าจากเหตุการณ์จริงในห้องตรวจ โรงพยาบาลชุมชน ชายแดน หรือเวทีนโยบาย ที่กลายเป็นจุดเปลี่ยนสำคัญของเส้นทางแพทย์",
+          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 1 / 5",
+          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 15–29",
+          title: "Q1: สำรวจเส้นทางวิชาชีพและจุดเปลี่ยนสำคัญ",
+          enHeading: "(Career Path Exploration & Turning Points)",
+          subQuestions: [
+            "ขอเชิญอาจารย์ร่วมแบ่งปันเรื่องราวเส้นทางวิชาชีพ นับตั้งแต่เริ่มต้นดูแลรักษาผู้ป่วยรายบุคคล จนขยับขยายบทบาทมาสู่การทำงานในระดับเวชปฏิบัติฐานระบบ (Systems-Based Practice: SBP) ในปัจจุบัน",
+            "ตลอดเส้นทางที่ผ่านมา มีเหตุการณ์หรือประสบการณ์ใดที่เป็น “จุดเปลี่ยนสำคัญ” ซึ่งทำให้อาจารย์เริ่มขยายมุมมองจากการรักษาเฉพาะรายมาสู่การทำงานเชื่อมโยงระบบสุขภาพ?"
+          ],
           moderatorNotes: {
-            lead: "ลำดับเปิด: เริ่มที่ นพ.ทักษพล → เชิญ นพ.วิรุฬ → ศ.เกียรติคุณ พญ.สุวรรณา",
+            lead: "ลำดับเปิดแนะนำ: เริ่มที่ นพ.ทักษพล → เชิญ นพ.วิรุฬ → ศ.เกียรติคุณ พญ.สุวรรณา",
             bullets: [
-              "หยิบหนึ่งหมุดจากไทม์ไลน์ของแต่ละท่านเป็นทางเข้า แล้วให้ท่านเลือกเหตุการณ์เอง (ในห้องตรวจ ชุมชน หรือการทำงานกับระบบ)",
-              "คำถามต่อยอด (Probing): ตอนนั้นเกิดอะไรขึ้น และอาจารย์ต้องเลือกระหว่างเรื่องอะไรครับ?",
-              "คำถามต่อยอด: อะไรทำให้วันนี้ยังจำเหตุการณ์นี้ได้ชัดเจน?",
-              "จดคำสำคัญและชื่อเหตุการณ์ของทั้ง 3 ท่านไว้เป็นสมอสำหรับถามต่อในข้อ 2–4"
+              "เชื่อมจากเส้นทางรถไฟสายวิชาชีพของแต่ละท่าน ให้ท่านเล่าเหตุการณ์จริงที่เป็นจุดเปลี่ยนจากข้างเตียง (Bedside) สู่การมองระดับระบบ (SBP)",
+              "จดชื่อเหตุการณ์สำคัญของทั้ง 3 ท่านไว้เชื่อมต่อไปยัง Q2 (มุมมองที่เปลี่ยนไปอย่างเป็นรูปธรรม)"
             ],
             refs: [
               { label: "Ganz และคณะ • Public Narrative", url: "https://www.hks.harvard.edu/publications/crafting-public-narrative-enable-collective-action-pedagogy-leadership-development" }
@@ -781,106 +781,110 @@
         {
           id: "g-s07",
           num: "08",
-          navLabel: "08 · คำถาม 2/5",
+          navLabel: "08 · Q2 มุมมองเชิงระบบ",
           type: "prompt",
           qStep: 2,
           bg: "bg_06_ripples_perspective.jpg",
           kb: "kb-c",
           orbs: ["rgba(56,189,248,0.28)", "rgba(20,184,166,0.22)", "rgba(99,102,241,0.22)"],
-          kicker: "คำถาม 2 จาก 5 · นาทีที่ 29–43",
-          kickerSub: "สิ่งที่ทำและผลที่เห็น (Action & Consequences · Single Loop)",
-          title: "“ตอนนั้นอาจารย์เลือกทำอะไร แล้วผลที่เห็นบอกอะไรเกี่ยวกับวิธีที่เลือกครับ?”",
-          logline: "สำรวจเหตุผลเบื้องหลังการลงมือทำ ผลลัพธ์ที่เกิดขึ้นจริงเทียบกับสิ่งที่คาดหวัง และข้อจำกัดของวิธีการเดิม",
+          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 2 / 5",
+          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 29–43",
+          title: "Q2: มุมมองที่เปลี่ยนไปจากการทำงานเชิงระบบสู่สังคม โลก และสิ่งแวดล้อม",
+          enHeading: "(Understanding Shifts in Viewpoints through Systems-Based Work)",
+          subQuestions: [
+            "การได้เข้าไปทำงานในภาพใหญ่ของระบบ—ทั้งในมิติสังคมและสุขภาพ การวิจัยนโยบายและระบบสุขภาพ (HPSR) การจัดการความรู้เพื่อชี้นำและขับเคลื่อนนโยบายสาธารณะ ตลอดจนงานด้านสุขภาพโลก (Global Health) และสุขภาพของพิภพโลก (Planetary Health)—ได้เปลี่ยนมุมมองของอาจารย์ต่อผู้ป่วย ปัญหาสุขภาพ และบทบาทของแพทย์ไปอย่างไรบ้าง?",
+            "พอจะมีกรณีตัวอย่างหรือเหตุการณ์จริงที่สะท้อนการเปลี่ยนมุมมองดังกล่าวอย่างเป็นรูปธรรมหรือไม่?"
+          ],
           moderatorNotes: {
-            lead: "ลำดับเปิด: เริ่มที่ ศ.เกียรติคุณ พญ.สุวรรณา → วนกลับไปยังเรื่องของอีกสองท่าน (ใช้คำที่ท่านเพิ่งเล่าเป็นทางเข้า)",
+            lead: "ลำดับเปิดแนะนำ: เริ่มที่ นพ.วิรุฬ (มิติสังคม/พรมแดน/อากาศสะอาด) → ศ.เกียรติคุณ พญ.สุวรรณา (การจัดการความรู้/บุหรี่ไฟฟ้า) → นพ.ทักษพล (HPSR & Global Health)",
             bullets: [
-              "คำถามต่อยอด: อะไรทำให้อาจารย์เลือกใช้วิธีนี้ในเวลานั้น?",
-              "คำถามต่อยอด: อะไรทำให้คิดว่าผลลัพธ์ออกมาแบบที่เห็น?",
-              "What if? ครั้งที่ 1 (Single Loop — ภายใต้เป้าหมายเดิม): ถ้าย้อนกลับไปได้โดยยังมีเป้าหมายเดิม อาจารย์จะลองทำอะไรต่างไปบ้างครับ?",
-              "หากผลยังไม่ชัด ให้ถามว่าตอนนั้นสังเกตเห็นสัญญาณอะไร และยังอยากรู้อะไรเพิ่ม"
+              "ชวนให้เห็นการเชื่อมโยงตั้งแต่ผู้ป่วยตรงหน้า → ปัจจัยกำหนดสุขภาพทางสังคม/พาณิชย์ → นโยบายสาธารณะ → Global & Planetary Health",
+              "ขอให้ยก 1 กรณีตัวอย่างที่เป็นรูปธรรมเพื่อให้นักศึกษาปี 3 เห็นภาพชัดเจน"
             ],
             refs: [
-              { label: "Argyris (1977) • Single & Double-Loop Learning", url: "https://hbr.org/1977/09/double-loop-learning-in-organizations" },
-              { label: "IHI • 5 Whys ในบริบทการปรับปรุงคุณภาพ", url: "https://www.ihi.org/library/tools/5-whys-finding-root-cause" }
+              { label: "AMEE • Planetary health & sustainable healthcare education", url: "https://pubmed.ncbi.nlm.nih.gov/33602043/" }
             ]
           }
         },
         {
           id: "g-s08",
           num: "09",
-          navLabel: "09 · คำถาม 3/5",
+          navLabel: "09 · Q3 สมรรถนะ & ทักษะ",
           type: "prompt",
           qStep: 3,
           bg: "bg_03_border_anthropology.jpg",
           kb: "kb-d",
           orbs: ["rgba(16,185,129,0.28)", "rgba(245,158,11,0.22)", "rgba(56,189,248,0.2)"],
-          kicker: "คำถาม 3 จาก 5 · นาทีที่ 43–57",
-          kickerSub: "โจทย์เดิมในสายตาคนอื่น (Reframing Assumptions · Double Loop)",
-          title: "“ถ้ามองเหตุการณ์เดิมจากมุมของคนอีกคน โจทย์ที่เราเห็นจะเปลี่ยนไปไหมครับ?”",
-          logline: "ก้าวออกจากกรอบคิดของแพทย์ผู้รักษา ไปฟังเสียงของผู้ป่วย ครอบครัว เพื่อนร่วมทีม ชุมชน หรือผู้กำหนดนโยบาย",
+          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 3 / 5",
+          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 43–57",
+          title: "Q3: สมรรถนะและทักษะสำคัญที่บ่มเพาะขึ้นระหว่างทาง",
+          enHeading: "(Competencies Developed Through Evolving Perspectives)",
+          subQuestions: [
+            "ในการขยับขยายมุมมองมาทำงานเชิงระบบร่วมกับทีมสหวิชาชีพและภาคส่วนต่าง ๆ ทั้งในและนอกระบบสุขภาพ ทักษะ สมรรถนะ หรือคุณสมบัติสำคัญใดที่อาจารย์พบว่าจำเป็นอย่างยิ่งต่อการขับเคลื่อนงานให้เกิดผลจริง?",
+            "อาจารย์มีแนวทางฝึกฝน เรียนรู้ และบ่มเพาะทักษะเหล่านั้นขึ้นมาอย่างไรตลอดเส้นทางการทำงานที่ผ่านมา?"
+          ],
           moderatorNotes: {
-            lead: "ลำดับเปิด: เริ่มที่ นพ.วิรุฬ → ชวนอีกสองท่านกลับไปสำรวจเรื่องของตนเอง",
+            lead: "ลำดับเปิดแนะนำ: เริ่มที่ ศ.เกียรติคุณ พญ.สุวรรณา → นพ.ทักษพล → นพ.วิรุฬ",
             bullets: [
-              "ขอให้วิทยากรระบุว่า ‘คนอีกคนนั้น’ คือใคร (เช่น ผู้ป่วย ครอบครัว พยาบาล/ทีม ชาวบ้าน หรือฝ่ายนโยบาย)",
-              "คำถามต่อยอด: อะไรทำให้โจทย์เดิมดูสมเหตุสมผลในสายตาเราตอนนั้น?",
-              "คำถามต่อยอด (Double Loop): มีเสียงหรือข้อมูลอะไรที่ทำให้อาจารย์เริ่มตั้งคำถามกับ ‘เป้าหมายเดิม’ หรือเกณฑ์ตัดสินความสำเร็จเดิม?",
-              "คำถามต่อยอด: ถ้าต้องตั้งชื่อโจทย์นี้ใหม่ อาจารย์จะเรียกปัญหานี้ว่าอะไรครับ?"
+              "เชื่อมเข้ากับ LO 3–4: การประสานความร่วมมือกับทีมสหวิชาชีพและภาคส่วนนอกระบบสุขภาพ การสื่อสาร การฟังอย่างลึกซึ้ง และความใฝ่รู้ตลอดชีวิต",
+              "ชวนถามต่อว่าทักษะใดที่โรงเรียนแพทย์ไม่ได้สอนตรง ๆ แต่ได้มาจากการลงมือทำงานจริง"
             ],
             refs: [
-              { label: "Argyris (1977) • Double-Loop Learning in Organizations", url: "https://hbr.org/1977/09/double-loop-learning-in-organizations" },
-              { label: "University of Edinburgh • What? So what? Now what?", url: "https://reflection.ed.ac.uk/reflectors-toolkit/reflecting-on-experience/what-so-what-now-what" }
+              { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" }
             ]
           }
         },
         {
           id: "g-s09",
           num: "10",
-          navLabel: "10 · คำถาม 4/5",
+          navLabel: "10 · Q4 คำแนะนำ & โอกาส",
           type: "prompt",
           qStep: 4,
           bg: "bg_07_lantern_purpose.jpg",
           kb: "kb-a",
           orbs: ["rgba(245,158,11,0.3)", "rgba(99,102,241,0.25)", "rgba(14,165,233,0.2)"],
-          kicker: "คำถาม 4 จาก 5 · นาทีที่ 57–71",
-          kickerSub: "ความหมายของบทบาทแพทย์ (Identity & Purpose · Triple Loop)",
-          title: "“เมื่อย้อนมองเรื่องนี้ วันนี้อาจารย์เข้าใจว่าแพทย์ทำงานเพื่อใครและเพื่ออะไรครับ?”",
-          logline: "ทบทวนคุณค่ารากฐาน อัตลักษณ์วิชาชีพ และขอบเขตความรับผิดชอบของแพทย์เมื่อปัญหาสุขภาพเชื่อมโยงทั้งสังคมและโลก",
+          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 4 / 5",
+          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 57–71",
+          title: "Q4: คำแนะนำ ความท้าทาย และโอกาสสำหรับแพทย์รุ่นใหม่",
+          enHeading: "(Advice for Aspiring Professionals: Challenges & Opportunities)",
+          subQuestions: [
+            "สำหรับนักศึกษาแพทย์และแพทย์รุ่นใหม่ที่ต้องการนำมุมมองเวชปฏิบัติฐานระบบ (SBP) และวิทยาระบบสุขภาพ (HSS) ไปใช้—ไม่ว่าจะเติบโตในสายคลินิกเฉพาะทาง สายชุมชน สายวิชาการ หรือสายพัฒนาระบบและนโยบาย—อาจารย์มีคำแนะนำในการเตรียมตัวและเริ่มต้นอย่างไร?",
+            "บนเส้นทางดังกล่าวมีความท้าทายใดที่ควรรู้เท่าทัน และมีโอกาสใหม่ ๆ ด้านใดบ้างที่กำลังเปิดกว้างให้ค้นพบ?"
+          ],
           moderatorNotes: {
-            lead: "ลำดับเปิด: เริ่มที่ นพ.ทักษพล (หยิบคำจากข้อ 3 มาสะท้อนกลับ) → เชิญอีกสองท่านนิยามบทบาทแพทย์ในภาษาของตนเอง",
+            lead: "ลำดับเปิดแนะนำ: เริ่มที่ นพ.ทักษพล → นพ.วิรุฬ → ศ.เกียรติคุณ พญ.สุวรรณา",
             bullets: [
-              "คำถามต่อยอด (Triple Loop): ประสบการณ์หรือคุณค่าอะไรที่หล่อหลอมความเข้าใจนี้ครับ?",
-              "คำถามต่อยอด: วิธีที่ทีมสุขภาพ ‘ฟัง’ หรือ ‘เรียนรู้’ ควรเปลี่ยนไปอย่างไร เพื่อให้มองเห็นสิ่งที่เคยมองข้าม?",
-              "คำถามต่อยอด: เมื่อปัญหากว้างกว่าคนไข้หนึ่งราย ใครควรมีส่วนร่วมกำหนดโจทย์และตัดสินใจ และความรับผิดชอบของแพทย์ขยายไปถึงใคร?"
+              "ย้ำว่า SBP และ HSS ไม่ได้จำกัดเฉพาะคนทำนโยบาย แต่แพทย์คลินิกเฉพาะทาง แพทย์ชุมชน และอาจารย์แพทย์ล้วนใช้สร้างการเปลี่ยนแปลงได้",
+              "ชวนชี้ให้เห็นโอกาสใหม่ ๆ ของแพทย์รุ่นใหม่ ทั้งระดับพื้นที่ ประเทศ ภูมิภาค และระดับโลก"
             ],
             refs: [
-              { label: "Peschl (2007) • Triple-loop learning", url: "https://constructivist.info/2/2-3/136" },
-              { label: "Tosey และคณะ (2012) • ทบทวนแนวคิด Triple Loop", url: "https://doi.org/10.1177/1350507611426239" },
-              { label: "AMEE • Planetary health & sustainable healthcare education", url: "https://pubmed.ncbi.nlm.nih.gov/33602043/" }
+              { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" }
             ]
           }
         },
         {
           id: "g-s10",
           num: "11",
-          navLabel: "11 · คำถาม 5/5",
+          navLabel: "11 · Q5 ข้อคิดฝากอนาคต",
           type: "prompt",
           qStep: 5,
           bg: "bg_01_bedside_horizon.jpg",
           kb: "kb-b",
           orbs: ["rgba(56,189,248,0.28)", "rgba(16,185,129,0.24)", "rgba(245,158,11,0.22)"],
-          kicker: "คำถาม 5 จาก 5 · นาทีที่ 71–85",
-          kickerSub: "ก้าวแรกของนักศึกษาแพทย์ (Now What? · Systems-Based Practice)",
-          title: "“ถ้าเจอเรื่องคล้ายกัน นักศึกษาแพทย์จะลองทำอะไรเป็นก้าวแรก และควรเรียนรู้จากใครครับ?”",
-          logline: "แปลงมุมมองเชิงระบบให้เป็นก้าวเล็ก ๆ ที่นักศึกษาแพทย์ชั้นปีที่ 3 ลองฝึกได้จริง ทั้งในวอร์ด ชุมชน และพื้นที่ภาคสนาม 9 แห่ง",
+          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 5 / 5",
+          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 71–85",
+          title: "Q5: ข้อคิดและบทเรียนสำคัญฝากถึงแพทย์รุ่นอนาคต",
+          enHeading: "(Wisdom for Future Generations)",
+          subQuestions: [
+            "เมื่อมองย้อนกลับไปตลอดเส้นทางการทำงานและการเติบโตทางความคิดที่ผ่านมา อะไรคือ “บทเรียนสำคัญ” หรือข้อคิดหลัก ที่อาจารย์อยากฝากไว้ให้แก่นักศึกษาแพทย์รุ่นใหม่ เพื่อเป็นเข็มทิศในการดูแลผู้ป่วยและร่วมสร้างสรรค์สังคมด้วยจิตสาธารณะต่อไปในอนาคต?"
+          ],
           moderatorNotes: {
-            lead: "ลำดับเปิด: เริ่มที่ ศ.เกียรติคุณ พญ.สุวรรณา → ให้ทั้งสามท่านฝากคนละหนึ่งก้าวที่ นศพ.ปี 3 ลองทำได้จริงภายใต้การดูแลของทีม",
+            lead: "ลำดับเปิดแนะนำ: เชิญทั้ง 3 ท่านฝากบทเรียนเข็มทิศวิชาชีพสั้น ๆ ท่านละ 2–3 นาที ก่อนส่งไมค์เข้าช่วง Q&A จากนักศึกษาเต็ม 60 นาที (นาทีที่ 85)",
             bullets: [
-              "What if? ครั้งที่ 2 + Now what?: ถ้าเงื่อนไขในสถานการณ์ใหม่ต่างไป บทเรียนอะไรยังใช้ได้และต้องปรับอะไร?",
-              "คำถามต่อยอด: นักศึกษาควรสังเกตอะไร หรือขอความเห็นจากใคร เพื่อรู้ว่าควรทำต่อหรือทบทวน?",
-              "หากคำตอบยังกว้าง ขอให้ท่านยกตัวอย่างสิ่งที่จะลองในคลินิก ชุมชน หรืองานระบบอย่างน้อย 1 อย่าง แล้วส่งไมค์เข้าช่วง Q&A ที่นาที 85"
+              "เชื่อมเข้าสู่วัตถุประสงค์ข้อที่ 4: การมององค์รวมและการคิดเชิงระบบ ความใฝ่รู้ตลอดชีวิต คุณธรรมจริยธรรม และจิตสาธารณะเพื่อชุมชนและสังคม"
             ],
             refs: [
-              { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" }
+              { label: "University of Edinburgh • What? So what? Now what?", url: "https://reflection.ed.ac.uk/reflectors-toolkit/reflecting-on-experience/what-so-what-now-what" }
             ]
           }
         },
@@ -1011,191 +1015,6 @@
               ]
             }
           ]
-        }
-      ]
-    },
-
-    /* ---------- Reusable Ambient Screensaver Decks for Remaining 3 Panel Sessions ---------- */
-    "w3-d3-dhs-panel": {
-      id: "w3-d3-dhs-panel",
-      hashSlug: "panel-dhs",
-      code: "PANEL-DHS",
-      seriesTag: "RACM 303 PANEL SERIES · EPISODE 02",
-      shortTitle: "PANEL-DHS · ระบบสุขภาพอำเภอ 6BB+1 (9 ธ.ค. 69)",
-      sessionMeta: "วันพุธที่ 9 ธันวาคม 2569 · 09.00 – 12.00 น. · ห้อง 2C2-02..03",
-      sessionLimitMin: 180,
-      pptxHref: "",
-      slides: [
-        {
-          id: "dhs-01",
-          num: "01",
-          navLabel: "01 · เปิดเวที DHS",
-          type: "cover",
-          bg: "bg_02_nahwa_to_world.jpg",
-          kb: "kb-a",
-          orbs: ["rgba(16,185,129,0.28)", "rgba(245,158,11,0.22)", "rgba(56,189,248,0.2)"],
-          kicker: "RACM 303 · พุธ 9 ธ.ค. 2569 · 09.00–12.00 น. · ก่อนเดินทางออกภาคสนาม",
-          kickerSub: "Learning How to Learn & Experiential Fieldwork Compass",
-          title: "District Health Systems – Six Building Blocks Plus One",
-          subtitle: "ฝึกทักษะการฟังอย่างลึกซึ้งและท่าทีการเรียนรู้ร่วมกับชุมชนและระบบสุขภาพอำเภอ ก่อนลงพื้นที่จริงทั้ง 9 แห่ง",
-          cast: [
-            { initials: "สก", name: "รศ. นพ.สุรเกียรติ อาชานานุภาพ", role: "วิทยากรหลัก · ระบบสุขภาพอำเภอและการเรียนรู้จากการปฏิบัติจริง" }
-          ]
-        },
-        {
-          id: "dhs-02",
-          num: "02",
-          navLabel: "02 · คำถามชวนคิด 1",
-          type: "prompt",
-          qStep: 1,
-          totalSteps: 2,
-          bg: "bg_03_border_anthropology.jpg",
-          kb: "kb-b",
-          orbs: ["rgba(16,185,129,0.28)", "rgba(56,189,248,0.22)", "rgba(245,158,11,0.18)"],
-          kicker: "คำถามชวนคิดก่อนลงภาคสนาม · ข้อ 1 จาก 2",
-          kickerSub: "Learning with Community vs. Extracting Data",
-          title: "“ท่าทีของการ ‘ไปเรียนรู้ร่วมกับชุมชน’ แตกต่างจากการ ‘ไปเก็บข้อมูลจากชุมชน’ อย่างไร?”",
-          logline: "สำรวจผลของท่าทีความอ่อนน้อมและการรับฟังอย่างไม่ด่วนตัดสิน ต่อความลึกซึ้งของสิ่งที่ทีมจะค้นพบในพื้นที่จริง"
-        },
-        {
-          id: "dhs-03",
-          num: "03",
-          navLabel: "03 · คำถามชวนคิด 2",
-          type: "prompt",
-          qStep: 2,
-          totalSteps: 2,
-          bg: "bg_06_ripples_perspective.jpg",
-          kb: "kb-c",
-          orbs: ["rgba(56,189,248,0.26)", "rgba(251,191,36,0.22)", "rgba(16,185,129,0.2)"],
-          kicker: "คำถามชวนคิดก่อนลงภาคสนาม · ข้อ 2 จาก 2",
-          kickerSub: "After Action Review & Collective Reflection",
-          title: "“ทีมของเราจะใช้กระบวนการทบทวนหลังปฏิบัติงานร่วมกันอย่างไรตลอด 8–10 วันในพื้นที่?”",
-          logline: "เชื่อมโยงประสบการณ์ตรงรายวันสู่ภาพรวมของระบบสุขภาพอำเภอและศักยภาพของชุมชน"
-        }
-      ]
-    },
-
-    "w5-d3-panel-homeless": {
-      id: "w5-d3-panel-homeless",
-      hashSlug: "panel-6bb",
-      code: "PANEL-6BB",
-      seriesTag: "RACM 303 PANEL SERIES · EPISODE 03",
-      shortTitle: "PANEL-6BB · สุขภาวะข้างถนน & ความเป็นธรรม (23 ธ.ค. 69)",
-      sessionMeta: "วันพุธที่ 23 ธันวาคม 2569 · 09.00 – 12.00 น. · ห้อง 2C2-03",
-      sessionLimitMin: 180,
-      pptxHref: "",
-      slides: [
-        {
-          id: "hb-01",
-          num: "01",
-          navLabel: "01 · เปิดเวที 6BB",
-          type: "cover",
-          bg: "bg_04_youth_city_canopy.jpg",
-          kb: "kb-a",
-          orbs: ["rgba(245,158,11,0.28)", "rgba(239,68,68,0.2)", "rgba(56,189,248,0.22)"],
-          kicker: "RACM 303 · พุธ 23 ธ.ค. 2569 · 09.00–12.00 น. · ห้อง 2C2-03",
-          kickerSub: "Connecting the Six Building Blocks for Health Equity",
-          title: "เมื่อระบบสุขภาพไม่ได้แยกส่วน: บทเรียนจาก “สุขภาวะข้างถนน”",
-          subtitle: "การเชื่อมโยง 6 องค์ประกอบของระบบสุขภาพและการจัดบริการปฐมภูมิเชิงรุก เพื่อสร้างความเป็นธรรมแก่ชุมชนคนไร้บ้าน",
-          cast: [
-            { initials: "ภท", name: "นพ.ภูริทัต แสงทองพานิชกุล", role: "ผู้อำนวยการโรงพยาบาลราชพิพัฒน์" },
-            { initials: "อน", name: "นพ.อานนท์ กุลธรรมานุสรณ์", role: "นักวิจัยระบบสุขภาพ" },
-            { initials: "อฆ", name: "อ.อนรรฆ พิทักษ์ธานิน", role: "นักวิชาการด้านเมืองและคนไร้บ้าน" },
-            { initials: "ยพ", name: "รศ. ภญ. ดร.ยุพดี ศิริสินสุข", role: "รองเลขาธิการ สปสช." },
-            { initials: "ณว", photo: "assets/photos/advisor_nuttawut.jpg", name: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์", role: "ผู้ดำเนินการอภิปราย" }
-          ]
-        },
-        {
-          id: "hb-02",
-          num: "02",
-          navLabel: "02 · คำถามหลัก 1",
-          type: "prompt",
-          qStep: 1,
-          totalSteps: 2,
-          bg: "bg_05_compass_crossroads.jpg",
-          kb: "kb-b",
-          orbs: ["rgba(245,158,11,0.28)", "rgba(56,189,248,0.22)", "rgba(99,102,241,0.22)"],
-          kicker: "คำถามหลักประจำเวที · ข้อ 1 จาก 2",
-          kickerSub: "Structural Barriers & Disconnected Building Blocks",
-          title: "“อุปสรรคด้านสิทธิ บัตรประชาชน ที่อยู่อาศัย และอคติทางสังคม ทำให้ 6 องค์ประกอบของระบบสุขภาพขาดการเชื่อมต่อกันตรงจุดใด?”",
-          logline: "วิเคราะห์รอยต่อที่ทำให้กลุ่มเปราะบางหลุดออกจากระบบบริการตั้งรับแบบดั้งเดิม"
-        },
-        {
-          id: "hb-03",
-          num: "03",
-          navLabel: "03 · คำถามหลัก 2",
-          type: "prompt",
-          qStep: 2,
-          totalSteps: 2,
-          bg: "bg_08_dialogue_constellation.jpg",
-          kb: "kb-c",
-          orbs: ["rgba(16,185,129,0.26)", "rgba(245,158,11,0.24)", "rgba(56,189,248,0.2)"],
-          kicker: "คำถามหลักประจำเวที · ข้อ 2 จาก 2",
-          kickerSub: "Proactive Primary Health Care & Co-Creation",
-          title: "“บทเรียนเชิงรุกจาก ‘สุขภาวะข้างถนน’ ช่วยชี้แนวทางออกแบบระบบบริการปฐมภูมิเพื่อลดความเหลื่อมล้ำในพื้นที่ของเราได้อย่างไร?”",
-          logline: "เชื่อมบทเรียนการทำงานข้ามภาคส่วนเข้ากับการสังเคราะห์ข้อเสนอแนะภาคสนาม (ฟอร์ม 3A)"
-        }
-      ]
-    },
-
-    "w5-d4-policy": {
-      id: "w5-d4-policy",
-      hashSlug: "panel-policy",
-      code: "PANEL-HP",
-      seriesTag: "RACM 303 PANEL SERIES · EPISODE 04",
-      shortTitle: "PANEL-HP · Young-Gen & นโยบายสร้างเสริมสุขภาพ (24 ธ.ค. 69)",
-      sessionMeta: "วันพฤหัสบดีที่ 24 ธันวาคม 2569 · 13.00 – 16.30 น. · ห้อง 2C2-03",
-      sessionLimitMin: 210,
-      pptxHref: "",
-      slides: [
-        {
-          id: "hp-01",
-          num: "01",
-          navLabel: "01 · เปิดเวทีนโยบาย",
-          type: "cover",
-          bg: "bg_05_compass_crossroads.jpg",
-          kb: "kb-a",
-          orbs: ["rgba(56,189,248,0.28)", "rgba(168,85,247,0.24)", "rgba(245,158,11,0.2)"],
-          kicker: "RACM 303 · พฤหัสบดี 24 ธ.ค. 2569 · 13.00–16.30 น. · ห้อง 2C2-03",
-          kickerSub: "Integrated Health Promotion & Political Economy of Health Policy",
-          title: "Young-Gen Systems-based Practitioner",
-          subtitle: "การขับเคลื่อนข้อเสนอเชิงนโยบายและการสร้างเสริมสุขภาพเชิงบูรณาการภายใต้บริบทเศรษฐศาสตร์การเมือง",
-          cast: [
-            { initials: "พท", name: "นพ.พงศ์เทพ วงศ์วัชรไพบูลย์", role: "ผู้จัดการกองทุนสนับสนุนการสร้างเสริมสุขภาพ (สสส.)" },
-            { initials: "กต", name: "นพ.กติกา อรรฆศิลป์", role: "หัวหน้าฝ่ายการผสานข้อมูลและประเมินโครงการส่งเสริมสุขภาพ" },
-            { initials: "ฐต", name: "นพ.ฐิติกร โตโพธิ์ไทย", role: "กองกิจกรรมทางกายเพื่อสุขภาพ กรมอนามัย" },
-            { initials: "ณว", photo: "assets/photos/advisor_nuttawut.jpg", name: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์", role: "ผู้ดำเนินการอภิปราย" }
-          ]
-        },
-        {
-          id: "hp-02",
-          num: "02",
-          navLabel: "02 · คำถามหลัก 1",
-          type: "prompt",
-          qStep: 1,
-          totalSteps: 2,
-          bg: "bg_04_youth_city_canopy.jpg",
-          kb: "kb-b",
-          orbs: ["rgba(56,189,248,0.26)", "rgba(16,185,129,0.24)", "rgba(245,158,11,0.2)"],
-          kicker: "คำถามหลักประจำเวที · ข้อ 1 จาก 2",
-          kickerSub: "Beyond Health Education → Data, Environment & Public Policy",
-          title: "“เหตุใดการรณรงค์ให้ความรู้เพียงอย่างเดียวจึงไม่พอ และข้อมูล สิ่งแวดล้อม กับนโยบายสาธารณะเข้ามาเสริมพลังอย่างไร?”",
-          logline: "ถอดกลไก Ottawa Charter และ COM-B สู่การออกแบบมาตรการระดับประชากรที่ได้ผลจริง"
-        },
-        {
-          id: "hp-03",
-          num: "03",
-          navLabel: "03 · คำถามหลัก 2",
-          type: "prompt",
-          qStep: 2,
-          totalSteps: 2,
-          bg: "bg_07_lantern_purpose.jpg",
-          kb: "kb-c",
-          orbs: ["rgba(245,158,11,0.28)", "rgba(168,85,247,0.24)", "rgba(56,189,248,0.2)"],
-          kicker: "คำถามหลักประจำเวที · ข้อ 2 จาก 2",
-          kickerSub: "Translating Fieldwork Insights into System Proposals",
-          title: "“กลุ่มของเราจะนำบทเรียนการผสานข้อมูลและการขับเคลื่อนนโยบายไปยกระดับข้อเสนอแนะของพื้นที่ภาคสนามได้อย่างไร?”",
-          logline: "เตรียมความพร้อมสู่การนำเสนอระบบสุขภาพภาคสนาม (ฟอร์ม 3A) และการสะท้อนคิด SRN 2"
         }
       ]
     }
@@ -1504,27 +1323,33 @@
     const body = document.getElementById("psvSlideBody");
     if (!modal || modal.hidden || !viewport || !body) return;
 
+    const hudTop = document.getElementById("psvHudTop");
+    const hudH = hudTop ? Math.ceil(hudTop.offsetHeight || 44) : 44;
+    const topClear = Math.max(46, hudH + 10);
+    modal.style.setProperty("--psv-top-clear", `${topClear}px`);
+
     if (window.innerWidth <= 960) {
       modal.style.setProperty("--psv-fit-scale", "1");
       return;
     }
 
     const isRail = body.classList.contains("is-railway-mode");
-    const availH = viewport.clientHeight - (isRail ? 18 : 28);
-    const availW = isRail ? body.clientWidth + 2 : viewport.clientWidth - 48;
-    if (availH < 120 || availW < 200) return;
+    const cs = window.getComputedStyle(viewport);
+    const padBottom = parseFloat(cs.paddingBottom) || 0;
+    const availH = viewport.clientHeight - topClear - padBottom - 4;
+    if (availH < 120) return;
 
     body.setAttribute("data-measuring", "1");
-    let lo = 0.50;
-    let hi = isRail ? 1.12 : 1.24;
+    let lo = isRail ? 0.50 : 0.62;
+    let hi = isRail ? 1.04 : 1.18;
     for (let i = 0; i < 12; i += 1) {
       const mid = (lo + hi) * 0.5;
       modal.style.setProperty("--psv-fit-scale", mid.toFixed(4));
-      const fits = body.scrollHeight <= availH && body.scrollWidth <= (isRail ? body.clientWidth + 4 : availW);
+      const fits = body.scrollHeight <= availH && body.scrollWidth <= body.clientWidth + 4;
       if (fits) lo = mid;
       else hi = mid;
     }
-    const safeScale = Math.max(0.50, Math.min(isRail ? 1.10 : 1.22, lo * 0.965));
+    const safeScale = Math.max(isRail ? 0.50 : 0.62, Math.min(isRail ? 1.02 : 1.16, lo * 0.975));
     modal.style.setProperty("--psv-fit-scale", safeScale.toFixed(4));
     body.removeAttribute("data-measuring");
   }
@@ -1887,13 +1712,35 @@
         const cls = i === cur ? " is-current" : i < cur ? " is-done" : "";
         pips += `<span class="psv-q-pip${cls}"></span>`;
       }
+      const subs = Array.isArray(slide.subQuestions) ? slide.subQuestions : [];
+      const subCardsHtml = subs.length
+        ? `
+          <div class="psv-semi-q-stack">
+            ${subs
+              .map(
+                (sq, idx) => `
+                <div class="psv-semi-q-item">
+                  <span class="psv-semi-q-bullet">${subs.length > 1 ? `${cur}.${idx + 1}` : `Q${cur}`}</span>
+                  <p class="psv-semi-q-text">${esc(sq)}</p>
+                </div>
+              `
+              )
+              .join("")}
+          </div>
+        `
+        : "";
+
       return `
         <div class="psv-kicker-row">
           <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
           ${slide.kickerSub ? `<span class="psv-kicker-sub">${esc(slide.kickerSub)}</span>` : ""}
+          <div class="psv-q-progress" aria-hidden="true">${pips}</div>
         </div>
-        <div class="psv-q-progress" aria-hidden="true">${pips}</div>
-        <h2 class="psv-hero-title is-prompt-quote">${esc(slide.title)}</h2>
+        <div class="psv-q-head-wrap">
+          <h2 class="psv-hero-title ${subs.length ? "is-semi-q-title" : "is-prompt-quote"}">${esc(slide.title)}</h2>
+          ${slide.enHeading ? `<p class="psv-q-en-sub">${esc(slide.enHeading)}</p>` : ""}
+        </div>
+        ${subCardsHtml}
         ${slide.logline ? `<p class="psv-logline">${esc(slide.logline)}</p>` : ""}
       `;
     }
@@ -1901,15 +1748,7 @@
     if (slide.type === "qa") {
       const savedQ = getSavedStudentNote(`${deck.id}_qa`);
       const qaActionHtml =
-        ROLE === "faculty" && deck.qaLoopRange
-          ? `
-            <div style="margin-top:4px">
-              <button type="button" class="psv-pill-btn${state.qaLoopOnly && state.ambientCycle ? " is-ambient-on" : ""}" data-psv-act="toggle-qa-loop">
-                ${state.qaLoopOnly && state.ambientCycle ? "⏸ หยุดหมุนทวนคำถาม 1–5" : "🌊 หมุนภาพ & ทวนคำถาม 1–5 ช้าๆ ระหว่างช่วง Q&A"}
-              </button>
-            </div>
-          `
-          : ROLE === "student"
+        ROLE === "student"
           ? `
             <div class="psv-student-pad">
               <div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:6px">💬 สมุดทดประเด็นคำถามส่วนตัวของคุณ (บันทึกอัตโนมัติในเครื่อง)</div>
@@ -2053,17 +1892,9 @@
         <img class="psv-dicut-img" id="psvDicutImg" alt="" />
       </div>
 
-      <div class="psv-ambient-watermark" aria-hidden="true">
-        <span class="psv-wm-left"><span class="psv-wm-dot"></span><span id="psvWmSeries">RACM 303 PANEL SERIES</span></span>
-        <span class="psv-wm-clock" id="psvWmClock"></span>
-      </div>
-
       <header class="psv-hud-top" id="psvHudTop">
-        <div class="psv-hud-brand">
-          <span class="psv-series-pill"><span class="psv-n-bar"></span>PANEL SCREENSAVER</span>
-          <select class="psv-deck-picker" id="psvDeckPicker" aria-label="เลือกคาบเสวนา Panel Discussion"></select>
-        </div>
-        <div class="psv-hud-controls" id="psvHudControls"></div>
+        <div class="psv-chapter-dots" id="psvChapterDots" role="tablist" aria-label="สารบัญสไลด์เสวนา"></div>
+        <div class="psv-hud-foot-right" id="psvFootRight"></div>
       </header>
 
       <button type="button" class="psv-edge-nav is-prev" data-psv-act="prev" aria-label="สไลด์ก่อนหน้า" title="สไลด์ก่อนหน้า (←)">‹</button>
@@ -2117,11 +1948,6 @@
         <div class="psv-pin-zoom-card" id="psvPinZoomCard"></div>
       </div>
 
-      <footer class="psv-hud-bottom" id="psvHudBottom">
-        <div class="psv-chapter-dots" id="psvChapterDots" role="tablist" aria-label="สารบัญสไลด์เสวนา"></div>
-        <div class="psv-hud-foot-right" id="psvFootRight"></div>
-      </footer>
-
       <div class="psv-ambient-progress" aria-hidden="true">
         <div class="psv-ambient-progress-bar" id="psvAmbientProgressBar"></div>
       </div>
@@ -2133,14 +1959,11 @@
   }
 
   function populateDeckPicker() {
-    const picker = document.getElementById("psvDeckPicker");
-    if (!picker) return;
-    picker.innerHTML = Object.keys(PANEL_DECKS)
-      .map((id) => {
-        const d = PANEL_DECKS[id];
-        return `<option value="${esc(id)}"${id === state.deckId ? " selected" : ""}>${esc(d.shortTitle)}</option>`;
-      })
-      .join("");
+    const badge = document.getElementById("psvSessionBadge");
+    const deck = getCurrentDeck();
+    if (badge && deck) {
+      badge.textContent = deck.shortTitle || deck.code || "";
+    }
   }
 
   function syncHudButtonsOnly() {
@@ -2244,7 +2067,7 @@
 
     const footRight = document.getElementById("psvFootRight");
     if (footRight) {
-      footRight.innerHTML = `<span>${esc(deck.sessionMeta)}</span><span>·</span><strong>${state.slideIdx + 1} / ${deck.slides.length}</strong>`;
+      footRight.innerHTML = `<span class="psv-top-counter">${state.slideIdx + 1} / ${deck.slides.length}</span><button type="button" class="psv-top-close-btn" data-psv-act="close" title="ปิดหน้าสไลด์เสวนา (Esc)" aria-label="ปิดหน้าสไลด์เสวนา">✕</button>`;
     }
 
     if (ROLE === "faculty") {
@@ -2755,6 +2578,129 @@
     }
   }
 
+  function mountInlineShelf(containerEl, sessionId) {
+    if (!containerEl) return;
+    const resolvedId = resolveDeckId(sessionId);
+    const deck = PANEL_DECKS[resolvedId];
+    if (!deck || !Array.isArray(deck.slides) || !deck.slides.length) {
+      containerEl.hidden = true;
+      return;
+    }
+
+    let curIdx = 0;
+    const renderShelf = () => {
+      const sl = deck.slides[curIdx] || deck.slides[0];
+      const bgImg = sl.bg || "bg_01_bedside_horizon.jpg";
+      const dicutHtml = sl.dicutImg
+        ? `<img class="psv-inl-dicut" src="${IMG_DIR}/${esc(sl.dicutImg)}?v=${ASSET_VER}" alt="${esc(sl.title || "")}" />`
+        : "";
+      const orgStripHtml = Array.isArray(sl.haloLogos)
+        ? `<div class="psv-inl-logos">${sl.haloLogos
+            .slice(0, 6)
+            .map((hl) => `<span class="psv-inl-logo-pill"><img src="${IMG_DIR}/${esc(hl.logo)}?v=${ASSET_VER}" alt="" />${esc(hl.label)}</span>`)
+            .join("")}</div>`
+        : "";
+      const previewSub =
+        sl.enSubtitle ||
+        sl.enHeading ||
+        sl.roleSubtitle ||
+        (Array.isArray(sl.subQuestions) && sl.subQuestions[0]) ||
+        sl.stemLead ||
+        sl.logline ||
+        sl.kickerSub ||
+        "";
+
+      const pptxBtnHtml =
+        ROLE === "faculty" && deck.pptxHref
+          ? `<a class="btn sm" href="${esc(deck.pptxHref)}" download>⬇ ดาวน์โหลด .pptx</a>`
+          : "";
+
+      const chaptersHtml = deck.slides
+        .map(
+          (item, idx) =>
+            `<button type="button" class="psv-inl-ch-btn${idx === curIdx ? " is-active" : ""}" data-inl-idx="${idx}">${esc(
+              item.navLabel || item.num
+            )}</button>`
+        )
+        .join("");
+
+      containerEl.innerHTML = `
+        <div class="psv-inl-head">
+          <div>
+            <div class="sf-detail-kicker">🎬 Slide ประกอบคาบ ${esc(deck.code)} · แขวนประจำคาบ (${deck.slides.length} สไลด์ · 16:9 Top-Aligned)</div>
+            <p class="sf-detail-lead" style="margin-top:4px">ชุดสไลด์ประจำคาบเสวนาโดยเฉพาะ (จัดวางเนื้อหาชิดริมบนเพื่อไม่ให้โซฟาวิทยากรบังจอ) สามารถกดเลื่อนดูตัวอย่างสไลด์ด้านล่าง หรือกดฉายเต็มหน้าจอ 16:9 ได้ทันที</p>
+          </div>
+          <div class="psv-inl-actions">
+            <button type="button" class="btn sm primary" data-inl-act="open-fs">📺 เปิดฉายเต็มจอ 16:9 (เริ่มสไลด์ ${esc(sl.num)})</button>
+            <button type="button" class="btn sm teal" data-inl-act="copy-link">🔗 คัดลอกลิงก์ #${esc(deck.hashSlug)}</button>
+            ${pptxBtnHtml}
+          </div>
+        </div>
+
+        <div class="psv-inl-stage" style="background-image:linear-gradient(180deg,rgba(4,7,16,0.88) 0%,rgba(4,7,16,0.72) 62%,rgba(4,7,16,0.38) 100%),url('${IMG_DIR}/${esc(
+        bgImg
+      )}?v=${ASSET_VER}')" data-inl-act="open-fs" title="คลิกเพื่อเปิดฉายสไลด์หน้านี้แบบเต็มหน้าจอ 16:9">
+          <div class="psv-inl-stage-top">
+            <div class="psv-inl-stage-copy">
+              <span class="psv-inl-kicker">${esc(sl.kicker || deck.seriesTag)}</span>
+              <h4 class="psv-inl-title">${esc(sl.title || "")}</h4>
+              ${previewSub ? `<p class="psv-inl-sub">${esc(previewSub)}</p>` : ""}
+              ${orgStripHtml}
+            </div>
+            ${dicutHtml}
+          </div>
+          <div class="psv-inl-stage-foot">
+            <button type="button" class="psv-inl-nav-btn" data-inl-act="prev">‹ สไลด์ก่อนหน้า</button>
+            <span class="psv-inl-counter">สไลด์ ${curIdx + 1} / ${deck.slides.length} · คลิกเพื่อขยายเต็มจอ ⛶</span>
+            <button type="button" class="psv-inl-nav-btn" data-inl-act="next">สไลด์ถัดไป ›</button>
+          </div>
+        </div>
+
+        <div class="psv-inl-ch-strip" role="tablist" aria-label="เลือกดูสไลด์ประจำคาบ">
+          ${chaptersHtml}
+        </div>
+      `;
+    };
+
+    containerEl.onclick = (ev) => {
+      const chBtn = ev.target.closest("[data-inl-idx]");
+      if (chBtn) {
+        ev.stopPropagation();
+        curIdx = parseInt(chBtn.getAttribute("data-inl-idx"), 10) || 0;
+        renderShelf();
+        return;
+      }
+      const actEl = ev.target.closest("[data-inl-act]");
+      if (!actEl) return;
+      const act = actEl.getAttribute("data-inl-act");
+      if (act === "prev") {
+        ev.stopPropagation();
+        curIdx = (curIdx - 1 + deck.slides.length) % deck.slides.length;
+        renderShelf();
+      } else if (act === "next") {
+        ev.stopPropagation();
+        curIdx = (curIdx + 1) % deck.slides.length;
+        renderShelf();
+      } else if (act === "copy-link") {
+        ev.stopPropagation();
+        const fullUrl = `${window.location.origin}${window.location.pathname}#${deck.hashSlug}`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(fullUrl).then(() => {
+            actEl.textContent = "✓ คัดลอกลิงก์แล้ว";
+            setTimeout(() => {
+              actEl.textContent = `🔗 คัดลอกลิงก์ #${deck.hashSlug}`;
+            }, 1800);
+          }).catch(() => {});
+        }
+      } else if (act === "open-fs") {
+        ev.stopPropagation();
+        openDeck(deck.id, curIdx);
+      }
+    };
+
+    renderShelf();
+  }
+
   window.RACM_PANEL_DECK = {
     open: openDeck,
     close: closeDeck,
@@ -2762,7 +2708,8 @@
     stepSlide,
     setFontScale,
     toggleAmbientCycle,
-    hasDeck: (id) => Boolean(PANEL_DECKS[resolveDeckId(id)] && PANEL_DECKS[id]),
+    mountInlineShelf,
+    hasDeck: (id) => Boolean(PANEL_DECKS[id] || PANEL_DECKS[resolveDeckId(id)]),
     getDecks: () => PANEL_DECKS,
     pptxHref: MODERATOR_PPTX_HREF
   };
@@ -2771,14 +2718,8 @@
     const params = new URLSearchParams(window.location.search);
     const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
     const slideParam = (params.get("slides") || params.get("panel") || "").toUpperCase();
-    if (h === "panel-global" || slideParam === "GLOBAL") {
+    if ((h === "panel-global" || slideParam === "GLOBAL") && PANEL_DECKS["w1-d1-global"]) {
       setTimeout(() => openDeck("w1-d1-global", 0), 70);
-    } else if (h === "panel-dhs" || slideParam === "PANEL-DHS") {
-      setTimeout(() => openDeck("w3-d3-dhs-panel", 0), 70);
-    } else if (h === "panel-6bb" || slideParam === "PANEL-6BB") {
-      setTimeout(() => openDeck("w5-d3-panel-homeless", 0), 70);
-    } else if (h === "panel-policy" || slideParam === "PANEL-HP" || slideParam === "PANEL-POLICY") {
-      setTimeout(() => openDeck("w5-d4-policy", 0), 70);
     }
   }
 
