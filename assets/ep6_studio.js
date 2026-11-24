@@ -117,6 +117,7 @@
 
   const studioState = {
     activeModule: "EP4",
+    perBundleEpisode: {},
     perLectureSec: { EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
     currentSec: 4,
     activeSlideId: 1,
@@ -294,17 +295,39 @@
 
   function renderEpStudio(container, opts) {
     if (!container) return;
-    const modules = getModulesMap();
-    const availableCodes = MODULE_ORDER.filter((c) => Boolean(modules[c]));
+    const standaloneData = opts && opts.standaloneData && typeof opts.standaloneData === "object" ? opts.standaloneData : null;
+    const isMultiStandalone = Boolean(standaloneData && standaloneData.isMultiEpisode && standaloneData.episodes);
+    const standaloneCode = standaloneData
+      ? String((opts && opts.moduleCode) || (standaloneData.meta && standaloneData.meta.moduleCode) || "VDO")
+      : "";
+    const modules = isMultiStandalone
+      ? standaloneData.episodes
+      : standaloneData
+      ? { [standaloneCode]: standaloneData }
+      : getModulesMap();
+    const availableCodes = isMultiStandalone
+      ? (standaloneData.episodeOrder || Object.keys(modules)).filter((c) => Boolean(modules[c]))
+      : standaloneData
+      ? [standaloneCode]
+      : MODULE_ORDER.filter((c) => Boolean(modules[c]));
     if (!availableCodes.length) return;
 
-    if (opts && opts.moduleCode && modules[opts.moduleCode]) {
-      studioState.activeModule = opts.moduleCode;
-    } else if (!modules[studioState.activeModule]) {
-      studioState.activeModule = availableCodes[0];
+    let modCode = standaloneCode;
+    if (isMultiStandalone) {
+      const wantedEp = opts && opts.episodeCode && modules[opts.episodeCode] ? opts.episodeCode : null;
+      const savedEp = studioState.perBundleEpisode[standaloneCode];
+      const defEp = standaloneData.defaultEpisode && modules[standaloneData.defaultEpisode] ? standaloneData.defaultEpisode : availableCodes[0];
+      modCode = wantedEp || (savedEp && modules[savedEp] ? savedEp : defEp);
+      studioState.perBundleEpisode[standaloneCode] = modCode;
+    } else if (!standaloneData) {
+      if (opts && opts.moduleCode && modules[opts.moduleCode]) {
+        studioState.activeModule = opts.moduleCode;
+      } else if (!modules[studioState.activeModule]) {
+        studioState.activeModule = availableCodes[0];
+      }
+      modCode = studioState.activeModule;
     }
 
-    const modCode = studioState.activeModule;
     const DATA = modules[modCode];
     const MIN_SEC = Number(DATA.meta.startSec) || 0;
     const MAX_SEC = Number(DATA.meta.endSec || DATA.meta.durationSec) || 3600;
@@ -337,9 +360,13 @@
       };
     }
 
-    // Restore saved position for this specific lecture
-    const savedSec = studioState.perLectureSec[modCode];
+    // Restore saved position (or explicit initialSeekSec) for this specific lecture
+    const savedSec =
+      opts && typeof opts.initialSeekSec === "number"
+        ? opts.initialSeekSec
+        : studioState.perLectureSec[modCode];
     studioState.currentSec = Math.max(MIN_SEC, Math.min(MAX_SEC - 1, savedSec != null ? savedSec : MIN_SEC));
+    studioState.perLectureSec[modCode] = studioState.currentSec;
     studioState.activeSlideId = findSlideAtTime(DATA, studioState.currentSec);
     studioState.activeStageId = getSlideById(DATA, studioState.activeSlideId).stageId;
     studioState.stageFilter = 0;
@@ -366,35 +393,44 @@
       videoEl: null,
       activePartIdx: initPartInfo.partIdx,
       pendingLocalSeek: initPartInfo.localSec,
-      pendingAutoPlay: false,
+      pendingAutoPlay: Boolean(opts && opts.autoPlay),
       flashTimer: null,
       dockedMeasuredHeight: 0,
       cleanupListeners: null
     };
     activeInstance = instance;
 
-    // 0. Multi-Lecture Switcher Ribbon (EP6 · EP7 · EP8 · EP9)
+    // 0. Multi-Lecture Switcher Ribbon
     if (availableCodes.length > 1) {
+      const switcherHeading = standaloneData
+        ? standaloneData.switcherLabel || "🎬 เลือกตอนวิดีโอบรรยายประจำคาบ"
+        : "🎬 เลือกคาบบรรยายระบาดวิทยา";
       const switcher = document.createElement("div");
       switcher.className = "ep6-module-switcher";
       switcher.setAttribute("role", "tablist");
-      switcher.setAttribute("aria-label", "เลือกบทเรียนวิดีโอบรรยายระบาดวิทยา (EP4–EP9)");
+      switcher.setAttribute("aria-label", switcherHeading);
       switcher.innerHTML = `
-        <div class="ep6-ms-label">🎬 เลือกคาบบรรยายระบาดวิทยา</div>
+        <div class="ep6-ms-label">${esc(switcherHeading)}</div>
         <div class="ep6-ms-grid">
           ${availableCodes
             .map((code) => {
               const m = modules[code];
-              const info = MODULE_SHORT_LABELS[code] || { short: m.meta.courseTitle, sub: "" };
+              const info =
+                (standaloneData && standaloneData.shortLabels && standaloneData.shortLabels[code]) ||
+                MODULE_SHORT_LABELS[code] ||
+                { short: m.meta.courseTitle, sub: "" };
+              const cardBadgeRight = m.meta.examWeight
+                ? `สอบ ${m.meta.examWeight}`
+                : m.meta.cardTag || m.meta.sessionTag || standaloneCode || "VDO";
               const active = code === modCode;
               return `
                 <button type="button" role="tab" aria-selected="${active}" class="ep6-ms-card ${active ? "is-active" : ""}" data-switch-ep-mod="${code}">
                   <div class="ep6-ms-top">
-                    <span class="ep6-ms-code">${esc(code)} · สอบ ${esc(m.meta.examWeight || "—")}</span>
+                    <span class="ep6-ms-code">${esc(code)} · ${esc(cardBadgeRight)}</span>
                     <span class="ep6-ms-dur">⏱ ${esc(m.meta.durationLabel || fmtTime(m.meta.durationSec))} · ${m.slides.length} สไลด์</span>
                   </div>
                   <div class="ep6-ms-title">${esc(info.short)}</div>
-                  <div class="ep6-ms-sub">${esc(m.meta.lecturer || "")} — ${esc(info.sub)}</div>
+                  <div class="ep6-ms-sub">${esc(m.meta.lecturer || "")}${info.sub ? ` — ${esc(info.sub)}` : ""}</div>
                 </button>
               `;
             })
@@ -406,12 +442,15 @@
 
     // 1. Header Banner
     const pdfFilename = (DATA.meta.pdfDownloadPath || "").split("/").pop() || `${modCode}_Slides.pdf`;
+    const badgeRightTxt = DATA.meta.examWeight
+      ? `สอบ ${DATA.meta.examWeight}`
+      : DATA.meta.sessionTag || "STEP 06 · VDO Lecture";
     const header = document.createElement("div");
     header.className = "ep6-studio-header";
     header.innerHTML = `
       <div class="ep6-head-main">
         <div class="ep6-head-eyebrow">
-          <span class="ep6-badge-code">${esc(modCode)} · สอบ ${esc(DATA.meta.examWeight || "15%")}</span>
+          <span class="ep6-badge-code">${esc(modCode)} · ${esc(badgeRightTxt)}</span>
           <span class="ep6-badge-meta">🎬 Native Video Player (ไม่ใช้ YouTube · หั่นคลิปตรงคาบ)</span>
           <span class="ep6-badge-meta">${TOTAL_SLIDES} Captured Slides · Verbatim → Conceptualized</span>
           <span class="ep6-badge-meta">⏱ ${esc(DATA.meta.durationLabel || fmtTime(MAX_SEC))}</span>
@@ -420,7 +459,7 @@
         <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายพร้อมเสียงครบเต็มรูปแบบ ปรับความเร็ว 0.5x–2x ข้าม ±10 วินาที มีคำบรรยายไทย CC แยกใต้จอวิดีโอไม่บังปุ่มควบคุม และรองรับโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านด้านล่าง</p>
       </div>
       <div class="ep6-head-actions">
-        <a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="${esc(pdfFilename)}">📥 ดาวน์โหลดสไลด์ ${esc(modCode)} (.PDF)</a>
+        ${DATA.meta.pdfDownloadPath ? `<a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="${esc(pdfFilename)}">📥 ดาวน์โหลดสไลด์ ${esc(modCode)} (.PDF)</a>` : ""}
         <span class="ep6-protected-pill" title="สตรีมวิดีโอตรงประจำคาบเรียนสำหรับนักศึกษา RACM 303">🔒 สตรีมประจำคาบ ${esc(modCode)}</span>
       </div>
     `;
@@ -1065,7 +1104,7 @@
              </button>`
           : `<div class="ep6-bridge-step is-next">
                <div class="ep6-bridge-head">
-                 <span class="ep6-bridge-lbl">สรุปครบชุดบรรยายระบาดวิทยาคลินิก (EP4–EP9)</span>
+                 <span class="ep6-bridge-lbl">${esc(DATA.meta.completionBadge || "สรุปครบชุดบรรยายระบาดวิทยาคลินิก (EP4–EP9)")}</span>
                </div>
                <p>${esc(slide.logicalFlow?.toNext || "")}</p>
              </div>`;
@@ -1334,6 +1373,17 @@
 
     function switchActiveModule(nextCode) {
       if (!modules[nextCode] || nextCode === modCode) return;
+      if (isMultiStandalone) {
+        studioState.perBundleEpisode[standaloneCode] = nextCode;
+        window.dispatchEvent(new CustomEvent("racm:epmodulechange", { detail: { moduleCode: nextCode } }));
+        renderEpStudio(container, {
+          ...opts,
+          episodeCode: nextCode,
+          initialSeekSec: undefined,
+          autoPlay: false
+        });
+        return;
+      }
       studioState.activeModule = nextCode;
       savePersistedPrefs();
       window.dispatchEvent(new CustomEvent("racm:epmodulechange", { detail: { moduleCode: nextCode } }));
@@ -1598,8 +1648,8 @@
         body.innerHTML = `
           <div class="ep6-matrix-card">
             <div class="ep6-matrix-head">
-              <h4>ตารางสังเคราะห์ตัวชี้วัด สูตร และจุดเน้นออกสอบประจำคาบ ${esc(modCode)} (สอบ ${esc(DATA.meta.examWeight || "")})</h4>
-              <p>สรุปเปรียบเทียบโครงสร้างแนวคิด สูตรคำนวณ และข้อควรระวังในการแปลผลจากคำสอนของอาจารย์</p>
+              <h4>ตารางสังเคราะห์กรอบแนวคิด ตัวชี้วัด และจุดเน้นออกสอบประจำคาบ ${esc(modCode)}${DATA.meta.examWeight ? ` (สอบ ${esc(DATA.meta.examWeight)})` : ""}</h4>
+              <p>สรุปเปรียบเทียบโครงสร้างแนวคิด ตัวชี้วัด และข้อควรระวังในการวิเคราะห์จากคำสอนของอาจารย์</p>
             </div>
             <div class="ep6-matrix-table-wrap">
               <table class="ep6-matrix-table">
@@ -2446,7 +2496,12 @@
       }
     },
     getState: () => studioState,
-    destroy: destroyActiveTimers
+    destroy: destroyActiveTimers,
+    destroyIfInside: (hostEl) => {
+      if (activeInstance && activeInstance.container && hostEl && hostEl.contains(activeInstance.container)) {
+        destroyActiveTimers();
+      }
+    }
   };
 
   window.RACM303_EP6_STUDIO = studioApi;

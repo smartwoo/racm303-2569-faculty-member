@@ -1,4 +1,4 @@
-# HS3: คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)
+# HS3: หน้าที่ของระบบสุขภาพ (Functions of Health Systems) และคุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)
 
 ภูษิต ประคองสาย
 ปวินท์ ศรีวิเชียร

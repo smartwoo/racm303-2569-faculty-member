@@ -24,8 +24,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS2",
       "code": "HS2",
-      "title": "หน้าที่และโครงสร้างของระบบสุขภาพ (Structure and Functions of Health Systems) และรูปแบบการดูแล (Models of Care)",
-      "enTitle": "Structure and Functions of Health Systems and Models of Care",
+      "title": "โครงสร้างของระบบสุขภาพ (Structure of Health Systems) และรูปแบบการดูแล (Models of Care)",
+      "enTitle": "Structure of Health Systems and Models of Care",
       "scheduleDate": "วันจันทร์ที่ 30 พฤศจิกายน 2569",
       "lectureTime": "08.30 – 09.30 น.",
       "discTime": "09.40 – 12.00 น.",
@@ -41,8 +41,8 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS3",
       "code": "HS3",
-      "title": "คุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)",
-      "enTitle": "Desirable Characteristics of Health Services Systems",
+      "title": "หน้าที่ของระบบสุขภาพ (Functions of Health Systems) และคุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (Desirable Characteristics of Health Services Systems)",
+      "enTitle": "Functions of Health Systems and Desirable Characteristics of Health Services Systems",
       "scheduleDate": "วันจันทร์ที่ 30 พฤศจิกายน 2569",
       "lectureTime": "13.30 – 14.30 น.",
       "discTime": "14.40 – 16.40 น.",
@@ -75,7 +75,7 @@ window.RACM_HS_DISCUSSION_DATA = {
     {
       "id": "HS5",
       "code": "HS5",
-      "title": "ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)",
+      "title": "ระบบสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)",
       "enTitle": "Primary Health Care and Primary Care",
       "scheduleDate": "วันอังคารที่ 1 ธันวาคม 2569",
       "lectureTime": "13.30 – 14.30 น.",
@@ -2367,7 +2367,7 @@ window.RACM_HS_DISCUSSION_DATA = {
       "caseNumber": 1,
       "module": "HS5",
       "title": "กรณีศึกษาที่ 1: “สุขภาวะข้างถนน” ภารกิจต่อจิ๊กซอว์สุขภาพเพื่อคนไร้บ้าน",
-      "subtitle": "การวิเคราะห์คุณลักษณะบริการปฐมภูมิ 5 ประการ (Primary Care) และองค์ประกอบหลักของระบบบริการสุขภาพปฐมภูมิ (PHC)",
+      "subtitle": "การวิเคราะห์คุณลักษณะบริการปฐมภูมิ 5 ประการ (Primary Care) และองค์ประกอบหลักของระบบสุขภาพปฐมภูมิ (PHC)",
       "frameworks": [
         "คุณลักษณะของบริการปฐมภูมิที่ดี 5 ประการ (First-Contact, Comprehensiveness, Continuity, Coordination, Person-Centeredness)",
         "องค์ประกอบ 3 เสาหลักของ Primary Health Care ตามปฏิญญา Astana (2018)",
@@ -2416,7 +2416,7 @@ window.RACM_HS_DISCUSSION_DATA = {
           "id": "q-7-1",
           "label": "ประเด็นอภิปรายที่ 1.1",
           "title": "การวิเคราะห์คุณลักษณะของบริการสุขภาพระดับบุคคล / บริการปฐมภูมิ (Characteristics of Personal / Primary Care)",
-          "prompt": "จากบทความข้างต้น จงวิเคราะห์ว่าโครงการ “สุขภาวะข้างถนน” ได้จัดบริการที่สอดคล้องกับ “คุณลักษณะของบริการสุขภาพระดับบุคคล (characteristics of personal care)” ของระบบบริการสุขภาพปฐมภูมิอย่างไรบ้าง? (วิเคราะห์ให้ครบทั้ง 5 คุณลักษณะ)",
+          "prompt": "จากบทความข้างต้น จงวิเคราะห์ว่าโครงการ “สุขภาวะข้างถนน” ได้จัดบริการที่สอดคล้องกับ “คุณลักษณะของบริการสุขภาพระดับบุคคล (characteristics of personal care)” ของระบบสุขภาพปฐมภูมิอย่างไรบ้าง? (วิเคราะห์ให้ครบทั้ง 5 คุณลักษณะ)",
           "worksheet": {
             "type": "table",
             "headers": [
@@ -2641,10 +2641,10 @@ window.RACM_HS_DISCUSSION_DATA = {
             "shortLabel": "④ Key Takeaway #2",
             "studentShortLabel": "Key Takeaway #2",
             "kicker": "Key Takeaway #2",
-            "title": "องค์ประกอบหลัก 3 ประการของระบบบริการสุขภาพปฐมภูมิ",
+            "title": "องค์ประกอบหลัก 3 ประการของระบบสุขภาพปฐมภูมิ",
             "enTitle": "Three Components of Primary Health Care (Astana 2018)",
             "sourceNote": "WHO & UNICEF Declaration of Astana (2018)",
-            "coreTerm": "“ระบบบริการสุขภาพปฐมภูมิ” (Primary Health Care: PHC)",
+            "coreTerm": "“ระบบสุขภาพปฐมภูมิ” (Primary Health Care: PHC)",
             "coreDefinitionLead": "เป็นแนวทางการจัดระบบสุขภาพของทั้งสังคม (whole-of-society approach) ที่มีขอบเขตกว้างกว่าบริการปฐมภูมิในคลินิก",
             "coreDefinitionQualifier": "โดยบูรณาการบริการสุขภาพ นโยบายข้ามภาคส่วน และการเสริมพลังประชาชนเข้าด้วยกันสามองค์ประกอบ",
             "coreDefinition": "เป็นแนวทางการจัดระบบสุขภาพของทั้งสังคม (whole-of-society approach) ที่มีขอบเขตกว้างกว่าบริการปฐมภูมิในคลินิก โดยบูรณาการบริการสุขภาพ นโยบายข้ามภาคส่วน และการเสริมพลังประชาชนเข้าด้วยกันสามองค์ประกอบ",

@@ -49,13 +49,13 @@ UID:w2-d2-hs5-disc@racm303-2569.mahidol.ac.th
 DTSTAMP:20261123T073000Z
 DTSTART;TZID=Asia/Bangkok:20261201T144000
 DTEND;TZID=Asia/Bangkok:20261201T164000
-SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
+SUMMARY:[RACM 303] Discussion & Case Analysis (HS5): ระบบสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 LOCATION:1C1-03 (Discussion กลุ่มที่ 2 (28 คน))
 DESCRIPTION:วัตถุประสงค์: วิเคราะห์กรณีศึกษาการจัดบริการปฐมภูมิ การทำงานข้ามภาคส่วน การเสริมพลังชุมชน และความท้าทายของระบบสุขภาพปฐมภูมิไทยในปัจจุบัน\nอาจารย์ผู้สอน: อ. นพ.ปวินท์ / นพ.ภรัณยู\nสถานที่/ห้องเรียน: 1C1-03 (Discussion กลุ่มที่ 2 (28 คน))\nรูปแบบ: Onsite · แยก 6 กลุ่มย่อย (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบบริการสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Discussion & Case Analysis (HS5): ระบบสุขภาพปฐมภูมิ (Primary Health Care) และบริการปฐมภูมิ (Primary Care)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT

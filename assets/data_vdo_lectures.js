@@ -47,7 +47,7 @@
     },
     HS2: {
       code: "HS2",
-      title: "VDO Lecture · ระบบสุขภาพ ขอบเขต หน้าที่ และการจัดระบบบริการสุขภาพ",
+      title: "VDO Lecture · โครงสร้างของระบบสุขภาพและรูปแบบการดูแล (Structure of Health Systems & Models of Care)",
       uploaded: false,
       statusLabel: "รอแขวน VDO",
       statusEn: "Awaiting VDO",
@@ -67,7 +67,7 @@
     },
     HS3: {
       code: "HS3",
-      title: "VDO Lecture · คุณลักษณะอันพึงประสงค์ของระบบบริการสุขภาพและการทำหน้าที่ของระบบสุขภาพ (EQESaRR)",
+      title: "VDO Lecture · หน้าที่ของระบบสุขภาพและคุณลักษณะของระบบบริการสุขภาพที่พึงประสงค์ (EQESaRR)",
       uploaded: true,
       readyLabel: "พร้อมรับชม Interactive Studio",
       statusLabel: "พร้อมรับชม",
@@ -105,7 +105,7 @@
     },
     HS5: {
       code: "HS5",
-      title: "VDO Lecture · ระบบบริการสุขภาพปฐมภูมิ (Primary Care & Primary Health Care)",
+      title: "VDO Lecture · ระบบสุขภาพปฐมภูมิและบริการปฐมภูมิ (Primary Health Care & Primary Care)",
       uploaded: false,
       statusLabel: "รอแขวน VDO",
       statusEn: "Awaiting VDO",
