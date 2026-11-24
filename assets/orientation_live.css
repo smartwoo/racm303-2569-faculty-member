@@ -3698,6 +3698,10 @@ html[data-role="faculty"] .or-deck-shell.is-io-deck[data-io-theme="dark"] .or-co
 .or-slide-canvas.is-io-pitch[data-io-theme="dark"] .or-td-sub.is-danger { color: #f87171; }
 
 /* ---------- RACM 303 Schedule Matrix Slides (Weeks 1–3 & Weeks 4–6 · Auto-Fit --fit-scale) ---------- */
+.or-sld-body > .or-infog-split:only-child {
+  grid-template-rows: minmax(0, 1fr);
+}
+
 .or-sld-body > .or-table-wrap:only-child {
   flex: 1;
   height: 100%;
@@ -4023,6 +4027,9 @@ html[data-role="faculty"] .or-slide-canvas.is-io-pitch:not([data-io-theme="dark"
 }
 
 @media (max-width: 700px) and (orientation: portrait) {
+  .or-sld-body > .or-infog-split:only-child {
+    grid-template-rows: auto !important;
+  }
   .or-table-wrap.is-sched-matrix {
     flex: 0 0 auto !important;
     min-height: auto !important;

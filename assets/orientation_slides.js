@@ -621,7 +621,7 @@
                 </td>
                 <td class="is-ep">
                   <div><strong>ระบาด Day 3 (EP6–EP8)</strong></div>
-                  <div class="or-sch-room">09.00–12.00 น. Burden, Survey &amp; RCT (2C2-03 / Zoom)</div>
+                  <div class="or-sch-room">09.00–12.00 น. Burden, Survey &amp; RCT<br>(2C2-03 / Zoom)</div>
                 </td>
                 <td class="is-hs">
                   <div><strong>HS6: Health Insurance &amp; Payment</strong></div>
@@ -690,7 +690,7 @@
                   <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 3</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
                 </td>
                 <td class="is-sg">
-                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 4</strong> <span class="or-sch-room">(9 ห้อง)</span></div>
+                  <div><strong>14.30–16.30 พบ อ.ที่ปรึกษา ครั้งที่ 4</strong> <span class="or-sch-room" style="white-space:nowrap">(9 ห้อง)</span></div>
                   <div><strong class="or-sch-dl">ส่ง SRN 1 (17.00)</strong> · <span class="or-sch-travel">23.00 อุ้มผางเดินทาง</span></div>
                 </td>
                 <td class="is-sg">
@@ -764,7 +764,7 @@
                   <div class="or-sch-room">Open Note A4 ลายมือ 1 แผ่น<br>(จัดสอบ 3 ห้องใหญ่ 2C2-01..03)</div>
                 </td>
                 <td class="is-panel">
-                  <div><strong>เสวนาเชื่อม 6BB สู่ระบบที่เป็นธรรม</strong></div>
+                  <div><strong>เสวนา 6BB สู่ระบบที่เป็นธรรม</strong></div>
                   <div class="or-sch-room">บทเรียน “สุขภาวะข้างถนน”<br>(ห้องใหญ่ 2C2-03)</div>
                 </td>
                 <td class="is-sg">
@@ -836,8 +836,8 @@
                   <div class="or-sch-room">13.00–16.30 น. ซักซ้อมการนำเสนอ (ห้องย่อย 9 ห้อง)</div>
                 </td>
                 <td class="is-oral">
-                  <div><strong>นำเสนอระบบ (ต่อ)</strong> <span class="or-sch-room">(ห้องใหญ่ 2C2-03)</span></div>
-                  <div><strong>เตรียมนำเสนอระบาด</strong> <span class="or-sch-room">(ห้องย่อย 9 ห้อง)</span></div>
+                  <div><strong>นำเสนอระบบ (ต่อ)</strong> <span class="or-sch-room" style="white-space:nowrap">(2C2-03)</span></div>
+                  <div><strong>เตรียมนำเสนอระบาด</strong> <span class="or-sch-room" style="white-space:nowrap">(ห้องย่อย 9 ห้อง)</span></div>
                 </td>
                 <td class="is-sdl">
                   <div><strong>13.00–16.30 SDL &amp; ประเมินเจตคติ</strong></div>

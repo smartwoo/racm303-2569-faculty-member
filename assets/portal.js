@@ -2297,6 +2297,7 @@
             state.schedSub = "week";
             syncSegButtons();
             renderScheduleCurrent();
+            requestAnimationFrame(() => scrollToWeekBlock(state.calWeek, "auto"));
             openEventModal(matched);
           }
         };
@@ -2551,32 +2552,15 @@
       });
     });
 
-    if ($("calPrevBtn")) {
-      $("calPrevBtn").addEventListener("click", () => {
-        if (state.schedSub === "month") state.schedSub = "week";
-        state.calWeek = Math.max(1, state.calWeek - 1);
-        if ($("schedWeekFilter") && $("schedWeekFilter").value) $("schedWeekFilter").value = String(state.calWeek);
-        syncSegButtons();
-        refreshCalendarStudioUI();
-        renderScheduleCurrent();
-      });
-    }
-    if ($("calNextBtn")) {
-      $("calNextBtn").addEventListener("click", () => {
-        if (state.schedSub === "month") state.schedSub = "week";
-        state.calWeek = Math.min(6, state.calWeek + 1);
-        if ($("schedWeekFilter") && $("schedWeekFilter").value) $("schedWeekFilter").value = String(state.calWeek);
-        syncSegButtons();
-        refreshCalendarStudioUI();
-        renderScheduleCurrent();
-      });
-    }
     if ($("calStartWeekBtn")) {
       $("calStartWeekBtn").addEventListener("click", () => {
         state.calWeek = 1;
         if ($("schedWeekFilter")) $("schedWeekFilter").value = "";
         refreshCalendarStudioUI();
         renderScheduleCurrent();
+        if (state.schedSub === "week") {
+          requestAnimationFrame(() => scrollToWeekBlock(1, "smooth"));
+        }
       });
     }
 
@@ -2662,8 +2646,12 @@
 
     if (titleEl) {
       if (state.schedSub === "week") {
-        const wb = WEEK_BOUNDS.find((w) => w.week === state.calWeek) || WEEK_BOUNDS[0];
-        titleEl.textContent = wb.label;
+        if (weekVal) {
+          const wb = WEEK_BOUNDS.find((w) => String(w.week) === weekVal) || WEEK_BOUNDS[0];
+          titleEl.textContent = wb.label;
+        } else {
+          titleEl.textContent = "พฤศจิกายน – ธันวาคม 2569 (ตารางรายสัปดาห์ต่อเนื่องครบ 6 สัปดาห์ · เลื่อนลงดู W1–W6)";
+        }
       } else if (state.schedSub === "table") {
         titleEl.textContent = "ตารางรวมกิจกรรมการเรียนการสอน (คลิกหัวคอลัมน์เพื่อ Sort ลำดับได้ทันที)";
       } else if (state.schedSub === "spec") {
@@ -2675,9 +2663,6 @@
         titleEl.textContent = "พฤศจิกายน – ธันวาคม 2569 (ปฏิทินรายวิชาครบ 6 สัปดาห์)";
       }
     }
-
-    if ($("calPrevBtn")) $("calPrevBtn").disabled = state.schedSub === "week" && state.calWeek <= 1;
-    if ($("calNextBtn")) $("calNextBtn").disabled = state.schedSub === "week" && state.calWeek >= 6;
 
     if (statusEl) {
       const parts = [
@@ -2765,6 +2750,7 @@
         state.schedSub = "week";
         syncSegButtons();
         renderScheduleCurrent();
+        requestAnimationFrame(() => scrollToWeekBlock(wb.week, "smooth"));
       });
       row.appendChild(wCell);
 
@@ -2843,115 +2829,252 @@
     wrap.replaceChildren(shell);
   }
 
-  /* ---------- View 2: Week Time-Grid View (08:00–18:00 / Dynamic 24:00 for Evening Travel) ---------- */
+  /* ---------- View 2: Continuous Multi-Week Scroll Time-Grid View (W1–W6 Stacked) ---------- */
+  let weekScrollObserver = null;
+
+  function scrollToWeekBlock(weekNum, behavior = "smooth") {
+    const target = $(`calWeekBlock-${weekNum}`);
+    if (!target) return;
+    target.scrollIntoView({ behavior, block: "start" });
+  }
+
+  function formatWeekRangeShort(wb) {
+    const [y1, m1, d1] = String(wb.start).split("-").map(Number);
+    const [, m2] = String(wb.end).split("-").map(Number);
+    if (m1 === m2) {
+      return `${d1}–${formatThaiShortDate(wb.end, true)}`;
+    }
+    return `${d1} ${TH_MONTHS_SHORT[m1]}${y1 === 2027 ? " 70" : ""}–${formatThaiShortDate(wb.end, true)}`;
+  }
+
   function renderScheduleWeek() {
     const wrap = $("schedWeekContent");
     if (!wrap) return;
 
-    const weekDropdownVal = Number(($("schedWeekFilter") && $("schedWeekFilter").value) || 0);
-    if (weekDropdownVal >= 1 && weekDropdownVal <= 6) {
-      state.calWeek = weekDropdownVal;
+    if (weekScrollObserver) {
+      weekScrollObserver.disconnect();
+      weekScrollObserver = null;
     }
 
-    const wb = WEEK_BOUNDS.find((w) => w.week === state.calWeek) || WEEK_BOUNDS[0];
+    const weekFilterVal = ($("schedWeekFilter") && $("schedWeekFilter").value) || "";
+    if (weekFilterVal) {
+      const parsedW = Number(weekFilterVal);
+      if (parsedW >= 1 && parsedW <= 6) state.calWeek = parsedW;
+    }
+
     const ctx = getActivePersonalContext();
-    const allFiltered = getFilteredSessions(true);
-    const byDate = expandSessionsByDate(allFiltered, ctx);
+    const filteredSessions = getFilteredSessions(false);
+    const byDate = expandSessionsByDate(filteredSessions, ctx);
 
-    const weekSet = new Set();
-    let maxEndMin = 18 * 60;
-    for (let i = 0; i < 7; i++) {
-      (byDate.get(addDaysISO(wb.start, i)) || []).forEach((x) => {
-        weekSet.add(x.session.id);
-        if (!x.eff.isAllDay) {
-          maxEndMin = Math.max(maxEndMin, timeToMinutes(x.session.endTime || "12:00"));
-        }
-      });
+    const baseWeeks = weekFilterVal
+      ? WEEK_BOUNDS.filter((wb) => String(wb.week) === weekFilterVal)
+      : WEEK_BOUNDS;
+
+    const catVal = ($("schedCatFilter") && $("schedCatFilter").value) || "";
+    const qVal = (($("schedSearchInput") && $("schedSearchInput").value) || "").trim();
+    const hasNarrowingFilter = Boolean(catVal || ctx.teacherVal || (qVal && !ctx.searchStudent));
+
+    const weekDataList = baseWeeks.map((wb) => {
+      const weekSet = new Set();
+      let minStartMin = 8 * 60;
+      let maxEndMin = 18 * 60;
+      let hasAllDay = false;
+      for (let i = 0; i < 7; i++) {
+        (byDate.get(addDaysISO(wb.start, i)) || []).forEach((x) => {
+          weekSet.add(x.session.id);
+          if (x.eff.isAllDay) {
+            hasAllDay = true;
+          } else {
+            minStartMin = Math.min(minStartMin, timeToMinutes(x.session.startTime || "09:00"));
+            maxEndMin = Math.max(maxEndMin, timeToMinutes(x.session.endTime || "12:00"));
+          }
+        });
+      }
+      return { wb, weekSet, minStartMin, maxEndMin, hasAllDay };
+    });
+
+    const renderedWeeks =
+      hasNarrowingFilter && baseWeeks.length > 1
+        ? weekDataList.filter((d) => d.weekSet.size > 0)
+        : weekDataList;
+
+    const totalVisibleIds = new Set();
+    renderedWeeks.forEach((d) => d.weekSet.forEach((id) => totalVisibleIds.add(id)));
+    updateScheduleStatusBar(totalVisibleIds.size);
+
+    if (!renderedWeeks.length) {
+      wrap.replaceChildren(
+        make("div", "ไม่พบคาบเรียนที่ตรงกับตัวกรอง ลองกด “ล้างตัวกรอง” เพื่อดูตารางทั้งหมด", "empty-state")
+      );
+      return;
     }
-    updateScheduleStatusBar(weekSet.size);
 
-    const HOUR_START = 8;
-    const HOUR_END = maxEndMin > 18 * 60 ? Math.min(24, Math.ceil(maxEndMin / 60)) : 18;
+    const stack = make("div", null, "cal-week-stack");
+    const jumpPillMap = new Map();
+
+    if (renderedWeeks.length > 1) {
+      const jumpBar = make("nav", null, "cal-week-jump-strip");
+      jumpBar.setAttribute("aria-label", "ทางลัดเลื่อนไปยังสัปดาห์");
+      jumpBar.appendChild(make("span", "↕ เลื่อนลงดูต่อเนื่อง:", "cal-week-jump-label"));
+
+      const pillsWrap = make("div", null, "cal-week-jump-pills");
+      renderedWeeks.forEach(({ wb }, idx) => {
+        const isCurrent = wb.week === state.calWeek || (idx === 0 && !renderedWeeks.some((x) => x.wb.week === state.calWeek));
+        const pill = make(
+          "button",
+          `W${wb.week} · ${formatWeekRangeShort(wb)}`,
+          `cal-week-jump-pill${isCurrent ? " is-active" : ""}`
+        );
+        pill.type = "button";
+        pill.title = wb.label;
+        pill.dataset.jumpWeek = String(wb.week);
+        pill.addEventListener("click", () => {
+          state.calWeek = wb.week;
+          jumpPillMap.forEach((btn, wk) => btn.classList.toggle("is-active", wk === wb.week));
+          scrollToWeekBlock(wb.week, "smooth");
+        });
+        jumpPillMap.set(wb.week, pill);
+        pillsWrap.appendChild(pill);
+      });
+      jumpBar.appendChild(pillsWrap);
+      stack.appendChild(jumpBar);
+    }
+
     const HOUR_PX = 56;
 
-    const shell = make("div", null, "cal-week-shell");
-    const minWrap = make("div", null, "cal-week-min");
+    renderedWeeks.forEach(({ wb, weekSet, minStartMin, maxEndMin, hasAllDay }) => {
+      const HOUR_START = minStartMin < 8 * 60 ? Math.max(0, Math.floor(minStartMin / 60)) : 8;
+      const HOUR_END = maxEndMin > 18 * 60 ? Math.min(24, Math.ceil(maxEndMin / 60)) : 18;
 
-    const head = make("div", null, "cal-week-head");
-    head.appendChild(make("div", `W${wb.week}`, "cal-gutter-label"));
-    for (let i = 0; i < 7; i++) {
-      const iso = addDaysISO(wb.start, i);
-      const dayItems = byDate.get(iso) || [];
-      const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
-      const isEx = dayItems.some((x) => x.session.category === "EXAM");
-      const isAnchor = iso === "2026-11-25" || iso === "2026-12-30";
-      const hc = make(
-        "div",
-        null,
-        `cal-week-head-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}${isEx ? " is-exam-day" : ""}`
+      const shell = make("section", null, "cal-week-shell");
+      shell.id = `calWeekBlock-${wb.week}`;
+      shell.dataset.week = String(wb.week);
+      const minWrap = make("div", null, "cal-week-min");
+
+      const banner = make("div", null, "cal-week-banner");
+      const bannerLeft = make("div", null, "cal-week-banner-left");
+      bannerLeft.appendChild(make("span", `สัปดาห์ที่ ${wb.week}`, "cal-week-badge"));
+      bannerLeft.appendChild(
+        make("span", wb.label.replace(/^สัปดาห์ที่\s*\d+\s*·\s*/, ""), "cal-week-banner-title")
       );
-      hc.innerHTML = `<span class="wd-name">${TH_DOW_SHORT[i]}${isHol ? " · วันหยุด" : ""}</span><span class="wd-num${isAnchor ? " is-course-anchor" : ""}">${escapeHtml(formatThaiShortDate(iso, true))}</span>`;
-      head.appendChild(hc);
-    }
-    minWrap.appendChild(head);
+      banner.appendChild(bannerLeft);
+      banner.appendChild(make("span", `${weekSet.size} คาบกิจกรรม`, "cal-week-count-pill"));
+      minWrap.appendChild(banner);
 
-    const allDayRow = make("div", null, "cal-allday-row");
-    allDayRow.appendChild(make("div", "ตลอดวัน", "cal-gutter-label"));
-    for (let i = 0; i < 7; i++) {
-      const iso = addDaysISO(wb.start, i);
-      const dayItems = byDate.get(iso) || [];
-      const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
-      const adCell = make(
-        "div",
-        null,
-        `cal-allday-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
-      );
-      dayItems
-        .filter((x) => x.eff.isAllDay)
-        .forEach(({ session: s, eff }) => {
-          const chip = make("button", null, `cal-chip is-allday cat-${s.category}`);
-          chip.type = "button";
-          chip.dataset.calSessionId = s.id;
-          const txt =
-            s.category === "HOLIDAY"
-              ? `🏖 วันหยุด: ${eff.title}`
-              : s.code === "FIELD" && ctx.areaVal
-                ? `ฝึกภาคสนาม (${ctx.areaVal})`
-                : eff.title;
-          chip.appendChild(make("span", txt, "chip-title"));
-          chip.addEventListener("click", () => openEventModal(s));
-          adCell.appendChild(chip);
-        });
-      allDayRow.appendChild(adCell);
-    }
-    minWrap.appendChild(allDayRow);
-
-    const body = make("div", null, "cal-timegrid-body");
-    const gutter = make("div", null, "cal-time-gutter");
-    for (let h = HOUR_START; h < HOUR_END; h++) {
-      gutter.appendChild(make("div", `${String(h).padStart(2, "0")}:00`, "cal-hour-tick"));
-    }
-    body.appendChild(gutter);
-
-    for (let i = 0; i < 7; i++) {
-      const iso = addDaysISO(wb.start, i);
-      const dayItems = byDate.get(iso) || [];
-      const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
-      const col = make(
-        "div",
-        null,
-        `cal-day-col${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
-      );
-      col.style.height = `${(HOUR_END - HOUR_START) * HOUR_PX}px`;
-      if (isHol) {
-        const holBanner = make("div", "🏖 วันหยุดราชการ (งดการเรียนการสอนในชั้นเรียน)", "cal-week-holiday-watermark");
-        col.appendChild(holBanner);
+      const head = make("div", null, "cal-week-head");
+      head.appendChild(make("div", `W${wb.week}`, "cal-gutter-label"));
+      for (let i = 0; i < 7; i++) {
+        const iso = addDaysISO(wb.start, i);
+        const isOutside = iso < "2026-11-24" || iso > "2026-12-30";
+        const dayItems = byDate.get(iso) || [];
+        const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
+        const isEx = dayItems.some((x) => x.session.category === "EXAM");
+        const isAnchor = iso === "2026-11-25" || iso === "2026-12-30";
+        const hc = make(
+          "div",
+          null,
+          `cal-week-head-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isOutside ? " is-outside" : ""}${isHol ? " is-holiday-day" : ""}${isEx ? " is-exam-day" : ""}`
+        );
+        hc.innerHTML = `<span class="wd-name">${TH_DOW_SHORT[i]}${isHol ? " · วันหยุด" : ""}</span><span class="wd-num${isAnchor ? " is-course-anchor" : ""}">${escapeHtml(formatThaiShortDate(iso, true))}</span>`;
+        head.appendChild(hc);
       }
-      dayItems
-        .filter((x) => !x.eff.isAllDay)
-        .forEach(({ session: s, eff }) => {
-          const sMin = Math.max(HOUR_START * 60, timeToMinutes(s.startTime || "09:00"));
-          const eMin = Math.min(HOUR_END * 60, Math.max(sMin + 30, timeToMinutes(s.endTime || "12:00")));
+      minWrap.appendChild(head);
+
+      if (hasAllDay) {
+        const allDayRow = make("div", null, "cal-allday-row");
+        allDayRow.appendChild(make("div", "ตลอดวัน", "cal-gutter-label"));
+        for (let i = 0; i < 7; i++) {
+          const iso = addDaysISO(wb.start, i);
+          const dayItems = byDate.get(iso) || [];
+          const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
+          const adCell = make(
+            "div",
+            null,
+            `cal-allday-cell${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
+          );
+          dayItems
+            .filter((x) => x.eff.isAllDay)
+            .forEach(({ session: s, eff }) => {
+              const chip = make("button", null, `cal-chip is-allday cat-${s.category}`);
+              chip.type = "button";
+              chip.dataset.calSessionId = s.id;
+              const txt =
+                s.category === "HOLIDAY"
+                  ? `🏖 วันหยุด: ${eff.title}`
+                  : s.code === "FIELD" && ctx.areaVal
+                    ? `ฝึกภาคสนาม (${ctx.areaVal})`
+                    : eff.title;
+              chip.appendChild(make("span", txt, "chip-title"));
+              chip.addEventListener("click", () => openEventModal(s));
+              adCell.appendChild(chip);
+            });
+          allDayRow.appendChild(adCell);
+        }
+        minWrap.appendChild(allDayRow);
+      }
+
+      const body = make("div", null, "cal-timegrid-body");
+      const gutter = make("div", null, "cal-time-gutter");
+      for (let h = HOUR_START; h < HOUR_END; h++) {
+        gutter.appendChild(make("div", `${String(h).padStart(2, "0")}:00`, "cal-hour-tick"));
+      }
+      body.appendChild(gutter);
+
+      for (let i = 0; i < 7; i++) {
+        const iso = addDaysISO(wb.start, i);
+        const dayItems = byDate.get(iso) || [];
+        const isHol = dayItems.some((x) => x.session.category === "HOLIDAY");
+        const col = make(
+          "div",
+          null,
+          `cal-day-col${i >= 5 ? " is-weekend" : ""}${i === 5 ? " is-saturday" : ""}${isHol ? " is-holiday-day" : ""}`
+        );
+        col.style.height = `${(HOUR_END - HOUR_START) * HOUR_PX}px`;
+        if (isHol) {
+          const holBanner = make("div", "🏖 วันหยุดราชการ (งดการเรียนการสอนในชั้นเรียน)", "cal-week-holiday-watermark");
+          col.appendChild(holBanner);
+        }
+
+        const timedItems = dayItems
+          .filter((x) => !x.eff.isAllDay)
+          .map((x) => {
+            const sMin = Math.max(HOUR_START * 60, timeToMinutes(x.session.startTime || "09:00"));
+            const eMin = Math.min(HOUR_END * 60, Math.max(sMin + 30, timeToMinutes(x.session.endTime || "12:00")));
+            return { session: x.session, eff: x.eff, sMin, eMin, lane: 0, totalLanes: 1 };
+          })
+          .sort((a, b) => a.sMin - b.sMin || b.eMin - a.eMin);
+
+        let cluster = [];
+        let clusterEnd = -1;
+        const flushCluster = (items) => {
+          if (items.length <= 1) return;
+          const laneEnds = [];
+          items.forEach((it) => {
+            let placed = laneEnds.findIndex((endMin) => endMin <= it.sMin);
+            if (placed === -1) {
+              placed = laneEnds.length;
+              laneEnds.push(it.eMin);
+            } else {
+              laneEnds[placed] = it.eMin;
+            }
+            it.lane = placed;
+          });
+          items.forEach((it) => {
+            it.totalLanes = laneEnds.length;
+          });
+        };
+        timedItems.forEach((it) => {
+          if (cluster.length && it.sMin >= clusterEnd) {
+            flushCluster(cluster);
+            cluster = [];
+            clusterEnd = -1;
+          }
+          cluster.push(it);
+          clusterEnd = Math.max(clusterEnd, it.eMin);
+        });
+        flushCluster(cluster);
+
+        timedItems.forEach(({ session: s, eff, sMin, eMin, lane, totalLanes }) => {
           const topPx = ((sMin - HOUR_START * 60) / 60) * HOUR_PX;
           const heightPx = Math.max(30, ((eMin - sMin) / 60) * HOUR_PX - 2);
 
@@ -2960,6 +3083,11 @@
           block.dataset.calSessionId = s.id;
           block.style.top = `${topPx}px`;
           block.style.height = `${heightPx}px`;
+          if (totalLanes > 1) {
+            block.style.left = `calc(${(lane * 100) / totalLanes}% + 2px)`;
+            block.style.right = "auto";
+            block.style.width = `calc(${100 / totalLanes}% - 4px)`;
+          }
 
           const slideBadge = typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(s.id) ? " · 📊 Slide" : "";
           const timeLine = `${s.startTime}–${s.endTime}${s.zoom ? " · 🎥 Zoom" : ""}${slideBadge}`;
@@ -2971,12 +3099,34 @@
           block.addEventListener("click", () => openEventModal(s));
           col.appendChild(block);
         });
-      body.appendChild(col);
-    }
+        body.appendChild(col);
+      }
 
-    minWrap.appendChild(body);
-    shell.appendChild(minWrap);
-    wrap.replaceChildren(shell);
+      minWrap.appendChild(body);
+      shell.appendChild(minWrap);
+      stack.appendChild(shell);
+    });
+
+    wrap.replaceChildren(stack);
+
+    if (jumpPillMap.size > 1 && typeof IntersectionObserver === "function") {
+      weekScrollObserver = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((en) => en.isIntersecting)
+            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible.length > 0) {
+            const wk = Number(visible[0].target.dataset.week);
+            if (wk >= 1 && wk <= 6) {
+              state.calWeek = wk;
+              jumpPillMap.forEach((btn, k) => btn.classList.toggle("is-active", k === wk));
+            }
+          }
+        },
+        { rootMargin: "-90px 0px -60% 0px", threshold: [0, 0.15, 0.4] }
+      );
+      stack.querySelectorAll(".cal-week-shell").forEach((sec) => weekScrollObserver.observe(sec));
+    }
   }
 
   /* ---------- View 3: Detailed Agenda / Daily Cards (Full-Card Color Coding for Rapid Skim/Scan) ---------- */
