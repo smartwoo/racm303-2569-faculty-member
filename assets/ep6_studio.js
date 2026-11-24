@@ -1304,6 +1304,24 @@
             slot.style.minHeight = `${h}px`;
           }
           studioState.isPipActive = true;
+          if (
+            studioState.timelineSync &&
+            studioState.isPlaying &&
+            instance.lastPipAutoScrolledSlide !== studioState.activeSlideId
+          ) {
+            instance.lastPipAutoScrolledSlide = studioState.activeSlideId;
+            const activeCard = root.querySelector(`#ep6AtlasSlideCard-${studioState.activeSlideId}`);
+            if (activeCard) {
+              const r = activeCard.getBoundingClientRect();
+              if (r.top < 30 || r.top > window.innerHeight * 0.65) {
+                setTimeout(() => {
+                  if (studioState.isPipActive && studioState.timelineSync) {
+                    scrollAtlasToSlide(studioState.activeSlideId, true);
+                  }
+                }, 80);
+              }
+            }
+          }
         }
         dock.classList.add("is-pip-floating");
         dock.classList.toggle("is-pip-left", studioState.pipCorner === "left");
@@ -1454,10 +1472,11 @@
                   const prevSl = sl.id > 1 ? getSlideById(DATA, sl.id - 1) : null;
                   const nextSl = sl.id < TOTAL_SLIDES ? getSlideById(DATA, sl.id + 1) : null;
                   return `
-                <article class="ep6-flow-slide-card ${sl.id === studioState.activeSlideId ? "is-active-playing" : ""}" id="ep6AtlasSlideCard-${sl.id}" data-slide-card="${sl.id}">
+                <article class="ep6-flow-slide-card ${sl.id === studioState.activeSlideId ? "is-active-playing" : sl.id < studioState.activeSlideId ? "is-completed-slide" : ""}" id="ep6AtlasSlideCard-${sl.id}" data-slide-card="${sl.id}">
                   <div class="ep6-fsc-left">
                     <div class="ep6-fsc-meta">
                       <span class="ep6-fsc-num">Slide ${sl.id} / ${TOTAL_SLIDES} <small>(หน้า ${sl.deckSlideNo})</small></span>
+                      <span class="ep6-fsc-sync-badge ${sl.id === studioState.activeSlideId ? "is-live" : sl.id < studioState.activeSlideId ? "is-done" : ""}" data-fsc-sync-badge="${sl.id}" ${sl.id <= studioState.activeSlideId ? "" : "hidden"}>${sl.id === studioState.activeSlideId ? "▶ กำลังเล่นช่วงนี้" : "✓ ผ่านแล้ว"}</span>
                       <button type="button" class="ep6-play-chip" data-atlas-seek="${sl.startSec}">▶ ${esc(sl.timeLabel)}</button>
                     </div>
                     <div class="ep6-fsc-thumb" data-zoom-slide="${sl.id}" title="คลิกเพื่อขยายภาพสไลด์ขนาดเต็ม">
@@ -1473,8 +1492,8 @@
                       ${(sl.verbatimQuotes || [])
                         .map(
                           (vq) => `
-                        <div class="ep6-fsc-qitem">
-                          <button type="button" class="ep6-qtime-mini" data-atlas-seek="${vq.tSec}">▶ ${esc(vq.time)}</button>
+                        <div class="ep6-fsc-qitem" data-q-sec="${vq.tSec}">
+                          <button type="button" class="ep6-qtime-mini" data-atlas-seek="${vq.tSec}" data-q-label="${esc(vq.time)}">▶ ${esc(vq.time)}</button>
                           <span>“${esc(vq.text)}”</span>
                         </div>
                       `
@@ -1545,6 +1564,14 @@
           );
         });
       });
+
+      const curSl = getSlideById(DATA, studioState.activeSlideId);
+      const curQuotes = (curSl && curSl.verbatimQuotes) || [];
+      let curQIdx = 0;
+      for (let i = 0; i < curQuotes.length; i++) {
+        if (studioState.currentSec >= curQuotes[i].tSec - 2) curQIdx = i;
+      }
+      syncAtlasTimelineTicks(studioState.currentSec, studioState.activeSlideId, curQIdx);
     }
 
     // Wire Module Switcher Cards
@@ -1585,8 +1612,24 @@
 
     root.querySelector("#ep6ResetWorkspaceBtn")?.addEventListener("click", () => {
       studioState.layoutMode = "balanced";
+      studioState.timelineSync = true;
       studioState.panels = { ...DEFAULT_PANELS };
+      syncTimelineSyncControls();
       applyWorkspaceLayout();
+    });
+
+    root.querySelectorAll("[data-timeline-sync-btn]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        studioState.timelineSync = !studioState.timelineSync;
+        syncTimelineSyncControls();
+        savePersistedPrefs();
+        if (
+          studioState.timelineSync &&
+          (btn.hasAttribute("data-atlas-sync-trigger") || btn.hasAttribute("data-pip-sync-pill") || isUserInAtlasZone())
+        ) {
+          scrollAtlasToSlide(studioState.activeSlideId, true);
+        }
+      });
     });
 
     root.querySelectorAll("[data-imgq]").forEach((btn) => {
@@ -1750,23 +1793,12 @@
       applyPipMode(true);
     });
 
-    // Explicit click-only button to jump down to active slide in the Atlas
+    // Explicit click-only button to jump down to active slide in the Atlas & enable Timeline Sync
     root.querySelector("#ep6JumpToActiveCardBtn")?.addEventListener("click", () => {
-      if (!studioState.panels.atlas) {
-        studioState.panels.atlas = true;
-        applyWorkspaceLayout();
-      }
-      if (studioState.atlasView !== "flow") {
-        studioState.atlasView = "flow";
-        root.querySelectorAll("[data-aview]").forEach((b) =>
-          b.classList.toggle("is-active", b.getAttribute("data-aview") === "flow")
-        );
-        renderAtlasBody();
-      }
-      const card = root.querySelector(`#ep6AtlasSlideCard-${studioState.activeSlideId}`);
-      if (card) {
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      studioState.timelineSync = true;
+      syncTimelineSyncControls();
+      savePersistedPrefs();
+      scrollAtlasToSlide(studioState.activeSlideId, true);
     });
 
     // Wire Scrubber Drag/Click + Hover Tooltip — ZERO unwanted page scroll!
