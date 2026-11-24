@@ -917,7 +917,7 @@
       const quotes = slide.verbatimQuotes || [];
       let activeQuoteIdx = 0;
       for (let i = 0; i < quotes.length; i++) {
-        if (clamped >= quotes[i].tSec - 0.35) {
+        if (clamped >= quotes[i].tSec - 0.12) {
           activeQuoteIdx = i;
         }
       }
@@ -944,8 +944,9 @@
             : `Slide ${slide.id}/${TOTAL_SLIDES}`;
         }
         if (upvDots) {
+          upvDots.classList.toggle("is-dense", quotes.length > 8);
           upvDots.innerHTML =
-            quotes.length > 1
+            quotes.length > 1 && quotes.length <= 16
               ? quotes
                   .map(
                     (qItem, qIdx) =>
@@ -1213,15 +1214,28 @@
             badge.hidden = true;
           }
         }
+        const qWrap = card.querySelector(".ep6-fsc-quotes");
         card.querySelectorAll(".ep6-fsc-qitem").forEach((qEl, qIdx) => {
           const qBtn = qEl.querySelector(".ep6-qtime-mini");
           const baseTime = qBtn ? qBtn.getAttribute("data-q-label") || "" : "";
           const qSpeaking = isCurrent && qIdx === activeQIdx;
           const qDone = isDone || (isCurrent && qIdx < activeQIdx);
+          const wasSpeaking = qEl.classList.contains("is-speaking");
           qEl.classList.toggle("is-speaking", qSpeaking);
           qEl.classList.toggle("is-spoken-done", qDone);
           if (qBtn && baseTime) {
             qBtn.textContent = `${qDone ? "✓" : "▶"} ${baseTime}`;
+          }
+          if (
+            qSpeaking &&
+            !wasSpeaking &&
+            studioState.timelineSync &&
+            qWrap &&
+            qWrap.classList.contains("is-scrollable-vq") &&
+            !qWrap.classList.contains("is-expanded")
+          ) {
+            const relTop = qEl.offsetTop - qWrap.offsetTop - 28;
+            qWrap.scrollTo({ top: Math.max(0, relTop), behavior: "smooth" });
           }
         });
       });
@@ -1679,9 +1693,9 @@
                   </div>
 
                   <div class="ep6-fsc-mid">
-                    <div class="ep6-fsc-col-label">① Verbatim Quotation (คำพูดผู้สอนคำต่อคำ)</div>
+                    <div class="ep6-fsc-col-label">① Verbatim Quotation ครบตาม CC (${(sl.verbatimQuotes || []).length} ช่วงต่อเนื่อง)</div>
                     <h5 class="ep6-fsc-title">${esc(sl.title)}</h5>
-                    <div class="ep6-fsc-quotes">
+                    <div class="ep6-fsc-quotes ${(sl.verbatimQuotes || []).length > 6 ? "is-scrollable-vq" : ""}" id="ep6AtlasVqWrap-${sl.id}">
                       ${(sl.verbatimQuotes || [])
                         .map(
                           (vq) => `
@@ -1693,6 +1707,7 @@
                         )
                         .join("")}
                     </div>
+                    ${(sl.verbatimQuotes || []).length > 6 ? `<button type="button" class="ep6-fsc-expand-vq-btn" data-expand-vq="${sl.id}">↕ กางดูคำพูดทั้งหมด (${(sl.verbatimQuotes || []).length} ช่วง)</button>` : ""}
                   </div>
 
                   <div class="ep6-fsc-right">
@@ -1758,11 +1773,22 @@
         });
       });
 
+      body.querySelectorAll("[data-expand-vq]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sid = btn.getAttribute("data-expand-vq");
+          const wrap = root.querySelector(`#ep6AtlasVqWrap-${sid}`);
+          if (!wrap) return;
+          const expanded = wrap.classList.toggle("is-expanded");
+          const count = wrap.querySelectorAll(".ep6-fsc-qitem").length;
+          btn.textContent = expanded ? "▴ ย่อกล่องคำพูด" : `↕ กางดูคำพูดทั้งหมด (${count} ช่วง)`;
+        });
+      });
+
       const curSl = getSlideById(DATA, studioState.activeSlideId);
       const curQuotes = (curSl && curSl.verbatimQuotes) || [];
       let curQIdx = 0;
       for (let i = 0; i < curQuotes.length; i++) {
-        if (studioState.currentSec >= curQuotes[i].tSec - 2) curQIdx = i;
+        if (studioState.currentSec >= curQuotes[i].tSec - 0.12) curQIdx = i;
       }
       syncAtlasTimelineTicks(studioState.currentSec, studioState.activeSlideId, curQIdx);
     }
@@ -1883,7 +1909,7 @@
       jumpToSlide(nextId, studioState.isPlaying);
     };
 
-    // Step across Verbatim Quotes (Under-Player ▲ / ▼ controls)
+    // Step across Verbatim Quotes chronologically (Under-Player ▲ / ▼ controls)
     const stepVerbatimQuote = (dir) => {
       const allQuotes = [];
       (DATA.slides || []).forEach((sl) => {
@@ -1891,15 +1917,16 @@
           allQuotes.push({ slideId: sl.id, qIdx, tSec: Number(vq.tSec) || sl.startSec });
         });
       });
+      allQuotes.sort((a, b) => a.tSec - b.tSec);
       if (!allQuotes.length) return;
       let curFlatIdx = 0;
       for (let i = 0; i < allQuotes.length; i++) {
-        if (studioState.currentSec >= allQuotes[i].tSec - 0.35) {
+        if (studioState.currentSec >= allQuotes[i].tSec - 0.12) {
           curFlatIdx = i;
         }
       }
       const nextFlatIdx = Math.max(0, Math.min(allQuotes.length - 1, curFlatIdx + dir));
-      seekToSecond(allQuotes[nextFlatIdx].tSec + 0.1, true);
+      seekToSecond(allQuotes[nextFlatIdx].tSec + 0.08, true);
     };
     root.querySelector("#ep6UpvPrevBtn")?.addEventListener("click", () => stepVerbatimQuote(-1));
     root.querySelector("#ep6UpvNextBtn")?.addEventListener("click", () => stepVerbatimQuote(1));
