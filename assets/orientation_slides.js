@@ -1253,7 +1253,7 @@
           <div class="or-infog-split is-even is-full-h">
             <div class="or-card is-navy-tint is-vcenter" data-fit-solo="1">
               <span class="or-card-kicker">6-STEP GUIDED LEARNING (ST1 และ HS1–HS6)</span>
-              <h3 class="or-card-title">จากการอ่านเตรียมความพร้อมสู่อภิปรายกลุ่มย่อยและดู VDO ทบทวน</h3>
+              <h3 class="or-card-title">จากการอ่านเตรียมความพร้อมสู่การอภิปรายกลุ่มย่อยและดู VDO ทบทวน</h3>
               <ul class="or-list is-s07-list">
                 <li><strong>ขั้นที่ 1–2 เอกสารฉบับเต็มและฉบับย่อ:</strong> ศึกษาแนวคิดหลักและตอบคำถามนำก่อนเข้าชั้นเรียน</li>
                 <li><strong>ขั้นที่ 3 แบบทดสอบและคำศัพท์ทบทวน:</strong> ฝึกทบทวนความเข้าใจด้วยตนเองเพื่อพัฒนาการเรียนรู้</li>
@@ -2049,6 +2049,8 @@
   const THAI_COMPOUND_RE = new RegExp(
     "(" +
       [
+        "ศาสตร์วิทยาระบบสุขภาพ",
+        "วิทยาศาสตร์ระบบสุขภาพ",
         "สหสาขาวิชาชีพ",
         "สหวิชาชีพ",
         "เวชศาสตร์ชุมชน",
@@ -2117,6 +2119,35 @@
         "วิเคราะห์",
         "ประเมินผล",
         "วินิจฉัย",
+        "อภิปราย",
+        "กลุ่มย่อย",
+        "การเรียนรู้",
+        "เรียนรู้",
+        "นำเสนอ",
+        "ได้จริง",
+        "ระบาดฯ",
+        "แหล่งฝึก",
+        "ข้างเตียง",
+        "ต่อเนื่อง",
+        "แม่นยำ",
+        "ขาดช่วง",
+        "ป่วยซ้ำ",
+        "ส่งต่อ",
+        "รองรับ",
+        "ประคอง",
+        "เกื้อหนุน",
+        "เชื่อมโยง",
+        "สอดประสาน",
+        "เปลี่ยนแปลง",
+        "สะท้อนคิด",
+        "ยั่งยืน",
+        "รอบด้าน",
+        "ครบถ้วน",
+        "ครบวงจร",
+        "คุ้มค่า",
+        "รายบุคคล",
+        "รายวิชา",
+        "หลักสูตร",
         "สอบซ่อม",
         "ลงทะเบียน",
         "จัดวางใหม่",
@@ -2188,9 +2219,17 @@
     );
     if (isPhoneReflowMode() && !document.body.classList.contains("is-printing-orientation-deck")) {
       allScaled.forEach((el) => el.style.removeProperty("--fit-scale"));
+      canvas._lastFitSig = "";
       return;
     }
     if (canvas.clientWidth < 120 || canvas.clientHeight < 80) return;
+
+    const s02Grid = canvas.querySelector(".or-s02-3fig-grid");
+    const focusKey = s02Grid ? s02Grid.getAttribute("data-s02-focus") || "0" : "";
+    const printKey = document.body.classList.contains("is-printing-orientation-deck") ? "P" : "S";
+    const fitSig = `${canvas.clientWidth}x${canvas.clientHeight}:${focusKey}:${printKey}`;
+    if (canvas._lastFitSig === fitSig) return;
+    canvas._lastFitSig = fitSig;
 
     canvas.setAttribute("data-measuring", "1");
 
@@ -2273,8 +2312,17 @@
   function wireImageLoadRefit(rootEl) {
     if (!rootEl) return;
     rootEl.querySelectorAll("img").forEach((img) => {
+      if (img.closest && img.closest("[data-prem-stage]")) return;
       if (!img.complete) {
-        img.addEventListener("load", scheduleFitOnResize, { once: true });
+        img.addEventListener(
+          "load",
+          () => {
+            const c = img.closest && img.closest(".or-slide-canvas");
+            if (c) c._lastFitSig = "";
+            scheduleFitOnResize();
+          },
+          { once: true }
+        );
       }
     });
   }
@@ -3266,6 +3314,7 @@
 
   function applyS02DomFocus(targetFocus, animSlot) {
     state.s02Focus = targetFocus;
+    const domFocus = targetFocus === 4 ? 0 : targetFocus;
     const modal = document.getElementById("orientationDeckModal");
     if (!modal || modal.hidden) return false;
     const canvas = modal.querySelector('.or-slide-canvas[data-slide-id="s02-third-pillar-why"]');
@@ -3282,16 +3331,22 @@
     const plateFirst = !reduceMotion && plateEl && plateEl.offsetParent !== null ? plateEl.getBoundingClientRect() : null;
     const boxFirst = !reduceMotion && boxEl && boxEl.offsetParent !== null ? boxEl.getBoundingClientRect() : null;
 
-    grid.setAttribute("data-s02-focus", String(targetFocus));
+    grid.setAttribute("data-s02-focus", String(domFocus));
 
     const footNum = canvas.querySelector(".or-sld-foot-num");
-    const stepLabels = { 0: "", 1: " · ภาพ 1 (Fig. 1.4)", 2: " · ภาพ 2A (Framework)", 3: " · ภาพ 2B (Patient Focus)" };
+    const stepLabels = {
+      0: "",
+      1: " · ภาพ 1 (Fig. 1.4)",
+      2: " · ภาพ 2A (Framework)",
+      3: " · ภาพ 2B (Patient Focus)",
+      4: " · ภาพรวมสรุป"
+    };
     if (footNum) {
       footNum.textContent = `03 / ${SLIDES.length}${stepLabels[targetFocus] || ""}`;
     }
     const cchNum = document.querySelector("#orClickerCornerHud .or-cch-num");
     if (cchNum) {
-      const shortLabels = { 0: "", 1: " [1]", 2: " [2A]", 3: " [2B]" };
+      const shortLabels = { 0: "", 1: " [1]", 2: " [2A]", 3: " [2B]", 4: " [รวม]" };
       cchNum.textContent = `03${shortLabels[targetFocus] || ""} / ${SLIDES.length}`;
     }
     flashStepToast();
@@ -3299,10 +3354,10 @@
     fitSingleSlideCanvas(canvas);
 
     if (!reduceMotion && activeCard) {
-      const dur = targetFocus === 0 ? 340 : 450;
+      const dur = domFocus === 0 ? 360 : 450;
       animateFlipElement(plateEl, plateFirst, dur);
       animateFlipElement(boxEl, boxFirst, dur);
-      if (targetFocus === 0) {
+      if (domFocus === 0) {
         grid.querySelectorAll(".or-s02-flow-card").forEach((card) => {
           if (card === activeCard || typeof card.animate !== "function") return;
           try {
@@ -3380,10 +3435,19 @@
           }, 365);
           return;
         }
-        // state.s02Focus === 3 -> proceed to Slide 04
+        if (state.s02Focus === 3) {
+          // Zoom out Fig 2B back to full 3-figure Overview and WAIT for the next clicker press!
+          applyS02DomFocus(4, 3);
+          return;
+        }
+        // state.s02Focus === 4 -> proceed to next slide on clicker press!
         goToSlide(state.slideIdx + 1, { s02Focus: 0 });
         return;
       } else {
+        if (state.s02Focus === 4) {
+          applyS02DomFocus(3, 3);
+          return;
+        }
         if (state.s02Focus === 3) {
           applyS02DomFocus(0, 3);
           state.s02PendingTarget = 2;
@@ -3417,10 +3481,10 @@
       }
     }
 
-    // Stepping backward from Slide 04 lands on Slide 03's final spotlight (2B) for seamless reverse replay
+    // Stepping backward from Slide 04 lands on Slide 03's final overview (4) for seamless reverse replay
     const targetIdx = state.slideIdx + d;
     if (d < 0 && targetIdx >= 0 && SLIDES[targetIdx] && SLIDES[targetIdx].id === "s02-third-pillar-why") {
-      goToSlide(targetIdx, { s02Focus: 3 });
+      goToSlide(targetIdx, { s02Focus: 4 });
       return;
     }
     goToSlide(targetIdx, { s02Focus: 0 });
@@ -3481,7 +3545,7 @@
                 <div class="or-cg-krow"><kbd>PageUp</kbd> <kbd>&larr;</kbd> <kbd>Backspace</kbd><span>สไลด์ก่อนหน้า (Previous Slide)</span></div>
                 <div class="or-cg-krow"><kbd>F5</kbd> หรือ <kbd>C</kbd><span>เข้า/ออกโหมด <strong>Keynote Pitch Stage</strong> (ซ่อนแถบเมนูอัตโนมัติ)</span></div>
                 <div class="or-cg-krow"><kbd>.</kbd> หรือ <kbd>B</kbd><span>พักหน้าจอดำ <strong>Blackout Stage</strong> (รองรับปุ่มจอดำบน Clicker ทุกรุ่น)</span></div>
-                <div class="or-cg-krow"><kbd>1–20</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
+                <div class="or-cg-krow"><kbd>1–19</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
                 <div class="or-cg-krow"><kbd>L</kbd> เลเซอร์ · <kbd>H</kbd> ซ่อน/แสดงแถบ · <kbd>T</kbd> โทนสว่าง/มืด<span>ควบคุมเวทีครบมือโดยไม่ต้องจับเมาส์</span></div>
               </div>
               <div class="or-cg-actions">
@@ -3993,7 +4057,7 @@
         const slotNum = Number(card.getAttribute("data-s02-slot")) || 0;
         if (!slotNum) return;
         state.autoPlay = false;
-        if (state.s02Focus === 0) {
+        if (state.s02Focus === 0 || state.s02Focus === 4) {
           applyS02DomFocus(slotNum, slotNum);
         } else {
           stepSlide(1);
@@ -4038,7 +4102,10 @@
     applyZoomToCurrentSlide(1);
     wireImageLoadRefit(modal);
     wireLaserIfActive(modal);
-    if (cur.isCover) animateCoverKpis(modal);
+    if (cur.isCover) {
+      animateCoverKpis(modal);
+      setTimeout(() => preloadPremUpcoming(true), 160);
+    }
     if (onPremSlideNow) wirePremScreensaver(modal);
     scheduleAutoPlayTick();
     if (state.clickerStage || state.presentationMode) {

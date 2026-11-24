@@ -5301,8 +5301,16 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   }
   body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-card,
   body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-schematic-box,
-  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-visual-pillar-copy {
+  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-visual-pillar-copy,
+  .or-slide-canvas.is-io-pitch .or-card,
+  .or-slide-canvas.is-io-pitch .or-schematic-box,
+  .or-slide-canvas.is-io-pitch .or-visual-pillar-copy {
     overflow: visible !important;
+  }
+  body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch .or-grid-6,
+  .or-slide-canvas.is-io-pitch .or-grid-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
   }
   body.is-printing-orientation-deck .or-slide-canvas.is-io-pitch:last-child {
     break-after: auto;
