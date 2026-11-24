@@ -11113,6 +11113,11 @@
     if (/^ST1$/i.test(String(modCode || ""))) {
       state.activeHsModule = "ST1";
       state.lsDriveScope = "module";
+      const customSt1 = getSlidesRegistry()["w1-d1-st"];
+      if (!customSt1 && window.RACM_ST1_DECK) {
+        window.RACM_ST1_DECK.open(0);
+        return;
+      }
       openSystemsForum("w1-d1-st", "lecture-slides");
       return;
     }
@@ -12632,10 +12637,10 @@
           fileName: "RACM303_ใบงาน_Discussion_รวมทุกบท_HS1-HS6_(เลื่อนอ่านยาว).web",
           kicker: "📜 ใบงาน Discussion รวมทุกบท (Scroll)",
           headCls: "is-concise",
-          title: "ใบงานกรณีศึกษารวมครบ HS1–HS6 (11 กรณี · 21 ข้อย่อย)",
+          title: "ใบงานกรณีศึกษารวมครบ HS1–HS6 (12 กรณี · 23 ข้อย่อย)",
           subDesc: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทุกกรณีศึกษาในหน้าเดียว สำหรับทบทวนภาพรวมหรือพิมพ์เตรียมสอบ Open Note",
           chipLabel: "Web Scroll · ครบ 6 บท",
-          meta: "HS1–HS6 · 11 กรณีศึกษา",
+          meta: "HS1–HS6 · 12 กรณีศึกษา",
           onOpen: () => {
             state.hsdViewMode = "scroll";
             state.hsdModule = "ALL";
@@ -14824,16 +14829,20 @@
     }
 
     const sfExtMeta = detectSlideExtMeta(slideRec);
+    const isBuiltInInteractiveDeck = Boolean(slideRec && (slideRec.isBuiltInOrientation || slideRec.isBuiltInSt1Deck));
     const isDirectDl =
-      sfExtMeta.extKind === "pptx" || sfExtMeta.extKind === "key" || sfExtMeta.extKind === "docx";
+      !isBuiltInInteractiveDeck &&
+      (sfExtMeta.extKind === "pptx" || sfExtMeta.extKind === "key" || sfExtMeta.extKind === "docx");
 
     if (slideRec) {
       const openSlBtn = make(
         "button",
         isDirectDl
           ? `⬇ ดาวน์โหลดไฟล์ ${sfExtMeta.extBadge} (${sess.code})`
+          : isBuiltInInteractiveDeck
+          ? `🖥️ ④ เปิด Slide ${sess.code} (${sfExtMeta.extBadge} · 16:9)`
           : `📊 เปิด Slide / ไฟล์สอน (${sess.code} · ${sfExtMeta.extBadge})`,
-        sessFullDoc ? "tv-hero-btn is-glass" : "tv-hero-btn is-primary"
+        sessFullDoc ? "tv-hero-btn is-glass is-slide-uploaded-hero" : "tv-hero-btn is-primary"
       );
       openSlBtn.type = "button";
       openSlBtn.addEventListener("click", () => openSessionSlide(sess.id, isDirectDl));
@@ -14941,6 +14950,23 @@
         dc.href = `exports/docx/${encodeURIComponent(sessConciseDoc.id)}.docx`;
         dc.setAttribute("download", `RACM303_${sessConciseDoc.id}_Abridged.docx`);
         docBtnRow.appendChild(dc);
+      }
+      if (sess.code === "ST1") {
+        const bs = make("button", "🖥️ ④ เปิด Slide ST1 (16 สไลด์ · 16:9)", "btn sm slide-ready-btn");
+        bs.type = "button";
+        bs.addEventListener("click", () => {
+          if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
+          else openSessionSlide("w1-d1-st", false);
+        });
+        docBtnRow.appendChild(bs);
+        const sPptx = make("a", "⬇ Slide ST1 (.pptx)", "btn sm");
+        sPptx.href = "exports/pptx/RACM303_2569_ST1_Slides.pptx";
+        sPptx.setAttribute("download", "RACM303_2569_ST1_Slides.pptx");
+        docBtnRow.appendChild(sPptx);
+        const sPdf = make("a", "⬇ Slide ST1 (PDF)", "btn sm pdf-red");
+        sPdf.href = "exports/pdf/RACM303_2569_ST1_Slides.pdf";
+        sPdf.setAttribute("download", "RACM303_2569_ST1_Slides.pdf");
+        docBtnRow.appendChild(sPdf);
       }
       docShelf.appendChild(docBtnRow);
       wrap.appendChild(docShelf);
@@ -28396,7 +28422,7 @@
       storageBox.innerHTML =
         `<div class="gdrive-storage-head">☁️ <span>คลังสไลด์สอนพร้อมใช้งาน</span></div>` +
         `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:100%"></div></div>` +
-        `<div class="gdrive-storage-caption">ครบทั้ง 6 คาบ (HS1–HS6) · 11 กรณีศึกษา · 21 ข้อย่อย พร้อมเฉลย Teacher Key รายขั้น</div>`;
+        `<div class="gdrive-storage-caption">ครบทั้ง 6 คาบ (HS1–HS6) · 12 กรณีศึกษา · 23 ข้อย่อย พร้อมเฉลย Teacher Key รายขั้น</div>`;
     } else {
       const pct = allProg.total > 0 ? Math.min(100, Math.round((allProg.filled / allProg.total) * 100)) : 0;
       storageBox.innerHTML =
@@ -28542,7 +28568,7 @@
             icoCls: "is-docx",
             icoTxt: "W",
             name: "RACM303_ใบงานรวมทุกบท_HS1-HS6_โหมดเลื่อนอ่านยาว.web",
-            sub: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทั้ง 11 กรณีศึกษา (21 ข้อย่อย) ในหน้าเดียว",
+            sub: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทั้ง 12 กรณีศึกษา (23 ข้อย่อย) ในหน้าเดียว",
             badge: "Web Scroll",
             onClick: () => {
               closeHsdGoogleDrivePickerModal();
@@ -33156,6 +33182,9 @@
     if (rec.isBuiltInOrientation) {
       return { extKind: "pptx", extBadge: "20 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
     }
+    if (rec.isBuiltInSt1Deck) {
+      return { extKind: "pptx", extBadge: "16 SLIDES", icoCls: "is-pptx", icoTxt: "P" };
+    }
     const fn = String(rec.fileName || rec.repoPath || "").toLowerCase();
     const mt = String(rec.mime || "").toLowerCase();
     const url = String(rec.externalUrl || "").toLowerCase();
@@ -33256,6 +33285,17 @@
         pptxHref: "exports/pptx/RACM303_2569_Orientation_Slides.pptx",
         pdfHref: "exports/pdf/RACM303_2569_Orientation_Slides.pdf",
         uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+        uploadedAt: "ประจำรายวิชา 2569"
+      };
+    }
+    if (sessionId === "w1-d1-st" || sessionId === "hs-st1-lec") {
+      return {
+        sessionId: "w1-d1-st",
+        isBuiltInSt1Deck: true,
+        fileName: "Slide ST1: Systems & Systems Thinking (16 สไลด์ · 16:9)",
+        pptxHref: "exports/pptx/RACM303_2569_ST1_Slides.pptx",
+        pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf",
+        uploadedBy: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ · ผศ. นพ.บวรศม ลีระพันธ์",
         uploadedAt: "ประจำรายวิชา 2569"
       };
     }
@@ -33460,6 +33500,22 @@
   async function openSessionSlide(sessionId, forceDownload) {
     const rec = getSessionSlideRecord(sessionId);
     if (!rec) return;
+    if (rec.isBuiltInSt1Deck) {
+      if (!forceDownload && window.RACM_ST1_DECK) {
+        window.RACM_ST1_DECK.open(0);
+        return;
+      }
+      const href = rec.pptxHref || rec.pdfHref;
+      if (href) {
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = href.split("/").pop() || "RACM303_2569_ST1_Slides.pptx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      return;
+    }
     if (rec.isBuiltInOrientation) {
       if (!forceDownload && window.RACM_ORIENTATION_DECK) {
         window.RACM_ORIENTATION_DECK.open(0);
@@ -41619,6 +41675,7 @@
     switchTab,
     openFacultyPrintoutHub: () => openFacultyPrintoutHub(),
     openOrientationDeck: (idx, opts) => window.RACM_ORIENTATION_DECK && window.RACM_ORIENTATION_DECK.open(idx, opts),
+    openSt1Deck: (idx, opts) => window.RACM_ST1_DECK && window.RACM_ST1_DECK.open(idx, opts),
     openHsDiscussion,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),
