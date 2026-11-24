@@ -1095,7 +1095,7 @@ a:hover {
 .student-portrait {
   width: 100%;
   aspect-ratio: 230 / 312;
-  max-height: 222px;
+  max-height: 320px;
   background: #f2f2f7;
   border-radius: 10px;
   display: flex;
@@ -1792,8 +1792,10 @@ a:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
-  .student-portrait {
-    height: 165px;
+  .student-card .student-portrait:not(.compact-avatar):not(.stu-quick-portrait) {
+    height: auto;
+    aspect-ratio: 230 / 312;
+    max-height: none;
   }
   .srn-grid {
     grid-template-columns: 1fr;
@@ -5424,7 +5426,7 @@ a:hover {
     position: relative;
   }
   .student-card .student-portrait:not(.compact-avatar):not(.stu-quick-portrait) {
-    max-height: calc(222px * var(--roster-scale, 1));
+    max-height: calc(320px * var(--roster-scale, 1));
   }
   .student-card h3 {
     font-size: calc(16px * var(--roster-scale, 1));
@@ -10827,16 +10829,16 @@ details.bulk-key-archive {
 
 .fm-avatar-wrap {
   position: relative;
-  width: 46px;
-  height: 46px;
-  margin-bottom: -5px;
+  width: 50px;
+  height: 50px;
+  margin-bottom: -1px;
   z-index: 2;
 }
 
 .fm-board.is-wide .fm-avatar-wrap {
-  width: 58px;
-  height: 58px;
-  margin-bottom: -6px;
+  width: 62px;
+  height: 62px;
+  margin-bottom: -1px;
 }
 
 .fm-avatar-ring {
@@ -10878,8 +10880,9 @@ details.bulk-key-archive {
 
 .fm-collar-badge {
   position: absolute;
-  right: -7px;
-  bottom: 1px;
+  right: -9px;
+  bottom: -2px;
+  z-index: 4;
   padding: 1.5px 5px;
   border-radius: 6px;
   background: linear-gradient(
@@ -40095,19 +40098,19 @@ html[data-theme="dark"] .td-mentor-chip.is-staff {
   display: block;
 }
 
-/* ---------- Calibrated HTML Face Zoom (Matches Staff Coordinator Head Scale) ---------- */
+/* ---------- Calibrated HTML Face Zoom (100% Full-Face Non-Clipping Calibration for All 191 Portraits) ---------- */
 @media screen {
-  /* 1. 3:4 Portrait Frames (Roster Cards, Advisor Cards, Header Badges, Map Plaques, Slides, TV) */
+  /* 1. 3:4 Portrait Frames (Roster Cards, Quick Modal, Advisor/Staff Cards, Header Badges, Map Plaques, Slides, TV) */
   .student-portrait img[src*="assets/photos/6"]:not(#lightboxImg),
   .student-portrait img[src*="drive.google.com/thumbnail"]:not(#lightboxImg) {
-    object-position: 50% 6% !important;
-    transform: scale(1.36);
-    transform-origin: 50% 6%;
+    object-position: var(--stu-pox, 50%) var(--stu-poy, 10%) !important;
+    transform: scale(var(--stu-pz, 1.06));
+    transform-origin: var(--stu-pox, 50%) var(--stu-poy, 10%);
   }
 
   .student-portrait img[src*="staff_"]:not(#lightboxImg),
   .tv-adv-frame img[src*="staff_"]:not(#lightboxImg) {
-    object-position: 50% 0% !important;
+    object-position: var(--stf-ox, 50%) var(--stf-oy, 6%) !important;
     transform: none !important;
   }
 
@@ -40115,27 +40118,27 @@ html[data-theme="dark"] .td-mentor-chip.is-staff {
   .or-s09-adv-frame img[src*="advisor_"],
   .tv-adv-frame img[src*="advisor_"] {
     object-position: var(--adv-ox, 50%) var(--adv-oy, 5%) !important;
-    transform: scale(var(--adv-z, 1.60));
+    transform: scale(var(--adv-z, 1.48));
     transform-origin: var(--adv-ox, 50%) var(--adv-oy, 5%);
   }
 
-  /* 2. 1:1 Circular Avatars (Formation Pitch, Sorter Chips, Hover Popover, Discussion, Table) */
+  /* 2. 1:1 Circular Avatars (Formation Pitch, Sorter Chips, Hover Popover, Discussion, Spotlight, Table) */
   .fm-avatar-ring img[src*="assets/photos/6"]:not(#lightboxImg),
   .gsorter-chip-avatar img[src*="assets/photos/6"]:not(#lightboxImg),
   .ghp-avatar img[src*="assets/photos/6"]:not(#lightboxImg),
   .fm-avatar-ring img[src*="drive.google.com/thumbnail"]:not(#lightboxImg),
   .gsorter-chip-avatar img[src*="drive.google.com/thumbnail"]:not(#lightboxImg),
   .ghp-avatar img[src*="drive.google.com/thumbnail"]:not(#lightboxImg) {
-    object-position: 50% 10% !important;
-    transform: scale(1.22);
-    transform-origin: 50% 10%;
+    object-position: var(--stu-cox, 50%) var(--stu-coy, 18%) !important;
+    transform: scale(var(--stu-cz, 1.06));
+    transform-origin: var(--stu-cox, 50%) var(--stu-coy, 18%);
   }
 
   .gsorter-chip-avatar img[src*="staff_"]:not(#lightboxImg),
   .ghp-avatar img[src*="staff_"]:not(#lightboxImg),
   .inst-mini-av img[src*="staff_"]:not(#lightboxImg),
   .td-mentor-av img[src*="staff_"]:not(#lightboxImg) {
-    object-position: 50% 6% !important;
+    object-position: var(--stf-ox, 50%) var(--stf-coy, 14%) !important;
     transform: none !important;
   }
 
@@ -40144,25 +40147,206 @@ html[data-theme="dark"] .td-mentor-chip.is-staff {
   .inst-mini-av img[src*="advisor_"]:not(#lightboxImg),
   .td-mentor-av img[src*="advisor_"]:not(#lightboxImg) {
     object-position: var(--adv-ox, 50%) var(--adv-coy, 10%) !important;
-    transform: scale(var(--adv-cz, 1.88));
+    transform: scale(var(--adv-cz, 1.70));
     transform-origin: var(--adv-ox, 50%) var(--adv-coy, 10%);
   }
 
-  /* 3. Per-Advisor Face-Calibrated Variables (All 14 Faculty Advisors) */
-  img[src*="advisor_chatchai"]   { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 50%; --adv-oy: 5%; --adv-coy: 10%; }
-  img[src*="advisor_chathaya"]   { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 49%; --adv-oy: 6%; --adv-coy: 11%; }
-  img[src*="advisor_jakkrit"]    { --adv-z: 1.58; --adv-cz: 1.86; --adv-ox: 50%; --adv-oy: 7%; --adv-coy: 12%; }
-  img[src*="advisor_nuttawut"]   { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 48%; --adv-oy: 5%; --adv-coy: 10%; }
-  img[src*="advisor_pawin"]      { --adv-z: 1.70; --adv-cz: 2.00; --adv-ox: 65%; --adv-oy: 7%; --adv-coy: 12%; }
-  img[src*="advisor_peerasit"]   { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 53%; --adv-oy: 3%; --adv-coy: 8%;  }
-  img[src*="advisor_pharanyu"]   { --adv-z: 1.68; --adv-cz: 1.98; --adv-ox: 51%; --adv-oy: 3%; --adv-coy: 8%;  }
-  img[src*="advisor_phusit"]     { --adv-z: 1.64; --adv-cz: 1.94; --adv-ox: 50%; --adv-oy: 6%; --adv-coy: 11%; }
-  img[src*="advisor_roengrudee"] { --adv-z: 1.58; --adv-cz: 1.86; --adv-ox: 51%; --adv-oy: 5%; --adv-coy: 10%; }
-  img[src*="advisor_samrit"]     { --adv-z: 1.60; --adv-cz: 1.89; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
-  img[src*="advisor_sawanee"]    { --adv-z: 1.56; --adv-cz: 1.84; --adv-ox: 53%; --adv-oy: 4%; --adv-coy: 9%;  }
-  img[src*="advisor_warisa"]     { --adv-z: 1.44; --adv-cz: 1.72; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
-  img[src*="advisor_wich."]      { --adv-z: 1.76; --adv-cz: 2.08; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
-  img[src*="advisor_wichai"]     { --adv-z: 1.56; --adv-cz: 1.84; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
+  /* 3. Per-Staff Face-Calibrated Variables (All 8 Area Staff Coordinators) */
+  img[src*="staff_1"] { --stf-ox: 50%; --stf-oy: 8%;  --stf-coy: 14%; }
+  img[src*="staff_2"] { --stf-ox: 50%; --stf-oy: 8%;  --stf-coy: 16%; }
+  img[src*="staff_3"] { --stf-ox: 50%; --stf-oy: 8%;  --stf-coy: 12%; }
+  img[src*="staff_4"] { --stf-ox: 50%; --stf-oy: 6%;  --stf-coy: 11%; }
+  img[src*="staff_5"] { --stf-ox: 50%; --stf-oy: 10%; --stf-coy: 18%; }
+  img[src*="staff_6"] { --stf-ox: 50%; --stf-oy: 6%;  --stf-coy: 12%; }
+  img[src*="staff_7"] { --stf-ox: 50%; --stf-oy: 8%;  --stf-coy: 16%; }
+  img[src*="staff_9"] { --stf-ox: 50%; --stf-oy: 10%; --stf-coy: 18%; }
+
+  /* 4. Per-Advisor Face-Calibrated Variables (All 14 Faculty Advisors) */
+  img[src*="advisor_chatchai"]   { --adv-z: 1.48; --adv-cz: 1.70; --adv-ox: 50%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_chathaya"]   { --adv-z: 1.48; --adv-cz: 1.72; --adv-ox: 49%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_jakkrit"]    { --adv-z: 1.46; --adv-cz: 1.68; --adv-ox: 50%; --adv-oy: 7%; --adv-coy: 12%; }
+  img[src*="advisor_nuttawut"]   { --adv-z: 1.44; --adv-cz: 1.64; --adv-ox: 48%; --adv-oy: 4%; --adv-coy: 8%;  }
+  img[src*="advisor_pawin"]      { --adv-z: 1.50; --adv-cz: 1.72; --adv-ox: 63%; --adv-oy: 7%; --adv-coy: 12%; }
+  img[src*="advisor_peerasit"]   { --adv-z: 1.44; --adv-cz: 1.66; --adv-ox: 53%; --adv-oy: 3%; --adv-coy: 7%;  }
+  img[src*="advisor_pharanyu"]   { --adv-z: 1.40; --adv-cz: 1.54; --adv-ox: 51%; --adv-oy: 5%; --adv-coy: 11%; }
+  img[src*="advisor_phusit"]     { --adv-z: 1.50; --adv-cz: 1.74; --adv-ox: 50%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_roengrudee"] { --adv-z: 1.48; --adv-cz: 1.72; --adv-ox: 51%; --adv-oy: 5%; --adv-coy: 10%; }
+  img[src*="advisor_samrit"]     { --adv-z: 1.48; --adv-cz: 1.72; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_sawanee"]    { --adv-z: 1.46; --adv-cz: 1.68; --adv-ox: 53%; --adv-oy: 5%; --adv-coy: 10%; }
+  img[src*="advisor_warisa"]     { --adv-z: 1.38; --adv-cz: 1.56; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 8%;  }
+  img[src*="advisor_wich."]      { --adv-z: 1.56; --adv-cz: 1.80; --adv-ox: 51%; --adv-oy: 6%; --adv-coy: 11%; }
+  img[src*="advisor_wichai"]     { --adv-z: 1.46; --adv-cz: 1.68; --adv-ox: 51%; --adv-oy: 4%; --adv-coy: 9%;  }
+
+  /* 5. Per-Student Face-Calibrated Variables (All 169 Medical Students — Complete Crown-to-Chin Framing) */
+  img[src*="/6602007.jpg"] { --stu-pox: 55.1%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 57.0%; --stu-coy: 0.0%; --stu-cz: 1.22; }
+  img[src*="/6602049.jpg"] { --stu-pox: 45.1%; --stu-poy: 3.6%; --stu-pz: 1.26; --stu-cox: 41.4%; --stu-coy: 6.4%; --stu-cz: 1.13; }
+  img[src*="/6602053.jpg"] { --stu-pox: 47.9%; --stu-poy: 6.8%; --stu-pz: 1.32; --stu-cox: 47.3%; --stu-coy: 9.4%; --stu-cz: 1.23; }
+  img[src*="/6602080.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6602085.jpg"] { --stu-pox: 52.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 53.2%; --stu-coy: 0.0%; --stu-cz: 1.25; }
+  img[src*="/6602102.jpg"] { --stu-pox: 48.4%; --stu-poy: 2.5%; --stu-pz: 1.28; --stu-cox: 47.3%; --stu-coy: 5.6%; --stu-cz: 1.15; }
+  img[src*="/6602108.jpg"] { --stu-pox: 51.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 52.1%; --stu-coy: 0.9%; --stu-cz: 1.19; }
+  img[src*="/6602132.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 9.8%; --stu-cz: 1.0; }
+  img[src*="/6702001.jpg"] { --stu-pox: 50.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.3%; --stu-coy: 0.0%; --stu-cz: 1.18; }
+  img[src*="/6702002.jpg"] { --stu-pox: 44.4%; --stu-poy: 1.8%; --stu-pz: 1.31; --stu-cox: 41.1%; --stu-coy: 5.0%; --stu-cz: 1.17; }
+  img[src*="/6702004.jpg"] { --stu-pox: 44.0%; --stu-poy: 0.0%; --stu-pz: 1.26; --stu-cox: 39.1%; --stu-coy: 1.7%; --stu-cz: 1.13; }
+  img[src*="/6702005.jpg"] { --stu-pox: 52.2%; --stu-poy: 0.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702006.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 12.2%; --stu-cz: 1.0; }
+  img[src*="/6702007.jpg"] { --stu-pox: 49.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.7%; --stu-coy: 3.0%; --stu-cz: 1.31; }
+  img[src*="/6702008.jpg"] { --stu-pox: 10.6%; --stu-poy: 0.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 0.5%; --stu-cz: 1.0; }
+  img[src*="/6702009.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.3; --stu-cox: 50.0%; --stu-coy: 2.3%; --stu-cz: 1.17; }
+  img[src*="/6702010.jpg"] { --stu-pox: 55.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 54.7%; --stu-coy: 0.4%; --stu-cz: 1.35; }
+  img[src*="/6702011.jpg"] { --stu-pox: 44.1%; --stu-poy: 0.0%; --stu-pz: 1.09; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702012.jpg"] { --stu-pox: 48.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 48.9%; --stu-coy: 2.5%; --stu-cz: 1.34; }
+  img[src*="/6702013.jpg"] { --stu-pox: 47.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 45.9%; --stu-coy: 0.0%; --stu-cz: 1.19; }
+  img[src*="/6702014.jpg"] { --stu-pox: 45.9%; --stu-poy: 0.0%; --stu-pz: 1.3; --stu-cox: 43.4%; --stu-coy: 0.5%; --stu-cz: 1.17; }
+  img[src*="/6702015.jpg"] { --stu-pox: 51.5%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.4%; --stu-coy: 0.2%; --stu-cz: 1.35; }
+  img[src*="/6702016.jpg"] { --stu-pox: 50.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.9%; --stu-coy: 3.7%; --stu-cz: 1.22; }
+  img[src*="/6702017.jpg"] { --stu-pox: 41.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 41.5%; --stu-coy: 0.0%; --stu-cz: 1.31; }
+  img[src*="/6702018.jpg"] { --stu-pox: 46.4%; --stu-poy: 0.0%; --stu-pz: 1.19; --stu-cox: 41.2%; --stu-coy: 0.0%; --stu-cz: 1.07; }
+  img[src*="/6702019.jpg"] { --stu-pox: 41.9%; --stu-poy: 14.6%; --stu-pz: 1.32; --stu-cox: 38.2%; --stu-coy: 13.5%; --stu-cz: 1.2; }
+  img[src*="/6702020.jpg"] { --stu-pox: 39.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 39.0%; --stu-coy: 0.1%; --stu-cz: 1.31; }
+  img[src*="/6702021.jpg"] { --stu-pox: 47.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.6%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702022.jpg"] { --stu-pox: 50.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.0%; --stu-coy: 0.0%; --stu-cz: 1.25; }
+  img[src*="/6702023.jpg"] { --stu-pox: 44.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 44.0%; --stu-coy: 0.0%; --stu-cz: 1.3; }
+  img[src*="/6702024.jpg"] { --stu-pox: 46.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.1%; --stu-coy: 6.6%; --stu-cz: 1.29; }
+  img[src*="/6702025.jpg"] { --stu-pox: 44.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 42.1%; --stu-coy: 0.0%; --stu-cz: 1.19; }
+  img[src*="/6702026.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 5.5%; --stu-cz: 1.0; }
+  img[src*="/6702027.jpg"] { --stu-pox: 50.7%; --stu-poy: 5.5%; --stu-pz: 1.28; --stu-cox: 51.2%; --stu-coy: 7.4%; --stu-cz: 1.15; }
+  img[src*="/6702028.jpg"] { --stu-pox: 54.1%; --stu-poy: 0.0%; --stu-pz: 1.23; --stu-cox: 58.2%; --stu-coy: 0.0%; --stu-cz: 1.1; }
+  img[src*="/6702029.jpg"] { --stu-pox: 28.4%; --stu-poy: 0.0%; --stu-pz: 1.08; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702030.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 13.1%; --stu-cz: 1.0; }
+  img[src*="/6702031.jpg"] { --stu-pox: 45.7%; --stu-poy: 1.5%; --stu-pz: 1.11; --stu-cox: 50.0%; --stu-coy: 7.8%; --stu-cz: 1.0; }
+  img[src*="/6702032.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.27; --stu-cox: 50.1%; --stu-coy: 0.0%; --stu-cz: 1.14; }
+  img[src*="/6702033.jpg"] { --stu-pox: 49.5%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.5%; --stu-coy: 1.1%; --stu-cz: 1.34; }
+  img[src*="/6702034.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702035.jpg"] { --stu-pox: 49.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.1%; --stu-coy: 2.6%; --stu-cz: 1.19; }
+  img[src*="/6702036.jpg"] { --stu-pox: 46.9%; --stu-poy: 0.0%; --stu-pz: 1.27; --stu-cox: 44.7%; --stu-coy: 0.0%; --stu-cz: 1.14; }
+  img[src*="/6702037.jpg"] { --stu-pox: 56.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 55.6%; --stu-coy: 7.4%; --stu-cz: 1.35; }
+  img[src*="/6702038.jpg"] { --stu-pox: 39.3%; --stu-poy: 0.0%; --stu-pz: 1.26; --stu-cox: 31.1%; --stu-coy: 0.0%; --stu-cz: 1.13; }
+  img[src*="/6702039.jpg"] { --stu-pox: 52.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 52.7%; --stu-coy: 4.2%; --stu-cz: 1.27; }
+  img[src*="/6702040.jpg"] { --stu-pox: 48.9%; --stu-poy: 14.9%; --stu-pz: 1.32; --stu-cox: 48.4%; --stu-coy: 13.5%; --stu-cz: 1.19; }
+  img[src*="/6702041.jpg"] { --stu-pox: 50.7%; --stu-poy: 0.0%; --stu-pz: 1.25; --stu-cox: 51.3%; --stu-coy: 0.0%; --stu-cz: 1.12; }
+  img[src*="/6702042.jpg"] { --stu-pox: 48.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 48.2%; --stu-coy: 3.3%; --stu-cz: 1.34; }
+  img[src*="/6702043.jpg"] { --stu-pox: 46.4%; --stu-poy: 12.2%; --stu-pz: 1.32; --stu-cox: 46.1%; --stu-coy: 14.0%; --stu-cz: 1.29; }
+  img[src*="/6702044.jpg"] { --stu-pox: 66.2%; --stu-poy: 0.0%; --stu-pz: 1.08; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702046.jpg"] { --stu-pox: 47.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.4%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702047.jpg"] { --stu-pox: 33.8%; --stu-poy: 0.0%; --stu-pz: 1.05; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702048.jpg"] { --stu-pox: 46.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.5%; --stu-coy: 0.3%; --stu-cz: 1.33; }
+  img[src*="/6702049.jpg"] { --stu-pox: 47.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 47.4%; --stu-coy: 5.3%; --stu-cz: 1.33; }
+  img[src*="/6702050.jpg"] { --stu-pox: 53.9%; --stu-poy: 0.4%; --stu-pz: 1.32; --stu-cox: 54.7%; --stu-coy: 6.4%; --stu-cz: 1.25; }
+  img[src*="/6702051.jpg"] { --stu-pox: 52.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 53.8%; --stu-coy: 0.0%; --stu-cz: 1.21; }
+  img[src*="/6702052.jpg"] { --stu-pox: 47.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.8%; --stu-coy: 2.2%; --stu-cz: 1.23; }
+  img[src*="/6702053.jpg"] { --stu-pox: 52.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 53.3%; --stu-coy: 0.0%; --stu-cz: 1.24; }
+  img[src*="/6702054.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 11.1%; --stu-cz: 1.0; }
+  img[src*="/6702055.jpg"] { --stu-pox: 53.4%; --stu-poy: 0.0%; --stu-pz: 1.18; --stu-cox: 59.7%; --stu-coy: 0.0%; --stu-cz: 1.06; }
+  img[src*="/6702056.jpg"] { --stu-pox: 49.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.7%; --stu-coy: 5.5%; --stu-cz: 1.24; }
+  img[src*="/6702058.jpg"] { --stu-pox: 50.2%; --stu-poy: 10.3%; --stu-pz: 1.32; --stu-cox: 50.2%; --stu-coy: 13.9%; --stu-cz: 1.34; }
+  img[src*="/6702059.jpg"] { --stu-pox: 55.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 58.9%; --stu-coy: 3.4%; --stu-cz: 1.18; }
+  img[src*="/6702060.jpg"] { --stu-pox: 41.9%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 37.7%; --stu-coy: 0.9%; --stu-cz: 1.19; }
+  img[src*="/6702061.jpg"] { --stu-pox: 47.0%; --stu-poy: 0.0%; --stu-pz: 1.24; --stu-cox: 44.2%; --stu-coy: 2.4%; --stu-cz: 1.11; }
+  img[src*="/6702062.jpg"] { --stu-pox: 57.4%; --stu-poy: 0.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702063.jpg"] { --stu-pox: 50.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.3%; --stu-coy: 0.0%; --stu-cz: 1.35; }
+  img[src*="/6702064.jpg"] { --stu-pox: 44.6%; --stu-poy: 1.8%; --stu-pz: 1.32; --stu-cox: 43.5%; --stu-coy: 7.2%; --stu-cz: 1.25; }
+  img[src*="/6702065.jpg"] { --stu-pox: 50.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.3%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702067.jpg"] { --stu-pox: 43.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 42.5%; --stu-coy: 0.0%; --stu-cz: 1.25; }
+  img[src*="/6702068.jpg"] { --stu-pox: 49.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.7%; --stu-coy: 7.4%; --stu-cz: 1.31; }
+  img[src*="/6702069.jpg"] { --stu-pox: 26.3%; --stu-poy: 0.0%; --stu-pz: 1.1; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702070.jpg"] { --stu-pox: 54.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 54.4%; --stu-coy: 2.2%; --stu-cz: 1.3; }
+  img[src*="/6702071.jpg"] { --stu-pox: 50.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.2%; --stu-coy: 1.5%; --stu-cz: 1.31; }
+  img[src*="/6702072.jpg"] { --stu-pox: 47.7%; --stu-poy: 0.2%; --stu-pz: 1.32; --stu-cox: 46.9%; --stu-coy: 5.4%; --stu-cz: 1.23; }
+  img[src*="/6702073.jpg"] { --stu-pox: 39.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 37.0%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702074.jpg"] { --stu-pox: 53.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 52.9%; --stu-coy: 0.0%; --stu-cz: 1.34; }
+  img[src*="/6702075.jpg"] { --stu-pox: 16.5%; --stu-poy: 0.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 13.9%; --stu-cz: 1.0; }
+  img[src*="/6702076.jpg"] { --stu-pox: 44.5%; --stu-poy: 0.0%; --stu-pz: 1.25; --stu-cox: 39.8%; --stu-coy: 0.0%; --stu-cz: 1.12; }
+  img[src*="/6702077.jpg"] { --stu-pox: 50.0%; --stu-poy: 5.4%; --stu-pz: 1.32; --stu-cox: 50.0%; --stu-coy: 9.5%; --stu-cz: 1.26; }
+  img[src*="/6702078.jpg"] { --stu-pox: 49.4%; --stu-poy: 0.7%; --stu-pz: 1.32; --stu-cox: 49.4%; --stu-coy: 8.8%; --stu-cz: 1.35; }
+  img[src*="/6702079.jpg"] { --stu-pox: 44.4%; --stu-poy: 1.1%; --stu-pz: 1.28; --stu-cox: 40.6%; --stu-coy: 4.7%; --stu-cz: 1.15; }
+  img[src*="/6702080.jpg"] { --stu-pox: 45.2%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 40.2%; --stu-coy: 0.0%; --stu-cz: 1.1; }
+  img[src*="/6702081.jpg"] { --stu-pox: 47.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.4%; --stu-coy: 0.0%; --stu-cz: 1.25; }
+  img[src*="/6702082.jpg"] { --stu-pox: 51.9%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 53.9%; --stu-coy: 0.0%; --stu-cz: 1.1; }
+  img[src*="/6702083.jpg"] { --stu-pox: 48.5%; --stu-poy: 8.0%; --stu-pz: 1.32; --stu-cox: 47.9%; --stu-coy: 9.4%; --stu-cz: 1.2; }
+  img[src*="/6702084.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 8.8%; --stu-cz: 1.0; }
+  img[src*="/6702085.jpg"] { --stu-pox: 52.3%; --stu-poy: 0.0%; --stu-pz: 1.08; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702086.jpg"] { --stu-pox: 43.8%; --stu-poy: 18.2%; --stu-pz: 1.32; --stu-cox: 41.2%; --stu-coy: 16.0%; --stu-cz: 1.21; }
+  img[src*="/6702087.jpg"] { --stu-pox: 46.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.2%; --stu-coy: 0.0%; --stu-cz: 1.26; }
+  img[src*="/6702088.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.0%; --stu-coy: 4.4%; --stu-cz: 1.35; }
+  img[src*="/6702089.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 9.7%; --stu-cz: 1.0; }
+  img[src*="/6702090.jpg"] { --stu-pox: 53.8%; --stu-poy: 0.0%; --stu-pz: 1.26; --stu-cox: 56.7%; --stu-coy: 0.0%; --stu-cz: 1.13; }
+  img[src*="/6702091.jpg"] { --stu-pox: 48.4%; --stu-poy: 15.6%; --stu-pz: 1.32; --stu-cox: 48.2%; --stu-coy: 15.6%; --stu-cz: 1.27; }
+  img[src*="/6702092.jpg"] { --stu-pox: 48.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 48.1%; --stu-coy: 3.7%; --stu-cz: 1.3; }
+  img[src*="/6702093.jpg"] { --stu-pox: 31.1%; --stu-poy: 0.0%; --stu-pz: 1.13; --stu-cox: 0.0%; --stu-coy: 0.4%; --stu-cz: 1.02; }
+  img[src*="/6702094.jpg"] { --stu-pox: 47.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 47.3%; --stu-coy: 5.7%; --stu-cz: 1.26; }
+  img[src*="/6702095.jpg"] { --stu-pox: 50.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.3%; --stu-coy: 0.0%; --stu-cz: 1.3; }
+  img[src*="/6702096.jpg"] { --stu-pox: 47.3%; --stu-poy: 5.3%; --stu-pz: 1.32; --stu-cox: 47.5%; --stu-coy: 11.1%; --stu-cz: 1.35; }
+  img[src*="/6702097.jpg"] { --stu-pox: 47.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 47.2%; --stu-coy: 2.5%; --stu-cz: 1.25; }
+  img[src*="/6702098.jpg"] { --stu-pox: 50.9%; --stu-poy: 0.0%; --stu-pz: 1.31; --stu-cox: 51.5%; --stu-coy: 0.0%; --stu-cz: 1.17; }
+  img[src*="/6702099.jpg"] { --stu-pox: 57.7%; --stu-poy: 7.3%; --stu-pz: 1.32; --stu-cox: 58.5%; --stu-coy: 11.1%; --stu-cz: 1.28; }
+  img[src*="/6702100.jpg"] { --stu-pox: 40.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 37.0%; --stu-coy: 0.0%; --stu-cz: 1.22; }
+  img[src*="/6702101.jpg"] { --stu-pox: 49.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 49.4%; --stu-coy: 5.3%; --stu-cz: 1.32; }
+  img[src*="/6702102.jpg"] { --stu-pox: 59.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 62.2%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702103.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.29; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.16; }
+  img[src*="/6702104.jpg"] { --stu-pox: 35.9%; --stu-poy: 100.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 42.5%; --stu-cz: 1.0; }
+  img[src*="/6702105.jpg"] { --stu-pox: 43.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 41.3%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702106.jpg"] { --stu-pox: 36.8%; --stu-poy: 0.0%; --stu-pz: 1.27; --stu-cox: 27.2%; --stu-coy: 0.0%; --stu-cz: 1.14; }
+  img[src*="/6702107.jpg"] { --stu-pox: 48.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 48.1%; --stu-coy: 0.0%; --stu-cz: 1.29; }
+  img[src*="/6702108.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.0%; --stu-coy: 6.1%; --stu-cz: 1.34; }
+  img[src*="/6702110.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702111.jpg"] { --stu-pox: 44.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 45.0%; --stu-coy: 0.0%; --stu-cz: 1.35; }
+  img[src*="/6702112.jpg"] { --stu-pox: 46.5%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 45.6%; --stu-coy: 4.7%; --stu-cz: 1.24; }
+  img[src*="/6702113.jpg"] { --stu-pox: 41.6%; --stu-poy: 0.0%; --stu-pz: 1.25; --stu-cox: 34.4%; --stu-coy: 0.0%; --stu-cz: 1.12; }
+  img[src*="/6702114.jpg"] { --stu-pox: 53.3%; --stu-poy: 21.2%; --stu-pz: 1.32; --stu-cox: 53.1%; --stu-coy: 15.6%; --stu-cz: 1.35; }
+  img[src*="/6702115.jpg"] { --stu-pox: 36.9%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 22.0%; --stu-coy: 0.0%; --stu-cz: 1.09; }
+  img[src*="/6702116.jpg"] { --stu-pox: 47.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.8%; --stu-coy: 4.3%; --stu-cz: 1.29; }
+  img[src*="/6702117.jpg"] { --stu-pox: 46.8%; --stu-poy: 0.0%; --stu-pz: 1.29; --stu-cox: 44.7%; --stu-coy: 0.0%; --stu-cz: 1.16; }
+  img[src*="/6702118.jpg"] { --stu-pox: 48.7%; --stu-poy: 0.0%; --stu-pz: 1.2; --stu-cox: 46.9%; --stu-coy: 0.0%; --stu-cz: 1.08; }
+  img[src*="/6702119.jpg"] { --stu-pox: 47.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 47.6%; --stu-coy: 3.0%; --stu-cz: 1.31; }
+  img[src*="/6702120.jpg"] { --stu-pox: 50.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.6%; --stu-coy: 0.0%; --stu-cz: 1.33; }
+  img[src*="/6702121.jpg"] { --stu-pox: 44.1%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 37.8%; --stu-coy: 3.2%; --stu-cz: 1.1; }
+  img[src*="/6702122.jpg"] { --stu-pox: 51.2%; --stu-poy: 6.1%; --stu-pz: 1.32; --stu-cox: 51.5%; --stu-coy: 9.5%; --stu-cz: 1.24; }
+  img[src*="/6702123.jpg"] { --stu-pox: 51.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.1%; --stu-coy: 0.0%; --stu-cz: 1.35; }
+  img[src*="/6702124.jpg"] { --stu-pox: 43.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 43.1%; --stu-coy: 0.0%; --stu-cz: 1.28; }
+  img[src*="/6702125.jpg"] { --stu-pox: 52.4%; --stu-poy: 9.9%; --stu-pz: 1.32; --stu-cox: 52.6%; --stu-coy: 12.6%; --stu-cz: 1.28; }
+  img[src*="/6702126.jpg"] { --stu-pox: 54.3%; --stu-poy: 27.5%; --stu-pz: 1.32; --stu-cox: 54.1%; --stu-coy: 23.1%; --stu-cz: 1.34; }
+  img[src*="/6702127.jpg"] { --stu-pox: 47.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.8%; --stu-coy: 0.0%; --stu-cz: 1.22; }
+  img[src*="/6702128.jpg"] { --stu-pox: 49.8%; --stu-poy: 2.7%; --stu-pz: 1.32; --stu-cox: 49.7%; --stu-coy: 6.0%; --stu-cz: 1.2; }
+  img[src*="/6702129.jpg"] { --stu-pox: 51.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.3%; --stu-coy: 3.6%; --stu-cz: 1.21; }
+  img[src*="/6702130.jpg"] { --stu-pox: 49.6%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 49.3%; --stu-coy: 1.2%; --stu-cz: 1.1; }
+  img[src*="/6702131.jpg"] { --stu-pox: 55.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 58.3%; --stu-coy: 0.0%; --stu-cz: 1.2; }
+  img[src*="/6702132.jpg"] { --stu-pox: 52.1%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 52.8%; --stu-coy: 1.3%; --stu-cz: 1.22; }
+  img[src*="/6702133.jpg"] { --stu-pox: 31.5%; --stu-poy: 0.0%; --stu-pz: 1.13; --stu-cox: 0.0%; --stu-coy: 0.0%; --stu-cz: 1.01; }
+  img[src*="/6702134.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 19.9%; --stu-cz: 1.0; }
+  img[src*="/6702135.jpg"] { --stu-pox: 55.1%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 56.5%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702136.jpg"] { --stu-pox: 55.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 57.8%; --stu-coy: 0.0%; --stu-cz: 1.2; }
+  img[src*="/6702137.jpg"] { --stu-pox: 64.2%; --stu-poy: 0.0%; --stu-pz: 1.1; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702138.jpg"] { --stu-pox: 42.6%; --stu-poy: 5.5%; --stu-pz: 1.32; --stu-cox: 40.2%; --stu-coy: 8.6%; --stu-cz: 1.23; }
+  img[src*="/6702139.jpg"] { --stu-pox: 50.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.3%; --stu-coy: 5.1%; --stu-cz: 1.35; }
+  img[src*="/6702140.jpg"] { --stu-pox: 38.1%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 38.4%; --stu-coy: 1.0%; --stu-cz: 1.33; }
+  img[src*="/6702141.jpg"] { --stu-pox: 48.2%; --stu-poy: 15.1%; --stu-pz: 1.32; --stu-cox: 48.3%; --stu-coy: 13.7%; --stu-cz: 1.35; }
+  img[src*="/6702142.jpg"] { --stu-pox: 31.1%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 21.4%; --stu-coy: 0.0%; --stu-cz: 1.19; }
+  img[src*="/6702143.jpg"] { --stu-pox: 50.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 7.4%; --stu-cz: 1.0; }
+  img[src*="/6702144.jpg"] { --stu-pox: 46.2%; --stu-poy: 23.8%; --stu-pz: 1.32; --stu-cox: 46.4%; --stu-coy: 12.7%; --stu-cz: 1.35; }
+  img[src*="/6702145.jpg"] { --stu-pox: 39.6%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 40.2%; --stu-coy: 3.0%; --stu-cz: 1.35; }
+  img[src*="/6702146.jpg"] { --stu-pox: 39.2%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 34.2%; --stu-coy: 0.0%; --stu-cz: 1.2; }
+  img[src*="/6702147.jpg"] { --stu-pox: 50.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 50.3%; --stu-coy: 0.6%; --stu-cz: 1.29; }
+  img[src*="/6702148.jpg"] { --stu-pox: 53.5%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 53.4%; --stu-coy: 1.7%; --stu-cz: 1.33; }
+  img[src*="/6702149.jpg"] { --stu-pox: 33.0%; --stu-poy: 0.0%; --stu-pz: 1.04; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702150.jpg"] { --stu-pox: 73.0%; --stu-poy: 0.0%; --stu-pz: 1.03; --stu-cox: 50.0%; --stu-coy: 1.0%; --stu-cz: 1.0; }
+  img[src*="/6702151.jpg"] { --stu-pox: 47.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 46.9%; --stu-coy: 4.1%; --stu-cz: 1.26; }
+  img[src*="/6702152.jpg"] { --stu-pox: 0.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 0.0%; --stu-cz: 1.0; }
+  img[src*="/6702153.jpg"] { --stu-pox: 50.9%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 51.0%; --stu-coy: 0.3%; --stu-cz: 1.26; }
+  img[src*="/6702154.jpg"] { --stu-pox: 32.3%; --stu-poy: 36.1%; --stu-pz: 1.07; --stu-cox: 50.0%; --stu-coy: 20.6%; --stu-cz: 1.0; }
+  img[src*="/6702155.jpg"] { --stu-pox: 44.7%; --stu-poy: 0.0%; --stu-pz: 1.22; --stu-cox: 38.7%; --stu-coy: 0.0%; --stu-cz: 1.09; }
+  img[src*="/6702156.jpg"] { --stu-pox: 50.7%; --stu-poy: 0.0%; --stu-pz: 1.28; --stu-cox: 51.1%; --stu-coy: 0.0%; --stu-cz: 1.15; }
+  img[src*="/6702157.jpg"] { --stu-pox: 44.0%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 41.0%; --stu-coy: 0.0%; --stu-cz: 1.19; }
+  img[src*="/6702158.jpg"] { --stu-pox: 51.8%; --stu-poy: 0.0%; --stu-pz: 1.25; --stu-cox: 53.4%; --stu-coy: 0.0%; --stu-cz: 1.12; }
+  img[src*="/6702159.jpg"] { --stu-pox: 47.9%; --stu-poy: 5.2%; --stu-pz: 1.32; --stu-cox: 47.3%; --stu-coy: 8.7%; --stu-cz: 1.23; }
+  img[src*="/6702160.jpg"] { --stu-pox: 48.4%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 48.2%; --stu-coy: 0.3%; --stu-cz: 1.26; }
+  img[src*="/6702161.jpg"] { --stu-pox: 43.5%; --stu-poy: 0.0%; --stu-pz: 1.16; --stu-cox: 25.3%; --stu-coy: 0.0%; --stu-cz: 1.04; }
+  img[src*="/6702162.jpg"] { --stu-pox: 48.3%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 47.7%; --stu-coy: 2.2%; --stu-cz: 1.23; }
+  img[src*="/6702163.jpg"] { --stu-pox: 43.7%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 40.5%; --stu-coy: 0.0%; --stu-cz: 1.19; }
+  img[src*="/6702164.jpg"] { --stu-pox: 48.1%; --stu-poy: 0.0%; --stu-pz: 1.29; --stu-cox: 46.8%; --stu-coy: 0.0%; --stu-cz: 1.16; }
+  img[src*="/6702165.jpg"] { --stu-pox: 45.8%; --stu-poy: 0.0%; --stu-pz: 1.32; --stu-cox: 44.4%; --stu-coy: 0.0%; --stu-cz: 1.23; }
+  img[src*="/6702166.jpg"] { --stu-pox: 0.0%; --stu-poy: 0.0%; --stu-pz: 1.0; --stu-cox: 50.0%; --stu-coy: 12.1%; --stu-cz: 1.0; }
 }
 
 
@@ -41600,12 +41784,38 @@ html[data-theme="dark"] .hsd-slide-shell.is-ppt-app {
 }
 
 .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;
   background: linear-gradient(90deg, #b7472a 0%, #c43e1c 50%, #9e351a 100%) !important;
   color: #ffffff !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
   padding: 5px 10px !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-left,
+.hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-right {
+  flex: 0 0 auto !important;
+  min-width: 0;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-titlebar-center {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  justify-content: center !important;
+  overflow: hidden;
+}
+
+.hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar .ppt-doc-filename {
+  max-width: 100% !important;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-titlebar.is-desktop-titlebar {
@@ -41851,6 +42061,7 @@ html[data-theme="dark"] .hsd-slide-shell.is-ppt-app .ppt-statusbar.is-authentic-
 }
 
 /* 4. Familiar PowerPoint Slide Master "Color Head" Inside Every Slide */
+html:not([data-theme="dark"]) .ppt-slide-sheet .ppt-slide-master-head,
 .ppt-slide-sheet .ppt-slide-master-head {
   background: linear-gradient(90deg, #9a3118 0%, #b7472a 54%, #8c2a14 100%) !important;
   color: #ffffff !important;
