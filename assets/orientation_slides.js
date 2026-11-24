@@ -766,7 +766,7 @@
     },
     {
       id: "s05-hs-5objectives",
-      num: "06",
+      num: "05",
       section: "objectives",
       sectionLabel: "Act I · Start with Why",
       actClass: "",

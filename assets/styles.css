@@ -16548,15 +16548,20 @@ html[data-theme="dark"] .ppt-launch-win-btn {
   padding: 5px 9px;
 }
 
-.cal-mat-btn.is-hsd-jump {
+.cal-mat-btn.is-hsd-jump,
+.btn.cal-mat-btn.is-hsd-jump {
   grid-column: 1 / -1;
   background: linear-gradient(135deg, #002d72 0%, #0b46a6 100%);
   color: #ffffff !important;
   border: 1px solid #0b46a6;
 }
 
-.cal-mat-btn.is-hsd-jump:hover {
-  filter: brightness(1.08);
+.cal-mat-btn.is-hsd-jump:hover,
+.btn.cal-mat-btn.is-hsd-jump:hover {
+  background: linear-gradient(135deg, #002054 0%, #083785 100%);
+  border-color: #002054;
+  color: #ffffff !important;
+  filter: none;
 }
 
 .spec-hs-jump-link {
@@ -21748,6 +21753,25 @@ html[data-theme="dark"] .btn.sm.ghost-teal {
   background: rgba(13, 148, 136, 0.16);
   border-color: rgba(45, 212, 191, 0.5);
   color: #5eead4;
+}
+
+html[data-theme="dark"] .btn.sm.ghost-teal:hover,
+html[data-theme="dark"] .btn.sm.ghost-teal[aria-expanded="true"] {
+  background: rgba(13, 148, 136, 0.28);
+  border-color: #2dd4bf;
+  color: #99f6e4;
+}
+
+html[data-theme="dark"] .btn.sm.ghost-danger {
+  background: rgba(225, 29, 72, 0.16);
+  border-color: rgba(251, 113, 133, 0.45);
+  color: #fda4af;
+}
+
+html[data-theme="dark"] .btn.sm.ghost-danger:hover {
+  background: rgba(225, 29, 72, 0.28);
+  border-color: #fb7185;
+  color: #ffe4e6;
 }
 
 html[data-theme="dark"] .cal-sub-inline-drawer {
@@ -42892,6 +42916,12 @@ html[data-theme="dark"] .ppt-reading-statusbar {
   color: #ffffff;
 }
 
+.ppt-reading-nav-btn.is-key-cta:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+  border-color: #78350f;
+  color: #ffffff;
+}
+
 .ppt-reading-nav-btn.is-slideshow-launch {
   background: #b7472a;
   border-color: #9b351b;
@@ -42900,8 +42930,10 @@ html[data-theme="dark"] .ppt-reading-statusbar {
   padding: 0 11px;
 }
 
-.ppt-reading-nav-btn.is-slideshow-launch:hover {
+.ppt-reading-nav-btn.is-slideshow-launch:hover:not(:disabled) {
   background: #9b351b;
+  border-color: #7c2410;
+  color: #ffffff;
 }
 
 html[data-theme="dark"] .ppt-reading-nav-btn:not(.is-key-cta):not(.is-slideshow-launch) {
