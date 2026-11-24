@@ -507,7 +507,7 @@
               tone: "tone-crimson",
               icon: ICONS.slides,
               title: t("ระบบสุขภาพ · 6 ขั้นตอน (HS1–HS6)", "Health Systems · 6-Step Flow (HS1–6)"),
-              sub: t("① ฉบับเต็ม → ② ฉบับย่อ → ③ Self-Quiz → ④ Upload Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture", "6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
+              sub: t("①\u00a0ฉบับเต็ม → ②\u00a0ฉบับย่อ → ③\u00a0Self-Quiz → ④\u00a0Upload Slide อาจารย์ → ⑤\u00a0Case Discussion → ⑥\u00a0VDO Lecture", "6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
               badge: "HS1 – HS6",
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -567,7 +567,7 @@
               tone: "tone-teal",
               icon: ICONS.slides,
               title: t("ระบบสุขภาพ · 6 ขั้นตอน (HS1–HS6)", "Health Systems · 6-Step Flow (HS1–6)"),
-              sub: t("① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion → ⑥ VDO Lecture", "Coherent 6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
+              sub: t("①\u00a0ฉบับเต็ม (Full) → ②\u00a0ฉบับย่อ (Abridged) → ③\u00a0Self-Quiz → ④\u00a0Slide อาจารย์ → ⑤\u00a0Case Discussion → ⑥\u00a0VDO Lecture", "Coherent 6-step flow across HS1–HS6: Full → Abridged → Self-Quiz → Lecture Slides → Discussion → VDO Lecture"),
               badge: t("HS1 – HS6", "HS1 – HS6"),
               action: () => navigateFromTile("app-hsd", () => {
                 const a = getApi();
@@ -2820,7 +2820,7 @@
                   folderPath: ["manuals"],
                   name: "01_เอกสารสำหรับอาจารย์_RACM303_2569_Print-out_(ครบ_6_หมวด_&_9_แฟ้มพื้นที่).pdf",
                   title: "เอกสารสำหรับอาจารย์ — รายวิชา RACM 303 ปีการศึกษา 2569 (Print-out PDF · ครบ 6 หมวด & 9 แฟ้ม อ.ที่ปรึกษา)",
-                  sub: "1. รูป นศพ. 9 พื้นที่ · 2. รูป Discussion 6 กลุ่ม · 3. ฟอร์ม 1A (GRS) · 4. ฟอร์ม 2A · 5. ฟอร์ม 3A · 6. ฟอร์ม 4A",
+                  sub: "1.\u00a0รูป นศพ. 9 พื้นที่ · 2.\u00a0รูป Discussion 6 กลุ่ม · 3.\u00a0ฟอร์ม 1A (GRS) · 4.\u00a0ฟอร์ม 2A · 5.\u00a0ฟอร์ม 3A · 6.\u00a0ฟอร์ม 4A",
                   meta: "24 หน้า / 58 หน้า · A4",
                   badge: "🖨️ เปิดชุด Print-out",
                   icoCls: "is-faculty",

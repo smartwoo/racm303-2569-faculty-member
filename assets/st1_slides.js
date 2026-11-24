@@ -8,7 +8,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124st1deck1";
+  const ASSET_VER = "20261124tv2";
   const PPTX_HREF = `exports/pptx/RACM303_2569_ST1_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_ST1_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/st1";
@@ -969,7 +969,7 @@
             <div class="or-card is-white">
               <span class="or-card-kicker">5 DECISION ZONES · เลือกวิธีตัดสินใจให้ตรงพื้นที่</span>
               <h3 class="or-card-title">Simple · Complicated (Tech / Social) · Complex · Chaotic</h3>
-              <p class="or-card-text"><strong>เรียบง่าย:</strong> ใช้เหตุผลมาตรฐาน · <strong>ยุ่งยากเชิงเทคนิค:</strong> ใช้วิจารณญาณผู้เชี่ยวชาญ · <strong>ยุ่งยากเชิงสังคม:</strong> เจรจาคุณค่า/นโยบาย · <strong>ซับซ้อน:</strong> ใช้ <code>Systems thinking</code> · <strong>สับสนวุ่นวาย:</strong> ไร้ระเบียบควบคุมไม่ได้</p>
+              <p class="or-card-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>เรียบง่าย:</strong>&nbsp;ใช้เหตุผลมาตรฐาน</span><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>ยุ่งยากเชิงเทคนิค:</strong>&nbsp;ใช้วิจารณญาณผู้เชี่ยวชาญ</span><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>ยุ่งยากเชิงสังคม:</strong>&nbsp;เจรจาคุณค่า/นโยบาย</span><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>ซับซ้อน:</strong>&nbsp;ใช้</span> <code>Systems thinking</code><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>สับสนวุ่นวาย:</strong>&nbsp;ไร้ระเบียบควบคุมไม่ได้</span></span></p>
             </div>
 
             <div class="or-card is-teal-tint">
