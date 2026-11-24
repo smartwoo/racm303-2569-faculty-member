@@ -2891,7 +2891,14 @@
           chip.appendChild(make("span", shortTime, "chip-time"));
           chip.appendChild(make("span", labelTitle, "chip-title"));
           if (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(s.id)) {
-            chip.appendChild(make("span", "Slide", "chip-slide-ready"));
+            const slChip = make("span", "Slide", "chip-slide-ready");
+            slChip.style.cursor = "pointer";
+            slChip.title = "คลิกเพื่อเปิด Slide คาบนี้ทันที";
+            slChip.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              openSessionSlide(s.id);
+            });
+            chip.appendChild(slChip);
           } else if (s.zoom) {
             chip.appendChild(make("span", "Zoom", "chip-zoom"));
           }
@@ -3659,8 +3666,7 @@
         const slBtn = make("button", "📊 Slide", "btn sm teal");
         slBtn.type = "button";
         slBtn.addEventListener("click", () => {
-          if (s.id === "w1-d1-orient") openSessionSlide(s.id);
-          else openEventModal(s);
+          openSessionSlide(s.id);
         });
         actStack.appendChild(slBtn);
       }
@@ -11760,7 +11766,7 @@
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
       title: "จากการดูแลผู้ป่วยรายบุคคลสู่เวชปฏิบัติฐานระบบ: เรียนรู้บทบาทและเส้นทางวิชาชีพจากแพทย์ผู้มีประสบการณ์ในการสร้างเสริมระบบสุขภาพ เพื่อลดความเหลื่อมล้ำและเอื้อให้สังคมเติบโตได้อย่างปลอดภัย ท่ามกลางสิ่งแวดล้อมที่เกื้อกูลชีวิตอย่างยั่งยืน",
       titleThSub: "From Bedside to Systems-Based Practice: Learning Roles and Career Pathways from Experienced Physicians in Strengthening Health Systems to Reduce Inequity and Foster Safe, Thriving Communities Within a Sustainable, Life-Supporting Environment",
-      speakers: "วิทยากรร่วมเสวนา (Panelists): นพ.ทักษพล ธรรมรังสี — ผู้อำนวยการมูลนิธิการแพทย์แห่งประเทศจีน (China Medical Board: CMB Foundation) · นพ.วิรุฬ ลิ้มสวาท — หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข · ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ — รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) | ผู้ดำเนินรายการ (Moderator): อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ — ภาควิชาเวชศาสตร์ชุมชน รพ.รามาธิบดี ม.มหิดล",
+      speakers: "วิทยากรร่วมเสวนา (Panelists): นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) · นพ.วิรุฬ ลิ้มสวาท — หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข · ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ — รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) | ผู้ดำเนินรายการ (Moderator): อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ — ภาควิชาเวชศาสตร์ชุมชน รพ.รามาธิบดี ม.มหิดล",
       examBadge: "เชื่อมตรงวัตถุประสงค์ที่ 5 · Physician Roles, HSS & SBP",
       whyImportant: "จากการรับฟังและแลกเปลี่ยนมุมมองร่วมกับวิทยากรทั้ง 3 ท่านในเวทีเสวนา (Panel Discussion) นักศึกษาแพทย์สามารถ เพื่อเรียนรู้บทบาทและเส้นทางวิชาชีพจากแพทย์ผู้มีประสบการณ์ในการสร้างเสริมระบบสุขภาพ ลดความเหลื่อมล้ำ และเอื้อให้สังคมเติบโตได้อย่างปลอดภัย ท่ามกลางสิ่งแวดล้อมที่เกื้อกูลชีวิตอย่างยั่งยืน",
       objectives: [
@@ -32725,6 +32731,17 @@
       aLink.addEventListener("click", (ev) => ev.stopPropagation());
       actRow.appendChild(aLink);
     }
+    if (typeof hasUploadedSessionSlide === "function" && hasUploadedSessionSlide(sess.id)) {
+      const pMap = { "w1-d1-global": "#panel-global", "w3-d3-dhs-panel": "#panel-dhs", "w5-d3-panel-homeless": "#panel-6bb", "w5-d4-policy": "#panel-policy" };
+      const slQuick = make("a", "🎬 Slide →", "cq-link-btn is-primary");
+      slQuick.href = pMap[sess.id] || "#";
+      slQuick.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openSessionSlide(sess.id);
+      });
+      actRow.appendChild(slQuick);
+    }
     if (sess.conciseLink || sess.docLink) {
       const readBtn = make("button", `สรุป ${sess.code.replace("-DISC", "")} →`, "cq-link-btn");
       readBtn.type = "button";
@@ -34442,17 +34459,36 @@
 
     const slideRec = getSessionSlideRecord(session.id);
     if (slideRec) {
-      const bSlide = make("button", `📊 เปิด Slide · ${slideRec.fileName || "ดาวน์โหลด"}`, "btn sm slide-ready-btn");
-      bSlide.type = "button";
-      bSlide.addEventListener("click", () => {
+      const panelHashMap = {
+        "w1-d1-global": "#panel-global",
+        "w3-d3-dhs-panel": "#panel-dhs",
+        "w5-d3-panel-homeless": "#panel-6bb",
+        "w5-d4-policy": "#panel-policy"
+      };
+      const panelHash = slideRec.isBuiltInPanelDeck ? (panelHashMap[session.id] || "#panel-global") : "";
+      const bSlide = make(
+        "a",
+        slideRec.isBuiltInPanelDeck
+          ? `🎬 เปิด Slide เสวนา (${panelHash}) · ${slideRec.fileName || "Apple TV Screensaver"}`
+          : `📊 เปิด Slide · ${slideRec.fileName || "ดาวน์โหลด"}`,
+        "btn sm slide-ready-btn"
+      );
+      bSlide.href = panelHash || "#";
+      bSlide.style.textDecoration = "none";
+      bSlide.addEventListener("click", (ev) => {
+        ev.preventDefault();
         if (closeModalFirst) closeEventModal();
         openSessionSlide(session.id);
       });
-      container.appendChild(bSlide);
+      if (slideRec.isBuiltInPanelDeck && container.firstChild) {
+        container.insertBefore(bSlide, container.firstChild);
+      } else {
+        container.appendChild(bSlide);
+      }
       if (slideRec.pptxHref) {
         const aPptx = make("a", "⬇ .pptx", "btn sm");
         aPptx.href = slideRec.pptxHref;
-        aPptx.download = "RACM303_2569_Orientation_Slides.pptx";
+        aPptx.download = slideRec.pptxHref.split("/").pop().split("?")[0] || "RACM303_2569_Slides.pptx";
         container.appendChild(aPptx);
       }
       if (slideRec.pdfHref) {
@@ -34606,15 +34642,23 @@
     }
 
     if (slideRec && !isHol) {
-      const slideBtn = make("button", `📊 Slide: ${slideRec.fileName || "เปิดดู"}`, "cal-mat-btn is-slide-ready");
-      slideBtn.type = "button";
+      const pHovMap = { "w1-d1-global": "#panel-global", "w3-d3-dhs-panel": "#panel-dhs", "w5-d3-panel-homeless": "#panel-6bb", "w5-d4-policy": "#panel-policy" };
+      const hovHash = slideRec.isBuiltInPanelDeck ? (pHovMap[session.id] || "#panel-global") : "";
+      const slideBtn = make("a", `🎬 Slide: ${slideRec.fileName || "เปิดดู"}`, "cal-mat-btn is-slide-ready");
+      slideBtn.href = hovHash || "#";
+      slideBtn.style.textDecoration = "none";
       slideBtn.title = `อัปโหลดโดย ${slideRec.uploadedBy || "อาจารย์"} (${slideRec.uploadedAt || ""})`;
       slideBtn.addEventListener("click", (ev) => {
+        ev.preventDefault();
         ev.stopPropagation();
         hideCalendarHoverPopover();
         openSessionSlide(session.id);
       });
-      matRow.appendChild(slideBtn);
+      if (slideRec.isBuiltInPanelDeck && matRow.firstChild) {
+        matRow.insertBefore(slideBtn, matRow.firstChild);
+      } else {
+        matRow.appendChild(slideBtn);
+      }
     } else {
       const slideEmpty = make(
         "button",
