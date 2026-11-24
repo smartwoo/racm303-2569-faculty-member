@@ -4067,3 +4067,29 @@ html[data-role="faculty"] .ppt-sm-mod {
     box-shadow: none !important;
   }
 }
+
+/* Google Material 3 Person Chips for Framed Advisor Portraits on Slides 08 & 09 */
+.or-slide-canvas.is-io-pitch .or-adv-pair {
+  border-radius: 999px;
+  padding: 0.08cqw 0.48cqw 0.08cqw 0.14cqw;
+  background: rgba(66, 133, 244, 0.16);
+  border: 1px solid rgba(138, 180, 248, 0.34);
+  color: #f1f3f4;
+  font-family: var(--io-font-display);
+  font-weight: 600;
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="light"] .or-adv-pair {
+  background: #e8f0fe;
+  border-color: #aecbfa;
+  color: #174ea6;
+}
+
+.or-slide-canvas.is-io-pitch .or-s09-adv-frame {
+  border-radius: 999px;
+  border-color: rgba(138, 180, 248, 0.65);
+}
+
+.or-slide-canvas.is-io-pitch[data-io-theme="light"] .or-s09-adv-frame {
+  border-color: #ffffff;
+}
