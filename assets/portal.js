@@ -20555,7 +20555,7 @@
         id: "ALL",
         code: "📄 HS1–HS6 รวมทุกบท (เอกสารยาว)",
         countText: `${allProg.caseCount} กรณี`,
-        title: "เปิดโหมดเอกสารยาวรวมครบ 10 กรณีศึกษาเพื่ออ่านรวดเดียวหรือพิมพ์/Export",
+        title: `เปิดโหมดเอกสารยาวรวมครบ ${allProg.caseCount || 11} กรณีศึกษาเพื่ออ่านรวดเดียวหรือพิมพ์/Export`,
         dateShort: "26 พ.ย.–4 ธ.ค."
       }
     ];
@@ -25851,7 +25851,7 @@
       storageBox.innerHTML =
         `<div class="gdrive-storage-head">☁️ <span>คลังสไลด์สอนพร้อมใช้งาน</span></div>` +
         `<div class="gdrive-storage-track"><div class="gdrive-storage-fill" style="width:100%"></div></div>` +
-        `<div class="gdrive-storage-caption">ครบทั้ง 6 คาบ (HS1–HS6) · 10 กรณีศึกษา · 20 ข้อย่อย พร้อมเฉลย Teacher Key 4 ขั้น</div>`;
+        `<div class="gdrive-storage-caption">ครบทั้ง 6 คาบ (HS1–HS6) · 11 กรณีศึกษา · 21 ข้อย่อย พร้อมเฉลย Teacher Key รายขั้น</div>`;
     } else {
       const pct = allProg.total > 0 ? Math.min(100, Math.round((allProg.filled / allProg.total) * 100)) : 0;
       storageBox.innerHTML =
@@ -25997,7 +25997,7 @@
             icoCls: "is-docx",
             icoTxt: "W",
             name: "RACM303_ใบงานรวมทุกบท_HS1-HS6_โหมดเลื่อนอ่านยาว.web",
-            sub: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทั้ง 10 กรณีศึกษา (20 ข้อย่อย) ในหน้าเดียว",
+            sub: "เปิดหน้าเว็บโหมดเลื่อนอ่านยาวครบทั้ง 11 กรณีศึกษา (21 ข้อย่อย) ในหน้าเดียว",
             badge: "Web Scroll",
             onClick: () => {
               closeHsdGoogleDrivePickerModal();
@@ -27101,7 +27101,7 @@
     const out = [];
     (caseObj && caseObj.scenarioBlocks ? caseObj.scenarioBlocks : []).forEach((b) => {
       if (!b) return;
-      if (b.type === "paragraph" && b.text) out.push(String(b.text).trim());
+      if ((b.type === "paragraph" || b.type === "p") && b.text) out.push(String(b.text).trim());
       else if (b.type === "dialogue" && b.text) {
         out.push(`${b.speaker ? `${b.speaker}: ` : ""}${String(b.text).trim()}`);
       } else if (b.type === "callout") {
@@ -27126,9 +27126,10 @@
     const rows = (ws.rows || []).map((rObj) => {
       const cells = (rObj.cells || []).map((c, cIdx) => {
         if (c.static) {
-          return { text: String(c.text || ""), bold: cIdx === 0, color: "0F172A" };
+          return { text: String(c.static || c.text || ""), bold: cIdx === 0, color: "0F172A" };
         }
-        const draftVal = includeDrafts && c.id ? String(state.hsdDrafts[c.id] || "").trim() : "";
+        const cid = c.inputId || c.id || "";
+        const draftVal = includeDrafts && cid ? String(state.hsdDrafts[cid] || "").trim() : "";
         return {
           text: draftVal || (c.placeholder ? `[${c.placeholder}]` : " "),
           bold: false,
@@ -27141,6 +27142,53 @@
       headers,
       rows,
       colFractions: headers.length === 3 ? [0.22, 0.39, 0.39] : headers.length === 2 ? [0.28, 0.72] : undefined
+    };
+  }
+
+  function buildStudentDohPptxDiagramSpec(qObj, includeDrafts) {
+    const ws = qObj && qObj.worksheet;
+    if (!ws || ws.type !== "doh-diagram") return null;
+    const meta = ws.diagramMeta || {};
+    const nodesMeta = meta.nodes || {};
+    const linksCid = meta.linksInputId || "c1b_q1_links";
+    const linkSt = includeDrafts ? parseDohLinksString(state.hsdDrafts[linksCid] || "") : parseDohLinksString("");
+    const readNodeDraft = (nodeKey) => {
+      const nMeta = nodesMeta[nodeKey] || {};
+      const cid = nMeta.inputId || `c1b_q1_${nodeKey}`;
+      return includeDrafts ? String(state.hsdDrafts[cid] || "").trim() : "";
+    };
+    const outcomeVal = readNodeDraft("outcome");
+    return {
+      mode: includeDrafts ? "student-draft" : "blank-sheet",
+      outerRing: includeDrafts ? Boolean(linkSt.outerRing) : false,
+      innerRing: includeDrafts ? Boolean(linkSt.innerRing) : false,
+      edges: includeDrafts ? linkSt.edges : {},
+      outcome: {
+        title: outcomeVal || "ปัญหาสุขภาพตรงกลาง",
+        sub: outcomeVal ? "" : "(ระบุภาวะสุขภาพหลักของ ด.ช.โมโน)"
+      },
+      nodes: {
+        structural: {
+          title: (nodesMeta.structural && nodesMeta.structural.title) || "ปัจจัยด้านโครงสร้าง",
+          text: readNodeDraft("structural"),
+          placeholder: "ระบุปัจจัยโครงสร้าง/นโยบาย/ค่านิยม/โฆษณา และวาดวงล้อมชั้นนอก…"
+        },
+        individual: {
+          title: (nodesMeta.individual && nodesMeta.individual.title) || "ปัจจัยด้านปัจเจก",
+          text: readNodeDraft("individual"),
+          placeholder: "ระบุพันธุกรรม พฤติกรรม และการรับรู้ระดับบุคคล…"
+        },
+        soc_env: {
+          title: (nodesMeta.soc_env && nodesMeta.soc_env.title) || "ปัจจัยด้านสังคมและสิ่งแวดล้อม",
+          text: readNodeDraft("soc_env"),
+          placeholder: "ระบุครอบครัว ที่พัก ชุมชน และสิ่งแวดล้อมในโรงเรียน…"
+        },
+        health_sys: {
+          title: (nodesMeta.health_sys && nodesMeta.health_sys.title) || "ระบบบริการสุขภาพ",
+          text: readNodeDraft("health_sys"),
+          placeholder: "ระบุบทบาท/ช่องว่างของระบบบริการสุขภาพในโรงเรียน…"
+        }
+      }
     };
   }
 
@@ -27297,6 +27345,7 @@
         };
       }
       let tableSpec = null;
+      let diagramSpec = null;
       let clues = [];
       let questionClues = [];
       let drawConnectors = false;
@@ -27308,11 +27357,14 @@
       ) {
         const facPayload = buildFacultyPptxSlidePayload(it.qObj, it.mod, it.forceLayout);
         tableSpec = facPayload.table;
+        diagramSpec = facPayload.diagram || null;
         clues = facPayload.clues || [];
         questionClues = facPayload.questionClues || [];
         drawConnectors = it.forceLayout === "split-concept";
       } else {
-        tableSpec = buildStudentWorksheetPptxTableSpec(it.qObj, !it.blankWorksheet && ROLE === "student");
+        const includeDrafts = !it.blankWorksheet && ROLE === "student";
+        tableSpec = buildStudentWorksheetPptxTableSpec(it.qObj, includeDrafts);
+        diagramSpec = buildStudentDohPptxDiagramSpec(it.qObj, includeDrafts);
       }
 
       return {
@@ -27329,7 +27381,8 @@
         clues,
         questionClues,
         drawConnectors,
-        table: tableSpec
+        table: tableSpec,
+        diagram: diagramSpec
       };
     });
 
@@ -33355,6 +33408,9 @@
     card.appendChild(qInfo);
 
     const ws = qObj.worksheet;
+    if (ws && ws.type === "doh-diagram") {
+      card.appendChild(buildReadonlyStudentDohDiagramDOM(qObj, rec, idxNum + 1));
+    }
     if (ws && ws.headers && ws.rows) {
       const tblWrap = make("div", null, "hsd-ws-wrap");
       const tbl = make("table", null, "hsd-ws-table");
@@ -33421,11 +33477,71 @@
     modal.hidden = false;
   }
 
+  function buildReadonlyStudentDohDiagramDOM(qObj, rec, teamNum) {
+    const ws = (qObj && qObj.worksheet) || {};
+    const meta = ws.diagramMeta || {};
+    const nodesMeta = meta.nodes || {};
+    const linksInputId = meta.linksInputId || "c1b_q1_links";
+    const cells = (rec && rec.cells) || {};
+    const linkSt = parseDohLinksString(cells[linksInputId] || "");
+
+    const shell = make(
+      "div",
+      null,
+      `doh-diagram-shell doh-live-diagram-readonly${linkSt.outerRing ? " is-outer-oval-on" : ""}`
+    );
+    const structZone = make("div", null, "doh-structural-zone");
+    const innerOval = make(
+      "div",
+      null,
+      `doh-inner-oval${linkSt.innerRing ? " is-inner-oval-on" : ""}`
+    );
+    const arena = make("div", null, "doh-inner-arena");
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgEl.setAttribute("class", "doh-arrows-svg");
+    svgEl.setAttribute("aria-hidden", "true");
+
+    const buildNodeView = (nodeKey, extraCls) => {
+      const nMeta = nodesMeta[nodeKey] || {};
+      const cid = nMeta.inputId || `c1b_q1_${nodeKey}`;
+      const val = String(cells[cid] || "").trim();
+      const card = make("div", null, `doh-node-card${extraCls ? ` ${extraCls}` : ""}`);
+      card.setAttribute("data-doh-slot", nodeKey);
+      const head = make("div", null, "doh-node-head");
+      head.appendChild(make("span", nMeta.title || nodeKey, "doh-node-title"));
+      card.appendChild(head);
+      const body = make(
+        "div",
+        val || `รอคำตอบจากกลุ่ม ${teamNum || "1–3"}…`,
+        `doh-node-live-text${val ? "" : " is-empty"}`
+      );
+      card.appendChild(body);
+      return card;
+    };
+
+    structZone.appendChild(buildNodeView("structural", "is-structural-card"));
+    const posInd = make("div", null, "doh-pos-ind");
+    posInd.appendChild(buildNodeView("individual", ""));
+    const posSoc = make("div", null, "doh-pos-soc");
+    posSoc.appendChild(buildNodeView("soc_env", ""));
+    const posOut = make("div", null, "doh-pos-out");
+    posOut.appendChild(buildNodeView("outcome", "is-outcome-card"));
+    const posHsys = make("div", null, "doh-pos-hsys");
+    posHsys.appendChild(buildNodeView("health_sys", ""));
+
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
+    innerOval.appendChild(arena);
+    shell.append(structZone, innerOval);
+
+    mountDohArenaArrows(arena, svgEl, null, () => linkSt.edges, null);
+    return shell;
+  }
+
   function buildLiveAnswerSheetTableDOM(qObj) {
     const ws = qObj.worksheet;
     const wrap = make("div", null, "hsd-ws-wrap");
     wrap.setAttribute("data-live-sheet-wrap", "1");
-    if (!ws || ws.type !== "table") return wrap;
+    if (!ws || (ws.type !== "table" && ws.type !== "doh-diagram")) return wrap;
 
     const tbl = make("table", null, "hsd-ws-table");
     const colWidths = ws.colWidths || [];
@@ -33549,12 +33665,16 @@
   function populateLiveWallBody(wallEl, qObj) {
     if (!wallEl || !LIVE) return;
     const countBadge = wallEl.querySelector("[data-live-count]");
+    const diagHolder = wallEl.querySelector("[data-live-diag-holder]");
     const sheetHolder = wallEl.querySelector("[data-live-sheet-holder]");
     const grid = wallEl.querySelector("[data-live-grid]");
     const demoHolder = wallEl.querySelector("[data-live-demo-holder]");
     const anonBtn = wallEl.querySelector("[data-live-anon-btn]");
 
-    const mode = state.hsdLiveWallMode || "sheet";
+    const isDohDiagram = Boolean(qObj && qObj.worksheet && qObj.worksheet.type === "doh-diagram");
+    const rawMode = isDohDiagram ? state.hsdLiveWallDiagMode || "diagram" : state.hsdLiveWallMode || "sheet";
+    const mode = !isDohDiagram && rawMode === "diagram" ? "sheet" : rawMode;
+
     wallEl.querySelectorAll("[data-live-vmode]").forEach((btn) => {
       btn.setAttribute("aria-pressed", btn.dataset.liveVmode === mode ? "true" : "false");
     });
@@ -33581,6 +33701,7 @@
       anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดงชื่อกลุ่ม" : "🙈 ซ่อนชื่อกลุ่ม";
     }
 
+    if (diagHolder) diagHolder.hidden = mode !== "diagram";
     if (sheetHolder) sheetHolder.hidden = mode !== "sheet";
     if (grid) grid.hidden = mode !== "people";
     if (demoHolder) {
@@ -33592,6 +33713,51 @@
     }
 
     const anonMap = buildAnonIndexMap(qObj.id);
+
+    if (mode === "diagram" && diagHolder && isDohDiagram) {
+      diagHolder.replaceChildren();
+      const wrap = make("div", null, "doh-live-teams-wrap");
+      const tabs = make("div", null, "doh-live-team-tabs");
+      const isAnon = LIVE.getAnonymousWall();
+      const byTeam = new Map();
+      list.forEach((r) => {
+        if (r.teamId >= 1 && r.teamId <= 3) byTeam.set(Number(r.teamId), r);
+      });
+      let selTeam = Number(state.hsdLiveSelectedDiagramTeam) || 1;
+      if (!byTeam.has(selTeam) && byTeam.size > 0) {
+        selTeam = Array.from(byTeam.keys()).sort()[0];
+        state.hsdLiveSelectedDiagramTeam = selTeam;
+      }
+
+      [1, 2, 3].forEach((tid) => {
+        const rec = byTeam.get(tid) || null;
+        const tLbl = isAnon ? `กลุ่มนิรนาม ${String.fromCharCode(64 + tid)}` : `กลุ่ม ${tid}`;
+        const stTag = rec ? (rec.status === "submitted" ? "✓ ส่งแล้ว" : "✍ พิมพ์สด") : "รอคำตอบ";
+        const tBtn = make(
+          "button",
+          `🗺️ ${tLbl} (${stTag})`,
+          `doh-tool-pill${selTeam === tid ? " is-active" : ""}`
+        );
+        tBtn.type = "button";
+        tBtn.addEventListener("click", () => {
+          state.hsdLiveSelectedDiagramTeam = tid;
+          populateLiveWallBody(wallEl, qObj);
+        });
+        tabs.appendChild(tBtn);
+      });
+
+      const activeRec = byTeam.get(selTeam) || null;
+      if (activeRec) {
+        const expandBtn = make("button", "⤢ ขยายเต็มจอ", "doh-tool-pill");
+        expandBtn.type = "button";
+        expandBtn.addEventListener("click", () => openStudentResponseSpotlight(activeRec, qObj, selTeam - 1));
+        tabs.appendChild(expandBtn);
+      }
+
+      wrap.appendChild(tabs);
+      wrap.appendChild(buildReadonlyStudentDohDiagramDOM(qObj, activeRec, selTeam));
+      diagHolder.appendChild(wrap);
+    }
 
     if (mode === "sheet" && sheetHolder) {
       populateLiveAnswerSheetCells(sheetHolder, qObj, anonMap);
@@ -33684,21 +33850,29 @@
 
     const acts = make("div", null, "hsd-timer-controls");
 
+    const isDohDiagram = Boolean(qObj && qObj.worksheet && qObj.worksheet.type === "doh-diagram");
     const viewSeg = make("div", null, "hsd-live-view-seg");
-    [
+    const modesList = [
+      ...(isDohDiagram ? [{ id: "diagram", label: "🗺️ ผัง Diagram สด (3 กลุ่ม)" }] : []),
       { id: "sheet", label: "▦ เทียบในตารางใบงาน" },
       { id: "people", label: "👥 แยกการ์ด 3 กลุ่ม (1·2·3)" },
       { id: "demo", label: "📝 ช่องพิมพ์สาธิต" }
-    ].forEach((m) => {
+    ];
+    const initMode = isDohDiagram ? state.hsdLiveWallDiagMode || "diagram" : state.hsdLiveWallMode || "sheet";
+    modesList.forEach((m) => {
       const b = make("button", m.label, "hsd-live-vbtn");
       b.type = "button";
       b.dataset.liveVmode = m.id;
-      b.setAttribute("aria-pressed", (state.hsdLiveWallMode || "sheet") === m.id ? "true" : "false");
+      b.setAttribute("aria-pressed", initMode === m.id ? "true" : "false");
       b.addEventListener("click", () => {
-        state.hsdLiveWallMode = m.id;
-        try {
-          localStorage.setItem("racm303_hsd_live_wall_mode", m.id);
-        } catch (_) {}
+        if (isDohDiagram) {
+          state.hsdLiveWallDiagMode = m.id;
+        } else {
+          state.hsdLiveWallMode = m.id;
+          try {
+            localStorage.setItem("racm303_hsd_live_wall_mode", m.id);
+          } catch (_) {}
+        }
         refreshAllVisibleLiveWalls();
       });
       viewSeg.appendChild(b);
@@ -33723,6 +33897,10 @@
     acts.append(viewSeg, anonBtn, clrBtn);
     head.append(titleWrap, acts);
 
+    const diagHolder = make("div");
+    diagHolder.setAttribute("data-live-diag-holder", "1");
+    diagHolder.hidden = !isDohDiagram;
+
     const sheetHolder = make("div");
     sheetHolder.setAttribute("data-live-sheet-holder", "1");
     sheetHolder.appendChild(buildLiveAnswerSheetTableDOM(qObj));
@@ -33735,7 +33913,7 @@
     demoHolder.setAttribute("data-live-demo-holder", "1");
     demoHolder.hidden = true;
 
-    wall.append(head, sheetHolder, grid, demoHolder);
+    wall.append(head, diagHolder, sheetHolder, grid, demoHolder);
     populateLiveWallBody(wall, qObj);
     return wall;
   }
@@ -34588,6 +34766,183 @@
     });
   }
 
+  function buildFacultyDohKeyDiagramDOM(qObj, modObj, tk, ctx) {
+    const dk = tk && tk.diagramKey;
+    const wrap = make("div", null, "doh-tk-diagram-wrap");
+    if (!dk || !Array.isArray(dk.steps)) return { wrap, redraw: () => {} };
+
+    const { isConceptStage, isUnhideAllStage, hasStepMode, visSet, step, justStep, canClickReveal } = ctx;
+    const isStepRevealed = (stNum) => {
+      if (isConceptStage || isUnhideAllStage || !hasStepMode) return true;
+      return visSet ? visSet.has(stNum) : step >= stNum;
+    };
+
+    let showInnerOval = false;
+    let showOuterOval = false;
+    const activeEdges = {};
+    dk.steps.forEach((sDef) => {
+      if (!isStepRevealed(sDef.step)) return;
+      if (sDef.showInnerOval) showInnerOval = true;
+      if (sDef.showOuterOval) showOuterOval = true;
+      (sDef.arrows || []).forEach((edgeId) => {
+        const ed = DOH_EDGE_DEFS.find((x) => x.id === edgeId);
+        activeEdges[edgeId] = ed ? ed.std : "fwd";
+      });
+    });
+
+    const shell = make(
+      "div",
+      null,
+      `doh-diagram-shell is-clean-key-step${showOuterOval ? " is-outer-oval-on" : ""}`
+    );
+    const structZone = make("div", null, "doh-structural-zone");
+    const innerOval = make(
+      "div",
+      null,
+      `doh-inner-oval${showInnerOval ? " is-inner-oval-on" : ""}`
+    );
+    const arena = make("div", null, "doh-inner-arena");
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgEl.setAttribute("class", "doh-arrows-svg");
+    svgEl.setAttribute("aria-hidden", "true");
+
+    // Center Outcome Node (Always visible even at Step 0 — matches Frame 1!)
+    const posOut = make("div", null, "doh-pos-out");
+    const outBox = make("div", null, "doh-key-outcome-box");
+    outBox.setAttribute("data-doh-slot", "outcome");
+    outBox.appendChild(
+      make("div", (dk.outcome && dk.outcome.title) || "ภาวะอ้วนในเด็ก", "doh-key-outcome-title")
+    );
+    if (dk.outcome && dk.outcome.sub && !inCompactProjection()) {
+      outBox.appendChild(make("div", dk.outcome.sub, "doh-key-outcome-sub"));
+    }
+    posOut.appendChild(outBox);
+
+    function inCompactProjection() {
+      return Boolean(state.isPptSlideSharePopup);
+    }
+
+    const buildStepSlotDOM = (sDef) => {
+      const stNum = sDef.step;
+      const colorIdx = ((stNum - 1) % 6) + 1;
+      const linkInfo = Array.isArray(tk.conceptLinks) ? tk.conceptLinks[stNum - 1] || null : null;
+      const rowTuple =
+        tk.keyTable && Array.isArray(tk.keyTable.rows) ? tk.keyTable.rows[stNum - 1] || [sDef.title] : [sDef.title];
+      const revealed = isStepRevealed(stNum);
+
+      if (!revealed) {
+        const showClickableMask = Boolean(canClickReveal && !state.isPptSlideSharePopup);
+        const mask = make(
+          "div",
+          null,
+          `doh-key-masked-slot${showClickableMask ? "" : " is-ghost-hidden"}`
+        );
+        mask.setAttribute("data-doh-slot", sDef.nodeId);
+        mask.dataset.keyRowMasked = String(stNum);
+        const pill = make(
+          "span",
+          `+ คลิกเปิดขั้นที่ ${stNum}: ${sDef.title}`,
+          "ppt-key-mask-pill"
+        );
+        mask.appendChild(pill);
+        if (showClickableMask && typeof toggleHsKeySingleStep === "function") {
+          mask.title = `คลิกเพื่อเปิดแสดงขั้นที่ ${stNum} (${sDef.title}) พร้อมลูกศรและไฮไลต์หลักฐาน`;
+          mask.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            toggleHsKeySingleStep(qObj.id, stNum, true);
+          });
+        }
+        return mask;
+      }
+
+      const isStructural = sDef.nodeId === "structural";
+      const nodeEl = make(
+        "div",
+        null,
+        `doh-key-node is-c${colorIdx}${isStructural ? " is-structural-key" : ""}${
+          hasStepMode && justStep === stNum ? " is-just-revealed" : ""
+        }`
+      );
+      nodeEl.setAttribute("data-doh-slot", sDef.nodeId);
+      nodeEl.dataset.conceptRowStep = String(stNum);
+      if (hasStepMode && justStep === stNum) {
+        nodeEl.setAttribute("data-ppt-just-revealed", "1");
+      }
+
+      const head = make("div", null, "doh-key-head");
+      head.append(
+        make("span", sDef.title, "doh-key-heading"),
+        make(
+          "span",
+          isConceptStage ? `ประเด็น #${stNum}` : `หลักฐาน #${stNum}`,
+          `hsd-concept-step-pill${isConceptStage ? "" : " is-evidence-pill"} is-c${colorIdx}`
+        )
+      );
+      nodeEl.appendChild(head);
+
+      const ul = make("ul", null, "doh-key-bullets");
+      (sDef.bullets || []).forEach((bTxt) => {
+        const li = document.createElement("li");
+        populateAnswerKeyCellDOM(li, bTxt, {
+          shouldHighlight: Boolean(isConceptStage || linkInfo),
+          rowStep: stNum,
+          colorIdx,
+          colIdx: 1,
+          linkInfo,
+          modObj,
+          rowTuple
+        });
+        ul.appendChild(li);
+      });
+      nodeEl.appendChild(ul);
+
+      const showFoot =
+        (linkInfo && !state.isPptSlideSharePopup) ||
+        (hasStepMode && canClickReveal && typeof toggleHsKeySingleStep === "function");
+      if (showFoot) {
+        const foot = make("div", null, "doh-key-node-foot hsd-no-print");
+        if (linkInfo && !state.isPptSlideSharePopup) {
+          foot.appendChild(buildDocRefChipDOM(linkInfo, modObj, stNum, rowTuple));
+        }
+        if (hasStepMode && canClickReveal && typeof toggleHsKeySingleStep === "function") {
+          const hideBtn = make("button", `ซ่อนขั้นที่ ${stNum}`, "ppt-key-row-hide-btn");
+          hideBtn.type = "button";
+          hideBtn.dataset.keyRowToggle = String(stNum);
+          hideBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            toggleHsKeySingleStep(qObj.id, stNum, false);
+          });
+          foot.appendChild(hideBtn);
+        }
+        nodeEl.appendChild(foot);
+      }
+      return nodeEl;
+    };
+
+    const stepMap = {};
+    dk.steps.forEach((s) => {
+      stepMap[s.nodeId] = s;
+    });
+
+    if (stepMap.structural) {
+      structZone.appendChild(buildStepSlotDOM(stepMap.structural));
+    }
+    const posInd = make("div", null, "doh-pos-ind");
+    if (stepMap.individual) posInd.appendChild(buildStepSlotDOM(stepMap.individual));
+    const posSoc = make("div", null, "doh-pos-soc");
+    if (stepMap.soc_env) posSoc.appendChild(buildStepSlotDOM(stepMap.soc_env));
+    const posHsys = make("div", null, "doh-pos-hsys");
+    if (stepMap.health_sys) posHsys.appendChild(buildStepSlotDOM(stepMap.health_sys));
+
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
+    innerOval.appendChild(arena);
+    shell.append(structZone, innerOval);
+    wrap.appendChild(shell);
+
+    const redraw = mountDohArenaArrows(arena, svgEl, null, () => activeEdges, null);
+    return { wrap, redraw };
+  }
+
   function buildFacultyTeacherKeyPanelDOM(qObj, modObj, opts) {
     const tk = (HSD_KEY.keys || {})[qObj.id];
     if (!tk) return make("div", "ไม่พบข้อมูลเฉลยสำหรับข้อย่อยนี้", "empty-state");
@@ -34638,7 +34993,29 @@
       ? `แนวคำตอบมาตรฐานสำหรับอาจารย์ (${clearQLabel})`
       : "แนวคำตอบมาตรฐานสำหรับอาจารย์ (Teacher Answer Key)";
 
+    const hasDiagramKey = Boolean(tk.diagramKey && Array.isArray(tk.diagramKey.steps));
+    const keyViewMode = hasDiagramKey ? state.hsdKeyDiagramViewMode || "diagram" : "table";
+
     const tkHeadRight = make("div", null, "hsd-tk-head-actions");
+    if (hasDiagramKey && !state.isPptSlideSharePopup) {
+      const modeSeg = make("div", null, "doh-toolbar-group hsd-no-print");
+      const diagModeBtn = make(
+        "button",
+        "🗺️ แผนภาพ Diagram",
+        `doh-tool-pill${keyViewMode === "diagram" ? " is-active" : ""}`
+      );
+      diagModeBtn.type = "button";
+      const tblModeBtn = make(
+        "button",
+        "▦ ตารางหลักฐาน",
+        `doh-tool-pill${keyViewMode === "table" ? " is-active" : ""}`
+      );
+      tblModeBtn.type = "button";
+      modeSeg.append(diagModeBtn, tblModeBtn);
+      tkHeadRight.appendChild(modeSeg);
+
+      panel._dohModeBtns = { diagModeBtn, tblModeBtn };
+    }
     if (tk.scoreLabel) {
       tkHeadRight.appendChild(make("span", tk.scoreLabel, "hsd-tk-score-pill"));
     }
@@ -34676,8 +35053,28 @@
     tkHead.append(make("h6", titleStr, "hsd-tk-title"), tkHeadRight);
     panel.appendChild(tkHead);
 
+    let diagObj = null;
+    if (hasDiagramKey) {
+      diagObj = buildFacultyDohKeyDiagramDOM(qObj, modObj, tk, {
+        isConceptStage,
+        isUnhideAllStage,
+        hasStepMode,
+        visSet,
+        step,
+        justStep,
+        canClickReveal
+      });
+      diagObj.wrap.hidden = keyViewMode !== "diagram";
+      panel.appendChild(diagObj.wrap);
+    }
+
+    let tblWrapRef = null;
     if (tk.keyTable && tk.keyTable.headers && tk.keyTable.rows) {
       const tblWrap = make("div", null, "clean-table-wrap");
+      tblWrapRef = tblWrap;
+      if (hasDiagramKey) {
+        tblWrap.hidden = keyViewMode !== "table";
+      }
       const tbl = make("table", null, "clean-table hsd-tk-table");
       if (tk.keyTable.colWidths && tk.keyTable.colWidths.length === tk.keyTable.headers.length) {
         const cg = document.createElement("colgroup");
