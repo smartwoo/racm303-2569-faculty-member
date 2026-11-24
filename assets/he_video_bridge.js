@@ -934,10 +934,10 @@
             <div class="he-dock-note-top">
               <span class="he-dock-note-time">📍 ช่วงสไลด์ ${initCh ? `${fmtTime(initCh.startSec)}–${fmtTime(initCh.endSec)}` : fmtTime(state.currentSec)}</span>
               <div class="he-dock-transport">
-                <button type="button" class="he-mini-seek" data-he-delta="-15" title="ย้อนกลับ 15 วินาที">↺ -15s</button>
+                <button type="button" class="he-mini-seek" data-he-delta="-10" title="ย้อนกลับ 10 วินาที">↺ -10s</button>
                 <button type="button" class="he-mini-seek" data-he-nav-ch="prev" data-he-seek="0">‹ สไลด์ก่อน</button>
                 <button type="button" class="he-mini-seek" data-he-nav-ch="next" data-he-seek="0">สไลด์ถัดไป ›</button>
-                <button type="button" class="he-mini-seek" data-he-delta="15" title="ข้ามไปข้างหน้า 15 วินาที">+15s ↻</button>
+                <button type="button" class="he-mini-seek" data-he-delta="10" title="ข้ามไปข้างหน้า 10 วินาที">+10s ↻</button>
                 <select class="he-speed-select" aria-label="ความเร็วการเล่นวิดีโอ" title="ปรับความเร็วเสียงบรรยาย">${speedOptsHtml}</select>
               </div>
             </div>

@@ -10079,6 +10079,7 @@
       flashTargetEl(targetEl);
       return true;
     };
+    proseContainer._jumpToId = (id) => jumpToIdHandler(id);
 
     wireInteractiveProseChildren(proseContainer, docGallery, (id) => jumpToIdHandler(id));
 
@@ -11234,7 +11235,7 @@
         quizProg,
         wbDoc,
         wbDl,
-        desc: `ฝึกดึงความรู้ (Active Recall) เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${qaList.length} ข้อพร้อม AI Mentor ตรวจแนวคำตอบ, บัตรคำศัพท์ ${glList.length} คำ และตาราง Rapid Review`,
+        desc: `ฝึกดึงความรู้ (Active Recall) เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${qaList.length} ข้อพร้อมตรวจความเข้าใจและชี้พิกัดอ่านต่อ, บัตรคำศัพท์ ${glList.length} คำ และตาราง Rapid Review`,
         bridge: profile.quizBridge,
         primaryLabel: `▶ เริ่มทำ Self-Quiz (${qaList.length} ข้อ)`,
         onPrimary: () => openSelfQuizForModule(code, "qa")
@@ -12043,16 +12044,49 @@
     return banner;
   }
 
-  function openTextbookDoc(docId) {
-    if (docId) {
-      state.activeDocId = docId;
-      const parsed = parseHsDocInfo(docId);
+  function openTextbookDoc(docId, targetAnchorId) {
+    let cleanDocId = String(docId || "").trim();
+    let cleanAnchor = String(targetAnchorId || "").trim().replace(/^#+/, "");
+    if (cleanDocId.includes("#")) {
+      const parts = cleanDocId.split("#");
+      cleanDocId = parts[0].trim();
+      if (!cleanAnchor && parts[1]) cleanAnchor = parts.slice(1).join("#").trim();
+    }
+    if (cleanDocId) {
+      state.activeDocId = cleanDocId;
+      const parsed = parseHsDocInfo(cleanDocId);
       state.activeHsModule = parsed.modCode;
       state.preferredHsFormat = parsed.format;
     }
     state.textbookSubMode = "doc-reader";
     switchTab("textbooks");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (cleanAnchor) {
+      const attemptJump = () => {
+        const proseEl = $("textbookProseContainer");
+        if (proseEl && typeof proseEl._jumpToId === "function" && proseEl._jumpToId(cleanAnchor)) {
+          return true;
+        }
+        const el = document.getElementById(cleanAnchor);
+        if (el) {
+          const parentDetails = el.closest ? el.closest("details") : null;
+          if (parentDetails && !parentDetails.open) parentDetails.open = true;
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.classList.remove("anchor-flash");
+          void el.offsetWidth;
+          el.classList.add("anchor-flash");
+          return true;
+        }
+        return false;
+      };
+      if (!attemptJump()) {
+        setTimeout(attemptJump, 90);
+      } else {
+        setTimeout(attemptJump, 120);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
   window.racmOpenTextbookDoc = openTextbookDoc;
 
@@ -12232,9 +12266,9 @@
           kicker: "③ STEP 03 · Self-Quiz (ทดสอบความเข้าใจด้วยตนเอง)",
           chipLabel: `ขั้นที่ 3 · ${modQaCount} โจทย์ · ${modGlossaryCount} คำศัพท์`,
           headCls: "is-quiz",
-          subDesc: `ฝึกดึงความรู้เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${modQaCount} ข้อพร้อม AI Mentor, บัตรคำศัพท์ ${modGlossaryCount} คำ และ Rapid Review`,
+          subDesc: `ฝึกดึงความรู้เรื่อง${profile.quizFocus} ผ่านโจทย์ประเมินตนเอง ${modQaCount} ข้อพร้อมตรวจความเข้าใจรายประเด็น, บัตรคำศัพท์ ${modGlossaryCount} คำ และ Rapid Review`,
           headings: [
-            `แบบทดสอบ Self-Quiz พร้อม AI Mentor (${modQaCount} ข้อ)`,
+            `แบบทดสอบ Self-Quiz ตรวจความเข้าใจและชี้จุดอ่านต่อ (${modQaCount} ข้อ)`,
             `บัตรคำศัพท์สำคัญ 2 ภาษา (${modGlossaryCount} คำ)`,
             `ตารางทบทวนเร็ว High-Yield Rapid Review (${m.code})`
           ],
@@ -14695,7 +14729,7 @@
         make("div", `📘 เอกสารคำสอนประจำคาบ ${sess.code} · Guided Learning (Full & Abridged)`, "sf-detail-kicker"),
         make(
           "p",
-          "เอกสารคำสอนฉบับสมบูรณ์พร้อมแผนภาพประกอบ 6 ภาพ ตารางวิเคราะห์ แบบจำลองภูเขาน้ำแข็ง 4 ระดับ ตารางทบทวนสาระสำคัญ (Rapid Review) คำศัพท์สำคัญ 14 คำ และแบบทบทวนความรู้ด้วยตนเอง 6 ข้อพร้อม AI Mentor",
+          "เอกสารคำสอนฉบับสมบูรณ์พร้อมแผนภาพประกอบ 6 ภาพ ตารางวิเคราะห์ แบบจำลองภูเขาน้ำแข็ง 4 ระดับ ตารางทบทวนสาระสำคัญ (Rapid Review) คำศัพท์สำคัญ 14 คำ และแบบทบทวนความรู้ด้วยตนเอง 6 ข้อพร้อมตรวจความเข้าใจและลิงก์อ่านต่อ",
           "sf-detail-lead"
         )
       );
@@ -17998,7 +18032,7 @@
           make("div", null, "hs-selfquiz-flow-top"),
           make(
             "p",
-            `เช็กความแม่นยำเรื่อง${flow.profile.quizFocus} — พิมพ์ร่างคำตอบด้วยตนเองก่อนให้ AI Mentor ตรวจหรือเปิดแนวคำตอบ`
+            `เช็กความแม่นยำเรื่อง${flow.profile.quizFocus} — พิมพ์ร่างคำตอบด้วยตนเองก่อนกดตรวจความเข้าใจหรือเปิดเฉลยสังเคราะห์`
           )
         );
         copy.firstChild.append(
@@ -18065,7 +18099,7 @@
           topLine,
           make(
             "p",
-            "เลือกบทเรียน ST1 & HS1–HS6 จากแถบด้านบนเพื่อทำ Self-Quiz รายบท พร้อมตรวจคำตอบด้วย AI Mentor ก่อนดู Slide อาจารย์ อภิปรายในชั้นเรียน และ VDO Lecture"
+            "เลือกบทเรียน ST1 & HS1–HS6 จากแถบด้านบนเพื่อทำ Self-Quiz รายบท พร้อมตรวจความเข้าใจและดูพิกัดอ่านต่อก่อนดู Slide อาจารย์ อภิปรายในชั้นเรียน และ VDO Lecture"
           )
         );
         const bHub = make("button", "🧭 ดูภาพรวม 6 ขั้นตอน (ST1 & HS1–HS6)", "btn sm");
@@ -38659,7 +38693,7 @@
       ],
       "panel-practice": [
         "Step 03 · Self-Quiz (60 Active Recall Qs) · 111 Key Terms & Rapid Review",
-        "Test your understanding from Full & Abridged textbooks with AI Mentor feedback before Case Discussion in Class."
+        "Test your understanding from Full & Abridged textbooks with targeted feedback and reading links before Case Discussion in Class."
       ]
     };
     Object.keys(secHeaders).forEach((pid) => {
@@ -39419,7 +39453,7 @@
         const isSpssZoom = String(zr.id || "").replace(/\s+/g, "") === "95270544175";
         const zCard = make("div", null, `ep-zoom-card${isSpssZoom ? " is-spss" : ""}`);
         const dayTag = zr.dayTag || (idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : idx === 2 ? "Day 3 · พฤ. 3 ธ.ค. 69" : "SPSS · อ. 8 ธ.ค. 69");
-        const zoomTime = zr.timeLabel || (idx === 0 ? "08.30 – 11.00 น." : "09.00 – 16.30 น.");
+        const zoomTime = zr.timeLabel || (idx === 0 ? "08.30 – 11.00 น." : "08.30 – 16.30 น.");
         zCard.innerHTML = `
           <div class="ep-zoom-top">
             <span class="ep-zoom-tag${isSpssZoom ? " is-spss-tag" : ""}">ZOOM · ${escapeHtml(dayTag)}</span>

@@ -580,7 +580,7 @@
               tone: "tone-amber",
               icon: ICONS.quiz,
               title: t("Self-Quiz (66 ข้อ) & คำศัพท์ 125 คำ", "Self-Quiz (66 Qs) & 125 Flashcards"),
-              sub: t("ทดสอบความเข้าใจ Active Recall พร้อม AI Mentor บัตรคำศัพท์ และตาราง Rapid Review ครบ ST1 & HS1–HS6", "Active recall Self-Quiz with AI Mentor, 125 flashcards & Rapid Review"),
+              sub: t("ทดสอบความเข้าใจ Active Recall พร้อมตรวจความเข้าใจรายประเด็น บัตรคำศัพท์ และตาราง Rapid Review ครบ ST1 & HS1–HS6", "Active recall Self-Quiz with concept feedback & reading links, 125 flashcards & Rapid Review"),
               badge: t("STEP 03 · ST1 & HS1–6", "STEP 03 · ST1 & HS1–6"),
               action: () => navigateFromTile("app-books", () => {
                 const a = getApi();
@@ -889,12 +889,12 @@
               <span class="tv-quick-meta">ID: 910 2256 1292 · Pass: 346256 · หลัง 11.00 SDL ใน E-learning</span>
             </a>
             <a class="tv-quick-card" href="https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
-              <span class="tv-quick-tag">ZOOM · พ. 2 ธ.ค. 69 (09.00–16.30 น.)</span>
+              <span class="tv-quick-tag">ZOOM · พ. 2 ธ.ค. 69 (08.30–16.30 น.)</span>
               <span class="tv-quick-title">EP4 – EP5 &amp; Exercise 3–4</span>
               <span class="tv-quick-meta">ID: 943 1762 6613 · Pass: 547989</span>
             </a>
             <a class="tv-quick-card" href="https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1" target="_blank" rel="noopener" data-tv-focus data-tv-row="5">
-              <span class="tv-quick-tag">ZOOM · พฤ. 3 ธ.ค. 69 (09.00–16.30 น.)</span>
+              <span class="tv-quick-tag">ZOOM · พฤ. 3 ธ.ค. 69 (08.30–16.30 น.)</span>
               <span class="tv-quick-title">EP6 – EP9 &amp; Exercise 5–6</span>
               <span class="tv-quick-meta">ID: 929 4095 3542 · Pass: 165796</span>
             </a>
@@ -1074,7 +1074,7 @@
       ? flow.steps[1].bridge
       : t("สกัดแก่นสำคัญ แผนภาพสรุป และตารางเปรียบเทียบเตรียมสอบ Open Note", "Abridged high-yield summary & diagrams");
     const step3Sub = flow
-      ? `${flow.qaCount} ข้อ Self-Quiz พร้อม AI Mentor · ${flow.glossaryCount} คำศัพท์ · ตาราง Rapid Review`
+      ? `${flow.qaCount} ข้อ Self-Quiz พร้อมตรวจความเข้าใจและชี้พิกัดอ่านต่อ · ${flow.glossaryCount} คำศัพท์ · ตาราง Rapid Review`
       : t("ทดสอบความเข้าใจ Active Recall พร้อมคำศัพท์และตารางทบทวนเร็ว", "Active recall Self-Quiz & flashcards");
     const step4Sub = epSlideInf.uploaded
       ? `✓ อัปโหลดแล้ว (${epSlideInf.extBadge})${
@@ -2093,7 +2093,7 @@
         folderPath: ["health-systems", m.id],
         name: `03_${m.code}_Self-Quiz_และคำศัพท์ทบทวน_(Active_Recall).app`,
         title: `Self-Quiz (${qCnt} ข้อ) · บัตรคำศัพท์ ${gCnt} คำ · Rapid Review (${m.code})`,
-        sub: (flow && flow.steps[2].desc) || "③ STEP 03 · ฝึกดึงความรู้ Active Recall พร้อม AI Mentor ก่อนเข้าห้องอภิปราย",
+        sub: (flow && flow.steps[2].desc) || "③ STEP 03 · ฝึกดึงความรู้ Active Recall พร้อมตรวจความเข้าใจและชี้พิกัดอ่านต่อก่อนเข้าห้องอภิปราย",
         meta: `${qCnt} ข้อ · ${gCnt} คำศัพท์`,
         badge: "③ Self-Quiz",
         icoCls: "is-quiz",
@@ -2388,7 +2388,7 @@
             id: "hs:practice-all",
             folderPath: ["health-systems"],
             name: "RACM303_คลัง_Self-Quiz_66ข้อ_และคำศัพท์_125คำ_ST1_HS1-HS6.app",
-            title: "Self-Quiz 66 ข้อ (AI Mentor) · บัตรคำศัพท์ 125 คำ · ตาราง Rapid Review (ST1 & HS1–HS6)",
+            title: "Self-Quiz 66 ข้อ (ตรวจความเข้าใจ & พิกัดอ่านต่อ) · บัตรคำศัพท์ 125 คำ · ตาราง Rapid Review (ST1 & HS1–HS6)",
             sub: "ทบทวนและทดสอบความเข้าใจครบทุกบทเรียนระบบสุขภาพตั้งแต่ ST1 ถึง HS6",
             meta: "66 ข้อ · 125 คำศัพท์",
             badge: "🧠 เปิด Self-Quiz",

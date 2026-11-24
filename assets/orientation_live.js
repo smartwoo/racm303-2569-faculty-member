@@ -1671,6 +1671,12 @@
     const cloudOk = isCloudConnected();
 
     if (state.coverPaneMode === "hero" && !isHandout) {
+      const deckModal = document.getElementById("orientationDeckModal");
+      const isDarkStage =
+        o.ioTheme === "dark" ||
+        (deckModal && deckModal.getAttribute("data-io-theme") === "dark") ||
+        (!o.ioTheme && !deckModal && document.documentElement.getAttribute("data-theme") === "dark");
+      const heroFile = isDarkStage ? "orient_s01_hero_dark.png" : "orient_s01_hero.png";
       return `
         <div class="orl-cover-card is-hero-view">
           <div class="orl-cover-head">
@@ -1679,7 +1685,7 @@
           </div>
           <figure class="or-fig-plate is-cover-hero" style="flex:1;min-height:0">
             <div class="or-fig-img-wrap">
-              <img class="or-fig-img" src="assets/images/orientation/orient_s01_hero.png?v=20261124gio1" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
+              <img class="or-fig-img" data-base-img="orient_s01_hero.png" src="assets/images/orientation/${heroFile}?v=20261124gio2" alt="Bedside Care connected to Community & Health Systems Science" loading="eager" decoding="async" />
             </div>
           </figure>
         </div>

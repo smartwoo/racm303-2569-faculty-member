@@ -8,7 +8,8 @@
 (function () {
   "use strict";
 
-  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v8";
+  const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v9";
+  const LEGACY_UI_PREFS_KEY = "racm303_ep_studio_prefs_v8";
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const MODULE_ORDER = ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
 
@@ -106,7 +107,7 @@
   const DEFAULT_PANELS = {
     stages: true,
     video: true,
-    slide: true,
+    slide: false,
     scrubber: true,
     concept: true,
     verbatim: true,
@@ -120,7 +121,7 @@
     activeSlideId: 1,
     activeStageId: 1,
     imgQuality: "hd", // 'hd' | 'yt'
-    layoutMode: "cinema", // 'cinema' | 'tri' | 'balanced' | 'stack'
+    layoutMode: "balanced", // 'balanced' | 'tri' | 'cinema' | 'stack'
     panels: { ...DEFAULT_PANELS },
     atlasView: "flow", // 'flow' | 'matrix'
     stageFilter: 0,
@@ -139,7 +140,21 @@
   (function loadPersistedPrefs() {
     try {
       const raw = localStorage.getItem(STORAGE_UI_PREFS_KEY);
-      if (!raw) return;
+      if (!raw) {
+        const legacyRaw = localStorage.getItem(LEGACY_UI_PREFS_KEY);
+        if (legacyRaw) {
+          const legacy = JSON.parse(legacyRaw);
+          if (legacy && typeof legacy === "object") {
+            if (MODULE_ORDER.includes(legacy.activeModule)) {
+              studioState.activeModule = legacy.activeModule;
+            }
+            if (typeof legacy.playbackSpeed === "number" && SPEEDS.includes(legacy.playbackSpeed)) {
+              studioState.playbackSpeed = legacy.playbackSpeed;
+            }
+          }
+        }
+        return;
+      }
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
         if (MODULE_ORDER.includes(parsed.activeModule)) {
@@ -232,9 +247,9 @@
   ];
 
   const LAYOUT_DEFS = [
-    { id: "cinema", label: "🖥️ จอกว้าง (วิดีโอ+สไลด์บน · เนื้อหาล่าง)" },
+    { id: "balanced", label: "⚖️ 2 คอลัมน์สมดุล (ซ้าย VDO · ขวาเนื้อหา)" },
     { id: "tri", label: "🎬 วิดีโอ+สไลด์คู่ขนาน" },
-    { id: "balanced", label: "⚖️ 2 คอลัมน์สมดุล (ซ้ายสื่อ · ขวาเนื้อหา)" },
+    { id: "cinema", label: "🖥️ จอกว้าง (วิดีโอ+สไลด์บน · เนื้อหาล่าง)" },
     { id: "stack", label: "📄 เรียงเดี่ยวแนวตั้ง" }
   ];
 
@@ -335,7 +350,7 @@
       switcher.setAttribute("role", "tablist");
       switcher.setAttribute("aria-label", "เลือกบทเรียนวิดีโอบรรยายระบาดวิทยา (EP4–EP9)");
       switcher.innerHTML = `
-        <div class="ep6-ms-label">🎬 เลือกคาบบรรยายระบาดวิทยา (ตัดแบ่งคลิปตรงตามแต่ละหัวข้อ EP · เล่นโดยตรงไม่ผ่าน YouTube):</div>
+        <div class="ep6-ms-label">🎬 เลือกคาบบรรยายระบาดวิทยา</div>
         <div class="ep6-ms-grid">
           ${availableCodes
             .map((code) => {
@@ -372,7 +387,7 @@
           <span class="ep6-badge-meta">⏱ ${esc(DATA.meta.durationLabel || fmtTime(MAX_SEC))}</span>
         </div>
         <h3 class="ep6-head-title">${esc(DATA.meta.courseTitle)}</h3>
-        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายพร้อมเสียงครบเต็มรูปแบบ ปรับความเร็ว 0.5x–2x ข้าม ±15 วินาที มีคำบรรยายไทย CC แยกใต้จอวิดีโอไม่บังปุ่มควบคุม และรองรับโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านด้านล่าง</p>
+        <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายพร้อมเสียงครบเต็มรูปแบบ ปรับความเร็ว 0.5x–2x ข้าม ±10 วินาที มีคำบรรยายไทย CC แยกใต้จอวิดีโอไม่บังปุ่มควบคุม และรองรับโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านด้านล่าง</p>
       </div>
       <div class="ep6-head-actions">
         <a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="${esc(pdfFilename)}">📥 ดาวน์โหลดสไลด์ ${esc(modCode)} (.PDF)</a>
@@ -419,7 +434,7 @@
             ).join("")}
           </div>
         </div>
-        <button type="button" class="ep6-reset-ws-btn" id="ep6ResetWorkspaceBtn" title="แสดงครบทุกส่วนและคืนค่า Layout มาตรฐาน">↺ แสดงครบทุกส่วน</button>
+        <button type="button" class="ep6-reset-ws-btn" id="ep6ResetWorkspaceBtn" title="คืนค่า Layout มาตรฐาน (วิดีโอคู่เนื้อหา · ปิดสไลด์ซิงก์ไว้ก่อน)">↺ คืนค่าเริ่มต้น</button>
       </div>
     `;
     root.appendChild(workspaceBar);
@@ -513,12 +528,12 @@
                 <span class="ep6-cc-text" id="ep6CcText">คำบรรยายภาษาไทยตามเวลาการบรรยาย (${esc(DATA.meta.lecturer || "")})</span>
               </div>
 
-              <!-- YouTube-Style Quick Transport Bar (Speed 0.5x–2x, ±15s, CC Toggle, Fullscreen) -->
+              <!-- YouTube-Style Quick Transport Bar (Speed 0.5x–2x, ±10s, CC Toggle, Fullscreen) -->
               <div class="ep6-ytstyle-bar" id="ep6YtStyleBar">
                 <div class="ep6-ytb-left">
                   <button type="button" class="ep6-ytb-btn is-play" id="ep6DockPlayBtn" title="เล่น / หยุดวิดีโอ (K)">▶ เล่น</button>
-                  <button type="button" class="ep6-ytb-btn" id="ep6DockRew15Btn" title="ถอยหลัง 15 วินาที (J หรือ ←)">↺ -15s</button>
-                  <button type="button" class="ep6-ytb-btn" id="ep6DockFwd15Btn" title="เดินหน้า 15 วินาที (L หรือ →)">+15s ↻</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6DockRew15Btn" title="ถอยหลัง 10 วินาที (J หรือ ←)">↺ -10s</button>
+                  <button type="button" class="ep6-ytb-btn" id="ep6DockFwd15Btn" title="เดินหน้า 10 วินาที (L หรือ →)">+10s ↻</button>
                   <button type="button" class="ep6-ytb-btn ep6-pip-only" id="ep6PipPrevSlideBtn" title="สไลด์ก่อนหน้า">⏮</button>
                   <button type="button" class="ep6-ytb-btn ep6-pip-only" id="ep6PipNextSlideBtn" title="สไลด์ถัดไป">⏭</button>
                   <span class="ep6-ytb-time"><strong id="ep6DockTimeTxt">${fmtTime(studioState.currentSec)}</strong> / ${esc(DATA.meta.durationLabel || fmtTime(MAX_SEC))}</span>
@@ -557,9 +572,9 @@
           <div class="ep6-scrubber-controls">
             <div class="ep6-transport-btns">
               <button type="button" class="ep6-ctrl-btn" id="ep6PrevSlideBtn" title="สไลด์ก่อนหน้า">⏮ สไลด์ก่อน</button>
-              <button type="button" class="ep6-ctrl-btn" id="ep6Rew15Btn" title="ถอยหลัง 15 วินาที">↺ -15 วิ</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6Rew15Btn" title="ถอยหลัง 10 วินาที">↺ -10 วิ</button>
               <button type="button" class="ep6-ctrl-btn is-primary" id="ep6PlayPauseBtn">▶ เล่นวิดีโอ</button>
-              <button type="button" class="ep6-ctrl-btn" id="ep6Fwd15Btn" title="เดินหน้า 15 วินาที">+15 วิ ↻</button>
+              <button type="button" class="ep6-ctrl-btn" id="ep6Fwd15Btn" title="เดินหน้า 10 วินาที">+10 วิ ↻</button>
               <button type="button" class="ep6-ctrl-btn" id="ep6NextSlideBtn" title="สไลด์ถัดไป">สไลด์ถัดไป ⏭</button>
             </div>
             <div class="ep6-scrubber-right-meta">
@@ -1427,7 +1442,7 @@
     // Wire Layout Mode & Hide/Unhide Section Controls
     root.querySelectorAll("[data-layout-mode]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        studioState.layoutMode = btn.getAttribute("data-layout-mode") || "cinema";
+        studioState.layoutMode = btn.getAttribute("data-layout-mode") || "balanced";
         applyWorkspaceLayout();
       });
     });
@@ -1453,7 +1468,7 @@
     });
 
     root.querySelector("#ep6ResetWorkspaceBtn")?.addEventListener("click", () => {
-      studioState.layoutMode = "cinema";
+      studioState.layoutMode = "balanced";
       studioState.panels = { ...DEFAULT_PANELS };
       applyWorkspaceLayout();
     });
@@ -1491,7 +1506,7 @@
     root.querySelector("#ep6ZoomCurrentSlideBtn")?.addEventListener("click", zoomHandler);
     root.querySelector("#ep6SyncSlideImgWrap")?.addEventListener("click", zoomHandler);
 
-    // Wire Play/Pause, ±15s, Prev/Next Slide, CC, Speed, Fullscreen
+    // Wire Play/Pause, ±10s, Prev/Next Slide, CC, Speed, Fullscreen
     const togglePlayPause = () => {
       if (!videoEl) return;
       if (videoEl.paused) {
@@ -1515,10 +1530,10 @@
 
     root.querySelector("#ep6DockPlayBtn")?.addEventListener("click", togglePlayPause);
     root.querySelector("#ep6PlayPauseBtn")?.addEventListener("click", togglePlayPause);
-    root.querySelector("#ep6DockRew15Btn")?.addEventListener("click", () => skipBySeconds(-15));
-    root.querySelector("#ep6Rew15Btn")?.addEventListener("click", () => skipBySeconds(-15));
-    root.querySelector("#ep6DockFwd15Btn")?.addEventListener("click", () => skipBySeconds(15));
-    root.querySelector("#ep6Fwd15Btn")?.addEventListener("click", () => skipBySeconds(15));
+    root.querySelector("#ep6DockRew15Btn")?.addEventListener("click", () => skipBySeconds(-10));
+    root.querySelector("#ep6Rew15Btn")?.addEventListener("click", () => skipBySeconds(-10));
+    root.querySelector("#ep6DockFwd15Btn")?.addEventListener("click", () => skipBySeconds(10));
+    root.querySelector("#ep6Fwd15Btn")?.addEventListener("click", () => skipBySeconds(10));
     root.querySelector("#ep6PrevSlideBtn")?.addEventListener("click", goPrevSlide);
     root.querySelector("#ep6NextSlideBtn")?.addEventListener("click", goNextSlide);
     root.querySelector("#ep6PipPrevSlideBtn")?.addEventListener("click", goPrevSlide);
@@ -1684,24 +1699,26 @@
       track.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           e.preventDefault();
-          skipBySeconds(15);
+          e.stopPropagation();
+          skipBySeconds(10);
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          skipBySeconds(-15);
+          e.stopPropagation();
+          skipBySeconds(-10);
         }
       });
     }
 
-    // Keyboard shortcuts inside Studio (J = -15s, K = Play/Pause, L = +15s, C = CC)
+    // Keyboard shortcuts inside Studio (J / ← = -10s, K = Play/Pause, L / → = +10s, C = CC)
     root.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select" || tag === "video") return;
-      if (e.key === "j" || e.key === "J") {
+      if (e.key === "j" || e.key === "J" || e.key === "ArrowLeft") {
         e.preventDefault();
-        skipBySeconds(-15);
-      } else if (e.key === "l" || e.key === "L") {
+        skipBySeconds(-10);
+      } else if (e.key === "l" || e.key === "L" || e.key === "ArrowRight") {
         e.preventDefault();
-        skipBySeconds(15);
+        skipBySeconds(10);
       } else if (e.key === "k" || e.key === "K") {
         e.preventDefault();
         togglePlayPause();

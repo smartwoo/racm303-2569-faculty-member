@@ -515,7 +515,7 @@
       keyMessageHtml:
         "การประเมินความแม่นยำของการตรวจและการจัดการอคติ (<strong>Selection Bias, Information Bias และ Confounding</strong>) ช่วยให้ผลสำรวจสุขภาพชุมชนน่าเชื่อถือและนำไปใช้ได้จริง",
       notes:
-        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 08.30–11.00 น. (ห้อง 2A01 และ Zoom) ต่อด้วยแบบฝึกหัดที่ 1–2 ในระบบ E-learning วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
+        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 08.30–11.00 น. (ห้อง 2A01 และ Zoom) ต่อด้วยแบบฝึกหัดที่ 1–2 ในระบบ E-learning วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 08.30 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
       render: () => `
         <div class="or-top-fig-stack is-s08-stack">
           ${figPlate("orient_s08_epi_pipeline.png", "4-Stage Clinical and Community Epidemiology Pipeline", "")}
@@ -536,7 +536,7 @@
                 <h3 class="or-card-title">EP4–EP5 · รูปแบบวิจัยและสอบสวนโรค</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ. พญ.สวนีย์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>เรียนผสมผสาน (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ควบคู่<strong>แบบฝึกหัด 3–4</strong></p>
+              <p class="or-card-text"><strong>08.30–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 3–4</strong></p>
             </div>
 
             <div class="or-card is-teal-tint is-s08-card">
@@ -545,7 +545,7 @@
                 <h3 class="or-card-title">EP6–EP9 · ภาระโรคและเวชปฏิบัติอิงหลักฐาน</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>เรียนผสมผสาน (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ควบคู่<strong>แบบฝึกหัด 5–6</strong></p>
+              <p class="or-card-text"><strong>08.30–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย<strong>EP9 &amp; แบบฝึกหัด 5–6</strong></p>
             </div>
 
             <div class="or-card is-navy-tint is-s08-card">

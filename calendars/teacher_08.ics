@@ -19,7 +19,7 @@ END:VTIMEZONE
 BEGIN:VEVENT
 UID:w2-d3-ep45@racm303-2569.mahidol.ac.th
 DTSTAMP:20261123T073000Z
-DTSTART;TZID=Asia/Bangkok:20261202T090000
+DTSTART;TZID=Asia/Bangkok:20261202T083000
 DTEND;TZID=Asia/Bangkok:20261202T120000
 SUMMARY:[RACM 303] EP4: Overview of Study Designs & Measurement of Impact (AR\, AR%\, PAR\, PAR%) · EP5: Disease Surveillance & Outbreak Investigation
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก | Zoom: https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1

@@ -405,6 +405,29 @@
     if (fullSections.length > 0) {
       if (docId === (fullDoc && fullDoc.id) && enclosingAnchorId) {
         bestFullSec = fullSections.find((s) => s.anchorId === enclosingAnchorId) || null;
+        if (
+          bestFullSec &&
+          bestFullSec.level === 2 &&
+          bestFullSec.num &&
+          !bestFullSec.summaryNote &&
+          bestFullSec.bullets.length === 0 &&
+          bestFullSec.plain.length < 520
+        ) {
+          const childPrefix = `${bestFullSec.num}.`;
+          const childSecs = fullSections.filter((s) => s.num && s.num.startsWith(childPrefix));
+          if (childSecs.length > 0) {
+            let bestChild = childSecs[0];
+            let bestChildScore = -1;
+            for (const cs of childSecs) {
+              const sc = scoreOverlap(queryBlob, `${cs.title} ${cs.summaryNote || ""} ${cs.plain.slice(0, 1500)}`);
+              if (sc > bestChildScore) {
+                bestChildScore = sc;
+                bestChild = cs;
+              }
+            }
+            bestFullSec = bestChild;
+          }
+        }
       }
       if (!bestFullSec) {
         const secNumMatches = [...queryBlob.matchAll(/หัวข้อ(?:ย่อย)?(?:ที่)?\s*(\d+(?:\.\d+)*)/g)].map((x) => x[1]);
@@ -1186,6 +1209,13 @@
     ["สามกองทุนหลักของไทย (บัตรทอง ประกันสังคม สวัสดิการข้าราชการ)", ["บัตรทอง", "หลักประกันสุขภาพแห่งชาติ", "ประกันสังคม", "สวัสดิการข้าราชการ", "ucs", "sss", "csmbs"]],
     ["กลไกจ่ายเงินผู้ให้บริการ (FFS, Capitation, DRGs, Global Budget)", ["จ่ายตามรายการ", "เหมาจ่ายรายหัว", "กลุ่มวินิจฉัยโรคร่วม", "งบประมาณยอดรวม", "งบปลายปิด", "งบปลายเปิด", "เร่งทำแต้ม", "ให้รหัสสูงเกินจริง", "ลดบริการ", "ffs", "capitation", "drg", "adjrw", "global budget", "upcoding", "treadmill"]],
     ["Moral Hazard และ Supplier-Induced Demand (SID) + Gatekeeping", ["ผู้จ่ายแทน", "สั่งการตรวจรักษาเกิน", "สั่งบริการเกิน", "ร่วมจ่าย", "ด่านหน้า", "moral hazard", "sid", "gatekeeping", "co-payment"]],
+
+    // ST1: Systems & Systems Thinking
+    ["องค์ประกอบ ขอบเขต และบริบทของระบบ (Elements, Boundary & Contexts)", ["บริบท", "ขอบเขต", "การให้ความหมาย", "เวลาและสถานที่", "ปัจจัยนำเข้า", "context", "boundary", "meaning"]],
+    ["ระบบยุ่งยาก vs ระบบซับซ้อนที่ปรับตัวได้ (Complicated vs CAS)", ["ระบบยุ่งยาก", "ระบบซับซ้อน", "ไม่เป็นเส้นตรง", "จัดการตัวเอง", "ผุดบังเกิด", "ความน่าจะเป็น", "complicated", "complex adaptive", "nonlinear", "emergent"]],
+    ["ความไม่แน่นอนและความเข้าใจที่ตรงกันในคลินิก", ["ความไม่แน่นอน", "ความเข้าใจไม่ตรงกัน", "ความเข้าใจร่วมกัน", "รับฟังความกังวล", "สับสนวุ่นวาย", "chaotic", "uncertainty"]],
+    ["วงจรอุบาทว์และผลลัพธ์ที่ไม่ได้ตั้งใจ (Vicious Cycle & Unintended Consequences)", ["วงจรอุบาทว์", "ผลลัพธ์ที่ไม่ได้ตั้งใจ", "ห้องฉุกเฉิน", "ดึงงบ", "ปฐมภูมิ", "vicious cycle", "unintended"]],
+    ["แบบจำลองภูเขาน้ำแข็ง 4 ระดับ และ Systems vs Systematic Thinking", ["ภูเขาน้ำแข็ง", "เหตุการณ์", "แนวโน้ม", "โครงสร้างระบบ", "กรอบความคิด", "คิดเชิงระบบ", "คิดอย่างเป็นระบบ", "iceberg", "mental model", "systems thinking", "systematic thinking"]],
   ];
 
   function extractKeyConceptsFromText(plainText, rawHtml) {
@@ -1629,6 +1659,8 @@
         verdictLabel: verdictMap[verdict],
         groundingRef: teachingCtx.groundingLabel,
         cellFeedbackMap,
+        matchedConcepts,
+        missedConcepts: missingConcepts,
         whatDidWell: didWell,
         whatNeedsAttention: needsAttention,
         whatCanImprove: canImprove,
@@ -2041,6 +2073,9 @@
       verdict,
       verdictLabel,
       groundingRef: teachingCtx.groundingLabel,
+      matchedConcepts: matched,
+      missedConcepts: missed,
+      misconceptionCount: misconceptions.length,
       whatDidWell: didWell,
       whatNeedsAttention: needsAttention,
       whatCanImprove: canImprove,
@@ -2049,241 +2084,8 @@
   }
 
   /* ==========================================================================
-   * LAYER 4: LIVE GEMINI 4 NEON EXTRA / HYDROGEN API ENGINE (GROUNDED)
-   * ========================================================================== */
-  const GEMINI_RESPONSE_SCHEMA = {
-    type: "OBJECT",
-    properties: {
-      verdict: {
-        type: "STRING",
-        enum: [
-          "gibberish",
-          "keyboard_layout_typo",
-          "non_answer",
-          "prompt_copy",
-          "off_topic",
-          "misconception",
-          "developing",
-          "proficient",
-          "exemplary",
-        ],
-      },
-      verdictLabel: { type: "STRING" },
-      groundingRef: { type: "STRING" },
-      whatDidWell: { type: "ARRAY", items: { type: "STRING" } },
-      whatNeedsAttention: { type: "ARRAY", items: { type: "STRING" } },
-      whatCanImprove: { type: "ARRAY", items: { type: "STRING" } },
-      socraticFollowUp: { type: "STRING" },
-    },
-    required: ["verdict", "verdictLabel", "groundingRef", "whatDidWell", "whatNeedsAttention", "whatCanImprove"],
-  };
-
-  function getProfileById(id) {
-    if (id === "flash_38") return LEGACY_FALLBACK_PROFILE;
-    return GEMINI_PROFILES[id] || GEMINI_PROFILES.neon_xhigh;
-  }
-
-  function extractTextFromGeminiJson(json) {
-    const cand = json && json.candidates && json.candidates[0];
-    const parts = cand && cand.content && Array.isArray(cand.content.parts) ? cand.content.parts : [];
-    // CRITICAL for Gemini 4 / thinking models: skip thought parts (p.thought === true) and grab final response text
-    const answerParts = parts.filter((p) => !p.thought && typeof p.text === "string");
-    const raw = (answerParts.length ? answerParts : parts.filter((p) => typeof p.text === "string"))
-      .map((p) => p.text)
-      .join("")
-      .trim();
-    return raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  }
-
-  async function callGeminiModelOnce(apiKey, profile, sysPrompt, userPrompt) {
-    const generationConfig = {
-      responseMimeType: "application/json",
-      responseSchema: GEMINI_RESPONSE_SCHEMA,
-      maxOutputTokens: profile.maxOutputTokens || 10240,
-      thinkingConfig: {
-        thinkingLevel: profile.thinkingLevel || "HIGH",
-      },
-    };
-    // Per official Gemini 4 API guide: do NOT send temperature/topP/topK on Gemini 4 models!
-    if (!profile.isGemini4) {
-      generationConfig.temperature = 0.25;
-    }
-
-    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), profile.timeoutMs || 45000) : null;
-
-    try {
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(profile.model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller ? controller.signal : undefined,
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: sysPrompt }] },
-            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-            generationConfig,
-          }),
-        }
-      );
-
-      if (!resp.ok) {
-        let errDetail = `HTTP ${resp.status}`;
-        try {
-          const errJson = await resp.json();
-          if (errJson && errJson.error && errJson.error.message) {
-            errDetail = `${resp.status}: ${errJson.error.message}`;
-          }
-        } catch (_) {
-          /* ignore */
-        }
-        const err = new Error(errDetail);
-        err.httpStatus = resp.status;
-        throw err;
-      }
-
-      const json = await resp.json();
-      const rawTxt = extractTextFromGeminiJson(json);
-      if (!rawTxt) throw new Error("Empty model output");
-      const parsed = JSON.parse(rawTxt);
-      if (
-        !Array.isArray(parsed.whatDidWell) ||
-        !Array.isArray(parsed.whatNeedsAttention) ||
-        !Array.isArray(parsed.whatCanImprove)
-      ) {
-        throw new Error("Invalid JSON schema in model response");
-      }
-      return parsed;
-    } finally {
-      if (timer) clearTimeout(timer);
-    }
-  }
-
-  async function evaluateWithOptionalGemini(rubric, submission, localFallback, teachingCtx) {
-    const apiKey = getGeminiKey();
-    if (!apiKey || localFallback.emptySubmission) {
-      return { ...localFallback, source: "rubric" };
-    }
-
-    const ctx = teachingCtx || extractTeachingContext(rubric);
-    let userSummary = "";
-    if (rubric.kind === "table") {
-      const qRows = rubric.rows || [];
-      const headers = rubric.headers || [];
-      const cells = (submission && submission.cells) || {};
-      const lines = [];
-      qRows.forEach((r, rIdx) => {
-        const parts = [`แถว ${r[0] || rIdx + 1}:`];
-        r.forEach((orig, cIdx) => {
-          if (cIdx === 0 || (orig && orig.trim())) return;
-          parts.push(`${headers[cIdx] || cIdx} = "${cells[`${rIdx}_${cIdx}`] || "(ว่าง)"}"`);
-        });
-        lines.push(parts.join(" | "));
-      });
-      userSummary = lines.join("\n");
-    } else if (rubric.kind === "cloze") {
-      userSummary = JSON.stringify((submission && submission.blanks) || {});
-    } else if (rubric.kind === "checklist") {
-      userSummary = `เลือก: ${((submission && submission.checked) || []).join(", ")} | เหตุผล: ${(submission && submission.notes) || ""}`;
-    } else {
-      userSummary = (submission && submission.text) || "";
-    }
-
-    const sysPrompt = [
-      "คุณคืออาจารย์แพทย์เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (รายวิชา RACM 303 คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล) ที่ใช้หลักการสอนแบบ Gemini Guided Learning",
-      "ภารกิจ: ประเมินคำตอบของนักศึกษาแพทย์ชั้นปีที่ 3 และเขียน Constructive Feedback ที่เฉียบคม กัลยาณมิตร อบอุ่น ซื่อสัตย์ทางวิชาการ และยึดโยง 100% กับเนื้อหาประกอบคำสอนและแนวคำตอบที่ให้ไว้เท่านั้น",
-      "",
-      "กฎเหล็กที่ต้องปฏิบัติอย่างเคร่งครัด:",
-      "1. ซื่อสัตย์และห้ามชมแบบเท็จ (Anti-Sycophancy & Gibberish Detection):",
-      "   - หากคำตอบของผู้เรียนเป็นการพิมพ์มั่ว/ตัวอักษรสุ่ม/กดแป้นเรียงแถว (เช่น 'dfgdfg ;ldfgk', 'asdf', 'ฟหกด่าสว', 'กขคง', ตัวเลขลอยๆ) ให้ตั้ง verdict = 'gibberish' และระบุตรงๆ อย่างสุภาพว่าข้อความดังกล่าวเป็นการพิมพ์มั่ว/ไม่เป็นคำที่มีความหมาย ห้ามกล่าวชมว่าผู้เรียนเริ่มเรียบเรียงคำตอบหรือฝึก retrieval practice เด็ดขาด ใน whatDidWell ให้เขียนเพียงว่ายังไม่สามารถประเมินจุดแข็งได้เพราะยังไม่ใช่คำตอบจริง พร้อมชวนให้ลองพิมพ์ความคิดสั้นๆ ใหม่",
-      "   - หากดูเหมือนลืมเปลี่ยนภาษาแป้นพิมพ์ EN↔TH ให้ตั้ง verdict = 'keyboard_layout_typo' และแจ้งอย่างสุภาพ",
-      "   - หากเป็นคำทดสอบ ('test', 'ทดสอบ', '5555') หรือยอมแพ้ ('ไม่รู้', 'คิดไม่ออก') ให้ตั้ง verdict = 'non_answer' ห้ามชมแบบปลอม แต่ให้กำลังใจอย่างเข้าใจพร้อมให้คำใบ้ตั้งต้นจากเนื้อหาคำสอน",
-      "   - หากคัดลอกข้อความโจทย์มาวางเฉยๆ ให้ตั้ง verdict = 'prompt_copy'",
-      "   - หากเขียนประโยคจริงแต่ไม่เกี่ยวข้องกับโจทย์และเนื้อหา RACM 303 เลย ให้ตั้ง verdict = 'off_topic'",
-      "2. ยึดโยงเนื้อหาประกอบคำสอนอย่างเคร่งครัด (Strict Teaching-Material Grounding):",
-      "   - อ้างอิงเฉพาะกรณีศึกษา ตัวละคร (เช่น บุคคล ก–ง, ผู้รับบริการรายที่ 1–4, เด็กคนที่ 1–2), ตัวแบบ และคำศัพท์มาตรฐานไทย-อังกฤษ ที่ปรากฏในเนื้อหาประกอบคำสอนและแนวคำตอบของข้อนี้เท่านั้น ห้ามดึงประเด็นจากหัวข้ออื่นที่ไม่เกี่ยวมาปน",
-      "   - ตรวจเช็กให้ครบทุกคำถามย่อยในโจทย์ และชี้ให้เห็นความเข้าใจคลาดเคลื่อนเฉพาะจุด (misconception) หากมี เช่น สลับผลบวกลวง/ผลลบลวง, เข้าใจว่าโรคกับความเจ็บป่วยคือสิ่งเดียวกัน, สับสน equity vs equality",
-      "3. เขียน Constructive Feedback คุณภาพสูงสุด:",
-      "   - ใช้สรรพนามเรียกผู้เรียนว่า 'ผู้เรียน' และใช้ **ตัวหนา** เน้นคำสำคัญสั้นๆ ให้อ่านง่าย",
-      "   - whatDidWell (1–3 ข้อ): อ้างถึงจุดแข็งหรือคำอธิบายที่ผู้เรียนทำได้จริงอย่างจำเพาะ (หรือแจ้งตรงๆ หากยังไม่สามารถประเมินได้)",
-      "   - whatNeedsAttention (1–3 ข้อ): ระบุจุดที่คลาดเคลื่อน ตกหล่น หรือคำถามย่อยที่ยังไม่ได้ตอบ พร้อมอธิบายเหตุผลเชิงคลินิก/ระบบสุขภาพสั้นๆ",
-      "   - whatCanImprove (1–3 ข้อ): แนะนำวิธีปรับปรุงที่เป็นรูปธรรม ทำตามได้ทันที (เช่น โครงประโยคตั้งต้น หรือการเติมประเด็นเฉพาะจากเนื้อหาคำสอน)",
-      "   - socraticFollowUp (1 ประโยคสั้น): คำถามชวนคิดต่อ 1 ข้อเพื่อกระตุ้นการคิดวิเคราะห์ทางคลินิก/ระบบสุขภาพ",
-      "   - groundingRef: ระบุชื่อเอกสารและหัวข้อประกอบคำสอนที่ใช้อ้างอิงสั้นๆ",
-      "   - verdictLabel: ป้ายสถานะภาษาไทยสั้นๆ พร้อมอิโมจิ 1 ตัว (เช่น '⚠️ ตรวจพบข้อความพิมพ์มั่ว', '🌱 กำลังพัฒนา · จับประเด็นได้บางส่วน', '✅ ดีมาก · ตรงประเด็นสำคัญ', '🌟 ยอดเยี่ยม · ครบถ้วนและลึกซึ้ง')",
-    ].join("\n");
-
-    const userPrompt = [
-      `=== เอกสารและหัวข้อประกอบคำสอน ===`,
-      `${ctx.groundingLabel}`,
-      "",
-      ctx.caseVignette ? `=== สถานการณ์ / กรณีศึกษาประกอบโจทย์ ===\n${ctx.caseVignette}\n` : "",
-      ctx.companionExcerpt
-        ? `=== เนื้อหาประกอบคำสอนที่เกี่ยวข้อง (${ctx.moduleCode} ${ctx.companionHeading}) ===\n${ctx.companionExcerpt}\n`
-        : ctx.followingProse
-        ? `=== เนื้อหาประกอบคำสอนในหัวข้อนี้ ===\n${ctx.followingProse}\n`
-        : "",
-      `=== โจทย์คำถาม ===`,
-      `${rubric.prompt || rubric.sectionTitle || ""}`,
-      "",
-      `=== แนวคำตอบอ้างอิงของอาจารย์ (Model Answer) ===`,
-      `${stripTags(rubric.answerHtml)}`,
-      "",
-      `=== สัญญาณตรวจเบื้องต้นจากระบบในตัว ===`,
-      `verdict เบื้องต้น: ${localFallback.verdict || "valid"} (${localFallback.verdictLabel || ""})`,
-      "",
-      `=== คำตอบของผู้เรียน ===`,
-      `${userSummary}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const preferredId = getGeminiProfileId();
-    const chain = FALLBACK_CHAIN[preferredId] || ["neon_xhigh", "hydrogen_xhigh", "hydrogen_high", "flash_38"];
-    let lastErrMsg = "";
-
-    for (let i = 0; i < chain.length; i++) {
-      const pid = chain[i];
-      const prof = getProfileById(pid);
-      try {
-        const parsed = await callGeminiModelOnce(apiKey, prof, sysPrompt, userPrompt);
-        const hideKeyByDefault = ["gibberish", "keyboard_layout_typo", "non_answer", "prompt_copy", "off_topic"].includes(
-          parsed.verdict
-        );
-        return {
-          ...localFallback,
-          verdict: parsed.verdict || localFallback.verdict,
-          verdictLabel: parsed.verdictLabel || localFallback.verdictLabel,
-          groundingRef: parsed.groundingRef || ctx.groundingLabel,
-          whatDidWell: parsed.whatDidWell.map((x) => formatSafeRichText(x)),
-          whatNeedsAttention: parsed.whatNeedsAttention.map((x) => formatSafeRichText(x)),
-          whatCanImprove: parsed.whatCanImprove.map((x) => formatSafeRichText(x)),
-          socraticFollowUp: parsed.socraticFollowUp ? formatSafeRichText(parsed.socraticFollowUp) : localFallback.socraticFollowUp,
-          hideKeyByDefault,
-          source: "gemini",
-          modelBadge: prof.badge,
-          fallbackNote: i > 0 ? `สลับจาก ${getProfileById(preferredId).badge} มาใช้ ${prof.badge} อัตโนมัติ` : "",
-        };
-      } catch (err) {
-        lastErrMsg = (err && err.message) || "API error";
-        // Stop immediately on 401/400 invalid API key errors — no point retrying other models with a broken key
-        if (err && (err.httpStatus === 401 || /API key not valid|INVALID_ARGUMENT.*key/i.test(lastErrMsg))) {
-          break;
-        }
-      }
-    }
-
-    return {
-      ...localFallback,
-      source: "rubric",
-      apiErrorNote: lastErrMsg
-        ? `เชื่อมต่อ Gemini API ไม่สำเร็จ (${clipText(lastErrMsg, 110)}) — แสดงผลจากระบบวิเคราะห์เชิงลึกในตัวแทน`
-        : "",
-    };
-  }
-
-  /* ==========================================================================
-   * LAYER 5: RENDERING CONSTRUCTIVE FEEDBACK PANEL + MODEL ANSWER + MODAL
+   * LAYER 4: CONCEPTUALIZED ANSWER KEY & PERSONALIZED DEEP-LINK PRESCRIPTION
+   * 100% In-Browser · Zero API Key · Anchored in ฉบับย่อ + Concise ฉบับเต็ม
    * ========================================================================== */
   function getVerdictStyleClass(verdict) {
     if (verdict === "gibberish" || verdict === "keyboard_layout_typo") return "is-verdict-danger";
@@ -2294,14 +2096,221 @@
     return "is-verdict-dev";
   }
 
-  function buildFeedbackHtml(rubric, evalResult, mode) {
+  function stripMetaRoadmapLead(txt) {
+    return String(txt || "")
+      .replace(/^คำถามนำของ(?:หัวข้อ|ส่วน|บท)นี้คือ[^?؟]+[?؟]?\s*/i, "")
+      .replace(/^(?:หัวข้อ|ส่วน|บท)นี้(?:เริ่มจากการ)?(?:ชี้ให้เห็นว่า|สำรวจว่า|ชวนพิจารณาว่า|อธิบายว่า)\s*/i, "")
+      .trim();
+  }
+
+  /** Extract a concise, non-redundant expansion note from the Full textbook section */
+  function buildFullSectionConciseExpansion(rubric, teachingCtx) {
+    const fullSec = teachingCtx && teachingCtx.fullSec;
+    if (!fullSec) return "";
+    const ansPlain = stripTags((rubric && rubric.answerHtml) || "").toLowerCase();
+
+    if (fullSec.summaryNote) {
+      const cleaned = stripMetaRoadmapLead(fullSec.summaryNote);
+      const overlap = computeCharNgramContainment(cleaned, ansPlain, 5);
+      if (cleaned.length >= 35 && overlap < 0.68) {
+        return cleaned;
+      }
+    }
+
+    for (const b of fullSec.bullets || []) {
+      const cleaned = stripMetaRoadmapLead(b);
+      const overlap = computeCharNgramContainment(cleaned, ansPlain, 5);
+      if (cleaned.length >= 35 && overlap < 0.62) {
+        return cleaned;
+      }
+    }
+
+    if (fullSec.plain && fullSec.plain.length >= 60) {
+      const firstSentences = stripMetaRoadmapLead(
+        fullSec.plain
+          .replace(/\([A-Z][a-zA-Z\s&.,;0-9\-]+\d{4}[a-z]?\)/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+      );
+      if (!/^(?:ส่วนถัดมา|จากนั้นจึง|ก่อนปิดท้ายด้วย)/.test(firstSentences) && firstSentences.length >= 45) {
+        const candidate = clipText(firstSentences, 230);
+        if (computeCharNgramContainment(candidate, ansPlain, 5) < 0.65) {
+          return candidate;
+        }
+      }
+    }
+    return "";
+  }
+
+  /** Extract a crisp 1-line Abridged summary note when distinct from answerHtml */
+  function buildConciseSectionAnchorNote(rubric, teachingCtx) {
+    const cSec = teachingCtx && teachingCtx.conciseSec;
+    if (!cSec) return "";
+    const ansPlain = stripTags((rubric && rubric.answerHtml) || "").toLowerCase();
+    if (cSec.summaryNote && computeCharNgramContainment(cSec.summaryNote, ansPlain, 5) < 0.65) {
+      return cSec.summaryNote;
+    }
+    for (const b of cSec.bullets || []) {
+      if (computeCharNgramContainment(b, ansPlain, 5) < 0.62) {
+        return clipText(b, 200);
+      }
+    }
+    return "";
+  }
+
+  /** Build personalized reading recommendations with clickable deep-links to ฉบับย่อ & ฉบับเต็ม */
+  function buildPersonalizedReadingItems(rubric, evalResult, teachingCtx) {
+    const ctx = teachingCtx || extractTeachingContext(rubric);
+    const mod = ctx.moduleCode || "HS1";
+    const cSec = ctx.conciseSec;
+    const fSec = ctx.fullSec;
+    const missed = (evalResult && evalResult.missedConcepts) || [];
+    const items = [];
+
+    // 1. Primary Abridged (ฉบับย่อ) deep-link — always lead with concise big-picture structure!
+    if (cSec) {
+      const cLink = buildDocDeepLinkHtml(
+        cSec.docId,
+        cSec.anchorId,
+        `⚡ ${mod} ฉบับย่อ · ${cSec.shortTitle}`,
+        "is-concise"
+      );
+      if (missed.length > 0) {
+        items.push(
+          `<strong>เริ่มทบทวนโครงสร้างหลักในฉบับย่อ:</strong> อ่านสรุปประเด็น ${missed
+            .slice(0, 2)
+            .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
+            .join(" และ ")} แบบกระชับได้ที่ ${cLink}`
+        );
+      } else {
+        items.push(
+          `<strong>ทบทวนแก่นสรุปไวในฉบับย่อ:</strong> เช็กโครงสร้างและตารางเปรียบเทียบสำหรับจดสรุปสอบได้ที่ ${cLink}`
+        );
+      }
+    }
+
+    // 2. Targeted Full-Version (ฉบับเต็ม) deep-link — pinpointed to the specific missed concept's subsection!
+    const targetFullSec =
+      missed.length > 0 ? findSectionForConcept(missed[0], ctx.fullSections, fSec) : fSec;
+    if (targetFullSec) {
+      const fLink = buildDocDeepLinkHtml(
+        targetFullSec.docId,
+        targetFullSec.anchorId,
+        `📘 ${mod} ฉบับเต็ม · ${targetFullSec.shortTitle}`,
+        "is-full"
+      );
+      if (missed.length > 0) {
+        items.push(
+          `<strong>อ่านขยายความประเด็นที่ควรเสริมในฉบับเต็ม:</strong> เจาะลึกกลไกและตัวอย่างเรื่อง ${missed
+            .slice(0, 2)
+            .map((c) => `<strong>${escapeHtml(c.label)}</strong>`)
+            .join(", ")} เพิ่มเติมที่ ${fLink}`
+        );
+      } else {
+        items.push(
+          `<strong>อ่านขยายความและกรณีตัวอย่างในฉบับเต็ม:</strong> ดูเหตุผลเชิงระบบและตัวอย่างเวชปฏิบัติเพิ่มเติมที่ ${fLink}`
+        );
+      }
+    }
+
+    // 3. Keep the most actionable writing/application suggestion from evaluateLocally (if non-redundant)
+    const rawImprove = (evalResult && evalResult.whatCanImprove) || [];
+    if (rawImprove.length > 0) {
+      items.push(rawImprove[0]);
+    }
+
+    return items;
+  }
+
+  /** Build Conceptualized Answer Key: Core (Abridged-first) + Concise Full Expansion + Hyperlinks */
+  function buildConceptualizedAnswerHtml(rubric, teachingCtx, shouldCollapse) {
+    if (!rubric || !rubric.answerHtml) return "";
+    const ctx = teachingCtx || extractTeachingContext(rubric);
+    const mod = ctx.moduleCode || "";
+    const cSec = ctx.conciseSec;
+    const fSec = ctx.fullSec;
+
+    const cleanAnswerHtml = String(rubric.answerHtml).replace(
+      /<strong>\s*แนวคิดหลักจากเนื้อหาส่วนนี้[^<]*<\/strong>\s*/gi,
+      ""
+    );
+
+    const conciseNote = rubric.kind === "table" || rubric.kind === "cloze" ? "" : buildConciseSectionAnchorNote(rubric, ctx);
+    const fullExpansion = buildFullSectionConciseExpansion(rubric, ctx);
+
+    const linkChips = [];
+    if (cSec) {
+      linkChips.push(
+        buildDocDeepLinkHtml(
+          cSec.docId,
+          cSec.anchorId,
+          `⚡ อ่านฉบับย่อ: ${mod} · ${cSec.shortTitle} →`,
+          "is-concise"
+        )
+      );
+    }
+    if (fSec) {
+      linkChips.push(
+        buildDocDeepLinkHtml(
+          fSec.docId,
+          fSec.anchorId,
+          `📘 อ่านขยายความฉบับเต็ม: ${mod} · ${fSec.shortTitle} →`,
+          "is-full"
+        )
+      );
+    }
+
+    const innerBody = `
+      <div class="iq-concept-key-stack">
+        <div class="iq-concept-core-block">
+          <div class="iq-concept-subkicker is-concise">⚡ สรุปแก่นคำตอบเชิงแนวคิด (อิงเนื้อหาฉบับย่อ)</div>
+          <div class="iq-concept-core-prose">${cleanAnswerHtml}</div>
+          ${
+            conciseNote
+              ? `<div class="iq-concise-anchor-note"><strong>ประเด็นเชื่อมโยงในฉบับย่อ:</strong> ${escapeHtml(conciseNote)}</div>`
+              : ""
+          }
+        </div>
+        ${
+          fullExpansion
+            ? `<div class="iq-concept-expand-block">
+                 <div class="iq-concept-subkicker is-full">📘 ขยายความกระชับจากฉบับเต็ม (${escapeHtml(mod)}${fSec && fSec.num ? ` หัวข้อ ${escapeHtml(fSec.num)}` : ""})</div>
+                 <p class="iq-concept-expand-text">${escapeHtml(fullExpansion)}</p>
+               </div>`
+            : ""
+        }
+        ${
+          linkChips.length > 0
+            ? `<div class="iq-concept-links-bar">
+                 <span class="iq-concept-links-label">🔗 พิกัดอ่านต่อตรงประเด็น:</span>
+                 <div class="iq-concept-links-row">${linkChips.join("")}</div>
+               </div>`
+            : ""
+        }
+      </div>
+    `;
+
+    if (shouldCollapse) {
+      return `
+        <details class="iq-model-key-box is-collapsed-key">
+          <summary class="iq-model-key-head is-clickable">📖 เฉลยสังเคราะห์ตามเนื้อหา · ฉบับย่อ &amp; พิกัดอ่านต่อฉบับเต็ม (แนะนำให้ลองเขียนคำตอบก่อน · คลิกเพื่อเปิดดู)</summary>
+          <div class="iq-model-key-body">${innerBody}</div>
+        </details>
+      `;
+    }
+    return `
+      <div class="iq-model-key-box">
+        <div class="iq-model-key-head">📖 เฉลยสังเคราะห์ตามเนื้อหา (แก่นฉบับย่อ &amp; ขยายความกระชับจากฉบับเต็ม)</div>
+        <div class="iq-model-key-body">${innerBody}</div>
+      </div>
+    `;
+  }
+
+  function buildFeedbackHtml(rubric, evalResult, mode, precomputedCtx) {
+    const teachingCtx = precomputedCtx || extractTeachingContext(rubric);
     const parts = [];
-    if (mode === "ai_and_key" && evalResult) {
-      const isLive = evalResult.source === "gemini";
-      const badgeLabel = isLive
-        ? `✨ ${escapeHtml(evalResult.modelBadge || "Gemini 4 Neon · Extra High")}`
-        : `✨ AI Mentor · วิเคราะห์เชิงลึกยึดโยงเนื้อหาคำสอน`;
-      const srcBadge = `<span class="iq-ai-badge${isLive ? " is-live" : ""}">${badgeLabel}</span>`;
+    if (mode === "check_and_key" && evalResult) {
+      const srcBadge = `<span class="iq-ai-badge">📋 ผลการวิเคราะห์ความเข้าใจตามเนื้อหาบทเรียน</span>`;
       const vClass = getVerdictStyleClass(evalResult.verdict);
       const verdictPill = evalResult.verdictLabel
         ? `<span class="iq-verdict-pill ${vClass}">${escapeHtml(evalResult.verdictLabel)}</span>`
@@ -2312,25 +2321,43 @@
       const isDangerMiss = evalResult.verdict === "gibberish" || evalResult.verdict === "misconception";
 
       const col1Title = isNonSubstantive
-        ? "ℹ️ Status · สถานะการตรวจคำตอบ"
-        : "✓ What you did well · สิ่งที่ทำได้ดี";
+        ? "ℹ️ สถานะคำตอบที่ส่งตรวจ"
+        : "✓ เข้าใจตรงไหนได้ดีแล้ว";
       const col1Class = isNonSubstantive ? "iq-ai-col is-neutral" : "iq-ai-col is-well";
       const col2Class = isDangerMiss ? "iq-ai-col is-miss is-critical" : "iq-ai-col is-miss";
 
+      const quickTopLinks = [];
+      if (teachingCtx.conciseSec) {
+        quickTopLinks.push(
+          buildDocDeepLinkHtml(
+            teachingCtx.conciseSec.docId,
+            teachingCtx.conciseSec.anchorId,
+            `⚡ ${teachingCtx.moduleCode} ฉบับย่อ (${teachingCtx.conciseSec.num || "สรุป"})`,
+            "is-concise is-compact"
+          )
+        );
+      }
+      if (teachingCtx.fullSec) {
+        quickTopLinks.push(
+          buildDocDeepLinkHtml(
+            teachingCtx.fullSec.docId,
+            teachingCtx.fullSec.anchorId,
+            `📘 ${teachingCtx.moduleCode} ฉบับเต็ม (${teachingCtx.fullSec.num || "เนื้อหา"})`,
+            "is-full is-compact"
+          )
+        );
+      }
+
       const groundingBar = evalResult.groundingRef
-        ? `<div class="iq-grounding-bar">📚 <strong>ยึดโยงเนื้อหาประกอบคำสอน:</strong> ${escapeHtml(evalResult.groundingRef)}</div>`
+        ? `<div class="iq-grounding-bar">📚 <strong>อ้างอิงเนื้อหาบทเรียน:</strong> ${escapeHtml(evalResult.groundingRef)}${
+            quickTopLinks.length ? ` <span class="iq-grounding-links">${quickTopLinks.join(" ")}</span>` : ""
+          }</div>`
         : "";
 
-      const statusNotes = [];
-      if (evalResult.fallbackNote) {
-        statusNotes.push(`<div class="iq-api-note is-info">ℹ️ ${escapeHtml(evalResult.fallbackNote)}</div>`);
-      }
-      if (evalResult.apiErrorNote) {
-        statusNotes.push(`<div class="iq-api-note is-warn">⚠️ ${escapeHtml(evalResult.apiErrorNote)}</div>`);
-      }
+      const readingItems = buildPersonalizedReadingItems(rubric, evalResult, teachingCtx);
 
       const socraticHtml = evalResult.socraticFollowUp
-        ? `<div class="iq-socratic-box"><span class="iq-socratic-label">🤔 ชวนคิดต่อ (Guided Learning):</span> ${evalResult.socraticFollowUp}</div>`
+        ? `<div class="iq-socratic-box"><span class="iq-socratic-label">🤔 คำถามชวนคิดต่อยอด:</span> ${evalResult.socraticFollowUp}</div>`
         : "";
 
       parts.push(`
@@ -2340,22 +2367,20 @@
               ${srcBadge}
               ${verdictPill}
             </div>
-            <button type="button" class="iq-key-gear-btn" data-iq-open-settings title="ตั้งค่า Gemini 4 Neon Extra / API Key">⚙️ ตั้งค่า AI</button>
           </div>
           ${groundingBar}
-          ${statusNotes.join("")}
           <div class="iq-ai-grid">
             <div class="${col1Class}">
               <div class="iq-ai-col-title">${col1Title}</div>
               <ul>${(evalResult.whatDidWell || []).map((x) => `<li>${x}</li>`).join("")}</ul>
             </div>
             <div class="${col2Class}">
-              <div class="iq-ai-col-title">△ What needs attention · จุดที่ยังคลาดเคลื่อน/ตกหล่น</div>
+              <div class="iq-ai-col-title">△ ยังไม่เข้าใจชัด / ประเด็นที่ยังตกหล่น</div>
               <ul>${(evalResult.whatNeedsAttention || []).map((x) => `<li>${x}</li>`).join("")}</ul>
             </div>
             <div class="iq-ai-col is-improve">
-              <div class="iq-ai-col-title">💡 What can be improved · แนวทางพัฒนาต่อ</div>
-              <ul>${(evalResult.whatCanImprove || []).map((x) => `<li>${x}</li>`).join("")}</ul>
+              <div class="iq-ai-col-title">🧭 ควรไปอ่านอะไร · ประเด็นไหนเพิ่มเติม</div>
+              <ul>${readingItems.map((x) => `<li>${x}</li>`).join("")}</ul>
             </div>
           </div>
           ${socraticHtml}
@@ -2364,36 +2389,15 @@
     }
 
     if (rubric && rubric.answerHtml) {
-      const shouldCollapse = Boolean(mode === "ai_and_key" && evalResult && (evalResult.hideKeyByDefault || evalResult.emptySubmission));
-      if (shouldCollapse) {
-        parts.push(`
-          <details class="iq-model-key-box is-collapsed-key">
-            <summary class="iq-model-key-head is-clickable">📖 เฉลยและแนวคำตอบ (แนะนำให้ลองพิมพ์คำตอบของตนเองก่อน · คลิกเพื่อเปิดดูหากต้องการ)</summary>
-            <div class="iq-model-key-body">${rubric.answerHtml}</div>
-          </details>
-        `);
-      } else {
-        parts.push(`
-          <div class="iq-model-key-box">
-            <div class="iq-model-key-head">📖 เฉลยและแนวคำตอบ (Model Answer)</div>
-            <div class="iq-model-key-body">${rubric.answerHtml}</div>
-          </div>
-        `);
-      }
+      const shouldCollapse = Boolean(
+        mode === "check_and_key" && evalResult && (evalResult.hideKeyByDefault || evalResult.emptySubmission)
+      );
+      parts.push(buildConceptualizedAnswerHtml(rubric, teachingCtx, shouldCollapse));
     }
     return parts.join("");
   }
 
-  function getLoadingMessage() {
-    const apiKey = getGeminiKey();
-    if (!apiKey) {
-      return "กำลังวิเคราะห์คำตอบเทียบเนื้อหาประกอบคำสอนและเกณฑ์แนวคำตอบ…";
-    }
-    const prof = getProfileById(getGeminiProfileId());
-    return `✨ ${prof.badge} กำลังคิดวิเคราะห์และเขียน Constructive Feedback ยึดโยงเนื้อหาประกอบคำสอน…`;
-  }
-
-  /* ---------- Floating Pop-up Modal (For Side-by-Side / Slide Deck Viewing & AI Settings) ---------- */
+  /* ---------- Floating Pop-up Modal (For Side-by-Side / Slide Deck Q&A) ---------- */
   let modalBackdrop = null;
 
   function ensureModal() {
@@ -2404,7 +2408,7 @@
     modalBackdrop.innerHTML = `
       <div class="iq-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="iqModalTitle">
         <div class="iq-modal-header">
-          <h3 id="iqModalTitle">คำแนะนำ AI &amp; แนวคำตอบ</h3>
+          <h3 id="iqModalTitle">ตรวจความเข้าใจ &amp; เฉลยสังเคราะห์ตามเนื้อหา</h3>
           <button type="button" class="iq-modal-close" aria-label="ปิดหน้าต่าง">✕</button>
         </div>
         <div class="iq-modal-body" id="iqModalBody"></div>
@@ -2415,8 +2419,6 @@
     modalBackdrop.addEventListener("click", (e) => {
       if (e.target === modalBackdrop || e.target.closest(".iq-modal-close")) {
         modalBackdrop.hidden = true;
-      } else if (e.target.closest("[data-iq-open-settings]")) {
-        openAiSettingsModal();
       }
     });
     document.addEventListener("keydown", (e) => {
@@ -2431,7 +2433,7 @@
     const bd = ensureModal();
     const titleEl = bd.querySelector("#iqModalTitle");
     const bodyEl = bd.querySelector("#iqModalBody");
-    titleEl.textContent = titleText || "ฝึกตอบคำถาม · AI Mentor & แนวคำตอบ";
+    titleEl.textContent = titleText || "ฝึกตอบคำถาม · ตรวจความเข้าใจ & เฉลย";
 
     const curSub = getSubmissionFn ? getSubmissionFn() : {};
     const isSimpleQ = rubric.kind === "question" || rubric.kind === "reflection";
@@ -2441,10 +2443,10 @@
       ${
         isSimpleQ
           ? `<div class="iq-popup-editor">
-               <textarea class="iq-textarea" rows="4" placeholder="พิมพ์คำตอบของคุณที่นี่ แล้วกดรับคำแนะนำ AI…">${escapeHtml(curSub.text || "")}</textarea>
+               <textarea class="iq-textarea" rows="4" placeholder="พิมพ์คำตอบด้วยภาษาของตนเอง แล้วกดตรวจความเข้าใจเพื่อดูจุดที่เข้าใจดีและพิกัดอ่านต่อ…">${escapeHtml(curSub.text || "")}</textarea>
                <div class="iq-btn-row">
-                 <button type="button" class="iq-btn is-ai" data-popup-submit>✨ ส่งคำตอบ &amp; รับคำแนะนำ AI</button>
-                 <button type="button" class="iq-btn is-key" data-popup-key>👁 แสดงเฉพาะแนวคำตอบ</button>
+                 <button type="button" class="iq-btn is-ai" data-popup-submit>✓ ส่งคำตอบ &amp; ตรวจความเข้าใจ</button>
+                 <button type="button" class="iq-btn is-key" data-popup-key>👁 ดูเฉลยสังเคราะห์</button>
                </div>
              </div>`
           : ""
@@ -2455,18 +2457,16 @@
     const resBox = bodyEl.querySelector(".iq-popup-result");
     const popupTa = bodyEl.querySelector("textarea.iq-textarea");
 
-    const runEvalInPopup = async (mode) => {
+    const runEvalInPopup = (mode) => {
       const latestSub = isSimpleQ && popupTa ? { text: popupTa.value } : getSubmissionFn();
       if (isSimpleQ && popupTa && onSaveTextFn) onSaveTextFn(popupTa.value);
+      const teachingCtx = extractTeachingContext(rubric);
       if (mode === "key_only") {
-        resBox.innerHTML = buildFeedbackHtml(rubric, null, "key_only");
+        resBox.innerHTML = buildFeedbackHtml(rubric, null, "key_only", teachingCtx);
         return;
       }
-      resBox.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
-      const teachingCtx = extractTeachingContext(rubric);
       const localRes = evaluateLocally(rubric, latestSub, teachingCtx);
-      const finalRes = await evaluateWithOptionalGemini(rubric, latestSub, localRes, teachingCtx);
-      resBox.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
+      resBox.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
     };
 
     if (popupTa && onSaveTextFn) {
@@ -2474,7 +2474,7 @@
     }
     const subBtn = bodyEl.querySelector("[data-popup-submit]");
     const keyBtn = bodyEl.querySelector("[data-popup-key]");
-    if (subBtn) subBtn.addEventListener("click", () => runEvalInPopup("ai_and_key"));
+    if (subBtn) subBtn.addEventListener("click", () => runEvalInPopup("check_and_key"));
     if (keyBtn) keyBtn.addEventListener("click", () => runEvalInPopup("key_only"));
 
     const hasContent =
@@ -2483,97 +2483,9 @@
       (curSub.blanks && Object.values(curSub.blanks).some((v) => v && v.trim())) ||
       (curSub.checked && curSub.checked.length > 0);
 
-    if (hasContent) runEvalInPopup("ai_and_key");
+    if (hasContent) runEvalInPopup("check_and_key");
     else if (!isSimpleQ) runEvalInPopup("key_only");
 
-    bd.hidden = false;
-  }
-
-  function openAiSettingsModal() {
-    const bd = ensureModal();
-    const titleEl = bd.querySelector("#iqModalTitle");
-    const bodyEl = bd.querySelector("#iqModalBody");
-    titleEl.textContent = "⚙️ ตั้งค่าผู้ช่วยวิเคราะห์คำตอบ (AI Mentor & Gemini 4 Neon Extra)";
-    const curKey = getGeminiKey();
-    const curProfile = getGeminiProfileId();
-
-    const profileOptions = Object.values(GEMINI_PROFILES)
-      .map(
-        (p) =>
-          `<option value="${escapeHtml(p.id)}"${p.id === curProfile ? " selected" : ""}>${escapeHtml(p.badge)} — ${escapeHtml(p.desc)}</option>`
-      )
-      .join("");
-
-    bodyEl.innerHTML = `
-      <div class="iq-settings-box">
-        <p style="margin:0 0 10px;line-height:1.62">
-          <strong>1. โหมด AI Mentor ในตัว (ทำงานทันที ไม่ต้องใช้ API Key):</strong> วิเคราะห์คำตอบเชิงลึกยึดโยงกับเอกสารประกอบคำสอน HS1–HS6 และแนวคำตอบของอาจารย์ พร้อมตรวจจับการพิมพ์มั่ว/ลืมเปลี่ยนภาษา/คัดลอกโจทย์/ตอบไม่ตรงประเด็น และความเข้าใจคลาดเคลื่อนโดยอัตโนมัติบนเบราว์เซอร์ของคุณ
-        </p>
-        <p style="margin:0 0 10px;line-height:1.62">
-          <strong>2. โหมดเชื่อมต่อ Gemini 4 Neon Extra (Live API เสริม):</strong> หากต้องการให้โมเดล <code>gemini-4-neon</code> (ระดับคิด <code>xhigh</code>) หรือ <code>gemini-4-hydrogen</code> อ่านเนื้อหาประกอบคำสอนและเขียน Constructive Feedback เฉพาะบุคคล สามารถวาง Gemini API Key ด้านล่าง (เก็บเฉพาะในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ส่งไปเซิร์ฟเวอร์อื่น)
-        </p>
-        <label style="display:block;font-weight:700;font-size:13px;margin:10px 0 5px">เลือกรุ่นโมเดลและระดับการคิด (Model &amp; Thinking Level):</label>
-        <select class="iq-api-select" id="iqGeminiProfileSelect">${profileOptions}</select>
-        <label style="display:block;font-weight:700;font-size:13px;margin:12px 0 5px">Gemini API Key (จาก Google AI Studio):</label>
-        <input type="password" class="iq-api-input" id="iqGeminiKeyInput" placeholder="AIzaSy... (เว้นว่างเพื่อใช้โหมด AI Mentor ในตัว)" value="${escapeHtml(curKey)}">
-        <div class="iq-btn-row" style="margin-top:12px">
-          <button type="button" class="iq-btn is-ai" id="iqSaveKeyBtn">บันทึกการตั้งค่า</button>
-          <button type="button" class="iq-btn is-key" id="iqTestKeyBtn">🔌 ทดสอบการเชื่อมต่อ API</button>
-          <button type="button" class="iq-btn is-ghost" id="iqClearKeyBtn">ล้างค่า API Key</button>
-        </div>
-        <div id="iqKeyStatusMsg" style="margin-top:10px;font-size:13.2px;line-height:1.5;color:var(--teal-deep);font-weight:600"></div>
-      </div>
-    `;
-    const inp = bodyEl.querySelector("#iqGeminiKeyInput");
-    const sel = bodyEl.querySelector("#iqGeminiProfileSelect");
-    const msg = bodyEl.querySelector("#iqKeyStatusMsg");
-
-    bodyEl.querySelector("#iqSaveKeyBtn").addEventListener("click", () => {
-      setGeminiKey(inp.value);
-      setGeminiProfileId(sel.value);
-      const prof = getProfileById(sel.value);
-      msg.textContent = inp.value.trim()
-        ? `✓ บันทึกเรียบร้อยแล้ว — พร้อมใช้งาน ${prof.badge}`
-        : "✓ ใช้โหมด AI Mentor วิเคราะห์เชิงลึกในตัว (ยึดโยงเนื้อหาคำสอน HS1–HS6)";
-    });
-
-    bodyEl.querySelector("#iqTestKeyBtn").addEventListener("click", async () => {
-      const k = inp.value.trim();
-      if (!k) {
-        msg.textContent = "⚠️ กรุณาวาง Gemini API Key ก่อนกดทดสอบการเชื่อมต่อ";
-        return;
-      }
-      setGeminiKey(k);
-      setGeminiProfileId(sel.value);
-      const prof = getProfileById(sel.value);
-      msg.textContent = `กำลังทดสอบเชื่อมต่อ ${prof.badge}…`;
-      try {
-        const res = await evaluateWithOptionalGemini(
-          {
-            id: "api_test",
-            docId: "HS1",
-            kind: "question",
-            prompt: "โรค (disease) กับการเจ็บป่วย (illness) ต่างกันอย่างไร",
-            answerHtml: "<p>โรคคือความผิดปกติในร่างกายที่ตรวจพบได้ ส่วนการเจ็บป่วยคือประสบการณ์ความรู้สึกไม่สบายของผู้ป่วย</p>",
-          },
-          { text: "โรคคือความผิดปกติที่แพทย์ตรวจพบ ส่วนการเจ็บป่วยคือความรู้สึกไม่สบายของผู้ป่วย" },
-          { verdict: "proficient", verdictLabel: "ดีมาก", whatDidWell: [], whatNeedsAttention: [], whatCanImprove: [] }
-        );
-        if (res.source === "gemini") {
-          msg.textContent = `✓ เชื่อมต่อสำเร็จ! โมเดลที่ตอบกลับ: ${res.modelBadge}${res.fallbackNote ? ` (${res.fallbackNote})` : ""}`;
-        } else {
-          msg.textContent = `⚠️ ${res.apiErrorNote || "ไม่สามารถเชื่อมต่อ Gemini API ได้ กรุณาตรวจสอบ API Key หรือสิทธิ์ Paid/Free tier"}`;
-        }
-      } catch (e) {
-        msg.textContent = `⚠️ ทดสอบไม่สำเร็จ: ${(e && e.message) || "เกิดข้อผิดพลาด"}`;
-      }
-    });
-
-    bodyEl.querySelector("#iqClearKeyBtn").addEventListener("click", () => {
-      inp.value = "";
-      setGeminiKey("");
-      msg.textContent = "✓ ล้างค่า API Key และกลับสู่โหมด AI Mentor ในตัวเรียบร้อยแล้ว";
-    });
     bd.hidden = false;
   }
 
@@ -2686,9 +2598,9 @@
       panel.dataset.dockFor = tblId;
       panel.innerHTML = `
         <div class="iq-btn-row is-table-actions">
-          <button type="button" class="iq-btn is-ai" data-tbl-submit>✨ ส่งคำตอบตารางนี้ &amp; รับคำแนะนำ AI</button>
-          <button type="button" class="iq-btn is-key" data-tbl-key>👁 แสดงเฉลยตารางนี้</button>
-          <button type="button" class="iq-btn is-popup" data-tbl-popup title="เปิดดูคำแนะนำ AI และแนวคำตอบในหน้าต่าง Pop-up">⤢ Pop-up</button>
+          <button type="button" class="iq-btn is-ai" data-tbl-submit>✓ ตรวจคำตอบตารางนี้ &amp; ดูพิกัดอ่านต่อ</button>
+          <button type="button" class="iq-btn is-key" data-tbl-key>👁 เฉลยตารางนี้</button>
+          <button type="button" class="iq-btn is-popup" data-tbl-popup title="เปิดดูผลการตรวจความเข้าใจและเฉลยในหน้าต่าง Pop-up">⤢ Pop-up</button>
           <button type="button" class="iq-btn is-ghost" data-tbl-clear>ล้างช่องกรอก</button>
         </div>
         <div class="iq-feedback-drawer" hidden></div>
@@ -2736,16 +2648,13 @@
 
     if (subBtn && !subBtn._iqBound) {
       subBtn._iqBound = "1";
-      subBtn.addEventListener("click", async () => {
+      subBtn.addEventListener("click", () => {
         drawer.hidden = false;
-        drawer.dataset.mode = "ai_and_key";
-        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        drawer.dataset.mode = "check_and_key";
         const teachingCtx = extractTeachingContext(rubric);
         const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
         applyCellStatuses(localRes.cellFeedbackMap);
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
-        drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
-        bindDrawerSettingsBtn(drawer);
+        drawer.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
       });
     }
     if (keyBtn && !keyBtn._iqBound) {
@@ -2818,8 +2727,8 @@
       dock.className = "iq-cloze-dock";
       dock.innerHTML = `
         <div class="iq-btn-row">
-          <button type="button" class="iq-btn is-ai" data-cloze-submit>✨ ส่งคำตอบช่องว่าง &amp; รับคำแนะนำ AI</button>
-          <button type="button" class="iq-btn is-key" data-cloze-key>👁 แสดงเฉลย (1)–(7)</button>
+          <button type="button" class="iq-btn is-ai" data-cloze-submit>✓ ตรวจคำตอบช่องว่าง &amp; ดูคำแนะนำ</button>
+          <button type="button" class="iq-btn is-key" data-cloze-key>👁 เฉลย (1)–(7)</button>
           <button type="button" class="iq-btn is-popup" data-cloze-popup>⤢ Pop-up</button>
           <button type="button" class="iq-btn is-ghost" data-cloze-clear>ล้างคำตอบ</button>
         </div>
@@ -2838,10 +2747,9 @@
 
     if (subBtn && !subBtn._iqBound) {
       subBtn._iqBound = "1";
-      subBtn.addEventListener("click", async () => {
+      subBtn.addEventListener("click", () => {
         drawer.hidden = false;
-        drawer.dataset.mode = "ai_and_key";
-        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        drawer.dataset.mode = "check_and_key";
         const teachingCtx = extractTeachingContext(rubric);
         const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
         pEl.querySelectorAll(".iq-cloze-input").forEach((inp) => {
@@ -2849,9 +2757,7 @@
           inp.classList.toggle("is-exact", st === "exact");
           inp.classList.toggle("is-mismatch", st === "mismatch");
         });
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
-        drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
-        bindDrawerSettingsBtn(drawer);
+        drawer.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
       });
     }
     if (keyBtn && !keyBtn._iqBound) {
@@ -2922,8 +2828,8 @@
       dock.innerHTML = `
         <textarea class="iq-textarea" rows="2" placeholder="ระบุเกณฑ์ที่คุณใช้ตัดสินว่ากิจกรรมใดอยู่ในระบบสุขภาพ พร้อมเหตุผลสั้น ๆ…"></textarea>
         <div class="iq-btn-row">
-          <button type="button" class="iq-btn is-ai" data-chk-submit>✨ ส่งคำตอบ &amp; รับคำแนะนำ AI</button>
-          <button type="button" class="iq-btn is-key" data-chk-key>👁 แนวคำตอบ</button>
+          <button type="button" class="iq-btn is-ai" data-chk-submit>✓ ส่งคำตอบ &amp; ตรวจความเข้าใจ</button>
+          <button type="button" class="iq-btn is-key" data-chk-key>👁 เฉลยสังเคราะห์</button>
           <button type="button" class="iq-btn is-popup" data-chk-popup>⤢ Pop-up</button>
         </div>
         <div class="iq-feedback-drawer" hidden></div>
@@ -2952,15 +2858,12 @@
     const popBtn = dock.querySelector("[data-chk-popup]");
     if (subBtn && !subBtn._iqBound) {
       subBtn._iqBound = "1";
-      subBtn.addEventListener("click", async () => {
+      subBtn.addEventListener("click", () => {
         drawer.hidden = false;
-        drawer.dataset.mode = "ai_and_key";
-        drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+        drawer.dataset.mode = "check_and_key";
         const teachingCtx = extractTeachingContext(rubric);
         const localRes = evaluateLocally(rubric, getSub(), teachingCtx);
-        const finalRes = await evaluateWithOptionalGemini(rubric, getSub(), localRes, teachingCtx);
-        drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
-        bindDrawerSettingsBtn(drawer);
+        drawer.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
       });
     }
     if (keyBtn && !keyBtn._iqBound) {
@@ -2996,9 +2899,9 @@
         sidePills = document.createElement("span");
         sidePills.className = "iq-side-pills";
         sidePills.innerHTML = `
-          <button type="button" class="iq-mini-pill is-write" data-iq-toggle-box title="พิมพ์คำตอบและรับคำแนะนำ AI">${mode === "compact" ? "✍️ ลองตอบ & AI" : "✍️ ตอบ"}</button>
-          <button type="button" class="iq-mini-pill is-ans" data-iq-quick-key title="แสดง/ซ่อนแนวคำตอบใต้ข้อนี้ทันที">👁 เฉลย</button>
-          <button type="button" class="iq-mini-pill is-pop" data-iq-quick-pop title="เปิดหน้าต่าง Pop-up ตอบและเทียบเฉลย">⤢ Pop-up</button>
+          <button type="button" class="iq-mini-pill is-write" data-iq-toggle-box title="พิมพ์คำตอบเพื่อตรวจความเข้าใจและดูพิกัดอ่านต่อ">✍️ ลองตอบ</button>
+          <button type="button" class="iq-mini-pill is-ans" data-iq-quick-key title="แสดง/ซ่อนเฉลยสังเคราะห์ตามเนื้อหา">👁 เฉลย</button>
+          <button type="button" class="iq-mini-pill is-pop" data-iq-quick-pop title="เปิดหน้าต่าง Pop-up ลองตอบและเทียบเฉลย">⤢ Pop-up</button>
         `;
         const lastP = el.tagName === "BLOCKQUOTE" ? el.querySelector("p:last-of-type") : null;
         if (lastP) lastP.appendChild(sidePills);
@@ -3010,10 +2913,10 @@
       const startOpen = mode === "open" || Boolean(savedText);
       widget.innerHTML = `
         <div class="iq-editor-shell"${startOpen ? "" : " hidden"}>
-          <textarea class="iq-textarea" rows="2" placeholder="พิมพ์คำตอบของคุณที่นี่ แล้วกดส่งคำตอบเพื่อรับคำแนะนำ AI (บันทึกอัตโนมัติ)…"></textarea>
+          <textarea class="iq-textarea" rows="2" placeholder="พิมพ์คำตอบด้วยภาษาของตนเอง แล้วกดตรวจความเข้าใจเพื่อดูประเด็นที่เข้าใจดี จุดที่ควรเสริม และลิงก์อ่านต่อ (บันทึกอัตโนมัติ)…"></textarea>
           <div class="iq-btn-row">
-            <button type="button" class="iq-btn is-ai" data-iq-submit>✨ ส่งคำตอบ &amp; รับคำแนะนำ AI</button>
-            <button type="button" class="iq-btn is-key" data-iq-key>👁 แนวคำตอบข้อนี้</button>
+            <button type="button" class="iq-btn is-ai" data-iq-submit>✓ ส่งคำตอบ &amp; ตรวจความเข้าใจ</button>
+            <button type="button" class="iq-btn is-key" data-iq-key>👁 เฉลยข้อนี้</button>
             <button type="button" class="iq-btn is-popup" data-iq-popup>⤢ Pop-up</button>
             <button type="button" class="iq-btn is-ghost" data-iq-clear>ล้าง</button>
           </div>
@@ -3046,17 +2949,14 @@
       });
     }
 
-    const runSubmit = async () => {
+    const runSubmit = () => {
       if (editorShell && editorShell.hidden) editorShell.hidden = false;
       drawer.hidden = false;
-      drawer.dataset.mode = "ai_and_key";
-      drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+      drawer.dataset.mode = "check_and_key";
       const sub = { text: (ta && ta.value) || "" };
       const teachingCtx = extractTeachingContext(rubric);
       const localRes = evaluateLocally(rubric, sub, teachingCtx);
-      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes, teachingCtx);
-      drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
-      bindDrawerSettingsBtn(drawer);
+      drawer.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
     };
 
     const toggleKeyInline = () => {
@@ -3127,15 +3027,6 @@
     }
   }
 
-  function bindDrawerSettingsBtn(drawer) {
-    if (!drawer) return;
-    drawer.querySelectorAll("[data-iq-open-settings]").forEach((b) => {
-      if (b._iqBound) return;
-      b._iqBound = "1";
-      b.addEventListener("click", openAiSettingsModal);
-    });
-  }
-
   /* ---------- 5. Public Container Enhancer & Practice Tab Card Builder ---------- */
   function enhanceContainer(rootEl) {
     if (!rootEl) return;
@@ -3164,10 +3055,10 @@
     const ui = document.createElement("div");
     ui.className = "iq-practice-card-body";
     ui.innerHTML = `
-      <textarea class="iq-textarea" rows="3" placeholder="พิมพ์คำตอบของคุณที่นี่ แล้วกดส่งคำตอบเพื่อรับคำแนะนำ AI (บันทึกอัตโนมัติ)…">${escapeHtml(savedText)}</textarea>
+      <textarea class="iq-textarea" rows="3" placeholder="พิมพ์คำตอบด้วยภาษาของตนเอง แล้วกดตรวจความเข้าใจเพื่อดูประเด็นที่เข้าใจดี จุดที่ควรเสริม และลิงก์อ่านต่อ (บันทึกอัตโนมัติ)…">${escapeHtml(savedText)}</textarea>
       <div class="iq-btn-row">
-        <button type="button" class="iq-btn is-ai" data-sc-submit>✨ ส่งคำตอบ &amp; รับคำแนะนำ AI</button>
-        <button type="button" class="iq-btn is-key" data-sc-key>👁 ดูแนวคำตอบ</button>
+        <button type="button" class="iq-btn is-ai" data-sc-submit>✓ ส่งคำตอบ &amp; ตรวจความเข้าใจ</button>
+        <button type="button" class="iq-btn is-key" data-sc-key>👁 เฉลยสังเคราะห์</button>
         <button type="button" class="iq-btn is-popup" data-sc-popup>⤢ Pop-up</button>
         <button type="button" class="iq-btn is-ghost" data-sc-clear>ล้าง</button>
       </div>
@@ -3183,16 +3074,13 @@
     };
 
     ta.addEventListener("input", () => saveText(ta.value));
-    ui.querySelector("[data-sc-submit]").addEventListener("click", async () => {
+    ui.querySelector("[data-sc-submit]").addEventListener("click", () => {
       drawer.hidden = false;
-      drawer.dataset.mode = "ai_and_key";
-      drawer.innerHTML = `<div class="iq-loading">${escapeHtml(getLoadingMessage())}</div>`;
+      drawer.dataset.mode = "check_and_key";
       const sub = { text: ta.value };
       const teachingCtx = extractTeachingContext(rubric);
       const localRes = evaluateLocally(rubric, sub, teachingCtx);
-      const finalRes = await evaluateWithOptionalGemini(rubric, sub, localRes, teachingCtx);
-      drawer.innerHTML = buildFeedbackHtml(rubric, finalRes, "ai_and_key");
-      bindDrawerSettingsBtn(drawer);
+      drawer.innerHTML = buildFeedbackHtml(rubric, localRes, "check_and_key", teachingCtx);
     });
     ui.querySelector("[data-sc-key]").addEventListener("click", () => {
       const closing = !drawer.hidden && drawer.dataset.mode === "key_only";
@@ -3250,15 +3138,35 @@
     });
   }
 
+  /* ---------- Global Deep-Link Click Handler (Jump Straight to ฉบับย่อ or ฉบับเต็ม Heading) ---------- */
+  document.addEventListener("click", (ev) => {
+    const link = ev.target && ev.target.closest ? ev.target.closest("[data-racm-doc]") : null;
+    if (!link) return;
+    ev.preventDefault();
+    const docId = link.getAttribute("data-racm-doc") || "";
+    const anchorId = link.getAttribute("data-racm-anchor") || "";
+    if (!docId) return;
+
+    if (modalBackdrop && !modalBackdrop.hidden) {
+      modalBackdrop.hidden = true;
+    }
+    if (window.RACM_SECTION_TAKEAWAYS && typeof window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal === "function") {
+      window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal();
+    }
+
+    if (typeof window.racmOpenTextbookDoc === "function") {
+      window.racmOpenTextbookDoc(docId, anchorId);
+    }
+  });
+
   window.RACMInteractiveQA = {
     enhanceContainer,
     enhancePracticeCard,
     toggleAllInlineAnswers,
-    openAiSettingsModal,
     // Diagnostic / test hooks
     analyzeSubmissionQuality,
     extractTeachingContext,
     evaluateLocally,
-    GEMINI_PROFILES,
+    buildConceptualizedAnswerHtml,
   };
 })();

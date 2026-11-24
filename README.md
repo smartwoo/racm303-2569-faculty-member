@@ -29,7 +29,7 @@
 | วัน-เวลา | คาบเรียน | ลิงก์ Zoom | Meeting ID | Passcode |
 |---|---|---|---|---|
 | ศุกร์ที่ 27 พ.ย. 2569 (`08.30 – 11.00 น.`) | `EP1–EP3` *(Hybrid ณ Auditorium · หลัง 11.00 น. ทำ `EXERCISE 1–2` & `EX-SDL` ใน E-learning)* | https://zoom.us/j/91022561292?pwd=et9CaKS1UfrmfbU3euz5UKpDqKHrrV.1 | `910 2256 1292` | `346256` |
-| พุธที่ 2 ธ.ค. 2569 (`09.00 – 16.30 น.`) | `EP4–EP5`, `EXERCISE 3–4` | https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1 | `943 1762 6613` | `547989` |
-| พฤหัสบดีที่ 3 ธ.ค. 2569 (`09.00 – 16.30 น.`) | `EP6–EP8`, `EP9 + EXERCISE 5–6` | https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1 | `929 4095 3542` | `165796` |
+| พุธที่ 2 ธ.ค. 2569 (`08.30 – 16.30 น.`) | `EP4–EP5`, `EXERCISE 3–4` | https://zoom.us/j/94317626613?pwd=0M6tElkd5gdbRjjdMQ1wYUmThR7Bla.1 | `943 1762 6613` | `547989` |
+| พฤหัสบดีที่ 3 ธ.ค. 2569 (`08.30 – 16.30 น.`) | `EP6–EP8`, `EP9 + EXERCISE 5–6` | https://zoom.us/j/92940953542?pwd=95C9xFpBvOFg8gtuaXkDBkc4ivtFGU.1 | `929 4095 3542` | `165796` |
 | อังคารที่ 8 ธ.ค. 2569 (`13.30 – 14.30 น.`) | `SPSS` โปรแกรมวิเคราะห์ข้อมูลทางสถิติ *(Hybrid ณ ห้อง `2C2-03`)* | https://zoom.us/j/95270544175?pwd=B7iFJGrjOcvFM4uzwtBfgic83Hse2q.1 | `952 7054 4175` | `756928` |
 
