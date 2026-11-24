@@ -1189,12 +1189,28 @@
 
   function isAutoHeightBox(el) {
     if (!el || el.clientHeight <= 0) return true;
-    el.style.setProperty("--fit-scale", "0.72");
+    el.style.setProperty("--fit-scale", "0.70");
     const h1 = el.clientHeight;
-    el.style.setProperty("--fit-scale", "1.32");
+    el.style.setProperty("--fit-scale", "1.45");
     const h2 = el.clientHeight;
     el.style.removeProperty("--fit-scale");
-    return Math.abs(h2 - h1) > 2;
+    return h2 - h1 > Math.max(16, h1 * 0.24);
+  }
+
+  function filterBoundedGroup(els) {
+    if (!els.length) return [];
+    els.forEach((el) => el.style.setProperty("--fit-scale", "0.70"));
+    const h1 = els.map((el) => el.clientHeight);
+    els.forEach((el) => el.style.setProperty("--fit-scale", "1.45"));
+    const h2 = els.map((el) => el.clientHeight);
+    els.forEach((el) => el.style.removeProperty("--fit-scale"));
+    const bounded = [];
+    for (let i = 0; i < els.length; i++) {
+      if (els[i].clientHeight > 0 && h2[i] - h1[i] <= Math.max(16, h1[i] * 0.24)) {
+        bounded.push(els[i]);
+      }
+    }
+    return bounded;
   }
 
   function findMaxScaleForBox(el, checkFn, minS, maxS, safetyFactor) {
@@ -1213,7 +1229,7 @@
   }
 
   function binarySearchUniformScale(els, checkFn, minS, maxS, safetyFactor) {
-    const bounded = els.filter((el) => !isAutoHeightBox(el));
+    const bounded = filterBoundedGroup(els);
     els.forEach((el) => {
       if (bounded.indexOf(el) === -1) el.style.removeProperty("--fit-scale");
     });
@@ -1239,7 +1255,7 @@
 
   function fitHarmonizedCardGroup(els, minS, maxS, safetyFactor, maxSiblingSpread) {
     if (!els.length) return;
-    const bounded = els.filter((el) => !isAutoHeightBox(el));
+    const bounded = filterBoundedGroup(els);
     els.forEach((el) => {
       if (bounded.indexOf(el) === -1) el.style.removeProperty("--fit-scale");
     });
