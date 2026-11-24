@@ -3311,7 +3311,12 @@
         }
       }
 
-      const card = make("article", null, `session-card cat-${s.category}`);
+      const tStatus = getSessionTemporalStatus(s, eff, nowInfo);
+      const card = make(
+        "article",
+        null,
+        `session-card cat-${s.category}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`
+      );
       const main = make("div", null, "session-main");
 
       const timeLabelTxt = isHoliday
@@ -3592,12 +3597,14 @@
     });
     thead.appendChild(hr);
 
+    const nowInfo = getBangkokNowInfo();
     const tbody = document.createElement("tbody");
     sessions.forEach((s) => {
       const eff = resolveEffectiveSessionDetails(s, ctx);
       const isHol = s.category === "HOLIDAY";
+      const tStatus = getSessionTemporalStatus(s, eff, nowInfo);
       const trEl = document.createElement("tr");
-      trEl.className = `sched-tbl-row cat-row-${s.category}`;
+      trEl.className = `sched-tbl-row cat-row-${s.category}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`;
 
       // 1. Date & Time
       const tdDate = document.createElement("td");
