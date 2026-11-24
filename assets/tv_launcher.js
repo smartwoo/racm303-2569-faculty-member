@@ -2426,9 +2426,9 @@
             id: "sched:st1-slides",
             folderPath: ["schedule"],
             name: "01_RACM303_2569_ST1_Slides_(คิดเชิงระบบ_16x9).pptx",
-            title: "Slide คาบ ST1: Systems & Systems Thinking (16 สไลด์ · 16:9 + Concept Check 5 ข้อ)",
-            sub: "วันพุธที่ 25 พ.ย. 2569 (09.30–12.00 น. · ห้อง 2C2-03) — 16 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
-            meta: "16 สไลด์ · 16:9",
+            title: "Slide คาบ ST1: Systems & Systems Thinking (31 สไลด์ Interactive · 16:9 + Concept Check 6 ข้อ)",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (09.30–12.00 น. · ห้อง 2C2-03) — 31 สไลด์ Interactive 16:9 (Warped Juggle · CLD Lab · Archetypes · En-ROADS) พร้อมดาวน์โหลด .pptx / PDF",
+            meta: "31 สไลด์ · 16:9",
             badge: "▶ เปิดสไลด์ ST1",
             icoCls: "is-pptx",
             icoTxt: "P",
@@ -2823,9 +2823,9 @@
             id: "man:st1-slides",
             folderPath: ["manuals"],
             name: "01_RACM303_2569_ST1_Slides_(คิดเชิงระบบ_16x9).pptx",
-            title: "Slide คาบ ST1: Systems & Systems Thinking (CAS, CLD, Iceberg Model & Realist HPSR)",
-            sub: "สไลด์คาบ ST1 16 หน้า (16:9) พร้อม Live Concept Check 5 ข้อ และดาวน์โหลด .pptx / PDF",
-            meta: "16 สไลด์ · 16:9",
+            title: "Slide คาบ ST1: Systems & Systems Thinking (Warped Juggle, CLD, Archetypes, Iceberg, CAS & En-ROADS)",
+            sub: "สไลด์คาบ ST1 31 หน้า Interactive (16:9) พร้อม Live Concept Check 6 ข้อ และดาวน์โหลด .pptx / PDF",
+            meta: "31 สไลด์ · 16:9",
             badge: "▶ เปิดสไลด์ ST1",
             icoCls: "is-pptx",
             icoTxt: "P",
@@ -3651,7 +3651,7 @@
             <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
           </div>
           <div class="tv-up-tracks">
-            <button type="button" class="tv-hosp-chip" id="stuOpenSt1DeckQuickBtn">🖥️ เปิด Slide ST1 (16 สไลด์ · 16:9)</button>
+            <button type="button" class="tv-hosp-chip" id="stuOpenSt1DeckQuickBtn">🖥️ เปิด Slide ST1 (31 สไลด์ Interactive · 16:9)</button>
             <button type="button" class="tv-hosp-chip" id="stuOpenSpssDeckQuickBtn">💻 เปิด Slide SPSS Workshop (10 สไลด์ · 16:9)</button>
             <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_ST1_Slides.pdf" download="RACM303_2569_ST1_Slides.pdf" style="text-decoration:none">⬇ Slide ST1 (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_SPSS_Workshop_Slides.pdf" download="RACM303_2569_SPSS_Workshop_Slides.pdf" style="text-decoration:none">⬇ Slide SPSS (.pdf)</a>
