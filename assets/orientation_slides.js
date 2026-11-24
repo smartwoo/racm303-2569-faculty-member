@@ -1,13 +1,13 @@
 /* ==========================================================================
    RACM 303 (2569) — Orientation to Community Medicine & Health Systems Science
-   20-Slide Interactive 16:9 Widescreen Apple-Keynote Slide Deck
+   19-Slide Interactive 16:9 Widescreen Apple-Keynote Slide Deck
    Constructive Policy-Brief Prose · Source-Validated HSS · Auto-Fit Typography
    ========================================================================== */
 (function () {
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124prem3";
+  const ASSET_VER = "20261124prem4";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -37,8 +37,8 @@
       pos: "50% 46%",
       badge: "COMMUNITY MEDICINE CENTER · 28 ต.ค. 2551",
       era: "สำนักงานศูนย์เวชศาสตร์ชุมชน",
-      shortTag: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้ายศูนย์ฯ",
-      title: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้าย “สำนักงานศูนย์เวชศาสตร์ชุมชน” (Community Medicine Center)",
+      shortTag: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้าย COMMED",
+      title: "ถ่ายรูปรวมกับลูกศิษย์หน้าป้าย “สำนักงานศูนย์เวชศาสตร์ชุมชน” (COMMED)",
       desc: "ภาพถ่ายประวัติศาสตร์วันที่ 28 ตุลาคม 2551 พร้อมหน้าลูกศิษย์ คณาจารย์ และบุคลากรผู้สืบสานพันธกิจเวชศาสตร์ชุมชน รามาธิบดี"
     },
     {
@@ -575,7 +575,7 @@
     more: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
-  /* ---------- Complete 20-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
+  /* ---------- Complete 19-Slide Deck (Constructive Concise Prose · Source-Validated · Auto-Fit) ---------- */
   const SLIDES = [
     {
       id: "s01-cover",
@@ -601,14 +601,14 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · FOUNDING FATHER",
-      timeWindow: "08.34 – 08.38 น. (4 นาที)",
+      timeWindow: "08.34 – 08.39 น. (5 นาที)",
       kicker: "01 · RAMATHIBODI COMMUNITY MEDICINE HERITAGE",
       title: "Prof. Dr. Prem Buri — บิดาผู้วางรากฐานและต้นแบบการสอนเวชศาสตร์ชุมชน รามาธิบดี",
       keyTag: "ต้นแบบครูแพทย์",
       keyMessageHtml:
         "<strong>Prof. Dr. Prem Buri</strong>, our founding father and our role model of teaching community medicine in Ramathibodi",
       notes:
-        "รำลึกถึงศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี หัวหน้าภาควิชาศัลยศาสตร์ท่านแรก และผู้อำนวยการโครงการเวชศาสตร์ชุมชนท่านแรกของคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี (พ.ศ. 2512–2520) ผู้วางรากฐานการจัดการเรียนการสอนเวชศาสตร์ชุมชนแบบสหสาขาวิชาชีพ ณ อำเภอบางปะอิน จังหวัดพระนครศรีอยุธยา ร่วมกับกระทรวงสาธารณสุข เพื่อให้บัณฑิตแพทย์เข้าใจชีวิตจริงของประชาชนและเป็นผู้นำการเปลี่ยนแปลงในระบบสุขภาพ (Photo Grid Screensaver เปลี่ยนภาพอัตโนมัติทุก 6 วินาที เริ่มจากภาพรอยยิ้มของ อ.เปรม บุรี เป็นภาพแรก และสุ่มลำดับภาพจดหมายเหตุที่เหลือ)",
+        "รำลึกถึงศาสตราจารย์เกียรติคุณ นายแพทย์เปรม บุรี หัวหน้าภาควิชาศัลยศาสตร์ท่านแรก และผู้อำนวยการโครงการเวชศาสตร์ชุมชนท่านแรกของคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี (พ.ศ. 2512–2520) ผู้วางรากฐานการจัดการเรียนการสอนเวชศาสตร์ชุมชนแบบสหสาขาวิชาชีพ ณ อำเภอบางปะอิน จังหวัดพระนครศรีอยุธยา ร่วมกับกระทรวงสาธารณสุข เพื่อให้บัณฑิตแพทย์เข้าใจชีวิตจริงของประชาชนและเป็นผู้นำการเปลี่ยนแปลงในระบบสุขภาพ (Photo Grid Screensaver แสดงภาพ 1/18 รอยยิ้ม อ.เปรม บุรี, 2/18 พิธีเจิมป้ายศูนย์เวชศาสตร์ชุมชน, 3/18 ถ่ายรูปรวมกับลูกศิษย์หน้าป้าย COMMED และสุ่มลำดับภาพจดหมายเหตุที่เหลือทุก 6 วินาที)",
       render: () => `
         <div class="or-infog-split is-prem-tv-split${premReelState.expanded ? " is-cinema-expanded" : ""}" data-prem-split>
           ${renderPremScreensaverStageHtml()}
@@ -642,18 +642,18 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · START WITH WHY",
-      timeWindow: "08.38 – 08.42 น. (4 นาที)",
+      timeWindow: "08.39 – 08.45 น. (6 นาที)",
       kicker: "01 · HEALTH SYSTEMS SCIENCE (HSS) · THE THIRD PILLAR OF MEDICAL EDUCATION",
-      title: "วิทยาศาสตร์ระบบสุขภาพ: เสาหลักที่ 3 ที่ต่อยอดความรู้พื้นฐานและคลินิกสู่การดูแลผู้ป่วยในระบบจริง",
+      title: "ศาสตร์วิทยาระบบสุขภาพ (HSS): เสาหลักที่ 3 ที่ต่อยอดความรู้พื้นฐานและคลินิกสู่การดูแลผู้ป่วยในระบบจริง",
       keyTag: "สาระสำคัญ",
       keyMessageHtml:
-        "<strong>วิทยาศาสตร์พื้นฐาน</strong> อธิบายกลไกของโรค <strong>วิทยาศาสตร์คลินิก</strong> ชี้แนวทางวินิจฉัยและรักษาผู้ป่วยรายบุคคล ควบคู่กับ <strong>วิทยาศาสตร์ระบบสุขภาพ (HSS)</strong> ที่ศึกษาการจัดบริการ การทำงานร่วมกันของทีม และการพัฒนาระบบให้ดียิ่งขึ้น",
+        "<strong>วิทยาศาสตร์พื้นฐาน</strong> อธิบายกลไกของโรค <strong>วิทยาศาสตร์คลินิก</strong> ชี้แนวทางวินิจฉัยและรักษาผู้ป่วยรายบุคคล ควบคู่กับ <strong>ศาสตร์วิทยาระบบสุขภาพ (HSS)</strong> ที่ศึกษาการจัดบริการ การทำงานร่วมกันของทีม และการพัฒนาระบบให้ดียิ่งขึ้น",
       notes:
-        "ไล่เรียงตามลำดับความคิดของแผนภาพต้นฉบับทั้ง 3 รูป: (1) รูปที่ 1 แสดงเสาหลักทั้ง 3 ของแพทยศาสตรศึกษา ชี้ให้เห็นว่าลำพังการวินิจฉัยและรักษาทางคลินิกที่แม่นยำยังไม่เพียงพอ หากระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องที่บ้านและชุมชนยังขาดช่วงจนผู้ป่วยกลับมาป่วยซ้ำ (2) รูปที่ 2A (Gonzalo et al., 2017) แสดงกรอบการเรียนรู้ที่ผสานองค์ประกอบหลักของระบบสุขภาพ 6 ด้าน เข้ากับสมรรถนะร่วมที่ใช้สอดประสานในการทำงานทุกบริบท 5 ด้าน โดยมี Systems thinking เป็นตัวเชื่อมเข้ากับความรู้พื้นฐานและคลินิก และ (3) รูปที่ 2B (AMA / Skochelak et al., 2020) นำกรอบแนวคิดชุดเดียวกันมาจัดวางใหม่เพื่อย้ำว่าผู้ป่วย ครอบครัว และชุมชนคือจุดมุ่งหมายตรงกลางของทุกระบบ",
+        "ไล่เรียงตามลำดับความคิดของแผนภาพต้นฉบับทั้ง 3 รูป: (1) รูปที่ 1 แสดงเสาหลักทั้ง 3 ของแพทยศาสตรศึกษา ชี้ให้เห็นว่าลำพังการวินิจฉัยและรักษาทางคลินิกที่แม่นยำยังไม่เพียงพอ หากระบบส่งต่อ สิทธิการรักษา หรือการดูแลต่อเนื่องที่บ้านและชุมชนยังขาดช่วงจนผู้ป่วยกลับมาป่วยซ้ำ (2) รูปที่ 2A (Gonzalo et al., 2017) แสดงกรอบการเรียนรู้ศาสตร์วิทยาระบบสุขภาพ (HSS) ที่ผสานองค์ประกอบหลักของระบบสุขภาพ 6 ด้าน เข้ากับสมรรถนะร่วมที่ใช้สอดประสานในการทำงานทุกบริบท 5 ด้าน โดยมี Systems thinking เป็นตัวเชื่อมเข้ากับความรู้พื้นฐานและคลินิก และ (3) รูปที่ 2B (AMA / Skochelak et al., 2020) นำกรอบแนวคิดชุดเดียวกันมาจัดวางใหม่เพื่อย้ำว่าผู้ป่วย ครอบครัว และชุมชนคือจุดมุ่งหมายตรงกลางของทุกระบบ ก่อนซูมออกกลับมาเห็นภาพรวมทั้ง 3 รูปอีกครั้ง",
       render: () => {
         const isExportOrPrint =
           Boolean(window.__RACM_EXPORTING_DECK) || document.body.classList.contains("is-printing-orientation-deck");
-        const focusVal = isExportOrPrint ? 0 : state.s02Focus || 0;
+        const focusVal = isExportOrPrint || state.s02Focus === 4 ? 0 : state.s02Focus || 0;
         return `
         <div class="or-s02-3fig-grid" data-fit-group="s02-takeaways" data-s02-focus="${focusVal}">
           ${s02FlowCard({
@@ -699,73 +699,25 @@
       }
     },
     {
-      id: "s03-beyond-bedside",
+      id: "s04-course-objectives",
       num: "04",
       section: "objectives",
       sectionLabel: "Act I · Start with Why",
       actClass: "",
-      actLabel: "ACT I · START WITH WHY",
-      timeWindow: "08.42 – 08.46 น. (4 นาที)",
-      kicker: "01 · BEYOND THE BEDSIDE & RAMATHIBODI COMMUNITY MEDICINE HERITAGE",
-      title: "มองให้ลึกกว่าข้างเตียง จากรากเหง้าสุขภาพชุมชนสู่ปณิธานรามาธิบดี",
-      keyTag: "สาระสำคัญ",
-      keyMessageHtml:
-        "การรักษาข้างเตียงช่วยดูแลผู้ป่วยเฉพาะราย ควบคู่กับ <strong>ความเข้าใจปัจจัยกำหนดสุขภาพ ชุมชน และระบบบริการ</strong> ที่ช่วยลดความเสี่ยงการเจ็บป่วยซ้ำของประชากร",
-      notes:
-        "เชื่อมภาพสิ่งที่พบในโรงพยาบาลเข้ากับปัจจัยพื้นฐานในชุมชน (อาชีพ โภชนาการ ที่อยู่อาศัย อสม. ระบบบริการปฐมภูมิ หลักประกันสุขภาพ และนโยบายสาธารณะ) สืบเนื่องจากปณิธานก่อตั้งเวชศาสตร์ชุมชน รามาธิบดี ตั้งแต่ พ.ศ. 2511 โดย ศ.นพ.อารี วัลยะเสวี และ ศ.นพ.เปรม บุรี",
-      render: () => `
-        <div class="or-infog-split is-fig-left">
-          ${figPlate(
-            "orient_s03_beyond_bedside.png",
-            "เชื่อมโยงการดูแลข้างเตียง ปัจจัยกำหนดสุขภาพในชุมชน และระบบสุขภาพ สู่บทบาทผู้นำการเปลี่ยนแปลง",
-            ""
-          )}
-
-          <div class="or-stack-col is-s03-stack" data-fit-group="cards">
-            <div class="or-card is-navy-tint">
-              <span class="or-card-kicker">FOUNDING VISION · พ.ศ. 2511 ถึงปัจจุบัน</span>
-              <h3 class="or-card-title">ปณิธาน ศ.นพ.อารี วัลยะเสวี และ ศ.นพ.เปรม บุรี</h3>
-              <p class="or-card-text">เตรียมบัณฑิตแพทย์ให้เข้าใจบริบทชีวิตจริงของประชาชน ทำงานร่วมกับชุมชนและทีมสาธารณสุขอย่างมีความสุขเพื่อร่วมพัฒนาระบบสุขภาพ</p>
-            </div>
-
-            <div class="or-card is-white">
-              <span class="or-card-kicker">RAMATHIBODI HERITAGE · พัฒนาการและพันธกิจหลัก 3 ด้าน</span>
-              <ul class="or-list">
-                <li><strong>พ.ศ. 2511–2512:</strong> บุกเบิกสำรวจสุขภาพ ต.บางชัน และโครงการสหวิชาชีพ อ.บางปะอิน</li>
-                <li><strong>พ.ศ. 2525–2546:</strong> พัฒนาจากศูนย์เวชศาสตร์ชุมชนสู่<strong>ภาควิชาเวชศาสตร์ชุมชน</strong></li>
-                <li><strong>พันธกิจ 3 ด้าน:</strong> สร้างเสริมสุขภาพและสุขภาพโลก วิจัยระบบสุขภาพ และอาชีวเวชศาสตร์</li>
-              </ul>
-            </div>
-
-            <div class="or-card is-teal-tint">
-              <span class="or-card-kicker">3-LEVEL CLINICAL LENS</span>
-              <h3 class="or-card-title">เชื่อมโยงมุมมอง 3 ระดับในทุกกรณีศึกษา</h3>
-              <p class="or-card-text">พิจารณาสุขภาพของ<strong>ผู้ป่วยตรงหน้า</strong>ควบคู่กับบริบท<strong>ครอบครัวและชุมชน (SDH, CDoH)</strong> ตลอดจน<strong>การจัดบริการของระบบสุขภาพ</strong>อย่างเป็นองค์รวม</p>
-            </div>
-          </div>
-        </div>
-      `
-    },
-    {
-      id: "s04-course-objectives",
-      num: "05",
-      section: "objectives",
-      sectionLabel: "Act I · Start with Why",
-      actClass: "",
       actLabel: "ACT I · OBJECTIVES",
-      timeWindow: "08.46 – 08.50 น. (4 นาที)",
+      timeWindow: "08.45 – 08.50 น. (5 นาที)",
       kicker: "01 · COURSE GOALS (ก–ง) & 5 CORE PHYSICIAN COMPETENCIES",
       title: "วัตถุประสงค์รายวิชา (ก–ง) เชื่อมตรงสู่สมรรถนะหลักของแพทย์ทั้ง 5 ด้าน",
       keyTag: "ความสอดคล้องเชิงหลักสูตร",
       keyMessageHtml:
         "ทุกกิจกรรมการเรียนรู้และการประเมินผลใน RACM 303 ออกแบบให้สอดรับกันตั้งแต่ <strong>วัตถุประสงค์ ก–ง ไปจนถึงสมรรถนะหลักทั้ง 5 ด้าน (C1–C5)</strong>",
       notes:
-        "ชี้ให้เห็นว่าวัตถุประสงค์รายวิชาทั้ง 4 หมวด (ก–ง) ในคู่มือรายวิชา ออกแบบให้รองรับสมรรถนะหลัก 5 ด้านของบัณฑิตแพทย์ ซึ่งจะใช้เป็นกรอบประเมินผลสัมฤทธิ์ของรายวิชาอย่างโปร่งใส",
+        "ชี้ให้เห็นว่าวัตถุประสงค์รายวิชาทั้ง 4 หมวด (ก–ง) ในคู่มือรายวิชา ออกแบบให้รองรับบทบาทแพทย์เวชปฏิบัติอิงระบบ (Physician in Systems-Based Practice) และสมรรถนะหลัก 5 ด้านของบัณฑิตแพทย์ ซึ่งจะใช้เป็นกรอบประเมินผลสัมฤทธิ์ของรายวิชาอย่างโปร่งใส",
       render: () => `
         <div class="or-infog-split is-fig-left-compact">
           ${figPlate(
             "orient_s04_competencies.png",
-            "5 Core Physician Competencies of RACM 303",
+            "Physician in Systems-Based Practice: 5 Core Competencies of RACM 303",
             ""
           )}
 

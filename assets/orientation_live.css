@@ -5168,9 +5168,14 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   white-space: nowrap;
 }
 
-.or-slide-canvas[data-measuring="1"],
-.or-slide-canvas[data-measuring="1"] *,
-.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-schematic-box .or-card {
+.or-slide-canvas[data-measuring="1"] .or-card,
+.or-slide-canvas[data-measuring="1"] .or-schematic-box,
+.or-slide-canvas[data-measuring="1"] .or-visual-pillar-copy,
+.or-slide-canvas[data-measuring="1"] .or-table-wrap,
+.or-slide-canvas[data-measuring="1"] .or-cover-kpi,
+.or-slide-canvas[data-measuring="1"] .or-cover-act-chip,
+.or-slide-frame-wrap .or-slide-canvas.is-keynote-animated .or-schematic-box .or-card,
+.or-slide-frame-wrap .or-slide-canvas[data-slide-id="s02-prem-buri-founder"].is-keynote-animated .or-card {
   animation: none !important;
   transition: none !important;
 }
@@ -5548,6 +5553,16 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   grid-row: 1 / 4;
 }
 
+.or-prem-grid-layer.is-hero-fullframe {
+  grid-template-columns: 1.56fr 0.68fr;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.or-prem-grid-layer.is-hero-fullframe > .or-prem-tile.is-hero {
+  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+}
+
 .or-prem-grid-layer.is-hero-wide {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: 1.66fr 0.84fr;
@@ -5559,7 +5574,7 @@ html[data-role="faculty"] .or-keynote-progress-fill {
 }
 
 .or-prem-grid-layer.is-wall-5 {
-  grid-template-columns: 1.26fr 0.87fr 0.87fr;
+  grid-template-columns: 1.44fr 0.78fr 0.78fr;
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
@@ -5580,6 +5595,24 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   cursor: pointer;
   isolation: isolate;
   transition: border-color 0.22s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease;
+}
+
+.or-prem-tile.is-hero.is-docked-hero {
+  display: flex;
+  flex-direction: column;
+  background: #090d16;
+}
+
+.or-prem-hero-media {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28cqw;
 }
 
 .or-prem-tile.is-mosaic:hover {
@@ -5617,6 +5650,10 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   object-position: center center;
 }
 
+.or-prem-tile.is-mosaic.is-preserve-frame {
+  padding-bottom: 1.55cqw;
+}
+
 @keyframes orPremKenBurnsIn {
   from { transform: scale(1.005) translate3d(0, 0, 0); }
   to { transform: scale(1.068) translate3d(-0.8%, -0.6%, 0); }
@@ -5625,6 +5662,11 @@ html[data-role="faculty"] .or-keynote-progress-fill {
 @keyframes orPremKenBurnsOut {
   from { transform: scale(1.064) translate3d(0.7%, -0.4%, 0); }
   to { transform: scale(1.006) translate3d(0, 0, 0); }
+}
+
+@keyframes orPremKenBurnsContain {
+  from { transform: scale(0.985) translate3d(0, 0, 0); }
+  to { transform: scale(1.000) translate3d(0, 0, 0); }
 }
 
 .or-prem-tv-stage:not(.is-static-mode):not(.is-screensaver-paused) .or-prem-tile.is-kb-a .or-prem-img {
@@ -5636,7 +5678,7 @@ html[data-role="faculty"] .or-keynote-progress-fill {
 }
 
 .or-prem-tv-stage:not(.is-static-mode):not(.is-screensaver-paused) .or-prem-tile.is-preserve-frame .or-prem-img {
-  animation-duration: 7600ms;
+  animation: orPremKenBurnsContain 6800ms ease-out forwards;
 }
 
 .or-prem-hero-overlay {
@@ -5654,6 +5696,15 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   flex-direction: column;
   gap: 0.18cqw;
   pointer-events: none;
+}
+
+.or-prem-hero-overlay.is-docked-caption {
+  position: relative;
+  inset: auto;
+  flex-shrink: 0;
+  padding: 0.44cqw 0.74cqw 0.52cqw;
+  background: linear-gradient(180deg, rgba(10, 15, 27, 0.96) 0%, rgba(6, 9, 16, 0.99) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .or-prem-hero-meta {
