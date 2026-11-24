@@ -7,11 +7,12 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124sch2";
+  const ASSET_VER = "20261124tv1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
   const AUTOPLAY_MS = 9000;
+  const CLICKER_HUD_IDLE_MS = 2300;
 
   function loadIoStageTheme() {
     try {
@@ -31,6 +32,16 @@
     zoomScale: 1,
     sorterFilter: "all",
     presentationMode: false,
+    clickerStage: false, // Apple Keynote / Google I/O Cinema Pitch Stage (Auto-hiding HUD + Click-anywhere + Hardware Clicker)
+    hudIdle: false,
+    hudIdleTimer: 0,
+    blackoutActive: false,
+    clickerGuideOpen: false,
+    transitionDir: "next", // "next" | "prev"
+    jumpDigits: "",
+    jumpTimer: 0,
+    stepToastActive: false,
+    stepToastTimer: 0,
     showNotes: ROLE === "faculty" && window.innerWidth >= 1024 && window.innerHeight >= 620,
     toolsMenuOpen: false,
     laserActive: false,
@@ -146,6 +157,7 @@
     print: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
     notes: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>`,
     fullscreen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+    clicker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="5"/><circle cx="12" cy="8" r="2"/><line x1="12" y1="14" x2="12" y2="17"/></svg>`,
     more: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
@@ -1839,7 +1851,14 @@
   }
 
   function animateCoverKpis(rootEl) {
-    if (!rootEl || state.viewMode !== "deck") return;
+    if (
+      !rootEl ||
+      state.viewMode !== "deck" ||
+      window.__RACM_EXPORTING_DECK ||
+      document.body.classList.contains("is-printing-orientation-deck")
+    ) {
+      return;
+    }
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const els = rootEl.querySelectorAll("[data-count-to]");
     els.forEach((el) => {
@@ -1942,7 +1961,8 @@
   }
 
   function renderSingleSlideCanvasHtml(slide, idx, animateDeck) {
-    const animCls = animateDeck ? " is-keynote-animated" : "";
+    const dirCls = animateDeck ? (state.transitionDir === "prev" ? " is-dir-prev" : " is-dir-next") : "";
+    const animCls = animateDeck ? " is-keynote-animated" + dirCls : "";
     const ioTheme = getEffectiveIoTheme();
     if (slide.isCover) {
       return `
@@ -1996,8 +2016,25 @@
       document.fonts.ready.then(scheduleFitOnResize).catch(() => {});
     }
 
+    modal.addEventListener("mousemove", () => {
+      if (!state.isOpen || modal.hidden) return;
+      if (state.clickerStage || state.presentationMode) {
+        wakeHud();
+      }
+    });
+
     modal.addEventListener("click", (ev) => {
-      if (ev.target === modal && !state.presentationMode) {
+      if (state.blackoutActive && !ev.target.closest(".or-blackout-card button")) {
+        state.blackoutActive = false;
+        renderModal();
+        return;
+      }
+      if (state.clickerGuideOpen && ev.target.classList && ev.target.classList.contains("or-clicker-guide-backdrop")) {
+        state.clickerGuideOpen = false;
+        renderModal();
+        return;
+      }
+      if (ev.target === modal && !state.presentationMode && !state.clickerStage) {
         closeDeck();
         return;
       }
@@ -2005,6 +2042,38 @@
         state.toolsMenuOpen = false;
         const pop = modal.querySelector(".or-tools-popover");
         if (pop) pop.hidden = true;
+      }
+      // Click-anywhere stage advance in Keynote Clicker / Presentation mode (zero mouse button hunting!)
+      if (
+        (state.clickerStage || state.presentationMode) &&
+        state.viewMode === "deck" &&
+        Math.abs((state.zoomScale || 1) - 1) < 0.04
+      ) {
+        const curSlide = SLIDES[state.slideIdx];
+        const inInteractive =
+          ev.target &&
+          ev.target.closest &&
+          ev.target.closest(
+            "button, a, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap"
+          );
+        if (!inInteractive && !(curSlide && curSlide.isLiveQuizSlide)) {
+          const vpRect = modal.getBoundingClientRect();
+          const relX = (ev.clientX - vpRect.left) / Math.max(1, vpRect.width);
+          state.autoPlay = false;
+          if (relX <= 0.22) {
+            stepSlide(-1);
+          } else {
+            stepSlide(1);
+          }
+          return;
+        }
+      }
+      // Keep focus off toolbar <button>s so follow-up Space / Enter on wireless clicker or keyboard always advances slides!
+      const clickedBtn = ev.target && ev.target.closest && ev.target.closest("button");
+      if (clickedBtn && typeof clickedBtn.blur === "function") {
+        setTimeout(() => {
+          if (document.activeElement === clickedBtn) clickedBtn.blur();
+        }, 0);
       }
     });
 
@@ -2130,95 +2199,355 @@
       { passive: false }
     );
 
-    document.addEventListener("keydown", (ev) => {
-      if (!state.isOpen || modal.hidden) return;
-      const tag = (ev.target && ev.target.tagName) || "";
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    // Capture-phase Hardware Wireless Clicker, Apple TV Remote & Keynote Pitch Keyboard Engine
+    window.addEventListener(
+      "keydown",
+      (ev) => {
+        if (!state.isOpen || modal.hidden) return;
+        if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
 
-      if (ev.key === "Escape") {
-        ev.preventDefault();
-        if (state.toolsMenuOpen) {
-          state.toolsMenuOpen = false;
+        // Yield cleanly if Google Drive PDF Preview or Live Participant Overlay is open on top
+        const pdfPrev = document.getElementById("gdrivePdfPreviewModal");
+        if (pdfPrev && !pdfPrev.hidden) return;
+        if (
+          window.RACM_ORIENTATION_LIVE &&
+          typeof window.RACM_ORIENTATION_LIVE.hasOpenOverlay === "function" &&
+          window.RACM_ORIENTATION_LIVE.hasOpenOverlay()
+        ) {
+          return;
+        }
+
+        const tag = (ev.target && ev.target.tagName) || "";
+        const isTextInput =
+          tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || Boolean(ev.target && ev.target.isContentEditable);
+        if (isTextInput) return;
+
+        // Ensure accidentally focused toolbar buttons never hijack Space / Enter / Arrow keys from clickers!
+        if (tag === "BUTTON" && ev.target && modal.contains(ev.target)) {
+          if (
+            [
+              " ",
+              "Enter",
+              "PageDown",
+              "PageUp",
+              "ArrowRight",
+              "ArrowLeft",
+              "ArrowDown",
+              "ArrowUp"
+            ].includes(ev.key)
+          ) {
+            try {
+              ev.target.blur();
+            } catch (_) {}
+          }
+        }
+
+        // Blackout curtain: any clicker/key press wakes the stage cleanly
+        if (state.blackoutActive) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.blackoutActive = false;
+          flashStepToast();
           renderModal();
-        } else if (state.presentationMode) {
-          exitPresentationMode();
-        } else {
-          closeDeck();
+          return;
         }
-      } else if (ev.key === "ArrowRight" || ev.key === "PageDown" || ev.key === " ") {
-        if (tag === "BUTTON" && ev.key === " ") return;
-        if (state.viewMode === "deck") {
+
+        if (state.clickerGuideOpen && (ev.key === "Escape" || ev.key === "?")) {
           ev.preventDefault();
+          ev.stopPropagation();
+          state.clickerGuideOpen = false;
+          renderModal();
+          return;
+        }
+
+        if (ev.key === "Escape") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (state.jumpDigits) {
+            clearJumpBuffer();
+            renderModal();
+          } else if (state.toolsMenuOpen) {
+            state.toolsMenuOpen = false;
+            renderModal();
+          } else if (state.clickerStage || state.presentationMode) {
+            exitPresentationMode();
+          } else {
+            closeDeck();
+          }
+          return;
+        }
+
+        // F5 (standard wireless presentation clicker Play/Fullscreen key) or C toggles Keynote Clicker Stage
+        if (ev.key === "F5" || ev.key === "c" || ev.key === "C") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleClickerStage();
+          return;
+        }
+
+        // Standard wireless clicker Blackout button sends "." (Period) or "b"/"B"
+        if (ev.key === "." || ev.key === "b" || ev.key === "B") {
+          if (state.viewMode === "deck") {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleBlackout();
+            return;
+          }
+        }
+
+        // Digit Quick-Jump (e.g. type "8" + Enter -> Slide 08, "17" + Enter -> Slide 17)
+        if (/^[0-9]$/.test(ev.key) && state.viewMode === "deck") {
+          if (ev.key === "0" && !state.jumpDigits && Math.abs((state.zoomScale || 1) - 1) > 0.04) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            setZoomScale(1);
+            return;
+          }
+          if (ev.key !== "0" || state.jumpDigits.length > 0) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            pushJumpDigit(ev.key);
+            return;
+          }
+        }
+
+        const isNextKey =
+          ev.key === "PageDown" ||
+          ev.key === "ArrowRight" ||
+          ev.key === "ArrowDown" ||
+          ev.key === " " ||
+          ev.key === "Enter" ||
+          ev.key === "MediaTrackNext" ||
+          ev.key === "BrowserForward";
+
+        const isPrevKey =
+          ev.key === "PageUp" ||
+          ev.key === "ArrowLeft" ||
+          ev.key === "ArrowUp" ||
+          ev.key === "Backspace" ||
+          ev.key === "MediaTrackPrevious" ||
+          ev.key === "BrowserBack";
+
+        if (ev.key === "Enter" && state.jumpDigits && state.viewMode === "deck") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          commitJumpBuffer();
+          return;
+        }
+
+        if (isNextKey && state.viewMode === "deck") {
+          ev.preventDefault();
+          ev.stopPropagation();
           state.autoPlay = false;
-          goToSlide(state.slideIdx + 1);
+          const curSlide = SLIDES[state.slideIdx];
+          if (
+            curSlide &&
+            curSlide.isLiveQuizSlide &&
+            window.RACM_ORIENTATION_LIVE &&
+            typeof window.RACM_ORIENTATION_LIVE.stepQuizWithClicker === "function"
+          ) {
+            const allowStart = ev.key === "Enter" || ev.key === " ";
+            if (window.RACM_ORIENTATION_LIVE.stepQuizWithClicker(allowStart)) {
+              return;
+            }
+          }
+          stepSlide(1);
+          return;
         }
-      } else if (ev.key === "ArrowLeft" || ev.key === "PageUp") {
-        if (state.viewMode === "deck") {
+
+        if (isPrevKey && state.viewMode === "deck") {
           ev.preventDefault();
+          ev.stopPropagation();
           state.autoPlay = false;
-          goToSlide(state.slideIdx - 1);
+          if (ev.key === "Backspace" && state.jumpDigits) {
+            state.jumpDigits = state.jumpDigits.slice(0, -1);
+            renderModal();
+            return;
+          }
+          stepSlide(-1);
+          return;
         }
-      } else if (ev.key === "Home") {
-        if (state.viewMode === "deck") {
+
+        if (ev.key === "Home" && state.viewMode === "deck") {
           ev.preventDefault();
+          ev.stopPropagation();
           state.autoPlay = false;
           goToSlide(0);
-        }
-      } else if (ev.key === "End") {
-        if (state.viewMode === "deck") {
+        } else if (ev.key === "End" && state.viewMode === "deck") {
           ev.preventDefault();
+          ev.stopPropagation();
           state.autoPlay = false;
           goToSlide(SLIDES.length - 1);
+        } else if (ev.key === "p" || ev.key === "P") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleAutoPlay();
+        } else if (ev.key === "f" || ev.key === "F") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          togglePresentationMode();
+        } else if (ev.key === "h" || ev.key === "H") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.hudIdle = !state.hudIdle;
+          modal.classList.toggle("is-hud-idle", state.hudIdle);
+        } else if (ev.key === "?") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.clickerGuideOpen = !state.clickerGuideOpen;
+          renderModal();
+        } else if (ev.key === "g" || ev.key === "G") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.autoPlay = false;
+          state.viewMode = state.viewMode === "sorter" ? "deck" : "sorter";
+          renderModal();
+        } else if (ev.key === "n" || ev.key === "N") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.showNotes = !state.showNotes;
+          renderModal();
+        } else if (ev.key === "l" || ev.key === "L") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.laserActive = !state.laserActive;
+          renderModal();
+        } else if (ev.key === "k" || ev.key === "K") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          state.autoPlay = false;
+          state.viewMode = state.viewMode === "live" ? "deck" : "live";
+          state.zoomScale = 1;
+          renderModal();
+        } else if (ev.key === "t" || ev.key === "T") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleIoStageTheme();
+        } else if (ev.key === "+" || ev.key === "=") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          setZoomScale((state.zoomScale || 1) + 0.25);
+        } else if (ev.key === "-" || ev.key === "_") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          setZoomScale((state.zoomScale || 1) - 0.25);
+        } else if (ev.key === "0") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          setZoomScale(1);
         }
-      } else if (ev.key === "p" || ev.key === "P") {
-        ev.preventDefault();
-        toggleAutoPlay();
-      } else if (ev.key === "f" || ev.key === "F") {
-        ev.preventDefault();
-        togglePresentationMode();
-      } else if (ev.key === "g" || ev.key === "G") {
-        ev.preventDefault();
-        state.autoPlay = false;
-        state.viewMode = state.viewMode === "sorter" ? "deck" : "sorter";
-        renderModal();
-      } else if (ev.key === "n" || ev.key === "N") {
-        ev.preventDefault();
-        state.showNotes = !state.showNotes;
-        renderModal();
-      } else if (ev.key === "l" || ev.key === "L") {
-        ev.preventDefault();
-        state.laserActive = !state.laserActive;
-        renderModal();
-      } else if (ev.key === "k" || ev.key === "K") {
-        ev.preventDefault();
-        state.autoPlay = false;
-        state.viewMode = state.viewMode === "live" ? "deck" : "live";
-        state.zoomScale = 1;
-        renderModal();
-      } else if (ev.key === "t" || ev.key === "T") {
-        ev.preventDefault();
-        toggleIoStageTheme();
-      } else if (ev.key === "+" || ev.key === "=") {
-        ev.preventDefault();
-        setZoomScale((state.zoomScale || 1) + 0.25);
-      } else if (ev.key === "-" || ev.key === "_") {
-        ev.preventDefault();
-        setZoomScale((state.zoomScale || 1) - 0.25);
-      } else if (ev.key === "0") {
-        ev.preventDefault();
-        setZoomScale(1);
-      }
-    });
+      },
+      true
+    );
 
     document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement && state.presentationMode) {
+      if (!document.fullscreenElement && (state.presentationMode || state.clickerStage)) {
         state.presentationMode = false;
-        modal.classList.remove("is-presentation-mode");
+        state.clickerStage = false;
+        state.hudIdle = false;
+        clearHudIdleTimer();
+        modal.classList.remove("is-presentation-mode", "is-clicker-stage", "is-hud-idle");
         renderModal();
       }
     });
 
     return modal;
+  }
+
+  function clearHudIdleTimer() {
+    if (state.hudIdleTimer) {
+      clearTimeout(state.hudIdleTimer);
+      state.hudIdleTimer = 0;
+    }
+  }
+
+  function armHudIdleTimer() {
+    clearHudIdleTimer();
+    if (!state.isOpen || (!state.clickerStage && !state.presentationMode) || state.viewMode !== "deck" || state.toolsMenuOpen || state.clickerGuideOpen) {
+      state.hudIdle = false;
+      const m = document.getElementById("orientationDeckModal");
+      if (m) m.classList.remove("is-hud-idle");
+      return;
+    }
+    state.hudIdleTimer = setTimeout(() => {
+      if (!state.isOpen || (!state.clickerStage && !state.presentationMode) || state.viewMode !== "deck" || state.toolsMenuOpen || state.clickerGuideOpen) return;
+      state.hudIdle = true;
+      const m = document.getElementById("orientationDeckModal");
+      if (m) m.classList.add("is-hud-idle");
+    }, CLICKER_HUD_IDLE_MS);
+  }
+
+  function wakeHud() {
+    state.hudIdle = false;
+    const m = document.getElementById("orientationDeckModal");
+    if (m) m.classList.remove("is-hud-idle");
+    armHudIdleTimer();
+  }
+
+  function flashStepToast() {
+    state.stepToastActive = true;
+    if (state.stepToastTimer) clearTimeout(state.stepToastTimer);
+    state.stepToastTimer = setTimeout(() => {
+      state.stepToastActive = false;
+      const pill = document.getElementById("orClickerCornerHud");
+      if (pill) pill.classList.remove("is-visible");
+    }, 1850);
+  }
+
+  function clearJumpBuffer() {
+    state.jumpDigits = "";
+    if (state.jumpTimer) {
+      clearTimeout(state.jumpTimer);
+      state.jumpTimer = 0;
+    }
+  }
+
+  function pushJumpDigit(d) {
+    const next = (state.jumpDigits + d).slice(-2);
+    state.jumpDigits = next;
+    if (state.jumpTimer) clearTimeout(state.jumpTimer);
+    state.jumpTimer = setTimeout(() => {
+      commitJumpBuffer();
+    }, 1150);
+    renderModal();
+  }
+
+  function commitJumpBuffer() {
+    if (!state.jumpDigits) return;
+    const num = parseInt(state.jumpDigits, 10);
+    clearJumpBuffer();
+    if (Number.isFinite(num) && num >= 1 && num <= SLIDES.length) {
+      goToSlide(num - 1);
+    } else {
+      renderModal();
+    }
+  }
+
+  function toggleBlackout() {
+    state.blackoutActive = !state.blackoutActive;
+    state.toolsMenuOpen = false;
+    renderModal();
+  }
+
+  function toggleClickerStage() {
+    const modal = ensureModalElement();
+    state.toolsMenuOpen = false;
+    state.clickerGuideOpen = false;
+    if (!state.clickerStage) {
+      state.viewMode = "deck";
+      state.clickerStage = true;
+      state.presentationMode = true;
+      state.showNotes = false;
+      modal.classList.add("is-presentation-mode", "is-clicker-stage");
+      if (modal.requestFullscreen) {
+        modal.requestFullscreen().catch(() => {});
+      }
+      flashStepToast();
+      renderModal();
+      armHudIdleTimer();
+    } else {
+      exitPresentationMode();
+    }
   }
 
   function wireLaserIfActive(rootEl) {
@@ -2247,20 +2576,60 @@
   function printHandout() {
     state.autoPlay = false;
     state.toolsMenuOpen = false;
+    state.clickerGuideOpen = false;
+    state.blackoutActive = false;
     clearAutoPlayTimer();
     const prevMode = state.viewMode;
     state.viewMode = "handout";
     document.body.classList.add("is-printing-orientation-deck");
+
+    let pageRule = document.getElementById("orWidescreenPrintRule");
+    if (!pageRule) {
+      pageRule = document.createElement("style");
+      pageRule.id = "orWidescreenPrintRule";
+      document.head.appendChild(pageRule);
+    }
+    pageRule.textContent = `
+      @page { size: 13.333in 7.5in !important; margin: 0 !important; }
+      @media print {
+        html, body {
+          width: 13.333in !important;
+          height: 7.5in !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #ffffff !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        body.is-printing-orientation-deck .or-slide-canvas {
+          width: 13.333in !important;
+          height: 7.5in !important;
+          max-width: 13.333in !important;
+          max-height: 7.5in !important;
+          margin: 0 !important;
+          border: 0 !important;
+          border-radius: 0 !important;
+          break-after: page;
+          page-break-after: always;
+        }
+        body.is-printing-orientation-deck .or-slide-canvas:last-child {
+          break-after: auto;
+          page-break-after: auto;
+        }
+      }
+    `;
+
     renderModal();
     setTimeout(() => {
       fitAllVisibleCanvases();
       window.print();
       setTimeout(() => {
         document.body.classList.remove("is-printing-orientation-deck");
+        if (pageRule && pageRule.parentNode) pageRule.parentNode.removeChild(pageRule);
         state.viewMode = prevMode;
         renderModal();
       }, 300);
-    }, 140);
+    }, 160);
   }
 
   function togglePresentationMode() {
@@ -2273,16 +2642,22 @@
       if (modal.requestFullscreen) {
         modal.requestFullscreen().catch(() => {});
       }
+      flashStepToast();
+      renderModal();
+      armHudIdleTimer();
     } else {
       exitPresentationMode();
     }
-    renderModal();
   }
 
   function exitPresentationMode() {
     const modal = ensureModalElement();
     state.presentationMode = false;
-    modal.classList.remove("is-presentation-mode");
+    state.clickerStage = false;
+    state.hudIdle = false;
+    state.blackoutActive = false;
+    clearHudIdleTimer();
+    modal.classList.remove("is-presentation-mode", "is-clicker-stage", "is-hud-idle");
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});
     }
@@ -2345,9 +2720,13 @@
   }
 
   function goToSlide(idx) {
-    state.slideIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
+    const nextIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
+    state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
+    state.slideIdx = nextIdx;
     state.zoomScale = 1;
     state.toolsMenuOpen = false;
+    clearJumpBuffer();
+    flashStepToast();
     syncHostSlideToLive();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
@@ -2377,14 +2756,62 @@
     if (!state.isOpen || state.viewMode !== "deck") return;
     const safeIdx = Math.max(0, Math.min(SLIDES.length - 1, Number(remoteIdx) || 0));
     if (safeIdx === state.slideIdx) return;
+    state.transitionDir = safeIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = safeIdx;
     state.zoomScale = 1;
+    flashStepToast();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
     if (vp) {
       vp.scrollTop = 0;
       vp.scrollLeft = 0;
     }
+  }
+
+  function renderClickerGuideHtml() {
+    if (!state.clickerGuideOpen) return "";
+    const liveApi = window.RACM_ORIENTATION_LIVE;
+    const remoteUrl =
+      liveApi && typeof liveApi.getJoinUrl === "function"
+        ? liveApi.getJoinUrl()
+        : window.location.origin + window.location.pathname + "#live";
+    const qrHtml =
+      liveApi && typeof liveApi.buildQrSvg === "function" ? liveApi.buildQrSvg(remoteUrl, "is-clicker-qr") : "";
+    return `
+      <div class="or-clicker-guide-backdrop" role="dialog" aria-modal="true" aria-label="Keynote Clicker & Wireless Remote Guide">
+        <div class="or-clicker-guide-sheet">
+          <div class="or-cg-head">
+            <div>
+              <span class="or-cg-pill">● APPLE TV × KEYNOTE PITCH · CLICKER READY</span>
+              <h3 class="or-cg-title">ควบคุมสไลด์แบบไม่ต้องใช้เมาส์ (Wireless Clicker &amp; Phone Remote)</h3>
+            </div>
+            <button type="button" class="or-tool-btn is-close" id="orCloseClickerGuideBtn" aria-label="ปิดหน้าต่างแนะนำ Clicker">&times;</button>
+          </div>
+          <div class="or-cg-grid">
+            <div class="or-cg-col">
+              <div class="or-cg-kicker">1 · USB / BLUETOOTH PRESENTATION CLICKER &amp; KEYBOARD</div>
+              <div class="or-cg-keymap">
+                <div class="or-cg-krow"><kbd>PageDown</kbd> <kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>Enter</kbd><span>สไลด์ถัดไป (Next Slide)</span></div>
+                <div class="or-cg-krow"><kbd>PageUp</kbd> <kbd>&larr;</kbd> <kbd>Backspace</kbd><span>สไลด์ก่อนหน้า (Previous Slide)</span></div>
+                <div class="or-cg-krow"><kbd>F5</kbd> หรือ <kbd>C</kbd><span>เข้า/ออกโหมด <strong>Keynote Pitch Stage</strong> (ซ่อนแถบเมนูอัตโนมัติ)</span></div>
+                <div class="or-cg-krow"><kbd>.</kbd> หรือ <kbd>B</kbd><span>พักหน้าจอดำ <strong>Blackout Stage</strong> (รองรับปุ่มจอดำบน Clicker ทุกรุ่น)</span></div>
+                <div class="or-cg-krow"><kbd>1–20</kbd> + <kbd>Enter</kbd><span>พิมพ์เลขสไลด์แล้วกด Enter เพื่อกระโดดข้ามหน้าทันที</span></div>
+                <div class="or-cg-krow"><kbd>L</kbd> เลเซอร์ · <kbd>H</kbd> ซ่อน/แสดงแถบ · <kbd>T</kbd> โทนสว่าง/มืด<span>ควบคุมเวทีครบมือโดยไม่ต้องจับเมาส์</span></div>
+              </div>
+              <div class="or-cg-actions">
+                <button type="button" class="or-tool-btn is-clicker-launch" id="orGuideStartClickerBtn">${SVG.clicker} <span>เริ่มโหมด Keynote Pitch เต็มจอทันที (F5)</span></button>
+                <button type="button" class="or-tool-btn" id="orGuideBlackoutBtn">⬛ ทดสอบพักจอดำ (B)</button>
+              </div>
+            </div>
+            <div class="or-cg-col is-qr-col">
+              <div class="or-cg-kicker">2 · ใช้มือถือ / iPad เป็น WIRELESS CLICKER</div>
+              <div class="or-cg-qr-box">${qrHtml}</div>
+              <p class="or-cg-qr-desc">สแกน QR เลือกชื่ออาจารย์ แล้วเปิดแท็บ <strong>🎛️ รีโมต</strong> เพื่อกด <strong>NEXT SLIDE ▶ / ◀ PREV / ⬛ พักจอดำ / ยิง Quiz</strong> จากกลางห้องบรรยายได้ทันที</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function openLiveLobby() {
@@ -2450,8 +2877,11 @@
     document.body.classList.add("orient-deck-open");
     modal.hidden = false;
     modal.classList.toggle("is-presentation-mode", state.presentationMode);
+    modal.classList.toggle("is-clicker-stage", state.clickerStage);
+    modal.classList.toggle("is-hud-idle", Boolean((state.clickerStage || state.presentationMode) && state.hudIdle));
 
     const cur = SLIDES[state.slideIdx] || SLIDES[0];
+    const progressPct = (((state.slideIdx + 1) / Math.max(1, SLIDES.length)) * 100).toFixed(1);
     const showNotesNow = state.viewMode === "deck" && state.showNotes;
     const notesLabel = ROLE === "faculty" ? t("โน้ตผู้สอน", "Presenter Notes") : t("คำอธิบายสไลด์", "Slide Notes");
     const liveCount =
@@ -2538,8 +2968,8 @@
 
     modal.setAttribute("data-io-theme", effectiveIoTheme);
     modal.innerHTML = `
-      <div class="or-deck-shell is-io-deck${showNotesNow ? " has-notes-open" : ""}" data-io-theme="${effectiveIoTheme}">
-        <div class="or-deck-topbar">
+      <div class="or-deck-shell is-io-deck is-appletv-deck${showNotesNow ? " has-notes-open" : ""}${state.clickerStage ? " is-clicker-active" : ""}" data-io-theme="${effectiveIoTheme}">
+        <div class="or-deck-topbar is-tv-capsule">
           <div class="or-top-left">
             <span class="or-code-pill is-io-brand-pill">RACM 303</span>
             <div class="or-top-title-wrap">
@@ -2549,7 +2979,7 @@
                   "RACM 303 Orientation · Community Medicine & Health Systems Science"
                 )
               )}</span>
-              <span class="or-top-sub">พุธ 25 พ.ย. 2569 · 08.30 – 09.30 น. · ห้อง 2C2-03 อาคารพรีคลินิก</span>
+              <span class="or-top-sub">พุธ 25 พ.ย. 2569 · 08.30 – 09.30 น. · ห้อง 2C2-03 · <strong>Clicker Ready</strong></span>
             </div>
           </div>
 
@@ -2562,6 +2992,8 @@
 
           <div class="or-top-right">
             <div class="or-desktop-tools">
+              <button type="button" class="or-tool-btn is-clicker-pill${state.clickerStage ? " is-active-toggle" : ""}" id="orClickerStageBtn" title="โหมด Keynote / Google I/O Pitch Stage — กดด้วย Wireless Clicker / Space / ลูกศร / คลิกที่จอ โดยไม่ต้องเล็งเมาส์ (กด F5 หรือ C)">${SVG.clicker} <span>${state.clickerStage ? "Pitch On" : "Clicker"}</span></button>
+              <button type="button" class="or-tool-btn is-clicker-help-btn" id="orClickerGuideBtn" title="ดูปุ่มลัด Presentation Clicker และสแกน QR ใช้มือถือเป็นรีโมตไร้สาย (กด ?)">🎛️</button>
               <button type="button" class="or-tool-btn is-io-theme-toggle" id="orIoThemeBtn" title="สลับโทนสไลด์ Clean Light / Dark (พร้อมเปลี่ยนภาพ PNG เป็น Dark BG อัตโนมัติ · กด T)"><span>${isIoDark ? "🌙 Dark" : "☀️ Light"}</span></button>
               ${
                 ROLE === "faculty"
@@ -2572,14 +3004,17 @@
                 state.autoPlay ? t("หยุดเล่น", "Pause") : t("Auto-Play", "Auto-Play")
               )}</span></button>
               <button type="button" class="or-tool-btn${state.showNotes ? " is-active-toggle" : ""}" id="orToggleNotesBtn" title="เปิด/ปิดโน้ตผู้สอน (กด N)">${SVG.notes} <span>${esc(notesLabel)}</span></button>
-              <a class="or-tool-btn" href="${PPTX_HREF}" download="RACM303_2569_Orientation_Slides.pptx" title="ดาวน์โหลดไฟล์ PowerPoint (.pptx) อัตราส่วน 16:9 แก้ไขได้">${SVG.download} <span>.pptx</span></a>
-              <a class="or-tool-btn" href="${PDF_HREF}" download="RACM303_2569_Orientation_Slides.pdf" title="ดาวน์โหลดไฟล์สไลด์ PDF 16:9 คมชัดสูง">${SVG.download} <span>PDF</span></a>
-              <button type="button" class="or-tool-btn" id="orPrintBtn" title="สั่งพิมพ์เอกสารประกอบสไลด์ 16:9">${SVG.print} <span>${esc(t("พิมพ์", "Print"))}</span></button>
+              <a class="or-tool-btn" href="${PPTX_HREF}" download="RACM303_2569_Orientation_Slides.pptx" title="ดาวน์โหลดไฟล์ PowerPoint (.pptx) อัตราส่วน 16:9">${SVG.download} <span>.pptx</span></a>
+              <a class="or-tool-btn" href="${PDF_HREF}" download="RACM303_2569_Orientation_Slides.pdf" title="เปิดดู Preview และดาวน์โหลดสไลด์ PDF ขนาด 16:9">${SVG.download} <span>PDF</span></a>
+              <button type="button" class="or-tool-btn" id="orPrintBtn" title="สั่งพิมพ์ / Save as PDF ขนาด Widescreen 16:9">${SVG.print} <span>${esc(t("พิมพ์", "Print"))}</span></button>
             </div>
 
             <div class="or-tools-menu-wrap">
-              <button type="button" class="or-tool-btn or-compact-more-btn${state.toolsMenuOpen || state.autoPlay || state.showNotes ? " is-active-toggle" : ""}" id="orMoreToolsBtn" aria-expanded="${state.toolsMenuOpen ? "true" : "false"}" title="เครื่องมือสไลด์เพิ่มเติม">${SVG.more}</button>
+              <button type="button" class="or-tool-btn or-compact-more-btn${state.toolsMenuOpen || state.autoPlay || state.showNotes || state.clickerStage ? " is-active-toggle" : ""}" id="orMoreToolsBtn" aria-expanded="${state.toolsMenuOpen ? "true" : "false"}" title="เครื่องมือสไลด์เพิ่มเติม">${SVG.more}</button>
               <div class="or-tools-popover" ${state.toolsMenuOpen ? "" : "hidden"}>
+                <button type="button" class="or-pop-item${state.clickerStage ? " is-active" : ""}" id="orPopClickerStageBtn">${SVG.clicker} <span>${state.clickerStage ? "ออกจากโหมด Keynote Pitch" : "โหมด Keynote Pitch / Clicker (F5)"}</span></button>
+                <button type="button" class="or-pop-item" id="orPopClickerGuideBtn"><span>🎛️ คู่มือ Clicker &amp; QR มือถือเป็นรีโมต (?)</span></button>
+                <button type="button" class="or-pop-item" id="orPopBlackoutBtn"><span>⬛ พักหน้าจอดำ Blackout (B / .)</span></button>
                 <button type="button" class="or-pop-item" id="orPopIoThemeBtn"><span>${isIoDark ? "☀️ สลับเป็นโหมด Clean Light" : "🌙 สลับเป็นโหมด Clean Dark"}</span></button>
                 ${
                   ROLE === "faculty"
@@ -2591,8 +3026,8 @@
                 )}</span></button>
                 <button type="button" class="or-pop-item${state.showNotes ? " is-active" : ""}" id="orPopNotesBtn">${SVG.notes} <span>${esc(notesLabel)}</span></button>
                 <a class="or-pop-item" href="${PPTX_HREF}" download="RACM303_2569_Orientation_Slides.pptx">${SVG.download} <span>ดาวน์โหลด PowerPoint (.pptx)</span></a>
-                <a class="or-pop-item" href="${PDF_HREF}" download="RACM303_2569_Orientation_Slides.pdf">${SVG.download} <span>ดาวน์โหลดสไลด์ PDF</span></a>
-                <button type="button" class="or-pop-item" id="orPopPrintBtn">${SVG.print} <span>${esc(t("สั่งพิมพ์ (Print)", "Print Handout"))}</span></button>
+                <a class="or-pop-item" href="${PDF_HREF}" download="RACM303_2569_Orientation_Slides.pdf">${SVG.download} <span>ดาวน์โหลดสไลด์ PDF (16:9)</span></a>
+                <button type="button" class="or-pop-item" id="orPopPrintBtn">${SVG.print} <span>${esc(t("สั่งพิมพ์ 16:9 (Print)", "Print 16:9 Handout"))}</span></button>
               </div>
             </div>
 
@@ -2606,6 +3041,43 @@
         <div class="or-deck-viewport${state.viewMode !== "deck" && state.viewMode !== "live" ? " is-scrollable-mode" : ""}" id="orDeckViewport">
           ${viewportHtml}
         </div>
+
+        ${
+          state.viewMode === "deck"
+            ? `
+          <div class="or-clicker-corner-hud${state.stepToastActive ? " is-visible" : ""}" id="orClickerCornerHud" aria-live="polite">
+            <span class="or-cch-badge">KEYNOTE</span>
+            <span class="or-cch-num">${cur.num} / ${SLIDES.length}</span>
+            <span class="or-cch-sep">·</span>
+            <span class="or-cch-time">${esc(cur.timeWindow)}</span>
+          </div>
+          ${
+            state.jumpDigits
+              ? `<div class="or-jump-buffer-pill" role="status">ไปสไลด์ที่ <strong>${esc(state.jumpDigits)}</strong> &crarr; <small>(กด Enter)</small></div>`
+              : ""
+          }
+          <div class="or-keynote-progress-rail" aria-hidden="true">
+            <div class="or-keynote-progress-fill" style="width:${progressPct}%"></div>
+          </div>
+        `
+            : ""
+        }
+
+        ${
+          state.blackoutActive
+            ? `
+          <div class="or-blackout-curtain" role="dialog" aria-label="Keynote Stage Paused">
+            <div class="or-blackout-card">
+              <span class="or-blackout-dot"></span>
+              <div class="or-blackout-title">RACM 303 · KEYNOTE STAGE PAUSED</div>
+              <div class="or-blackout-sub">กดปุ่มใดก็ได้บน Clicker / Space / ลูกศร หรือแตะหน้าจอเพื่อกลับสู่สไลด์ ${cur.num}/${SLIDES.length}</div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        ${renderClickerGuideHtml()}
 
         ${
           showNotesNow
@@ -2624,7 +3096,7 @@
         ${
           state.viewMode === "deck" || state.viewMode === "live"
             ? `
-          <div class="or-deck-bottombar">
+          <div class="or-deck-bottombar is-tv-capsule">
             <div class="or-nav-cluster">
               ${
                 state.viewMode === "deck"
@@ -2704,6 +3176,40 @@
       const b = document.getElementById(id);
       if (b) b.addEventListener("click", toggleIoStageTheme);
     });
+
+    ["orClickerStageBtn", "orPopClickerStageBtn", "orGuideStartClickerBtn"].forEach((id) => {
+      const b = document.getElementById(id);
+      if (b) b.addEventListener("click", toggleClickerStage);
+    });
+
+    ["orClickerGuideBtn", "orPopClickerGuideBtn"].forEach((id) => {
+      const b = document.getElementById(id);
+      if (b) {
+        b.addEventListener("click", () => {
+          state.toolsMenuOpen = false;
+          state.clickerGuideOpen = !state.clickerGuideOpen;
+          renderModal();
+        });
+      }
+    });
+
+    ["orPopBlackoutBtn", "orGuideBlackoutBtn"].forEach((id) => {
+      const b = document.getElementById(id);
+      if (b) {
+        b.addEventListener("click", () => {
+          state.clickerGuideOpen = false;
+          toggleBlackout();
+        });
+      }
+    });
+
+    const closeGuideBtn = document.getElementById("orCloseClickerGuideBtn");
+    if (closeGuideBtn) {
+      closeGuideBtn.addEventListener("click", () => {
+        state.clickerGuideOpen = false;
+        renderModal();
+      });
+    }
 
     ["orTimerBtn", "orPopTimerBtn"].forEach((id) => {
       const b = document.getElementById(id);
@@ -2815,22 +3321,28 @@
     wireLaserIfActive(modal);
     if (cur.isCover) animateCoverKpis(modal);
     scheduleAutoPlayTick();
+    if (state.clickerStage || state.presentationMode) {
+      armHudIdleTimer();
+    }
   }
 
   function openDeck(initialSlideIdx, opts) {
     const o = opts || {};
     state.isOpen = true;
     state.toolsMenuOpen = false;
+    state.clickerGuideOpen = false;
+    state.blackoutActive = false;
     if (typeof initialSlideIdx === "number" && !Number.isNaN(initialSlideIdx)) {
       state.slideIdx = Math.max(0, Math.min(SLIDES.length - 1, initialSlideIdx));
     }
     if (o.viewMode) state.viewMode = o.viewMode;
-    if (o.presentationMode) {
+    if (o.presentationMode || o.clickerStage) {
       state.presentationMode = true;
+      state.clickerStage = Boolean(o.clickerStage);
     }
     syncHostSlideToLive();
     renderModal();
-    if (o.presentationMode) {
+    if (o.presentationMode || o.clickerStage) {
       const modal = ensureModalElement();
       if (modal.requestFullscreen) modal.requestFullscreen().catch(() => {});
     }
@@ -2840,10 +3352,16 @@
     state.isOpen = false;
     state.autoPlay = false;
     state.toolsMenuOpen = false;
+    state.clickerGuideOpen = false;
+    state.blackoutActive = false;
+    state.hudIdle = false;
+    clearJumpBuffer();
+    clearHudIdleTimer();
     clearAutoPlayTimer();
     document.body.classList.remove("orient-deck-open");
-    if (state.presentationMode) {
+    if (state.presentationMode || state.clickerStage) {
       state.presentationMode = false;
+      state.clickerStage = false;
       if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
@@ -2851,7 +3369,7 @@
     const modal = document.getElementById("orientationDeckModal");
     if (modal) {
       modal.hidden = true;
-      modal.classList.remove("is-presentation-mode");
+      modal.classList.remove("is-presentation-mode", "is-clicker-stage", "is-hud-idle");
     }
     if (window.location.hash === "#orientation" || window.location.hash === "#orientation-slides") {
       history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -2870,6 +3388,8 @@
     resumeSlidesFromLobby,
     refreshLiveSurface,
     toggleAutoPlay,
+    toggleClickerStage,
+    toggleBlackout,
     fitAllVisibleCanvases,
     getSlides: () => SLIDES,
     pptxHref: PPTX_HREF,

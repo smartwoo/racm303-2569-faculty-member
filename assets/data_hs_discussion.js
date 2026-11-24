@@ -16,7 +16,7 @@ window.RACM_HS_DISCUSSION_DATA = {
       "docId": "HS1",
       "conciseDocId": "HS1-CONCISE",
       "wbDocId": "HS1-WB",
-      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพสร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) วิเคราะห์ระดับการป้องกันโรคและปัจจัยกำหนดสุขภาพทางสังคมตามกรอบ WHO CSDH จากกรณีการคัดกรองสารเสพติดในคลินิกฝากครรภ์ (เคสที่ 2) และเชื่อมสู่นิยามสุขภาพ 4 มิติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับของคนวัยทำงาน (เคสที่ 3)",
+      "summaryFocus": "ฝึกประยุกต์ใช้กรอบแนวคิดปัจจัยกำหนดสุขภาพสร้างแผนภาพความเชื่อมโยงเชิงระบบจากกรณีภาวะอ้วนในเด็ก (เคสที่ 1) วิเคราะห์ปัจจัยกำหนดสุขภาพทางสังคมตามกรอบ WHO CSDH และระดับการป้องกันโรคจากกรณีการคัดกรองสารเสพติดในคลินิกฝากครรภ์ (เคสที่ 2) และเชื่อมสู่นิยามสุขภาพ 4 มิติ ปัจจัยกำหนดสุขภาพ และการจำแนกระดับการป้องกันโรคทั้ง 4 ระดับของคนวัยทำงาน (เคสที่ 3)",
       "unlockAfterIso": "2026-11-26T12:00:00+07:00",
       "unlockAfterLabel": "วันพฤหัสบดีที่ 26 พฤศจิกายน 2569 เวลา 12.00 น.",
       "unlockShortLabel": "พฤ. 26 พ.ย. · 12.00 น."
@@ -302,9 +302,9 @@ window.RACM_HS_DISCUSSION_DATA = {
           "conceptSummarySlide": {
             "id": "cs-hs1-2",
             "takeawayNumber": 1,
-            "badge": "ขั้น ⑦ Key Takeaway #1 (คำอธิบายสังเคราะห์)",
+            "badge": "ขั้น ⑥ Key Takeaway #1 (คำอธิบายสังเคราะห์)",
             "studentBadge": "Key Takeaway #1 · คำอธิบายสังเคราะห์",
-            "shortLabel": "⑦ คำอธิบาย #1",
+            "shortLabel": "⑥ คำอธิบาย #1",
             "studentShortLabel": "Key Takeaway #1",
             "kicker": "Key Takeaway #1 · คำอธิบายสังเคราะห์ 4 หมวด",
             "title": "แผนภาพพลวัตปัจจัยกำหนดสุขภาพหลายระดับ (คำอธิบายสังเคราะห์)",
@@ -312,56 +312,21 @@ window.RACM_HS_DISCUSSION_DATA = {
             "sourceNote": "Wibulpolprasert et al. (2011) · Solar & Irwin / WHO CSDH (2010)",
             "frameworkSynthesisSlide": {
               "id": "cs-hs1-2-framework",
-              "kicker": "Key Takeaway #1 · Framework Synthesis (1/2)",
-              "badge": "ขั้น ⑤ Key Takeaway #1 (DoH Framework)",
-              "studentBadge": "Key Takeaway #1 · DoH Framework",
-              "shortLabel": "⑤ DoH Framework",
-              "studentShortLabel": "DoH Framework",
-              "stageBtnLabel": "⑤ DoH Framework",
+              "kicker": "Key Takeaway #1 · Framework Synthesis",
+              "badge": "ขั้น ⑤ Key Takeaway #1 (Framework Diagram)",
+              "studentBadge": "Key Takeaway #1 · Framework Diagram",
+              "shortLabel": "⑤ ภาพ Framework #1",
+              "studentShortLabel": "Framework #1",
+              "stageBtnLabel": "⑤ ภาพ Framework",
+              "studentStageBtnLabel": "🖼 ภาพ Framework",
               "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
               "enTitle": "Synthesized Determinants of Health Framework with Structural Determinants",
               "sourceNote": "Synthesized from Wibulpolprasert et al. (2011) & Solar & Irwin / WHO CSDH (2010)",
               "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=3",
               "imageAlt": "Synthesized Determinants of Health Framework with Outer Structural Determinants Ring, Health System Structure/Attributes, and Physician Roles",
               "caption": "วงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)",
-              "nextBtnLabel": "กรอบ WHO CSDH (Slide ถัดไป)"
+              "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
             },
-            "frameworkSynthesisSlides": [
-              {
-                "id": "cs-hs1-2-framework",
-                "kicker": "Key Takeaway #1 · Framework Synthesis (1/2)",
-                "badge": "ขั้น ⑤ Key Takeaway #1 (DoH Framework)",
-                "studentBadge": "Key Takeaway #1 · DoH Framework",
-                "shortLabel": "⑤ DoH Framework",
-                "studentShortLabel": "DoH Framework",
-                "stageBtnLabel": "⑤ DoH Framework",
-                "studentStageBtnLabel": "🖼 DoH Framework",
-                "title": "กรอบแนวคิดพลวัตปัจจัยกำหนดสุขภาพและวงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
-                "enTitle": "Synthesized Determinants of Health Framework with Structural Determinants",
-                "sourceNote": "Synthesized from Wibulpolprasert et al. (2011) & Solar & Irwin / WHO CSDH (2010)",
-                "imageSrc": "assets/images/hs1_doh_structural_framework.jpg?v=3",
-                "imageAlt": "Synthesized Determinants of Health Framework with Outer Structural Determinants Ring, Health System Structure/Attributes, and Physician Roles",
-                "caption": "วงล้อมปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) กำหนดบริบทของปัจจัยปัจเจก สิ่งแวดล้อม และระบบบริการสุขภาพ (โครงสร้าง Type/Level · คุณสมบัติ Equity, Quality, Efficiency, Good Governance) เชื่อมโยงกับบทบาทแพทย์ 3 ด้าน (Clinician · Manager · Health Promoter)",
-                "nextBtnLabel": "กรอบ WHO CSDH (Slide ถัดไป)"
-              },
-              {
-                "id": "cs-hs1-2-csdh-framework",
-                "kicker": "Key Takeaway #1 · CSDH Conceptual Framework (2/2)",
-                "badge": "ขั้น ⑥ Key Takeaway #1 (WHO CSDH Framework)",
-                "studentBadge": "Key Takeaway #1 · WHO CSDH Framework",
-                "shortLabel": "⑥ WHO CSDH",
-                "studentShortLabel": "WHO CSDH",
-                "stageBtnLabel": "⑥ WHO CSDH",
-                "studentStageBtnLabel": "🖼 WHO CSDH",
-                "title": "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (CSDH Conceptual Framework, WHO 2007)",
-                "enTitle": "CSDH Conceptual Framework — Structural & Intermediary Determinants of Health",
-                "sourceNote": "Commission on Social Determinants of Health (CSDH), WHO (2007)",
-                "imageSrc": "assets/images/hs1_csdh_conceptual_framework.jpg?v=1",
-                "imageAlt": "CSDH Conceptual Framework, WHO (2007): Structural DoH to Intermediary DoH (Individual, Environment, Health system; SDH 25% + 60%) to Health inequity and feedback loop",
-                "caption": "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural DoH: บริบทเศรษฐกิจ-การเมือง และสถานะทางเศรษฐกิจสังคม) ส่งผลผ่านปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary DoH: Individual ↔ Environment ↔ Health system · SDH 25% + 60%) ไปสู่ความเหลื่อมล้ำด้านสุขภาพ (Health inequity) และย้อนกลับสู่โครงสร้างต้นน้ำ",
-                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
-              }
-            ],
             "coreTerm": "“แผนภาพปัจจัยกำหนดสุขภาพเชิงระบบ”",
             "coreDefinitionLead": "เชื่อมโยงปฏิสัมพันธ์สองทางของปัจจัยด้านปัจเจก สังคมสิ่งแวดล้อม และระบบบริการสุขภาพที่ส่งผลต่อปัญหาสุขภาพตรงกลาง",
             "coreDefinitionQualifier": "ภายใต้กรอบวงล้อมของปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพที่กำหนดทางเลือกและโอกาสทางสุขภาพของประชากร",
@@ -403,18 +368,19 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.2)"
           }
         }
-      ]
+      ],
+      "coverTitle": "เด็กชายโมโนกับภาวะอ้วนในเด็ก"
     },
     {
       "id": "case-hs1-anc",
       "caseNumber": 2,
       "module": "HS1",
-      "title": "กรณีศึกษาที่ 2: การคัดกรองสารเสพติดในคลินิกฝากครรภ์ (ANC) และการวิเคราะห์ปัจจัยกำหนดสุขภาพทางสังคม (Social Determinants of Health)",
+      "title": "กรณีศึกษาที่ 2: การวิเคราะห์ปัจจัยกำหนดสุขภาพทางสังคม (Social Determinants of Health) และการคัดกรองสารเสพติดในคลินิกฝากครรภ์ (ANC)",
       "subtitle": "หญิงตั้งครรภ์วัยรุ่น (อายุ 15–18 ปี) ที่มีผลตรวจคัดกรอง Urine Amphetamine Positive ณ โรงพยาบาลชุมชน",
       "frameworks": [
-        "ระดับของการป้องกันโรค (Levels of Disease Prevention — Secondary Prevention / Early Detection)",
         "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (Conceptual Framework for Action on the Social Determinants of Health: WHO CSDH)",
-        "การจำแนกปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) และปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary Determinants)"
+        "การจำแนกปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural Determinants) และปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary Determinants)",
+        "ระดับของการป้องกันโรค (Levels of Disease Prevention — Secondary Prevention / Early Detection)"
       ],
       "scenarioBlocks": [
         {
@@ -432,118 +398,11 @@ window.RACM_HS_DISCUSSION_DATA = {
       ],
       "questions": [
         {
-          "id": "q-hs1-anc-1",
+          "id": "q-hs1-anc-2",
           "label": "ประเด็นอภิปรายที่ 2.1",
           "shortLabel": "2.1",
           "headingLabel": "คำถามข้อที่ 2.1",
           "enHeadingLabel": "Question 2.1",
-          "title": "การจำแนกระดับของการป้องกันโรค (Level of Disease Prevention) ของการคัดกรอง Urine Amphetamine ในหญิงที่มาฝากครรภ์",
-          "prompt": "การคัดกรอง urine amphetamine ในหญิงที่มาฝากครรภ์ทุกราย จัดเป็น level of disease prevention ในระดับใด เพราะเหตุใด",
-          "worksheet": {
-            "type": "table",
-            "headers": [
-              "ประเด็นวิเคราะห์ (Analytical Point)",
-              "คำตอบและเหตุผลประกอบจากสถานการณ์ (Answer & Rationale)"
-            ],
-            "rows": [
-              {
-                "rowId": "r1",
-                "cells": [
-                  {
-                    "static": "1. ระดับของการป้องกันโรค (Level of disease prevention)"
-                  },
-                  {
-                    "inputId": "c1_anc_q1_level",
-                    "placeholder": "ระบุระดับของการป้องกันโรค (เช่น Primary / Secondary / Tertiary / Quaternary prevention)…",
-                    "compact": true,
-                    "maxWords": 25,
-                    "maxChars": 140,
-                    "maxLines": 2,
-                    "a4BoxLabel": "ระบุระดับการป้องกันโรค (≤25 คำ)"
-                  }
-                ]
-              },
-              {
-                "rowId": "r2",
-                "cells": [
-                  {
-                    "static": "2. เหตุผลประกอบ (เพราะเหตุใด / Rationale)"
-                  },
-                  {
-                    "inputId": "c1_anc_q1_reason",
-                    "placeholder": "อธิบายเหตุผลตามวัตถุประสงค์ของการคัดกรอง (early detection) และการให้การบำบัดตั้งแต่ระยะแรกเพื่อลดภาวะแทรกซ้อนต่อมารดาและทารก…",
-                    "compact": false,
-                    "maxWords": 55,
-                    "maxChars": 280,
-                    "maxLines": 4,
-                    "a4BoxLabel": "อธิบายเหตุผลประกอบ (≤55 คำ)"
-                  }
-                ]
-              }
-            ],
-            "colWidths": [
-              "28%",
-              "72%"
-            ]
-          },
-          "conceptSummarySlide": {
-            "id": "cs-hs1-anc-1",
-            "takeawayNumber": 2,
-            "badge": "ขั้น ⑤ Key Takeaway #2",
-            "studentBadge": "Key Takeaway #2",
-            "shortLabel": "⑤ Key Takeaway #2",
-            "studentShortLabel": "Key Takeaway #2",
-            "kicker": "Key Takeaway #2",
-            "title": "การคัดกรองในคลินิกฝากครรภ์และการป้องกันขั้นที่สอง (Secondary Prevention)",
-            "enTitle": "ANC Screening & Secondary Prevention",
-            "sourceNote": "Leavell & Clark (1958) · WHO Antenatal Care Guidelines",
-            "coreTerm": "“การป้องกันขั้นที่สอง” (secondary prevention)",
-            "coreDefinitionLead": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ",
-            "coreDefinitionQualifier": "เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
-            "coreDefinition": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
-            "dimensions": [
-              {
-                "num": "01",
-                "thTitle": "การค้นหาระยะแรกเริ่ม",
-                "enTitle": "Early Detection / Screening",
-                "definition": "การตรวจคัดกรอง urine amphetamine ในหญิงตั้งครรภ์ทุกรายที่มา ANC เพื่อค้นหาผู้ใช้สารตั้งแต่ก่อนเกิดภาวะแทรกซ้อนทางคลินิก",
-                "anchor": "จุดต่างสำคัญจาก Primary คือผู้ใช้สารเกิดพฤติกรรม/ภาวะเสี่ยงขึ้นแล้ว แต่ยังไม่เกิดภาวะแทรกซ้อนรุนแรง"
-              },
-              {
-                "num": "02",
-                "thTitle": "การบำบัดดูแลทันท่วงที",
-                "enTitle": "Prompt Intervention",
-                "definition": "การคัดกรองจะมีคุณค่าทางสุขภาพก็ต่อเมื่อเชื่อมสู่ระบบการบำบัดเลิกยาทันทีโดยไม่ตีตราผู้รับบริการ",
-                "anchor": "หากคัดกรองแล้วลงโทษหรือผลักไส หญิงตั้งครรภ์จะหลุดออกจากระบบฝากครรภ์และเกิดผลเสียหนักกว่าเดิม"
-              },
-              {
-                "num": "03",
-                "thTitle": "การปกป้องสุขภาพสองชีวิต",
-                "enTitle": "Maternal & Fetal Protection",
-                "definition": "ลดความเสี่ยงภาวะแทรกซ้อนขณะตั้งครรภ์ (เช่น คลอดก่อนกำหนด รกลอกตัวก่อนกำหนด) และผลกระทบต่อทารกในครรภ์",
-                "anchor": "การหยุดยั้งผลกระทบตั้งแต่ระยะฝากครรภ์เป็นการตัดวงจรความเสี่ยงข้ามรุ่นสู่ทารกแรกเกิด"
-              },
-              {
-                "num": "04",
-                "thTitle": "การต่อยอดสู่ต้นน้ำในชุมชน",
-                "enTitle": "Upstream Surveillance Signal",
-                "definition": "เมื่อคลินิกพบผลบวกบ่อยขึ้น ข้อมูลจาก Secondary prevention ต้องถูกใช้เป็นสัญญาณเตือนเพื่อสืบค้นปัจจัยต้นน้ำในชุมชนต่อ",
-                "anchor": "เชื่อมงานบริการในโรงพยาบาลเข้ากับการวิเคราะห์ Social Determinants of Health ในคำถามข้อถัดไป"
-              }
-            ],
-            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.1 · คลินิกฝากครรภ์ รพช.",
-            "caseBridge": "การคัดกรองในคลินิกช่วยค้นหาและดูแลผู้ป่วยรายบุคคลได้ทันเวลา แต่เมื่อพบผู้ป่วยเพิ่มขึ้นต่อเนื่อง แพทย์ต้องมองทะลุผลตรวจปัสสาวะไปให้เห็นรากเหง้าทางสังคมในชุมชน",
-            "docId": "HS1-CONCISE",
-            "docSec": "1.4",
-            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)"
-          }
-        },
-        {
-          "id": "q-hs1-anc-2",
-          "label": "ประเด็นอภิปรายที่ 2.2",
-          "shortLabel": "2.2",
-          "headingLabel": "คำถามข้อที่ 2.2",
-          "enHeadingLabel": "Question 2.2",
           "title": "การวิเคราะห์ปัจจัยกำหนดสุขภาพตามกรอบแนวคิด Social Determinants of Health (WHO CSDH)",
           "prompt": "จาก conceptual framework for action on the social determinants of health ปัจจัยกำหนดสุขภาพของหญิงตั้งครรภ์ที่มี urine amphetamine positive ในโจทย์นี้ มีอะไรบ้าง",
           "worksheet": {
@@ -595,12 +454,12 @@ window.RACM_HS_DISCUSSION_DATA = {
           },
           "conceptSummarySlide": {
             "id": "cs-hs1-anc-2",
-            "takeawayNumber": 3,
-            "badge": "ขั้น ⑤ Key Takeaway #3",
-            "studentBadge": "Key Takeaway #3",
-            "shortLabel": "⑤ Key Takeaway #3",
-            "studentShortLabel": "Key Takeaway #3",
-            "kicker": "Key Takeaway #3",
+            "takeawayNumber": 2,
+            "badge": "ขั้น ⑥ Key Takeaway #2 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #2 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑥ คำอธิบาย #2",
+            "studentShortLabel": "Key Takeaway #2",
+            "kicker": "Key Takeaway #2 · คำอธิบายสังเคราะห์ 4 หมวด",
             "title": "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (WHO CSDH Conceptual Framework)",
             "enTitle": "Structural & Intermediary Determinants of Health",
             "sourceNote": "Solar & Irwin / WHO Commission on Social Determinants of Health (2010)",
@@ -638,14 +497,139 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "anchor": "เป็นปัจจัยทางสังคมที่มีผลต่อสุขภาพ (intermediary determinants) ที่สัมผัสตัวผู้ป่วยโดยตรงในชีวิตประจำวัน"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.2 · หญิงตั้งครรภ์ในชุมชน",
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.1 · หญิงตั้งครรภ์ในชุมชน",
             "caseBridge": "การบำบัดเลิกยาในคลินิกฝากครรภ์จะได้ผลยั่งยืนเมื่อเข้าใจบริบทงานกรีดยาง ครอบครัว วัยรุ่นตั้งครรภ์ และการควบคุมแหล่งกระจายยาในชุมชนควบคู่กัน",
             "docId": "HS1-CONCISE",
             "docSec": "1.2",
-            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.2)"
+            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.2)",
+            "frameworkSynthesisSlide": {
+              "id": "cs-hs1-anc-2-framework",
+              "kicker": "Key Takeaway #2 · CSDH Conceptual Framework",
+              "badge": "ขั้น ⑤ Key Takeaway #2 (WHO CSDH Framework)",
+              "studentBadge": "Key Takeaway #2 · WHO CSDH Framework",
+              "shortLabel": "⑤ ภาพ Framework #2",
+              "studentShortLabel": "WHO CSDH Framework",
+              "stageBtnLabel": "⑤ ภาพ Framework",
+              "studentStageBtnLabel": "🖼 ภาพ Framework",
+              "title": "กรอบแนวคิดปัจจัยกำหนดสุขภาพทางสังคม (CSDH Conceptual Framework, WHO 2007)",
+              "enTitle": "CSDH Conceptual Framework — Structural & Intermediary Determinants of Health",
+              "sourceNote": "Commission on Social Determinants of Health (CSDH), WHO (2007)",
+              "imageSrc": "assets/images/hs1_csdh_conceptual_framework.jpg?v=1",
+              "imageAlt": "CSDH Conceptual Framework, WHO (2007): Structural DoH to Intermediary DoH (Individual, Environment, Health system; SDH 25% + 60%) to Health inequity and feedback loop",
+              "caption": "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (Structural DoH: บริบทเศรษฐกิจ-การเมือง และสถานะทางเศรษฐกิจสังคม) ส่งผลผ่านปัจจัยทางสังคมที่มีผลต่อสุขภาพ (Intermediary DoH: Individual ↔ Environment ↔ Health system · SDH 25% + 60%) ไปสู่ความเหลื่อมล้ำด้านสุขภาพ (Health inequity) และย้อนกลับสู่โครงสร้างต้นน้ำ",
+              "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+            }
+          }
+        },
+        {
+          "id": "q-hs1-anc-1",
+          "label": "ประเด็นอภิปรายที่ 2.2",
+          "shortLabel": "2.2",
+          "headingLabel": "คำถามข้อที่ 2.2",
+          "enHeadingLabel": "Question 2.2",
+          "title": "การจำแนกระดับของการป้องกันโรค (Level of Disease Prevention) ของการคัดกรอง Urine Amphetamine ในหญิงที่มาฝากครรภ์",
+          "prompt": "การคัดกรอง urine amphetamine ในหญิงที่มาฝากครรภ์ทุกราย จัดเป็น level of disease prevention ในระดับใด เพราะเหตุใด",
+          "worksheet": {
+            "type": "table",
+            "headers": [
+              "ประเด็นวิเคราะห์ (Analytical Point)",
+              "คำตอบและเหตุผลประกอบจากสถานการณ์ (Answer & Rationale)"
+            ],
+            "rows": [
+              {
+                "rowId": "r1",
+                "cells": [
+                  {
+                    "static": "1. ระดับของการป้องกันโรค (Level of disease prevention)"
+                  },
+                  {
+                    "inputId": "c1_anc_q1_level",
+                    "placeholder": "ระบุระดับของการป้องกันโรค (เช่น Primary / Secondary / Tertiary / Quaternary prevention)…",
+                    "compact": true,
+                    "maxWords": 25,
+                    "maxChars": 140,
+                    "maxLines": 2,
+                    "a4BoxLabel": "ระบุระดับการป้องกันโรค (≤25 คำ)"
+                  }
+                ]
+              },
+              {
+                "rowId": "r2",
+                "cells": [
+                  {
+                    "static": "2. เหตุผลประกอบ (เพราะเหตุใด / Rationale)"
+                  },
+                  {
+                    "inputId": "c1_anc_q1_reason",
+                    "placeholder": "อธิบายเหตุผลตามวัตถุประสงค์ของการคัดกรอง (early detection) และการให้การบำบัดตั้งแต่ระยะแรกเพื่อลดภาวะแทรกซ้อนต่อมารดาและทารก…",
+                    "compact": false,
+                    "maxWords": 55,
+                    "maxChars": 280,
+                    "maxLines": 4,
+                    "a4BoxLabel": "อธิบายเหตุผลประกอบ (≤55 คำ)"
+                  }
+                ]
+              }
+            ],
+            "colWidths": [
+              "28%",
+              "72%"
+            ]
+          },
+          "conceptSummarySlide": {
+            "id": "cs-hs1-anc-1",
+            "takeawayNumber": 3,
+            "badge": "ขั้น ⑤ Key Takeaway #3",
+            "studentBadge": "Key Takeaway #3",
+            "shortLabel": "⑤ Key Takeaway #3",
+            "studentShortLabel": "Key Takeaway #3",
+            "kicker": "Key Takeaway #3",
+            "title": "การคัดกรองในคลินิกฝากครรภ์และการป้องกันขั้นที่สอง (Secondary Prevention)",
+            "enTitle": "ANC Screening & Secondary Prevention",
+            "sourceNote": "Leavell & Clark (1958) · WHO Antenatal Care Guidelines",
+            "coreTerm": "“การป้องกันขั้นที่สอง” (secondary prevention)",
+            "coreDefinitionLead": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ",
+            "coreDefinitionQualifier": "เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
+            "coreDefinition": "มุ่งเน้นการค้นหาปัญหาหรือการใช้สารเสพติดตั้งแต่ระยะแรกเริ่ม (early detection) ในกลุ่มประชากรเป้าหมายที่ยังไม่มีอาการแทรกซ้อนปรากฏ เพื่อนำเข้าสู่การบำบัดดูแลอย่างทันท่วงที (prompt intervention) ก่อนเกิดอันตรายต่อมารดาและทารกในครรภ์",
+            "dimensions": [
+              {
+                "num": "01",
+                "thTitle": "การค้นหาระยะแรกเริ่ม",
+                "enTitle": "Early Detection / Screening",
+                "definition": "การตรวจคัดกรอง urine amphetamine ในหญิงตั้งครรภ์ทุกรายที่มา ANC เพื่อค้นหาผู้ใช้สารตั้งแต่ก่อนเกิดภาวะแทรกซ้อนทางคลินิก",
+                "anchor": "จุดต่างสำคัญจาก Primary คือผู้ใช้สารเกิดพฤติกรรม/ภาวะเสี่ยงขึ้นแล้ว แต่ยังไม่เกิดภาวะแทรกซ้อนรุนแรง"
+              },
+              {
+                "num": "02",
+                "thTitle": "การบำบัดดูแลทันท่วงที",
+                "enTitle": "Prompt Intervention",
+                "definition": "การคัดกรองจะมีคุณค่าทางสุขภาพก็ต่อเมื่อเชื่อมสู่ระบบการบำบัดเลิกยาทันทีโดยไม่ตีตราผู้รับบริการ",
+                "anchor": "หากคัดกรองแล้วลงโทษหรือผลักไส หญิงตั้งครรภ์จะหลุดออกจากระบบฝากครรภ์และเกิดผลเสียหนักกว่าเดิม"
+              },
+              {
+                "num": "03",
+                "thTitle": "การปกป้องสุขภาพสองชีวิต",
+                "enTitle": "Maternal & Fetal Protection",
+                "definition": "ลดความเสี่ยงภาวะแทรกซ้อนขณะตั้งครรภ์ (เช่น คลอดก่อนกำหนด รกลอกตัวก่อนกำหนด) และผลกระทบต่อทารกในครรภ์",
+                "anchor": "การหยุดยั้งผลกระทบตั้งแต่ระยะฝากครรภ์เป็นการตัดวงจรความเสี่ยงข้ามรุ่นสู่ทารกแรกเกิด"
+              },
+              {
+                "num": "04",
+                "thTitle": "การต่อยอดสู่ต้นน้ำในชุมชน",
+                "enTitle": "Upstream Surveillance Signal",
+                "definition": "เมื่อคลินิกพบผลบวกบ่อยขึ้น ข้อมูลจาก Secondary prevention ต้องถูกใช้เป็นสัญญาณเตือนเพื่อสืบค้นปัจจัยต้นน้ำในชุมชนต่อ",
+                "anchor": "เชื่อมการคัดกรองในโรงพยาบาลย้อนกลับไปสู่ปัจจัยต้นน้ำทางสังคมตามกรอบ WHO CSDH ในข้อ 2.1"
+              }
+            ],
+            "caseBridgeLabel": "เชื่อมโยงเคสที่ 2 ข้อ 2.2 · คลินิกฝากครรภ์ รพช.",
+            "caseBridge": "การคัดกรองในคลินิกช่วยค้นหาและดูแลผู้ป่วยรายบุคคลได้ทันเวลา (Secondary prevention) แต่การแก้ปัญหาอย่างยั่งยืนต้องควบคู่กับการจัดการปัจจัยกำหนดสุขภาพทางสังคมในข้อ 2.1",
+            "docId": "HS1-CONCISE",
+            "docSec": "1.4",
+            "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)"
           }
         }
-      ]
+      ],
+      "coverTitle": "การคัดกรอง Urine Amphetamine ในคลินิกฝากครรภ์"
     },
     {
       "id": "case-1",
@@ -1150,7 +1134,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS1 ฉบับย่อ (1.4)"
           }
         }
-      ]
+      ],
+      "coverTitle": "นายสมชายกับสุขภาวะคนวัยทำงานในโรงงาน"
     },
     {
       "id": "case-2",
@@ -1487,7 +1472,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS2 (4.1)"
           }
         }
-      ]
+      ],
+      "coverTitle": "วิกฤตภาระงานแพทย์ Intern ลาออกใน รพช."
     },
     {
       "id": "case-3",
@@ -1663,7 +1649,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS2 (5.3)"
           }
         }
-      ]
+      ],
+      "coverTitle": "การเลือกรูปแบบการดูแลผู้ป่วย 2 ระยะ (Models of Care)"
     },
     {
       "id": "case-4",
@@ -1974,7 +1961,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS3 (4.1–4.2)"
           }
         }
-      ]
+      ],
+      "coverTitle": "นโยบาย “Cancer Anywhere” (มะเร็งรักษาทุกที่)"
     },
     {
       "id": "case-5",
@@ -2158,7 +2146,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS3 (3.2–3.3)"
           }
         }
-      ]
+      ],
+      "coverTitle": "ช่องว่างระบบบริการดูแลแบบประคับประคอง (Palliative Care)"
     },
     {
       "id": "case-6",
@@ -2663,7 +2652,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS4 (4.1–4.2)"
           }
         }
-      ]
+      ],
+      "coverTitle": "กับดักสารเคมีและทางออกที่ยั่งยืนของเกษตรกรไทย"
     },
     {
       "id": "case-7",
@@ -2981,7 +2971,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS5 (4.1–4.2)"
           }
         }
-      ]
+      ],
+      "coverTitle": "“สุขภาวะข้างถนน” การดูแลสุขภาพคนไร้บ้าน"
     },
     {
       "id": "case-8",
@@ -3223,7 +3214,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS6 (1.3–1.4)"
           }
         }
-      ]
+      ],
+      "coverTitle": "สถานการณ์หลักประกันสุขภาพถ้วนหน้าโลก (SDG 3.8)"
     },
     {
       "id": "case-9",
@@ -3438,7 +3430,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS6 (3.2)"
           }
         }
-      ]
+      ],
+      "coverTitle": "ช่องว่างสิทธิประกันสุขภาพของแรงงานนอกระบบ"
     },
     {
       "id": "case-10",
@@ -3891,7 +3884,8 @@ window.RACM_HS_DISCUSSION_DATA = {
             "docLabel": "อ่านเพิ่มเติม HS6 (4.3–4.4 & 5.3)"
           }
         }
-      ]
+      ],
+      "coverTitle": "กลไกการจ่ายเงินผู้ให้บริการ (FFS, Capitation & P4P)"
     }
   ]
 };
