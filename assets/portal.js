@@ -2602,15 +2602,7 @@
         downloadScheduleXlsx(true);
       });
     }
-    if ($("exportSchedulePdfBtn")) {
-      $("exportSchedulePdfBtn").addEventListener("click", (ev) => {
-        if (!hasActiveScheduleFilter()) return;
-        ev.preventDefault();
-        const ctx = getActivePersonalContext();
-        const tag = ctx.teacherVal || (ctx.effectiveStudent && ctx.effectiveStudent.id) || ctx.areaVal || ctx.discVal || "เฉพาะเงื่อนไขที่กรอง";
-        printWithCleanTitle(`ตารางสอน_RACM303_2569_${sanitizeFilenamePart(tag)}`);
-      });
-    }
+    /* exportSchedulePdfBtn opens Google Drive-style 24-page Schedule PDF Preview */
     if ($("exportScheduleDocxBtn")) {
       $("exportScheduleDocxBtn").addEventListener("click", (ev) => {
         if (!hasActiveScheduleFilter()) return;
@@ -11403,7 +11395,7 @@
         "แนวคิดเบื้องต้นเกี่ยวกับระบบ บริบท ระบบซับซ้อนที่ปรับตัวได้ (CAS) วงจรอุบาทว์ของห้องฉุกเฉิน และแบบจำลองภูเขาน้ำแข็ง (Iceberg Model)",
       speakers:
         "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์ (ประธานรายวิชา) · เอกสารคำสอนโดย ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
-      kickoffNote: "ต่อเนื่องจากปฐมนิเทศรายวิชา (Orientation 09.00–09.30 น. · คณาจารย์ 12 ท่าน) — พร้อมเอกสารคำสอนฉบับเต็ม & ฉบับย่อ และ Self-Quiz 6 ข้อ",
+      kickoffNote: "ต่อเนื่องจากปฐมนิเทศรายวิชา (Orientation 08.30–09.30 น. · คณาจารย์ 12 ท่าน) — พร้อมเอกสารคำสอนฉบับเต็ม & ฉบับย่อ และ Self-Quiz 6 ข้อ",
       examBadge: "นอกข้อสอบ HS1–HS6 · รากฐานทุกบท",
       whyImportant:
         "เป็นกรอบคิดตั้งต้น (Foundational Mental Model) ก่อนเรียน HS1–HS6 ช่วยให้เข้าใจตั้งแต่ความหมายและบริบทของระบบ ความต่างของระบบสามัญ/ยุ่งยาก/ซับซ้อน (CAS) ความซับซ้อนในคลินิกและโรคเรื้อรัง วงจรอุบาทว์ของห้องฉุกเฉิน ไปจนถึงแบบจำลองภูเขาน้ำแข็ง 4 ระดับ และการแยก Systems Thinking ออกจาก Systematic Thinking",
@@ -11451,7 +11443,7 @@
       weekLabel: "สัปดาห์ที่ 1",
       dateTH: "วันพุธที่ 25 พฤศจิกายน 2569",
       shortDate: "พ. 25 พ.ย. 69",
-      timeLabel: "13.30 – 16.30 น.",
+      timeLabel: "13.00 – 16.00 น.",
       hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
       title: "Bedside to Systems-Based Practice: Global/Planetary Health & HPSR — From Bedside to Health Public Policy",
@@ -11506,7 +11498,7 @@
       timeLabel: "09.00 – 12.00 น.",
       hours: "3 ชม.",
       room: "ห้อง 2C2-02 และ 2C2-03 (2 ห้อง) ชั้น 2 อาคารพรีคลินิก",
-      title: "Workshop: Learning How to Learn",
+      title: "Panel Discussion: District Health Systems – Six Building Blocks Plus One",
       titleThSub: "เวิร์กชอปฝึกทักษะและท่าทีการเรียนรู้จากการปฏิบัติจริงร่วมกับชุมชนและระบบสุขภาพอำเภอก่อนลงภาคสนาม",
       speakers: "วิทยากร: รศ. นพ.สุรเกียรติ อาชานานุภาพ",
       examBadge: "นอกข้อสอบ HS1–HS6 · เข็มทิศภาคสนาม",
@@ -11552,7 +11544,7 @@
       weekLabel: "สัปดาห์ที่ 5",
       dateTH: "วันอังคารที่ 22 ธันวาคม 2569",
       shortDate: "อ. 22 ธ.ค. 69",
-      timeLabel: "13.30 – 16.30 น.",
+      timeLabel: "13.00 – 16.30 น.",
       hours: "3 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
       title: "Workshop: Systems Thinking in Action – Causal Loop Diagram (CLD) & System Archetypes (Synthesis & Wrap-up)",
@@ -11651,10 +11643,10 @@
       weekLabel: "สัปดาห์ที่ 5",
       dateTH: "วันพฤหัสบดีที่ 24 ธันวาคม 2569",
       shortDate: "พฤ. 24 ธ.ค. 69",
-      timeLabel: "13.30 – 16.30 น.",
-      hours: "3 ชม.",
+      timeLabel: "13.00 – 16.30 น.",
+      hours: "3.5 ชม.",
       room: "2C2-03 ชั้น 2 อาคารพรีคลินิก",
-      title: "Integrated Health Promotion in Action: Learning from Expert Experience",
+      title: "Panel Discussion: Young-Gen Systems-based Practitioner การขับเคลื่อนข้อเสนอเชิงนโยบายภายใต้บริบทเศรษฐศาสตร์การเมือง",
       titleThSub: "สร้างเสริมสุขภาพเชิงบูรณาการในภาคปฏิบัติ: เรียนรู้ผ่านประสบการณ์จริงของผู้เชี่ยวชาญ",
       speakers:
         "วิทยากร: นพ.พงศ์เทพ วงศ์วัชรไพบูลย์ (ผู้จัดการ สสส.), นพ.กติกา อรรฆศิลป์ (หัวหน้าฝ่ายการผสานข้อมูลและประเมินโครงการส่งเสริมสุขภาพ), นพ.ฐิติกร โตโพธิ์ไทย (กองกิจกรรมทางกายเพื่อสุขภาพ) | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
@@ -15429,7 +15421,7 @@
     [
       {
         id: "w1-d1-orient",
-        label: "🟢 ปฐมนิเทศรายวิชา (Orientation) · พ. 25 พ.ย. 09.00–09.30 น."
+        label: "🟢 ปฐมนิเทศรายวิชา (Orientation) · พ. 25 พ.ย. 08.30–09.30 น."
       },
       {
         id: "w6-d3-wrapup",
@@ -31043,8 +31035,8 @@
         tagEn: "Kickoff",
         titleTh: "เปิดรายวิชา & Orientation",
         titleEn: "Course Kickoff & Orientation",
-        subTh: "พ. 25 พ.ย. · 09.00 น. ห้อง 2C2-03",
-        subEn: "Wed 25 Nov · 09:00 Rm 2C2-03",
+        subTh: "พ. 25 พ.ย. · 08.30–09.30 น. ห้อง 2C2-03",
+        subEn: "Wed 25 Nov · 08:30–09:30 Rm 2C2-03",
         actionTab: "schedule",
         jumpISO: "2026-11-25"
       },
@@ -32719,6 +32711,13 @@
     }
     if (rec.repoPath) {
       const lowerPath = String(rec.repoPath).toLowerCase();
+      if (lowerPath.endsWith(".pdf") && window.RACM_PDF_PREVIEW) {
+        window.RACM_PDF_PREVIEW.open(rec.repoPath, {
+          title: rec.fileName || rec.repoPath.split("/").pop(),
+          downloadName: rec.fileName || rec.repoPath.split("/").pop()
+        });
+        return;
+      }
       if (!forceDownload && lowerPath.endsWith(".pdf")) {
         window.open(rec.repoPath, "_blank", "noopener");
         return;

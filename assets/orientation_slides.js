@@ -158,14 +158,14 @@
       sectionLabel: "Opening",
       actClass: "",
       actLabel: "OPENING · 4-ACT STORY",
-      timeWindow: "09.00 – 09.02 น. (2 นาที)",
+      timeWindow: "08.30 – 08.34 น. (4 นาที)",
       kicker: "RACM 303 · ACADEMIC YEAR 2569 · COURSE ORIENTATION",
       title: "Orientation to Community Medicine & Health Systems Science",
       keyTag: "สาระสำคัญ",
       keyMessageHtml:
         "เชื่อมโยง <strong>การดูแลผู้ป่วยข้างเตียง</strong> เข้ากับ <strong>วิถีชุมชนและระบบสุขภาพ</strong> ผ่านประสบการณ์เรียนรู้จริงตลอด 6 สัปดาห์ เพื่อพัฒนาสมรรถนะหลักทั้ง 5 ด้าน",
       notes:
-        "กล่าวต้อนรับนักศึกษาแพทย์ชั้นปีที่ 3 รุ่นปีการศึกษา 2569 ทั้ง 169 คน แนะนำคณาจารย์ประจำรายวิชา ชี้แจงภาพรวมคาบปฐมนิเทศ 30 นาทีแรก (09.00–09.30 น.) ทั้ง 4 ช่วง ได้แก่ ความสำคัญและวัตถุประสงค์รายวิชา เส้นทางการเรียนรู้ 6 สัปดาห์และโรงพยาบาลแหล่งฝึก 9 แห่ง การประเมินผลตามสมรรถนะหลัก 5 ด้าน ตลอดจนแนวทางดูแลความปลอดภัยและก้าวแรกของสัปดาห์ที่ 1",
+        "กล่าวต้อนรับนักศึกษาแพทย์ชั้นปีที่ 3 รุ่นปีการศึกษา 2569 ทั้ง 169 คน แนะนำคณาจารย์ประจำรายวิชา ชี้แจงภาพรวมคาบปฐมนิเทศ 1 ชั่วโมงแรก (08.30–09.30 น.) ทั้ง 4 ช่วง ได้แก่ ความสำคัญและวัตถุประสงค์รายวิชา เส้นทางการเรียนรู้ 6 สัปดาห์และโรงพยาบาลแหล่งฝึก 9 แห่ง การประเมินผลตามสมรรถนะหลัก 5 ด้าน ตลอดจนแนวทางดูแลความปลอดภัยและก้าวแรกของสัปดาห์ที่ 1",
       isCover: true
     },
     {
@@ -175,7 +175,7 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · FOUNDING FATHER",
-      timeWindow: "09.02 – 09.03 น. (1 นาที)",
+      timeWindow: "08.34 – 08.38 น. (4 นาที)",
       kicker: "01 · RAMATHIBODI COMMUNITY MEDICINE HERITAGE",
       title: "Prof. Dr. Prem Buri — บิดาผู้วางรากฐานและต้นแบบการสอนเวชศาสตร์ชุมชน รามาธิบดี",
       keyTag: "ต้นแบบครูแพทย์",
@@ -220,7 +220,7 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · START WITH WHY",
-      timeWindow: "09.02 – 09.04 น. (2 นาที)",
+      timeWindow: "08.38 – 08.42 น. (4 นาที)",
       kicker: "01 · HEALTH SYSTEMS SCIENCE (HSS) · THE THIRD PILLAR OF MEDICAL EDUCATION",
       title: "วิทยาศาสตร์ระบบสุขภาพ: เสาหลักที่ 3 ที่ต่อยอดความรู้พื้นฐานและคลินิกสู่การดูแลผู้ป่วยในระบบจริง",
       keyTag: "สาระสำคัญ",
@@ -275,7 +275,7 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · START WITH WHY",
-      timeWindow: "09.04 – 09.06 น. (2 นาที)",
+      timeWindow: "08.42 – 08.46 น. (4 นาที)",
       kicker: "01 · BEYOND THE BEDSIDE & RAMATHIBODI COMMUNITY MEDICINE HERITAGE",
       title: "มองให้ลึกกว่าข้างเตียง จากรากเหง้าสุขภาพชุมชนสู่ปณิธานรามาธิบดี",
       keyTag: "สาระสำคัญ",
@@ -323,7 +323,7 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · OBJECTIVES",
-      timeWindow: "09.06 – 09.08 น. (2 นาที)",
+      timeWindow: "08.46 – 08.50 น. (4 นาที)",
       kicker: "01 · COURSE GOALS (ก–ง) & 5 CORE PHYSICIAN COMPETENCIES",
       title: "วัตถุประสงค์รายวิชา (ก–ง) เชื่อมตรงสู่สมรรถนะหลักของแพทย์ทั้ง 5 ด้าน",
       keyTag: "ความสอดคล้องเชิงหลักสูตร",
@@ -389,7 +389,7 @@
       sectionLabel: "Act I · Start with Why",
       actClass: "",
       actLabel: "ACT I · FIVE HSS OBJECTIVES",
-      timeWindow: "09.08 – 09.10 น. (2 นาที)",
+      timeWindow: "08.50 – 08.54 น. (4 นาที)",
       kicker: "01 · FIVE HEALTH SYSTEMS OBJECTIVES LINKED BY SYSTEMS THINKING",
       title: "วัตถุประสงค์หมวดระบบสุขภาพทั้ง 5 ด้านที่เชื่อมโยงกันด้วยการคิดเชิงระบบ",
       keyTag: "การเชื่อมโยงเชิงระบบ",
@@ -441,7 +441,7 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.10 – 09.13 น. (3 นาที)",
+      timeWindow: "08.54 – 09.00 น. (6 นาที)",
       kicker: "02 · 6-WEEK LEARNING JOURNEY (25 NOV – 30 DEC 2569)",
       title: "เส้นทางการเรียนรู้ 6 สัปดาห์ จากการปูกรอบคิดสู่โรงพยาบาลแหล่งฝึกและการสังเคราะห์ทีม",
       keyTag: "ลำดับการเรียนรู้",
@@ -536,7 +536,7 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.13 – 09.15 น. (2 นาที)",
+      timeWindow: "09.00 – 09.04 น. (4 นาที)",
       kicker: "02 · HEALTH SYSTEMS SCIENCE ARCHITECTURE (ST1 & HS1–HS6)",
       title: "การเรียนรู้หมวดระบบสุขภาพแบบนำทาง 5 ขั้นตอน ควบคู่กับ 6 เวทีฝึกคิดเชิงระบบ",
       keyTag: "การออกแบบการเรียนรู้",
@@ -584,14 +584,14 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.15 – 09.17 น. (2 นาที)",
+      timeWindow: "09.04 – 09.08 น. (4 นาที)",
       kicker: "02 · CLINICAL & COMMUNITY EPIDEMIOLOGY PIPELINE (EP1–EP9)",
       title: "หมวดระบาดวิทยาคลินิกและชุมชน (EP1–EP9) จากหลักฐานวิชาการสู่การสำรวจจริง",
       keyTag: "จากหลักฐานสู่การปฏิบัติ",
       keyMessageHtml:
         "การประเมินความแม่นยำของการตรวจและการจัดการอคติ (<strong>Selection Bias, Information Bias และ Confounding</strong>) ช่วยให้ผลสำรวจสุขภาพชุมชนน่าเชื่อถือและนำไปใช้ได้จริง",
       notes:
-        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 08.30–11.00 น. (ห้อง 2A01 และ Zoom) ต่อด้วยแบบฝึกหัดที่ 1–2 ในระบบ E-learning วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 08.30 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
+        "ชี้แจงแผนการเรียนระบาดวิทยาทั้ง 4 ช่วง วันศุกร์ 27 พ.ย. บรรยาย EP1–EP3 เวลา 09.00–11.00 น. (ห้อง 2A01 และ Zoom) ต่อด้วยแบบฝึกหัดที่ 1–2 ในระบบ E-learning วันที่ 2–3 ธ.ค. เรียนรูปแบบผสมผสาน เริ่ม 09.00 น. (ห้อง 2C2-03 และ Zoom) และวันอังคาร 8 ธ.ค. ช่วงเช้าสอบภาคทฤษฎี ช่วงบ่ายฝึกวิเคราะห์ข้อมูลด้วย SPSS",
       render: () => `
         <div class="or-top-fig-stack is-s08-stack">
           ${figPlate("orient_s08_epi_pipeline.png", "4-Stage Clinical and Community Epidemiology Pipeline", "")}
@@ -603,7 +603,7 @@
                 <h3 class="or-card-title">EP1–EP3 · การวินิจฉัยและอคติ</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /></span><span>อ. นพ.จักรกฤษณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>08.30–11.00 น.</strong> (<code>2A01</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 1–2 หลัง 11.00 น.</strong></p>
+              <p class="or-card-text"><strong>09.00–11.00 น.</strong> (<code>Auditorium</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 1–2 หลัง 11.00 น.</strong></p>
             </div>
 
             <div class="or-card is-white is-s08-card">
@@ -612,7 +612,7 @@
                 <h3 class="or-card-title">EP4–EP5 · รูปแบบวิจัยและสอบสวนโรค</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /></span><span>อ. พญ.สวนีย์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>08.30–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 3–4</strong></p>
+              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ต่อด้วย<strong>แบบฝึกหัด 3–4</strong></p>
             </div>
 
             <div class="or-card is-teal-tint is-s08-card">
@@ -621,7 +621,7 @@
                 <h3 class="or-card-title">EP6–EP9 · ภาระโรคและเวชปฏิบัติอิงหลักฐาน</h3>
                 <div class="or-s08-inst-row"><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /></span><span>อ.ปวินท์</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /></span><span>ศ.วิชัย</span></span><span class="or-adv-pair"><span class="or-s09-adv-frame"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /></span><span>ผศ.ฉัฐญาณ์</span></span></div>
               </div>
-              <p class="or-card-text"><strong>08.30–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย<strong>EP9 &amp; แบบฝึกหัด 5–6</strong></p>
+              <p class="or-card-text"><strong>09.00–12.00 น. (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ต่อด้วย<strong>EP9 &amp; แบบฝึกหัด 5–6</strong></p>
             </div>
 
             <div class="or-card is-navy-tint is-s08-card">
@@ -643,7 +643,7 @@
       sectionLabel: "Act II · Learning Journey",
       actClass: "is-act-2",
       actLabel: "ACT II · THE JOURNEY",
-      timeWindow: "09.17 – 09.20 น. (3 นาที)",
+      timeWindow: "09.08 – 09.13 น. (5 นาที)",
       kicker: "02 · KOLB'S EXPERIENTIAL LEARNING & 9 FIELDWORK TRAINING HOSPITALS",
       title: "การเรียนรู้จากประสบการณ์จริงตามวงจร Kolb ณ โรงพยาบาลแหล่งฝึกทั้ง 9 แห่ง",
       keyTag: "การเรียนรู้ร่วมกัน",
@@ -707,7 +707,7 @@
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.20 – 09.23 น. (3 นาที)",
+      timeWindow: "09.13 – 09.17 น. (4 นาที)",
       kicker: "03 · COMPETENCY-BASED ASSESSMENT BLUEPRINT (RACM 303 · ปีการศึกษา 2569)",
       title: "โครงสร้างการประเมินผลตามสมรรถนะหลัก 5 ด้าน ทั้งเพื่อพัฒนาและตัดสินผล",
       keyTag: "หลักการประเมินผล",
@@ -795,7 +795,7 @@
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.23 – 09.25 น. (2 นาที)",
+      timeWindow: "09.17 – 09.20 น. (3 นาที)",
       kicker: "03 · COMPETENCY 1 DEEP DIVE · EPIDEMIOLOGY EXAM & HEALTH SYSTEMS EXAM",
       title: "รายละเอียดการสอบภาคทฤษฎี หมวดระบาดวิทยาและหมวดระบบสุขภาพ",
       keyTag: "แนวปฏิบัติการสอบ",
@@ -858,7 +858,7 @@
       sectionLabel: "Act III · Evaluation",
       actClass: "is-act-3",
       actLabel: "ACT III · EVALUATION",
-      timeWindow: "09.25 – 09.27 น. (2 นาที)",
+      timeWindow: "09.20 – 09.23 น. (3 นาที)",
       kicker: "03 · COMPETENCIES 2–5 · TEAM PRESENTATION, REFLECTION & INTEGRITY",
       title: "การประเมินภาคปฏิบัติ การนำเสนอผลงานทีม งานสะท้อนคิด และเจตคติวิชาชีพ",
       keyTag: "การสังเคราะห์ร่วมกัน",
@@ -920,7 +920,7 @@
       sectionLabel: "Act IV · Conduct & Launch",
       actClass: "is-act-4",
       actLabel: "ACT IV · CONDUCT & SAFETY",
-      timeWindow: "09.26 – 09.27 น. (1 นาที)",
+      timeWindow: "09.23 – 09.25 น. (2 นาที)",
       kicker: "04 · ATTENDANCE (≥ 80%), LEAVE QUOTAS (3d / 1.5d) & 6 SAFETY RULES",
       title: "เวลาเรียน สิทธิ์เข้าสอบ โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
       keyTag: "สิทธิ์เข้าสอบ & ความปลอดภัย",
@@ -974,7 +974,7 @@
       sectionLabel: "Act IV · Live Quiz O/S/M/U",
       actClass: "is-act-4",
       actLabel: "LIVE QUIZ · O / S / M / U",
-      timeWindow: "09.27 – 09.28 น. (กิจกรรมสด)",
+      timeWindow: "09.25 – 09.27 น. (กิจกรรมสด)",
       kicker: "04 · INTERACTIVE KAHOOT QUIZ · DO'S & DON'TS & ATTITUDE (O · S · M · U)",
       title: "Live Quiz ทวนสอบความเข้าใจ: เวลาเรียน พฤติกรรมไม่พึงประสงค์ และเกณฑ์ O · S · M · U",
       keyTag: "ร่วมตอบสดพร้อมกัน",
@@ -1000,7 +1000,7 @@
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
       actLabel: "OFFICIAL CRITERIA · O · S · M · U",
-      timeWindow: "09.28 – 09.29 น. (1 นาที)",
+      timeWindow: "09.27 – 09.28 น. (1 นาที)",
       kicker: "04 · SECTION 12–13 · ATTENDANCE, RAMA ATTITUDE RULES B.E. 2567 & FINAL GRADE O / S / M / U",
       title: "ชี้แจงเกณฑ์เวลาเรียน การประเมินด้านเจตคติ (พ.ศ. 2567) และเกณฑ์ตัดสิน O · S · M · U",
       keyTag: "หมายเหตุสำคัญ",
@@ -1058,7 +1058,7 @@
       sectionLabel: "Act IV · ผังเกรด & 7 กำหนดการ",
       actClass: "is-act-3",
       actLabel: "ACT IV · FLOW & 7 MILESTONES",
-      timeWindow: "09.29 น. (สรุปกำหนดการ)",
+      timeWindow: "09.28 – 09.29 น. (สรุปกำหนดการ)",
       kicker: "04 · FINAL GRADE FLOWCHART & 7 KEY ASSESSMENT MILESTONES",
       title: "ผังสรุปการตัดสินเกรดรายวิชา และกำหนดการสอบ–ส่งงานสำคัญ 7 รายการ",
       keyTag: "ข้อควรจำสำคัญ",
@@ -1103,7 +1103,7 @@
                   <tr><td><strong>2. ส่งงานสะท้อนคิด SRN 1</strong> พร้อมประเมินภาคทฤษฎี</td><td>พ. 9 ธ.ค. 69 (ภายใน 17.00 น.) · E-learning</td></tr>
                   <tr><td><strong>3. สอบข้อเขียนระบบสุขภาพ (โน้ต A4)</strong></td><td>อ. 22 ธ.ค. 69 (09.00–12.00 น.) · <code>2C2-01..03</code></td></tr>
                   <tr><td><strong>4. นำเสนอผลงานทีม หมวดระบบสุขภาพ (3A)</strong></td><td>อ. 29 ธ.ค. 69 (08.30–15.30 น.) · <code>2C2-03</code></td></tr>
-                  <tr><td><strong>5. นำเสนอผลงานทีม หมวดระบาดวิทยา (4A)</strong></td><td>พ. 30 ธ.ค. 69 (08.30–12.45 น.) · <code>2C2-03</code></td></tr>
+                  <tr><td><strong>5. นำเสนอผลงานทีม หมวดระบาดวิทยา (4A)</strong></td><td>พ. 30 ธ.ค. 69 (08.30–13.00 น.) · <code>2C2-03</code></td></tr>
                   <tr><td><strong>6. ส่งงานสะท้อนคิด SRN 2</strong> พร้อมประเมินรายวิชา</td><td>พ. 30 ธ.ค. 69 (ภายใน 17.00 น.) · E-learning</td></tr>
                   <tr><td><strong>7. ส่งไฟล์สไลด์นำเสนอและรายงานสำรวจชุมชน</strong></td><td>พ. 30 ธ.ค. 69 (ภายใน 17.00 น.) · Google Form</td></tr>
                 </tbody>
@@ -1158,7 +1158,7 @@
               </div>
               <div class="or-card is-white is-s15-step">
                 <span class="or-card-kicker">③ เย็นวันนี้ · เตรียมตัวล่วงหน้าก่อนเข้าชั้นเรียนพรุ่งนี้</span>
-                <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 08.30 น. และกลุ่มย่อย 09.40 น.</strong></p>
+                <p class="or-card-text"><strong>ศึกษาเอกสารและตอบคำถามนำ <code>HS1</code> ก่อนเข้าฟังบรรยายพรุ่งนี้ 09.00 น. และกลุ่มย่อย 10.10 น.</strong></p>
               </div>
               <div class="or-card is-white is-s15-step">
                 <span class="or-card-kicker">④ พฤหัสบดี 26 พ.ย. · 13.30 – 16.30 น.</span>
@@ -1402,8 +1402,8 @@
         state.timerSeconds += 1;
         document.querySelectorAll("[data-or-timer-display]").forEach((btn) => {
           btn.textContent = formatTimer(state.timerSeconds);
-          btn.classList.toggle("is-running", state.timerRunning && state.timerSeconds <= 1800);
-          btn.classList.toggle("is-overtime", state.timerSeconds > 1800);
+          btn.classList.toggle("is-running", state.timerRunning && state.timerSeconds <= 3600);
+          btn.classList.toggle("is-overtime", state.timerSeconds > 3600);
         });
       }, 1000);
     }
@@ -1454,7 +1454,7 @@
         <div class="or-cover-split">
           <div class="or-cover-left-col">
             <div class="or-cover-head-stack">
-              <span class="or-cover-kicker">Course Orientation · พุธ 25 พฤศจิกายน 2569 · 09.00 – 09.30 น.</span>
+              <span class="or-cover-kicker">Course Orientation · พุธ 25 พฤศจิกายน 2569 · 08.30 – 09.30 น.</span>
               <h2 class="or-cover-h1">${esc(slide.title)}</h2>
               <div class="or-top-key-banner is-cover-key">
                 <span class="or-top-key-text">${slide.keyMessageHtml}</span>
@@ -2131,7 +2131,7 @@
                   "RACM 303 Orientation · Community Medicine & Health Systems Science"
                 )
               )}</span>
-              <span class="or-top-sub">พุธ 25 พ.ย. 2569 · 09.00 – 09.30 น. · ห้อง 2C2-03 อาคารพรีคลินิก</span>
+              <span class="or-top-sub">พุธ 25 พ.ย. 2569 · 08.30 – 09.30 น. · ห้อง 2C2-03 อาคารพรีคลินิก</span>
             </div>
           </div>
 
@@ -2147,7 +2147,7 @@
               <button type="button" class="or-tool-btn is-io-theme-toggle" id="orIoThemeBtn" title="สลับโทนสไลด์ Clean Light / Dark (พร้อมเปลี่ยนภาพ PNG เป็น Dark BG อัตโนมัติ · กด T)"><span>${isIoDark ? "🌙 Dark" : "☀️ Light"}</span></button>
               ${
                 ROLE === "faculty"
-                  ? `<button type="button" class="or-timer-pill${state.timerRunning && state.timerSeconds <= 1800 ? " is-running" : ""}${state.timerSeconds > 1800 ? " is-overtime" : ""}" id="orTimerBtn" data-or-timer-display title="คลิกเพื่อเริ่ม/หยุดจับเวลาคาบปฐมนิเทศ 30 นาที (ดับเบิลคลิกเพื่อรีเซ็ต)">${formatTimer(state.timerSeconds)}</button>`
+                  ? `<button type="button" class="or-timer-pill${state.timerRunning && state.timerSeconds <= 3600 ? " is-running" : ""}${state.timerSeconds > 3600 ? " is-overtime" : ""}" id="orTimerBtn" data-or-timer-display title="คลิกเพื่อเริ่ม/หยุดจับเวลาคาบปฐมนิเทศ 60 นาที (ดับเบิลคลิกเพื่อรีเซ็ต)">${formatTimer(state.timerSeconds)}</button>`
                   : ""
               }
               <button type="button" class="or-tool-btn${state.autoPlay ? " is-active-toggle" : ""}" id="orAutoPlayBtn" title="เล่นสไลด์อัตโนมัติแบบ Keynote Reel (กด P)">${state.autoPlay ? SVG.pause : SVG.play} <span>${esc(

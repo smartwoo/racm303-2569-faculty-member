@@ -3,7 +3,7 @@ VERSION:2.0
 PRODID:-//Ramathibodi Community Medicine//RACM 303 2569//TH
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:RACM 303 (2569) · อาจารย์ นพ.วิรุฬ ลิ้มสวาท (วิทยากรพิเศษ)
+X-WR-CALNAME:RACM 303 (2569) · อาจารย์ นพ.ทักษพล ธรรมรังสี (วิทยากรพิเศษ)
 X-WR-TIMEZONE:Asia/Bangkok
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
@@ -18,16 +18,16 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:w1-d1-global@racm303-2569.mahidol.ac.th
-DTSTAMP:20261123T073000Z
-DTSTART;TZID=Asia/Bangkok:20261125T133000
-DTEND;TZID=Asia/Bangkok:20261125T163000
-SUMMARY:[RACM 303] Bedside to Systems-Based Practice: Global/Planetary Health & HPSR — From Bedside to Health Public Policy
+DTSTAMP:20261124T050000Z
+DTSTART;TZID=Asia/Bangkok:20261125T130000
+DTEND;TZID=Asia/Bangkok:20261125T160000
+SUMMARY:[RACM 303] Bedside to Systems-Based Practice: Global/Planetary Health & HPSR
 LOCATION:2C2-03 ชั้น 2 อาคารพรีคลินิก
-DESCRIPTION:วัตถุประสงค์: 1) อธิบายภาพรวมบทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems) และเส้นทางวิชาชีพแพทย์ (Physician Career Paths) เชิงวิทยาศาสตร์ระบบสุขภาพ (Health Systems Science: HSS) ที่ต่อยอดจากการดูแลผู้ป่วยข้างเตียงสู่เวชปฏิบัติอิงระบบ (Systems-Based Practice: SBP) | 2) วิเคราะห์การบูรณาการบทบาทแพทย์ในฐานะผู้นำการเปลี่ยนแปลง (Change Agent) นักวิจัยนโยบายและระบบสุขภาพ (HPSR) และผู้ขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพ (From Bedside to Health Public Policy) เชื่อมโยงผู้ป่วย ครอบครัว ชุมชน สู่สุขภาพโลกและสุขภาพดาวเคราะห์ (Global & Planetary Health) | 3) สะท้อนคิดแนวทางการพัฒนาสมรรถนะ HSS & SBP และเส้นทางอาชีพแพทย์ในการทำงานร่วมกับทีมสหวิชาชีพและสังคม\nอาจารย์ผู้สอน: วิทยากร: นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิการแพทย์แห่งประเทศจีน China Medical Board: CMB Foundation)\, นพ.วิรุฬ ลิ้มสวาท (หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ)\, ศ.เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ (รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ: ศจย.) | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (169 คน) (เช็คชื่อ)
+DESCRIPTION:วัตถุประสงค์: 1) อธิบายภาพรวมบทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems) และเส้นทางวิชาชีพแพทย์ (Physician Career Paths) เชิงวิทยาศาสตร์ระบบสุขภาพ (Health Systems Science: HSS) ที่ต่อยอดจากการดูแลผู้ป่วยข้างเตียงสู่เวชปฏิบัติอิงระบบ (Systems-Based Practice: SBP) | 2) วิเคราะห์การบูรณาการบทบาทแพทย์ในฐานะผู้นำการเปลี่ยนแปลง (Change Agent) นักวิจัยนโยบายและระบบสุขภาพ (HPSR) และผู้ขับเคลื่อนนโยบายสาธารณะเพื่อสุขภาพ (From Bedside to Health Public Policy) เชื่อมโยงผู้ป่วย ครอบครัว ชุมชน สู่สุขภาพโลกและสุขภาพดาวเคราะห์ (Global & Planetary Health) | 3) สะท้อนคิดแนวทางการพัฒนาสมรรถนะ HSS & SBP และเส้นทางอาชีพแพทย์ในการทำงานร่วมกับทีมสหวิชาชีพและสังคม\nอาจารย์ผู้สอน: วิทยากร: นพ.ทักษพล ธรรมรังสี\, นพ.วิรุฬ ลิ้มสวาท | ผู้ดำเนินการอภิปราย: อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์\nสถานที่/ห้องเรียน: 2C2-03 ชั้น 2 อาคารพรีคลินิก\nรูปแบบ: Onsite (จำนวน นศพ. 169 คน) (เช็คชื่อ)
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Bedside to Systems-Based Practice: Global/Planetary Health & HPSR — From Bedside to Health Public Policy
+DESCRIPTION:แจ้งเตือนกำหนดการ [RACM 303] Bedside to Systems-Based Practice: Global/Planetary Health & HPSR
 END:VALARM
 END:VEVENT
 END:VCALENDAR

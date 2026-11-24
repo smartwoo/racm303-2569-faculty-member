@@ -1509,6 +1509,15 @@
         if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
       });
 
+      const pdfSchedBtn = document.createElement("a");
+      pdfSchedBtn.className = "tv-pill-action-btn is-pdf-pill";
+      pdfSchedBtn.id = "tvQuickSchedulePdfBtn";
+      pdfSchedBtn.href = "exports/pdf/RACM303_2569_Schedule.pdf?v=20261124pdf24";
+      pdfSchedBtn.setAttribute("download", "ตารางการเรียนการสอน_RACM303_2569.pdf");
+      pdfSchedBtn.setAttribute("data-pdf-preview-title", "ตารางการเรียนการสอน รายวิชา RACM 303 ปีการศึกษา 2569 (24 หน้า).pdf");
+      pdfSchedBtn.title = t("ดูตัวอย่างและดาวน์โหลดตารางเรียน PDF ต้นฉบับ (24 หน้า)", "Preview & Download Official 24-Page Schedule PDF");
+      pdfSchedBtn.innerHTML = `${ICONS.download} <span>${esc(t("ดาวน์โหลดตารางเรียน (PDF)", "Download Schedule (PDF)"))}</span>`;
+
       const filterToggleBtn = document.createElement("button");
       filterToggleBtn.type = "button";
       filterToggleBtn.className = "tv-pill-action-btn";
@@ -1522,6 +1531,7 @@
       });
 
       exportGroup.insertBefore(filterToggleBtn, exportGroup.firstChild);
+      exportGroup.insertBefore(pdfSchedBtn, exportGroup.firstChild);
       exportGroup.insertBefore(syncBtn, exportGroup.firstChild);
     }
 
@@ -2229,7 +2239,7 @@
             folderPath: ["schedule"],
             name: "00_RACM303_2569_Orientation_Slides_(ปฐมนิเทศรายวิชา_16x9).pptx",
             title: "Slide ปฐมนิเทศรายวิชา RACM 303 (Objectives, Learning Experience & 5-Competency Evaluation)",
-            sub: "วันพุธที่ 25 พ.ย. 2569 (09.00–09.30 น. · ห้อง 2C2-03) — 14 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
+            sub: "วันพุธที่ 25 พ.ย. 2569 (08.30–09.30 น. · ห้อง 2C2-03) — 14 สไลด์ 16:9 พร้อมดาวน์โหลด .pptx / PDF",
             meta: "14 สไลด์ · 16:9",
             badge: "▶ เปิดสไลด์ปฐมนิเทศ",
             icoCls: "is-pptx",

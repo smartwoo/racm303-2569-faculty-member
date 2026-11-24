@@ -1,0 +1,516 @@
+/* ==========================================================================
+   RACM 303 (2569) — Google Drive-Style Interactive PDF Preview Overlay
+   Matches Google Drive PDF Viewer UI:
+   - Top header bar (Close/Back, PDF icon + Title, Print, Download, Open in new tab)
+   - High-DPI multi-page continuous canvas stage on dark charcoal backdrop
+   - Floating bottom pill: Page [ 1 ] / 24 | Download | Print | Fit | - 100% v +
+   ========================================================================== */
+
+.gdpv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(23, 24, 27, 0.93);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #e8eaed;
+  font-family: "Google Sans", "IBM Plex Sans Thai", "Sarabun", system-ui, -apple-system, sans-serif;
+  user-select: none;
+  animation: gdpvFadeIn 0.16s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.gdpv-overlay[hidden] {
+  display: none !important;
+}
+
+@keyframes gdpvFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Top Google Drive Header Bar ---------- */
+.gdpv-topbar {
+  flex: 0 0 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, rgba(20, 21, 24, 0.96) 0%, rgba(28, 30, 34, 0.88) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  z-index: 5;
+}
+
+.gdpv-top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.gdpv-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #e8eaed;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.1s ease;
+  flex-shrink: 0;
+}
+
+.gdpv-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+}
+
+.gdpv-icon-btn:active {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0.96);
+}
+
+.gdpv-icon-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
+  pointer-events: none;
+}
+
+.gdpv-icon-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.gdpv-pdf-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  background: #ea4335;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.gdpv-doc-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #f1f3f4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.gdpv-top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.gdpv-top-dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(138, 180, 248, 0.38);
+  background: rgba(138, 180, 248, 0.16);
+  color: #d2e3fc;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.gdpv-top-dl-btn:hover {
+  background: #8ab4f8;
+  border-color: #8ab4f8;
+  color: #17181b;
+}
+
+.gdpv-top-dl-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ---------- Scrollable Document Stage ---------- */
+.gdpv-stage {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 24px 16px 96px;
+  scroll-behavior: auto;
+  overscroll-behavior: contain;
+}
+
+.gdpv-pages-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  min-height: 100%;
+  margin: 0 auto;
+}
+
+.gdpv-page-slot {
+  position: relative;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.52), 0 1px 3px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.12s ease, height 0.12s ease;
+}
+
+.gdpv-page-slot canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gdpv-page-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa0a6;
+  font-size: 13px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #f8f9fa 25%, #f1f3f4 50%, #f8f9fa 75%);
+  background-size: 200% 100%;
+  animation: gdpvShimmer 1.4s infinite linear;
+}
+
+@keyframes gdpvShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.gdpv-loading-box,
+.gdpv-fallback-box {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 36px 28px;
+  text-align: center;
+  color: #e8eaed;
+}
+
+.gdpv-spinner {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #8ab4f8;
+  animation: gdpvSpin 0.75s linear infinite;
+}
+
+@keyframes gdpvSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gdpv-native-iframe {
+  width: min(1120px, 96vw);
+  height: calc(100vh - 140px);
+  border: none;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Google Drive Bottom Floating Control Pill ---------- */
+.gdpv-bottom-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.gdpv-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(36, 37, 40, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.35);
+  color: #e8eaed;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.gdpv-page-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.gdpv-page-label {
+  color: #bdc1c6;
+  font-size: 13.5px;
+  font-weight: 400;
+}
+
+.gdpv-page-input {
+  width: 34px;
+  height: 26px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.gdpv-page-input:focus {
+  border-color: #8ab4f8;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.gdpv-page-slash,
+.gdpv-page-total {
+  color: #e8eaed;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gdpv-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.gdpv-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #e8eaed;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+  flex-shrink: 0;
+}
+
+.gdpv-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.gdpv-pill-btn.is-active {
+  background: rgba(138, 180, 248, 0.2);
+  color: #8ab4f8;
+}
+
+.gdpv-pill-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.gdpv-pill-btn svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+/* Zoom preset button & menu */
+.gdpv-zoom-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gdpv-zoom-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #e8eaed;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 0.14s ease;
+}
+
+.gdpv-zoom-select-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.gdpv-zoom-caret {
+  width: 12px;
+  height: 12px;
+  opacity: 0.82;
+}
+
+.gdpv-zoom-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 172px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #292a2d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.58);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: auto;
+}
+
+.gdpv-zoom-menu[hidden] {
+  display: none !important;
+}
+
+.gdpv-zoom-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 11px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #e8eaed;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gdpv-zoom-opt:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.gdpv-zoom-opt.is-selected {
+  background: rgba(138, 180, 248, 0.18);
+  color: #8ab4f8;
+  font-weight: 600;
+}
+
+.gdpv-print-frame {
+  position: fixed;
+  width: 0;
+  height: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Schedule top-bar PDF pill button styling */
+.tv-pill-action-btn.is-pdf-pill {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid rgba(225, 29, 72, 0.28);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tv-pill-action-btn.is-pdf-pill:hover {
+  background: #ffe4e6;
+  border-color: rgba(190, 18, 60, 0.48);
+  color: #9f1239;
+}
+
+[data-theme="dark"] .tv-pill-action-btn.is-pdf-pill {
+  background: rgba(244, 63, 94, 0.16);
+  color: #fda4af;
+  border-color: rgba(251, 113, 133, 0.34);
+}
+
+[data-theme="dark"] .tv-pill-action-btn.is-pdf-pill:hover {
+  background: rgba(244, 63, 94, 0.26);
+  color: #ffe4e6;
+}
+
+@media (max-width: 640px) {
+  .gdpv-topbar {
+    height: 52px;
+    padding: 0 10px;
+  }
+  .gdpv-top-dl-btn span {
+    display: none;
+  }
+  .gdpv-top-dl-btn {
+    padding: 0 10px;
+  }
+  .gdpv-bottom-dock {
+    bottom: 12px;
+    max-width: 96vw;
+  }
+  .gdpv-pill {
+    height: 42px;
+    padding: 0 10px;
+    gap: 2px;
+    font-size: 12.5px;
+  }
+  .gdpv-page-label {
+    display: none;
+  }
+  .gdpv-divider {
+    margin: 0 3px;
+  }
+  .gdpv-pill-btn {
+    width: 31px;
+    height: 31px;
+  }
+}
