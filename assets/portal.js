@@ -3760,7 +3760,7 @@
       .map(
         (x) =>
           `<tr><td><strong>${escapeHtml(x.code)}</strong></td><td>${escapeHtml(x.title)}${
-            ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(x.code)
+            ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(x.code)
               ? ` <button type="button" class="spec-hs-jump-link" data-spec-epmod="${escapeHtml(x.code.toLowerCase())}">🎬 เปิด Video + Conceptualized Slides →</button>`
               : ""
           }</td><td>${escapeHtml(x.date)}</td><td><strong>${escapeHtml(x.weight)}</strong></td></tr>`
@@ -34380,7 +34380,20 @@
       container.appendChild(bDoc);
     }
 
-    if (session.id === "w2-d3-ep45") {
+    if (session.id === "w1-d3-ep123") {
+      [
+        { sec: "ep2", label: "🎬 EP2: Diagnostic Test (Video + 25 สไลด์)" },
+        { sec: "ep3", label: "🎬 EP3: Errors in Epidemiology (Video + 18 สไลด์)" }
+      ].forEach((epItem) => {
+        const bEp = make("button", epItem.label, "btn sm teal");
+        bEp.type = "button";
+        bEp.addEventListener("click", () => {
+          if (closeModalFirst) closeEventModal();
+          openEpidemiology(epItem.sec);
+        });
+        container.appendChild(bEp);
+      });
+    } else if (session.id === "w2-d3-ep45") {
       [
         { sec: "ep4", label: "🎬 EP4: Study Designs & Impact (Video + 22 สไลด์)" },
         { sec: "ep5", label: "🎬 EP5: Surveillance & Outbreak (Video + 50 สไลด์)" }
@@ -35046,6 +35059,22 @@
         sub: "เวทีคำถามสดแบบ Kahoot บนสไลด์หน้าปกปฐมนิเทศ ทบทวนข้อควรทำ-ข้อห้ามและเกณฑ์ O / S / M / U ตามคู่มือนักศึกษา",
         hay: "kahoot orientation qr code pin 2569 do dont osmu คู่มือนักศึกษา ปฐมนิเทศ สแกน",
         run: () => { if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0); }
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP2: Diagnostic Test (Video + 25 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายตัดตรงคาบ Sensitivity, Specificity, จุดตัด Cutoff, PPV/NPV, ROC Curve และ Likelihood Ratio",
+        hay: "ep2 diagnostic test sensitivity specificity ppv npv prevalence cutoff roc curve likelihood ratio snnout sppin จักรกฤษณ์ การวินิจฉัยโรค",
+        run: () => openEpidemiology("ep2")
+      },
+      {
+        cat: "บทเรียน & คาบสอนหลัก",
+        icon: "🎬",
+        title: "EP3: Errors in Epidemiology (Video + 18 Conceptualized Slides)",
+        sub: "วิดีโอบรรยายตัดตรงคาบ Selection & Misclassification Bias, Confounding (Stratification), Ecological Fallacy และ Causation",
+        hay: "ep3 errors in epidemiology bias selection misclassification recall observer confounding stratification ecological fallacy bradford hill causation จักรกฤษณ์ อคติ",
+        run: () => openEpidemiology("ep3")
       },
       {
         cat: "บทเรียน & คาบสอนหลัก",
@@ -41865,7 +41894,7 @@
   function normalizeEpSection(sec) {
     const s = String(sec || "").trim().toLowerCase();
     if (s === "morbidity-mortality") return "ep6";
-    const valid = ["all", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9", "sessions", "zoom-spss", "exam-field"];
+    const valid = ["all", "ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9", "sessions", "zoom-spss", "exam-field"];
     return valid.includes(s) ? s : "all";
   }
 
@@ -41909,10 +41938,10 @@
     const kpiGrid = make("div", null, "ep-kpi-grid");
     const kpis = [
       {
-        badge: "🎬 EP4 – EP9 Interactive",
-        title: tr("6 คาบบรรยาย Video + สไลด์ซิงก์", "6 Interactive Video Lectures (EP4–EP9)"),
-        meta: tr("หั่นคลิปตรงแต่ละคาบ (ไม่ผ่าน YouTube) · รวม 200 สไลด์ · Verbatim → Conceptualized", "6 Sliced Native Videos · 200 Slides · Verbatim → Conceptualized"),
-        sec: "ep4"
+        badge: "🎬 EP2 – EP9 Interactive",
+        title: tr("8 คาบบรรยาย Video + สไลด์ซิงก์", "8 Interactive Video Lectures (EP2–EP9)"),
+        meta: tr("หั่นคลิปตรงแต่ละคาบ (ไม่ผ่าน YouTube) · รวม 243 สไลด์ · Verbatim → Conceptualized", "8 Sliced Native Videos · 243 Slides · Verbatim → Conceptualized"),
+        sec: "ep2"
       },
       {
         badge: "EP1 – EP9 & Ex 1–6",
@@ -41951,6 +41980,8 @@
     filterBar.setAttribute("role", "tablist");
     const filterItems = [
       { id: "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
+      { id: "ep2", label: tr("🎬 EP2: Diagnostic Test", "🎬 EP2: Diagnostic Test") },
+      { id: "ep3", label: tr("🎬 EP3: Errors in Epidemiology", "🎬 EP3: Errors in Epidemiology") },
       { id: "ep4", label: tr("🎬 EP4: Study Designs & Impact", "🎬 EP4: Study Designs & Impact") },
       { id: "ep5", label: tr("🎬 EP5: Surveillance & Outbreak", "🎬 EP5: Surveillance & Outbreak") },
       { id: "ep6", label: tr("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
@@ -41972,7 +42003,7 @@
     wrap.appendChild(filterBar);
 
     let ep6StudioHost = null;
-    const isEpLectureSec = ["ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(curSec);
+    const isEpLectureSec = ["ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(curSec);
     if (curSec === "all" || isEpLectureSec) {
       ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
       wrap.appendChild(ep6StudioHost);
@@ -42159,7 +42190,7 @@
                     <tr>
                       <td><span class="ep-code-pill">${escapeHtml(r.code)}</span></td>
                       <td><strong>${escapeHtml(r.title)}</strong>${
-                        ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(r.code)
+                        ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"].includes(r.code)
                           ? ` <button type="button" class="spec-hs-jump-link" data-ep-open-mod="${escapeHtml(r.code.toLowerCase())}">🎬 เปิด Video + Conceptualized →</button>`
                           : ""
                       }</td>

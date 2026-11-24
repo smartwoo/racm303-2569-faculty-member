@@ -11,10 +11,12 @@
   const STORAGE_UI_PREFS_KEY = "racm303_ep_studio_prefs_v10";
   const LEGACY_UI_PREFS_KEYS = ["racm303_ep_studio_prefs_v9", "racm303_ep_studio_prefs_v8"];
   const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-  const MODULE_ORDER = ["EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
+  const MODULE_ORDER = ["EP2", "EP3", "EP4", "EP5", "EP6", "EP7", "EP8", "EP9"];
 
   function getModulesMap() {
     const map = {};
+    if (window.RACM303_EP2_DIAGNOSTIC) map.EP2 = window.RACM303_EP2_DIAGNOSTIC;
+    if (window.RACM303_EP3_ERRORS) map.EP3 = window.RACM303_EP3_ERRORS;
     if (window.RACM303_EP4_STUDY_DESIGNS) map.EP4 = window.RACM303_EP4_STUDY_DESIGNS;
     if (window.RACM303_EP5_SURVEILLANCE) map.EP5 = window.RACM303_EP5_SURVEILLANCE;
     if (window.RACM303_EP6_MORBIDITY) map.EP6 = window.RACM303_EP6_MORBIDITY;
@@ -116,10 +118,10 @@
   };
 
   const studioState = {
-    activeModule: "EP4",
+    activeModule: "EP2",
     perBundleEpisode: {},
-    perLectureSec: { EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
-    currentSec: 4,
+    perLectureSec: { EP2: 0, EP3: 0, EP4: 0, EP5: 0, EP6: 4, EP7: 0, EP8: 0, EP9: 0 },
+    currentSec: 0,
     activeSlideId: 1,
     activeStageId: 1,
     imgQuality: "hd", // 'hd' | 'yt'
@@ -285,6 +287,8 @@
   ];
 
   const MODULE_SHORT_LABELS = {
+    EP2: { short: "Diagnostic Test", sub: "Sensitivity / Specificity · Cutoff · PPV & NPV · ROC Curve & Likelihood Ratio" },
+    EP3: { short: "Errors in Epidemiology", sub: "Selection & Misclassification Bias · Confounding (Stratification) & Causation" },
     EP4: { short: "Study Designs & Measurement of Impact", sub: "Cohort / Case-Control / OR / RR & AR, AR%, PAR, PAR%" },
     EP5: { short: "Disease Surveillance & Outbreak Investigation", sub: "Passive/Active รง.506 · Median 5 ปี · Epi Curve & Attack Rate" },
     EP6: { short: "Measures of Morbidity & Mortality", sub: "ความชุก อุบัติการณ์ อัตราตาย DALY & Standardization" },
