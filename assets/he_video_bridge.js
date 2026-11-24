@@ -23,7 +23,7 @@
       durationLabel: "04:38",
       shortTH: "แนะนำภาพรวมชุดสื่อเศรษฐศาสตร์สาธารณสุขและประกันสุขภาพ",
       shortEN: "Course Overview: Health Economics & Health Financing",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he00-overview",
@@ -48,7 +48,7 @@
       durationLabel: "23:33",
       shortTH: "หลักการพื้นฐานทางเศรษฐศาสตร์สาธารณสุขและการวิเคราะห์ต้นทุน",
       shortEN: "Basic Principles of Health Economics & Cost Analysis",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he01-what",
@@ -161,7 +161,7 @@
       durationLabel: "27:21",
       shortTH: "การประเมินทางเศรษฐศาสตร์และการกำหนดชุดสิทธิประโยชน์ (HTA)",
       shortEN: "Economic Evaluation & Health Technology Assessment",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he02-what",
@@ -252,7 +252,7 @@
       durationLabel: "27:03",
       shortTH: "หลักการของการประกันสุขภาพ เงื่อนไขตลาดสมัครใจ และรูปแบบกองทุนภาคบังคับ",
       shortEN: "Principles of Health Insurance, Adverse Selection & Financing Models",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he03-certainty",
@@ -420,7 +420,7 @@
       durationLabel: "36:16",
       shortTH: "สามกองทุนหลักของไทย รูปแบบการจ่ายค่าบริการ และปัญหา Moral Hazard",
       shortEN: "Thai Schemes, Provider Payment Methods & Moral Hazard Containment",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he04-thai",
@@ -566,7 +566,7 @@
       durationLabel: "22:18",
       shortTH: "อภิปรายกรณีศึกษา: การร่วมจ่ายในกลุ่มเปราะบาง และหลักฐานเชิงประจักษ์ CSMBS",
       shortEN: "Case Discussions: Co-payment Guardrails & CSMBS Empirical Evidence",
-      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ กิจพัฒนาสมบัติ",
+      speakers: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย",
       chapters: [
         {
           id: "he05-copay",

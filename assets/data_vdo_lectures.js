@@ -121,25 +121,27 @@
     },
     HS6: {
       code: "HS6",
-      title: "VDO Lecture · หลักการและองค์ประกอบของการประกันสุขภาพ และการคลังสุขภาพ",
-      uploaded: false,
-      statusLabel: "รอแขวน VDO",
-      statusEn: "Awaiting VDO",
-      stylePreset: "vdo-studio-pending",
-      videoUrl: "",
-      externalUrl: "",
-      durationLabel: "",
-      lecturer: "อ.นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · อ.นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
-      note: "รอแขวน VDO บรรยายหลักประจำคาบ HS6 — ระหว่างรอสามารถรับชมคลิปบรรยายชุด Health Economics 00–05 (6 ตอนครบ) ด้านล่างได้ทันที",
+      title: "VDO Lecture · หลักการและองค์ประกอบของการประกันสุขภาพ และการคลังสุขภาพ (Health Economics & Financing ครบทั้ง 6 ตอน)",
+      uploaded: true,
+      readyLabel: "พร้อมรับชม Interactive Studio (6 ตอน)",
+      statusLabel: "พร้อมรับชม",
+      statusEn: "Interactive Studio Ready (6 Episodes)",
+      stylePreset: "vdo-studio-ready",
+      studioGlobalKey: "RACM303_HS6_VDO_STUDIO",
+      videoUrl: "assets/videos/he00.mp4",
+      externalUrl: "https://drive.google.com/drive/folders/1RqT-o4rvYE7DXf7bFU7HfPgue0vp49LW?usp=sharing",
+      durationLabel: "6 ตอน · 141:09 · 71 สไลด์",
+      lecturer: "อ. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์ · นพ.ภานุวิชญ์ แก้วกำจรชัย · อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์",
+      note: "เปิดรับชมวิดีโอบรรยาย HS6 ครบทั้ง 6 ตอน (HE00–HE05 · รวม 141 นาที 71 สไลด์) แบบ Interactive VDO Lecture Studio เต็มรูปแบบ (สลับตอน HE00–HE05 ทันที · เล่นตรงไม่ผ่าน YouTube · กรอ ±10s · ซับไตเติลไทย CC · คำพูดอาจารย์ Verbatim เลื่อนขึ้นอัตโนมัติ · Conceptualized + Logical Flow · ✓ Timeline Sync · หน้าต่างลอย PiP ย้ายและกางนิ้วย่อขยายได้)",
       slides: [],
       chapters: [],
       companionHeClips: [
-        { clipId: "HE00", startSec: 15, label: "HE 00 · Overview & Health System Financing Flow (00:15)" },
-        { clipId: "HE01", startSec: 40, label: "HE 01 · Uncertainty, Need vs Demand & Elasticity (00:40)" },
-        { clipId: "HE02", startSec: 1090, label: "HE 02 · Asymmetric Information & Supplier-Induced Demand (18:10)" },
-        { clipId: "HE03", startSec: 41, label: "HE 03 · Risk Pooling, Adverse Selection & Moral Hazard (00:41)" },
-        { clipId: "HE04", startSec: 36, label: "HE 04 · UHC Cube, Beveridge/SHI/PHI & Thai 3 Schemes (00:36)" },
-        { clipId: "HE05", startSec: 25, label: "HE 05 · Strategic Purchasing: FFS, Capitation, DRG & Global Budget (00:25)" }
+        { clipId: "HE00", startSec: 128, label: "HE 00 · เกณฑ์แพทยสภา & แผนผัง 5 โมดูล (02:08)" },
+        { clipId: "HE01", startSec: 258, label: "HE 01 · Allocative/Technical Efficiency, Equity & Opportunity Cost (04:18)" },
+        { clipId: "HE02", startSec: 982, label: "HE 02 · CUA (QALY), ICER ≤ 160,000 & ชุดสิทธิประโยชน์ UCS (16:22)" },
+        { clipId: "HE03", startSec: 936, label: "HE 03 · Risk Pooling, Adverse Selection & SHI vs General Tax (15:36)" },
+        { clipId: "HE04", startSec: 368, label: "HE 04 · 3 กองทุนไทย, FFS, DRGs (RW/CMI), Capitation & Moral Hazard (06:08)" },
+        { clipId: "HE05", startSec: 456, label: "HE 05 · กรณีศึกษาร่วมจ่ายบัตรทอง & กราฟจริง CSMBS OP/IP (07:36)" }
       ]
     }
   };
@@ -171,6 +173,9 @@
     var base = window.RACM_VDO_LECTURE_MANIFEST[code] || DEFAULT_MANIFEST[code] || DEFAULT_MANIFEST.HS1;
     var overrides = readLocalOverrides();
     var ov = overrides[code] || null;
+    if (base.studioGlobalKey && ov && !ov.videoUrl && !ov.externalUrl) {
+      ov = null;
+    }
     var merged = Object.assign({}, base, ov || {});
     var hasUrl = Boolean(String(merged.videoUrl || merged.externalUrl || "").trim());
     var isUploaded = Boolean(merged.uploaded || hasUrl);

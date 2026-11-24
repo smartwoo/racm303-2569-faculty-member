@@ -442,6 +442,7 @@
 
     // 1. Header Banner
     const pdfFilename = (DATA.meta.pdfDownloadPath || "").split("/").pop() || `${modCode}_Slides.pdf`;
+    const masterPdfFilename = (DATA.meta.masterPdfDownloadPath || "").split("/").pop() || `${standaloneCode || modCode}_Complete_Slides.pdf`;
     const badgeRightTxt = DATA.meta.examWeight
       ? `สอบ ${DATA.meta.examWeight}`
       : DATA.meta.sessionTag || "STEP 06 · VDO Lecture";
@@ -460,6 +461,7 @@
       </div>
       <div class="ep6-head-actions">
         ${DATA.meta.pdfDownloadPath ? `<a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="${esc(pdfFilename)}">📥 ดาวน์โหลดสไลด์ ${esc(modCode)} (.PDF)</a>` : ""}
+        ${DATA.meta.masterPdfDownloadPath ? `<a class="btn sm" href="${esc(DATA.meta.masterPdfDownloadPath)}" download="${esc(masterPdfFilename)}">📚 รวมครบ 6 ตอน (.PDF)</a>` : ""}
         <span class="ep6-protected-pill" title="สตรีมวิดีโอตรงประจำคาบเรียนสำหรับนักศึกษา RACM 303">🔒 สตรีมประจำคาบ ${esc(modCode)}</span>
       </div>
     `;
