@@ -1832,7 +1832,7 @@
           tooltip.hidden = false;
         }
         if (dragging) {
-          updateLiveUI(hoverSec, { forceCard: true });
+          updateLiveUI(hoverSec, { forceCard: true, skipAutoScroll: true });
         }
       });
       track.addEventListener("pointerup", (e) => {
@@ -1923,8 +1923,9 @@
 
     // Initial render
     renderAtlasBody();
+    syncTimelineSyncControls();
     applyWorkspaceLayout();
-    updateLiveUI(studioState.currentSec, { forceCard: true });
+    updateLiveUI(studioState.currentSec, { forceCard: true, skipAutoScroll: true });
     syncTransportButtons();
   }
 
