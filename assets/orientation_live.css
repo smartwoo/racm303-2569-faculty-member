@@ -5145,6 +5145,30 @@ html[data-role="faculty"] .or-keynote-progress-fill {
   }
 }
 
+/* Inline Sublists: Keep Numbered Markers & Content Together on the Same Line */
+.or-inline-sublist {
+  display: block;
+}
+
+.or-subitem {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: baseline;
+}
+
+.or-sub-sep {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.or-slide-canvas[data-io-theme="dark"] .or-sub-sep {
+  color: #64748b;
+}
+
+.or-num-keep {
+  white-space: nowrap;
+}
+
 /* True 16:9 Widescreen Print & PDF Export Rules (Zero Portrait A4 Clipping!) */
 @media print {
   .or-clicker-corner-hud,

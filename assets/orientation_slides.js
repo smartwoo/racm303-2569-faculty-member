@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261124tv1";
+  const ASSET_VER = "20261124tv2";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -420,27 +420,27 @@
           <div class="or-stack-col is-s05-stack" data-fit-group="cards">
             <div class="or-card is-white is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">1 · สุขภาพ ปัจจัยกำหนดสุขภาพ (SDH, CDoH) และการป้องกันโรค</span><span class="or-mini-chip">HS1</span></div>
-              <p class="or-card-text is-s05-text"><strong>1.1</strong> สุขภาพองค์รวม · <strong>1.2</strong> ปัจจัยกำหนดสุขภาพทางสังคมและพาณิชย์ · <strong>1.3</strong> ระดับการป้องกันโรคในคลินิกและชุมชน</p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>1.1</strong>&nbsp;สุขภาพองค์รวม</span><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>1.2</strong>&nbsp;ปัจจัยกำหนดสุขภาพ</span>ทางสังคมและพาณิชย์<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>1.3</strong>&nbsp;ระดับการป้องกันโรค</span>ในคลินิกและชุมชน</span></p>
             </div>
 
             <div class="or-card is-navy-tint is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">2 · ระบบสุขภาพและระบบบริการสุขภาพ (Health Service Systems)</span><span class="or-mini-chip">ST1 · HS2–3, 5–6</span></div>
-              <p class="or-card-text is-s05-text"><strong>2.1</strong> ระบบซับซ้อนและการคิดเชิงระบบ · <strong>2.2</strong> ระบบบริการ (<code>6BB/6W/PHC/UHC</code>) · <strong>2.3</strong> คุณลักษณะ <code>EQESaRR</code> · <strong>2.4</strong> วิจัยพัฒนาระบบ</p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>2.1</strong>&nbsp;ระบบซับซ้อน</span>และการคิดเชิงระบบ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.2</strong>&nbsp;ระบบบริการ</span>&nbsp;(<code>6BB/6W/PHC/UHC</code>)<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.3</strong>&nbsp;คุณลักษณะ</span>&nbsp;<code>EQESaRR</code><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>2.4</strong>&nbsp;วิจัยพัฒนาระบบ</span></span></p>
             </div>
 
             <div class="or-card is-amber-tint is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">3 · ศักยภาพชุมชนในการพัฒนาสุขภาพ (Community Potential)</span><span class="or-mini-chip">HS1 · HS5</span></div>
-              <p class="or-card-text is-s05-text"><strong>3.1</strong> ความหมายและองค์ประกอบของชุมชน · <strong>3.2</strong> บทบาททุนทางสังคม อสม. และองค์กรท้องถิ่นในการร่วมดูแลสุขภาพ</p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>3.1</strong>&nbsp;ความหมาย</span>และองค์ประกอบของชุมชน<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>3.2</strong>&nbsp;บทบาททุนทางสังคม</span> อสม. และองค์กรท้องถิ่นในการร่วมดูแลสุขภาพ</span></p>
             </div>
 
             <div class="or-card is-teal-tint is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">4 · การสร้างเสริมสุขภาพ (Health Promotion)</span><span class="or-mini-chip">HS4 · COM-B</span></div>
-              <p class="or-card-text is-s05-text"><strong>4.1</strong> แนวคิดการสร้างเสริมสุขภาพ · <strong>4.2</strong> กลยุทธ์ Ottawa Charter, HiAP และกรอบ <code>COM-B</code> · <strong>4.3</strong> การเชื่อมเข้ากับระบบบริการ</p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>4.1</strong>&nbsp;แนวคิด</span>การสร้างเสริมสุขภาพ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>4.2</strong>&nbsp;กลยุทธ์</span> Ottawa Charter, HiAP และกรอบ&nbsp;<code>COM-B</code><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>4.3</strong>&nbsp;การเชื่อมเข้ากับระบบบริการ</span></span></p>
             </div>
 
             <div class="or-card is-white is-s05-card">
               <div class="or-card-head-inline"><span class="or-card-kicker">5 · บทบาทแพทย์ในระบบสุขภาพ (Physician Roles in Health Systems)</span><span class="or-mini-chip">Applying HSS</span></div>
-              <p class="or-card-text is-s05-text"><strong>5.1</strong> บทบาทของแพทย์ในแต่ละระดับบริการ · <strong>5.2</strong> การประยุกต์สมรรถนะระบบสุขภาพร่วมกับทีมสหวิชาชีพและชุมชน</p>
+              <p class="or-card-text is-s05-text or-inline-sublist"><span class="or-subitem"><span class="or-num-keep"><strong>5.1</strong>&nbsp;บทบาทของแพทย์</span>ในแต่ละระดับบริการ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep"><strong>5.2</strong>&nbsp;การประยุกต์สมรรถนะ</span>ระบบสุขภาพร่วมกับทีมสหวิชาชีพและชุมชน</span></p>
             </div>
           </div>
         </div>
@@ -750,7 +750,7 @@
                 <td class="is-period-col"><strong>เช้า</strong></td>
                 <td colspan="5" rowspan="2" class="is-field-band">
                   <div class="or-sch-field-pill">วันที่ 9 – 20 ธันวาคม 2569 · ฝึกปฏิบัติงานภาคสนาม ณ โรงพยาบาลแหล่งฝึกและชุมชนทั้ง 9 พื้นที่ (7–9 คืน)</div>
-                  <div class="or-sch-field-sub"><strong>เดินทางกลับถึง:</strong> อุ้มผาง (ศ. 18 ธ.ค.) · กุฉินารายณ์, ด่านซ้าย, ตะกั่วป่า, ท่าวังผา, เพชรบูรณ์ 1–2, ท่าสองยาง (ส. 19 ธ.ค.) · อุบลรัตน์ (อา. 20 ธ.ค.)</div>
+                  <div class="or-sch-field-sub or-inline-sublist"><strong>เดินทางกลับถึง:</strong> <span class="or-subitem">อุ้มผาง (ศ.&nbsp;18&nbsp;ธ.ค.)<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">กุฉินารายณ์, ด่านซ้าย, ตะกั่วป่า, ท่าวังผา, เพชรบูรณ์&nbsp;1–2, ท่าสองยาง (ส.&nbsp;19&nbsp;ธ.ค.)<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">อุบลรัตน์ (อา.&nbsp;20&nbsp;ธ.ค.)</span></div>
                 </td>
               </tr>
               <tr>
@@ -897,12 +897,12 @@
                 <p class="or-card-text is-s07-note">มุ่งเน้นฝึกเชื่อมโยงทั้ง 5 วัตถุประสงค์สำหรับการนำเสนอทีม (ฟอร์ม 3A) และงานสะท้อนคิด โดยไม่ออกสอบข้อเขียน</p>
               </div>
               <div class="or-s07-chips-grid">
-                <span class="or-mini-chip is-s07-chip">1. ST1 ระบบซับซ้อนและการคิดเชิงระบบ (25 พ.ย.)</span>
-                <span class="or-mini-chip is-s07-chip">2. สุขภาพโลกและวิจัยระบบสุขภาพ (25 พ.ย.)</span>
-                <span class="or-mini-chip is-s07-chip">3. ระบบสุขภาพอำเภอและการมีส่วนร่วม (9 ธ.ค.)</span>
-                <span class="or-mini-chip is-s07-chip">4. แผนผังวงจรเหตุผล CLD (22 ธ.ค.)</span>
-                <span class="or-mini-chip is-s07-chip">5. วิเคราะห์ 6BB สุขภาวะข้างถนน (23 ธ.ค.)</span>
-                <span class="or-mini-chip is-s07-chip">6. นโยบายและเศรษฐศาสตร์การเมืองสุขภาพ (24 ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">1.&nbsp;ST1</span> ระบบซับซ้อนและการคิดเชิงระบบ (25&nbsp;พ.ย.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">2.&nbsp;สุขภาพโลก</span>และวิจัยระบบสุขภาพ (25&nbsp;พ.ย.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">3.&nbsp;ระบบสุขภาพอำเภอ</span>และการมีส่วนร่วม (9&nbsp;ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">4.&nbsp;แผนผังวงจรเหตุผล</span> CLD (22&nbsp;ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">5.&nbsp;วิเคราะห์&nbsp;6BB</span> สุขภาวะข้างถนน (23&nbsp;ธ.ค.)</span>
+                <span class="or-mini-chip is-s07-chip"><span class="or-num-keep">6.&nbsp;นโยบาย</span>และเศรษฐศาสตร์การเมืองสุขภาพ (24&nbsp;ธ.ค.)</span>
               </div>
             </div>
           </div>
@@ -1169,11 +1169,11 @@
                 <p class="or-card-text is-s11-sub is-teal-sub">ห้อง <code>2C2-01..03</code> · ครอบคลุม <strong>5 วัตถุประสงค์ระบบสุขภาพ</strong> (รวม 100%)</p>
               </div>
               <div class="or-stat-bar-list is-s11-bars">
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><strong>1.</strong> สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (<code>HS1</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><strong>2.</strong> ระบบบริการสุขภาพและคุณลักษณะ <code>EQESaRR</code></span><span>25%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:94%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><strong>3.</strong> ศักยภาพชุมชนในการร่วมพัฒนาสุขภาพ</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><strong>4.</strong> การสร้างเสริมสุขภาพและกรอบ <code>COM-B</code> (<code>HS4</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
-                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><strong>5.</strong> บทบาทแพทย์ในการทำงานร่วมกับระบบสุขภาพ</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:58%"></div></div></div>
+                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>1.</strong>&nbsp;สุขภาพ</span> ปัจจัยกำหนดสุขภาพ และการป้องกันโรค (<code>HS1</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
+                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>2.</strong>&nbsp;ระบบบริการสุขภาพ</span>และคุณลักษณะ <code>EQESaRR</code></span><span>25%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:94%"></div></div></div>
+                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>3.</strong>&nbsp;ศักยภาพชุมชน</span>ในการร่วมพัฒนาสุขภาพ</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
+                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>4.</strong>&nbsp;การสร้างเสริมสุขภาพ</span>และกรอบ <code>COM-B</code> (<code>HS4</code>)</span><span>20%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:76%"></div></div></div>
+                <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span><span class="or-num-keep"><strong>5.</strong>&nbsp;บทบาทแพทย์</span>ในการทำงานร่วมกับระบบสุขภาพ</span><span>15%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:58%"></div></div></div>
               </div>
               <div class="or-s11-foot-badge is-teal">
                 นำกระดาษ A4 เขียนสรุปด้วยลายมือตนเองเข้าห้องสอบได้ 1 แผ่น (หน้าและหลัง) งดสิ่งพิมพ์และสำเนา
@@ -1291,8 +1291,8 @@
           <div class="or-s14-right-stack">
             ${figPlate("orient_s14_safety_shields.png", "6 Fieldwork Safety and Professionalism Shields", "")}
             <div class="or-card is-white is-s14-shield-note" data-fit-solo="1">
-              <p class="or-card-text">
-                <strong>ระเบียบภาคสนาม พ.ศ. 2561:</strong> (1) <strong>งดนำรถยนต์หรือพาหนะส่วนตัวไปใช้</strong> · (2) <strong>งดออกนอกพื้นที่หรือเดินทางลำพัง</strong> · (3) งดให้บุคคลภายนอกเข้าเยี่ยมในที่พัก · (4) แต่งกายสุภาพและติดป้ายชื่อ · (5) <strong>งดเครื่องดื่มแอลกอฮอล์ สารเสพติด และการพนัน</strong> · (6) เคารพสิทธิผู้ป่วยและชุมชนในการสื่อสารออนไลน์
+              <p class="or-card-text or-inline-sublist">
+                <strong>ระเบียบภาคสนาม พ.ศ.&nbsp;2561:</strong> <span class="or-subitem"><span class="or-num-keep">(1)&nbsp;<strong>งดนำรถยนต์</strong></span><strong>หรือพาหนะส่วนตัวไปใช้</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep">(2)&nbsp;<strong>งดออกนอกพื้นที่</strong></span><strong>หรือเดินทางลำพัง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep">(3)&nbsp;งดให้บุคคลภายนอก</span>เข้าเยี่ยมในที่พัก<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep">(4)&nbsp;แต่งกายสุภาพ</span>และติดป้ายชื่อ<span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep">(5)&nbsp;<strong>งดเครื่องดื่มแอลกอฮอล์</strong></span> <strong>สารเสพติด และการพนัน</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem"><span class="or-num-keep">(6)&nbsp;เคารพสิทธิผู้ป่วย</span>และชุมชนในการสื่อสารออนไลน์</span>
               </p>
             </div>
           </div>
@@ -1357,8 +1357,8 @@
             <h3 class="or-card-title">พฤติกรรมไม่พึงประสงค์ (M / U) &amp; เพื่อนประเมิน</h3>
             <ul class="or-list">
               <li><strong>แบบประเมินจากเพื่อนในกลุ่ม:</strong> เป็นข้อมูลที่อาจารย์ใช้ประกอบการพิจารณาประเมินผลนักศึกษา</li>
-              <li><strong>ระดับ <code>M</code> (ควรปรับปรุง):</strong> สายเกิน 15 นาที <strong>4 ครั้ง</strong> · ขาดเรียนไม่ลา <strong>&ge; 2 ครั้ง</strong> · ส่งงานช้า <strong>2 ครั้ง</strong> <em>(ได้ M &ge; 2 หมวด หรือซ้ำหมวดเดิม &rarr; ปรับเป็น <strong>U</strong>)</em></li>
-              <li><strong>ระดับ <code>U</code> (ไม่ผ่าน):</strong> สาย <strong>&ge; 5 ครั้ง</strong> · ส่งงานช้า <strong>&ge; 3 ครั้ง</strong> · ไม่ซื่อสัตย์ (เซ็นชื่อแทนกัน/เมคข้อมูล/ลอกงาน) หรือฝ่าฝืนระเบียบภาคสนาม</li>
+              <li><strong>ระดับ <code>M</code> (ควรปรับปรุง):</strong> <span class="or-subitem">สายเกิน 15&nbsp;นาที <strong>4&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ขาดเรียนไม่ลา <strong>&ge;&nbsp;2&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ส่งงานช้า <strong>2&nbsp;ครั้ง</strong></span> <em>(ได้ M &ge;&nbsp;2&nbsp;หมวด หรือซ้ำหมวดเดิม &rarr; ปรับเป็น <strong>U</strong>)</em></li>
+              <li><strong>ระดับ <code>U</code> (ไม่ผ่าน):</strong> <span class="or-subitem">สาย <strong>&ge;&nbsp;5&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ส่งงานช้า <strong>&ge;&nbsp;3&nbsp;ครั้ง</strong><span class="or-sub-sep">&nbsp;·</span></span> <span class="or-subitem">ไม่ซื่อสัตย์ (เซ็นชื่อแทนกัน/เมคข้อมูล/ลอกงาน) หรือฝ่าฝืนระเบียบภาคสนาม</span></li>
             </ul>
           </div>
 
