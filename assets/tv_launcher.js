@@ -839,6 +839,15 @@
                 const cleanStaff = String(s.staffRef || "")
                   .replace(/\s*\[[^\]]*\]/g, "")
                   .trim();
+                const advThumbsHtml = Array.isArray(s.advisorList) && s.advisorList.length
+                  ? `<span style="display:inline-flex;align-items:center;flex-shrink:0">${s.advisorList
+                      .map((a, ai) =>
+                        a.localPhoto
+                          ? `<img src="${esc(a.localPhoto)}" alt="" loading="lazy" style="width:28px;height:36px;object-fit:cover;object-position:center 14%;border-radius:6px;border:1.5px solid rgba(255,215,102,0.92);box-shadow:0 2px 6px rgba(15,23,42,0.20);flex-shrink:0${ai > 0 ? ";margin-left:-5px" : ""}">`
+                          : ""
+                      )
+                      .join("")}</span>`
+                  : "";
                 const staffThumbHtml = s.staffHasLocalPhoto
                   ? `<img src="assets/photos/staff_${s.id}.jpg" alt="" loading="lazy" style="width:28px;height:36px;object-fit:cover;border-radius:6px;border:1.5px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(15,23,42,0.18);flex-shrink:0">`
                   : `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:36px;border-radius:6px;background:rgba(15,23,42,0.12);font-size:11px;font-weight:800;flex-shrink:0">${esc(s.staffInitials || "จนท")}</span>`;
@@ -853,7 +862,7 @@
                   <span class="tv-site-prov">${esc(s.province)}</span>
                 </span>
                 <span class="tv-site-mentor">
-                  <strong>${esc(t("อ.ประจำกลุ่ม:", "Advisor:"))}</strong> ${esc(s.advisors || "-")}${
+                  <span style="display:flex;align-items:center;gap:8px">${advThumbsHtml}<span><strong>${esc(t("อ.ประจำกลุ่ม:", "Advisor:"))}</strong> ${esc(s.advisors || "-")}</span></span>${
                   cleanStaff
                     ? `<span style="display:flex;align-items:center;gap:8px;margin-top:6px">${staffThumbHtml}<span><strong>${esc(t("ผู้ประสานงาน:", "Coordinator:"))}</strong> ${esc(cleanStaff)}</span></span>`
                     : ""

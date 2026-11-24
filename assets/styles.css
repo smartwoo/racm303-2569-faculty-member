@@ -38129,3 +38129,394 @@ html[data-theme="dark"] .ghp-staff-banner {
     height: 36px !important;
   }
 }
+
+
+/* ==========================================================================
+   Faculty Advisor Portrait Cards, Group Badges, Discussion Avatars & Print
+   ========================================================================== */
+.student-card.is-advisor-card {
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.96) 0%, #ffffff 64%);
+  border: 1.5px solid rgba(30, 64, 175, 0.36);
+  box-shadow: 0 8px 20px -8px rgba(30, 58, 138, 0.22);
+}
+
+html[data-role="faculty"] .student-card.is-advisor-card {
+  background: linear-gradient(180deg, rgba(254, 242, 242, 0.96) 0%, #ffffff 64%);
+  border-color: rgba(153, 27, 27, 0.36);
+  box-shadow: 0 8px 20px -8px rgba(153, 27, 27, 0.22);
+}
+
+html[data-theme="dark"] .student-card.is-advisor-card {
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.30) 0%, rgba(15, 23, 42, 0.94) 68%);
+  border-color: rgba(96, 165, 250, 0.42);
+}
+
+html[data-role="faculty"][data-theme="dark"] .student-card.is-advisor-card {
+  background: linear-gradient(180deg, rgba(153, 27, 27, 0.30) 0%, rgba(15, 23, 42, 0.94) 68%);
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.student-card.is-advisor-card .advisor-role-mono {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(30, 64, 175, 0.12);
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+html[data-role="faculty"] .student-card.is-advisor-card .advisor-role-mono {
+  background: rgba(153, 27, 27, 0.12);
+  color: #991b1b;
+}
+
+html[data-theme="dark"] .student-card.is-advisor-card .advisor-role-mono {
+  background: rgba(96, 165, 250, 0.20);
+  color: #93c5fd;
+}
+
+html[data-role="faculty"][data-theme="dark"] .student-card.is-advisor-card .advisor-role-mono {
+  background: rgba(248, 113, 113, 0.22);
+  color: #fca5a5;
+}
+
+.area-group-badges-row,
+.advisor-badges-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.advisor-coord-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 7px;
+  border-radius: 12px;
+  background: rgba(239, 246, 255, 0.96);
+  border: 1px solid rgba(30, 64, 175, 0.28);
+  flex-shrink: 0;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+html[data-role="faculty"] .advisor-coord-badge {
+  background: rgba(254, 242, 242, 0.96);
+  border-color: rgba(153, 27, 27, 0.28);
+}
+
+html[data-theme="dark"] .advisor-coord-badge {
+  background: rgba(30, 58, 138, 0.24);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+html[data-role="faculty"][data-theme="dark"] .advisor-coord-badge {
+  background: rgba(153, 27, 27, 0.24);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.advisor-coord-badge.is-zoomable {
+  cursor: pointer;
+}
+
+.advisor-coord-badge.is-zoomable:hover {
+  transform: translateY(-1px);
+  border-color: rgba(30, 64, 175, 0.58);
+  box-shadow: 0 6px 14px rgba(30, 58, 138, 0.15);
+}
+
+html[data-role="faculty"] .advisor-coord-badge.is-zoomable:hover {
+  border-color: rgba(153, 27, 27, 0.58);
+  box-shadow: 0 6px 14px rgba(153, 27, 27, 0.15);
+}
+
+.advisor-coord-avatar.student-portrait {
+  width: 40px !important;
+  height: 52px !important;
+  aspect-ratio: 3 / 4;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+}
+
+.advisor-coord-avatar.student-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 14%;
+}
+
+.student-card.is-advisor-card .student-portrait img {
+  object-position: center 14%;
+}
+
+.advisor-coord-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.24;
+  text-align: left;
+}
+
+.advisor-coord-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #1e40af;
+}
+
+html[data-role="faculty"] .advisor-coord-kicker {
+  color: #991b1b;
+}
+
+html[data-theme="dark"] .advisor-coord-kicker {
+  color: #93c5fd;
+}
+
+html[data-role="faculty"][data-theme="dark"] .advisor-coord-kicker {
+  color: #fca5a5;
+}
+
+.advisor-coord-lead {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink-strong, #0f172a);
+}
+
+html[data-theme="dark"] .advisor-coord-lead {
+  color: #f8fafc;
+}
+
+.advisor-coord-sub {
+  font-size: 11.2px;
+  color: var(--muted, #64748b);
+}
+
+.fm-mentor-avatars-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.fm-advisor-avatar.student-portrait {
+  width: 38px !important;
+  height: 50px !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 215, 102, 0.92);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.25);
+}
+
+.fm-advisor-avatar.student-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 14%;
+}
+
+.fm-advisor-avatar.student-portrait.is-zoomable {
+  cursor: zoom-in;
+}
+
+.gsorter-staff-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.gsorter-stu-chip.is-advisor-mini-chip {
+  background: rgba(239, 246, 255, 0.95);
+  border: 1px solid rgba(30, 64, 175, 0.32);
+}
+
+html[data-role="faculty"] .gsorter-stu-chip.is-advisor-mini-chip {
+  background: rgba(254, 242, 242, 0.95);
+  border-color: rgba(153, 27, 27, 0.32);
+}
+
+html[data-theme="dark"] .gsorter-stu-chip.is-advisor-mini-chip {
+  background: rgba(30, 58, 138, 0.28);
+  border-color: rgba(96, 165, 250, 0.38);
+}
+
+html[data-role="faculty"][data-theme="dark"] .gsorter-stu-chip.is-advisor-mini-chip {
+  background: rgba(153, 27, 27, 0.28);
+  border-color: rgba(248, 113, 113, 0.38);
+}
+
+.gsorter-stu-chip.is-advisor-mini-chip .gsorter-chip-avatar img {
+  object-position: center 14%;
+}
+
+.inst-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.inst-mini-av {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #1e293b;
+  flex-shrink: 0;
+  transition: transform 0.12s ease;
+}
+
+.inst-avatar-stack.is-pair .inst-mini-av + .inst-mini-av {
+  margin-left: -5px;
+}
+
+.inst-mini-av.is-zoomable {
+  cursor: zoom-in;
+}
+
+.inst-mini-av.is-zoomable:hover {
+  transform: scale(1.12);
+  z-index: 3;
+}
+
+.inst-mini-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 14%;
+  display: block;
+}
+
+.disc-hs-inst,
+.slot-inst,
+.cq-slot-inst {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.fm-coach-cell span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.ghp-advisor-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  border-radius: 8px;
+  background: rgba(239, 246, 255, 0.96);
+  border: 1px solid rgba(30, 64, 175, 0.26);
+}
+
+html[data-role="faculty"] .ghp-advisor-banner {
+  background: rgba(254, 242, 242, 0.96);
+  border-color: rgba(153, 27, 27, 0.26);
+}
+
+html[data-theme="dark"] .ghp-advisor-banner {
+  background: rgba(30, 58, 138, 0.26);
+  border-color: rgba(96, 165, 250, 0.34);
+}
+
+.site-card-people-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 4px;
+}
+
+.fapc-adv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+@media print {
+  body.print-students-mode .student-card.is-advisor-card {
+    display: none !important;
+  }
+  body.print-students-mode .print-heading {
+    padding-right: 0 !important;
+  }
+  body.print-students-mode .print-mentors-cluster {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 3px;
+  }
+  body.print-students-mode .print-mentors-cluster .staff-coord-badge.is-print-badge,
+  body.print-students-mode .print-mentors-cluster .advisor-coord-badge.is-print-badge {
+    position: static !important;
+    padding: 2px 7px 2px 3px !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  body.print-students-mode .print-mentors-cluster .advisor-coord-avatar {
+    width: 28px !important;
+    height: 36px !important;
+  }
+}
+
+.or-s09-adv-cell,
+.or-s08-inst-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34cqw;
+  vertical-align: middle;
+}
+
+.or-s08-inst-row {
+  margin-top: 0.16cqw;
+  font-size: calc(0.84cqw * var(--fit-scale, 1));
+  font-weight: 700;
+  color: #334155;
+}
+
+html[data-theme="dark"] .or-s08-inst-row {
+  color: #cbd5e1;
+}
+
+.or-s09-adv-av {
+  width: 1.48cqw;
+  height: 1.88cqw;
+  min-width: 16px;
+  min-height: 20px;
+  object-fit: cover;
+  object-position: center 14%;
+  border-radius: 0.26cqw;
+  border: 1px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+  flex-shrink: 0;
+}
+
+.or-s09-adv-av.is-overlap {
+  margin-left: -0.26cqw;
+}

@@ -769,6 +769,261 @@
     return chip;
   }
 
+  /* ---------- Faculty Advisor Portrait Helpers (9 Fieldwork Sites & 6 HS Discussion Groups) ---------- */
+  const FALLBACK_FACULTY_ADVISORS = [
+    { key: "ณัฐวุฒิ", slug: "nuttawut", name: "อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์", shortName: "อ.ณัฐวุฒิ", initials: "ณว", roleTH: "ประธานรายวิชา · อาจารย์ที่ปรึกษากลุ่ม 1 กุฉินารายณ์", localPhoto: "assets/photos/advisor_nuttawut.jpg", siteIds: [1] },
+    { key: "ฉัฐญาณ์", slug: "chathaya", name: "ผศ. พญ.ฉัฐญาณ์ วงศ์รัฐนันท์", shortName: "ผศ.ฉัฐญาณ์", initials: "ฉญ", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 2 ด่านซ้าย", localPhoto: "assets/photos/advisor_chathaya.jpg", siteIds: [2] },
+    { key: "วริษา", slug: "warisa", name: "อ. พญ.วริษา สุนทรวินิต", shortName: "อ.วริษา", initials: "วร", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 2 ด่านซ้าย", localPhoto: "assets/photos/advisor_warisa.jpg", siteIds: [2] },
+    { key: "ฉัตรชัย", slug: "chatchai", name: "อ. นพ.ฉัตรชัย อิ่มอารมย์", shortName: "อ.ฉัตรชัย", initials: "ฉช", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 3 ตะกั่วป่า", localPhoto: "assets/photos/advisor_chatchai.jpg", siteIds: [3] },
+    { key: "จักรกฤษณ์", slug: "jakkrit", name: "อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา", shortName: "อ.จักรกฤษณ์", initials: "จก", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 4 ท่าวังผา", localPhoto: "assets/photos/advisor_jakkrit.jpg", siteIds: [4] },
+    { key: "สัมฤทธิ์", slug: "samrit", name: "ผศ. นพ.สัมฤทธิ์ ศรีธำรงสวัสดิ์", shortName: "ผศ.สัมฤทธิ์", initials: "สร", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 5 เพชรบูรณ์ 1", localPhoto: "assets/photos/advisor_samrit.jpg", siteIds: [5] },
+    { key: "พีรสิชฌ์", slug: "peerasit", name: "นพ.พีรสิชฌ์ สิทธิรัตน์", shortName: "นพ.พีรสิชฌ์", initials: "พร", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 5 เพชรบูรณ์ 1", localPhoto: "assets/photos/advisor_peerasit.jpg", siteIds: [5] },
+    { key: "ปวินท์", slug: "pawin", name: "อ. นพ.ปวินท์ ศรีวิเชียร", shortName: "อ.ปวินท์", initials: "ปว", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 6 เพชรบูรณ์ 2", localPhoto: "assets/photos/advisor_pawin.jpg", siteIds: [6] },
+    { key: "ภูษิต", slug: "phusit", name: "อ. นพ.ภูษิต ประคองสาย", shortName: "อ.ภูษิต", initials: "ภษ", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 7 อุบลรัตน์", localPhoto: "assets/photos/advisor_phusit.jpg", siteIds: [7] },
+    { key: "วิชช์", slug: "wich", name: "ผศ. นพ.วิชช์ เกษมทรัพย์", shortName: "ผศ.วิชช์", initials: "วช", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 8 ท่าสองยาง", localPhoto: "assets/photos/advisor_wich.jpg", siteIds: [8] },
+    { key: "ภรัณยู", slug: "pharanyu", name: "นพ.ภรัณยู โอสถธนากร", shortName: "นพ.ภรัณยู", initials: "ภร", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 8 ท่าสองยาง", localPhoto: "assets/photos/advisor_pharanyu.jpg", siteIds: [8] },
+    { key: "เริงฤดี", slug: "roengrudee", name: "รศ. พญ.เริงฤดี ปธานวนิช", shortName: "รศ.เริงฤดี", initials: "รร", roleTH: "อาจารย์ที่ปรึกษากลุ่ม 9 อุ้มผาง", localPhoto: "assets/photos/advisor_roengrudee.jpg", siteIds: [9] },
+    { key: "สวนีย์", slug: "sawanee", name: "อ. พญ.สวนีย์ ศรีเจริญธรรม", shortName: "อ.สวนีย์", initials: "สว", roleTH: "อาจารย์ประจำหมวดระบาดวิทยาและสถิติ", localPhoto: "assets/photos/advisor_sawanee.jpg", siteIds: [] },
+    { key: "วิชัย", slug: "wichai", name: "ศ. นพ.วิชัย เอกพลากร", shortName: "ศ.วิชัย", initials: "วช", roleTH: "อาจารย์อาวุโสประจำภาควิชา · หมวดระบาดวิทยา", localPhoto: "assets/photos/advisor_wichai.jpg", siteIds: [] }
+  ];
+
+  function getFacultyCatalogList() {
+    const raw = Array.isArray(SCHED.facultyAdvisors) && SCHED.facultyAdvisors.length
+      ? SCHED.facultyAdvisors
+      : FALLBACK_FACULTY_ADVISORS;
+    return raw.map((item) => ({
+      key: item.key,
+      slug: item.slug,
+      name: item.name,
+      shortName: item.shortName || `อ.${item.key}`,
+      initials: item.initials || String(item.key || "อจ").slice(0, 2),
+      roleTH: item.roleTH || "อาจารย์ประจำรายวิชา RACM 303",
+      localSrc: item.localPhoto || (item.slug ? `assets/photos/advisor_${encodeURIComponent(item.slug)}.jpg` : ""),
+      hasPhoto: Boolean(item.localPhoto || item.slug),
+      siteIds: item.siteIds || []
+    }));
+  }
+
+  function getAdvisorInfoByKey(key) {
+    if (!key) return null;
+    const cleanKey = String(key).trim();
+    return getFacultyCatalogList().find((a) => a.key === cleanKey) || null;
+  }
+
+  function resolveInstructorsFromText(rawText) {
+    const str = String(rawText || "");
+    if (!str || str === "-") return [];
+    const catalog = getFacultyCatalogList();
+    const hits = [];
+    catalog.forEach((adv) => {
+      const idx = str.indexOf(adv.key);
+      if (idx !== -1) {
+        hits.push({ idx, adv });
+      }
+    });
+    hits.sort((a, b) => a.idx - b.idx);
+    return hits.map((h) => h.adv);
+  }
+
+  function getSiteAdvisorsInfo(siteOrArea) {
+    const site =
+      siteOrArea && typeof siteOrArea === "object"
+        ? siteOrArea
+        : (SCHED.fieldworkSites || []).find((x) => x.shortName === String(siteOrArea || ""));
+    if (!site) return [];
+    if (Array.isArray(site.advisorKeys) && site.advisorKeys.length) {
+      const mapped = site.advisorKeys.map((k) => getAdvisorInfoByKey(k)).filter(Boolean);
+      if (mapped.length) return mapped;
+    }
+    if (Array.isArray(site.advisorList) && site.advisorList.length) {
+      return site.advisorList.map((item) => getAdvisorInfoByKey(item.key) || {
+        key: item.key,
+        slug: item.slug,
+        name: item.name,
+        shortName: item.shortName || `อ.${item.key}`,
+        initials: item.initials || "อจ",
+        roleTH: `อาจารย์ที่ปรึกษากลุ่ม ${site.id} ${site.shortName}`,
+        localSrc: item.localPhoto || (item.slug ? `assets/photos/advisor_${encodeURIComponent(item.slug)}.jpg` : ""),
+        hasPhoto: Boolean(item.localPhoto || item.slug),
+        siteIds: [site.id]
+      });
+    }
+    return resolveInstructorsFromText(site.advisors || "");
+  }
+
+  function zoomAdvisorPhoto(advOrKey, contextSubtitle) {
+    const adv = typeof advOrKey === "string" ? getAdvisorInfoByKey(advOrKey) : advOrKey;
+    if (!adv || !adv.hasPhoto || !adv.localSrc) return;
+    const sub = contextSubtitle || adv.roleTH || "อาจารย์ประจำรายวิชา RACM 303";
+    const caption = `${adv.name} · ${sub}`;
+    openLightbox(adv.localSrc, caption);
+  }
+
+  function renderAdvisorCardElement(adv, site) {
+    if (!adv || !site) return document.createDocumentFragment();
+    const siteId = site.id;
+    const card = make("article", null, `student-card is-interactive is-advisor-card card-site-${siteId} chip-site-${siteId}`);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${adv.name} อาจารย์ที่ปรึกษาประจำกลุ่มพื้นที่ ${site.shortName}`);
+
+    const portraitWrap = make("div", null, "student-portrait-wrap");
+    const portrait = make("div", null, `student-portrait${state.showPhotos ? "" : " compact-avatar"}`);
+    if (adv.localSrc) portrait.dataset.localPhoto = adv.localSrc;
+    portrait.dataset.initials = adv.initials;
+    portrait.dataset.studentName = adv.name;
+    portrait.innerHTML = `<span class="avatar-monogram">${escapeHtml(adv.initials)}</span>`;
+    if (state.showPhotos && adv.hasPhoto) {
+      if (photoObserver) photoObserver.observe(portrait);
+      else mountStudentPhoto(portrait);
+    }
+    portraitWrap.appendChild(portrait);
+
+    const ctxLabel = `อาจารย์ที่ปรึกษาประจำกลุ่ม ${siteId}. ${site.shortName} (${site.hospital} ${site.province})`;
+    if (state.showPhotos && adv.hasPhoto) {
+      const zoomCornerBtn = make("button", null, "portrait-zoom-corner-btn");
+      zoomCornerBtn.type = "button";
+      zoomCornerBtn.title = tr("ขยายรูปถ่ายอาจารย์ที่ปรึกษา (Zoom In)", "Zoom in advisor photo");
+      zoomCornerBtn.setAttribute("aria-label", tr(`ขยายรูปถ่าย ${adv.name}`, `Zoom photo of ${adv.name}`));
+      zoomCornerBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
+      zoomCornerBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        zoomAdvisorPhoto(adv, ctxLabel);
+      });
+      portraitWrap.appendChild(zoomCornerBtn);
+    }
+
+    card.appendChild(portraitWrap);
+    card.appendChild(make("h3", adv.shortName, "stu-card-lead"));
+    card.appendChild(make("p", adv.name, "stu-card-paren"));
+    card.appendChild(make("p", tr("อาจารย์ที่ปรึกษาประจำกลุ่ม", "Group Advisor"), "sid-mono advisor-role-mono"));
+
+    const pillWrap = make("div", null, "s-area area-sub-pill-wrap");
+    pillWrap.innerHTML = `<span class="area-sub-pill area-site-${siteId}"><i class="area-dot"></i>${siteId}. ${escapeHtml(site.shortName)}</span>`;
+    card.appendChild(pillWrap);
+    card.appendChild(make("p", `${site.hospital}`, "disc-line"));
+
+    const hint = make(
+      "span",
+      adv.hasPhoto ? tr("ขยายรูปอาจารย์ ↗", "Zoom Photo ↗") : tr("อาจารย์ที่ปรึกษา", "Advisor"),
+      "student-quick-hint"
+    );
+    card.appendChild(hint);
+
+    card.addEventListener("click", () => {
+      if (adv.hasPhoto) zoomAdvisorPhoto(adv, ctxLabel);
+      else setSyncedFieldworkArea(site.shortName);
+    });
+    card.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        if (adv.hasPhoto) zoomAdvisorPhoto(adv, ctxLabel);
+      }
+    });
+    return card;
+  }
+
+  function renderAdvisorHeaderBadges(siteOrArea, compactPrint = false) {
+    const site =
+      siteOrArea && typeof siteOrArea === "object"
+        ? siteOrArea
+        : (SCHED.fieldworkSites || []).find((x) => x.shortName === String(siteOrArea || ""));
+    const advisors = getSiteAdvisorsInfo(site);
+    if (!site || !advisors.length) return null;
+
+    const cluster = make("div", null, `advisor-badges-cluster${compactPrint ? " is-print-cluster" : ""}`);
+    advisors.forEach((adv) => {
+      const ctxLabel = `อาจารย์ที่ปรึกษาประจำกลุ่ม ${site.id}. ${site.shortName} (${site.hospital} ${site.province})`;
+      const wrap = make("div", null, `advisor-coord-badge${adv.hasPhoto ? " is-zoomable" : ""}${compactPrint ? " is-print-badge" : ""}`);
+      const av = make("div", null, "advisor-coord-avatar student-portrait");
+      if (adv.localSrc) av.dataset.localPhoto = adv.localSrc;
+      av.dataset.initials = adv.initials;
+      av.dataset.studentName = adv.name;
+      av.innerHTML = `<span class="avatar-monogram">${escapeHtml(adv.initials)}</span>`;
+      if (adv.hasPhoto) mountStudentPhoto(av);
+
+      const meta = make("div", null, "advisor-coord-meta");
+      meta.innerHTML =
+        `<span class="advisor-coord-kicker">${escapeHtml(tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
+        `<strong class="advisor-coord-lead">${escapeHtml(adv.shortName)}</strong>` +
+        `<span class="advisor-coord-sub">${escapeHtml(adv.name)}</span>`;
+      wrap.append(av, meta);
+      if (adv.hasPhoto) {
+        wrap.title = tr(`คลิกเพื่อขยายรูปถ่าย ${adv.name}`, `Click to zoom photo of ${adv.name}`);
+        wrap.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          zoomAdvisorPhoto(adv, ctxLabel);
+        });
+      }
+      cluster.appendChild(wrap);
+    });
+    return cluster;
+  }
+
+  function renderAdvisorMiniChips(siteOrArea) {
+    const site =
+      siteOrArea && typeof siteOrArea === "object"
+        ? siteOrArea
+        : (SCHED.fieldworkSites || []).find((x) => x.shortName === String(siteOrArea || ""));
+    const advisors = getSiteAdvisorsInfo(site);
+    if (!site || !advisors.length) return [];
+    const ctxLabel = `อาจารย์ที่ปรึกษาประจำกลุ่ม ${site.id}. ${site.shortName} (${site.hospital} ${site.province})`;
+    return advisors.map((adv) => {
+      const chip = make("button", null, `gsorter-stu-chip is-advisor-mini-chip chip-site-${site.id}`);
+      chip.type = "button";
+      chip.title = `${adv.name} · ${ctxLabel}`;
+      const av = make("span", null, "gsorter-chip-avatar");
+      if (adv.localSrc) {
+        const img = document.createElement("img");
+        img.src = adv.localSrc;
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.onerror = () => {
+          av.textContent = adv.initials;
+        };
+        av.appendChild(img);
+      } else {
+        av.textContent = adv.initials;
+      }
+      const txt = make("span", null, "gsorter-chip-txt");
+      txt.innerHTML = `<strong class="chip-lead">${escapeHtml(adv.shortName)}</strong><small class="chip-paren">(${escapeHtml(adv.name)} · อ.ที่ปรึกษา)</small>`;
+      chip.append(av, txt);
+      chip.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (adv.hasPhoto) zoomAdvisorPhoto(adv, ctxLabel);
+      });
+      return chip;
+    });
+  }
+
+  function renderInstructorAvatarStackHtml(instructorStr, ctxNote) {
+    const matched = resolveInstructorsFromText(instructorStr);
+    if (!matched.length) return "";
+    const noteAttr = ctxNote ? ` data-zoom-advisor-ctx="${escapeHtml(ctxNote)}"` : "";
+    const thumbs = matched
+      .map((adv) =>
+        adv.localSrc
+          ? `<span class="inst-mini-av is-zoomable" data-zoom-advisor-key="${escapeHtml(adv.key)}"${noteAttr} title="${escapeHtml(adv.name + " (คลิกขยายรูป)")}"><img src="${escapeHtml(adv.localSrc)}" alt="${escapeHtml(adv.shortName)}" loading="lazy" decoding="async" /></span>`
+          : `<span class="inst-mini-av">${escapeHtml(adv.initials)}</span>`
+      )
+      .join("");
+    return `<span class="inst-avatar-stack${matched.length > 1 ? " is-pair" : ""}">${thumbs}</span>`;
+  }
+
+  if (typeof document !== "undefined" && !window.__racmAdvisorZoomDelegated) {
+    window.__racmAdvisorZoomDelegated = true;
+    document.addEventListener("click", (ev) => {
+      const btn = ev.target && ev.target.closest ? ev.target.closest("[data-zoom-advisor-key]") : null;
+      if (!btn) return;
+      ev.stopPropagation();
+      const key = btn.getAttribute("data-zoom-advisor-key") || "";
+      const ctx = btn.getAttribute("data-zoom-advisor-ctx") || "";
+      if (key) zoomAdvisorPhoto(key, ctx);
+    });
+  }
+
+
   /* ---------- Student Nickname Store, Live Sheet Sync & Display Formatter ---------- */
   const NICKNAME_OVERRIDES_KEY = "racm303_nicknames_v1";
   const SHEET_NICKNAMES_CACHE_KEY = "racm303_sheet_nicknames_v1";
@@ -4174,11 +4429,13 @@
     `;
     const fieldBtnWrap = make("div", null, "header-actions");
     fieldBtnWrap.style.marginTop = "8px";
+    const modalBadgesRow = make("div", null, "area-group-badges-row");
+    modalBadgesRow.style.marginTop = "8px";
+    const advBadgesInModal = renderAdvisorHeaderBadges(site);
     const staffBadgeInModal = renderStaffHeaderBadge(site);
-    if (staffBadgeInModal) {
-      staffBadgeInModal.style.marginTop = "8px";
-      fieldBox.appendChild(staffBadgeInModal);
-    }
+    if (advBadgesInModal) modalBadgesRow.appendChild(advBadgesInModal);
+    if (staffBadgeInModal) modalBadgesRow.appendChild(staffBadgeInModal);
+    if (modalBadgesRow.childNodes.length) fieldBox.appendChild(modalBadgesRow);
     const jumpFieldBtn = make("button", `ไปที่รายชื่อกลุ่มพื้นที่ ${s.area} →`, "btn sm");
     jumpFieldBtn.type = "button";
     jumpFieldBtn.addEventListener("click", () => {
@@ -4978,10 +5235,12 @@
         const metaP = make("p", null, "gsorter-teachers");
         metaP.textContent = `อ.ที่ปรึกษา: ${site.advisors || "-"} · ห้อง ${site.room} · ${site.datesTH}`;
         card.appendChild(metaP);
+        const advMinis = renderAdvisorMiniChips(site);
         const staffMini = renderStaffMiniChip(site);
-        if (staffMini) {
+        if (advMinis.length || staffMini) {
           const staffRow = make("div", null, "gsorter-staff-row");
-          staffRow.appendChild(staffMini);
+          advMinis.forEach((ch) => staffRow.appendChild(ch));
+          if (staffMini) staffRow.appendChild(staffMini);
           card.appendChild(staffRow);
         }
 
@@ -5148,7 +5407,8 @@
         <div class="disc-rot-slots" style="margin-top:10px">
           ${HS_SLOTS_META.map((m) => {
             const c = rot[m.mod] || {};
-            return `<div class="disc-rot-slot"><span class="slot-code">${escapeHtml(m.label)}</span><span class="slot-inst">${escapeHtml(c.instructor || "-")}</span><span class="slot-room${c.highlightRoom ? " room-changed" : ""}">ห้อง ${escapeHtml(c.room || rot.room || "-")}</span></div>`;
+            const avHtml = renderInstructorAvatarStackHtml(c.instructor, `กลุ่ม Discussion ที่ ${curGroupObj.id} · ${m.label}`);
+            return `<div class="disc-rot-slot"><span class="slot-code">${escapeHtml(m.label)}</span><span class="slot-inst">${avHtml}<span>${escapeHtml(c.instructor || "-")}</span></span><span class="slot-room${c.highlightRoom ? " room-changed" : ""}">ห้อง ${escapeHtml(c.room || rot.room || "-")}</span></div>`;
           }).join("")}
         </div>
       `;
@@ -5192,9 +5452,11 @@
         </div>
       `;
       const deckActs = banner.querySelector(".header-actions");
+      const deckAdvBadges = renderAdvisorHeaderBadges(site);
       const deckStaffBadge = renderStaffHeaderBadge(site);
-      if (deckActs && deckStaffBadge) {
-        deckActs.prepend(deckStaffBadge);
+      if (deckActs) {
+        if (deckStaffBadge) deckActs.prepend(deckStaffBadge);
+        if (deckAdvBadges) deckActs.prepend(deckAdvBadges);
       }
       slideCard.appendChild(banner);
 
@@ -5202,7 +5464,10 @@
       if (!members.length) {
         grid.appendChild(make("div", "ไม่มีสมาชิกในพื้นที่นี้ที่ตรงกับคำค้นหา", "empty-state"));
       } else {
-        if (!q) grid.appendChild(renderStaffCoordinatorCardElement(site));
+        if (!q) {
+          getSiteAdvisorsInfo(site).forEach((adv) => grid.appendChild(renderAdvisorCardElement(adv, site)));
+          grid.appendChild(renderStaffCoordinatorCardElement(site));
+        }
         members.forEach((s) => grid.appendChild(renderStudentCardElement(s, "fieldwork")));
       }
       slideCard.appendChild(grid);
@@ -5649,27 +5914,48 @@
     if (mentorValue) {
       const plaque = make("div", null, "fm-mentor-plaque");
       const stInfo = staffSite ? getStaffCoordinatorInfo(staffSite) : null;
-      if (stInfo) {
+      const advList = staffSite ? getSiteAdvisorsInfo(staffSite) : [];
+      if (stInfo || advList.length) {
         plaque.classList.add("has-staff-avatar");
-        const stAv = make("div", null, `fm-staff-avatar student-portrait${stInfo.hasPhoto ? " is-zoomable" : ""}`);
-        if (stInfo.localSrc) stAv.dataset.localPhoto = stInfo.localSrc;
-        if (stInfo.photoId) stAv.dataset.photoId = stInfo.photoId;
-        stAv.dataset.initials = stInfo.initials;
-        stAv.dataset.studentName = stInfo.displayFull;
-        stAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(stInfo.initials)}</span>`;
-        if (stInfo.hasPhoto) {
-          mountStudentPhoto(stAv);
-          stAv.title = tr(`คลิกขยายรูปถ่าย ${stInfo.displayFull}`, `Zoom photo of ${stInfo.displayFull}`);
-          stAv.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            zoomStaffPhoto(staffSite);
-          });
+        const avGroup = make("div", null, "fm-mentor-avatars-group");
+        advList.forEach((adv) => {
+          const advAv = make("div", null, `fm-advisor-avatar student-portrait${adv.hasPhoto ? " is-zoomable" : ""}`);
+          if (adv.localSrc) advAv.dataset.localPhoto = adv.localSrc;
+          advAv.dataset.initials = adv.initials;
+          advAv.dataset.studentName = adv.name;
+          advAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(adv.initials)}</span>`;
+          if (adv.hasPhoto) {
+            mountStudentPhoto(advAv);
+            advAv.title = tr(`คลิกขยายรูปถ่าย ${adv.name} (อาจารย์ที่ปรึกษา)`, `Zoom photo of ${adv.name}`);
+            advAv.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              zoomAdvisorPhoto(adv, `อาจารย์ที่ปรึกษากลุ่ม ${staffSite.id}. ${staffSite.shortName} (${staffSite.hospital})`);
+            });
+          }
+          avGroup.appendChild(advAv);
+        });
+        if (stInfo) {
+          const stAv = make("div", null, `fm-staff-avatar student-portrait${stInfo.hasPhoto ? " is-zoomable" : ""}`);
+          if (stInfo.localSrc) stAv.dataset.localPhoto = stInfo.localSrc;
+          if (stInfo.photoId) stAv.dataset.photoId = stInfo.photoId;
+          stAv.dataset.initials = stInfo.initials;
+          stAv.dataset.studentName = stInfo.displayFull;
+          stAv.innerHTML = `<span class="avatar-monogram">${escapeHtml(stInfo.initials)}</span>`;
+          if (stInfo.hasPhoto) {
+            mountStudentPhoto(stAv);
+            stAv.title = tr(`คลิกขยายรูปถ่าย ${stInfo.displayFull} (ผู้ประสานงาน)`, `Zoom photo of ${stInfo.displayFull}`);
+            stAv.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              zoomStaffPhoto(staffSite);
+            });
+          }
+          avGroup.appendChild(stAv);
         }
         const txtCol = make("div", null, "fm-mentor-text-col");
         txtCol.innerHTML =
           `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
           `<span class="fm-mentor-val">${escapeHtml(mentorValue)}</span>`;
-        plaque.append(stAv, txtCol);
+        plaque.append(avGroup, txtCol);
       } else {
         plaque.innerHTML =
           `<span class="fm-mentor-lbl">${escapeHtml(mentorLabel || tr("อาจารย์ที่ปรึกษา", "Advisor"))}</span>` +
@@ -5701,7 +5987,8 @@
       ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].forEach((mod) => {
         const cell = coachesRot[mod] || {};
         const item = make("div", null, "fm-coach-cell");
-        item.innerHTML = `<strong>${mod} · ${escapeHtml(cell.room || coachesRot.room || "")}</strong><span>${escapeHtml(cell.instructor || "-")}</span>`;
+        const avHtml = renderInstructorAvatarStackHtml(cell.instructor, `Discussion กลุ่มที่ ${coachesRot.group || ""} · คาบ ${mod}`);
+        item.innerHTML = `<strong>${mod} · ${escapeHtml(cell.room || coachesRot.room || "")}</strong><span>${avHtml}<span>${escapeHtml(cell.instructor || "-")}</span></span>`;
         cStrip.appendChild(item);
       });
       board.appendChild(cStrip);
@@ -5715,11 +6002,13 @@
         renderSiteGroupedMiniChips(sortedMembers, mosaic);
       } else {
         if (staffSite) {
+          const advChips = renderAdvisorMiniChips(staffSite);
           const stChip = renderStaffMiniChip(staffSite);
-          if (stChip) {
+          if (advChips.length || stChip) {
             const stWrap = make("div", null, "gsorter-staff-row");
             stWrap.style.marginBottom = "8px";
-            stWrap.appendChild(stChip);
+            advChips.forEach((ch) => stWrap.appendChild(ch));
+            if (stChip) stWrap.appendChild(stChip);
             chipBody.appendChild(stWrap);
           }
         }
@@ -6038,10 +6327,11 @@
     const items = ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].map((mod) => {
       const cell = r[mod] || {};
       const inst = escapeHtml(cell.instructor || "-");
+      const avHtml = renderInstructorAvatarStackHtml(cell.instructor, `Discussion กลุ่มที่ ${r.group || ""} · คาบ ${mod}`);
       const roomChangedBadge = cell.highlightRoom
         ? ` <span class="disc-bullet-room-flag">ห้อง ${escapeHtml(cell.room)}</span>`
         : "";
-      return `<li><span class="disc-hs-code">${mod}</span><span class="disc-hs-inst">${inst}${roomChangedBadge}</span></li>`;
+      return `<li><span class="disc-hs-code">${mod}</span><span class="disc-hs-inst">${avHtml}<span>${inst}</span>${roomChangedBadge}</span></li>`;
     });
     return `<ul class="disc-hs-bullets">${items.join("")}</ul>`;
   }
@@ -6151,6 +6441,35 @@
       const head = make("div", null, "ghp-head");
       head.innerHTML = headHtml;
       pop.appendChild(head);
+      if (areaName) {
+        const advInfos = getSiteAdvisorsInfo(areaName);
+        advInfos.forEach((adv) => {
+          const advRow = make("div", null, "ghp-advisor-banner");
+          const advAv = make("span", null, "ghp-avatar");
+          if (adv.localSrc) {
+            const img = document.createElement("img");
+            img.src = adv.localSrc;
+            img.alt = "";
+            img.loading = "lazy";
+            img.onerror = () => { advAv.textContent = adv.initials; };
+            advAv.appendChild(img);
+          } else {
+            advAv.textContent = adv.initials;
+          }
+          const advTxt = make("span", null, "ghp-txt");
+          advTxt.innerHTML = `<strong>${escapeHtml(adv.name)}</strong><small>อาจารย์ที่ปรึกษาประจำกลุ่ม ${escapeHtml(areaName)}</small>`;
+          advRow.append(advAv, advTxt);
+          if (adv.hasPhoto) {
+            advRow.style.cursor = "pointer";
+            advRow.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              pop.hidden = true;
+              zoomAdvisorPhoto(adv, `อาจารย์ที่ปรึกษาประจำกลุ่ม ${areaName}`);
+            });
+          }
+          pop.appendChild(advRow);
+        });
+      }
       if (areaName && !discId) {
         const stInfo = getStaffCoordinatorInfo(areaName);
         if (stInfo) {
@@ -6967,7 +7286,9 @@
       const cell = rot[slotMeta.mod] || {};
       const slot = make("div", null, "disc-rot-slot");
       slot.appendChild(make("span", slotMeta.label, "slot-code"));
-      slot.appendChild(make("span", cell.instructor || "-", "slot-inst"));
+      const instSpan = make("span", null, "slot-inst");
+      instSpan.innerHTML = `${renderInstructorAvatarStackHtml(cell.instructor, `กลุ่มอภิปรายที่ ${rot.group} · ${slotMeta.label}`)}<span>${escapeHtml(cell.instructor || "-")}</span>`;
+      slot.appendChild(instSpan);
       slot.appendChild(
         make("span", `ห้อง ${cell.room || rot.room}`, `slot-room${cell.highlightRoom ? " room-changed" : ""}`)
       );
@@ -7346,6 +7667,11 @@
           <p class="site-meta">${escapeHtml(site.travelNote)}</p>
           <div style="margin-top:6px">${friBadge}</div>
         `;
+        const peopleRow = make("div", null, "site-card-people-row");
+        renderAdvisorMiniChips(site).forEach((ch) => peopleRow.appendChild(ch));
+        const stChipCard = renderStaffMiniChip(site);
+        if (stChipCard) peopleRow.appendChild(stChipCard);
+        if (peopleRow.childNodes.length) c.appendChild(peopleRow);
 
         const actRow = make("div", null, "header-actions");
         actRow.style.marginTop = "10px";
@@ -7920,8 +8246,12 @@
         printHeading.appendChild(
           make("div", `อาจารย์ที่ปรึกษา: ${formatAdvisorWithCoordinator(activeSiteObj)} · ห้องกลุ่มย่อย: ${activeSiteObj.room} · ช่วงฝึก: ${activeSiteObj.datesTH}`)
         );
+        const pCluster = make("div", null, "print-mentors-cluster");
+        const pAdvBadges = renderAdvisorHeaderBadges(activeSiteObj, true);
         const pBadge = renderStaffHeaderBadge(activeSiteObj, true);
-        if (pBadge) printHeading.appendChild(pBadge);
+        if (pAdvBadges) pCluster.appendChild(pAdvBadges);
+        if (pBadge) pCluster.appendChild(pBadge);
+        if (pCluster.childNodes.length) printHeading.appendChild(pCluster);
       }
     }
 
@@ -7934,6 +8264,7 @@
       cardsEl.appendChild(make("div", "ไม่พบรายชื่อนักศึกษาในกลุ่มพื้นที่ภาคสนามตามเงื่อนไขที่เลือก", "empty-state"));
     } else {
       if (areaVal && activeSiteObj && !q) {
+        getSiteAdvisorsInfo(activeSiteObj).forEach((adv) => cardsEl.appendChild(renderAdvisorCardElement(adv, activeSiteObj)));
         cardsEl.appendChild(renderStaffCoordinatorCardElement(activeSiteObj));
       }
       let lastArea = null;
@@ -7949,11 +8280,16 @@
           );
           h.appendChild(hTextCol);
           if (siteObj) {
+            const badgesRow = make("div", null, "area-group-badges-row");
+            const hAdvBadges = renderAdvisorHeaderBadges(siteObj);
             const hBadge = renderStaffHeaderBadge(siteObj);
-            if (hBadge) h.appendChild(hBadge);
+            if (hAdvBadges) badgesRow.appendChild(hAdvBadges);
+            if (hBadge) badgesRow.appendChild(hBadge);
+            if (badgesRow.childNodes.length) h.appendChild(badgesRow);
           }
           cardsEl.appendChild(h);
           if (siteObj && !q) {
+            getSiteAdvisorsInfo(siteObj).forEach((adv) => cardsEl.appendChild(renderAdvisorCardElement(adv, siteObj)));
             cardsEl.appendChild(renderStaffCoordinatorCardElement(siteObj));
           }
         }
@@ -28557,7 +28893,7 @@
           row.innerHTML =
             `<span class="cq-slot-mod">${mod}</span>` +
             `<strong class="cq-slot-rm${cell.highlightRoom ? " is-changed" : ""}">ห้อง ${escapeHtml(cell.room || rotObj.room)}</strong>` +
-            `<span class="cq-slot-inst">${escapeHtml(cell.instructor || "-")}</span>`;
+            `<span class="cq-slot-inst">${renderInstructorAvatarStackHtml(cell.instructor, `กลุ่มที่ ${s.disc} · คาบ ${mod}`)}<span>${escapeHtml(cell.instructor || "-")}</span></span>`;
           slotGrid.appendChild(row);
         });
         stage.appendChild(slotGrid);
@@ -28597,6 +28933,9 @@
 
       const mates = ROSTER.students.filter((st) => st.area === s.area).sort((a, b) => compareTH(a.id, b.id));
       const mosaic = make("div", null, "gsorter-avatar-mosaic cq-teammates-mosaic");
+      renderAdvisorMiniChips(siteObj).forEach((ch) => mosaic.appendChild(ch));
+      const cqStaffChip = renderStaffMiniChip(siteObj);
+      if (cqStaffChip) mosaic.appendChild(cqStaffChip);
       mates.forEach((m) => mosaic.appendChild(renderRosterMiniChip(m)));
       stage.appendChild(mosaic);
     } else {
@@ -36522,7 +36861,7 @@
                           <span class="fapc-meta">${s.count} คน · ${totalPages} หน้า · <a class="fapc-preview-lk" href="${escapeHtml(pdfHref)}" target="_blank" rel="noopener">เปิดดู ↗</a></span>
                         </div>
                         <div class="fapc-title">${escapeHtml(s.hospital)} <span class="fapc-prov">(${escapeHtml(s.province)})</span></div>
-                        <div class="fapc-adv">อ.ที่ปรึกษา: ${escapeHtml(s.advisors)}</div>
+                        <div class="fapc-adv fapc-adv-row">${renderInstructorAvatarStackHtml(s.advisors, `แฟ้มอาจารย์ที่ปรึกษากลุ่ม ${s.id} ${s.shortName}`)}<span>อ.ที่ปรึกษา: ${escapeHtml(s.advisors)}</span></div>
                         <div class="fapc-actions">
                           <a class="btn sm pdf-red" href="${escapeHtml(pdfHref)}" download="${escapeHtml(pdfDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ PDF">${pdfIco}Export as PDF</a>
                           <a class="btn sm docx-blue" href="${escapeHtml(docxHref)}" download="${escapeHtml(docxDl)}" title="ส่งออกแฟ้ม อ.ที่ปรึกษา กลุ่ม ${s.id} เป็นไฟล์ Microsoft Word (.docx)">${docxIco}Export as .docx</a>

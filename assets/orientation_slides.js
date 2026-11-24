@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261123sbp3";
+  const ASSET_VER = "20261124adv1";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -503,6 +503,7 @@
               <div>
                 <span class="or-card-kicker">STAGE 1 · ศ. 27 พ.ย. 69</span>
                 <h3 class="or-card-title">EP1–EP3 · การวินิจฉัยและอคติ</h3>
+                <div class="or-s08-inst-row"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /><span>อ. นพ.จักรกฤษณ์</span></div>
               </div>
               <p class="or-card-text"><strong>08.30–11.00 น.</strong> (<code>2A01</code> และ Zoom) ศึกษา Sens/Spec/PPV/LR และการจัดการอคติ ต่อด้วย<strong>แบบฝึกหัด 1–2 หลัง 11.00 น.</strong></p>
             </div>
@@ -511,6 +512,7 @@
               <div>
                 <span class="or-card-kicker">STAGE 2 · พ. 2 ธ.ค. 69</span>
                 <h3 class="or-card-title">EP4–EP5 · รูปแบบวิจัยและสอบสวนโรค</h3>
+                <div class="or-s08-inst-row"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /><span>อ. พญ.สวนีย์</span></div>
               </div>
               <p class="or-card-text"><strong>เรียนผสมผสาน (<code>2C2-03</code> และ Zoom):</strong> Cohort, Case-control, RR/OR/AR/PAR และการสอบสวนการระบาด ควบคู่<strong>แบบฝึกหัด 3–4</strong></p>
             </div>
@@ -519,6 +521,7 @@
               <div>
                 <span class="or-card-kicker">STAGE 3 · พฤ. 3 ธ.ค. 69</span>
                 <h3 class="or-card-title">EP6–EP9 · ภาระโรคและเวชปฏิบัติอิงหลักฐาน</h3>
+                <div class="or-s08-inst-row"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="อ.ปวินท์" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_wichai.jpg?v=${ASSET_VER}" alt="ศ.วิชัย" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="ผศ.ฉัฐญาณ์" loading="eager" decoding="async" /><span>อ.ปวินท์ · ศ.วิชัย · ผศ.ฉัฐญาณ์</span></div>
               </div>
               <p class="or-card-text"><strong>เรียนผสมผสาน (<code>2C2-03</code> และ Zoom):</strong> Incidence, Prevalence, DALYs, การสำรวจชุมชน และประเมินงานวิจัย RCT ควบคู่<strong>แบบฝึกหัด 5–6</strong></p>
             </div>
@@ -527,6 +530,7 @@
               <div>
                 <span class="or-card-kicker">STAGE 4 · 8 ถึง 30 ธ.ค. 69</span>
                 <h3 class="or-card-title">สอบทฤษฎี ฝึก SPSS และนำเสนอวิจัย</h3>
+                <div class="or-s08-inst-row"><img class="or-s09-adv-av" src="assets/photos/advisor_sawanee.jpg?v=${ASSET_VER}" alt="อ.สวนีย์" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="อ.จักรกฤษณ์" loading="eager" decoding="async" /><span>อ.สวนีย์ และทีมคณาจารย์</span></div>
               </div>
               <p class="or-card-text"><strong>8 ธ.ค.:</strong> เช้าสอบ <strong>Epi Exam</strong> บ่ายฝึก <strong>SPSS</strong> เพื่อเตรียมเก็บข้อมูลในพื้นที่จริงและนำเสนอผลงานวิจัยทีม (<code>ฟอร์ม 4A</code>) วันที่ 30 ธ.ค.</p>
             </div>
@@ -583,15 +587,15 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td><strong>1</strong></td><td><strong>รพร.กุฉินารายณ์</strong> จ.กาฬสินธุ์</td><td>20 คน</td><td>อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์</td><td><code>3B1-01</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>2</strong></td><td><strong>รพร.ด่านซ้าย</strong> จ.เลย</td><td>19 คน</td><td>ผศ. พญ.ฉัฐญาณ์ และ อ. พญ.วริษา</td><td><code>1C1-02</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
-                <tr><td><strong>3</strong></td><td><strong>รพ.ตะกั่วป่า</strong> จ.พังงา</td><td>18 คน</td><td>อ. นพ.ฉัตรชัย อิ่มอารมย์</td><td><code>3B1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>4</strong></td><td><strong>รพ.ท่าวังผา</strong> จ.น่าน</td><td>18 คน</td><td>อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา</td><td><code>3B1-06</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
-                <tr><td><strong>5</strong></td><td><strong>รพ.เพชรบูรณ์ (1)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td>รศ. ดร. นพ.ไพบูลย์ พิทยาเธียรอนันต์</td><td><code>1C1-04</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>6</strong></td><td><strong>รพ.เพชรบูรณ์ (2)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td>อ. นพ.ปวินท์ ศรีวิเชียร</td><td><code>1C1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
-                <tr><td><strong>7</strong></td><td><strong>รพ.อุบลรัตน์</strong> จ.ขอนแก่น</td><td>18 คน</td><td>อ. นพ.ภูษิต ประคองสาย</td><td><code>1C1-03</code></td><td>12–20 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
-                <tr><td><strong>8</strong></td><td><strong>รพ.ท่าสองยาง</strong> จ.ตาก</td><td>20 คน</td><td>ผศ. นพ.วิชช์ และ นพ.ภรัณยู</td><td><code>1C1-06</code></td><td>11–19 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
-                <tr><td><strong>9</strong></td><td><strong>รพ.อุ้มผาง</strong> จ.ตาก</td><td>20 คน</td><td>รศ. พญ.เริงฤดี ปธานวนิช</td><td><code>1C1-07</code></td><td>9–18 ธ.ค. 69 (ออกคืน 9 ธ.ค. 23.00)</td></tr>
+                <tr><td><strong>1</strong></td><td><strong>รพร.กุฉินารายณ์</strong> จ.กาฬสินธุ์</td><td>20 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_nuttawut.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์</span></span></td><td><code>3B1-01</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                <tr><td><strong>2</strong></td><td><strong>รพร.ด่านซ้าย</strong> จ.เลย</td><td>19 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_chathaya.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_warisa.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>ผศ. พญ.ฉัฐญาณ์ และ อ. พญ.วริษา</span></span></td><td><code>1C1-02</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
+                <tr><td><strong>3</strong></td><td><strong>รพ.ตะกั่วป่า</strong> จ.พังงา</td><td>18 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_chatchai.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>อ. นพ.ฉัตรชัย อิ่มอารมย์</span></span></td><td><code>3B1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                <tr><td><strong>4</strong></td><td><strong>รพ.ท่าวังผา</strong> จ.น่าน</td><td>18 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_jakkrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>อ. นพ.จักรกฤษณ์ เอื้อสุนทรวัฒนา</span></span></td><td><code>3B1-06</code></td><td>12–19 ธ.ค. 69 (7 คืน 8 วัน)</td></tr>
+                <tr><td><strong>5</strong></td><td><strong>รพ.เพชรบูรณ์ (1)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_samrit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_peerasit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>ผศ. นพ.สัมฤทธิ์ และ นพ.พีรสิชฌ์</span></span></td><td><code>1C1-04</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                <tr><td><strong>6</strong></td><td><strong>รพ.เพชรบูรณ์ (2)</strong> จ.เพชรบูรณ์</td><td>18 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_pawin.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>อ. นพ.ปวินท์ ศรีวิเชียร</span></span></td><td><code>1C1-05</code></td><td>10–19 ธ.ค. 69 (9 คืน 10 วัน)</td></tr>
+                <tr><td><strong>7</strong></td><td><strong>รพ.อุบลรัตน์</strong> จ.ขอนแก่น</td><td>18 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_phusit.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>อ. นพ.ภูษิต ประคองสาย</span></span></td><td><code>1C1-03</code></td><td>12–20 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
+                <tr><td><strong>8</strong></td><td><strong>รพ.ท่าสองยาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_wich.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><img class="or-s09-adv-av is-overlap" src="assets/photos/advisor_pharanyu.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>ผศ. นพ.วิชช์ และ นพ.ภรัณยู</span></span></td><td><code>1C1-06</code></td><td>11–19 ธ.ค. 69 (8 คืน 9 วัน)</td></tr>
+                <tr><td><strong>9</strong></td><td><strong>รพ.อุ้มผาง</strong> จ.ตาก</td><td>20 คน</td><td><span class="or-s09-adv-cell"><img class="or-s09-adv-av" src="assets/photos/advisor_roengrudee.jpg?v=${ASSET_VER}" alt="" loading="eager" decoding="async" /><span>รศ. พญ.เริงฤดี ปธานวนิช</span></span></td><td><code>1C1-07</code></td><td>9–18 ธ.ค. 69 (ออกคืน 9 ธ.ค. 23.00)</td></tr>
               </tbody>
             </table>
           </div>
