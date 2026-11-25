@@ -1,13 +1,13 @@
 /* ==========================================================================
    RACM 303 (2569) — Apple TV Aerial & Netflix Idle Screensaver Slide Engine
-   Reusable Multi-Panel Stage + Complete 16-Slide Deck for GLOBAL (25 Nov 2569)
+   Reusable Multi-Panel Stage + Complete 21-Slide Deck for GLOBAL (25 Nov 2569)
    Works seamlessly across Faculty Member (Red) and Student (Blue) Portals
    ========================================================================== */
 (function () {
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261125global11";
+  const ASSET_VER = "20261125global12";
   const IMG_DIR = "assets/images/panel_screensaver";
   const MODERATOR_PPTX_HREF =
     ROLE === "faculty" ? `exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx?v=${ASSET_VER}` : "";
@@ -465,7 +465,7 @@
               quote: "บ่มเพาะแพทย์รุ่นใหม่ให้มองเห็นทั้งคนไข้ตรงหน้าและโครงสร้างระบบสุขภาพที่โอบอุ้มสังคม"
             }
           ],
-          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 15",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 20",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) — แสดงครบทั้ง 6 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
@@ -603,7 +603,7 @@
               quote: "“We have no choice but to be hopeful — แต่ความหวังอย่างเดียวไม่พอ ต้องกล้าลงมือทำ”"
             }
           ],
-          footnote: "คลิกที่ภาพข่าว VOA / เวทีสาธารณะเพื่อขยายใหญ่ · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 15",
+          footnote: "คลิกที่ภาพข่าว VOA / เวทีสาธารณะเพื่อขยายใหญ่ · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 20",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: นพ.วิรุฬ ลิ้มสวาท หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข — รวมภาพชุด VOA Thai ทั้งผ่าตัดสมอง 2 ครั้ง ชุดครุย Harvard วิจัยชายแดน คลองเตยโมเดล และเวทีอากาศสะอาดครบในคลิกเดียว",
             bullets: [
@@ -719,7 +719,7 @@
               quote: "แพทย์ในฐานะ Change Agent ต้องสานพลังทุกภาคส่วนทั้งในและนอกระบบสุขภาพ เพื่อปกป้องอนาคตของเยาวชนร่วมกัน"
             }
           ],
-          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังสไลด์ถัดไป · อ้างอิงหน้า 15",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังสไลด์ถัดไป · อ้างอิงหน้า 20",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) — แสดงครบทั้ง 5 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
@@ -749,13 +749,13 @@
             { min: "00 – 15 นาที", title: "เปิดวงและเส้นทางวิทยากร", desc: "แนะนำหัวข้อ วัตถุประสงค์ LO 1–4 และเส้นทางอาชีพวิทยากรทั้ง 3 ท่าน" },
             { min: "15 – 71 นาที", title: "เสวนาแนวคำถาม Q1–Q4", desc: "สำรวจจุดเปลี่ยน มุมมองเชิงระบบ–โลก สมรรถนะ และโอกาสสำหรับแพทย์รุ่นใหม่", featured: true },
             { min: "71 – 131 นาที", title: "Live Q&A จากฟลอร์ (60 นาที)", desc: "สแกน QR ส่งคำถามสดจากฟลอร์ แลกเปลี่ยนมุมมองกับวิทยากรเต็มเวลา", featured: true },
-            { min: "131 – 150 นาที", title: "Q5 ข้อคิดฝากอนาคต & สะท้อนคิด", desc: "บทเรียนเข็มทิศวิชาชีพหลังฟังเสียงนักศึกษา (Q5) และตกผลึกก้าวถัดไปด้าน HSS & SBP" }
+            { min: "131 – 150 นาที", title: "Q5 · Key Takeaways & สะท้อนคิดปิดวง", desc: "ข้อคิดฝากอนาคต (Q5) สรุปแก่นการสะท้อนคิด & Learning Loops และบันทึกก้าวถัดไป" }
           ],
           moderatorNotes: {
-            lead: "เปิดประมาณ 3 นาที แนะนำไทม์ไลน์วิทยากรท่านละ ~4 นาที เดินคำถามหลัก Q1–Q4 ข้อละ ~14 นาที (นาที 15–71) → เปิดฟลอร์ Live Q&A เต็ม 60 นาที (นาที 71–131) → เชิญฝากข้อคิด Q5 (นาที 131–145) และสะท้อนคิดปิดวงนาที 145–150",
+            lead: "เปิดประมาณ 3 นาที แนะนำไทม์ไลน์วิทยากรท่านละ ~4 นาที เดินคำถามหลัก Q1–Q4 ข้อละ ~14 นาที (นาที 15–71) → เปิดฟลอร์ Live Q&A เต็ม 60 นาที (นาที 71–131) → เชิญฝากข้อคิด Q5 (นาที 131–142) → สรุป Key Takeaways 4 ภาพ (นาที 142–146) และสะท้อนคิดปิดวงนาที 146–150",
             bullets: [
               "สลับผู้ตอบคนแรกในแต่ละข้อ และเชิญทุกท่านเติมมุมมองตามความถนัดและประสบการณ์จริง",
-              "ลำดับใหม่: Q1 จุดเปลี่ยน → Q2 มุมมองเชิงระบบ/โลก/สิ่งแวดล้อม → Q3 สมรรถนะ → Q4 คำแนะนำ & โอกาส → Live Q&A จากฟลอร์ → Q5 ข้อคิดเข็มทิศวิชาชีพปิดท้าย",
+              "ลำดับ: Q1–Q4 → Live Q&A จากฟลอร์ (Slide 12) → Q5 ข้อคิดเข็มทิศวิชาชีพ (Slide 13) → Key Takeaways (Slides 14–18) → สะท้อนคิดปิดวง (Slide 19)",
               "หากเข้าใกล้นาที 71 ให้รวบคำถามต่อยอดเพื่อส่งเข้าช่วงสแกน QR Live Q&A บน Slide 12 เต็ม 60 นาที"
             ],
             refs: [
@@ -814,7 +814,7 @@
           },
           closingQuestion: {
             badge: "Q5 · Finale",
-            phase: "Slide 13 · Min 131–145 (After Q&A)",
+            phase: "Slide 13 · Min 131–142 (After Q&A)",
             targetSlideIdx: 12,
             en: "Closing Wisdom & Compass for Future Generations",
             th: "บทเรียนหลักและข้อคิดเข็มทิศวิชาชีพฝากถึงแพทย์รุ่นอนาคต หลังได้แลกเปลี่ยนกับนักศึกษาแพทย์"
@@ -822,7 +822,7 @@
           moderatorNotes: {
             lead: "ใช้สไลด์นี้ปูภาพรวมโครงคำถามสั้น ๆ ~1 นาที เพื่อให้นักศึกษาและวิทยากรเห็นจังหวะการเดินเรื่องร่วมกันก่อนเริ่ม Q1",
             bullets: [
-              "ชี้ให้เห็นว่าเราจะคุย 4 คำถามหลัก (Q1–Q4) ก่อน แล้วเปิดเวทีให้น้อง ๆ สแกน QR ส่งคำถามสดบน Slide 12 เต็มเวลา ก่อนปิดท้ายด้วย Q5 ข้อคิดฝากแพทย์รุ่นอนาคต",
+              "ชี้ให้เห็นว่าเราจะคุย 4 คำถามหลัก (Q1–Q4) ก่อน แล้วเปิดเวทีให้น้อง ๆ สแกน QR ส่งคำถามสดบน Slide 12 เต็มเวลา ก่อนปิดท้ายด้วย Q5 และ Key Takeaways",
               "ผู้ดำเนินรายการสามารถคลิกที่การ์ดแต่ละข้อบนหน้าจอเพื่อกระโดดไปยังสไลด์ข้อนั้นได้โดยตรง"
             ],
             refs: []
@@ -973,14 +973,14 @@
           kb: "kb-b",
           orbs: ["rgba(56,189,248,0.28)", "rgba(16,185,129,0.24)", "rgba(245,158,11,0.22)"],
           kicker: "แนวคำถามปิดท้ายหลังช่วง Q&A · คำถามข้อที่ 5 / 5",
-          kickerSub: "Closing Panel Question (หลังรับฟังคำถามจากฟลอร์) · นาทีที่ 131–145",
+          kickerSub: "Closing Panel Question (หลังรับฟังคำถามจากฟลอร์) · นาทีที่ 131–142",
           title: "Q5: ข้อคิดและบทเรียนสำคัญฝากถึงแพทย์รุ่นอนาคต",
           enHeading: "(Wisdom for Future Generations)",
           subQuestions: [
             "เมื่อมองย้อนกลับไปตลอดเส้นทางการทำงานและการเติบโตทางความคิดที่ผ่านมา อะไรคือ “บทเรียนสำคัญ” หรือข้อคิดหลัก ที่อาจารย์อยากฝากไว้ให้แก่นักศึกษาแพทย์รุ่นใหม่ เพื่อเป็นเข็มทิศในการดูแลผู้ป่วยและร่วมสร้างสรรค์สังคมด้วยจิตสาธารณะต่อไปในอนาคต?"
           ],
           moderatorNotes: {
-            lead: "นาทีที่ 131–145 (หลังจบช่วง Q&A จากนักศึกษา): เชิญทั้ง 3 ท่านฝากบทเรียนเข็มทิศวิชาชีพปิดท้ายท่านละ ~3–4 นาที ก่อนส่งเข้าสู่ช่วงสะท้อนคิดปิดวงนาทีที่ 145",
+            lead: "นาทีที่ 131–142 (หลังจบช่วง Q&A จากนักศึกษา): เชิญทั้ง 3 ท่านฝากบทเรียนเข็มทิศวิชาชีพปิดท้ายท่านละ ~3 นาที ก่อนสรุป Key Takeaways (Slides 14–18)",
             bullets: [
               "เชื่อมโยงเสียงคำถามของนักศึกษาเมื่อสักครู่เข้าสู่วัตถุประสงค์ข้อที่ 4: การมององค์รวมและการคิดเชิงระบบ ความใฝ่รู้ตลอดชีวิต คุณธรรมจริยธรรม และจิตสาธารณะเพื่อชุมชนและสังคม"
             ],
@@ -990,14 +990,148 @@
           }
         },
         {
-          id: "g-s12",
+          id: "g-kt00",
           num: "14",
-          navLabel: "14 · สะท้อนคิดปิดวง",
+          navLabel: "14 · Key Takeaways",
+          type: "takeaway-cover",
+          bg: "bg_05_compass_crossroads.jpg",
+          kb: "kb-a",
+          orbs: ["rgba(245,158,11,0.3)", "rgba(56,189,248,0.24)", "rgba(244,63,94,0.18)"],
+          kicker: "นาทีที่ 142–146 · SYNTHESIS BEFORE CLOSING REFLECTION",
+          title: "Key Takeaways",
+          subtitleEn: "Learning through Question-Asking & Self-Reflection for Personal Development",
+          subtitleTh: "สรุปกรอบการตั้งคำถามและสะท้อนคิดจากเวทีเสวนา ก่อนบันทึกพันธสัญญาส่วนตัวใน SRN 1",
+          roadmap: [
+            { num: "01", label: "What? · So What? · Now What?", targetSlideIdx: 14 },
+            { num: "02", label: "+ What If? (Hindsight → Foresight)", targetSlideIdx: 15 },
+            { num: "03", label: "Reflective Practice & Learning Loops", targetSlideIdx: 16 },
+            { num: "04", label: "Single · Double · Triple Loop", targetSlideIdx: 17 }
+          ],
+          moderatorNotes: {
+            lead: "นาทีที่ 142–146 (~4 นาที): ขอบคุณวิทยากรทั้ง 3 ท่าน แล้วชวนนักศึกษาสรุปเครื่องมือการเรียนรู้ผ่านการตั้งคำถามและสะท้อนคิด (Key Takeaways 4 ภาพ) เพื่อใช้ต่อยอดตลอดรายวิชา RACM 303 และบันทึก SRN 1",
+            bullets: [
+              "ชี้ให้เห็นว่าเรื่องเล่าของวิทยากรทั้ง 3 ท่านมีจุดร่วมสำคัญคือ ‘ความกล้าตั้งคำถาม’ และ ‘การสะท้อนคิดจนเปลี่ยนกรอบการมองปัญหา’"
+            ],
+            refs: []
+          }
+        },
+        {
+          id: "g-kt01",
+          num: "15",
+          navLabel: "15 · What–So What–Now What",
+          type: "takeaway-visual",
+          ktStep: 1,
+          ktTotal: 4,
+          bg: "bg_06_ripples_perspective.jpg",
+          kb: "kb-b",
+          orbs: ["rgba(6,182,212,0.28)", "rgba(245,158,11,0.2)", "rgba(15,23,42,0.5)"],
+          kicker: "KEY TAKEAWAYS · ภาพที่ 1 / 4 · Terry Borton Reflective Model",
+          titlePrefix: "Key Takeaway:",
+          title: "Learning through Question-Asking & Self-Reflection for Personal Development",
+          figImg: "kt_01_borton_what_sowhat_nowwhat.jpg",
+          matte: "dark",
+          captionTh: "3 คำถามหลักของการสะท้อนคิด: What? (เกิดอะไรขึ้นในอดีต) → So What? (ตีความหมายในปัจจุบัน) → Now What? (ก้าวต่อไปในอนาคต)",
+          sourceLabel: "Terry Borton (1970) · MODELTHINKERS.com",
+          sourceUrl: "https://modelthinkers.com/mental-model/what-so-what-now-what",
+          moderatorNotes: {
+            lead: "ภาพที่ 1/4 (~45 วินาที): กรอบสะท้อนคิดพื้นฐานของ Terry Borton — What? So What? Now What?",
+            bullets: [
+              "เชื่อมเส้นเวลา Past → Present → Future: สังเกตข้อเท็จจริงโดยยังไม่ด่วนตัดสิน (What?) → วิเคราะห์ความหมายและปัจจัยเบื้องหลัง (So What?) → เลือกก้าวปฏิบัติถัดไป (Now What?)"
+            ],
+            refs: [
+              { label: "ModelThinkers • What? So What? Now What?", url: "https://modelthinkers.com/mental-model/what-so-what-now-what" }
+            ]
+          }
+        },
+        {
+          id: "g-kt02",
+          num: "16",
+          navLabel: "16 · + What If? Foresight",
+          type: "takeaway-visual",
+          ktStep: 2,
+          ktTotal: 4,
+          bg: "bg_06_ripples_perspective.jpg",
+          kb: "kb-c",
+          orbs: ["rgba(99,102,241,0.26)", "rgba(245,158,11,0.22)", "rgba(56,189,248,0.22)"],
+          kicker: "KEY TAKEAWAYS · ภาพที่ 2 / 4 · Extending Reflection with Inquiry",
+          titlePrefix: "Key Takeaway:",
+          title: "Learning through Question-Asking & Self-Reflection for Personal Development",
+          figImg: "kt_02_pearson_what_if.jpg",
+          matte: "ice",
+          captionTh: "เติมคำถาม “What If?” เชื่อม Hindsight (Analysis) → Insight (Synthesis) → Foresight (Goals, Risk Plan & Strategy)",
+          sourceLabel: "© Garry Pearson OAM, 2022",
+          moderatorNotes: {
+            lead: "ภาพที่ 2/4 (~45 วินาที): ยกระดับด้วยคำถาม ‘What If?’ คั่นกลางระหว่างจังหวะสะท้อนคิด",
+            bullets: [
+              "หลังเห็น What? ให้ตั้งสมมติฐาน (What If? → Hypothesis) เพื่อสังเคราะห์ความเข้าใจ (So What? → Insight) แล้วถาม What If? อีกครั้งเพื่อออกแบบเป้าหมายและยุทธศาสตร์สู่อนาคต (Now What? → Foresight)"
+            ],
+            refs: []
+          }
+        },
+        {
+          id: "g-kt03",
+          num: "17",
+          navLabel: "17 · Learning Loops (3 ระดับ)",
+          type: "takeaway-visual",
+          ktStep: 3,
+          ktTotal: 4,
+          bg: "bg_03_border_anthropology.jpg",
+          kb: "kb-d",
+          orbs: ["rgba(16,185,129,0.26)", "rgba(56,189,248,0.24)", "rgba(245,158,11,0.2)"],
+          kicker: "KEY TAKEAWAYS · ภาพที่ 3 / 4 · Multi-Loop Reflective Practice",
+          titlePrefix: "Key Takeaway:",
+          title: "Reflective Practice & Learning Loops",
+          figImg: "kt_03_reflective_learning_loops.jpg",
+          matte: "paper",
+          captionTh: "เลือกความลึกของการเปลี่ยนแปลงจาก Now What?: Loop 1 Refine (แก้การกระทำ) · Loop 2 Reframe (รื้อกรอบคิด) · Loop 3 Relearn (เปลี่ยนบริบทและตัวตน)",
+          sourceLabel: "Borton (1970) · Argyris (1977) · Peschl (2007)",
+          moderatorNotes: {
+            lead: "ภาพที่ 3/4 (~1 นาที): เชื่อม What? → So What? → Now What? เข้ากับความลึกของการเรียนรู้ 3 ระดับ (Single / Double / Triple-Loop Learning)",
+            bullets: [
+              "Loop 1 (Refine): ทำสิ่งเดิมให้ดีขึ้น · Loop 2 (Reframe): ทบทวนสมมติฐานและกรอบคิดเดิมเหมือนที่วิทยากรขยับจากข้างเตียงสู่ระบบ · Loop 3 (Relearn): ทบทวนตัวตนและบทบาทวิชาชีพแพทย์ในสังคม"
+            ],
+            refs: [
+              { label: "Argyris (1977) • Double-Loop Learning", url: "https://hbr.org/1977/09/double-loop-learning-in-organizations" }
+            ]
+          }
+        },
+        {
+          id: "g-kt04",
+          num: "18",
+          navLabel: "18 · Single·Double·Triple Loop",
+          type: "takeaway-visual",
+          ktStep: 4,
+          ktTotal: 4,
+          bg: "bg_07_lantern_purpose.jpg",
+          kb: "kb-a",
+          orbs: ["rgba(245,158,11,0.28)", "rgba(56,189,248,0.22)", "rgba(244,63,94,0.18)"],
+          kicker: "KEY TAKEAWAYS · ภาพที่ 4 / 4 · Mental Models & Meta-Learning",
+          titlePrefix: "Key Takeaway:",
+          title: "Learning through Question-Asking & Self-Reflection for Personal Development",
+          figImg: "kt_04_triple_loop_cartoon.jpg",
+          matte: "paper",
+          captionTh: "Single Loop ปรับกระบวนการ (Input → Output) · Double Loop ตั้งคำถามกับเป้าหมาย ทางเลือก และเหตุผล · Triple Loop ถอยกลับมาทบทวนตัวตนและวิธีเรียนรู้",
+          sourceLabel: "Source: karthik-suresh.com",
+          sourceUrl: "https://karthik-suresh.com/",
+          moderatorNotes: {
+            lead: "ภาพที่ 4/4 (~30 วินาที): ภาพจำสั้น ๆ ก่อนส่งเข้าสไลด์สะท้อนคิดปิดวง (Slide 19)",
+            bullets: [
+              "ชวนนักศึกษาถอยออกมาเป็นคนยืนมองก้อนเมฆความคิด (Triple Loop): วันนี้เราเข้าใจบทบาทแพทย์เปลี่ยนไปอย่างไร และจะลองก้าวเล็ก ๆ อะไรในครั้งหน้า"
+            ],
+            refs: [
+              { label: "Karthik Suresh • Single, Double & Triple Loop Learning", url: "https://karthik-suresh.com/" }
+            ]
+          }
+        },
+        {
+          id: "g-s12",
+          num: "19",
+          navLabel: "19 · สะท้อนคิดปิดวง",
           type: "reflection",
           bg: "bg_07_lantern_purpose.jpg",
           kb: "kb-d",
           orbs: ["rgba(251,191,36,0.28)", "rgba(56,189,248,0.22)", "rgba(16,185,129,0.22)"],
-          kicker: "นาทีที่ 145–150 · สะท้อนคิดและปิดวง",
+          kicker: "นาทีที่ 146–150 · สะท้อนคิดและปิดวง",
           kickerSub: "สิ่งที่ฉันจะลองทำครั้งหน้า (Personal Commitment to Action)",
           title: "“วันนี้คุณเข้าใจบทบาทแพทย์อย่างไร และอยากลองทำอะไรกับความเข้าใจนั้น?”",
           stem: "« ครั้งหน้า ฉันจะลอง… แล้วฟัง… เพื่อทบทวน »",
@@ -1016,8 +1150,8 @@
         },
         {
           id: "g-s13",
-          num: "15",
-          navLabel: "15 · หลักฐานประวัติ",
+          num: "20",
+          navLabel: "20 · หลักฐานประวัติ",
           type: "sources",
           bg: "bg_02_nahwa_to_world.jpg",
           kb: "kb-a",
@@ -1058,14 +1192,14 @@
         },
         {
           id: "g-s14",
-          num: "16",
-          navLabel: "16 · กรอบสะท้อนคิด",
+          num: "21",
+          navLabel: "21 · กรอบสะท้อนคิด",
           type: "sources",
           bg: "bg_06_ripples_perspective.jpg",
           kb: "kb-b",
           orbs: ["rgba(139,92,246,0.25)", "rgba(56,189,248,0.22)", "rgba(245,158,11,0.18)"],
           kicker: "ภาคผนวก 2 · กดที่ชื่อแหล่งเพื่อเปิดเอกสารต้นฉบับ",
-          kickerSub: "รากฐานแนวคิดที่ใช้ในการออกแบบลำดับคำถามของเวทีเสวนา",
+          kickerSub: "รากฐานแนวคิดที่ใช้ในการออกแบบลำดับคำถามและ Key Takeaways ของเวทีเสวนา",
           title: "กรอบสะท้อนคิดและแหล่งเอกสารประกอบ",
           columns: [
             {
@@ -1073,6 +1207,7 @@
               items: [
                 { label: "Borton (1970) • Reach, Touch and Teach", url: "https://archive.org/details/reachtouchteachs0000bort" },
                 { label: "University of Edinburgh • What? So what? Now what?", url: "https://reflection.ed.ac.uk/reflectors-toolkit/reflecting-on-experience/what-so-what-now-what" },
+                { label: "ModelThinkers • What? So What? Now What? (Terry Borton)", url: "https://modelthinkers.com/mental-model/what-so-what-now-what" },
                 { label: "IHI • 5 Whys ในบริบทการปรับปรุงคุณภาพ", url: "https://www.ihi.org/library/tools/5-whys-finding-root-cause" }
               ]
             },
@@ -1081,7 +1216,8 @@
               items: [
                 { label: "Argyris (1977) • Single และ Double-Loop Learning", url: "https://hbr.org/1977/09/double-loop-learning-in-organizations" },
                 { label: "Peschl (2007) • Triple-Loop Learning", url: "https://constructivist.info/2/2-3/136" },
-                { label: "Tosey และคณะ (2012) • นิยาม Triple Loop ในวรรณกรรม", url: "https://doi.org/10.1177/1350507611426239" }
+                { label: "Tosey และคณะ (2012) • นิยาม Triple Loop ในวรรณกรรม", url: "https://doi.org/10.1177/1350507611426239" },
+                { label: "Karthik Suresh • Single, Double & Triple Loop Learning", url: "https://karthik-suresh.com/" }
               ]
             },
             {
@@ -1147,6 +1283,7 @@
     deck.slides.forEach((sl) => {
       preloadImageOnce(sl.bg);
       preloadImageOnce(sl.dicutImg);
+      preloadImageOnce(sl.figImg);
       if (Array.isArray(sl.haloLogos)) {
         sl.haloLogos.forEach((hl) => preloadImageOnce(hl && hl.logo));
       }
@@ -1814,6 +1951,11 @@
       return;
     }
 
+    if (body.classList.contains("is-takeaway-mode")) {
+      modal.style.setProperty("--psv-fit-scale", "1");
+      return;
+    }
+
     if (window.innerWidth <= 960) {
       modal.style.setProperty("--psv-fit-scale", "1");
       return;
@@ -1862,8 +2004,10 @@
     }
 
     const isTimelineAll = Boolean(slide.type === "timeline" && Array.isArray(slide.milestones) && slide.milestones.length);
+    const isTakeaway = slide.type === "takeaway-cover" || slide.type === "takeaway-visual";
     modal.classList.toggle("is-multi-station-bg", isTimelineAll);
     modal.classList.toggle("is-qa-stage", slide.type === "qa");
+    modal.classList.toggle("is-takeaway-stage", isTakeaway);
 
     const multiWall = document.getElementById("psvMultiBgWall");
     if (multiWall) {
@@ -2427,6 +2571,89 @@
       `;
     }
 
+    if (slide.type === "takeaway-cover") {
+      const roadmapHtml = (slide.roadmap || [])
+        .map(
+          (rm) => `
+          <button type="button" class="psv-kt-roadmap-pill" data-psv-idx="${rm.targetSlideIdx}">
+            <span class="psv-kt-roadmap-num">${esc(rm.num)}</span>
+            <span>${esc(rm.label)}</span>
+          </button>
+        `
+        )
+        .join("");
+      return `
+        <div class="psv-kt-cover-card">
+          <div class="psv-kt-geo-side is-left" aria-hidden="true">
+            <svg viewBox="0 0 120 580" preserveAspectRatio="none">
+              <path d="M48,0 H120 V88 A60,57 0 0 1 0,88 V48 A48,48 0 0 1 48,0 Z" fill="rgba(245,158,11,0.74)"/>
+              <rect x="0" y="145" width="120" height="72" fill="rgba(251,191,36,0.32)"/>
+              <polygon points="54,290 120,364 54,364" fill="rgba(56,189,248,0.42)"/>
+              <rect x="0" y="364" width="54" height="74" fill="rgba(251,191,36,0.36)"/>
+              <path d="M0,438 A120,142 0 0 1 120,580 H0 Z" fill="rgba(245,158,11,0.7)"/>
+            </svg>
+          </div>
+          <div class="psv-kt-geo-side is-right" aria-hidden="true">
+            <svg viewBox="0 0 120 580" preserveAspectRatio="none">
+              <polygon points="120,0 120,144 0,144" fill="rgba(56,189,248,0.38)"/>
+              <rect x="0" y="216" width="120" height="74" fill="rgba(251,191,36,0.34)"/>
+              <path d="M0,290 H120 A120,146 0 0 1 0,436 Z" fill="rgba(245,158,11,0.74)"/>
+              <circle cx="60" cy="510" r="58" fill="rgba(56,189,248,0.34)"/>
+            </svg>
+          </div>
+          <span class="psv-kt-cover-kicker"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
+          <h2 class="psv-kt-cover-title">${esc(slide.title)}</h2>
+          ${slide.subtitleEn ? `<p class="psv-kt-cover-sub">${esc(slide.subtitleEn)}</p>` : ""}
+          ${slide.subtitleTh ? `<p class="psv-kt-cover-th">${esc(slide.subtitleTh)}</p>` : ""}
+          ${roadmapHtml ? `<div class="psv-kt-roadmap-strip">${roadmapHtml}</div>` : ""}
+        </div>
+      `;
+    }
+
+    if (slide.type === "takeaway-visual") {
+      const total = slide.ktTotal || 4;
+      const cur = slide.ktStep || 1;
+      const stepDots = Array.from({ length: total }, (_, idx) => {
+        const s = idx + 1;
+        const cls = s === cur ? " is-active" : s < cur ? " is-done" : "";
+        return `<span class="psv-kt-step-dot${cls}"></span>`;
+      }).join("");
+      const matteCls =
+        slide.matte === "dark"
+          ? "is-dark-matte"
+          : slide.matte === "ice"
+          ? "is-ice-matte"
+          : "is-paper-matte";
+      const srcHtml = slide.sourceLabel
+        ? slide.sourceUrl
+          ? `<a class="psv-kt-fig-src" href="${esc(slide.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span>${esc(slide.sourceLabel)}</span><span aria-hidden="true">↗</span></a>`
+          : `<span class="psv-kt-fig-src">${esc(slide.sourceLabel)}</span>`
+        : "";
+      return `
+        <div class="psv-kt-visual-head">
+          <div class="psv-kt-head-left">
+            <div class="psv-kt-kicker-line">
+              <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
+              <span class="psv-kt-step-dots" aria-hidden="true">${stepDots}</span>
+            </div>
+            <h2 class="psv-kt-visual-title">${
+              slide.titlePrefix ? `<span class="psv-kt-title-accent">${esc(slide.titlePrefix)}</span> ` : ""
+            }${esc(slide.title)}</h2>
+          </div>
+          <button type="button" class="psv-kt-zoom-btn" data-psv-act="zoom-takeaway-fig" title="คลิกเพื่อขยายแผนภาพเต็มจอ">🔍 ขยายเต็มจอ</button>
+        </div>
+        <div class="psv-kt-fig-bezel">
+          <div class="psv-kt-fig-canvas ${matteCls}" data-psv-act="zoom-takeaway-fig" title="คลิกเพื่อขยายแผนภาพเต็มจอ">
+            <img class="psv-kt-fig-img" src="${IMG_DIR}/${esc(slide.figImg)}?v=${ASSET_VER}" alt="${esc(slide.title)}" />
+          </div>
+          <div class="psv-kt-fig-foot">
+            <span class="psv-kt-fig-note">${esc(slide.captionTh || "")}</span>
+            ${srcHtml}
+          </div>
+        </div>
+      `;
+    }
+
     if (slide.type === "sources") {
       const colsHtml = (slide.columns || [])
         .map((col) => {
@@ -2922,6 +3149,7 @@
     if (slideBody) {
       slideBody.classList.toggle("is-railway-mode", Boolean(slide.type === "timeline" && slide.dicutImg));
       slideBody.classList.toggle("is-qa-live-mode", slide.type === "qa");
+      slideBody.classList.toggle("is-takeaway-mode", slide.type === "takeaway-cover" || slide.type === "takeaway-visual");
       slideBody.innerHTML = renderSlideInnerHtml(deck, slide);
       wireStudentInputs(deck);
       const activeStop = slideBody.querySelector(".psv-rail-stop.is-active");
@@ -3082,6 +3310,30 @@
             }${esc(m.quote)}</blockquote>`
           : ""
       }
+    `;
+    clearIdleTimer();
+    zoomModal.hidden = false;
+  }
+
+  function openTakeawayZoomLightbox() {
+    const sl = getCurrentSlide();
+    const zoomModal = document.getElementById("psvPinZoomModal");
+    const zoomCard = document.getElementById("psvPinZoomCard");
+    if (!sl || !sl.figImg || !zoomModal || !zoomCard) return;
+    const matteCls = sl.matte === "dark" ? " is-dark-matte" : "";
+    zoomCard.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="psv-station-pill">✨ ${esc(sl.kicker || "KEY TAKEAWAYS")}</span>
+          ${sl.sourceLabel ? `<span class="psv-station-role-tag">${esc(sl.sourceLabel)}</span>` : ""}
+        </div>
+        <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิดภาพขยาย (Esc)</button>
+      </div>
+      <h3 style="margin:0;font-size:clamp(18px,2vw,25px);font-weight:800;color:#fff;line-height:1.25">${esc(sl.title || "")}</h3>
+      <div class="psv-kt-zoom-full-box${matteCls}">
+        <img src="${IMG_DIR}/${esc(sl.figImg)}?v=${ASSET_VER}" alt="${esc(sl.title || "")}" />
+      </div>
+      ${sl.captionTh ? `<p style="margin:0;font-size:15px;line-height:1.5;color:#e2e8f0">${esc(sl.captionTh)}</p>` : ""}
     `;
     clearIdleTimer();
     zoomModal.hidden = false;
@@ -3289,6 +3541,8 @@
         const qList = getVisibleQaList(state.deckId);
         const curQ = qList[state.qaFocusIdx];
         if (curQ) hideFloorQuestion(state.deckId, curQ.id);
+      } else if (act === "zoom-takeaway-fig") {
+        openTakeawayZoomLightbox();
       } else if (act === "close-pin-zoom") {
         closePinZoomLightbox();
       } else if (act === "toggle-ambient") {

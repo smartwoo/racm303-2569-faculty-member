@@ -913,7 +913,7 @@
               <button type="button" class="tv-episode-card ${esc(s.tone)}" id="tvSfCard-${esc(s.id)}" data-sf-id="${esc(s.id)}" data-ep-num="0${s.order}" data-tv-focus data-tv-row="4">
                 <span class="tv-ep-top">
                   <span class="tv-ep-code">${esc(s.code)}</span>
-                  <span class="tv-ep-weight">${esc(s.id === "w1-d1-global" ? "🎬 16 Slides · Screensaver" : s.kind === "panel" ? "🎬 Screensaver · Panel" : s.code === "ST1" ? "🖥️ 16 Slides · Systems" : "Systems Workshop")}</span>
+                  <span class="tv-ep-weight">${esc(s.id === "w1-d1-global" ? "🎬 21 Slides · Screensaver" : s.kind === "panel" ? "🎬 Screensaver · Panel" : s.code === "ST1" ? "🖥️ 16 Slides · Systems" : "Systems Workshop")}</span>
                 </span>
                 <span class="tv-ep-bottom">
                   <span class="tv-ep-title">${esc(s.title)}</span>
@@ -2441,9 +2441,9 @@
             id: "sched:global-panel-slides",
             folderPath: ["schedule"],
             name: "02_RACM303_2569_GLOBAL_Panel_Screensaver_Slides_(บทบาทแพทย์และเส้นทางอาชีพ_16x9).pptx",
-            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (16 สไลด์ · Apple TV / Netflix Screensaver)",
+            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (21 สไลด์ · Apple TV / Netflix Screensaver)",
             sub: "วันพุธที่ 25 พ.ย. 2569 (13.30–17.00 น. · ห้อง 2C2-03) — นพ.ทักษพล, นพ.วิรุฬ, ศ.เกียรติคุณ พญ.สุวรรณา",
-            meta: "16 สไลด์ · Screensaver",
+            meta: "21 สไลด์ · Screensaver",
             badge: "🎬 เปิดสไลด์เสวนา",
             icoCls: "is-pptx",
             icoTxt: "🎬",
@@ -2838,9 +2838,9 @@
             id: "man:global-panel-slides",
             folderPath: ["manuals"],
             name: "02_RACM303_2569_GLOBAL_Panel_Screensaver_Slides_(บทบาทแพทย์และเส้นทางอาชีพ_16x9).pptx",
-            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (16 สไลด์ · Apple TV / Netflix Screensaver)",
+            title: "Slide เวทีเสวนา GLOBAL: บทบาทแพทย์และเส้นทางอาชีพ (21 สไลด์ · Apple TV / Netflix Screensaver)",
             sub: "วันพุธที่ 25 พ.ย. 2569 (13.30–17.00 น. · ห้อง 2C2-03) — นพ.ทักษพล, นพ.วิรุฬ, ศ.เกียรติคุณ พญ.สุวรรณา",
-            meta: "16 สไลด์ · Screensaver",
+            meta: "21 สไลด์ · Screensaver",
             badge: "🎬 เปิดสไลด์เสวนา",
             icoCls: "is-pptx",
             icoTxt: "🎬",
