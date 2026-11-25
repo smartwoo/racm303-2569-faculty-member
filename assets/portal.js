@@ -133,6 +133,14 @@
     hsdSplitTopPct: Math.min(78, Math.max(22, Number(localStorage.getItem("racm303_hsd_split_top_pct")) || 42)),
     hsdRoomConfirmed: sessionStorage.getItem("racm303_hsd_room_confirmed") === "1",
     hsdSessionJoined: sessionStorage.getItem("racm303_hsd_session_joined_v1") === "1",
+    hsdLockedRoomId:
+      window.RACM_HSD_ROOM_PAGE && Number(window.RACM_HSD_ROOM_PAGE.roomId) >= 1 && Number(window.RACM_HSD_ROOM_PAGE.roomId) <= 6
+        ? Math.floor(Number(window.RACM_HSD_ROOM_PAGE.roomId))
+        : 0,
+    hsdRequireQrCheckin: Boolean(
+      (window.RACM_HSD_ROOM_PAGE && window.RACM_HSD_ROOM_PAGE.requireCheckin) ||
+        new URLSearchParams(window.location.search).get("checkin") === "1"
+    ),
     hsdLobbyOpen: false,
     hsdHideScenario: false,
     hsdHideInlineQInScen: false,
@@ -1593,11 +1601,26 @@
     if (rawTab === "students") return "fieldwork";
     if (rawTab === "srn" || rawTab === "elearning") return "submissions";
     if (rawTab === "ep" || rawTab === "epi" || rawTab === "epidemiology") return "epidemiology";
+    const mRoomDirect = String(rawTab).match(/^(?:hs-discussion-)?(HS[1-6])-(?:R|room)([1-6])$/i);
+    if (mRoomDirect) {
+      const modUpper = mRoomDirect[1].toUpperCase();
+      const rNum = Number(mRoomDirect[2]);
+      state.hsdModule = modUpper;
+      state.hsdSlideDeckMod = modUpper;
+      state.hsdLockedRoomId = rNum;
+      state.hsdViewMode = "slide";
+      state.hsdDriveFolderOpen = false;
+      if (ROLE === "student") state.hsdRequireQrCheckin = true;
+      if (LIVE) LIVE.setRoom(rNum, false);
+      if ($("hsdModuleSelect")) $("hsdModuleSelect").value = state.hsdModule;
+      return "hs-discussion";
+    }
     const m = String(rawTab).match(/^hs-discussion-(HS[1-6])$/i);
     if (m) {
       const modUpper = m[1].toUpperCase();
       state.hsdModule = modUpper;
       state.hsdSlideDeckMod = modUpper;
+      if (!window.RACM_HSD_ROOM_PAGE) state.hsdLockedRoomId = 0;
       state.hsdDriveFolderOpen = false;
       if ($("hsdModuleSelect")) $("hsdModuleSelect").value = state.hsdModule;
       return "hs-discussion";
@@ -18262,6 +18285,20 @@
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
+    if (
+      curMod.code === "HS1" &&
+      window.RACM_HSD_ROOM_QR &&
+      typeof window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM === "function"
+    ) {
+      stage.appendChild(
+        window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM(curMod.code, {
+          myStudentDisc: state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0,
+          activeRoomId: LIVE ? LIVE.getRoomId() : 1,
+          onDownloadRoomPptx: (mCode, rId) => downloadSingleModulePptx(mCode, rId)
+        })
+      );
+    }
+
     // 2. Tactile Case & Opening Slide Tiles for Active Module
     const tilesGrid = make("div", null, "hs-atv-tiles-grid");
     const openTile = make("button", null, "tv-app-tile hs-atv-doc-tile");
@@ -20225,6 +20262,12 @@
   function logoutFromHsDiscussionSession() {
     state.hsdSessionJoined = false;
     state.hsdRoomConfirmed = false;
+    if (ROLE === "student" && (window.RACM_HSD_ROOM_PAGE || state.hsdLockedRoomId)) {
+      state.hsdRequireQrCheckin = true;
+    }
+    if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.clearStudentCheckin === "function") {
+      window.RACM_HSD_ROOM_QR.clearStudentCheckin();
+    }
     try {
       sessionStorage.removeItem("racm303_hsd_session_joined_v1");
       sessionStorage.removeItem("racm303_hsd_room_confirmed");
@@ -20522,17 +20565,23 @@
     const roomPills = make("div", null, "hsd-room-pills");
     roomPills.setAttribute("role", "group");
     roomPills.setAttribute("aria-label", "เลือกห้องอภิปราย 1–6");
-    const curRoom = LIVE.getRoomId();
+    const curRoom = state.hsdLockedRoomId || LIVE.getRoomId();
+    if (state.hsdLockedRoomId && LIVE.getRoomId() !== state.hsdLockedRoomId) {
+      LIVE.setRoom(state.hsdLockedRoomId, false);
+    }
     LIVE.rooms.forEach((rm) => {
+      if (state.hsdLockedRoomId && rm.id !== state.hsdLockedRoomId) return;
       const rb = make("button", `ห้อง ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
       rb.type = "button";
       rb.setAttribute("aria-pressed", rm.id === curRoom ? "true" : "false");
       rb.addEventListener("click", () => {
+        if (state.hsdLockedRoomId) return;
         LIVE.setRoom(rm.id, false);
         renderHsLiveClassroomBar();
         renderHsDiscussionContextBar();
         if (ROLE === "student") renderHsDiscussionView();
         if (ROLE === "faculty") {
+          renderHsDiscussionView();
           broadcastActiveFacultySlideToStudents(false);
           if (typeof refreshAllVisibleLiveWalls === "function") {
             refreshAllVisibleLiveWalls();
@@ -20542,6 +20591,17 @@
       roomPills.appendChild(rb);
     });
     left.appendChild(roomPills);
+
+    if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.openRoomQrZoomModal === "function") {
+      const qrTopBtn = make("button", `📱 QR เช็คชื่อห้อง ${curRoom}`, "hsd-tbtn");
+      qrTopBtn.type = "button";
+      qrTopBtn.title = "แสดง QR Code ประจำห้องเรียนนี้เพื่อให้นักศึกษาสแกนและใส่รหัส 3 ตัวท้าย Check-in";
+      qrTopBtn.addEventListener("click", () => {
+        const effMod = state.hsdModule && state.hsdModule !== "ALL" ? state.hsdModule : "HS1";
+        window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(effMod, curRoom);
+      });
+      left.appendChild(qrTopBtn);
+    }
 
     // Live Check-in 3-Team Roster Button (Both Faculty & Student)
     left.appendChild(buildKahootLobbyTriggerBtnDOM("hsd-kahoot-lobby-btn"));
@@ -24786,10 +24846,14 @@
     } else {
       u.searchParams.delete("module");
     }
+    const shareRoomId = state.hsdLockedRoomId || (LIVE ? LIVE.getRoomId() : 0);
+    if (shareRoomId >= 1 && shareRoomId <= 6) {
+      u.searchParams.set("room", String(shareRoomId));
+    }
     if (state.hsdLastSelectedQId) {
       u.searchParams.set("qid", state.hsdLastSelectedQId);
     }
-    u.hash = "hs-discussion";
+    u.hash = shareRoomId ? `hs-discussion-${state.hsdModule || "HS1"}-R${shareRoomId}` : "hs-discussion";
 
     // Open in a standard New Browser Tab (PowerPoint Reading View · ideal for Share Chrome Tab & Slide Show!)
     const pop = window.open(u.toString(), "_blank");
@@ -26912,25 +26976,42 @@
   function buildPptOpeningKahootSlideStageDOM(cur, slides, isProjected, exportOpts) {
     const exp = Boolean(exportOpts);
     const mod = cur.mod || { id: "HS1", code: "HS1", title: "" };
-    const modCases =
-      Array.isArray(cur.modCases) && cur.modCases.length
-        ? cur.modCases
-        : (HSD_DATA.cases || []).filter((c) => c.module === mod.id);
 
-    const roomId = LIVE
-      ? LIVE.getRoomId()
-      : state.myStudent && state.myStudent.disc
-      ? Number(state.myStudent.disc)
-      : 1;
+    const roomId =
+      (exportOpts && Number(exportOpts.roomId)) ||
+      state.hsdLockedRoomId ||
+      (LIVE
+        ? LIVE.getRoomId()
+        : state.myStudent && state.myStudent.disc
+        ? Number(state.myStudent.disc)
+        : 1);
+    if (LIVE && !exp && LIVE.getRoomId() !== roomId) {
+      LIVE.setRoom(roomId, true);
+    }
+
+    const qrApi = window.RACM_HSD_ROOM_QR || null;
+    const rMeta = qrApi
+      ? qrApi.getRoomMeta(mod.code, roomId)
+      : {
+          modCode: mod.code,
+          roomId,
+          roomCode: `1C1-0${roomId + 1}`,
+          instructor: "อาจารย์ประจำกลุ่มหมุนเวียน",
+          pinCode: `${mod.code}-R${roomId}`,
+          htmlFile: mod.code === "HS1" ? `hs1-room${roomId}.html` : "",
+          studentQrUrl: `https://smartwoo.github.io/racm303-2569-student/hs1-room${roomId}.html`,
+          displayShortUrl: `racm303-2569-student/hs1-room${roomId}.html`,
+          pptxFileName: `RACM303_2569_${mod.code}_Room${roomId}.pptx`
+        };
     const rot = (SCHED.hsRotation || []).find((r) => r.group === roomId) || {};
     const modCell = rot[mod.id] || {};
-    const roomCode = modCell.room || rot.room || `1C1-0${roomId + 1}`;
-    const instName = modCell.instructor || "อาจารย์ประจำกลุ่มหมุนเวียน";
+    const roomCode = modCell.room || rot.room || rMeta.roomCode || `1C1-0${roomId + 1}`;
+    const instName = modCell.instructor || rMeta.instructor || "อาจารย์ประจำกลุ่มหมุนเวียน";
     const pinCode = `${mod.code}-R${roomId}`;
 
     const jumpToFirstQuestion = () => {
       const firstIdx = slides.findIndex(
-        (s) => (s.kind === "case-scenario" || s.kind === "question") && s.mod.id === mod.id
+        (s) => (s.kind === "case-cover" || s.kind === "case-scenario" || s.kind === "question") && s.mod.id === mod.id
       );
       if (firstIdx >= 0) {
         state.hsdSlideIdx = firstIdx;
@@ -26950,163 +27031,185 @@
 
     const stage = make("div", null, "ppt-opening-kahoot-stage is-16x9-canvas");
 
-    // Left Column: Session Overview + Sub-Group 1/2/3 Balanced Check-in
+    // Left Column: Clean "Case Discussion: HS1" Title Card + Scannable Room QR Check-in Card
     const leftCol = make("div", null, "ppt-ok-left");
-    const agendaCard = make("div", null, "ppt-ok-card is-compact-agenda");
+    const cleanHeroCard = make("div", null, "ppt-ok-card is-clean-case-hero");
     const schedStr = mod.scheduleDate ? mod.scheduleDate.replace(/^วัน/, "") : "";
-    agendaCard.append(
+    cleanHeroCard.append(
       make(
         "span",
-        `สไลด์เปิดคาบ ${mod.code}${schedStr ? ` · ${schedStr}` : ""}${mod.discTime ? ` (${mod.discTime})` : ""}${mod.examWeight ? ` · สอบ ${mod.examWeight}` : ""}`,
+        `${schedStr ? `${schedStr}` : `คาบ ${mod.code}`}${mod.discTime ? ` (${mod.discTime})` : ""}${mod.examWeight ? ` · สอบ ${mod.examWeight}` : ""}`,
         "ppt-ok-kicker"
       ),
-      make("p", mod.summaryFocus || mod.title || "", "ppt-ok-summary")
-    );
-
-    const qListWrap = make("div", null, "ppt-ok-q-list");
-    let flatIdx = 0;
-    modCases.forEach((c) => {
-      (c.questions || []).forEach((qObj) => {
-        const curFlat = flatIdx;
-        flatIdx += 1;
-        const qBtn = make("button", null, "ppt-ok-q-btn");
-        qBtn.type = "button";
-        qBtn.innerHTML =
-          `<span><strong>${escapeHtml(getClearQuestionHeadingLabel(qObj, curFlat))}:</strong> ${escapeHtml(qObj.title)}</span>` +
-          `<span>▶</span>`;
-        qBtn.addEventListener("click", () => {
-          selectHsQuestionById(qObj.id, true, 1);
-          broadcastPptPresentationState();
-        });
-        qListWrap.appendChild(qBtn);
-      });
-    });
-    agendaCard.appendChild(qListWrap);
-
-    if (!exp && !state.isPptSlideSharePopup && ROLE === "faculty") {
-      const startBtn = make("button", `▶ เริ่มโจทย์ข้อแรกของคาบ ${mod.code} (Slide 2) →`, "ppt-ok-start-btn");
-      startBtn.type = "button";
-      startBtn.addEventListener("click", jumpToFirstQuestion);
-      agendaCard.appendChild(startBtn);
-    }
-    leftCol.appendChild(agendaCard);
-
-    // Card 2: Classroom Selector + Balanced 3-Group Check-in (กลุ่ม 1 / 2 / 3)
-    const checkinCard = make("div", null, "ppt-ok-card is-checkin-card");
-    const checkinHead = make("div", null, "ppt-ok-checkin-head");
-    checkinHead.appendChild(
+      make("h3", `Case Discussion: ${mod.code}`, "ppt-ok-clean-heading"),
       make(
-        "span",
-        ROLE === "faculty"
-          ? "เลือกห้องอภิปราย 1–6 & ติดตามการแบ่งกลุ่มย่อย 1 / 2 / 3"
-          : "เช็คชื่อด้วยเบอร์ 3 หลัก & เลือกเข้า กลุ่ม 1 / 2 / 3 (ตอบร่วมกันในกลุ่ม)",
-        "ppt-ok-roster-count"
+        "p",
+        `ห้องอภิปรายที่ ${roomId} · ห้อง ${roomCode} · อ.ประจำห้อง: ${instName}`,
+        "ppt-ok-clean-sub"
       )
     );
-    checkinCard.appendChild(checkinHead);
+    leftCol.appendChild(cleanHeroCard);
 
-    // Compact 6-Room Strip (auto-selected when student types their 3-digit number)
-    const roomPills = make("div", null, "ppt-ok-room-pills is-compact-strip");
-    const myGrp = state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0;
-    [1, 2, 3, 4, 5, 6].forEach((gNum) => {
-      const gRot = (SCHED.hsRotation || []).find((r) => r.group === gNum) || {};
-      const gCell = gRot[mod.id] || {};
-      const gRoom = gCell.room || gRot.room || `1C1-0${gNum + 1}`;
-      const pill = make("button", null, `ppt-ok-room-pill${roomId === gNum ? " is-active" : ""}`);
-      pill.type = "button";
-      pill.title = `ห้องอภิปรายที่ ${gNum} (${gRoom}) · ${gCell.instructor || "อ.ประจำห้อง"}`;
-      pill.innerHTML = `<span>ห้อง ${gNum}${myGrp === gNum ? " ★" : ""} · ${escapeHtml(gRoom)}</span>`;
-      pill.addEventListener("click", () => {
-        if (LIVE) LIVE.setRoom(gNum, false);
-        renderHsLiveClassroomBar();
-        renderHsDiscussionView();
-        broadcastPptPresentationState();
+    // Card 2: Dedicated Room QR Code + 3-Digit Student ID Check-in Card
+    const qrCard = make("div", null, "ppt-ok-card is-room-qr-checkin-card");
+
+    if (!state.hsdLockedRoomId && !window.RACM_HSD_ROOM_PAGE && !exp && !state.isPptSlideSharePopup) {
+      const roomPills = make("div", null, "ppt-ok-room-pills is-compact-strip");
+      const myGrp = state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0;
+      [1, 2, 3, 4, 5, 6].forEach((gNum) => {
+        const gRot = (SCHED.hsRotation || []).find((r) => r.group === gNum) || {};
+        const gCell = gRot[mod.id] || {};
+        const gRoom = gCell.room || gRot.room || `1C1-0${gNum + 1}`;
+        const pill = make("button", null, `ppt-ok-room-pill${roomId === gNum ? " is-active" : ""}`);
+        pill.type = "button";
+        pill.title = `สลับดู PPT & QR ห้องอภิปรายที่ ${gNum} (${gRoom}) · ${gCell.instructor || "อ.ประจำห้อง"}`;
+        pill.innerHTML = `<span>ห้อง ${gNum}${myGrp === gNum ? " ★" : ""} · ${escapeHtml(gRoom)}</span>`;
+        pill.addEventListener("click", () => {
+          if (LIVE) LIVE.setRoom(gNum, false);
+          renderHsLiveClassroomBar();
+          renderHsDiscussionView();
+          broadcastPptPresentationState();
+        });
+        roomPills.appendChild(pill);
       });
-      roomPills.appendChild(pill);
+      qrCard.appendChild(roomPills);
+    }
+
+    const qrSplit = make("div", null, "ppt-ok-qr-split");
+    const qrFrameBtn = make("button", null, "ppt-ok-qr-frame-btn");
+    qrFrameBtn.type = "button";
+    qrFrameBtn.title = `แตะเพื่อขยาย QR Code ประจำห้อง ${roomCode} เต็มจอ`;
+    const qrSvgHtml =
+      qrApi && typeof qrApi.buildQrSvg === "function"
+        ? qrApi.buildQrSvg(rMeta.studentQrUrl, "", `QR Check-in ${pinCode}`)
+        : "";
+    qrFrameBtn.innerHTML =
+      qrSvgHtml +
+      `<span class="ppt-ok-qr-zoom-hint">🔍 ขยาย QR ห้อง ${escapeHtml(roomCode)}</span>`;
+    if (!exp) {
+      qrFrameBtn.addEventListener("click", () => {
+        if (qrApi && typeof qrApi.openRoomQrZoomModal === "function") {
+          qrApi.openRoomQrZoomModal(mod.code, roomId);
+        }
+      });
+    }
+
+    const qrInfo = make("div", null, "ppt-ok-qr-info");
+    qrInfo.appendChild(make("span", `📱 QR CHECK-IN ประจำห้อง ${roomCode}`, "ppt-ok-qr-badge"));
+
+    const stepsWrap = make("div", null, "ppt-ok-qr-steps");
+    const step1 = make("div", null, "ppt-ok-qr-step");
+    step1.innerHTML =
+      `<span class="ppt-ok-qr-step-num">1</span>` +
+      `<span>สแกน <strong>QR Code ประจำห้อง ${escapeHtml(roomCode)}</strong> (${escapeHtml(rMeta.htmlFile || pinCode)})</span>`;
+    const step2 = make("div", null, "ppt-ok-qr-step");
+    step2.innerHTML =
+      `<span class="ppt-ok-qr-step-num">2</span>` +
+      `<span>ใส่ <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> (เช่น 056) เพื่อ <strong>Check-in</strong> &amp; เข้ากลุ่ม 1 / 2 / 3</span>`;
+    stepsWrap.append(step1, step2);
+    qrInfo.appendChild(stepsWrap);
+
+    const urlPill = make("div", `🔗 ${rMeta.displayShortUrl}`, "ppt-ok-qr-url-pill");
+    urlPill.title = rMeta.studentQrUrl;
+    qrInfo.appendChild(urlPill);
+
+    const stNow = getKahootRoomRosterStatus(roomId);
+    const maxPerTeam = Math.ceil(stNow.totalExpected / 3);
+    const facTeamsRow = make("div", null, "ppt-ok-fac-teams-row");
+    facTeamsRow.setAttribute("data-ppt-ok-fac-teams", "1");
+    [1, 2, 3].forEach((tid) => {
+      const cnt = (stNow.teamCounts && stNow.teamCounts[tid]) || 0;
+      const box = make("div", null, `ppt-ok-fac-team-stat is-team-${tid}`);
+      box.innerHTML = `<strong>กลุ่ม ${tid}</strong><span>${cnt} / ${maxPerTeam} คน</span>`;
+      facTeamsRow.appendChild(box);
     });
-    checkinCard.appendChild(roomPills);
+    qrInfo.appendChild(facTeamsRow);
+
+    qrSplit.append(qrFrameBtn, qrInfo);
+    qrCard.appendChild(qrSplit);
 
     if (!exp && !state.isPptSlideSharePopup) {
+      const bottomBar = make("div", null, "ppt-ok-qr-bottom-bar");
       if (ROLE === "student") {
         const myTeam = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
         if (state.hsdSessionJoined && state.myStudent && myTeam >= 1 && myTeam <= 3) {
           const s = state.myStudent;
           const sNo = String(s.id || "").slice(-3);
-          const joinedBanner = make("div", null, `ppt-ok-joined-banner is-team-${myTeam}`);
-          const jText = make("div", null, "ppt-ok-joined-info");
-          jText.innerHTML =
-            `<span class="hsd-tsb-pill is-team-${myTeam}">กลุ่ม ${myTeam}</span>` +
-            `<div><strong>✓ เบอร์ ${escapeHtml(sNo)} · ${escapeHtml(s.nickname ? `${s.nickname} (${s.fullName})` : s.fullName)}</strong>` +
-            `<small>ห้อง ${escapeHtml(roomCode)} · ตอบร่วมกันในใบงานกลางของกลุ่ม ${myTeam}</small></div>`;
-          const jActs = make("div", null, "ppt-ok-joined-actions");
+          const joinedInfo = make(
+            "span",
+            `✓ Check-in แล้ว: เบอร์ ${sNo} ${s.nickname || s.fullName} (กลุ่ม ${myTeam})`,
+            "ppt-ok-roster-count"
+          );
+          const actWrap = make("div", null, "ppt-ok-joined-actions");
           const openSheetBtn = make("button", `เปิดใบงานกลุ่ม ${myTeam} →`, "ppt-ok-join-cta");
           openSheetBtn.type = "button";
           openSheetBtn.addEventListener("click", jumpToFirstQuestion);
-          const switchIdBtn = make("button", "เปลี่ยนเบอร์/กลุ่ม", "btn sm");
+          const switchIdBtn = make("button", "เปลี่ยนรหัส 3 ตัว", "btn sm");
           switchIdBtn.type = "button";
           switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
-          jActs.append(openSheetBtn, switchIdBtn);
-          joinedBanner.append(jText, jActs);
-          checkinCard.appendChild(joinedBanner);
+          actWrap.append(openSheetBtn, switchIdBtn);
+          bottomBar.append(joinedInfo, actWrap);
         } else {
-          checkinCard.appendChild(
-            buildSmartTeamCheckinWidgetDOM({
-              roomId,
-              modId: mod.id,
-              onRoomChanged: () => {
-                renderHsDiscussionView();
-                broadcastPptPresentationState();
-              }
-            })
+          const checkinNowBtn = make(
+            "button",
+            `📲 กดใส่รหัสนักศึกษา 3 ตัวท้ายเพื่อ Check-in ห้อง ${roomCode} →`,
+            "ppt-ok-join-cta"
           );
+          checkinNowBtn.type = "button";
+          checkinNowBtn.addEventListener("click", () => {
+            state.hsdRequireQrCheckin = true;
+            renderHsDiscussionView();
+          });
+          bottomBar.appendChild(checkinNowBtn);
         }
       } else {
-        const stNow = getKahootRoomRosterStatus(roomId);
-        const maxPerTeam = Math.ceil(stNow.totalExpected / 3);
-        const facTeamsRow = make("div", null, "ppt-ok-fac-teams-row");
-        facTeamsRow.setAttribute("data-ppt-ok-fac-teams", "1");
-        [1, 2, 3].forEach((tid) => {
-          const cnt = (stNow.teamCounts && stNow.teamCounts[tid]) || 0;
-          const box = make("div", null, `ppt-ok-fac-team-stat is-team-${tid}`);
-          box.innerHTML = `<strong>กลุ่ม ${tid}</strong><span>${cnt} / ${maxPerTeam} คน</span>`;
-          facTeamsRow.appendChild(box);
+        const leftBtns = make("div", null, "ppt-ok-join-row");
+        const zoomQrBtn = make("button", "🔍 ขยาย QR", "btn sm");
+        zoomQrBtn.type = "button";
+        zoomQrBtn.addEventListener("click", () => {
+          if (qrApi && typeof qrApi.openRoomQrZoomModal === "function") {
+            qrApi.openRoomQrZoomModal(mod.code, roomId);
+          }
         });
-        checkinCard.appendChild(facTeamsRow);
 
-        const facRow = make("div", null, "ppt-ok-join-row");
-        const lobbyBtn = make("button", "เปิดผังสมาชิก 3 กลุ่ม ↗", "btn sm");
+        const lobbyBtn = make("button", "ผัง 3 กลุ่ม ↗", "btn sm");
         lobbyBtn.type = "button";
         lobbyBtn.addEventListener("click", () => openHsdKahootLobbyModal());
 
-        const goQ1Btn = make("button", "▶ เริ่มข้อแรกพร้อม Sync ทั้ง 3 กลุ่ม →", "ppt-ok-join-cta");
+        leftBtns.append(zoomQrBtn, lobbyBtn);
+
+        if (qrApi && typeof qrApi.exportRoomCheckinCsv === "function") {
+          const csvBtn = make("button", "📥 CSV เช็คชื่อ", "btn sm");
+          csvBtn.type = "button";
+          csvBtn.title = `ดาวน์โหลดรายชื่อนักศึกษาที่ Check-in ห้อง ${roomCode} (.csv)`;
+          csvBtn.addEventListener("click", () => qrApi.exportRoomCheckinCsv(mod.code, roomId));
+          leftBtns.appendChild(csvBtn);
+        }
+
+        const goQ1Btn = make("button", "▶ เริ่มโจทย์ข้อแรก →", "ppt-ok-join-cta");
         goQ1Btn.type = "button";
         goQ1Btn.addEventListener("click", jumpToFirstQuestion);
 
-        facRow.append(lobbyBtn, goQ1Btn);
-        checkinCard.append(
-          facRow,
-          make(
-            "div",
-            "นักศึกษากรอกเบอร์ 3 หลักแล้วเลือกเข้า กลุ่ม 1 / 2 / 3 (ระบบเกลี่ยจำนวนคนเท่ากันอัตโนมัติ) เพื่อตอบร่วมกัน 3 กลุ่มต่อห้อง",
-            "ppt-ok-caption"
-          )
-        );
+        bottomBar.append(leftBtns, goQ1Btn);
       }
+      qrCard.appendChild(bottomBar);
     }
-    leftCol.appendChild(checkinCard);
+
+    leftCol.appendChild(qrCard);
 
     // Right Column: Room PIN Hero + Real-Time 3-Team Badged Roster Wall
     const rightCol = make("div", null, "ppt-ok-right");
     const pinHero = make("div", null, "ppt-ok-pin-hero");
     const pinLeft = make("div");
     pinLeft.append(
-      make("div", `ROOM PIN · ห้องอภิปรายที่ ${roomId} (แบ่งกลุ่ม 1 · 2 · 3)`, "ppt-ok-pin-kicker"),
+      make("div", `ROOM ${roomId} PPT · ห้องอภิปรายที่ ${roomId} (QR CHECK-IN รหัส 3 ตัว)`, "ppt-ok-pin-kicker"),
       make("div", pinCode, "ppt-ok-pin-code")
     );
     const pinRight = make("div", null, "ppt-ok-pin-meta");
     pinRight.innerHTML =
       `<strong>ห้อง ${escapeHtml(roomCode)}</strong>` +
-      `<span>อ.ประจำห้อง (${escapeHtml(mod.code)}): ${escapeHtml(instName)}</span>`;
+      `<span>อ.ประจำห้อง (${escapeHtml(mod.code)}): ${escapeHtml(instName)}</span>` +
+      (rMeta.htmlFile ? `<span class="ppt-ok-pin-html-tag">${escapeHtml(rMeta.htmlFile)}</span>` : "");
     pinHero.append(pinLeft, pinRight);
     rightCol.appendChild(pinHero);
 
@@ -27595,7 +27698,7 @@
 
   function buildPptSlideSheetDOM(cur, slides, isProjected, exportOpts) {
     const exp = exportOpts || null;
-    if (cur && cur.kind === "opening-kahoot") {
+    if (cur && (cur.kind === "opening-kahoot" || cur.kind === "opening-room-qr")) {
       const sheet = make(
         "div",
         null,
@@ -27603,14 +27706,36 @@
       );
       sheet.dataset.pptFitZoom = "0.90";
 
+      const headRoomId =
+        Number(cur.roomId) ||
+        (exp && Number(exp.roomId)) ||
+        state.hsdLockedRoomId ||
+        (LIVE ? LIVE.getRoomId() : 1);
+      const headRot = (SCHED.hsRotation || []).find((r) => r.group === headRoomId) || {};
+      const headCell = headRot[cur.mod.id] || {};
+      const headRoomCode = headCell.room || headRot.room || `1C1-0${headRoomId + 1}`;
+      const headInst = headCell.instructor || "";
+
       const mHead = make("div", null, "ppt-slide-master-head");
       const mLeft = make("div", null, "ppt-sm-left");
       mLeft.append(
-        make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
-        make("h4", `อภิปรายกรณีศึกษาระบบสุขภาพ: ${cur.mod.title}`, "ppt-sm-title")
+        make("span", `คาบ ${cur.mod.code} · ห้อง ${headRoomId} (${headRoomCode})`, "ppt-sm-mod"),
+        make(
+          "h4",
+          `Case Discussion: ${cur.mod.code}${headInst ? ` — ห้อง ${headRoomCode} (${headInst})` : ""}`,
+          "ppt-sm-title"
+        )
       );
 
       const mRight = make("div", null, "ppt-sm-right");
+      if (!exp && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.openRoomQrZoomModal === "function") {
+        const qrHeadBtn = make("button", `📱 QR ห้อง ${headRoomCode}`, "ppt-sm-qpill");
+        qrHeadBtn.type = "button";
+        qrHeadBtn.addEventListener("click", () => {
+          window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(cur.mod.code, headRoomId);
+        });
+        mRight.appendChild(qrHeadBtn);
+      }
       if (!exp && slides.length > 1) {
         const nextFirstBtn = make("button", "เริ่มโจทย์ข้อแรก →", "ppt-sm-qpill is-current");
         nextFirstBtn.type = "button";
@@ -29249,11 +29374,14 @@
     return `<svg class="${extraCls || "gdrive-inline-ico"}" width="${sizePx}" height="${sizePx}" viewBox="0 0 87.3 78" aria-hidden="true" style="flex-shrink:0"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5c-.8 1.4-1.2 2.95-1.2 4.5h27.5z" fill="#00ac47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z" fill="#ea4335"/><path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="M73.4 26.5L60.7 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 53h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>`;
   }
 
-  function downloadSingleModulePptx(modId) {
+  function downloadSingleModulePptx(modId, roomIdOpt) {
+    const effRoom = Number(roomIdOpt) || Number(state.hsdLockedRoomId) || (LIVE ? LIVE.getRoomId() : 1) || 1;
     return exportHsdSlidesToNativePptx(
       {
         scope: "current",
         targetMod: modId,
+        roomId: effRoom,
+        explicitRoomDeck: Boolean(roomIdOpt || state.hsdLockedRoomId || modId === "HS1"),
         contentMode: ROLE === "faculty" && state.hsdFacultyMode !== "student" ? "key-unhide-all" : "student-draft",
         pageOrient: "landscape",
         gridId: "2x2",
@@ -29651,6 +29779,34 @@
       canvas.appendChild(chipsRow);
 
       const matchedMods = getMatchingModules();
+      if (
+        sec === "decks" &&
+        matchedMods.some((m) => m.id === "HS1") &&
+        window.RACM_HSD_ROOM_QR &&
+        typeof window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM === "function"
+      ) {
+        const hs1SixBox = window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM("HS1", {
+          role: ROLE,
+          onOpenRoomPpt: (rId) => {
+            closeHsdGoogleDrivePickerModal();
+            state.hsdModule = "HS1";
+            state.hsdSlideDeckMod = "HS1";
+            state.hsdLockedRoomId = rId;
+            state.hsdViewMode = "slide";
+            state.hsdDriveFolderOpen = false;
+            state.hsdSlideIdx = 0;
+            if (LIVE) LIVE.setRoom(rId, false);
+            if ($("hsdModuleSelect")) $("hsdModuleSelect").value = "HS1";
+            renderHsLiveClassroomBar();
+            renderHsDiscussionView();
+          },
+          onDownloadRoomPptx: (rId) => {
+            downloadSingleModulePptx("HS1", rId);
+          }
+        });
+        canvas.appendChild(hs1SixBox);
+      }
+
       const secHead = make("div", null, "gdrive-section-head");
       secHead.append(
         make(
@@ -30759,12 +30915,33 @@
     const scopeMod = cfg.scope === "all" ? "ALL" : cfg.targetMod || getActiveSlideSessionMod();
     const cases = (HSD_DATA.cases || []).filter((c) => scopeMod === "ALL" || c.module === scopeMod);
     const out = [];
+    const seenOpeningMods = new Set();
+    const effRoom = Number(cfg.roomId || state.hsdLockedRoomId || (LIVE ? LIVE.getRoomId() : 1)) || 1;
     cases.forEach((c) => {
       const mod = (HSD_DATA.modules || []).find((m) => m.id === c.module) || {
         id: c.module,
         code: c.module,
         title: ""
       };
+      if (
+        !seenOpeningMods.has(mod.id) &&
+        window.RACM_HSD_ROOM_QR &&
+        (cfg.scope !== "all" || mod.code === "HS1")
+      ) {
+        seenOpeningMods.add(mod.id);
+        out.push({
+          kind: "opening-room-qr",
+          pedStage: -2,
+          forceLayout: "opening-room-qr",
+          pedBadge: `QR เช็คชื่อเข้าห้อง · ห้องย่อยที่ ${effRoom}`,
+          pedShort: "QR เช็คชื่อ",
+          mod,
+          roomId: effRoom,
+          caseObj: c,
+          qObj: (c.questions && c.questions[0]) || null,
+          shortNum: "Slide 1"
+        });
+      }
       const isTeacherDeck = ROLE === "faculty" && state.hsdFacultyMode !== "student";
       if (
         cfg.contentMode === "all-4-stages" &&
@@ -30947,6 +31124,32 @@
         : state.hsdSplitOrient || "vertical";
 
     const slideSpecs = items.map((it, idx) => {
+      if (it.kind === "opening-room-qr" && window.RACM_HSD_ROOM_QR) {
+        const effRoom = Number(it.roomId || cfg.roomId || state.hsdLockedRoomId || (LIVE ? LIVE.getRoomId() : 1)) || 1;
+        const rMeta = window.RACM_HSD_ROOM_QR.getRoomMeta(it.mod.code, effRoom);
+        const qrPngBytes =
+          typeof window.RACM_HSD_ROOM_QR.buildQrPngBytes === "function"
+            ? window.RACM_HSD_ROOM_QR.buildQrPngBytes(rMeta.studentQrUrl, 8, 4)
+            : null;
+        return {
+          kind: "opening-room-qr",
+          moduleCode: it.mod.code,
+          roomId: rMeta.roomId,
+          roomCode: rMeta.roomCode,
+          pinCode: rMeta.pinCode,
+          instructor: ROLE === "faculty" ? rMeta.instructor : "",
+          scheduleDate: rMeta.scheduleDate || it.mod.scheduleDate || "วันพฤหัสบดีที่ 26 พ.ย. 2569",
+          scheduleTime: rMeta.scheduleTime || "13:00–16:00 น.",
+          studentQrUrl: rMeta.studentQrUrl,
+          facultyHtmlFile: rMeta.facultyHtmlFile,
+          studentHtmlFile: rMeta.studentHtmlFile,
+          qrPngBytes,
+          rosterCount: rMeta.assignedStudents.length,
+          rosterItems: rMeta.assignedStudents.map(
+            (s) => `${String(s.id).slice(-3)} ${s.nickname || String(s.name || "").split(" ")[0]}`
+          )
+        };
+      }
       const qHeading = getClearQuestionHeadingLabel(it.qObj, idx);
       if (it.kind === "concept-summary" && it.conceptSummary) {
         const cs = it.conceptSummary;
@@ -31005,7 +31208,17 @@
     });
 
     const chosenTheme = cfg.slideTheme === "dark" ? "dark" : "light";
-    const modTag = cfg.scope === "all" ? "HS1-HS6_All" : `คาบ_${cfg.targetMod || getActiveSlideSessionMod()}`;
+    const effModCode = cfg.targetMod || getActiveSlideSessionMod();
+    const effRoomId = Number(cfg.roomId || state.hsdLockedRoomId || (LIVE ? LIVE.getRoomId() : 1)) || 1;
+    let modTag = cfg.scope === "all" ? "HS1-HS6_All" : `คาบ_${effModCode}`;
+    if (
+      cfg.scope !== "all" &&
+      window.RACM_HSD_ROOM_QR &&
+      (cfg.explicitRoomDeck || state.hsdLockedRoomId || effModCode === "HS1")
+    ) {
+      const rMeta = window.RACM_HSD_ROOM_QR.getRoomMeta(effModCode, effRoomId);
+      modTag = `${effModCode}_Room${rMeta.roomId}_${rMeta.cleanRoomSlug}`;
+    }
     const themeTag = chosenTheme === "dark" ? "_Dark" : "";
     const modeTag = asHandoutGridInPptx ? `_Handout_${preset.id}_${cfg.pageOrient}${themeTag}` : `_16x9${themeTag}`;
     const blob = window.RACM_PPTX_EXPORTER.buildPptxBlob({
@@ -31497,13 +31710,17 @@
     );
 
     const tbCenter = make("div", null, "ppt-titlebar-center");
-    const docFileBtn = make(
-      "span",
-      `${cur.mod.code}.pptx — ${cur.mod.title}  ▾`,
-      "ppt-doc-filename"
-    );
+    const effTitleRoomId = Number(state.hsdLockedRoomId) || (LIVE ? LIVE.getRoomId() : 1) || 1;
+    const roomMetaForTitle =
+      window.RACM_HSD_ROOM_QR && (state.hsdLockedRoomId || cur.mod.code === "HS1")
+        ? window.RACM_HSD_ROOM_QR.getRoomMeta(cur.mod.code, effTitleRoomId)
+        : null;
+    const docFileLabel = roomMetaForTitle
+      ? `${cur.mod.code}_Room${roomMetaForTitle.roomId}_${roomMetaForTitle.cleanRoomSlug}.pptx — Case Discussion: ${cur.mod.code} (ห้อง ${roomMetaForTitle.roomCode})  ▾`
+      : `${cur.mod.code}.pptx — ${cur.mod.title}  ▾`;
+    const docFileBtn = make("span", docFileLabel, "ppt-doc-filename");
     docFileBtn.style.cursor = "pointer";
-    docFileBtn.title = "คลิกเพื่อเลือกเปิดชุดสไลด์คาบอื่น (HS1–HS6)";
+    docFileBtn.title = "คลิกเพื่อเลือกเปิดชุดสไลด์คาบอื่น หรือเลือกไฟล์ PPT แยกห้อง 1–6";
     docFileBtn.addEventListener("click", () => openHsdGoogleDrivePickerModal());
     tbCenter.appendChild(docFileBtn);
 
@@ -31513,6 +31730,15 @@
 
     const tbRight = make("div", null, "ppt-titlebar-right");
     tbRight.appendChild(buildPptSlideThemeSwitcherDOM("is-in-studio"));
+    if (window.RACM_HSD_ROOM_QR && (state.hsdLockedRoomId || cur.mod.code === "HS1")) {
+      const tbQrBtn = make("button", `📱 QR ห้อง ${effTitleRoomId}`, "ppt-title-btn");
+      tbQrBtn.type = "button";
+      tbQrBtn.title = `เปิดขยาย QR Code สำหรับสแกนเข้าห้อง ${effTitleRoomId} และกรอกรหัสนักศึกษา 3 หลัก`;
+      tbQrBtn.addEventListener("click", () => {
+        window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(cur.mod.code, effTitleRoomId);
+      });
+      tbRight.appendChild(tbQrBtn);
+    }
     if (LIVE) {
       tbRight.appendChild(buildKahootLobbyTriggerBtnDOM("ppt-title-btn is-kahoot-title-btn"));
       if (ROLE === "faculty") {
@@ -32278,7 +32504,101 @@
     }
 
     const panelEl = $("panel-hs-discussion");
-    const isGateActive = false;
+    const effRoomForGate = Number(state.hsdLockedRoomId) || (LIVE ? LIVE.getRoomId() : 1) || 1;
+    const effModForGate = state.hsdModule && state.hsdModule !== "ALL" ? state.hsdModule : "HS1";
+
+    if (panelEl) {
+      let dedicatedRibbon = $("hsdDedicatedRoomRibbon");
+      if ((window.RACM_HSD_ROOM_PAGE || state.hsdLockedRoomId) && window.RACM_HSD_ROOM_QR) {
+        if (!dedicatedRibbon) {
+          dedicatedRibbon = make("div", null, "hsd-dedicated-room-ribbon hsd-no-print");
+          dedicatedRibbon.id = "hsdDedicatedRoomRibbon";
+          panelEl.insertBefore(dedicatedRibbon, panelEl.firstChild);
+        }
+        const rMeta = window.RACM_HSD_ROOM_QR.getRoomMeta(effModForGate, effRoomForGate);
+        dedicatedRibbon.replaceChildren();
+
+        const leftWrap = make("div", null, "hsd-drr-left");
+        leftWrap.append(
+          make("span", `📍 ${rMeta.pinCode} · ห้อง ${rMeta.roomCode}`, "hsd-drr-pill"),
+          make(
+            "span",
+            `Case Discussion: ${effModForGate}${rMeta.instructor && ROLE === "faculty" ? ` · อ.ประจำห้อง: ${rMeta.instructor}` : ""} (${rMeta.htmlFile})`,
+            "hsd-drr-title"
+          )
+        );
+
+        const rightWrap = make("div", null, "hsd-drr-right");
+        const roomSel = document.createElement("select");
+        roomSel.className = "hsd-drr-link";
+        roomSel.style.cursor = "pointer";
+        roomSel.setAttribute("aria-label", "สลับไฟล์ห้อง Discussion 1–6");
+        for (let r = 1; r <= 6; r += 1) {
+          const rm = window.RACM_HSD_ROOM_QR.getRoomMeta(effModForGate, r);
+          const opt = document.createElement("option");
+          opt.value = String(r);
+          opt.textContent = `ห้องย่อยที่ ${r} · ${rm.roomCode} (${rm.htmlFile})`;
+          if (r === effRoomForGate) opt.selected = true;
+          roomSel.appendChild(opt);
+        }
+        roomSel.addEventListener("change", () => {
+          const nextR = Number(roomSel.value) || 1;
+          const nextMeta = window.RACM_HSD_ROOM_QR.getRoomMeta(effModForGate, nextR);
+          if (window.RACM_HSD_ROOM_PAGE) {
+            window.location.href = nextMeta.htmlFile;
+          } else {
+            state.hsdLockedRoomId = nextR;
+            if (LIVE) LIVE.setRoom(nextR, false);
+            renderHsLiveClassroomBar();
+            renderHsDiscussionView();
+          }
+        });
+
+        const qrZoomBtn = make("button", `📱 QR ห้อง ${rMeta.roomId}`, "hsd-drr-link");
+        qrZoomBtn.type = "button";
+        qrZoomBtn.style.cursor = "pointer";
+        qrZoomBtn.addEventListener("click", () => {
+          window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(effModForGate, effRoomForGate);
+        });
+
+        const dlPptBtn = make("a", `⬇ PPT ห้อง ${rMeta.roomId} (.pptx)`, "hsd-drr-link");
+        dlPptBtn.href = `exports/pptx/RACM303_2569_HS1_Room${rMeta.roomId}_${rMeta.cleanRoomSlug}.pptx`;
+        dlPptBtn.setAttribute("download", `RACM303_2569_HS1_Room${rMeta.roomId}_${rMeta.cleanRoomSlug}.pptx`);
+
+        rightWrap.append(roomSel, qrZoomBtn, dlPptBtn);
+        if (window.RACM_HSD_ROOM_PAGE) {
+          const backPortalLink = make("a", "← หน้าหลักพอร์ทัลรวม", "hsd-drr-link");
+          backPortalLink.href = "./";
+          rightWrap.appendChild(backPortalLink);
+        } else {
+          const unlockBtn = make("button", "✕ ปลดล็อกทุกห้อง", "hsd-drr-link");
+          unlockBtn.type = "button";
+          unlockBtn.style.cursor = "pointer";
+          unlockBtn.addEventListener("click", () => {
+            state.hsdLockedRoomId = 0;
+            renderHsLiveClassroomBar();
+            renderHsDiscussionView();
+          });
+          rightWrap.appendChild(unlockBtn);
+        }
+
+        dedicatedRibbon.append(leftWrap, rightWrap);
+        dedicatedRibbon.hidden = false;
+      } else if (dedicatedRibbon) {
+        dedicatedRibbon.hidden = true;
+      }
+    }
+
+    const isGateActive =
+      ROLE === "student" &&
+      !state.isPptSlideSharePopup &&
+      Boolean(
+        state.hsdRequireQrCheckin ||
+          (window.RACM_HSD_ROOM_PAGE && window.RACM_HSD_ROOM_PAGE.requireCheckin)
+      ) &&
+      Boolean(window.RACM_HSD_ROOM_QR) &&
+      !window.RACM_HSD_ROOM_QR.isStudentCheckedIn(effModForGate, effRoomForGate);
+
     const isDriveFolderActive =
       state.hsdViewMode === "slide" && Boolean(state.hsdDriveFolderOpen) && !isGateActive && !state.isPptSlideSharePopup;
 
@@ -32293,7 +32613,44 @@
 
     container.replaceChildren();
     if (isGateActive) {
-      renderHsStudentRoomGateCard(container);
+      if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.renderStudentQrCheckinGateDOM === "function") {
+        window.RACM_HSD_ROOM_QR.renderStudentQrCheckinGateDOM(container, {
+          modCode: effModForGate,
+          roomId: effRoomForGate,
+          onCompletedCheckin: (stu, rId, finalTeam) => {
+            const finalRoom = Number(rId) || effRoomForGate;
+            state.hsdLockedRoomId = finalRoom;
+            state.hsdRoomConfirmed = true;
+            state.hsdSessionJoined = true;
+            state.hsdRequireQrCheckin = false;
+            try {
+              sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
+              sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
+            } catch (_) {}
+            applyMyStudent(stu, true);
+            if (LIVE) {
+              LIVE.setFollowTeacher(true);
+              if (typeof LIVE.joinSessionWithStudent === "function") {
+                LIVE.joinSessionWithStudent(stu, finalRoom, effModForGate, finalTeam);
+              } else {
+                LIVE.setRoom(finalRoom, false);
+              }
+            }
+            if (typeof syncStudentTeamWorksheetFromLive === "function") {
+              syncStudentTeamWorksheetFromLive("*");
+            }
+            const rMetaDone = window.RACM_HSD_ROOM_QR.getRoomMeta(effModForGate, finalRoom);
+            showStudentSlideSyncToast(
+              `✅ เช็คชื่อสำเร็จ! รหัส ${String(stu.id).slice(-3)} · ${stu.nickname || stu.name} (ห้อง ${rMetaDone.roomCode} · กลุ่มย่อยที่ ${finalTeam})`
+            );
+            renderHsLiveClassroomBar();
+            renderHsDiscussionView();
+            broadcastPptPresentationState();
+          }
+        });
+      } else {
+        renderHsStudentRoomGateCard(container);
+      }
       syncLiveBarQuestionPickerDOM(matchedCases);
       renderPptPresentationOverlay();
       return;
@@ -43098,6 +43455,11 @@
       document.body.classList.add("is-ppt-slideshare-window");
       const m = (params.get("module") || "").toUpperCase();
       if (/^HS[1-6]$/.test(m)) state.hsdModule = m;
+      const rPopup = Number(params.get("room"));
+      if (rPopup >= 1 && rPopup <= 6) {
+        state.hsdLockedRoomId = rPopup;
+        if (LIVE) LIVE.setRoom(rPopup, false);
+      }
       state.hsdViewMode = "slide";
       state.hsdDriveFolderOpen = false;
       ensureStudentRoomReadyForPresentation();
@@ -43108,9 +43470,67 @@
       return;
     }
 
-    if (params.get("page") === "hs-discussion") {
-      const m = (params.get("module") || "").toUpperCase();
-      if (/^HS[1-6]$/.test(m)) {
+    if (
+      window.RACM_HSD_ROOM_PAGE &&
+      Number(window.RACM_HSD_ROOM_PAGE.roomId) >= 1 &&
+      Number(window.RACM_HSD_ROOM_PAGE.roomId) <= 6
+    ) {
+      document.body.classList.add("is-dedicated-hsd-room-page");
+      const rp = window.RACM_HSD_ROOM_PAGE;
+      const rId = Number(rp.roomId);
+      const mCode = String(rp.module || "HS1").toUpperCase();
+      state.hsdModule = mCode;
+      state.hsdSlideDeckMod = mCode;
+      state.hsdLockedRoomId = rId;
+      state.hsdViewMode = "slide";
+      state.hsdDriveFolderOpen = false;
+      if (LIVE) LIVE.setRoom(rId, false);
+      if (ROLE === "student" && window.RACM_HSD_ROOM_QR) {
+        const savedRec =
+          typeof window.RACM_HSD_ROOM_QR.getStudentCheckinRecord === "function"
+            ? window.RACM_HSD_ROOM_QR.getStudentCheckinRecord(mCode, rId)
+            : null;
+        const matchedStu =
+          savedRec && savedRec.studentId && ROSTER && Array.isArray(ROSTER.students)
+            ? ROSTER.students.find((s) => String(s.id) === String(savedRec.studentId))
+            : null;
+        if (matchedStu) {
+          state.hsdRoomConfirmed = true;
+          state.hsdSessionJoined = true;
+          state.hsdRequireQrCheckin = false;
+          applyMyStudent(matchedStu, true);
+          if (LIVE) {
+            LIVE.setFollowTeacher(true);
+            if (typeof LIVE.joinSessionWithStudent === "function") {
+              LIVE.joinSessionWithStudent(matchedStu, rId, mCode, Number(savedRec.subTeam) || 1);
+            }
+          }
+        } else {
+          state.hsdRequireQrCheckin = true;
+        }
+      }
+      switchTab(`hs-discussion-${mCode}-R${rId}`, false);
+      return;
+    }
+
+    if (params.get("page") === "hs-discussion" || (params.get("room") && params.get("checkin") === "1")) {
+      const m = (params.get("module") || "HS1").toUpperCase();
+      const rParam = Number(params.get("room"));
+      if (rParam >= 1 && rParam <= 6) {
+        const cleanMod = /^HS[1-6]$/.test(m) ? m : "HS1";
+        state.hsdModule = cleanMod;
+        state.hsdSlideDeckMod = cleanMod;
+        state.hsdLockedRoomId = rParam;
+        state.hsdViewMode = "slide";
+        state.hsdDriveFolderOpen = false;
+        if (ROLE === "student" && params.get("checkin") === "1") {
+          state.hsdRequireQrCheckin = true;
+        }
+        if (LIVE) LIVE.setRoom(rParam, false);
+        switchTab(`hs-discussion-${cleanMod}-R${rParam}`, false);
+        return;
+      }
+      if (/^HS[1-6]$/.test(m) && params.get("module")) {
         state.hsdModule = m;
         state.hsdSlideDeckMod = m;
         switchTab(`hs-discussion-${m}`, false);

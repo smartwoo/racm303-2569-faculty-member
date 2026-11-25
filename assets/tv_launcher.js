@@ -471,6 +471,10 @@
   }
 
   function navigateTvTab(tabId) {
+    if (window.RACM_HSD_ROOM_PAGE && tabId === "home") {
+      window.location.href = "./";
+      return;
+    }
     hideCourseDriveBrowser();
     const api = getApi();
     if (!api) return;
@@ -488,6 +492,11 @@
       panel.className = "tab-panel";
       panel.id = "panel-home";
       panel.setAttribute("aria-label", "หน้าหลัก RACM 303");
+      const api = getApi();
+      const st = api && api.getState ? api.getState() : null;
+      if ((st && st.activeTab && st.activeTab !== "home") || window.RACM_HSD_ROOM_PAGE) {
+        panel.hidden = true;
+      }
       main.insertBefore(panel, main.firstChild);
     }
     return panel;
@@ -1906,6 +1915,20 @@
             <span>→</span>
           </button>
 
+          ${
+            mod.code === "HS1"
+              ? `<div style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px 8px;background:rgba(15,23,42,.04);border-radius:10px;border:1px dashed rgba(15,23,42,.15)">
+                  <span style="width:100%;font-size:12px;font-weight:700;opacity:.85">📱 เปิด PPT &amp; QR Check-in แยกตามห้องตัวเอง (Each PPT · Different HTML):</span>
+                  ${[1, 2, 3, 4, 5, 6]
+                    .map(
+                      (rNum) =>
+                        `<a class="tv-hosp-chip" href="hs1-room${rNum}.html" style="text-decoration:none;font-size:12px;padding:4px 9px" data-tv-modal-focus>ห้อง ${rNum} · 1C1-0${rNum + 1} ↗</a>`
+                    )
+                    .join("")}
+                </div>`
+              : ""
+          }
+
           <button type="button" class="tv-ep-action-btn ${epVdoInf.uploaded ? "is-slide-ready-action" : "is-slide-pending-action"}" id="tvEpActVdoLec" data-tv-modal-focus>
             <span>
               <span class="tv-ep-action-title-row"><span class="tv-ep-step-pill is-step-6 ${epVdoInf.uploaded ? "is-slide-uploaded" : "is-slide-pending"}">06</span> <span>${esc(
@@ -2910,12 +2933,12 @@
           id: `hsppt:${m.id}`,
           folderPath: ["health-systems", m.id],
           name: `05_${m.code}_Case_Discussion_in_Class.pptx`,
-          title: `Case Discussion in Class (16:9) · ${m.code}: ${m.title}`,
+          title: `Case Discussion: ${m.code} (หน้ารวมครบ 6 ห้อง)`,
           sub:
             (flow && flow.steps[4] && flow.steps[4].desc) ||
             (ROLE === "faculty"
-              ? `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
-              : `สไลด์เปิดคาบเช็คชื่อ + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
+              ? `สไลด์เปิดคาบ QR เช็คชื่อแยก 6 ห้อง + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+              : `สไลด์เปิดคาบ QR เช็คชื่อแยก 6 ห้อง + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
           meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
           badge: ROLE === "faculty" ? `⑤ Case + เฉลย` : `⑤ Case 16:9`,
           icoCls: "is-pptx",
@@ -2924,6 +2947,24 @@
             if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
           })
         });
+        if (m.code === "HS1" && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getAllHs1RoomMetas === "function") {
+          window.RACM_HSD_ROOM_QR.getAllHs1RoomMetas().forEach((rm) => {
+            files.push({
+              id: `hsppt:HS1:R${rm.roomId}`,
+              folderPath: ["health-systems", "HS1"],
+              name: `05_R${rm.roomId}_HS1_Room${rm.roomId}_${rm.cleanRoomSlug}_QR_Checkin.html`,
+              title: `Case Discussion: HS1 — ห้องย่อยที่ ${rm.roomId} (ห้อง ${rm.roomCode}) · QR Check-in รหัส 3 ตัว`,
+              sub: `PPT & HTML แยกเฉพาะห้อง ${rm.roomCode} (${rm.htmlFile}) · อ.ประจำห้อง: ${rm.instructor} · สแกน QR แล้วใส่รหัส นศ. 3 ตัวท้าย`,
+              meta: `${rm.pinCode} · ${rm.assignedStudents.length} คน`,
+              badge: `📱 ห้อง ${rm.roomId} (${rm.roomCode})`,
+              icoCls: "is-pptx",
+              icoTxt: `R${rm.roomId}`,
+              onOpen: openFileAction(() => {
+                window.location.href = rm.htmlFile;
+              })
+            });
+          });
+        }
       }
 
       // Step 06: VDO Lecture (รอแขวน VDO)

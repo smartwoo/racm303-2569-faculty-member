@@ -27,7 +27,7 @@
     return (c ^ 0xffffffff) >>> 0;
   }
 
-  function buildZipBlob(files, mimeType) {
+  function buildZipBytes(files) {
     const enc = new TextEncoder();
     const entries = files.map((f) => {
       const nameBytes = enc.encode(f.path);
@@ -106,6 +106,11 @@
     dv.setUint32(pos + 16, centralStart, true);
     dv.setUint16(pos + 20, 0, true);
 
+    return out;
+  }
+
+  function buildZipBlob(files, mimeType) {
+    const out = buildZipBytes(files);
     return new Blob([out], {
       type: mimeType || "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     });
@@ -791,6 +796,27 @@
     );
   }
 
+  function buildPictureXml(id, name, rId, box) {
+    return (
+      `<p:pic>` +
+      `<p:nvPicPr>` +
+      `<p:cNvPr id="${id}" name="${xmlEsc(name)}"/>` +
+      `<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>` +
+      `<p:nvPr/>` +
+      `</p:nvPicPr>` +
+      `<p:blipFill>` +
+      `<a:blip r:embed="${xmlEsc(rId)}"/>` +
+      `<a:stretch><a:fillRect/></a:stretch>` +
+      `</p:blipFill>` +
+      `<p:spPr>` +
+      `<a:xfrm><a:off x="${Math.round(box.x)}" y="${Math.round(box.y)}"/><a:ext cx="${Math.round(box.w)}" cy="${Math.round(box.h)}"/></a:xfrm>` +
+      `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>` +
+      `<a:ln w="12700"><a:solidFill><a:srgbClr val="CBD5E1"/></a:solidFill></a:ln>` +
+      `</p:spPr>` +
+      `</p:pic>`
+    );
+  }
+
   // 3. Build Single 16:9 Slide XML (12192000 x 6858000 EMU = 13.333" x 7.5")
   function buildSlideXml(slideSpec, slideIdx, totalSlides, deckSpec) {
     const W = 12192000;
@@ -801,6 +827,229 @@
     const pal = getSlideThemePalette(isDark);
     let shapeId = 2;
     const shapes = [];
+
+    if (slideSpec.kind === "opening-room-qr") {
+      const okShapes = [];
+      let okId = 2;
+      const padX = 320000;
+      const modCode = slideSpec.moduleCode || "HS1";
+      const roomId = slideSpec.roomId || 1;
+      const roomCode = slideSpec.roomCode || `1C1-0${roomId + 1}`;
+      const pinCode = slideSpec.pinCode || `${modCode}-R${roomId}`;
+      const instName = slideSpec.instructor || "อาจารย์ประจำห้อง";
+      const htmlFile = slideSpec.htmlFile || `hs1-room${roomId}.html`;
+      const shortUrl = slideSpec.shortUrl || `racm303-2569-student/${htmlFile}`;
+      const schedTxt = slideSpec.scheduleText || "พฤหัสบดีที่ 26 พฤศจิกายน 2569 (09.40 – 12.00 น.) · สอบ 20%";
+      const rosterItems = Array.isArray(slideSpec.rosterItems) ? slideSpec.rosterItems : [];
+
+      okShapes.push(buildShapeXml(okId++, "SlideBg", { x: 0, y: 0, w: W, h: H }, pal.canvasBg, null, ""));
+
+      const headP =
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`คาบ ${modCode} · ห้อง ${roomId} (${roomCode})`, { pt: 11.2, bold: true, color: pal.accent }) +
+        buildRunXml(`   Case Discussion: ${modCode} — ${instName}`, { pt: 13.2, bold: true, color: pal.ink }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "MasterHead",
+          { x: 0, y: 0, w: W, h: 480000, anchor: "ctr" },
+          pal.headerBg,
+          null,
+          headP,
+          0,
+          { l: padX, r: padX, t: 30000, b: 30000 }
+        )
+      );
+      okShapes.push(buildShapeXml(okId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, pal.border, null, ""));
+
+      const leftX = padX;
+      const leftW = 5520000;
+      const rightX = leftX + leftW + 220000;
+      const rightW = W - padX - rightX;
+
+      // Left Card 1: Clean "Case Discussion: HS1" Hero
+      const heroParas =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="100"/></a:spcAft></a:pPr>` +
+        buildRunXml(schedTxt, { pt: 11, bold: true, color: pal.accent }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="80"/></a:spcAft></a:pPr>` +
+        buildRunXml(`Case Discussion: ${modCode}`, { pt: 27, bold: true, color: pal.ink }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`ห้องอภิปรายที่ ${roomId} · ห้อง ${roomCode} · อ.ประจำห้อง: ${instName}`, { pt: 12, bold: false, color: pal.sub }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CleanCaseHeroCard",
+          { x: leftX, y: 610000, w: leftW, h: 1460000, anchor: "ctr" },
+          pal.cardBg,
+          pal.border,
+          heroParas,
+          4500,
+          { l: 190000, r: 190000, t: 110000, b: 110000 }
+        )
+      );
+
+      // Left Card 2: Dedicated Room QR Code + 3-Digit Student ID Check-in Instructions
+      const qrCardY = 2210000;
+      const qrCardH = 4150000;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "RoomQrCardBg",
+          { x: leftX, y: qrCardY, w: leftW, h: qrCardH },
+          pal.cardBg,
+          pal.border,
+          "",
+          4500
+        )
+      );
+
+      const qrSize = 2780000;
+      const qrX = leftX + 180000;
+      const qrY = qrCardY + Math.round((qrCardH - qrSize) / 2);
+      if (slideSpec.qrPngBytes) {
+        okShapes.push(
+          buildPictureXml(okId++, `RoomQrCode_${pinCode}`, "rIdQrImg", {
+            x: qrX,
+            y: qrY,
+            w: qrSize,
+            h: qrSize
+          })
+        );
+      }
+
+      const qrInfoX = qrX + qrSize + 150000;
+      const qrInfoW = leftX + leftW - 150000 - qrInfoX;
+      const qrInfoParas =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
+        buildRunXml(`QR CHECK-IN ห้อง ${roomCode}`, { pt: 12.5, bold: true, color: pal.accent }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
+        buildRunXml(`1. สแกน QR Code ประจำห้อง ${roomCode}`, { pt: 12.2, bold: true, color: pal.ink }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
+        buildRunXml(`2. ใส่รหัสนักศึกษา 3 ตัวท้าย (เช่น 056) เพื่อ Check-in เข้าห้องเรียน`, { pt: 12.2, bold: true, color: "047857" }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
+        buildRunXml(`3. เลือกเข้า กลุ่ม 1 / 2 / 3 ร่วมกันตอบในใบงานกลุ่ม`, { pt: 11.2, bold: false, color: pal.body }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(shortUrl, { pt: 10.2, bold: true, color: pal.muted, font: "Consolas" }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "RoomQrInstructions",
+          { x: qrInfoX, y: qrCardY + 180000, w: qrInfoW, h: qrCardH - 360000, anchor: "ctr" },
+          null,
+          null,
+          qrInfoParas,
+          0,
+          { l: 20000, r: 20000, t: 20000, b: 20000 }
+        )
+      );
+
+      // Right Card 1: Dark Room PIN Banner
+      const pinParas =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="70"/></a:spcAft></a:pPr>` +
+        buildRunXml(`ROOM PIN · ห้องอภิปรายที่ ${roomId} (แบ่งกลุ่ม 1 · 2 · 3)   |   ${htmlFile}`, {
+          pt: 10.5,
+          bold: true,
+          color: "60B4FF"
+        }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`${pinCode}`, { pt: 26, bold: true, color: "FFFFFF" }) +
+        buildRunXml(`     ห้อง ${roomCode}  ·  อ.ประจำห้อง (${modCode}): ${instName}`, {
+          pt: 12.2,
+          bold: true,
+          color: "E2E8F0"
+        }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "RoomPinHero",
+          { x: rightX, y: 610000, w: rightW, h: 1220000, anchor: "ctr" },
+          "1D1D1F",
+          "334155",
+          pinParas,
+          4500,
+          { l: 190000, r: 190000, t: 90000, b: 90000 }
+        )
+      );
+
+      // Right Card 2: Assigned Room Roster Grid
+      const rosY = 1970000;
+      const rosH = 4390000;
+      const rosHeadP =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="90"/></a:spcAft></a:pPr>` +
+        buildRunXml(`สมาชิกห้อง ${roomCode} (${rosterItems.length} คน) · สแกน QR แล้วใส่รหัส 3 ตัวท้ายเพื่อ Check-in`, {
+          pt: 11.8,
+          bold: true,
+          color: pal.ink
+        }) +
+        `</a:p>`;
+      const cols = 3;
+      const rowsXml = [];
+      for (let i = 0; i < rosterItems.length; i += cols) {
+        const chunk = rosterItems.slice(i, i + cols);
+        const lineTxt = chunk.map((it) => `• ${it}`).join("        ");
+        rowsXml.push(
+          `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="55"/></a:spcBef></a:pPr>` +
+            buildRunXml(lineTxt, { pt: 10.6, bold: false, color: pal.body }) +
+            `</a:p>`
+        );
+      }
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "RoomRosterCard",
+          { x: rightX, y: rosY, w: rightW, h: rosH },
+          pal.cardBg,
+          pal.border,
+          rosHeadP + rowsXml.join(""),
+          4500,
+          { l: 180000, r: 180000, t: 130000, b: 120000 }
+        )
+      );
+
+      // Footer
+      const footP =
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(
+          `RACM 303 เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ · คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี     |     Case Discussion: ${modCode} (${pinCode} · ${roomCode})  |  Slide ${slideIdx + 1} / ${totalSlides}`,
+          { pt: 8.8, color: pal.muted }
+        ) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "MasterFooter",
+          { x: 0, y: H - 340000, w: W, h: 340000, anchor: "ctr" },
+          pal.canvasBg,
+          pal.border,
+          footP,
+          0,
+          { l: padX, r: padX, t: 25000, b: 25000 }
+        )
+      );
+
+      return (
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+        `<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
+        `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ` +
+        `xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">` +
+        `<p:cSld><p:spTree>` +
+        `<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
+        `<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>` +
+        okShapes.join("") +
+        `</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`
+      );
+    }
 
     if (slideSpec.kind === "concept-summary" && slideSpec.conceptSummary) {
       const cs = slideSpec.conceptSummary;
@@ -1324,7 +1573,37 @@
       // Mini Split Content (or Concept Summary card in Handout Grid)
       const bodyY = cy + banH + 20000;
       const bodyH = cardH - banH - 40000;
-      if (sSpec.kind === "concept-summary" && sSpec.conceptSummary) {
+      if (sSpec.kind === "opening-room-qr") {
+        const okLines = [
+          `Case Discussion: ${sSpec.moduleCode || "HS1"} · ${sSpec.pinCode || ""} (ห้อง ${sSpec.roomCode || ""})`,
+          `• อ.ประจำห้อง: ${sSpec.instructor || ""}`,
+          `• สแกน QR ประจำห้อง (${sSpec.shortUrl || ""})`,
+          `• ใส่รหัสนักศึกษา 3 ตัวท้ายเพื่อ Check-in & แบ่งกลุ่ม 1 / 2 / 3`
+        ];
+        const okP = okLines
+          .map((ln, lIdx) =>
+            `<a:p><a:pPr algn="l"/>` +
+            buildRunXml(ln, {
+              pt: Math.max(4.5, scalePt - (lIdx === 0 ? 0.3 : 1.0)),
+              bold: lIdx === 0,
+              color: lIdx === 0 ? pal.ink : pal.body
+            }) +
+            `</a:p>`
+          )
+          .join("");
+        shapes.push(
+          buildShapeXml(
+            shapeId++,
+            `MiniOpeningQr_${idx + 1}`,
+            { x: cx + 25000, y: bodyY, w: cardW - 50000, h: bodyH },
+            pal.cardBg,
+            pal.border,
+            okP,
+            0,
+            { l: 45000, r: 45000, t: 35000, b: 35000 }
+          )
+        );
+      } else if (sSpec.kind === "concept-summary" && sSpec.conceptSummary) {
         const cs = sSpec.conceptSummary;
         const lines = [
           `${cs.coreTerm || "“สุขภาพ” (health)"} ${cs.coreDefinition || ""}`
@@ -1495,6 +1774,7 @@
       slideXmlList = rawSlides.map((sSpec, idx) => buildSlideXml(sSpec, idx, rawSlides.length, deckSpec));
     }
 
+    const hasAnyPng = !isHandoutPages && rawSlides.some((s) => s && s.qrPngBytes instanceof Uint8Array);
     const files = [];
 
     // [Content_Types].xml
@@ -1512,6 +1792,7 @@
         `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
         `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
         `<Default Extension="xml" ContentType="application/xml"/>` +
+        (hasAnyPng ? `<Default Extension="png" ContentType="image/png"/>` : "") +
         `<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>` +
         `<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>` +
         `<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>` +
@@ -1678,26 +1959,47 @@
         `</a:theme>`
     });
 
-    // Individual Slides + Slide Rels
+    // Individual Slides + Slide Rels + Optional Embedded QR PNG Media
     slideXmlList.forEach((sXml, idx) => {
       files.push({
         path: `ppt/slides/slide${idx + 1}.xml`,
         content: sXml
       });
+      const srcSlide = !isHandoutPages ? rawSlides[idx] : null;
+      let extraRelXml = "";
+      if (srcSlide && srcSlide.qrPngBytes instanceof Uint8Array) {
+        const mediaName = `qr_slide_${idx + 1}.png`;
+        files.push({
+          path: `ppt/media/${mediaName}`,
+          bytes: srcSlide.qrPngBytes
+        });
+        extraRelXml = `<Relationship Id="rIdQrImg" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${mediaName}"/>`;
+      }
       files.push({
         path: `ppt/slides/_rels/slide${idx + 1}.xml.rels`,
         content:
           `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
           `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
           `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>` +
+          extraRelXml +
           `</Relationships>`
       });
     });
 
-    return buildZipBlob(files);
+    return files;
   }
 
-  window.RACM_PPTX_EXPORTER = {
-    buildPptxBlob
+  function buildPptxBytes(deckSpec) {
+    return buildZipBytes(buildPptxBlob(deckSpec));
+  }
+
+  const exporterApi = {
+    buildPptxBytes,
+    buildPptxBlob: function (deckSpec) {
+      return buildZipBlob(buildPptxBlob(deckSpec));
+    }
   };
+  if (typeof window !== "undefined") window.RACM_PPTX_EXPORTER = exporterApi;
+  if (typeof globalThis !== "undefined") globalThis.RACM_PPTX_EXPORTER = exporterApi;
+  if (typeof module !== "undefined" && module.exports) module.exports = exporterApi;
 })();
