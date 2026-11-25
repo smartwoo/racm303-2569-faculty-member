@@ -40,11 +40,28 @@
   ];
 
   const CHOICE_META = [
-    { idx: 0, shape: "▲", cls: "is-red", hex: "#ea4335", nameTh: "สีแดง Google Red (▲)" },
-    { idx: 1, shape: "◆", cls: "is-blue", hex: "#4285f4", nameTh: "สีน้ำเงิน Google Blue (◆)" },
-    { idx: 2, shape: "●", cls: "is-gold", hex: "#f9ab00", nameTh: "สีเหลือง Google Yellow (●)" },
-    { idx: 3, shape: "■", cls: "is-green", hex: "#34a853", nameTh: "สีเขียว Google Green (■)" }
+    { idx: 0, grade: "O", sub: "Outstanding", shape: "▲", cls: "is-green", hex: "#26890c", nameTh: "เกรด O (▲ สีเขียว)" },
+    { idx: 1, grade: "S", sub: "Satisfactory", shape: "◆", cls: "is-blue", hex: "#1368ce", nameTh: "เกรด S (◆ สีน้ำเงิน)" },
+    { idx: 2, grade: "M", sub: "Marginal", shape: "●", cls: "is-gold", hex: "#d89e00", nameTh: "สัญลักษณ์ M (● สีเหลือง)" },
+    { idx: 3, grade: "U", sub: "Unsatisfactory", shape: "■", cls: "is-red", hex: "#e21b3c", nameTh: "เกรด U (■ สีแดง)" }
   ];
+
+  const KAHOOT_6_META = [
+    { idx: 0, grade: "", sub: "", shape: "▲", cls: "is-red", hex: "#e21b3c", nameTh: "ตัวเลือก ▲ สีแดง" },
+    { idx: 1, grade: "", sub: "", shape: "◆", cls: "is-blue", hex: "#1368ce", nameTh: "ตัวเลือก ◆ สีน้ำเงิน" },
+    { idx: 2, grade: "", sub: "", shape: "●", cls: "is-gold", hex: "#d89e00", nameTh: "ตัวเลือก ● สีเหลือง" },
+    { idx: 3, grade: "", sub: "", shape: "■", cls: "is-green", hex: "#26890c", nameTh: "ตัวเลือก ■ สีเขียว" },
+    { idx: 4, grade: "", sub: "", shape: "⬢", cls: "is-purple", hex: "#7c3aed", nameTh: "ตัวเลือก ⬢ สีม่วง" },
+    { idx: 5, grade: "", sub: "", shape: "★", cls: "is-teal", hex: "#0d9488", nameTh: "ตัวเลือก ★ สีเขียวน้ำทะเล" }
+  ];
+
+  function getChoiceMeta(q, idx) {
+    const safeIdx = Math.max(0, Number(idx) || 0);
+    if (q && q.isOsmuScenario && safeIdx < CHOICE_META.length) {
+      return CHOICE_META[safeIdx];
+    }
+    return KAHOOT_6_META[safeIdx % KAHOOT_6_META.length];
+  }
 
   /* ---------- 0. VisualViewport & On-Screen Keyboard Tracker ---------- */
   function syncVisualViewportVars() {
@@ -415,206 +432,148 @@
     return svg;
   }
 
-  /* ---------- 2. Source-Verified O/S/M/U & Do's/Don'ts Question Bank ---------- */
+  /* ---------- 2. Source-Verified 6 Kahoot Questions (1 × 6-Choice 5 HSS Objectives + 5 × O/S/M/U Scenarios · 10s) ---------- */
+  const OSMU_CHOICES = [
+    "O — Outstanding (ดีเยี่ยม)",
+    "S — Satisfactory (ผ่านตามเกณฑ์)",
+    "M — Marginal (คาบเส้น · บันทึกประวัติ M)",
+    "U — Unsatisfactory (ไม่ผ่าน / ลงทะเบียนเรียนใหม่)"
+  ];
+
   const BASE_QUESTIONS = [
     {
-      id: "q1_attendance_leave",
+      id: "q1_hs_5objectives_6c",
       quick5: true,
-      badge: "เวลาเรียน & สิทธิ์เข้าสอบ · โควตาการลา",
-      impactTag: "เวลาเรียน ≥ 80% · ทฤษฎี ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน",
-      durationSec: 20,
-      stem: "ตามคู่มือรายวิชา RACM 303 นักศึกษาจะมี “สิทธิ์เข้าสอบ” เมื่อมีเวลาเรียนไม่น้อยกว่าร้อยละเท่าใด และลาได้ไม่เกินกี่วันในช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามตามลำดับ?",
+      isOsmuScenario: false,
+      badge: "QUIZ 1 · 5 วัตถุประสงค์หมวดระบบสุขภาพ (6 Choices)",
+      impactTag: "เชื่อมโยงทั้ง 5 วัตถุประสงค์ด้วย Systems Thinking ในฟอร์ม 3A",
+      durationSec: 10,
+      stem: "ข้อใด “ไม่อยู่” ใน 5 วัตถุประสงค์หลักของหมวดระบบสุขภาพในรายวิชา RACM 303?",
       choices: [
-        "เวลาเรียน ≥ ร้อยละ 70 · ลาช่วงก่อน-หลังภาคสนาม ≤ 5 วัน · ภาคสนาม ≤ 2 วัน",
-        "เวลาเรียน ≥ ร้อยละ 80 · ลาช่วงก่อนและหลังภาคสนามรวมกัน ≤ 3 วัน · ช่วงภาคสนาม ≤ 1.5 วัน",
-        "เวลาเรียน ≥ ร้อยละ 80 · ลาช่วงก่อน-หลังภาคสนาม ≤ 4 วัน · ช่วงภาคสนามห้ามลาทุกกรณี",
-        "เวลาเรียน ≥ ร้อยละ 90 · ลาได้รวมตลอดรายวิชาไม่เกิน 3 วันโดยไม่แยกช่วง"
+        "1. สุขภาพ ปัจจัยกำหนดสุขภาพ (SDH, CDoH) และการป้องกันโรค",
+        "2. ระบบสุขภาพและระบบบริการสุขภาพ (6BB · PHC · UHC · EQESaRR)",
+        "3. ศักยภาพชุมชนในการพัฒนาสุขภาพ (ทุนทางสังคม · อสม. · ท้องถิ่น)",
+        "4. การสร้างเสริมสุขภาพ (Ottawa Charter · HiAP · COM-B)",
+        "5. การฝึกหัตถการผ่าตัดเฉพาะทางขั้นสูงในห้องผ่าตัด (OR Subspecialty)",
+        "6. บทบาทแพทย์ในระบบสุขภาพร่วมกับทีมสหวิชาชีพและชุมชน"
       ],
-      correctIdx: 1,
-      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 หัวข้อ เวลาเรียนและการลา & ประกาศคณะฯ พ.ศ. 2567 ข้อ 2.2",
-      doSummary: "รักษาเวลาเรียนรวมตลอดรายวิชา ≥ ร้อยละ 80 และยื่นใบลาขออนุมัติล่วงหน้าเสมอ (ก่อน-หลังภาคสนามรวม ≤ 3 วัน · ภาคสนาม ≤ 1.5 วัน)",
-      dontSummary: "ห้ามขาดกิจกรรมที่กำหนดว่าห้ามขาดโดยไม่ขออนุญาต (ข้อ 2.2.5 ร้ายแรง = U) และลาป่วย ≥ 3 วันต้องส่งใบรับรองแพทย์เสมอ (ไม่ส่ง = ข้อ 2.2.3 ร้ายแรง = U)",
-      osmuRule: "เวลาเรียนต่ำกว่าร้อยละ 80 จะไม่มีสิทธิ์เข้าสอบ · ขาดกิจกรรมบังคับโดยไม่ลา (ข้อ 2.2.5) หรือลาป่วย ≥ 3 วันไม่ส่งใบรับรองแพทย์ (ข้อ 2.2.3) พิจารณาให้ U ตามข้อ 3.2.1",
+      correctIdx: 4,
+      sourceRef: "สไลด์ 05 วัตถุประสงค์หมวดระบบสุขภาพทั้ง 5 ด้าน & แบบประเมินฟอร์ม 3A",
+      doSummary: "เชื่อมโยงทั้ง 5 วัตถุประสงค์ระบบสุขภาพเข้าด้วยกันผ่านการคิดเชิงระบบ (Systems Thinking) จากข้อมูลจริงในพื้นที่",
+      dontSummary: "อย่านำเสนอแยกเป็นข้อ ๆ ขาดจากกัน — ฟอร์ม 3A ให้น้ำหนักเนื้อหาบูรณาการเชื่อมโยง 5 วัตถุประสงค์ถึง 30 คะแนน",
+      osmuRule: "เฉลยข้อ ⬢! เพราะ 5 วัตถุประสงค์หลักหมวดระบบสุขภาพคือ (1) สุขภาพ/SDH/ป้องกันโรค (2) ระบบบริการสุขภาพ (3) ศักยภาพชุมชน (4) การสร้างเสริมสุขภาพ และ (5) บทบาทแพทย์ในระบบสุขภาพ",
       wrongHints: [
-        "เกณฑ์สิทธิ์เข้าสอบต้องมีเวลาเรียนไม่น้อยกว่าร้อยละ 80 และโควตาลาช่วงทฤษฎีรวมไม่เกิน 3 วัน ภาคสนามไม่เกิน 1.5 วัน",
+        "ข้อนี้เป็นวัตถุประสงค์ที่ 1 ของหมวดระบบสุขภาพ (HS1: สุขภาพ SDH/CDoH และการป้องกันโรค)",
+        "ข้อนี้เป็นวัตถุประสงค์ที่ 2 ของหมวดระบบสุขภาพ (ST1, HS2–3, HS5–6: ระบบบริการ 6BB/PHC/UHC/EQESaRR)",
+        "ข้อนี้เป็นวัตถุประสงค์ที่ 3 ของหมวดระบบสุขภาพ (ศักยภาพชุมชน ทุนทางสังคม และ อสม.)",
+        "ข้อนี้เป็นวัตถุประสงค์ที่ 4 ของหมวดระบบสุขภาพ (HS4: การสร้างเสริมสุขภาพ Ottawa Charter, HiAP และ COM-B)",
         "",
-        "ช่วงภาคสนามสามารถลาเมื่อมีเหตุจำเป็นได้ไม่เกิน 1.5 วัน (ต้องแจ้งและได้รับอนุมัติจากอาจารย์ที่ปรึกษา)",
-        "รายวิชาแยกเพดานวันลาชัดเจน: ช่วงก่อนและหลังภาคสนามรวม ≤ 3 วัน และช่วงภาคสนาม ≤ 1.5 วัน"
+        "ข้อนี้เป็นวัตถุประสงค์ที่ 5 ของหมวดระบบสุขภาพ (บทบาทแพทย์ในระบบสุขภาพร่วมกับสหวิชาชีพและชุมชน)"
       ]
     },
     {
-      id: "q2_conduct_2567_mu",
+      id: "sc1_leave_6sessions",
       quick5: true,
-      badge: "ประกาศคณะฯ พ.ศ. 2567 · ข้อ 2 และข้อ 3.2.1–3.2.3 (M vs U)",
-      impactTag: "2.1/2.2.3/2.2.5/2.3.3 = U · ตักเตือนไม่แก้ หรือเคยได้ M แล้วผิดซ้ำกลุ่มเดิม = U",
-      durationSec: 24,
-      stem: "ตามประกาศคณะแพทยศาสตร์ รพ.รามาธิบดี เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 (ข้อ 3.2.1–3.2.3) ข้อใดสรุปเกณฑ์การพิจารณาให้ “M” และ “U” ได้ถูกต้อง?",
-      choices: [
-        "ความผิดร้ายแรง (ข้อ 2.1 ไม่ซื่อสัตย์ทุกข้อ, 2.2.3 ลาป่วย ≥ 3 วันไม่ส่งใบรับรองแพทย์, 2.2.5 ขาดกิจกรรมห้ามขาดโดยไม่ลา, 2.3.3 เปิดเผยข้อมูลผู้ป่วย) = U ทันที · พฤติกรรมข้อ 2 อื่น ๆ พิจารณาให้ M (แต่ถ้าเตือนแล้วไม่ปรับปรุง หรือเคยได้ M จากวิชาใดแล้วผิดซ้ำกลุ่มเดิมตามข้อ 2 = U)",
-        "ต้องทำผิดเรื่องความไม่ซื่อสัตย์ครบ 3 ครั้งก่อนจึงจะได้ U ส่วนครั้งแรกได้เพียงตักเตือน",
-        "การมาสายเกิน 15 นาที (2.2.4) หรือส่งงานช้า (2.2.6) ไม่มีผลต่อ M หรือ U หากสอบทฤษฎีผ่านเกณฑ์",
-        "เคยได้ M จากรายวิชาอื่นมาก่อน จะเริ่มต้นนับหนึ่งใหม่เสมอในรายวิชาถัดไปโดยไม่นำมาคิดเป็น U"
-      ],
+      isOsmuScenario: true,
+      badge: "SCENARIO 1 · ลาเกิน 3 วัน (= เช้า-บ่าย 6 คาบที่เช็คชื่อ) & ข้อ 2.2.3",
+      impactTag: "ลาทฤษฎี ≤ 3 วัน (= 6 คาบเช็คชื่อ) · ลาป่วย ≥ 3 วันไม่ส่งใบรับรองแพทย์ = U",
+      durationSec: 10,
+      stem: "ช่วงก่อน–หลังภาคสนาม นศพ. ลาเรียนรวม 3.5 วัน (= เช้า–บ่าย 7 คาบ เกินโควตา 3 วัน = 6 คาบที่เช็คชื่อ) และลาป่วย 3 วันติดกันโดยไม่ส่งใบรับรองแพทย์ จะได้ผลประเมินใด?",
+      choices: OSMU_CHOICES.slice(),
+      correctIdx: 3,
+      sourceRef: "คู่มือรายวิชา RACM 303 (เวลาเรียน ≥ 80%, ลา ≤ 3 วัน = 6 คาบเช้า-บ่าย) & ประกาศคณะฯ พ.ศ. 2567 ข้อ 2.2.3 / 3.2.1",
+      doSummary: "ช่วงก่อน–หลังภาคสนามลาได้รวมกันไม่เกิน 3 วัน (= คาบเช้า–บ่าย รวม 6 คาบที่เช็คชื่อ) ภาคสนาม ≤ 1.5 วัน และลาป่วย ≥ 3 วันต้องส่งใบรับรองแพทย์เสมอ",
+      dontSummary: "ห้ามลาเกินโควตาจนเวลาเรียนต่ำกว่า 80% ห้ามขาดคาบห้ามขาดโดยไม่ลา (ข้อ 2.2.5) และห้ามลาป่วย ≥ 3 วันโดยไม่ส่งใบรับรองแพทย์ (ข้อ 2.2.3)",
+      osmuRule: "ได้ U ทันที! ลาเกิน 3 วัน (= 6 คาบเช้า-บ่าย) เสี่ยงเวลาเรียนไม่ถึง 80% หมดสิทธิ์สอบ และลาป่วย ≥ 3 วันไม่ส่งใบรับรองแพทย์ (ข้อ 2.2.3) เป็นความผิดร้ายแรงตามข้อ 3.2.1 = U",
+      wrongHints: [
+        "กรณีนี้ฝ่าฝืนทั้งเพดานวันลา (เกิน 3 วัน = 6 คาบเช้า-บ่าย) และข้อ 2.2.3 จึงไม่ได้ O",
+        "การลาป่วย ≥ 3 วันโดยไม่ส่งใบรับรองแพทย์เข้าข่ายพฤติกรรมร้ายแรงข้อ 2.2.3 จึงไม่ผ่านเป็น S",
+        "ข้อ 2.2.3 (ลาป่วย ≥ 3 วันไม่ส่งใบรับรองแพทย์) ถูกจัดเป็นความผิดร้ายแรงตามข้อ 3.2.1 จึงได้ U ทันที ไม่ใช่ M!",
+        ""
+      ]
+    },
+    {
+      id: "sc2_late_attire_m",
+      quick5: true,
+      isOsmuScenario: true,
+      badge: "SCENARIO 2 · สาย > 15 นาที (2.2.4) & ชุดนอกพื้นที่ (2.3.2) ครั้งแรก",
+      impactTag: "ผิดข้อ 2 (นอกกลุ่มร้ายแรง) ครั้งแรก + ยอมรับปรับปรุง = ข้อ 3.2.3 (M)",
+      durationSec: 10,
+      stem: "นศพ. เข้าคาบกลุ่มย่อยสายเกิน 15 นาทีโดยไม่แจ้ง (ข้อ 2.2.4) และสวมชุดปฏิบัติงาน รพ. ออกไปนอกพื้นที่ (ข้อ 2.3.2) เป็นครั้งแรก แต่ยอมรับคำตักเตือนและปรับปรุงตัวทันที จะพิจารณาให้สัญลักษณ์ใด?",
+      choices: OSMU_CHOICES.slice(),
+      correctIdx: 2,
+      sourceRef: "ประกาศคณะฯ พ.ศ. 2567 ข้อ 2.2.4, 2.3.2 และข้อ 3.2.3",
+      doSummary: "เข้าเรียนตรงเวลา แต่งกายถูกระเบียบ และหากได้รับข้อมูลป้อนกลับหรือคำตักเตือนจากอาจารย์ ต้องน้อมรับและปรับปรุงตัวทันที",
+      dontSummary: "ระวัง! แม้ครั้งแรกจะได้ M แต่ประวัติ M จะถูกบันทึกไว้ หากทำผิดซ้ำในกลุ่มข้อ 2 เดียวกันในรายวิชาใด ๆ ภายหลัง จะกลายเป็น U ทันที (ข้อ 3.2.2)",
+      osmuRule: "พิจารณาให้ M (Marginal / คาบเส้น) ตามข้อ 3.2.3 เพราะเป็นพฤติกรรมไม่พึงประสงค์ในข้อ 2 ที่ไม่ใช่ข้อร้ายแรงและกระทำผิดเป็นครั้งแรกโดยยอมรับปรับปรุงตัว",
+      wrongHints: [
+        "มีพฤติกรรมไม่พึงประสงค์ตามประกาศฯ ข้อ 2.2.4 และ 2.3.2 จึงไม่สามารถได้ O",
+        "ตามประกาศคณะฯ พ.ศ. 2567 ข้อ 3.2.3 เมื่อกระทำพฤติกรรมข้อ 2 (นอกกลุ่มร้ายแรง) สามารถพิจารณาให้สัญลักษณ์ M (คาบเส้น)",
+        "",
+        "สาย > 15 นาที (2.2.4) และชุดนอกพื้นที่ (2.3.2) ครั้งแรกที่ยอมรับปรับปรุงตัว พิจารณาให้ M ตามข้อ 3.2.3 (จะกลายเป็น U ก็ต่อเมื่อเตือนแล้วไม่แก้ หรือเคยได้ M แล้วผิดซ้ำกลุ่มเดิม)"
+      ]
+    },
+    {
+      id: "sc3_pdpa_repeat_u",
+      quick5: true,
+      isOsmuScenario: true,
+      badge: "SCENARIO 3 · โซเชียลผู้ป่วย (2.3.3) / ฝากเช็คชื่อ (2.1.6) / ซ้ำหลังได้ M",
+      impactTag: "ผิดร้ายแรง 2.1, 2.3.3 หรือเตือนไม่แก้ 2.4.4 หรือเคยได้ M แล้วซ้ำกลุ่มเดิม = U",
+      durationSec: 10,
+      stem: "นศพ. โพสต์ภาพติดข้อมูลผู้ป่วยลงโซเชียล (2.3.3) หรือฝากเช็คชื่อ (2.1.6) หรือไม่ยอมปรับปรุงหลังถูกเตือน (2.4.4) หรือเคยได้ M หมวด 2.2 จากวิชาอื่นแล้วส่งงานช้าซ้ำอีก (3.2.2) จะได้ผลใด?",
+      choices: OSMU_CHOICES.slice(),
+      correctIdx: 3,
+      sourceRef: "ประกาศคณะฯ พ.ศ. 2567 ข้อ 2.1, 2.3.3, 2.4.4 และข้อ 3.2.1–3.2.2",
+      doSummary: "ปกป้องความลับผู้ป่วย/ชุมชน 100% ซื่อสัตย์ไม่ฝากเช็คชื่อ (2.1.6) รับฟัง Feedback และหากเคยได้ M ต้องไม่ทำผิดซ้ำในหมวดเดิมอีกเด็ดขาด",
+      dontSummary: "ห้ามโพสต์ข้อมูลผู้ป่วยลงโซเชียล (2.3.3) ห้ามฝากเช็คชื่อ/ลอกงาน (2.1) ห้ามเพิกเฉยคำเตือน (2.4.4) และห้ามทำผิดซ้ำกลุ่มเดิมหลังเคยได้ M ข้ามวิชา",
+      osmuRule: "ได้ U ทันที (ต้องลงทะเบียนเรียนใหม่)! ครบทั้ง 3 เงื่อนไขให้ U ของประกาศฯ 2567: (1) ผิดร้ายแรง 2.1/2.2.3/2.2.5/2.3.3 · (2) เตือนไม่แก้ 2.4.4 · (3) เคยได้ M จากวิชาใดแล้วผิดซ้ำกลุ่มเดิม",
+      wrongHints: [
+        "ทุกกรณีเป็นความผิดระดับรุนแรงตามข้อ 3.2.1–3.2.2 ได้ U ทันที",
+        "ไม่สามารถผ่านเป็น S ได้ เพราะเข้าเกณฑ์พิจารณาให้ U ตามข้อ 3.2.1 และ 3.2.2",
+        "ไม่ได้ M ซ้ำ! เพราะข้อ 2.1.6/2.3.3 เป็นความผิดร้ายแรงได้ U ทันที และกรณีเคยได้ M แล้วผิดซ้ำกลุ่มเดิมหรือเตือนไม่แก้ (ข้อ 3.2.2) จะยกระดับเป็น U ทันที!",
+        ""
+      ]
+    },
+    {
+      id: "sc4_retest_s_honors",
+      quick5: true,
+      isOsmuScenario: true,
+      badge: "SCENARIO 4 · สอบทฤษฎี < 2.00 & สอบซ่อมแยกวิชา 1 ครั้งผ่าน",
+      impactTag: "สอบซ่อมผ่านได้เกรด S เท่านั้น (และมีผลต่อการได้รับเกียรตินิยม!)",
+      durationSec: 10,
+      stem: "นศพ. เวลาเรียนครบ เจตคติภาพรวม (ฟอร์ม 2A) ได้ O สอบระบาดฯ ได้ 3.85 แต่สอบระบบสุขภาพได้ 1.85 (< 2.00) จึงเข้าสอบซ่อมระบบฯ 1 ครั้งและสอบผ่าน จะได้เกรดสุดท้ายใด?",
+      choices: OSMU_CHOICES.slice(),
+      correctIdx: 1,
+      sourceRef: "คู่มือรายวิชา RACM 303 ปี 2569 ข้อ 13 การสอบซ่อมแยกวิชาและหมายเหตุเกียรตินิยม",
+      doSummary: "เตรียมสอบทั้งหมวดระบบสุขภาพและระบาดวิทยาให้ผ่าน ≥ 2.00 ตั้งแต่รอบแรก (ไม่นำคะแนนทั้งสองหมวดมาถัวเฉลี่ยข้ามกัน)",
+      dontSummary: "ระวัง! หากมีวิชาใด < 2.00 ต้องสอบซ่อมแยกวิชา (โอกาสแก้ตัว 1 ครั้ง) และหากมีการสอบซ่อมจะมีผลต่อการได้รับเกียรตินิยม",
+      osmuRule: "ได้เกรดสุดท้าย S (Satisfactory)! เมื่อสอบแก้ตัว 1 ครั้งผ่านจะได้รับเกรด S (ไม่สามารถได้เกรด O และมีผลต่อการได้รับเกียรตินิยม · หากสอบซ่อมไม่ผ่านจะได้ U)",
+      wrongHints: [
+        "แม้เจตคติได้ O และระบาดฯ ได้ 3.85 แต่เนื่องจากมีการสอบซ่อมวิชาระบบสุขภาพ จึงไม่ได้เกรด O (ได้สูงสุดคือ S และกระทบเกียรตินิยม)",
+        "",
+        "สัญลักษณ์ M ใช้สำหรับการประเมินเจตคติคาบเส้น ส่วนผู้ที่สอบซ่อมทฤษฎีผ่านใน 1 ครั้งจะได้รับเกรดสุดท้ายรายวิชาเป็น S",
+        "สอบซ่อม 1 ครั้งแล้ว 'สอบผ่าน' จึงได้รับเกรด S (จะได้ U ต้องลงทะเบียนเรียนใหม่ก็ต่อเมื่อสอบซ่อมไม่ผ่าน)"
+      ]
+    },
+    {
+      id: "sc5_outstanding_o",
+      quick5: true,
+      isOsmuScenario: true,
+      badge: "SCENARIO 5 · พฤติกรรมดีเยี่ยมสม่ำเสมอ (1A/2A) & ทฤษฎี ≥ 3.75 ทั้งคู่",
+      impactTag: "เจตคติ O + สอบทฤษฎี ≥ 3.75 ทั้งระบบฯ & ระบาดฯ + ไม่เคยสอบซ่อม = O",
+      durationSec: 10,
+      stem: "นศพ. เข้าเรียนครบ ซื่อสัตย์ รับผิดชอบ ช่วยเหลืองานกลุ่มสม่ำเสมอจนเจตคติภาพรวม (ฟอร์ม 2A) ได้ O และสอบทฤษฎีรอบแรกได้ ≥ 3.75 ทั้งระบบสุขภาพและระบาดวิทยา จะได้เกรดใด?",
+      choices: OSMU_CHOICES.slice(),
       correctIdx: 0,
-      sourceRef: "ประกาศคณะแพทยศาสตร์ รพ.รามาธิบดี เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 ข้อ 2 และข้อ 3.2",
-      doSummary: "ซื่อสัตย์ 100% ตรงต่อเวลา ส่งงานตามกำหนด เคารพข้อมูลส่วนบุคคลของผู้ป่วย/ชุมชน และรับฟังข้อมูลป้อนกลับเพื่อพัฒนาตนเสมอ",
-      dontSummary: "ห้ามทำผิดร้ายแรงข้อ 2.1, 2.2.3, 2.2.5, 2.3.3 เด็ดขาด (= U ทันที) และหากเคยได้รับตักเตือนหรือเคยได้ M ต้องระวังไม่ทำผิดซ้ำ!",
-      osmuRule: "ได้ U เมื่อ: (1) ผิดร้ายแรงข้อ 2.1, 2.2.3, 2.2.5, 2.3.3 [ข้อ 3.2.1] · (2) ตักเตือนแล้วไม่ปรับปรุง/ไม่ยอมรับ [ข้อ 3.2.2] · (3) เคยได้ M จากวิชาใด ๆ แล้วผิดซ้ำในกลุ่มเดียวกันตามข้อ 2 [ข้อ 3.2.2] | ส่วนพฤติกรรมข้อ 2 อื่น ๆ ครั้งแรกพิจารณาให้ M [ข้อ 3.2.3]",
+      sourceRef: "คู่มือรายวิชา RACM 303 ปี 2569 ข้อ 13 เกณฑ์การตัดสินเกรดระดับดีเยี่ยม (O)",
+      doSummary: "รักษามาตรฐานความซื่อสัตย์ ความรับผิดชอบ และการทำงานเป็นทีม (ฟอร์ม 1A & เพื่อนประเมิน → ฟอร์ม 2A = O) คู่กับการสอบทฤษฎีทั้งสองหมวด ≥ 3.75 ในรอบแรก",
+      dontSummary: "อย่าทิ้งด้านใดด้านหนึ่ง — หากสอบได้ ≥ 3.75 ทั้งคู่แต่เจตคติภาพรวมได้เพียง S เกรดสุดท้ายก็จะได้ S ไม่ใช่ O!",
+      osmuRule: "ได้เกรดสุดท้าย O (Outstanding)! เมื่อครบ 3 เงื่อนไข: เจตคติภาพรวม (ฟอร์ม 2A) ได้ O + ผลสอบทฤษฎีได้ O (≥ 3.75) ทั้งสองหมวดวิชา + ไม่มีการสอบซ่อม",
       wrongHints: [
         "",
-        "ข้อ 3.2.1 ระบุชัดว่า พฤติกรรมความไม่ซื่อสัตย์ (ข้อ 2.1.1–2.1.9 ทุกข้อ) ถือเป็นพฤติกรรมร้ายแรง สามารถพิจารณาให้ U ได้ตั้งแต่ครั้งแรก!",
-        "มาสายเกิน 15 นาที (ข้อ 2.2.4) และส่งงานล่าช้า/ไม่ส่งงาน (ข้อ 2.2.6–2.2.7) เป็นพฤติกรรมไม่พึงประสงค์ตามข้อ 2 สามารถพิจารณาให้ M และหากเตือนไม่แก้หรือทำซ้ำหลังได้ M จะเป็น U",
-        "ข้อ 3.2.2 ระบุว่า กรณีเคยได้รับ M มาแล้ว และกระทำผิดอีกในพฤติกรรมกลุ่มเดียวกันตามข้อ 2 จากรายวิชาใด ๆ สามารถพิจารณาให้ U ได้!"
-      ]
-    },
-    {
-      id: "q3_peer_and_grade_o",
-      quick5: true,
-      badge: "ข้อ 13 การประเมินเจตคติ · เพื่อนในกลุ่ม & เกรด O",
-      impactTag: "เจตคติ O + สอบทฤษฎี O ทั้งคู่ + ไม่เคยสอบซ่อม = เกรด O",
-      durationSec: 22,
-      stem: "ข้อใดกล่าว “ถูกต้อง” เกี่ยวกับแบบประเมินพฤติกรรมและเจตคติจากเพื่อนในกลุ่ม และการได้รับเกรดสุดท้ายระดับ O (Outstanding) ของรายวิชา RACM 303?",
-      choices: [
-        "แบบประเมินจากเพื่อนไม่มีผลใด ๆ และเกรด O ดูเฉพาะคะแนนสอบทฤษฎีเฉลี่ยรวมกันเกิน 3.50",
-        "ได้เกรด O ได้แม้เคยสอบซ่อม 1 ครั้ง หากหลังสอบซ่อมได้คะแนนสูงและเพื่อนประเมินให้ดี",
-        "แบบประเมินจากเพื่อนเป็นข้อมูลที่อาจารย์ใช้ประกอบการพิจารณาประเมินนักศึกษา และเกรดสุดท้ายได้ O เมื่อเจตคติภาพรวมได้ O + ผลสอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม",
-        "แบบประเมินจากเพื่อนใช้ตัดสินเกรดสุดท้ายแทนคะแนนสอบทฤษฎีทั้งหมด"
-      ],
-      correctIdx: 2,
-      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 ข้อ 13 การประเมินด้านเจตคติและการตัดสินเกรด",
-      doSummary: "ทำงานร่วมกับเพื่อนในกลุ่มอย่างรับผิดชอบ มีน้ำใจ ซื่อสัตย์ (สะท้อนใน Peer Evaluation & ฟอร์ม 2A) และเตรียมสอบทั้งสองวิชาให้พร้อมตั้งแต่รอบแรก",
-      dontSummary: "อย่ากินแรงกลุ่ม และอย่าประมาททิ้งวิชาใดวิชาหนึ่ง เพราะต้องผ่านเกณฑ์ระดับ O ทั้งเจตคติและผลสอบทฤษฎีโดยไม่มีการสอบซ่อม",
-      osmuRule: "เกรดสุดท้าย O = คะแนนประเมินภาพรวมเจตคติและพฤติกรรมได้ O + ผลสอบทฤษฎีได้ O (≥ 3.75 ทั้งระบบฯ และระบาดฯ) + ไม่มีการสอบซ่อม",
-      wrongHints: [
-        "คู่มือข้อ 13 ระบุชัดว่า แบบประเมินจากเพื่อนในกลุ่มเป็นข้อมูลสำคัญที่อาจารย์ใช้ประกอบการพิจารณาประเมินผลนักศึกษา",
-        "หากมีการสอบซ่อม จะไม่ได้รับเกรด O (เมื่อสอบซ่อมผ่านจะได้รับเกรดเป็น S เท่านั้น)",
-        "",
-        "ผลประเมินจากเพื่อนเป็นข้อมูลประกอบการพิจารณาของอาจารย์ ควบคู่กับฟอร์ม 1A/2A และผลสอบทฤษฎี"
-      ]
-    },
-    {
-      id: "q4_retest_honors",
-      quick5: true,
-      badge: "การสอบซ่อมแยกวิชา (< 2.00) · เกรด S & เกียรตินิยม",
-      impactTag: "ต่ำกว่า 2.00 สอบซ่อมแยกวิชา 1 ครั้ง → ผ่านได้ S & กระทบเกียรตินิยม",
-      durationSec: 22,
-      stem: "นศพ. สอบวิชาระบาดวิทยาได้ 3.80 แต่สอบวิชาระบบสุขภาพได้ 1.85 [แต้มต่ำกว่า 2.00] และผลเจตคติได้ O ข้อใดคือผลตามเกณฑ์การสอบซ่อมของรายวิชา?",
-      choices: [
-        "นำคะแนนทั้งสองวิชามาถัวเฉลี่ยกันได้ 2.82 จึงผ่านเป็นเกรด S ทันทีโดยไม่ต้องสอบซ่อม",
-        "ต้องสอบซ่อมเฉพาะวิชาระบบสุขภาพ (แก้ตัวได้ 1 ครั้ง) ถ้าผ่านจะได้เกรด S (และมีผลต่อการได้รับเกียรตินิยม) ถ้าไม่ผ่านต้องลงทะเบียนเรียนใหม่",
-        "ต้องสอบซ่อมใหม่ทั้งวิชาระบาดวิทยาและระบบสุขภาพพร้อมกัน และยังลุ้นเกรด O ได้",
-        "ให้โอกาสสอบแก้ตัวได้ไม่จำกัดจำนวนครั้งจนกว่าจะผ่าน 2.00 โดยไม่กระทบเกียรตินิยม"
-      ],
-      correctIdx: 1,
-      sourceRef: "คู่มือการเรียนการสอน RACM 303 ปี 2569 ข้อ 13 หัวข้อการสอบซ่อมและหมายเหตุเกียรตินิยม",
-      doSummary: "เตรียมตัวสอบให้ได้แต้ม ≥ 2.00 แยกกันทั้งวิชาระบบสุขภาพและวิชาระบาดวิทยาตั้งแต่การสอบรอบแรก",
-      dontSummary: "ห้ามเข้าใจผิดว่าคะแนนสอบทั้งสองวิชาถัวเฉลี่ยข้ามหมวดกันได้ — แต้มต่ำกว่า 2.00 แม้หมวดเดียวต้องสอบซ่อม!",
-      osmuRule: "สอบแยกวิชา [แต้ม < 2.00 ต้องสอบซ่อม] แก้ตัวได้ 1 ครั้ง: ผ่านได้เกรด S (หมายเหตุ: มีผลต่อการได้รับเกียรตินิยม!) · ไม่ผ่านต้องลงทะเบียนเรียนใหม่",
-      wrongHints: [
-        "คะแนนสอบคิดแยกวิชาระบบฯ และวิชาระบาดฯ ไม่นำมาถัวเฉลี่ยกัน หากวิชาใดต่ำกว่า 2.00 ต้องสอบซ่อมวิชานั้น!",
-        "",
-        "สอบซ่อมเฉพาะวิชาที่ได้แต้มต่ำกว่า 2.00 เท่านั้น และเมื่อสอบซ่อมผ่านจะได้รับเกรดเป็น S (ไม่ได้ O)",
-        "รายวิชาให้โอกาสสอบแก้ตัวได้เพียง 1 ครั้งเท่านั้น และคู่มือระบุหมายเหตุชัดว่า การสอบซ่อมมีผลต่อการได้รับเกียรตินิยม!"
-      ]
-    },
-    {
-      id: "q5_attitude_u_reregister",
-      quick5: true,
-      badge: "การลงทะเบียนเรียนใหม่ · เจตคติได้ U & ความซื่อสัตย์",
-      impactTag: "ผลประเมินเจตคติและพฤติกรรมได้ U → ต้องลงทะเบียนเรียนใหม่ทันที",
-      durationSec: 20,
-      stem: "เพื่อนฝากเช็คชื่อเข้าเรียน หรือช่วยกันเมคข้อมูลเท็จในแบบสำรวจชุมชน จนผลการประเมินเจตคติและพฤติกรรมได้ระดับ “U” ผลตามคู่มือข้อ 13 คือข้อใด?",
-      choices: [
-        "ขอสอบข้อเขียนแก้ตัวเพิ่มเติม 1 ครั้งเพื่อเปลี่ยนเกรดจาก U เป็น S ได้",
-        "ทำรายงานบำเพ็ญประโยชน์ส่งท้ายรายวิชาเพื่อปรับระดับ U เป็น M",
-        "ตักเตือนเฉพาะผู้ฝากเช็คชื่อ ส่วนผู้ทำให้ถือว่ามีน้ำใจช่วยเหลือเพื่อนในกลุ่ม",
-        "ทั้งผู้ฝากและผู้ทำแทนเข้าข่ายไม่ซื่อสัตย์ได้รับเจตคติระดับ U และเมื่อเจตคติและพฤติกรรมได้ U ต้องลงทะเบียนเรียนใหม่ (ไม่มีการสอบซ่อม)"
-      ],
-      correctIdx: 3,
-      sourceRef: "คู่มือรายวิชา 2569 ข้อ 13 การลงทะเบียนเรียนใหม่ & ภาคผนวกฟอร์ม 1A ข้อ 6.2",
-      doSummary: "ลงชื่อเข้าเรียนด้วยตนเอง เก็บข้อมูลชุมชนตามความจริง ไม่คัดลอกผลงาน และซื่อสัตย์ต่อวิชาชีพแพทย์",
-      dontSummary: "ห้ามเซ็นชื่อแทนกัน ห้ามบิดเบือน/เมคข้อมูลสำรวจ ห้ามปลอมใบรับรองแพทย์ และห้ามทุจริตการสอบเด็ดขาด",
-      osmuRule: "การลงทะเบียนเรียนใหม่: ผลการประเมินเจตคติและพฤติกรรมได้ U ต้องลงทะเบียนเรียนใหม่สถานเดียว (ไม่มีการสอบแก้ตัว!)",
-      wrongHints: [
-        "การสอบแก้ตัว 1 ครั้งใช้เฉพาะกรณีคะแนนสอบทฤษฎีต่ำกว่า 2.00 เท่านั้น ส่วนเจตคติได้ U ต้องลงทะเบียนเรียนใหม่ทันที!",
-        "เมื่อสรุปผลเจตคติและพฤติกรรมเป็น U แล้ว ไม่สามารถทำรายงานแก้ตัวได้ ต้องลงทะเบียนเรียนใหม่",
-        "ประกาศคณะฯ พ.ศ. 2567 และ มม.4 ระบุชัดว่าทั้งผู้ให้ทำแทนและผู้ทำแทนในการลงชื่อหรือทำงานแทน ได้รับ U ทั้งคู่",
-        ""
-      ]
-    },
-    {
-      id: "q6_fieldwork_donts",
-      quick5: false,
-      badge: "DO'S & DON'TS · ระเบียบภาคสนาม พ.ศ. 2561",
-      impactTag: "งดพาหนะส่วนตัว · งดออกนอกเขตฝึก · งดแอลกอฮอล์/พนัน",
-      durationSec: 20,
-      stem: "ระหว่างฝึกภาคสนาม ณ รพ.แหล่งฝึกทั้ง 9 แห่ง ข้อใดคือ “Don't (ห้ามทำเด็ดขาด)” ที่ฝ่าฝืนระเบียบฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 และนำไปสู่ระดับ U?",
-      choices: [
-        "เดินทางเป็นทีมด้วยรถที่ภาควิชา/รพ.จัดให้ และแจ้งอาจารย์ที่ปรึกษาทุกครั้งก่อนลงพื้นที่",
-        "นำรถยนต์/มอเตอร์ไซค์ส่วนตัวไปใช้ ออกนอกเขตฝึกโดยพลการ ดื่มแอลกอฮอล์/เล่นพนัน หรือพาคนนอกเข้าที่พักโดยไม่ขออนุญาต",
-        "แต่งกายสุภาพลงชุมชน และสวมชุดนักศึกษาแพทย์ติดป้ายชื่อเมื่อขึ้นปฏิบัติงานใน รพช.",
-        "เคารพสิทธิผู้ป่วยและชุมชนโดยไม่โพสต์ภาพหรือข้อมูลผู้ป่วยลงสื่อสังคมออนไลน์"
-      ],
-      correctIdx: 1,
-      sourceRef: "คู่มือรายวิชา 2569 หัวข้อ 2, 10, 14 (ประกาศระเบียบฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561)",
-      doSummary: "ใช้พาหนะและพักในที่พักที่จัดให้ ลงพื้นที่เป็นทีม แต่งกายสุภาพติดป้ายชื่อ และดูแลความปลอดภัยของเพื่อนร่วมทีม",
-      dontSummary: "งดพาหนะส่วนตัว งดออกนอกพื้นที่โดยพลการ งดแอลกอฮอล์/สารเสพติด/การพนัน งดพาคนนอกเข้าที่พัก และห้ามปกปิดการกระทำผิด",
-      osmuRule: "ฝ่าฝืนระเบียบภาคสนาม พ.ศ. 2561 หรือปกปิดการฝ่าฝืน = ดำเนินการทางวินัยและประเมินเจตคติเป็น U (ลงทะเบียนเรียนใหม่)",
-      wrongHints: [
-        "ข้อนี้เป็นแนวปฏิบัติที่ถูกต้อง (Do) เพื่อความปลอดภัยตลอดการฝึกภาคสนาม",
-        "",
-        "ข้อนี้เป็นแนวปฏิบัติการแต่งกายที่ถูกต้อง (Do)",
-        "ข้อนี้เป็นแนวปฏิบัติการคุ้มครองสิทธิผู้ป่วยที่ถูกต้อง (Do)"
-      ]
-    },
-    {
-      id: "q7_exam_opennote",
-      quick5: false,
-      badge: "DO'S & DON'TS · ระเบียบห้องสอบ & โน้ต A4",
-      impactTag: "สาย > 15 นาทีหมดสิทธิ์สอบ · A4 เขียนลายมือตนเองเท่านั้น",
-      durationSec: 20,
-      stem: "ข้อใดปฏิบัติ “ถูกต้อง (Do)” ในการเข้าสอบทฤษฎีระบาดวิทยา (8 ธ.ค.) และการสอบระบบสุขภาพ (22 ธ.ค. แบบ Open Note)?",
-      choices: [
-        "เข้าห้องสอบสายได้ไม่เกิน 30 นาที และสวม Smart Watch เข้าห้องสอบได้หากปิดเสียง",
-        "สอบระบบสุขภาพนำกระดาษ A4 ที่พิมพ์สรุปจาก iPad หรือถ่ายเอกสารลายมือเพื่อนเข้าห้องสอบได้ 1 แผ่น",
-        "เข้าห้องสอบไม่สายเกิน 15 นาที งดกระเป๋า/มือถือ/Smart Watch/เครื่องคิดเลข และสอบระบบสุขภาพนำ A4 เขียนลายมือตนเอง (หน้า-หลัง) เข้าได้ 1 แผ่น",
-        "สอบระบาดวิทยาอนุญาตให้นำเครื่องคิดเลขวิทยาศาสตร์ส่วนตัวเข้าห้องสอบได้"
-      ],
-      correctIdx: 2,
-      sourceRef: "คู่มือรายวิชา 2569 หัวข้อที่ 9 ระเบียบการสอบภาคทฤษฎี (หน้า 11–12)",
-      doSummary: "แต่งชุด นศพ. ติดป้ายชื่อ เข้าห้องสอบก่อนเวลา (สายเกิน 15 นาทีไม่อนุญาตให้เข้าสอบ) และเขียนสรุป A4 ด้วยลายมือตนเอง",
-      dontSummary: "ห้ามนำกระเป๋า มือถือ Smart Watch เครื่องคิดเลข เอกสารพิมพ์/สำเนา และอาหารเครื่องดื่มเข้าห้องสอบเด็ดขาด",
-      osmuRule: "ทุจริตหรือนำอุปกรณ์ต้องห้ามเข้าห้องสอบ = U ทันที · สอบต่ำกว่า 2.00 ต้องสอบซ่อมแยกหมวด",
-      wrongHints: [
-        "สายเกิน 15 นาทีหมดสิทธิ์เข้าสอบ และห้ามสวม Smart Watch ทุกชนิดเข้าห้องสอบ!",
-        "กระดาษ A4 1 แผ่นในวิชาสอบระบบสุขภาพต้องเขียนสดด้วยลายมือตนเองเท่านั้น ห้ามพิมพ์หรือถ่ายสำเนา!",
-        "",
-        "ไม่อนุญาตให้นำเครื่องคิดเลขและอุปกรณ์อิเล็กทรอนิกส์ทุกชนิดเข้าห้องสอบ"
-      ]
-    },
-    {
-      id: "q8_ai_pdpa_3a4a",
-      quick5: false,
-      badge: "DO'S & DON'TS · AI, PDPA & นำเสนอ 3A/4A",
-      impactTag: "SRN 1–2 = No AI · งด VDO ล่วงหน้า · ห้ามข้อมูลชาวบ้านเข้า AI",
-      durationSec: 22,
-      stem: "ข้อใดปฏิบัติ “ถูกต้อง” ตามเกณฑ์การใช้ AI ม.มหิดล, กฎหมาย PDPA และการนำเสนอผลงานภาคสนาม (ฟอร์ม 3A / 4A)?",
-      choices: [
-        "ใช้ Generative AI เขียนบันทึกสะท้อนคิด SRN 1 และ SRN 2 แทนตนเองเพื่อส่งให้ทันเวลา",
-        "อัปโหลดไฟล์ข้อมูลดิบที่มีชื่อ-นามสกุลผู้ป่วยในชุมชนเข้า AI สาธารณะเพื่อวิเคราะห์สถิติ",
-        "อัดคลิปวิดีโอนำเสนอล่วงหน้ามาเปิดฉายในวันนำเสนอ 29–30 ธ.ค. เพื่อคุมเวลาให้เป๊ะ",
-        "เขียน SRN 1–2 ด้วยตนเอง (No AI) · งานกลุ่ม 3A/4A ใช้ AI ช่วยได้โดยต้อง Declare Prompt ห้ามใส่ข้อมูลระบุตัวบุคคล และต้องนำเสนอสดตรงเวลา"
-      ],
-      correctIdx: 3,
-      sourceRef: "มม.4 ปี 2569 (AI Scale Assessment) & คู่มือรายวิชา หัวข้อ 15–17",
-      doSummary: "เขียน SRN 1–2 ด้วยตนเอง (ทำแบบประเมินออนไลน์ก่อนส่ง!) · นำเสนอ 3A (≤ 10 นาที) และ 4A (≤ 7 นาที) แบบสด และ Declare Prompt เมื่อใช้ AI",
-      dontSummary: "ห้ามใช้ AI เขียน SRN ห้ามนำข้อมูลระบุตัวบุคคลเข้า AI สาธารณะ และห้ามใช้วิดีโออัดล่วงหน้าในการนำเสนอ",
-      osmuRule: "ละเมิด PDPA/ลอกหรือปลอมงาน = U · ไม่รักษาเวลาหรือไม่หยุดเมื่อเตือนใน 3A/4A เสี่ยงติดหมวด U!",
-      wrongHints: [
-        "SRN 1–2 กำหนดเป็น No AI เด็ดขาด เพื่อประเมินการสะท้อนคิดจริงของนักศึกษา",
-        "ห้ามนำข้อมูลระบุตัวบุคคลของชาวบ้านเข้า AI สาธารณะโดยเด็ดขาด (ผิด PDPA และจริยธรรมวิจัย)",
-        "คู่มือรายวิชา หัวข้อ 16–17 ไม่อนุญาตให้ใช้วิดีโอถ่ายบันทึกล่วงหน้ามาเปิดนำเสนอ!",
-        ""
+        "กรณีนี้ผ่านครบทั้งเจตคติระดับ O และผลสอบทฤษฎีระดับ O (≥ 3.75) ทั้งสองวิชาโดยไม่เคยสอบซ่อม จึงได้รับเกรดสูงสุดคือ O!",
+        "ไม่มีพฤติกรรมไม่พึงประสงค์ใด ๆ จึงไม่ได้ M",
+        "ผ่านเกณฑ์ระดับดีเยี่ยมครบทุกมิติ จึงได้เกรด O"
       ]
     }
   ];
@@ -676,13 +635,16 @@
     safeSet("racm303_orient_pid_v1", savedPid);
   }
 
+  const savedSnoInit = safeGet("racm303_orient_sno_v1", "");
+
   const state = {
     role: ROLE,
     participantId: savedPid,
     memberType: safeGet("racm303_orient_mtype_v1", ROLE === "faculty" ? "faculty" : "student"), // "student" | "faculty"
     joined: safeGet("racm303_orient_joined_v1", "0") === "1",
     studentId: safeGet("racm303_orient_sid_v1", ""),
-    shortNo: safeGet("racm303_orient_sno_v1", ""),
+    shortNo: savedSnoInit,
+    pinDigits: /^\d{1,3}$/.test(savedSnoInit) ? savedSnoInit : "",
     nickname: safeGet("racm303_orient_nick_v1", ""),
     fullName: safeGet("racm303_orient_fname_v1", ""),
     area: safeGet("racm303_orient_area_v1", ""),
@@ -700,19 +662,19 @@
     soundMuted: safeGet("racm303_orient_mute_v1", "0") === "1",
     participantModalOpen: false,
 
-    presetMode: "quick5", // Default to crisp 5-question core O/S/M/U & Conduct 2567 check! ("quick5" | "all8")
-    customDurationSec: 20,
+    presetMode: "quick5", // 5-question core O/S/M/U scenarios (10s each)
+    customDurationSec: 10,
     customQuestions: loadCustomQuestions(),
 
     session: {
       seq: 0,
-      sessionId: safeGet("racm303_orient_sess_id_v1", "orient_2569"),
+      sessionId: safeGet("racm303_orient_sess_id_v1", "orient_2569_kahoot10s"),
       phase: "lobby", // "lobby" | "question" | "reveal" | "podium"
       activeDeckIds: BASE_QUESTIONS.filter((q) => q.quick5).map((q) => q.id),
       qPos: 0,
       currentQuestion: null,
-      durationSec: 20,
-      baseRemainingMs: 20000,
+      durationSec: 10,
+      baseRemainingMs: 10000,
       anchorPerfNow: performance.now(),
       timerRunning: false,
       hostSlideIdx: 0,
@@ -736,6 +698,12 @@
     return window.RACM_ROSTER_DATA && Array.isArray(window.RACM_ROSTER_DATA.students)
       ? window.RACM_ROSTER_DATA.students
       : [];
+  }
+
+  function findStudentsBy3Digits(pin3) {
+    const clean = String(pin3 || "").replace(/\D/g, "");
+    if (clean.length !== 3) return [];
+    return getRosterList().filter((s) => String(s.id || "").slice(-3) === clean);
   }
 
   function sanitizeStudentNickname(nick, sid, sno) {
@@ -762,12 +730,12 @@
       if (m7) return m7;
     }
     const id3 = raw.match(/^(\d{3})(?:\b|\s|·|-)/);
-    const parenNick = raw.match(/\(([^)]+)\)/);
+    const parenNick = raw.match(/\(([^)]+)\)$/);
     return (
       list.find((s) => String(s.id) === q) ||
       list.find((s) => String(s.id).slice(-3) === q) ||
       (id3 && list.find((s) => String(s.id).slice(-3) === id3[1])) ||
-      (parenNick && list.find((s) => String(s.nickname || "").toLowerCase() === parenNick[1].trim().toLowerCase())) ||
+      (parenNick && list.find((s) => String(s.id).slice(-3) === parenNick[1].trim().toLowerCase())) ||
       list.find((s) => String(s.nickname || "").toLowerCase() === q) ||
       list.find((s) => String(s.name || "").toLowerCase().includes(q) || String(s.nickname || "").toLowerCase().includes(q)) ||
       null
@@ -785,7 +753,7 @@
         const nick = String(s.nickname || "").toLowerCase();
         const name = String(s.name || s.fullName || "").toLowerCase();
         const area = String(s.area || "").toLowerCase();
-        return sid.includes(q) || sno === q || nick.includes(q) || name.includes(q) || area.includes(q);
+        return sid.includes(q) || sno.startsWith(q) || nick.includes(q) || name.includes(q) || area.includes(q);
       })
       .slice(0, 8);
   }
@@ -897,32 +865,261 @@
     return Math.max(0, Math.round(s.baseRemainingMs - elapsed));
   }
 
-  /* ---------- 4. Subtle Web Audio Game Sounds ---------- */
+  /* ---------- 4. Kahoot! Web Audio Synthesizer (Soft Countdown Groove + Cymbal Crash + Podium Fanfare) ---------- */
+  let sharedAudioCtx = null;
+  let sharedNoiseBuf = null;
+  let bgmTimerId = 0;
+  let bgmStepIdx = 0;
+  let bgmMasterGain = null;
+
+  function getAudioCtx() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+        sharedAudioCtx = new AudioCtx();
+        sharedNoiseBuf = null;
+      }
+      if (sharedAudioCtx.state === "suspended") {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function getNoiseBuffer(ctx) {
+    if (sharedNoiseBuf && sharedNoiseBuf.sampleRate === ctx.sampleRate) return sharedNoiseBuf;
+    const len = Math.floor(ctx.sampleRate * 1.6);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i += 1) {
+      ch[i] = Math.random() * 2 - 1;
+    }
+    sharedNoiseBuf = buf;
+    return buf;
+  }
+
+  function isBigStageVisible() {
+    const deckModal = document.getElementById("orientationDeckModal");
+    if (deckModal && !deckModal.hidden && !state.participantModalOpen) return true;
+    return state.role === "faculty" && !state.participantModalOpen;
+  }
+
   function playTone(freqs, durSec, typeOpt, volOpt) {
     if (state.soundMuted) return;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const vol = volOpt || 0.09;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const vol = volOpt || 0.08;
       freqs.forEach((f, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = typeOpt || "triangle";
         osc.frequency.value = f;
-        const t0 = ctx.currentTime + idx * (durSec * 0.68);
+        const t0 = ctx.currentTime + idx * (durSec * 0.65);
         gain.gain.setValueAtTime(0.0008, t0);
-        gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.018);
         gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durSec);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(t0);
-        osc.stop(t0 + durSec + 0.02);
+        osc.stop(t0 + durSec + 0.03);
       });
-      setTimeout(() => {
-        if (ctx && typeof ctx.close === "function") ctx.close().catch(() => {});
-      }, 1200);
     } catch (_) {}
+  }
+
+  function stopKahootCountdownBgm() {
+    if (bgmTimerId) {
+      clearTimeout(bgmTimerId);
+      bgmTimerId = 0;
+    }
+    if (bgmMasterGain && sharedAudioCtx) {
+      try {
+        const now = sharedAudioCtx.currentTime;
+        bgmMasterGain.gain.cancelScheduledValues(now);
+        bgmMasterGain.gain.setValueAtTime(Math.max(0.0001, bgmMasterGain.gain.value || 0.04), now);
+        bgmMasterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+      } catch (_) {}
+      bgmMasterGain = null;
+    }
+  }
+
+  // Upbeat soft Kahoot-like suspense groove (bouncy bass + marimba ostinato + light hi-hat)
+  const BGM_BASS_HZ = [130.81, 130.81, 98.0, 116.54, 130.81, 155.56, 174.61, 196.0];
+  const BGM_LEAD_HZ = [392.0, 523.25, 622.25, 587.33, 523.25, 466.16, 392.0, 466.16, 523.25, 622.25, 698.46, 622.25, 587.33, 523.25, 466.16, 587.33];
+
+  function scheduleKahootBgmStep() {
+    bgmTimerId = 0;
+    if (state.soundMuted || state.session.phase !== "question" || !state.session.timerRunning || !isBigStageVisible()) {
+      stopKahootCountdownBgm();
+      return;
+    }
+    const rem = getRemainingMs();
+    if (rem <= 60) {
+      stopKahootCountdownBgm();
+      return;
+    }
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+
+    if (!bgmMasterGain) {
+      bgmMasterGain = ctx.createGain();
+      bgmMasterGain.gain.value = 0.052; // Soft, exciting background level
+      bgmMasterGain.connect(ctx.destination);
+    }
+
+    const urgent = rem <= 3200;
+    const stepDurSec = urgent ? 0.185 : 0.225;
+    const now = ctx.currentTime;
+    const step = bgmStepIdx;
+    bgmStepIdx += 1;
+
+    try {
+      // 1. Bouncy lowpass pluck bass
+      const bassFreq = BGM_BASS_HZ[step % BGM_BASS_HZ.length] * (urgent ? 1.12246 : 1);
+      const bOsc = ctx.createOscillator();
+      const bFlt = ctx.createBiquadFilter();
+      const bGain = ctx.createGain();
+      bOsc.type = "sawtooth";
+      bOsc.frequency.setValueAtTime(bassFreq, now);
+      bFlt.type = "lowpass";
+      bFlt.frequency.setValueAtTime(urgent ? 680 : 520, now);
+      bGain.gain.setValueAtTime(0.001, now);
+      bGain.gain.exponentialRampToValueAtTime(0.42, now + 0.012);
+      bGain.gain.exponentialRampToValueAtTime(0.001, now + stepDurSec * 0.82);
+      bOsc.connect(bFlt);
+      bFlt.connect(bGain);
+      bGain.connect(bgmMasterGain);
+      bOsc.start(now);
+      bOsc.stop(now + stepDurSec * 0.88);
+
+      // 2. Syncopated marimba/synth lead
+      const leadFreq = BGM_LEAD_HZ[step % BGM_LEAD_HZ.length] * (urgent ? 1.12246 : 1);
+      const lOsc = ctx.createOscillator();
+      const lGain = ctx.createGain();
+      lOsc.type = "triangle";
+      lOsc.frequency.setValueAtTime(leadFreq, now);
+      lGain.gain.setValueAtTime(0.001, now);
+      lGain.gain.exponentialRampToValueAtTime(step % 2 === 0 ? 0.36 : 0.24, now + 0.01);
+      lGain.gain.exponentialRampToValueAtTime(0.001, now + stepDurSec * 0.72);
+      lOsc.connect(lGain);
+      lGain.connect(bgmMasterGain);
+      lOsc.start(now);
+      lOsc.stop(now + stepDurSec * 0.78);
+
+      // 3. Soft hi-hat tick on offbeats
+      if (step % 2 === 1) {
+        const hhSrc = ctx.createBufferSource();
+        hhSrc.buffer = getNoiseBuffer(ctx);
+        const hhFlt = ctx.createBiquadFilter();
+        hhFlt.type = "highpass";
+        hhFlt.frequency.value = 6800;
+        const hhGain = ctx.createGain();
+        hhGain.gain.setValueAtTime(0.14, now);
+        hhGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        hhSrc.connect(hhFlt);
+        hhFlt.connect(hhGain);
+        hhGain.connect(bgmMasterGain);
+        hhSrc.start(now, 0, 0.045);
+      }
+    } catch (_) {}
+
+    bgmTimerId = setTimeout(scheduleKahootBgmStep, Math.round(stepDurSec * 1000));
+  }
+
+  function startKahootCountdownBgm() {
+    stopKahootCountdownBgm();
+    if (state.soundMuted || !isBigStageVisible()) return;
+    bgmStepIdx = 0;
+    scheduleKahootBgmStep();
+  }
+
+  // Realistic Cymbal Crash + Gong Boom when Quiz timer finishes!
+  function playKahootTimesUpCrash() {
+    stopKahootCountdownBgm();
+    if (state.soundMuted) return;
+    try {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      // 1. Shimmering Cymbal Crash (filtered white noise + metallic partials)
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+      const hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.setValueAtTime(3100, now);
+      const bp = ctx.createBiquadFilter();
+      bp.type = "peaking";
+      bp.frequency.setValueAtTime(5600, now);
+      bp.gain.setValueAtTime(5.5, now);
+      const cymGain = ctx.createGain();
+      cymGain.gain.setValueAtTime(0.001, now);
+      cymGain.gain.exponentialRampToValueAtTime(0.16, now + 0.006);
+      cymGain.gain.exponentialRampToValueAtTime(0.055, now + 0.22);
+      cymGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.38);
+      noise.connect(hp);
+      hp.connect(bp);
+      bp.connect(cymGain);
+      cymGain.connect(ctx.destination);
+      noise.start(now, 0, 1.42);
+
+      [331, 487, 709, 983, 1367, 1913].forEach((hz) => {
+        const mOsc = ctx.createOscillator();
+        const mFlt = ctx.createBiquadFilter();
+        const mGain = ctx.createGain();
+        mOsc.type = "square";
+        mOsc.frequency.setValueAtTime(hz, now);
+        mFlt.type = "bandpass";
+        mFlt.frequency.setValueAtTime(4200, now);
+        mFlt.Q.value = 1.4;
+        mGain.gain.setValueAtTime(0.022, now);
+        mGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.58);
+        mOsc.connect(mFlt);
+        mFlt.connect(mGain);
+        mGain.connect(ctx.destination);
+        mOsc.start(now);
+        mOsc.stop(now + 0.6);
+      });
+
+      // 2. Warm Timpani / Gong Impact + Kahoot Reveal Triad
+      const boom = ctx.createOscillator();
+      const boomGain = ctx.createGain();
+      boom.type = "sine";
+      boom.frequency.setValueAtTime(156, now);
+      boom.frequency.exponentialRampToValueAtTime(54, now + 0.42);
+      boomGain.gain.setValueAtTime(0.18, now);
+      boomGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+      boom.connect(boomGain);
+      boomGain.connect(ctx.destination);
+      boom.start(now);
+      boom.stop(now + 0.58);
+
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+        const bell = ctx.createOscillator();
+        const bGain = ctx.createGain();
+        bell.type = "triangle";
+        bell.frequency.setValueAtTime(f, now + 0.04 + idx * 0.045);
+        bGain.gain.setValueAtTime(0.001, now + 0.04 + idx * 0.045);
+        bGain.gain.exponentialRampToValueAtTime(0.075, now + 0.06 + idx * 0.045);
+        bGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62 + idx * 0.045);
+        bell.connect(bGain);
+        bGain.connect(ctx.destination);
+        bell.start(now + 0.04 + idx * 0.045);
+        bell.stop(now + 0.66 + idx * 0.045);
+      });
+    } catch (_) {}
+  }
+
+  function playKahootPodiumFanfare() {
+    stopKahootCountdownBgm();
+    if (state.soundMuted) return;
+    playTone([523.25, 659.25, 783.99, 1046.5, 1318.5], 0.22, "triangle", 0.1);
+    setTimeout(() => {
+      if (!state.soundMuted) playKahootTimesUpCrash();
+    }, 520);
   }
 
   /* ---------- 5. Real-Time Transport Layer (BroadcastChannel + MQTT WSS + PeerJS) ---------- */
@@ -978,11 +1175,14 @@
     }
 
     if (msg.type === "session") {
+      if (isRetained && state.hasLocalHostAuthority) {
+        return;
+      }
       if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > STALE_SESSION_MS) {
         return;
       }
       const incomingSeq = Number(msg.seq) || 0;
-      if (incomingSeq < state.session.seq && (msg.sentWallMs || 0) < (state.session.updatedWallMs || 0)) {
+      if (incomingSeq <= state.session.seq && (msg.sentWallMs || 0) <= (state.session.updatedWallMs || 0)) {
         return;
       }
       const prevPhase = state.session.phase;
@@ -1005,8 +1205,25 @@
         state.session.activeDeckIds = msg.activeDeckIds.slice();
       }
       state.session.qPos = Number(msg.qPos) || 0;
-      state.session.currentQuestion = msg.currentQuestion || null;
-      state.session.durationSec = Math.max(5, Number(msg.durationSec) || 20);
+      if (msg.currentQuestion) {
+        const baseMatch = getAllQuestions().find((item) => item.id === msg.currentQuestion.id);
+        state.session.currentQuestion = baseMatch ? Object.assign({}, baseMatch, msg.currentQuestion, { correctIdx: baseMatch.correctIdx }) : msg.currentQuestion;
+        if (typeof state.session.currentQuestion.correctIdx === "number") {
+          const rqMap = state.answersByQ.get(state.session.currentQuestion.id);
+          if (rqMap) {
+            const durMs = Math.max(1000, (Number(msg.durationSec) || 10) * 1000);
+            rqMap.forEach((ans) => {
+              const isR = Number(ans.choiceIdx) === Number(state.session.currentQuestion.correctIdx);
+              const spRatio = Math.max(0, Math.min(1, Math.max(0, durMs - (ans.elapsedMs || 1000)) / durMs));
+              ans.correct = isR;
+              ans.points = isR ? Math.round(500 + 500 * spRatio) : 0;
+            });
+          }
+        }
+      } else {
+        state.session.currentQuestion = null;
+      }
+      state.session.durationSec = Math.max(5, Number(msg.durationSec) || 10);
       state.session.baseRemainingMs = rem;
       state.session.anchorPerfNow = performance.now();
       state.session.timerRunning = Boolean(msg.timerRunning) && rem > 0;
@@ -1015,7 +1232,6 @@
       if (msg.hostSlideTitle) state.session.hostSlideTitle = String(msg.hostSlideTitle);
       state.session.updatedWallMs = Number(msg.sentWallMs) || Date.now();
 
-      // Synced Slide Follow: if participant has Deck open with Follow Live Slide enabled, follow presenter!
       if (
         !isRetained &&
         state.followHostSlide &&
@@ -1031,7 +1247,6 @@
         if (navigator.vibrate) {
           try { navigator.vibrate([110, 50, 110]); } catch (_) {}
         }
-        // Auto-open answer pad for any joined participant (both student and faculty participants!) unless this screen is presenting the Deck!
         const deckModal = document.getElementById("orientationDeckModal");
         const isPresentingBigScreen =
           state.role === "faculty" && deckModal && !deckModal.hidden && window.innerWidth >= 1024;
@@ -1040,8 +1255,13 @@
           state.mobileTab = "pad";
         }
         playTone([523.25, 659.25, 783.99], 0.13, "triangle", 0.08);
+        startKahootCountdownBgm();
       } else if (state.session.phase === "reveal" && prevPhase === "question") {
-        playTone([587.33, 783.99, 1046.5], 0.16, "sine", 0.1);
+        playKahootTimesUpCrash();
+      } else if (state.session.phase === "podium" && prevPhase !== "podium") {
+        playKahootPodiumFanfare();
+      } else if (state.session.phase !== "question") {
+        stopKahootCountdownBgm();
       }
 
       renderAllSurfaces(true);
@@ -1111,15 +1331,23 @@
       if (msg.sessionId && msg.sessionId !== state.session.sessionId) return;
       if (!state.answersByQ.has(qId)) state.answersByQ.set(qId, new Map());
       const qMap = state.answersByQ.get(qId);
+      const localQ = getAllQuestions().find((item) => item.id === qId) || state.session.currentQuestion;
       if (!qMap.has(pid)) {
+        const cIdx = Math.max(0, Math.min(5, Number(msg.choiceIdx) || 0));
+        const elMs = Math.max(80, Number(msg.elapsedMs) || 1000);
+        const durMs = Math.max(1000, (state.session.durationSec || 10) * 1000);
+        const hasKey = localQ && typeof localQ.correctIdx === "number";
+        const isRight = hasKey ? cIdx === Number(localQ.correctIdx) : Boolean(msg.correct);
+        const speedRatio = Math.max(0, Math.min(1, Math.max(0, durMs - elMs) / durMs));
+        const pts = isRight ? Math.round(500 + 500 * speedRatio) : 0;
         qMap.set(pid, {
           participantId: pid,
           memberType: msg.memberType === "faculty" ? "faculty" : "student",
           qId,
-          choiceIdx: Math.max(0, Math.min(3, Number(msg.choiceIdx) || 0)),
-          correct: Boolean(msg.correct),
-          points: Math.max(0, Math.min(1500, Number(msg.points) || 0)),
-          elapsedMs: Math.max(0, Number(msg.elapsedMs) || 0),
+          choiceIdx: cIdx,
+          correct: isRight,
+          points: hasKey ? pts : Math.max(0, Math.min(1500, Number(msg.points) || 0)),
+          elapsedMs: elMs,
           studentId: String(msg.studentId || "").slice(0, 16),
           shortNo: String(msg.shortNo || "").slice(0, 12),
           nickname: String(msg.nickname || "").slice(0, 36),
@@ -1146,17 +1374,24 @@
         state.participants.get(pid).lastSeenMs = Date.now();
       }
 
+      const brkNow = getParticipantRoleBreakdown();
+      let stuAnsCount = 0;
+      qMap.forEach((a) => {
+        if (a.memberType !== "faculty") stuAnsCount += 1;
+      });
+      const allTargetAnswered = brkNow.stu > 0 ? stuAnsCount >= brkNow.stu : qMap.size >= state.participants.size;
+
       if (
-        state.role === "faculty" &&
+        isBigStageVisible() &&
         state.session.phase === "question" &&
         state.session.timerRunning &&
         state.session.currentQuestion &&
         state.session.currentQuestion.id === qId &&
         state.participants.size > 0 &&
-        qMap.size >= state.participants.size
+        allTargetAnswered
       ) {
         setTimeout(() => {
-          if (state.session.phase === "question" && state.session.currentQuestion && state.session.currentQuestion.id === qId) {
+          if (isBigStageVisible() && state.session.phase === "question" && state.session.currentQuestion && state.session.currentQuestion.id === qId) {
             hostRevealAnswer();
           }
         }, 450);
@@ -1168,6 +1403,7 @@
 
     if (msg.type === "reset_answers") {
       state.answersByQ.clear();
+      stopKahootCountdownBgm();
       if (msg.sessionId) {
         state.session.sessionId = String(msg.sessionId);
         safeSet("racm303_orient_sess_id_v1", state.session.sessionId);
@@ -1182,11 +1418,29 @@
         state.answersByQ.forEach((qMap) => {
           const mine = qMap.get(state.participantId);
           if (mine) {
-            publishPacket(`answer/${mine.qId}/${state.participantId}`, Object.assign({ type: "answer", sessionId: state.session.sessionId }, mine), false);
+            publishPacket(
+              `answer/${mine.qId}/${state.participantId}`,
+              {
+                type: "answer",
+                sessionId: state.session.sessionId,
+                participantId: mine.participantId,
+                memberType: mine.memberType,
+                qId: mine.qId,
+                choiceIdx: mine.choiceIdx,
+                elapsedMs: mine.elapsedMs,
+                studentId: mine.studentId,
+                shortNo: mine.shortNo,
+                nickname: mine.nickname,
+                area: mine.area,
+                avatar: mine.avatar,
+                sentWallMs: mine.sentWallMs
+              },
+              false
+            );
           }
         });
       }
-      if (state.role === "faculty" && state.session.seq > 0) {
+      if (isBigStageVisible() && state.session.seq > 0) {
         broadcastSessionState();
       }
     }
@@ -1304,7 +1558,7 @@
     return false;
   }
 
-  /* ---------- 6. Presence, Breakdown & Leaderboard ---------- */
+  /* ---------- 6. Presence, Breakdown, Speed & Leaderboard ---------- */
   function getPlayerLabel(p) {
     if (!p) return "ผู้เข้าร่วม";
     if (p.memberType === "faculty" || p.area === "คณาจารย์") {
@@ -1376,7 +1630,11 @@
         correctCount: 0,
         answeredCount: 0,
         streak: 0,
-        maxStreak: 0
+        maxStreak: 0,
+        totalCorrectMs: 0,
+        bestCorrectMs: Infinity,
+        avgCorrectMs: Infinity,
+        avgCorrectSec: null
       });
     });
 
@@ -1396,13 +1654,20 @@
             correctCount: 0,
             answeredCount: 0,
             streak: 0,
-            maxStreak: 0
+            maxStreak: 0,
+            totalCorrectMs: 0,
+            bestCorrectMs: Infinity,
+            avgCorrectMs: Infinity,
+            avgCorrectSec: null
           });
         }
         const entry = board.get(pid);
         entry.answeredCount += 1;
         if (ans.correct) {
+          const elMs = Math.max(80, Number(ans.elapsedMs) || 1000);
           entry.correctCount += 1;
+          entry.totalCorrectMs += elMs;
+          if (elMs < entry.bestCorrectMs) entry.bestCorrectMs = elMs;
           entry.streak += 1;
           if (entry.streak > entry.maxStreak) entry.maxStreak = entry.streak;
           const streakBonus = entry.streak >= 3 ? 100 : entry.streak === 2 ? 50 : 0;
@@ -1413,31 +1678,60 @@
       });
     });
 
-    const list = Array.from(board.values());
+    const list = Array.from(board.values()).filter((entry) => entry.memberType !== "faculty" || entry.answeredCount > 0);
+    list.forEach((entry) => {
+      if (entry.correctCount > 0) {
+        entry.avgCorrectMs = Math.round(entry.totalCorrectMs / entry.correctCount);
+        entry.avgCorrectSec = (entry.totalCorrectMs / entry.correctCount / 1000).toFixed(2);
+      }
+    });
     list.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       if (b.correctCount !== a.correctCount) return b.correctCount - a.correctCount;
+      if (a.avgCorrectMs !== b.avgCorrectMs) return a.avgCorrectMs - b.avgCorrectMs;
       return a.label.localeCompare(b.label, "th");
     });
     return list;
   }
 
+  function getFastestCorrectAnswers(q, limit) {
+    if (!q) return [];
+    const qMap = state.answersByQ.get(q.id);
+    if (!qMap) return [];
+    const right = [];
+    qMap.forEach((ans) => {
+      if (ans && ans.correct) {
+        right.push({
+          label: getPlayerLabel(ans),
+          avatar: ans.avatar || "🩺",
+          area: ans.area || "",
+          points: ans.points || 500,
+          elapsedMs: Math.max(80, Number(ans.elapsedMs) || 1000),
+          secStr: (Math.max(80, Number(ans.elapsedMs) || 1000) / 1000).toFixed(2)
+        });
+      }
+    });
+    right.sort((a, b) => a.elapsedMs - b.elapsedMs);
+    return right.slice(0, limit || 3);
+  }
+
   function getQuestionStats(q) {
-    const counts = [0, 0, 0, 0];
+    const nChoices = q && Array.isArray(q.choices) && q.choices.length ? q.choices.length : 4;
+    const counts = new Array(nChoices).fill(0);
     if (!q) return { counts, total: 0, correctCount: 0, pctCorrect: 0, topWrongIdx: -1, topWrongCount: 0 };
     const qMap = state.answersByQ.get(q.id);
     if (qMap) {
       qMap.forEach((ans) => {
-        const c = Math.max(0, Math.min(3, Number(ans.choiceIdx) || 0));
+        const c = Math.max(0, Math.min(nChoices - 1, Number(ans.choiceIdx) || 0));
         counts[c] += 1;
       });
     }
-    const total = counts[0] + counts[1] + counts[2] + counts[3];
+    const total = counts.reduce((acc, v) => acc + v, 0);
     const correctCount = counts[q.correctIdx] || 0;
     const pctCorrect = total > 0 ? Math.round((correctCount / total) * 100) : 0;
     let topWrongIdx = -1;
     let topWrongCount = 0;
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < nChoices; i += 1) {
       if (i !== q.correctIdx && counts[i] > topWrongCount) {
         topWrongCount = counts[i];
         topWrongIdx = i;
@@ -1448,6 +1742,18 @@
 
   /* ---------- 7. Host & Remote Controls ---------- */
   function buildSessionPacket() {
+    let pubQ = state.session.currentQuestion;
+    if (pubQ && state.session.phase === "question") {
+      pubQ = {
+        id: pubQ.id,
+        cat: pubQ.cat,
+        impactTag: pubQ.impactTag,
+        durationSec: pubQ.durationSec,
+        choiceCount: pubQ.choiceCount,
+        stem: pubQ.stem,
+        choices: pubQ.choices
+      };
+    }
     return {
       type: "session",
       msgId: randomId("sess"),
@@ -1456,7 +1762,7 @@
       phase: state.session.phase,
       activeDeckIds: state.session.activeDeckIds,
       qPos: state.session.qPos,
-      currentQuestion: state.session.currentQuestion,
+      currentQuestion: pubQ,
       durationSec: state.session.durationSec,
       remainingMs: getRemainingMs(),
       timerRunning: state.session.timerRunning,
@@ -1467,7 +1773,8 @@
   }
 
   function broadcastSessionState() {
-    state.session.seq += 1;
+    state.hasLocalHostAuthority = true;
+    state.session.seq = Math.max(Date.now(), (state.session.seq || 0) + 1);
     state.session.updatedWallMs = Date.now();
     publishPacket("session", buildSessionPacket(), true);
   }
@@ -1483,6 +1790,7 @@
   }
 
   function hostOpenLobby() {
+    stopKahootCountdownBgm();
     state.session.phase = "lobby";
     state.session.timerRunning = false;
     broadcastSessionState();
@@ -1494,7 +1802,7 @@
     const safePos = Math.max(0, Math.min(deck.length - 1, Number(pos) || 0));
     const q = deck[safePos];
     if (!q) return;
-    const dur = Number(state.customDurationSec) || q.durationSec || 20;
+    const dur = Number(state.customDurationSec) || q.durationSec || 10;
     state.session.qPos = safePos;
     state.session.currentQuestion = q;
     state.session.phase = "question";
@@ -1503,16 +1811,23 @@
     state.session.anchorPerfNow = performance.now();
     state.session.timerRunning = true;
     state.questionPickerOpen = false;
-    playTone([440, 554.37, 659.25], 0.12, "triangle", 0.08);
+    playTone([440, 554.37, 659.25], 0.11, "triangle", 0.08);
+    startKahootCountdownBgm();
     broadcastSessionState();
     renderAllSurfaces(true);
   }
 
   function hostRevealAnswer() {
+    const wasQuestion = state.session.phase === "question";
+    stopKahootCountdownBgm();
     state.session.phase = "reveal";
     state.session.baseRemainingMs = 0;
     state.session.timerRunning = false;
-    playTone([587.33, 783.99, 1046.5], 0.16, "sine", 0.1);
+    if (wasQuestion) {
+      playKahootTimesUpCrash();
+    } else {
+      playTone([587.33, 783.99, 1046.5], 0.16, "sine", 0.1);
+    }
     broadcastSessionState();
     renderAllSurfaces(true);
   }
@@ -1522,15 +1837,17 @@
     if (state.session.qPos + 1 < deck.length) {
       hostStartQuestionAt(state.session.qPos + 1);
     } else {
+      stopKahootCountdownBgm();
       state.session.phase = "podium";
       state.session.timerRunning = false;
-      playTone([523.25, 659.25, 783.99, 1046.5], 0.18, "triangle", 0.11);
+      playKahootPodiumFanfare();
       broadcastSessionState();
       renderAllSurfaces(true);
     }
   }
 
   function hostResetSession() {
+    stopKahootCountdownBgm();
     const newSessId = `orient_${Date.now().toString(36)}`;
     state.session.sessionId = newSessId;
     safeSet("racm303_orient_sess_id_v1", newSessId);
@@ -1600,9 +1917,10 @@
     if (qMap.has(state.participantId)) return;
 
     const remMs = getRemainingMs();
-    const durMs = Math.max(1000, (state.session.durationSec || 20) * 1000);
-    const elapsedMs = Math.max(0, durMs - remMs);
-    const isCorrect = Number(choiceIdx) === Number(q.correctIdx);
+    const durMs = Math.max(1000, (state.session.durationSec || 10) * 1000);
+    const elapsedMs = Math.max(80, durMs - remMs);
+    const fullQ = getAllQuestions().find((item) => item.id === q.id) || q;
+    const isCorrect = typeof fullQ.correctIdx === "number" ? Number(choiceIdx) === Number(fullQ.correctIdx) : false;
     const speedRatio = Math.max(0, Math.min(1, remMs / durMs));
     const points = isCorrect ? Math.round(500 + 500 * speedRatio) : 0;
 
@@ -1623,7 +1941,22 @@
     };
     qMap.set(state.participantId, rec);
     playTone([587.33, 880], 0.09, "sine", 0.07);
-    publishPacket(`answer/${q.id}/${state.participantId}`, Object.assign({ type: "answer", sessionId: state.session.sessionId }, rec), false);
+    const wireAns = {
+      type: "answer",
+      sessionId: state.session.sessionId,
+      participantId: rec.participantId,
+      memberType: rec.memberType,
+      qId: rec.qId,
+      choiceIdx: rec.choiceIdx,
+      elapsedMs: rec.elapsedMs,
+      studentId: rec.studentId,
+      shortNo: rec.shortNo,
+      nickname: rec.nickname,
+      area: rec.area,
+      avatar: rec.avatar,
+      sentWallMs: rec.sentWallMs
+    };
+    publishPacket(`answer/${q.id}/${state.participantId}`, wireAns, false);
     renderParticipantModal();
     refreshLiveCountsAndChips();
   }
@@ -1636,22 +1969,23 @@
       const secLeft = Math.ceil(rem / 1000);
       if (secLeft !== lastTickSec) {
         lastTickSec = secLeft;
-        if (secLeft > 0 && secLeft <= 5) {
-          playTone([secLeft === 1 ? 880 : 660], 0.07, "sine", 0.05);
+        if (secLeft > 0 && secLeft <= 3) {
+          playTone([secLeft === 1 ? 987.77 : 783.99], 0.065, "sine", 0.055);
         }
       }
       updateTimerDomInPlace(rem);
       if (rem <= 0) {
         state.session.timerRunning = false;
         state.session.baseRemainingMs = 0;
-        if (state.role === "faculty") {
+        if (isBigStageVisible()) {
           hostRevealAnswer();
         } else {
+          playKahootTimesUpCrash();
           renderParticipantModal();
         }
       }
     }
-  }, 200);
+  }, 120);
 
   setInterval(() => {
     const now = Date.now();
@@ -1825,8 +2159,8 @@
     `;
   }
 
-  /* ---------- 11. UI Surface 2: Full / Embedded Kahoot Stage (Lobby, Question, Reveal, Podium) ---------- */
-  function renderLobbyStageHtml(isEmbeddedSlide) {
+  /* ---------- 11. UI Surface 2: Authentic Kahoot! Stage (QR Lobby, 10s Question, Column Reveal, Rank 1-2-3 Podium) ---------- */
+  function renderLobbyStageHtml(isEmbeddedSlide, isDedicatedQrSlide) {
     const joinUrl = getJoinUrl();
     const qrSvg = buildQrSvg(joinUrl, "is-stage-qr");
     const brk = getParticipantRoleBreakdown();
@@ -1835,17 +2169,21 @@
     const deck = getActiveQuestionList();
 
     return `
-      <div class="orl-stage is-lobby-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
-        <div class="orl-stage-topbar">
-          <div class="orl-st-left">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> ${isEmbeddedSlide ? "LIVE QUIZ · PRE-CHECK O / S / M / U" : "LIVE WAITING LOBBY · อาจารย์ & นศพ."}</span>
-            <span class="orl-st-sub">สแกน QR ร่วมกันได้ทุกอุปกรณ์ (มือถือแนวตั้ง/แนวนอน · จอพับ Duo · แท็บเล็ต)</span>
+      <div class="orl-stage is-kahoot-purple is-lobby-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
+        <div class="orl-kh-join-banner">
+          <div class="orl-kh-join-step">
+            <span class="orl-kh-join-lbl">1. สแกนเข้าห้องที่ QR Code:</span>
+            <strong class="orl-kh-join-val">${state.qrUrlMode === "faculty" ? "racm303-2569-faculty-member/#live" : "racm303-2569-student/#live"}</strong>
           </div>
-          <div class="orl-st-right">
+          <div class="orl-kh-pin-divider" aria-hidden="true"></div>
+          <div class="orl-kh-join-step is-pin-step">
+            <span class="orl-kh-join-lbl">2. Login ด้วยรหัส นศพ. 3 ตัวท้าย:</span>
+            <strong class="orl-kh-pin-pill">🔢 กดเลข 3 ตัว (เช่น 006)</strong>
+          </div>
+          <div class="orl-kh-top-actions">
             <button type="button" class="orl-bar-btn" data-orl-action="zoom-qr">🔍 ขยาย QR</button>
-            <button type="button" class="orl-bar-btn" data-orl-action="toggle-mute">${state.soundMuted ? "🔇 ปิดเสียง" : "🔊 เสียง On"}</button>
-            <button type="button" class="orl-bar-btn" data-orl-action="open-participant-pad">📱 จอผู้เข้าร่วม</button>
-            ${ROLE === "faculty" ? `<button type="button" class="orl-bar-btn" data-orl-action="open-custom-modal">+ คำถามสด</button>` : ""}
+            <button type="button" class="orl-bar-btn" data-orl-action="toggle-mute">${state.soundMuted ? "🔇 ปิดเสียง" : "🔊 เพลง Kahoot On"}</button>
+            <button type="button" class="orl-bar-btn" data-orl-action="open-participant-pad">📱 แป้นกด 3 ตัว</button>
           </div>
         </div>
 
@@ -1855,37 +2193,23 @@
               ${qrSvg}
             </button>
             <div class="orl-stage-join-steps">
-              <div class="orl-step-badge">1. อาจารย์และนักศึกษาสแกน QR Code พร้อมกัน</div>
-              <div class="orl-url-pill">${state.qrUrlMode === "faculty" ? "smartwoo.github.io/racm303-2569-faculty-member/#live" : "smartwoo.github.io/racm303-2569-student/#live"}</div>
-              <div class="orl-step-badge">2. เลือก <code>นศพ. (รหัส 3 ตัวท้าย)</code> หรือ <code>คณาจารย์</code></div>
+              <div class="orl-step-badge">⚡ กติกา Kahoot! · ถูก + เร็วสุด = แต้มสูงสุด (1,000 pts/ข้อ)</div>
+              <div class="orl-url-pill">6 ข้อ: 5 วัตถุประสงค์ระบบฯ (6 ตัวเลือก) + 5 โจทย์ O·S·M·U</div>
             </div>
 
-            ${
-              ROLE === "faculty"
-                ? `
-              <div class="orl-host-config-box">
-                <div class="orl-cfg-row">
-                  <span class="orl-cfg-lbl">ชุดคำถาม:</span>
-                  <div class="orl-seg-group">
-                    <button type="button" class="orl-seg-btn${state.presetMode === "quick5" ? " is-active" : ""}" data-orl-preset="quick5">เน้นเกณฑ์ O·S·M·U (5 ข้อ)</button>
-                    <button type="button" class="orl-seg-btn${state.presetMode === "all8" ? " is-active" : ""}" data-orl-preset="all8">ครบทุกหมวด (${getAllQuestions().length} ข้อ)</button>
-                  </div>
-                </div>
-                <div class="orl-cfg-row">
-                  <span class="orl-cfg-lbl">เวลาต่อข้อ:</span>
-                  <div class="orl-seg-group">
-                    ${[15, 20, 30]
-                      .map(
-                        (sec) =>
-                          `<button type="button" class="orl-seg-btn${state.customDurationSec === sec ? " is-active" : ""}" data-orl-dur="${sec}">${sec} วิ</button>`
-                      )
-                      .join("")}
-                  </div>
+            <div class="orl-host-config-box">
+              <div class="orl-cfg-row">
+                <span class="orl-cfg-lbl">⏱️ เวลาต่อข้อ:</span>
+                <div class="orl-seg-group">
+                  ${[10, 15, 20]
+                    .map(
+                      (sec) =>
+                        `<button type="button" class="orl-seg-btn${state.customDurationSec === sec ? " is-active" : ""}" data-orl-dur="${sec}">${sec} วิ</button>`
+                    )
+                    .join("")}
                 </div>
               </div>
-            `
-                : ""
-            }
+            </div>
           </div>
 
           <div class="orl-lobby-players-panel">
@@ -1893,8 +2217,8 @@
               <div class="orl-players-counter">
                 <span class="orl-players-num" data-orl-participant-count>${brk.total}</span>
                 <div>
-                  <div class="orl-players-title">ผู้เข้าร่วมในห้องสด (<span data-orl-role-breakdown>🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน</span>)</div>
-                  <div class="orl-players-sub">ทวนสอบเวลาเรียน ≥ 80% · ประกาศเจตคติ พ.ศ. 2567 · เกณฑ์ O / S / M / U (${deck.length} ข้อ)</div>
+                  <div class="orl-players-title">Players ในห้องสด (<span data-orl-role-breakdown>🎓 นศพ. ${brk.stu}/169 · 👨‍⚕️ อาจารย์ ${brk.fac} ท่าน</span>)</div>
+                  <div class="orl-players-sub">กดรหัสนักศึกษา 3 ตัวท้ายเพื่อ Login ทันที · จบเกมสรุป Podium อันดับ 1 · 2 · 3 พร้อมแต้มรวม</div>
                 </div>
               </div>
               ${
@@ -1920,32 +2244,25 @@
 
             <div class="orl-lobby-action-bar">
               ${
-                isEmbeddedSlide
+                isDedicatedQrSlide
                   ? `
                 <button type="button" class="orl-big-btn is-secondary" data-orl-action="goto-criteria-slide">
-                  📘 ข้ามไปดูสไลด์ชี้แจงเกณฑ์ O / S / M / U ทันที &rarr;
-                  <small>อธิบายเวลาเรียน ≥ 80%, ประกาศเจตคติ 2567, การสอบซ่อม และเกียรตินิยม</small>
+                  📘 ข้ามไปสไลด์สรุปเกณฑ์ O / S / M / U &rarr;
+                  <small>ดูสรุปเวลาเรียน ≥ 80% · ประกาศคณะฯ 2567 · สอบซ่อม</small>
+                </button>
+                <button type="button" class="orl-big-btn is-primary is-kahoot-start" data-orl-action="launch-kahoot-slide">
+                  🚀 เริ่มเกม Kahoot! Quiz ทั้ง ${deck.length} ข้อ (${state.customDurationSec}s) &rarr;
+                  <small>ไปสไลด์ถัดไปและยิงคำถามข้อที่ 1 พร้อมเสียงดนตรีทันที!</small>
                 </button>
               `
                   : `
-                <button type="button" class="orl-big-btn is-secondary" data-orl-action="continue-slides">
-                  ▶ ไปต่อเนื้อหาสไลด์ Orientation &rarr;
-                  <small>ผู้ที่สแกนแล้วดูสไลด์ซิงค์สดและรอรับคำถามบนมือถือได้ต่อเนื่อง</small>
+                <button type="button" class="orl-big-btn is-secondary" data-orl-action="${isEmbeddedSlide ? "goto-criteria-slide" : "continue-slides"}">
+                  ${isEmbeddedSlide ? "📘 ข้ามไปสไลด์ชี้แจงเกณฑ์ O / S / M / U &rarr;" : "▶ ไปต่อเนื้อหาสไลด์ Orientation &rarr;"}
+                  <small>${isEmbeddedSlide ? "อธิบายเวลาเรียน ≥ 80%, ประกาศเจตคติ 2567, การสอบซ่อม และเกียรตินิยม" : "ผู้ที่สแกนแล้วดูสไลด์ซิงค์สดได้ต่อเนื่อง"}</small>
                 </button>
-              `
-              }
-              ${
-                ROLE === "faculty"
-                  ? `
-                <button type="button" class="orl-big-btn is-primary" data-orl-action="start-q0">
-                  ⚡ เริ่มยิงคำถาม Quiz O / S / M / U ข้อที่ 1 (${deck.length} ข้อ)
-                  <small>ส่งคำถามขึ้นจอมือถือของทั้งนักศึกษาและคณาจารย์พร้อมกันทันที</small>
-                </button>
-              `
-                  : `
-                <button type="button" class="orl-big-btn is-primary" data-orl-action="open-participant-pad">
-                  🙋 เปิดแป้นกดตอบคำถามบนอุปกรณ์นี้
-                  <small>${state.joined ? `เชื่อมต่อในชื่อ ${esc(getPlayerLabel(state))} แล้ว` : "แตะเพื่อลงชื่อเข้าร่วมตอบคำถามสด"}</small>
+                <button type="button" class="orl-big-btn is-primary is-kahoot-start" data-orl-action="start-q0">
+                  ⚡ เริ่มยิงคำถาม Kahoot! ข้อที่ 1 (${deck.length} ข้อ · ${state.customDurationSec} วิ)
+                  <small>ส่งโจทย์ขึ้นจอมือถือพร้อมเสียงเพลง Kahoot และจับเวลาความไว!</small>
                 </button>
               `
               }
@@ -1956,52 +2273,109 @@
     `;
   }
 
+  function renderQrLobbySlideHtml(opts) {
+    const o = opts || {};
+    const isStatic = o.viewMode === "handout" || Boolean(window.__RACM_EXPORTING_DECK);
+    if (isStatic) {
+      const joinUrl = getJoinUrl();
+      const qrSvg = buildQrSvg(joinUrl, "is-stage-qr");
+      return `
+        <div class="orl-slide-quiz-host">
+          <div class="orl-stage is-kahoot-purple is-lobby-stage is-embedded-slide-stage">
+            <div class="orl-kh-join-banner">
+              <div class="orl-kh-join-step">
+                <span class="orl-kh-join-lbl">1. สแกน QR Code เข้าห้องสด:</span>
+                <strong class="orl-kh-join-val">racm303-2569-student/#live</strong>
+              </div>
+              <div class="orl-kh-pin-divider"></div>
+              <div class="orl-kh-join-step is-pin-step">
+                <span class="orl-kh-join-lbl">2. กดรหัสนักศึกษา 3 ตัวท้าย:</span>
+                <strong class="orl-kh-pin-pill">🔢 PIN 3 หลัก (001–169)</strong>
+              </div>
+            </div>
+            <div class="orl-lobby-grid">
+              <div class="orl-lobby-qr-panel">
+                <div class="orl-stage-qr-box">${qrSvg}</div>
+                <div class="orl-stage-join-steps">
+                  <div class="orl-step-badge">⚡ 6 คำถาม Kahoot! · ข้อละ 10 วินาที · วัดความแม่นยำ + ความเร็วสูงสุด</div>
+                </div>
+              </div>
+              <div class="orl-lobby-players-panel" style="justify-content:space-evenly">
+                <div class="orl-players-title" style="font-size:1.35cqw">🎮 ขั้นตอนเตรียมพร้อมก่อนเริ่ม Kahoot! Quiz (สไลด์ถัดไป)</div>
+                <div class="orl-eo-steps">
+                  <div class="orl-eo-step"><span class="orl-eo-num">1</span><span>สแกน <strong>QR Code</strong> ด้านซ้ายด้วยกล้องมือถือหรือแท็บเล็ต</span></div>
+                  <div class="orl-eo-step"><span class="orl-eo-num">2</span><span>กด <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> บนแป้นตัวเลขเพื่อ Login เข้าห้องทันที</span></div>
+                  <div class="orl-eo-step"><span class="orl-eo-num">3</span><span>เตรียมกดตอบ <strong>1 คำถาม 5 วัตถุประสงค์ระบบฯ (6 ตัวเลือก)</strong> + <strong>5 สถานการณ์เกรด O / S / M / U</strong> ภายใน <strong>10 วินาที/ข้อ</strong> เพื่อชิง <strong>Podium Rank 1 · 2 · 3</strong>!</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return `
+      <div class="orl-slide-quiz-host">
+        ${renderLobbyStageHtml(true, true)}
+      </div>
+    `;
+  }
+
   function renderQuestionStageHtml(isEmbeddedSlide) {
     const q = getCurrentQuestion();
     const deck = getActiveQuestionList();
     const stats = getQuestionStats(q);
     const remMs = getRemainingMs();
     const sec = Math.ceil(remMs / 1000);
-    const durMs = Math.max(1000, (state.session.durationSec || 20) * 1000);
+    const durMs = Math.max(1000, (state.session.durationSec || 10) * 1000);
     const pct = Math.max(0, Math.min(100, (remMs / durMs) * 100));
+    const nChoices = q.choices.length;
+    const gridCls = nChoices >= 6 ? "is-6-choices" : "is-4-choices";
 
     return `
-      <div class="orl-stage is-question-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
-        <div class="orl-q-topbar">
-          <div class="orl-q-meta">
-            <span class="orl-q-num-pill">ข้อ ${state.session.qPos + 1} / ${deck.length}</span>
-            <span class="orl-q-cat-pill">${esc(q.badge)}</span>
-            <span class="orl-q-impact-pill">${esc(q.impactTag)}</span>
-          </div>
-          <div class="orl-q-stats-right">
-            <div class="orl-ans-counter-box">
-              <strong data-orl-answered-count>${stats.total}</strong>
-              <span>/ <span data-orl-participant-count>${state.participants.size}</span> ตอบแล้ว</span>
+      <div class="orl-stage is-kahoot-purple is-question-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
+        <div class="orl-kh-q-header-card">
+          <div class="orl-kh-q-eyebrow">
+            <span class="orl-kh-q-pill">Kahoot! ข้อ ${state.session.qPos + 1} / ${deck.length}</span>
+            <span class="orl-kh-q-badge">${esc(q.badge)}</span>
+            <div class="orl-kh-q-actions">
+              <button type="button" class="orl-kh-mini-btn" data-orl-action="toggle-mute">${state.soundMuted ? "🔇" : "🎵"}</button>
+              <button type="button" class="orl-kh-mini-btn" data-orl-action="open-participant-pad">📱 แป้นตอบ</button>
+              <button type="button" class="orl-kh-skip-btn" data-orl-action="reveal-now">⏭️ เฉลยทันที</button>
             </div>
-            <div class="orl-timer-badge${sec <= 5 ? " is-urgent" : ""}" data-orl-timer-sec>${sec}s</div>
-            ${
-              ROLE === "faculty"
-                ? `<button type="button" class="orl-bar-btn is-accent" data-orl-action="reveal-now">⏭️ ปิดรับ &amp; เฉลยทันที</button>`
-                : `<button type="button" class="orl-bar-btn is-accent" data-orl-action="open-participant-pad">📱 เปิดแป้นกดตอบ</button>`
-            }
+          </div>
+          <h2 class="orl-kh-q-stem">${esc(q.stem)}</h2>
+        </div>
+
+        <div class="orl-kh-mid-arena">
+          <div class="orl-kh-clock-orb${sec <= 3 ? " is-urgent" : ""}" data-orl-timer-orb>
+            <strong data-orl-timer-num>${sec}</strong>
+            <small>วินาที</small>
+          </div>
+
+          <div class="orl-kh-speed-center">
+            <div class="orl-kh-speed-kicker">
+              ${q.isOsmuScenario ? "⚡ เลือกเกรด O · S · M · U ที่ถูกต้องและไวที่สุด! (สูงสุด 1,000 แต้ม)" : `⚡ โจทย์ ${nChoices} ตัวเลือก · ตอบถูก + เร็วสุด = คะแนนสูงสุด!`}
+            </div>
+            <div class="orl-timer-progress-track is-kahoot-bar">
+              <div class="orl-timer-progress-fill" data-orl-timer-bar style="width:${pct.toFixed(1)}%"></div>
+            </div>
+            <div class="orl-kh-impact-sub">${esc(q.impactTag)}</div>
+          </div>
+
+          <div class="orl-kh-ans-orb">
+            <strong data-orl-answered-count>${stats.total}</strong>
+            <span>คำตอบ</span>
           </div>
         </div>
 
-        <div class="orl-timer-progress-track">
-          <div class="orl-timer-progress-fill" data-orl-timer-bar style="width:${pct.toFixed(1)}%"></div>
-        </div>
-
-        <div class="orl-q-stem-card">
-          <h2 class="orl-q-stem-title">${esc(q.stem)}</h2>
-        </div>
-
-        <div class="orl-choices-grid">
+        <div class="orl-choices-grid is-kahoot-tiles ${gridCls}">
           ${q.choices
             .map((txt, idx) => {
-              const meta = CHOICE_META[idx];
+              const meta = getChoiceMeta(q, idx);
               return `
-                <div class="orl-choice-tile ${meta.cls}">
+                <div class="orl-choice-tile is-kahoot-tile ${meta.cls}">
                   <span class="orl-choice-shape">${meta.shape}</span>
+                  ${meta.grade ? `<span class="orl-choice-grade-badge">${esc(meta.grade)}</span>` : ""}
                   <span class="orl-choice-text">${esc(txt)}</span>
                 </div>
               `;
@@ -2017,39 +2391,47 @@
     const deck = getActiveQuestionList();
     const stats = getQuestionStats(q);
     const maxCount = Math.max(1, ...stats.counts);
+    const fastestList = getFastestCorrectAnswers(q, 3);
+    const nChoices = q.choices.length;
 
-    let recheckInsightHtml = "";
-    if (stats.total === 0) {
-      recheckInsightHtml = `<div class="orl-insight-banner is-neutral">ℹ️ ยังไม่มีคำตอบส่งเข้ามาในข้อนี้ — อภิปรายหลักเกณฑ์ที่ถูกต้องด้านล่างร่วมกันได้ทันที</div>`;
-    } else if (stats.topWrongCount === 0) {
-      recheckInsightHtml = `<div class="orl-insight-banner is-perfect">🎯 <strong>ยอดเยี่ยม! ผู้ตอบทั้ง ${stats.total} คน (100%) ตอบถูกต้องครบทุกคน</strong> — เข้าใจเกณฑ์ข้อนี้ตรงกันอย่างแม่นยำ</div>`;
+    let speedBannerHtml = "";
+    if (fastestList.length > 0) {
+      const f0 = fastestList[0];
+      const runners = fastestList
+        .slice(1)
+        .map((r, i) => `${i === 0 ? "🥈" : "🥉"} ${esc(r.label)} (${r.secStr}s · +${r.points})`)
+        .join(" · ");
+      speedBannerHtml = `
+        <div class="orl-kh-fastest-strip">
+          <span class="orl-kh-fast-crown">⚡ ตอบถูกเร็วที่สุด: <strong>🥇 ${esc(f0.avatar)} ${esc(f0.label)}</strong> (${f0.secStr} วินาที · <strong>+${f0.points} pts</strong>)</span>
+          ${runners ? `<span class="orl-kh-fast-runners">${runners}</span>` : `<span class="orl-kh-fast-runners">ตอบถูก ${stats.correctCount}/${stats.total} คน (${stats.pctCorrect}%)</span>`}
+        </div>
+      `;
+    } else if (stats.total > 0) {
+      const wrongMeta = stats.topWrongIdx >= 0 ? getChoiceMeta(q, stats.topWrongIdx) : null;
+      const hintText = (wrongMeta && q.wrongHints && q.wrongHints[stats.topWrongIdx]) || q.osmuRule;
+      speedBannerHtml = `
+        <div class="orl-kh-fastest-strip is-miss">
+          <span>🔍 ข้อนี้ยังไม่มีผู้ตอบถูก (ตอบทั้งหมด ${stats.total} คน) — ${esc(hintText)}</span>
+        </div>
+      `;
     } else {
-      const wrongMeta = CHOICE_META[stats.topWrongIdx];
-      const hintText = (q.wrongHints && q.wrongHints[stats.topWrongIdx]) || "ตรวจสอบรายละเอียดเกณฑ์ที่ถูกต้องตามคู่มือรายวิชาด้านล่าง";
-      recheckInsightHtml = `
-        <div class="orl-insight-banner is-recheck">
-          <div>
-            <strong>🔍 Recheck จุดที่ยังสับสน (${stats.pctCorrect}% ตอบถูก · เลือก ${wrongMeta.nameTh} ${stats.topWrongCount} คน):</strong>
-            <span>${esc(hintText)}</span>
-          </div>
+      speedBannerHtml = `
+        <div class="orl-kh-fastest-strip is-neutral">
+          <span>🔔 หมดเวลา! เฉลยคำตอบที่ถูกต้องและหลักเกณฑ์สำคัญด้านล่าง</span>
         </div>
       `;
     }
 
     return `
-      <div class="orl-stage is-reveal-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
-        <div class="orl-q-topbar">
-          <div class="orl-q-meta">
-            <span class="orl-q-num-pill">เฉลยข้อ ${state.session.qPos + 1} / ${deck.length}</span>
-            <span class="orl-q-cat-pill">${esc(q.badge)}</span>
-            <span class="orl-source-cite">📘 ${esc(q.sourceRef)}</span>
-          </div>
-          <div class="orl-q-stats-right">
-            ${
-              ROLE === "faculty"
-                ? `
+      <div class="orl-stage is-kahoot-purple is-reveal-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
+        <div class="orl-kh-q-header-card is-compact">
+          <div class="orl-kh-q-eyebrow">
+            <span class="orl-kh-q-pill">เฉลยข้อ ${state.session.qPos + 1} / ${deck.length}</span>
+            <span class="orl-kh-q-badge">${esc(q.badge)}</span>
+            <div class="orl-kh-q-actions">
               <div class="orl-picker-wrap">
-                <button type="button" class="orl-bar-btn" data-orl-action="toggle-q-picker">🔢 เลือกข้อ ▾</button>
+                <button type="button" class="orl-kh-mini-btn" data-orl-action="toggle-q-picker">🔢 เลือกข้อ ▾</button>
                 ${
                   state.questionPickerOpen
                     ? `
@@ -2065,56 +2447,50 @@
                     : ""
                 }
               </div>
-              <button type="button" class="orl-bar-btn" data-orl-action="goto-criteria-slide">📘 ไปสไลด์ชี้แจงเกณฑ์ O/S/M/U</button>
-              <button type="button" class="orl-bar-btn is-primary-next" data-orl-action="next-question">
-                ${state.session.qPos + 1 < deck.length ? `ข้อถัดไป (${state.session.qPos + 2}/${deck.length}) →` : "🏆 ดูสรุปผล & Podium →"}
+              <button type="button" class="orl-kh-next-btn" data-orl-action="next-question">
+                ${state.session.qPos + 1 < deck.length ? `ข้อถัดไป (${state.session.qPos + 2}/${deck.length}) →` : "🏆 สรุป Podium Rank 1·2·3 →"}
               </button>
-            `
-                : `<span class="orl-q-cat-pill">ตอบถูก ${stats.correctCount}/${stats.total} (${stats.pctCorrect}%)</span>`
-            }
+            </div>
           </div>
+          <h3 class="orl-kh-q-stem is-sm">${esc(q.stem)}</h3>
         </div>
 
-        <h3 class="orl-reveal-stem">${esc(q.stem)}</h3>
-
-        <div class="orl-reveal-bars-grid">
+        <div class="orl-kh-columns-chart ${nChoices >= 6 ? "is-6-cols" : "is-4-cols"}">
           ${q.choices
             .map((txt, idx) => {
-              const meta = CHOICE_META[idx];
-              const cnt = stats.counts[idx];
-              const pct = stats.total > 0 ? Math.round((cnt / stats.total) * 100) : 0;
-              const barH = stats.total > 0 ? Math.max(12, Math.round((cnt / maxCount) * 100)) : 12;
+              const meta = getChoiceMeta(q, idx);
+              const cnt = stats.counts[idx] || 0;
+              const barPct = stats.total > 0 ? Math.max(10, Math.round((cnt / maxCount) * 100)) : idx === q.correctIdx ? 72 : 14;
               const isCorrect = idx === q.correctIdx;
               return `
-                <div class="orl-rev-card ${meta.cls}${isCorrect ? " is-correct" : " is-dimmed"}">
-                  <div class="orl-rev-bar-row">
-                    <span class="orl-rev-shape">${meta.shape}</span>
-                    <div class="orl-rev-bar-track">
-                      <div class="orl-rev-bar-fill" style="width:${barH}%"></div>
-                    </div>
-                    <span class="orl-rev-count">${cnt} คน (${pct}%)</span>
-                    ${isCorrect ? `<span class="orl-rev-correct-badge">✓ ถูกต้อง</span>` : ""}
+                <div class="orl-kh-col-wrap ${meta.cls}${isCorrect ? " is-correct" : " is-dimmed"}">
+                  <div class="orl-kh-col-count">${isCorrect ? "✓ " : ""}${cnt}</div>
+                  <div class="orl-kh-col-track">
+                    <div class="orl-kh-col-bar" style="height:${barPct}%"></div>
                   </div>
-                  <div class="orl-rev-choice-txt">${esc(txt)}</div>
+                  <div class="orl-kh-col-label">
+                    <span class="orl-kh-col-shape">${meta.shape}${meta.grade ? ` ${esc(meta.grade)}` : ""}</span>
+                    <span class="orl-kh-col-txt">${esc(txt)}</span>
+                  </div>
                 </div>
               `;
             })
             .join("")}
         </div>
 
-        ${recheckInsightHtml}
+        ${speedBannerHtml}
 
-        <div class="orl-recheck-3col">
+        <div class="orl-recheck-3col is-kahoot-debrief">
           <div class="orl-rc-box is-do">
             <span class="orl-rc-kicker">✅ DO · แนวปฏิบัติที่ถูกต้อง</span>
             <p>${esc(q.doSummary)}</p>
           </div>
           <div class="orl-rc-box is-dont">
-            <span class="orl-rc-kicker">🚫 DON'T · ข้อพึงระวัง / ห้ามทำ</span>
+            <span class="orl-rc-kicker">🚫 DON'T · ข้อควรระวัง</span>
             <p>${esc(q.dontSummary)}</p>
           </div>
           <div class="orl-rc-box is-osmu">
-            <span class="orl-rc-kicker">⚖️ ผลต่อเกรด O · S · M · U</span>
+            <span class="orl-rc-kicker">⚖️ สรุปเฉลย &amp; เกณฑ์ตัดสิน</span>
             <p>${esc(q.osmuRule)}</p>
           </div>
         </div>
@@ -2125,30 +2501,100 @@
   function renderPodiumStageHtml(isEmbeddedSlide) {
     const deck = getActiveQuestionList();
     const board = computeLeaderboard();
-    const top3 = [board[0], board[1], board[2]];
+    const top3 = [board[0] || null, board[1] || null, board[2] || null];
+
+    let fastestOverall = null;
+    board.forEach((p) => {
+      if (p.correctCount > 0 && (!fastestOverall || p.avgCorrectMs < fastestOverall.avgCorrectMs)) {
+        fastestOverall = p;
+      }
+    });
 
     return `
-      <div class="orl-stage is-podium-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
-        <div class="orl-stage-topbar">
+      <div class="orl-stage is-kahoot-purple is-podium-stage${isEmbeddedSlide ? " is-embedded-slide-stage" : ""}">
+        <div class="orl-stage-topbar is-podium-topbar">
           <div class="orl-st-left">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สรุปผล Quiz O / S / M / U — พร้อมไปสไลด์ชี้แจงเกณฑ์ฉบับเต็ม</span>
+            <span class="orl-kh-podium-crown-pill">🏆 KAHOOT! PODIUM · TOP 3 CHAMPIONS</span>
+            <span class="orl-st-sub">จัดอันดับจากคะแนนรวมความถูกต้อง + ความเร็วในการกดตอบ (${deck.length} ข้อ)</span>
           </div>
           <div class="orl-st-right">
-            ${
-              ROLE === "faculty"
-                ? `
-              <button type="button" class="orl-bar-btn" data-orl-action="back-to-lobby">📺 หน้า Lobby</button>
-              <button type="button" class="orl-bar-btn" data-orl-action="reset-session">🔄 รีเซ็ต</button>
-            `
-                : ""
-            }
-            <button type="button" class="orl-bar-btn is-primary-next" data-orl-action="goto-criteria-slide">📘 ไปสไลด์ถัดไป: ชี้แจงเกณฑ์ O / S / M / U &rarr;</button>
+            <button type="button" class="orl-bar-btn" data-orl-action="back-to-lobby">📺 Lobby</button>
+            ${ROLE === "faculty" ? `<button type="button" class="orl-bar-btn" data-orl-action="reset-session">🔄 รีเซ็ต</button>` : ""}
+            <button type="button" class="orl-kh-next-btn" data-orl-action="goto-criteria-slide">📘 ไปสไลด์ถัดไป: ชี้แจงเกณฑ์ O / S / M / U &rarr;</button>
           </div>
         </div>
 
-        <div class="orl-podium-split">
+        <div class="orl-podium-split is-kahoot-podium-layout">
+          <div class="orl-leaderboard-panel is-kahoot-spotlight">
+            <div class="orl-podium-top3 is-kahoot-pedestals">
+              ${[1, 0, 2]
+                .map((rankIdx) => {
+                  const p = top3[rankIdx];
+                  const rankNum = rankIdx + 1;
+                  const medal = rankNum === 1 ? "👑 🥇 RANK 1" : rankNum === 2 ? "🥈 RANK 2" : "🥉 RANK 3";
+                  if (!p) {
+                    return `
+                      <div class="orl-podium-col is-rank-${rankNum} is-placeholder">
+                        <div class="orl-pod-player-tag">
+                          <span class="orl-pod-ava">${rankNum === 1 ? "🏆" : rankNum === 2 ? "🥈" : "🥉"}</span>
+                          <strong class="orl-pod-name">รอผู้คว้าอันดับ ${rankNum}</strong>
+                          <span class="orl-pod-area">RACM 303 Kahoot!</span>
+                        </div>
+                        <div class="orl-pod-pedestal">
+                          <span class="orl-pod-medal">${medal}</span>
+                          <span class="orl-pod-pts">0 pts</span>
+                          <small>0/${deck.length} ข้อ</small>
+                        </div>
+                      </div>
+                    `;
+                  }
+                  return `
+                    <div class="orl-podium-col is-rank-${rankNum}">
+                      <div class="orl-pod-player-tag">
+                        <span class="orl-pod-ava">${esc(p.avatar)}</span>
+                        <strong class="orl-pod-name">${esc(p.label)}</strong>
+                        <span class="orl-pod-area">${esc(p.area ? `กลุ่ม ${p.area}` : "RACM 303")}</span>
+                      </div>
+                      <div class="orl-pod-pedestal">
+                        <span class="orl-pod-medal">${medal}</span>
+                        <span class="orl-pod-pts">${p.score.toLocaleString()} แต้ม</span>
+                        <small>ถูก ${p.correctCount}/${deck.length} ข้อ${p.avgCorrectSec ? ` · ⚡ ${p.avgCorrectSec}s` : ""}</small>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join("")}
+            </div>
+
+            ${
+              fastestOverall
+                ? `<div class="orl-kh-fastest-award">⚡ <strong>สถิติตอบถูกไวที่สุด (Fastest Responder):</strong> ${esc(fastestOverall.avatar)} ${esc(fastestOverall.label)} — เฉลี่ย <strong>${fastestOverall.avgCorrectSec} วินาที/ข้อ</strong> (${fastestOverall.score.toLocaleString()} แต้ม)</div>`
+                : ""
+            }
+
+            ${
+              board.length > 3
+                ? `
+              <div class="orl-runners-list">
+                ${board
+                  .slice(3, 8)
+                  .map(
+                    (p, idx) => `
+                  <div class="orl-runner-row">
+                    <span><strong>#${idx + 4}</strong> ${esc(p.avatar)} ${esc(p.label)} ${p.area ? `<em>(${esc(p.area)})</em>` : ""}</span>
+                    <strong>${p.score.toLocaleString()} แต้ม · ถูก ${p.correctCount}/${deck.length}${p.avgCorrectSec ? ` · ${p.avgCorrectSec}s` : ""}</strong>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            `
+                : ""
+            }
+          </div>
+
           <div class="orl-diagnostic-panel">
-            <h3 class="orl-panel-h3">📊 ความแม่นยำรายหัวข้อ (Class Rule Mastery)</h3>
+            <h3 class="orl-panel-h3">📊 สรุปความแม่นยำทั้ง ${deck.length} ข้อ</h3>
             <div class="orl-diag-list">
               ${deck
                 .map((q, idx) => {
@@ -2161,59 +2607,14 @@
                         <span>${esc(q.impactTag)}</span>
                       </div>
                       <div class="orl-diag-right">
-                        <span class="orl-diag-pct">${st.total > 0 ? `${st.pctCorrect}% (${st.correctCount}/${st.total})` : "ยังไม่ถาม"}</span>
-                        ${ROLE === "faculty" ? `<button type="button" class="orl-reask-btn" data-orl-jump-q="${idx}">ถามซ้ำ</button>` : ""}
+                        <span class="orl-diag-pct">${st.total > 0 ? `${st.pctCorrect}% (${st.correctCount}/${st.total})` : "พร้อมเล่น"}</span>
+                        ${ROLE === "faculty" ? `<button type="button" class="orl-reask-btn" data-orl-jump-q="${idx}">เล่นข้อนี้</button>` : ""}
                       </div>
                     </div>
                   `;
                 })
                 .join("")}
             </div>
-          </div>
-
-          <div class="orl-leaderboard-panel">
-            <h3 class="orl-panel-h3">🏆 Kahoot Recheck Podium (ผู้ตอบแม่นยำและไวที่สุด)</h3>
-            ${
-              board.length === 0
-                ? `<p class="orl-empty-wait">ยังไม่มีคะแนนผู้เข้าร่วมในรอบนี้</p>`
-                : `
-              <div class="orl-podium-top3">
-                ${[1, 0, 2]
-                  .map((rankIdx) => {
-                    const p = top3[rankIdx];
-                    if (!p) return `<div class="orl-podium-col is-empty"></div>`;
-                    const medal = rankIdx === 0 ? "🥇 อันดับ 1" : rankIdx === 1 ? "🥈 อันดับ 2" : "🥉 อันดับ 3";
-                    return `
-                      <div class="orl-podium-col is-rank-${rankIdx + 1}">
-                        <span class="orl-pod-ava">${esc(p.avatar)}</span>
-                        <strong class="orl-pod-name">${esc(p.label)}</strong>
-                        <span class="orl-pod-area">${esc(p.area || "RACM 303")}</span>
-                        <div class="orl-pod-pedestal">
-                          <span class="orl-pod-medal">${medal}</span>
-                          <span class="orl-pod-pts">${p.score.toLocaleString()} pts</span>
-                          <small>ถูก ${p.correctCount}/${deck.length} ข้อ</small>
-                        </div>
-                      </div>
-                    `;
-                  })
-                  .join("")}
-              </div>
-
-              <div class="orl-runners-list">
-                ${board
-                  .slice(3, 9)
-                  .map(
-                    (p, idx) => `
-                  <div class="orl-runner-row">
-                    <span><strong>#${idx + 4}</strong> ${esc(p.avatar)} ${esc(p.label)} ${p.area ? `<em>(${esc(p.area)})</em>` : ""}</span>
-                    <strong>${p.score.toLocaleString()} pts · ${p.correctCount}/${deck.length}</strong>
-                  </div>
-                `
-                  )
-                  .join("")}
-              </div>
-            `
-            }
           </div>
         </div>
       </div>
@@ -2225,23 +2626,29 @@
     if (ph === "question") return renderQuestionStageHtml(isEmbeddedSlide);
     if (ph === "reveal") return renderRevealStageHtml(isEmbeddedSlide);
     if (ph === "podium") return renderPodiumStageHtml(isEmbeddedSlide);
-    return renderLobbyStageHtml(isEmbeddedSlide);
+    return renderLobbyStageHtml(isEmbeddedSlide, false);
   }
 
   function renderEmbeddedQuizSlideHtml(opts) {
     const o = opts || {};
-    if (o.viewMode === "handout") {
+    if (o.viewMode === "handout" || Boolean(window.__RACM_EXPORTING_DECK)) {
       return `
-        <div class="or-grid-2">
-          ${BASE_QUESTIONS.slice(0, 4)
-            .map(
-              (q, i) => `
-            <div class="or-card is-white">
-              <span class="or-card-kicker">QUIZ ${i + 1} · ${esc(q.badge)}</span>
-              <p class="or-card-text"><strong>คำถาม:</strong> ${esc(q.stem)}<br><strong>หลักเกณฑ์สำคัญ:</strong> ${esc(q.osmuRule)}</p>
-            </div>
-          `
-            )
+        <div class="or-grid-3" style="height:100%;gap:0.55cqw">
+          ${BASE_QUESTIONS.slice(0, 6)
+            .map((q, i) => {
+              const ansMeta = getChoiceMeta(q, q.correctIdx);
+              return `
+                <div class="or-card is-white" style="padding:0.52cqw 0.65cqw;display:flex;flex-direction:column;justify-content:space-between">
+                  <div>
+                    <span class="or-card-kicker">KAHOOT! Q${i + 1} (${q.choices.length} ตัวเลือก · 10s)</span>
+                    <p class="or-card-text" style="margin-top:0.2cqw"><strong>โจทย์:</strong> ${esc(q.stem)}</p>
+                  </div>
+                  <div style="margin-top:0.28cqw;padding:0.28cqw 0.44cqw;border-radius:0.42cqw;background:#f8fafc;border-left:3px solid ${ansMeta.hex};font-size:0.78cqw;line-height:1.32">
+                    <strong>✓ เฉลย (${ansMeta.shape}${ansMeta.grade ? " " + ansMeta.grade : ""}):</strong> ${esc(q.choices[q.correctIdx])}
+                  </div>
+                </div>
+              `;
+            })
             .join("")}
         </div>
       `;
@@ -2260,6 +2667,25 @@
     if (hostParent && el.parentElement !== hostParent) {
       hostParent.appendChild(el);
     }
+  }
+
+  function handlePinDigitInput(digit) {
+    if (state.pinDigits.length >= 3) state.pinDigits = "";
+    state.pinDigits += String(digit).replace(/\D/g, "").slice(0, 1);
+    if (state.pinDigits.length === 3) {
+      const matches = findStudentsBy3Digits(state.pinDigits);
+      if (matches.length === 1) {
+        applyRosterToLocalState(matches[0], false);
+        playTone([659.25, 880], 0.08, "sine", 0.06);
+      } else {
+        state.studentId = "";
+        playTone([523.25], 0.06, "sine", 0.05);
+      }
+    } else {
+      state.studentId = "";
+      playTone([440 + state.pinDigits.length * 60], 0.05, "sine", 0.04);
+    }
+    renderParticipantModal();
   }
 
   function ensureParticipantModal() {
@@ -2290,6 +2716,16 @@
       } else if (act === "switch-mtab") {
         state.mobileTab = actBtn.getAttribute("data-mtab") === "remote" ? "remote" : "pad";
         renderParticipantModal();
+      } else if (act === "pin-digit") {
+        handlePinDigitInput(actBtn.getAttribute("data-digit") || "");
+      } else if (act === "pin-back") {
+        state.pinDigits = state.pinDigits.slice(0, -1);
+        state.studentId = "";
+        renderParticipantModal();
+      } else if (act === "pin-clear") {
+        state.pinDigits = "";
+        state.studentId = "";
+        renderParticipantModal();
       } else if (act === "pick-avatar") {
         state.avatar = actBtn.getAttribute("data-ava") || "🩺";
         safeSet("racm303_orient_avatar_v1", state.avatar);
@@ -2298,7 +2734,18 @@
         const sid = actBtn.getAttribute("data-sid");
         const stu = findRosterStudent(sid);
         if (stu) {
+          state.pinDigits = String(stu.id).slice(-3);
           applyRosterToLocalState(stu, false);
+          renderParticipantModal();
+        }
+      } else if (act === "pick-roster-join") {
+        const sid = actBtn.getAttribute("data-sid");
+        const stu = findRosterStudent(sid);
+        if (stu) {
+          state.pinDigits = String(stu.id).slice(-3);
+          applyRosterToLocalState(stu, true);
+          publishMyPresence();
+          publishPacket("cmd", { type: "who_is_here" }, false);
           renderParticipantModal();
         }
       } else if (act === "pick-faculty") {
@@ -2323,24 +2770,38 @@
             applyFacultyToLocalState(FACULTY_LIST[0], true);
           }
         } else {
-          const inp = document.getElementById("orlStuLookupInput");
-          const rawVal = inp ? inp.value.trim() : "";
-          if (rawVal) {
-            const matched = findRosterStudent(rawVal);
-            if (matched) {
-              applyRosterToLocalState(matched, true);
+          if (state.studentId && state.memberType === "student") {
+            state.joined = true;
+            safeSet("racm303_orient_joined_v1", "1");
+          } else if (state.pinDigits.length === 3) {
+            const m3 = findStudentsBy3Digits(state.pinDigits);
+            if (m3.length >= 1) {
+              applyRosterToLocalState(m3[0], true);
             } else {
-              state.nickname = rawVal.slice(0, 28);
+              state.shortNo = state.pinDigits;
+              state.nickname = `นศพ. ${state.pinDigits}`;
+              safeSet("racm303_orient_sno_v1", state.shortNo);
               safeSet("racm303_orient_nick_v1", state.nickname);
               state.joined = true;
               safeSet("racm303_orient_joined_v1", "1");
             }
-          } else if (state.studentId || state.nickname) {
-            state.joined = true;
-            safeSet("racm303_orient_joined_v1", "1");
           } else {
-            if (inp) inp.focus();
-            return;
+            const inp = document.getElementById("orlStuLookupInput");
+            const rawVal = inp ? inp.value.trim() : "";
+            if (rawVal) {
+              const matched = findRosterStudent(rawVal);
+              if (matched) {
+                state.pinDigits = String(matched.id).slice(-3);
+                applyRosterToLocalState(matched, true);
+              } else {
+                state.nickname = rawVal.slice(0, 28);
+                safeSet("racm303_orient_nick_v1", state.nickname);
+                state.joined = true;
+                safeSet("racm303_orient_joined_v1", "1");
+              }
+            } else {
+              return;
+            }
           }
         }
         publishMyPresence();
@@ -2369,13 +2830,18 @@
 
     el.addEventListener("input", (ev) => {
       if (ev.target && ev.target.id === "orlStuLookupInput") {
+        const val = ev.target.value.trim();
+        if (/^\d{1,3}$/.test(val)) {
+          state.pinDigits = val;
+        }
         const sugBox = document.getElementById("orlRosterSuggestBox");
         if (!sugBox) return;
-        const matches = searchRosterCandidates(ev.target.value);
+        const matches = searchRosterCandidates(val);
         sugBox.innerHTML = matches
+          .slice(0, 4)
           .map(
             (s) => `
-            <button type="button" class="orl-sug-item" data-orl-mact="pick-roster" data-sid="${esc(s.id)}">
+            <button type="button" class="orl-sug-item" data-orl-mact="pick-roster-join" data-sid="${esc(s.id)}">
               <strong>${esc(String(s.id).slice(-3))} · ${esc(s.nickname || s.name)}</strong>
               <span>${esc(s.fullName || s.name)} · กลุ่ม ${esc(s.area)}</span>
             </button>
@@ -2403,7 +2869,7 @@
     const cloudOk = isCloudConnected();
     const board = computeLeaderboard();
     const myRankIdx = board.findIndex((x) => x.participantId === state.participantId);
-    const myEntry = myRankIdx >= 0 ? board[myRankIdx] : { score: 0, correctCount: 0 };
+    const myEntry = myRankIdx >= 0 ? board[myRankIdx] : { score: 0, correctCount: 0, avgCorrectSec: null };
     const canRemote = ROLE === "faculty" || state.memberType === "faculty";
 
     let bodyHtml = "";
@@ -2414,8 +2880,8 @@
           : [];
       const quizIdx = Math.max(0, deckSlides.findIndex((s) => s.id === "s14-quiz-osmu"));
       const critIdx = Math.max(0, deckSlides.findIndex((s) => s.id === "s15-osmu-criteria"));
-      const quizSlideNum = deckSlides[quizIdx] ? deckSlides[quizIdx].num : "17";
-      const critSlideNum = deckSlides[critIdx] ? deckSlides[critIdx].num : "18";
+      const quizSlideNum = deckSlides[quizIdx] ? deckSlides[quizIdx].num : "28";
+      const critSlideNum = deckSlides[critIdx] ? deckSlides[critIdx].num : "29";
       bodyHtml = `
         <div class="orl-m-card is-appletv-remote-card">
           <div class="orl-m-badge">🎛️ KEYNOTE CLICKER · รีโมตไร้สายควบคุมสไลด์</div>
@@ -2430,8 +2896,8 @@
             <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="toggle-blackout">⬛ พักจอดำ (Blackout)</button>
           </div>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${quizIdx || 16}">🎮 ไป Slide ${quizSlideNum} (Quiz)</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${critIdx || 17}">⚖️ ไป Slide ${critSlideNum} (เกณฑ์ O/S/M/U)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${quizIdx || 27}">🎮 ไป Slide ${quizSlideNum} (Kahoot)</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="rcmd" data-rcmd="goto-slide" data-sidx="${critIdx || 28}">⚖️ ไป Slide ${critSlideNum} (เกณฑ์ O/S/M/U)</button>
           </div>
           <div class="orl-m-lbl" style="margin-top:6px">ควบคุม Kahoot Quiz สด (${state.participants.size} คนในห้อง)</div>
           <button type="button" class="orl-m-join-btn" data-orl-mact="rcmd" data-rcmd="start-q0">⚡ เริ่มยิงคำถามข้อที่ 1</button>
@@ -2444,22 +2910,51 @@
       `;
     } else if (!state.joined) {
       const isFacPick = state.memberType === "faculty";
-      const cleanPrefillNick = sanitizeStudentNickname(state.nickname, state.studentId, state.shortNo);
-      const prefill = !isFacPick && state.studentId
-        ? `${state.studentId}${cleanPrefillNick ? ` (${cleanPrefillNick})` : ""}`
-        : cleanPrefillNick || state.nickname || "";
-      const initialMatches = searchRosterCandidates(state.studentId || "");
+      const pin3 = state.pinDigits || "";
+      const pinMatches = pin3.length === 3 ? findStudentsBy3Digits(pin3) : [];
+      const hasBoundStu = Boolean(state.studentId && state.memberType === "student");
+
+      let pinStatusHtml = "";
+      if (pin3.length === 3) {
+        if (pinMatches.length === 1) {
+          const s = pinMatches[0];
+          pinStatusHtml = `
+            <div class="orl-m-selected-stu is-ready">
+              ✅ <strong>${esc(s.id)} · ${esc(s.nickname || s.name)}</strong> (${esc(s.fullName || s.name)} · กลุ่ม รพ.${esc(s.area)})
+            </div>
+          `;
+        } else if (pinMatches.length > 1) {
+          pinStatusHtml = `
+            <div class="orl-pin-multi-box">
+              <div class="orl-m-lbl">พบรหัสท้าย <strong>${esc(pin3)}</strong> จำนวน ${pinMatches.length} คน — แตะชื่อของคุณเพื่อเข้าห้องทันที:</div>
+              ${pinMatches
+                .map(
+                  (s) => `
+                  <button type="button" class="orl-sug-item is-pin-choice" data-orl-mact="pick-roster-join" data-sid="${esc(s.id)}">
+                    <strong>🎓 ${esc(s.id)} · ${esc(s.nickname || s.name)}</strong>
+                    <span>${esc(s.fullName || s.name)} · กลุ่ม รพ.${esc(s.area)}</span>
+                  </button>
+                `
+                )
+                .join("")}
+            </div>
+          `;
+        } else {
+          pinStatusHtml = `<div class="orl-pin-miss-note">⚠️ ไม่พบรหัสท้าย ${esc(pin3)} ในรายชื่อ 169 คน — กด ⌫ แก้ไข หรือกดเข้าห้องด้วยรหัสนี้ได้</div>`;
+        }
+      } else if (hasBoundStu) {
+        pinStatusHtml = `<div class="orl-m-selected-stu is-ready">✅ <strong>${esc(state.studentId)} · ${esc(state.nickname)}</strong> (กลุ่ม รพ.${esc(state.area)})</div>`;
+      }
 
       bodyHtml = `
-        <div class="orl-m-card">
+        <div class="orl-m-card is-kahoot-login-card">
           <div class="orl-m-head-compact">
-            <div class="orl-m-badge">🎮 RACM 303 · SCAN-TO-JOIN LIVE</div>
-            <h2 class="orl-m-title">เข้าร่วมปฐมนิเทศสดพร้อมกัน</h2>
-            <p class="orl-m-desc">รองรับทั้งคณาจารย์และนักศึกษาแพทย์ — ดูสไลด์ซิงค์สด (Pinch-Zoom ได้) และกดตอบ Quiz เกณฑ์ O · S · M · U</p>
+            <div class="orl-m-badge">🎮 RACM 303 · KAHOOT! LIVE LOBBY</div>
+            <h2 class="orl-m-title">กดรหัสนักศึกษา 3 ตัวท้ายเพื่อ Login</h2>
           </div>
 
           <div class="orl-role-tabs" role="tablist" aria-label="เลือกบทบาทผู้เข้าร่วม">
-            <button type="button" class="orl-role-tab${!isFacPick ? " is-active" : ""}" data-orl-mact="switch-mtype" data-mtype="student">🎓 นักศึกษาแพทย์ (169)</button>
+            <button type="button" class="orl-role-tab${!isFacPick ? " is-active" : ""}" data-orl-mact="switch-mtype" data-mtype="student">🎓 นักศึกษาแพทย์ (PIN 3 ตัว)</button>
             <button type="button" class="orl-role-tab${isFacPick ? " is-active" : ""}" data-orl-mact="switch-mtype" data-mtype="faculty">👨‍⚕️ อาจารย์ประจำรายวิชา</button>
           </div>
 
@@ -2478,40 +2973,33 @@
               <button type="button" class="orl-m-join-btn" data-orl-mact="join-now">🚀 เข้าร่วมในฐานะอาจารย์</button>
             `
               : `
-              <label class="orl-m-lbl" for="orlStuLookupInput">พิมพ์รหัสนักศึกษา 3 ตัวท้าย หรือชื่อเล่น</label>
-              <input id="orlStuLookupInput" class="orl-m-input" type="search" inputmode="search" enterkeyhint="go" autocomplete="off" value="${esc(prefill)}" placeholder="เช่น 006, เดือนอ้าย, มิน, 6702xxx…">
-
-              ${
-                state.studentId && state.memberType === "student"
-                  ? `<div class="orl-m-selected-stu">✅ เลือกแล้ว: <strong>${esc(state.shortNo)} ${esc(state.nickname)}</strong> · ${esc(state.fullName)} (${esc(state.area)})</div>`
-                  : ""
-              }
-
-              <div class="orl-sug-list" id="orlRosterSuggestBox">
-                ${initialMatches
-                  .slice(0, 5)
-                  .map(
-                    (s) => `
-                  <button type="button" class="orl-sug-item" data-orl-mact="pick-roster" data-sid="${esc(s.id)}">
-                    <strong>${esc(String(s.id).slice(-3))} · ${esc(s.nickname || s.name)}</strong>
-                    <span>${esc(s.fullName || s.name)} · กลุ่ม ${esc(s.area)}</span>
-                  </button>
-                `
-                  )
+              <div class="orl-pin-slots" aria-label="รหัสนักศึกษา 3 ตัวท้าย">
+                ${[0, 1, 2]
+                  .map((i) => {
+                    const ch = pin3[i] || "";
+                    const active = pin3.length === i;
+                    return `<div class="orl-pin-slot${ch ? " is-filled" : ""}${active ? " is-cursor" : ""}">${ch || "•"}</div>`;
+                  })
                   .join("")}
               </div>
 
-              <div class="orl-ava-section">
-                <div class="orl-m-lbl">เลือกไอคอนประจำตัว</div>
-                <div class="orl-ava-picker">
-                  ${AVATARS.map(
-                    (a) =>
-                      `<button type="button" class="orl-ava-btn${state.avatar === a ? " is-picked" : ""}" data-orl-mact="pick-avatar" data-ava="${a}">${a}</button>`
-                  ).join("")}
-                </div>
+              ${pinStatusHtml}
+
+              <div class="orl-pin-numpad" role="group" aria-label="แป้นกดรหัสนักศึกษา 3 ตัวท้าย">
+                ${["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                  .map((d) => `<button type="button" class="orl-pin-key" data-orl-mact="pin-digit" data-digit="${d}">${d}</button>`)
+                  .join("")}
+                <button type="button" class="orl-pin-key is-fn" data-orl-mact="pin-clear">ล้าง</button>
+                <button type="button" class="orl-pin-key" data-orl-mact="pin-digit" data-digit="0">0</button>
+                <button type="button" class="orl-pin-key is-fn" data-orl-mact="pin-back" aria-label="ลบตัวท้าย">⌫</button>
               </div>
 
-              <button type="button" class="orl-m-join-btn" data-orl-mact="join-now">🚀 เข้าร่วม Live Lobby ทันที</button>
+              <button type="button" class="orl-m-join-btn is-kahoot-enter${hasBoundStu || pin3.length === 3 ? " is-ready-pulse" : ""}" data-orl-mact="join-now">
+                🚀 เข้าห้อง Kahoot! ทันที ${hasBoundStu ? `(${esc(state.shortNo)} ${esc(state.nickname)})` : ""}
+              </button>
+
+              <input id="orlStuLookupInput" class="orl-m-input is-compact-fallback" type="search" inputmode="search" autocomplete="off" placeholder="หรือค้นหาด้วยชื่อเล่น / รหัส 7 หลัก…">
+              <div class="orl-sug-list" id="orlRosterSuggestBox"></div>
             `
           }
         </div>
@@ -2521,36 +3009,38 @@
       const qMap = q && state.answersByQ.get(q.id);
       const myAns = qMap ? qMap.get(state.participantId) : null;
       const remSec = Math.ceil(getRemainingMs() / 1000);
-      const pct = Math.max(0, Math.min(100, (getRemainingMs() / Math.max(1000, (state.session.durationSec || 20) * 1000)) * 100));
+      const pct = Math.max(0, Math.min(100, (getRemainingMs() / Math.max(1000, (state.session.durationSec || 10) * 1000)) * 100));
 
       if (myAns) {
-        const pickedMeta = CHOICE_META[myAns.choiceIdx];
+        const pickedMeta = getChoiceMeta(q, myAns.choiceIdx);
+        const secTaken = (Math.max(80, myAns.elapsedMs || 500) / 1000).toFixed(2);
         bodyHtml = `
           <div class="orl-m-card is-centered">
-            <div class="orl-m-locked-chip ${pickedMeta.cls}">${pickedMeta.shape} เลือก${pickedMeta.nameTh}แล้ว</div>
-            <h2 class="orl-m-title">ส่งคำตอบสำเร็จ! ⏳</h2>
-            <p class="orl-m-desc">รอลุ้นผลเฉลยและคำอธิบายเกณฑ์ O / S / M / U พร้อมกันทั้งห้อง…</p>
+            <div class="orl-m-locked-chip ${pickedMeta.cls}">${pickedMeta.shape}${pickedMeta.grade ? " " + esc(pickedMeta.grade) : ""} ส่งคำตอบแล้ว!</div>
+            <h2 class="orl-m-title">⚡ ความไวของคุณ: ${secTaken} วินาที</h2>
+            <p class="orl-m-desc">รอลุ้นเสียงฉาบหมดเวลาและผลคะแนนพร้อมกันทั้งห้อง…</p>
             <div class="orl-m-wait-pulse">เหลือเวลา <strong data-orl-timer-sec>${remSec}s</strong></div>
           </div>
         `;
       } else {
+        const padGridCls = q.choices.length >= 6 ? "is-6-pad" : "is-4-pad";
         bodyHtml = `
           <div class="orl-m-q-wrap">
             <div class="orl-m-q-head">
               <span class="orl-q-num-pill">ข้อ ${state.session.qPos + 1} / ${getActiveQuestionList().length}</span>
-              <span class="orl-timer-badge${remSec <= 5 ? " is-urgent" : ""}" data-orl-timer-sec>${remSec}s</span>
+              <span class="orl-timer-badge${remSec <= 3 ? " is-urgent" : ""}" data-orl-timer-sec>${remSec}s</span>
             </div>
             <div class="orl-timer-progress-track">
               <div class="orl-timer-progress-fill" data-orl-timer-bar style="width:${pct.toFixed(1)}%"></div>
             </div>
             <div class="orl-m-q-stem">${esc(q.stem)}</div>
-            <div class="orl-m-pad-grid">
+            <div class="orl-m-pad-grid ${padGridCls}">
               ${q.choices
                 .map((txt, idx) => {
-                  const meta = CHOICE_META[idx];
+                  const meta = getChoiceMeta(q, idx);
                   return `
                     <button type="button" class="orl-m-pad-btn ${meta.cls}" data-orl-mact="submit-choice" data-choice-idx="${idx}">
-                      <span class="orl-m-pad-shape">${meta.shape}</span>
+                      <span class="orl-m-pad-shape">${meta.shape}${meta.grade ? ` <strong>${esc(meta.grade)}</strong>` : ""}</span>
                       <span class="orl-m-pad-txt">${esc(txt)}</span>
                     </button>
                   `;
@@ -2564,18 +3054,19 @@
       const q = getCurrentQuestion();
       const qMap = q && state.answersByQ.get(q.id);
       const myAns = qMap ? qMap.get(state.participantId) : null;
-      const rightMeta = CHOICE_META[q.correctIdx];
+      const rightMeta = getChoiceMeta(q, q.correctIdx);
       const gotRight = Boolean(myAns && myAns.correct);
+      const secTaken = myAns ? (Math.max(80, myAns.elapsedMs || 500) / 1000).toFixed(2) : null;
 
       bodyHtml = `
         <div class="orl-m-card ${gotRight ? "is-res-correct" : "is-res-review"}">
           <div class="orl-m-verdict-banner ${gotRight ? "is-ok" : "is-miss"}">
             ${
               gotRight
-                ? `🎉 ถูกต้อง! +${myAns.points} คะแนน`
+                ? `🎉 ถูกต้อง! +${myAns.points} แต้ม (⚡ ${secTaken}s)`
                 : myAns
-                ? `💡 ทบทวนจุดสำคัญ! คำตอบที่ถูกคือ ${rightMeta.shape}`
-                : `⏰ หมดเวลา · คำตอบที่ถูกคือ ${rightMeta.shape}`
+                ? `💡 พลาดไปนิด! คำตอบที่ถูกคือ ${rightMeta.shape}${rightMeta.grade ? " " + rightMeta.grade : ""}`
+                : `⏰ หมดเวลา! คำตอบที่ถูกคือ ${rightMeta.shape}${rightMeta.grade ? " " + rightMeta.grade : ""}`
             }
           </div>
           <div class="orl-m-correct-ans-box">
@@ -2584,16 +3075,17 @@
           <div class="orl-m-recheck-notes">
             <div><strong>✅ DO:</strong> ${esc(q.doSummary)}</div>
             <div><strong>🚫 DON'T:</strong> ${esc(q.dontSummary)}</div>
-            <div><strong>⚖️ เกณฑ์ O·S·M·U:</strong> ${esc(q.osmuRule)}</div>
+            <div><strong>⚖️ สรุปเกณฑ์:</strong> ${esc(q.osmuRule)}</div>
           </div>
           <div class="orl-m-rank-strip">
-            <span>คะแนนสะสม: <strong>${myEntry.score.toLocaleString()} pts</strong></span>
-            <span>อันดับปัจจุบัน: <strong>#${myRankIdx >= 0 ? myRankIdx + 1 : "-"}</strong></span>
+            <span>แต้มรวม: <strong>${myEntry.score.toLocaleString()} แต้ม</strong></span>
+            <span>อันดับ: <strong>#${myRankIdx >= 0 ? myRankIdx + 1 : "-"}</strong></span>
           </div>
         </div>
       `;
     } else if (state.session.phase === "podium") {
       const deck = getActiveQuestionList();
+      const top3 = board.slice(0, 3);
       const missedList = deck.filter((q) => {
         const qMap = state.answersByQ.get(q.id);
         const mine = qMap && qMap.get(state.participantId);
@@ -2601,30 +3093,44 @@
       });
       bodyHtml = `
         <div class="orl-m-card">
-          <div class="orl-m-badge">🏆 สรุปผล Quiz O / S / M / U ของคุณ</div>
-          <h2 class="orl-m-title">${esc(state.avatar)} ${esc(getPlayerLabel(state))}</h2>
+          <div class="orl-m-badge">🏆 KAHOOT! PODIUM · อันดับ 1 · 2 · 3</div>
+          ${
+            top3.length
+              ? `
+            <div class="orl-m-top3-strip">
+              ${top3
+                .map((p, i) => {
+                  const med = i === 0 ? "🥇 #1" : i === 1 ? "🥈 #2" : "🥉 #3";
+                  return `<div class="orl-m-top3-row is-r${i + 1}"><span><strong>${med}</strong> ${esc(p.avatar)} ${esc(p.label)}</span><strong>${p.score.toLocaleString()} แต้ม</strong></div>`;
+                })
+                .join("")}
+            </div>
+          `
+              : ""
+          }
+          <h2 class="orl-m-title" style="margin-top:6px">${esc(state.avatar)} คุณ: ${esc(getPlayerLabel(state))}</h2>
           <div class="orl-m-rank-strip" style="margin:4px 0 8px">
-            <span>คะแนนรวม: <strong>${myEntry.score.toLocaleString()} pts</strong></span>
-            <span>ตอบถูก: <strong>${myEntry.correctCount}/${deck.length}</strong></span>
+            <span>แต้มของคุณ: <strong>${myEntry.score.toLocaleString()} แต้ม</strong></span>
+            <span>ถูก: <strong>${myEntry.correctCount}/${deck.length}</strong></span>
             <span>อันดับ: <strong>#${myRankIdx >= 0 ? myRankIdx + 1 : "-"}</strong></span>
           </div>
           ${
             missedList.length === 0
-              ? `<div class="orl-m-selected-stu">🌟 ยอดเยี่ยม! คุณตอบถูกครบทุกข้อ แม่นยำทุกเกณฑ์ O / S / M / U</div>`
+              ? `<div class="orl-m-selected-stu">🌟 ยอดเยี่ยม! คุณตอบถูกครบทั้ง ${deck.length} ข้อ!</div>`
               : `
-                <div class="orl-m-lbl">📌 สรุปเกณฑ์สำคัญที่ควรจดจำ:</div>
+                <div class="orl-m-lbl">📌 สรุปประเด็นสำคัญที่ควรจดจำ:</div>
                 <div class="orl-m-recheck-notes">
                   ${missedList.map((q) => `<div>• <strong>${esc(q.badge)}:</strong> ${esc(q.osmuRule)}</div>`).join("")}
                 </div>
               `
           }
-          <button type="button" class="orl-m-join-btn" data-orl-mact="view-synced-slides" style="margin-top:8px">📘 เปิดอ่านสไลด์ชี้แจงเกณฑ์ O/S/M/U (Pinch-Zoom ได้) &rarr;</button>
+          <button type="button" class="orl-m-join-btn" data-orl-mact="view-synced-slides" style="margin-top:8px">📘 เปิดดูสไลด์สรุปเกณฑ์ O/S/M/U &rarr;</button>
         </div>
       `;
     } else {
       bodyHtml = `
         <div class="orl-m-card is-centered">
-          <div class="orl-m-you-in">🎉 You're in! เข้าร่วมห้องสดสำเร็จ</div>
+          <div class="orl-m-you-in">🎉 You're in! เข้าห้อง Kahoot! สำเร็จ</div>
           <div class="orl-m-player-hero">
             <span class="orl-m-big-ava">${esc(state.avatar)}</span>
             <div>
@@ -2635,8 +3141,8 @@
 
           <div class="orl-m-wait-box">
             <div class="orl-m-spinner" aria-hidden="true"></div>
-            <strong>รอรับคำถาม Quiz O / S / M / U อัตโนมัติ…</strong>
-            <p>คุณสามารถกดเปิดอ่านสไลด์ซิงค์ตามจอหน้าห้อง (รองรับ Pinch-Zoom และเลื่อนขึ้น-ลงในสไลด์) ได้เลย เมื่อถึงข้อคำถาม แป้นกดตอบ 4 สีจะเด้งขึ้นมาเองอัตโนมัติ!</p>
+            <strong>เห็นชื่อของคุณบนจอหน้าห้องแล้วใช่ไหม? 🚀</strong>
+            <p>เตรียมนิ้วให้พร้อม! เมื่ออาจารย์เริ่มยิงคำถาม แป้นกดตอบ Kahoot! (ข้อละ 10 วินาที · ตอบถูก + เร็วสุดได้แต้มสูงสุด) จะเด้งขึ้นมาอัตโนมัติ</p>
             <div class="orl-m-slide-tracker">
               📡 สไลด์ปัจจุบัน: <strong>Slide ${esc(state.session.hostSlideNum || "01")}</strong> · ${esc(state.session.hostSlideTitle || "Orientation")}
             </div>
@@ -2644,8 +3150,8 @@
 
           <button type="button" class="orl-m-join-btn" data-orl-mact="view-synced-slides" style="width:100%">📖 ดูสไลด์ซิงค์ตามจอหน้าห้อง (Pinch-Zoom ได้)</button>
           <div class="orl-m-foot-btns">
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="edit-profile">✏️ เปลี่ยนชื่อ / บทบาท</button>
-            <button type="button" class="orl-m-sec-btn" data-orl-mact="close">เข้าหน้าหลักพอร์ทัล</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="edit-profile">✏️ เปลี่ยนรหัส 3 ตัว / บทบาท</button>
+            <button type="button" class="orl-m-sec-btn" data-orl-mact="close">ย่อหน้าต่าง</button>
           </div>
         </div>
       `;
@@ -2654,7 +3160,7 @@
     modal.innerHTML = `
       <div class="orl-m-shell">
         <div class="orl-m-topbar">
-          <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> RACM 303 LIVE</span>
+          <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> RACM 303 KAHOOT!</span>
           ${
             canRemote && state.joined
               ? `
@@ -2663,7 +3169,7 @@
               <button type="button" class="orl-seg-btn${state.mobileTab === "remote" ? " is-active" : ""}" data-orl-mact="switch-mtab" data-mtab="remote">🎛️ รีโมท</button>
             </div>
           `
-              : `<span class="orl-m-score-pill">${myEntry.score.toLocaleString()} pts</span>`
+              : `<span class="orl-m-score-pill">${myEntry.score.toLocaleString()} แต้ม</span>`
           }
           <button type="button" class="orl-m-close" data-orl-mact="close" aria-label="ย่อหน้าต่าง">&times;</button>
         </div>
@@ -2725,9 +3231,10 @@
         const newQ = {
           id: randomId("custq"),
           quick5: true,
+          isOsmuScenario: false,
           badge: "LIVE POLL · คำถามสดจากอาจารย์",
           impactTag: "ทวนสอบความเข้าใจในห้องปฐมนิเทศ",
-          durationSec: state.customDurationSec || 20,
+          durationSec: state.customDurationSec || 10,
           stem,
           choices: [c0, c1, c2 || "ไม่มีข้อใดถูก", c3 || "ถูกทุกข้อที่กล่าวมา"],
           correctIdx: right,
@@ -2764,7 +3271,7 @@
       el.innerHTML = `
         <div class="orl-qr-zoom-card">
           <div class="orl-qz-top">
-            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สแกนพร้อมกันทั้งอาจารย์ &amp; นศพ.</span>
+            <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สแกน QR แล้วกดรหัสนักศึกษา 3 ตัวท้าย</span>
             <button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button>
           </div>
           <div class="orl-qz-svg-wrap">
@@ -2807,7 +3314,7 @@
               <option value="3">■ สีเขียว</option>
             </select>
           </div>
-          <label class="orl-m-lbl">สรุปเฉลย / เกณฑ์ O·S·M·U ที่แสดงหลังเฉลย</label>
+          <label class="orl-m-lbl">สรุปเฉลย / เกณฑ์ที่แสดงหลังเฉลย</label>
           <input name="osmuRule" class="orl-m-input" placeholder="คำอธิบายสั้นๆ เมื่อเฉลยคำตอบ…">
           <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
             <button type="button" class="orl-bar-btn" data-orl-aux-close="1">ยกเลิก</button>
@@ -2821,11 +3328,17 @@
   /* ---------- 14. Surgical In-Place DOM Refresh & Event Delegation ---------- */
   function updateTimerDomInPlace(remMs) {
     const sec = Math.ceil(remMs / 1000);
-    const durMs = Math.max(1000, (state.session.durationSec || 20) * 1000);
+    const durMs = Math.max(1000, (state.session.durationSec || 10) * 1000);
     const pct = Math.max(0, Math.min(100, (remMs / durMs) * 100));
     document.querySelectorAll("[data-orl-timer-sec]").forEach((el) => {
       el.textContent = `${sec}s`;
-      el.classList.toggle("is-urgent", sec <= 5);
+      el.classList.toggle("is-urgent", sec <= 3);
+    });
+    document.querySelectorAll("[data-orl-timer-num]").forEach((el) => {
+      el.textContent = String(sec);
+    });
+    document.querySelectorAll("[data-orl-timer-orb]").forEach((el) => {
+      el.classList.toggle("is-urgent", sec <= 3);
     });
     document.querySelectorAll("[data-orl-timer-bar]").forEach((el) => {
       el.style.width = `${pct.toFixed(1)}%`;
@@ -2898,11 +3411,12 @@
     bar.hidden = false;
     bar.innerHTML =
       state.session.phase === "question"
-        ? `⚡ คำถาม Quiz O/S/M/U กำลังเปิดรับคำตอบ! แตะเพื่อตอบทันที &rarr;`
-        : `🟢 Orientation Live เปิดอยู่ (${state.participants.size} คน) · แตะเปิดแป้นตอบ/ซิงค์สไลด์`;
+        ? `⚡ Kahoot! Quiz กำลังนับเวลา! แตะเพื่อตอบทันที &rarr;`
+        : `🟢 Kahoot! Live เปิดอยู่ (${state.participants.size} คน) · แตะเปิดแป้นตอบ/ซิงค์สไลด์`;
   }
 
   document.addEventListener("click", (ev) => {
+    getAudioCtx();
     const btn = ev.target.closest("[data-orl-action], [data-orl-preset], [data-orl-dur], [data-orl-jump-q]");
     if (!btn) return;
 
@@ -2912,7 +3426,7 @@
       return;
     }
     if (btn.hasAttribute("data-orl-dur")) {
-      state.customDurationSec = Number(btn.getAttribute("data-orl-dur")) || 20;
+      state.customDurationSec = Number(btn.getAttribute("data-orl-dur")) || 10;
       renderAllSurfaces(true);
       return;
     }
@@ -2943,9 +3457,15 @@
       }
     } else if (act === "jump-to-quiz-slide") {
       if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.goToSlideById === "function") {
+        window.RACM_ORIENTATION_DECK.goToSlideById("s14a-kahoot-qr-lobby");
+      }
+    } else if (act === "launch-kahoot-slide") {
+      if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.goToSlideById === "function") {
         window.RACM_ORIENTATION_DECK.goToSlideById("s14-quiz-osmu");
       }
+      hostStartQuestionAt(0);
     } else if (act === "goto-criteria-slide") {
+      stopKahootCountdownBgm();
       if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.goToSlideById === "function") {
         window.RACM_ORIENTATION_DECK.goToSlideById("s15-osmu-criteria");
       }
@@ -2970,6 +3490,8 @@
     } else if (act === "toggle-mute") {
       state.soundMuted = !state.soundMuted;
       safeSet("racm303_orient_mute_v1", state.soundMuted ? "1" : "0");
+      if (state.soundMuted) stopKahootCountdownBgm();
+      else if (state.session.phase === "question" && state.session.timerRunning) startKahootCountdownBgm();
       renderAllSurfaces(true);
     } else if (act === "open-participant-pad") {
       openParticipantModal();
@@ -3005,6 +3527,33 @@
         ev.preventDefault();
         ev.stopPropagation();
         closeTopOverlay();
+        return;
+      }
+      if (state.participantModalOpen && !state.joined && state.memberType === "student") {
+        const tag = (ev.target && ev.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (/^[0-9]$/.test(ev.key)) {
+          ev.preventDefault();
+          handlePinDigitInput(ev.key);
+        } else if (ev.key === "Backspace") {
+          ev.preventDefault();
+          state.pinDigits = state.pinDigits.slice(0, -1);
+          state.studentId = "";
+          renderParticipantModal();
+        } else if (ev.key === "Enter" && (state.studentId || state.pinDigits.length === 3)) {
+          ev.preventDefault();
+          const m3 = state.pinDigits.length === 3 ? findStudentsBy3Digits(state.pinDigits) : [];
+          if (m3.length === 1 || state.studentId) {
+            if (!state.studentId && m3[0]) applyRosterToLocalState(m3[0], true);
+            else {
+              state.joined = true;
+              safeSet("racm303_orient_joined_v1", "1");
+            }
+            publishMyPresence();
+            publishPacket("cmd", { type: "who_is_here" }, false);
+            renderParticipantModal();
+          }
+        }
       }
     },
     true
@@ -3044,6 +3593,7 @@
 
   window.RACM_ORIENTATION_LIVE = {
     renderCoverCardHtml,
+    renderQrLobbySlideHtml,
     renderDeckLiveStageHtml,
     renderEmbeddedQuizSlideHtml,
     openParticipantModal,
@@ -3051,6 +3601,10 @@
     hasOpenOverlay,
     closeTopOverlay,
     notifyHostSlide,
+    hostOpenLobby,
+    hostResetSession,
+    hostStartQuestionAt,
+    stopKahootCountdownBgm,
     isFollowEnabled: () => state.followHostSlide,
     toggleFollowHostSlide: () => {
       state.followHostSlide = !state.followHostSlide;

@@ -7,7 +7,7 @@
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261125vdo1";
+  const ASSET_VER = "20261125kahoot3";
   const PPTX_HREF = `exports/pptx/RACM303_2569_Orientation_Slides.pptx?v=${ASSET_VER}`;
   const PDF_HREF = `exports/pdf/RACM303_2569_Orientation_Slides.pdf?v=${ASSET_VER}`;
   const IMG_DIR = "assets/images/orientation";
@@ -24,7 +24,9 @@
     timerId: 0,
     tickId: 0,
     remainSec: 5,
-    cinemaFull: false
+    cinemaFull: false,
+    fullscreenCinema: false,
+    unlocking: false
   };
 
   /* ---------- Netflix Pause Screensaver × Apple TV Photo Grid Catalog (Slide 02: Prem Buri) ---------- */
@@ -2553,9 +2555,9 @@
       title: "เวลาเรียน สิทธิ์เข้าสอบ โควตาการลา และแนวทางดูแลความปลอดภัยภาคสนาม 6 ข้อ",
       keyTag: "สิทธิ์เข้าสอบ & ความปลอดภัย",
       keyMessageHtml:
-        "นักศึกษาจะมีสิทธิ์เข้าสอบเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong> (ลาไม่เกิน <strong>3 วัน</strong> ช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามลาได้ไม่เกิน <strong>1.5 วัน</strong>) พร้อมปฏิบัติตามระเบียบภาคสนาม 6 ข้อ",
+        "นักศึกษาจะมีสิทธิ์เข้าสอบเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong> (ลาไม่เกิน <strong>3 วัน = คาบเช้า–บ่าย รวม 6 คาบที่เช็คชื่อ</strong> ช่วงก่อน-หลังภาคสนาม และช่วงภาคสนามลาได้ไม่เกิน <strong>1.5 วัน</strong>) พร้อมปฏิบัติตามระเบียบภาคสนาม 6 ข้อ",
       notes:
-        "ชี้แจงเกณฑ์เวลาเรียนไม่น้อยกว่าร้อยละ 80 จึงมีสิทธิ์เข้าสอบ โควตาการลาช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน ช่วงฝึกภาคสนามลาได้ไม่เกิน 1.5 วัน ช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ",
+        "ชี้แจงเกณฑ์เวลาเรียนไม่น้อยกว่าร้อยละ 80 จึงมีสิทธิ์เข้าสอบ โควตาการลาช่วงก่อนและหลังภาคสนามรวมกันไม่เกิน 3 วัน (= คาบเช้า–บ่าย รวม 6 คาบที่เช็คชื่อ) ช่วงฝึกภาคสนามลาได้ไม่เกิน 1.5 วัน ช่วงเวลาลงชื่อเข้าเรียน (ก่อนเริ่มคาบ 15 นาที ถึงหลังเริ่มคาบ 15 นาที) และระเบียบการฝึกปฏิบัติงานนอกสถานที่ พ.ศ. 2561 ทั้ง 6 ข้อ",
       render: () => `
         <div class="or-infog-split is-s14-split">
           <div class="or-schematic-box is-s14-left" data-fit-solo="1">
@@ -2575,7 +2577,7 @@
 
             <div class="or-stat-bar-list is-s14-bars">
               <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>เวลาเรียนรวมตลอดรายวิชาที่มีสิทธิ์เข้าสอบ</span><span>&ge; 80%</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-teal" style="width:80%"></div></div></div>
-              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาช่วงก่อนและหลังภาคสนามรวมกัน</span><span>&le; 3.0 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-amber" style="width:45%"></div></div></div>
+              <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาช่วงก่อนและหลังภาคสนามรวมกัน (= เช้า–บ่าย 6 คาบที่เช็คชื่อ)</span><span>&le; 3.0 วัน (6 คาบ)</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-amber" style="width:45%"></div></div></div>
               <div class="or-stat-bar-row"><div class="or-stat-bar-head"><span>โควตาลาเฉพาะช่วงฝึกปฏิบัติงานภาคสนาม</span><span>&le; 1.5 วัน</span></div><div class="or-stat-bar-track"><div class="or-stat-bar-fill is-crimson" style="width:24%"></div></div></div>
             </div>
 
@@ -2765,20 +2767,46 @@
       `
     },
     {
-      id: "s14-quiz-osmu",
+      id: "s14a-kahoot-qr-lobby",
       num: "27",
       section: "evaluation",
-      sectionLabel: "Act IV · Live Quiz O/S/M/U",
+      sectionLabel: "Act IV · QR Code & Live Lobby",
       actClass: "is-act-4",
-      actLabel: "LIVE QUIZ · O / S / M / U",
-      timeWindow: "09.24 – 09.26 น. (กิจกรรมสด)",
-      kicker: "04 · INTERACTIVE KAHOOT QUIZ · DO'S & DON'TS & ATTITUDE (O · S · M · U)",
-      title: "Live Quiz ทวนสอบความเข้าใจ: เวลาเรียน พฤติกรรมไม่พึงประสงค์ และเกณฑ์ O · S · M · U",
-      keyTag: "ร่วมตอบสดพร้อมกัน",
+      actLabel: "KAHOOT! LIVE LOBBY · PIN 3 DIGITS",
+      timeWindow: "09.23 – 09.24 น. (สแกน QR เข้าห้องสด)",
+      kicker: "04 · KAHOOT! LIVE LOBBY · SCAN QR CODE & 3-DIGIT STUDENT ID LOGIN",
+      title: "สแกน QR Code และกดรหัสนักศึกษา 3 ตัวท้ายเข้า Live Lobby ก่อนเริ่ม Kahoot! Quiz",
+      keyTag: "PIN 3 ตัวท้าย",
       keyMessageHtml:
-        "ผู้ที่สแกน QR Code แล้วกดตอบคำถาม 4 สีบนมือถือ/แท็บเล็ตได้ทันที เพื่อ <strong>Recheck ความเข้าใจก่อนชี้แจงเกณฑ์ตัดสิน O · S · M · U ฉบับสมบูรณ์ในสไลด์ถัดไป</strong>",
+        "เปิดกล้องสแกน <strong>QR Code</strong> แล้วกด <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> เพื่อ Login เข้าห้องสดทันที — สไลด์ถัดไปพบกับ <strong>Kahoot! Quiz 6 ข้อ (ข้อละ 10 วินาที · ตอบถูก + เร็วสุด ชิง Podium Rank 1 · 2 · 3)</strong>",
       notes:
-        "กดปุ่มเริ่มยิงคำถาม Quiz O/S/M/U บนสไลด์นี้เพื่อให้ทั้งนักศึกษาและคณาจารย์ที่สแกน QR Code ร่วมกันกดตอบสดบนมือถือ ทดสอบความเข้าใจเรื่องเวลาเรียน ≥ 80% โควตาลา 3 วัน / 1.5 วัน ประกาศคณะฯ พ.ศ. 2567 (ข้อ 2 และข้อ 3.2.1–3.2.3) แบบประเมินเพื่อนในกลุ่ม การสอบซ่อมแยกวิชา (< 2.00) ผลต่อเกียรตินิยม และการลงทะเบียนเรียนใหม่",
+        "ให้นักศึกษาและคณาจารย์สแกน QR Code เข้าห้องรอสด (Live Lobby) โดยนักศึกษาเพียงกดเลขรหัสนักศึกษา 3 ตัวท้ายบนแป้นตัวเลขเพื่อผูกชื่อและกลุ่ม รพ. ทันที เมื่อพร้อมแล้วกดปุ่มเริ่มเกมหรือกด Next Slide เพื่อเข้าสู่สไลด์ Kahoot! Quiz ทั้ง 6 ข้อ",
+      isLiveLobbySlide: true,
+      render: () => `
+        <div class="orl-s14-quiz-wrap" data-orl-slide-mount="qr-lobby">
+          ${
+            window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml === "function"
+              ? window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml({ viewMode: state.viewMode })
+              : ""
+          }
+        </div>
+      `
+    },
+    {
+      id: "s14-quiz-osmu",
+      num: "28",
+      section: "evaluation",
+      sectionLabel: "Act IV · Kahoot! Quiz (6 ข้อ · 10s)",
+      actClass: "is-act-4",
+      actLabel: "KAHOOT! QUIZ · 10s · SPEED + ACCURACY",
+      timeWindow: "09.24 – 09.27 น. (Kahoot! 6 ข้อ)",
+      kicker: "04 · KAHOOT! CHALLENGE · 5 HSS OBJECTIVES (6 CHOICES) + 5 BEHAVIORAL SCENARIOS (O · S · M · U)",
+      title: "Kahoot! Live Quiz (6 ข้อ · ข้อละ 10 วินาที): 5 วัตถุประสงค์ระบบฯ และสถานการณ์ตัดสิน O · S · M · U",
+      keyTag: "ถูก + เร็วสุด = Podium",
+      keyMessageHtml:
+        "โจทย์ข้อละ <strong>10 วินาที</strong> พร้อมเสียงดนตรี Kahoot! และเสียงฉาบหมดเวลา — วัดความเข้าใจ <strong>5 วัตถุประสงค์ระบบสุขภาพ (6 ตัวเลือก)</strong> + <strong>5 สถานการณ์จริง O / S / M / U</strong> แล้วสรุป <strong>Rank 1 · 2 · 3 พร้อมแต้มรวม</strong>!",
+      notes:
+        "ดำเนินกิจกรรม Kahoot! สด 6 ข้อ (ข้อละ 10 วินาที): ข้อ 1 ถามว่าอะไรไม่อยู่ใน 5 วัตถุประสงค์ของหมวดระบบสุขภาพ (6 ตัวเลือก) และข้อ 2–6 เป็นสถานการณ์จำลองพฤติกรรมนักศึกษาแพทย์ (ลาเกิน 3 วัน = 6 คาบเช้า-บ่าย, สาย > 15 นาที/ชุดนอกพื้นที่ครั้งแรกได้ M, โพสต์ข้อมูลผู้ป่วย/ฝากเช็คชื่อ/ซ้ำหลังได้ M ได้ U, สอบซ่อม 1 ครั้งผ่านได้ S กระทบเกียรตินิยม, และเกณฑ์ได้ O) ปิดท้ายด้วย Podium แสดงผู้ชนะอันดับ 1, 2, 3 พร้อมคะแนนรวม",
       isLiveQuizSlide: true,
       render: () => `
         <div class="orl-s14-quiz-wrap" data-orl-slide-mount="quiz">
@@ -2792,7 +2820,7 @@
     },
     {
       id: "s15-osmu-criteria",
-      num: "28",
+      num: "29",
       section: "evaluation",
       sectionLabel: "Act IV · เกณฑ์ O / S / M / U",
       actClass: "is-act-3",
@@ -2804,7 +2832,7 @@
       keyMessageHtml:
         "ผลการประเมินเจตคติและพฤติกรรมได้ <strong><code>U</code> ต้องลงทะเบียนเรียนใหม่</strong> · การสอบซ่อมแยกวิชา [แต้ม <strong>&lt; 2.00</strong>] ให้โอกาสแก้ตัว <strong>1 ครั้ง</strong> (ผ่านได้เกรด <strong><code>S</code></strong> และ<strong>มีผลต่อการได้รับเกียรตินิยม</strong>)",
       notes:
-        "ชี้แจงสรุปเกณฑ์ตามคู่มือรายวิชาหัวข้อเวลาเรียนและข้อ 13 การประเมินด้านเจตคติ: (1) เวลาเรียน ≥ ร้อยละ 80 จึงมีสิทธิ์เข้าสอบ ลาช่วงก่อน-หลังภาคสนาม ≤ 3 วัน ภาคสนาม ≤ 1.5 วัน (2) อ้างอิงประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 (ข้อ 3.2.1–3.2.3) และใช้แบบประเมินจากเพื่อนในกลุ่มประกอบการพิจารณาของอาจารย์ (3) เกรดสุดท้ายได้ O มาจากเจตคติภาพรวม O + สอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม (4) แต้มต่ำกว่า 2.00 ต้องสอบซ่อมแยกวิชาระบบฯ/ระบาดฯ โอกาสแก้ตัว 1 ครั้ง ผ่านได้เกรด S มีผลต่อเกียรตินิยม หากไม่ผ่านหรือเจตคติได้ U ต้องลงทะเบียนเรียนใหม่",
+        "ชี้แจงสรุปเกณฑ์ตามคู่มือรายวิชาหัวข้อเวลาเรียนและข้อ 13 การประเมินด้านเจตคติ: (1) เวลาเรียน ≥ ร้อยละ 80 จึงมีสิทธิ์เข้าสอบ ลาช่วงก่อน-หลังภาคสนาม ≤ 3 วัน (= คาบเช้า-บ่าย รวม 6 คาบที่เช็คชื่อ) ภาคสนาม ≤ 1.5 วัน (2) อ้างอิงประกาศคณะฯ เรื่องหลักเกณฑ์การประเมินเจตคติเกี่ยวกับพฤติกรรมที่ไม่พึงประสงค์ พ.ศ. 2567 (ข้อ 3.2.1–3.2.3) และใช้แบบประเมินจากเพื่อนในกลุ่มประกอบการพิจารณาของอาจารย์ (3) เกรดสุดท้ายได้ O มาจากเจตคติภาพรวม O + สอบทฤษฎีได้ O ทั้งสองวิชา + ไม่มีการสอบซ่อม (4) แต้มต่ำกว่า 2.00 ต้องสอบซ่อมแยกวิชาระบบฯ/ระบาดฯ โอกาสแก้ตัว 1 ครั้ง ผ่านได้เกรด S มีผลต่อเกียรตินิยม หากไม่ผ่านหรือเจตคติได้ U ต้องลงทะเบียนเรียนใหม่",
       render: () => `
         <div class="or-grid-2 is-s15-osmu-grid" data-fit-group="cards">
           <div class="or-card is-teal-tint">
@@ -2812,7 +2840,7 @@
             <h3 class="or-card-title">เงื่อนไขเวลาเรียนไม่น้อยกว่าร้อยละ 80</h3>
             <ul class="or-list">
               <li><strong>สิทธิ์เข้าสอบ:</strong> นักศึกษาจะมีสิทธิ์เข้าสอบได้ต่อเมื่อมี <strong>เวลาเรียนไม่น้อยกว่าร้อยละ 80</strong></li>
-              <li><strong>ช่วงก่อนและหลังภาคสนาม:</strong> ลาได้รวมกัน <strong>ไม่เกิน 3 วัน</strong></li>
+              <li><strong>ช่วงก่อนและหลังภาคสนาม:</strong> ลาได้รวมกัน <strong>ไม่เกิน 3 วัน (= คาบเช้า–บ่าย รวม 6 คาบที่เช็คชื่อ)</strong></li>
               <li><strong>ช่วงฝึกภาคสนาม:</strong> ลาได้ <strong>ไม่เกิน 1.5 วัน</strong> (ยื่นใบลาและได้รับอนุมัติจากอาจารย์ที่ปรึกษา)</li>
             </ul>
           </div>
@@ -2968,19 +2996,19 @@
     },
     {
       id: "s18-closing-vdo-hss",
-      num: "31",
+      num: "32",
       section: "action",
       sectionLabel: "Act IV · Closing VDO",
       actClass: "is-act-4",
-      actLabel: "CLOSING VDO · AUTOPLAY 5s",
+      actLabel: "CLOSING VDO · FULLSCREEN + UNMUTE 5s",
       timeWindow: "ส่งต่อสู่คาบ ST1 · 06:53 นาที",
       kicker: "04 · INTRODUCTION TO HEALTH SYSTEMS SCIENCE · CLOSING BRIDGE VDO",
       title: "บทนำเข้าสู่วิทยาระบบสุขภาพ: Introduction to Health Systems Science (VDO)",
-      keyTag: "Autoplay ใน 5 วินาที",
+      keyTag: "Autoplay Fullscreen 5s",
       keyMessageHtml:
-        "เมื่อเข้าสู่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง <strong>5 วินาที</strong> แล้วเริ่มเล่นวิดีโอ <strong>Introduction to Health Systems Science (พร้อมคำบรรยาย · 06:53 นาที)</strong> อัตโนมัติ เพื่อเชื่อมเข้าสู่คาบ <code>ST1</code> เวลา <strong>09.30 น.</strong>",
+        "เมื่อเข้าสู่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง <strong>5 วินาที</strong> แล้วขยายเต็มจอ (<strong>Full Screen + เปิดเสียง Unmute</strong>) เล่นวิดีโอ <strong>Introduction to Health Systems Science (06:53 นาที)</strong> อัตโนมัติ เพื่อส่งต่อสู่คาบ <code>ST1</code> เวลา <strong>09.30 น.</strong>",
       notes:
-        "สไลด์ปิดท้ายคาบปฐมนิเทศ: เมื่อกด Next Slide เข้ามาที่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง 5 วินาที แล้วเล่นวิดีโอ Introduction to Health Systems Science (with Subtitle, ความยาว 6 นาที 53 วินาที) โดยอัตโนมัติ เรื่องราวสร้างจากเรื่องจริงของผู้ป่วยโรคเรื้อรังที่สะท้อนว่าทำไมแพทย์ยุคใหม่จึงต้องเข้าใจวิทยาระบบสุขภาพ (Health Systems Science) ความปลอดภัยผู้ป่วย และการคิดเชิงระบบ เพื่อส่งต่อเข้าสู่คาบเรียนแรก ST1 เวลา 09.30 น. ได้อย่างต่อเนื่อง",
+        "สไลด์ปิดท้ายคาบปฐมนิเทศ: เมื่อกด Next Slide เข้ามาที่สไลด์สุดท้ายนี้ ระบบจะนับถอยหลัง 5 วินาที แล้วขยายเต็มจอพร้อมเปิดเสียงบรรยาย (Full Screen + Unmuted) เล่นวิดีโอ Introduction to Health Systems Science (with Subtitle, ความยาว 6 นาที 53 วินาที) โดยอัตโนมัติ (สามารถกด Esc หรือปุ่มมุมขวาบนเพื่อย่อกลับมาหน้าสไลด์ได้ทุกเมื่อ)",
       render: () => {
         const isStaticExport =
           state.viewMode === "handout" ||
@@ -2988,25 +3016,26 @@
           document.body.classList.contains("is-printing-orientation-deck");
         return `
           <div class="or-closing-vdo-split${closingVdoState.cinemaFull && !isStaticExport ? " is-cinema-full" : ""}" data-closing-vdo-split="1">
-            <div class="or-closing-vdo-player-card">
+            <div class="or-closing-vdo-player-card${closingVdoState.fullscreenCinema && !isStaticExport ? " is-fullscreen-playing" : ""}" data-closing-vdo-card="1">
               ${
                 isStaticExport
                   ? `<img class="or-closing-vdo-el" src="${CLOSING_VDO_POSTER}" alt="Introduction to Health Systems Science (Based on True Story)" loading="eager" decoding="async" />`
                   : `<video class="or-closing-vdo-el" data-closing-vdo-el="1" src="${CLOSING_VDO_SRC}" poster="${CLOSING_VDO_POSTER}" preload="auto" playsinline controls></video>
+                     <button type="button" class="or-closing-vdo-fs-exit" data-vdo-action="exit-fs-cinema" title="ย่อกลับหน้าสไลด์ (Esc)">🔊 Full Screen · ✕ ย่อกลับสไลด์ (Esc)</button>
                      <button type="button" class="or-closing-vdo-unmute-float" data-vdo-action="unmute" hidden>🔇 คลิกเพื่อเปิดเสียงบรรยาย 🔊</button>
                      <div class="or-closing-vdo-countdown-overlay" data-closing-vdo-overlay="1">
                        <div class="or-closing-vdo-cd-box">
                          <div class="or-closing-vdo-cd-top">
-                           <span class="or-closing-vdo-cd-pill">🎬 Autoplay ใน <span data-closing-vdo-sec="1">5</span> วินาที</span>
+                           <span class="or-closing-vdo-cd-pill">🎬 Full Screen + เสียง ใน <span data-closing-vdo-sec="1">5</span> วินาที</span>
                            <span class="or-closing-vdo-cd-sub">Introduction to Health Systems Science · 06:53 นาที</span>
                          </div>
                          <div class="or-closing-vdo-cd-bar">
                            <div class="or-closing-vdo-cd-bar-fill is-counting" data-closing-vdo-bar="1"></div>
                          </div>
                          <div class="or-closing-vdo-cd-actions">
-                           <span class="or-closing-vdo-cd-sub">เล่นอัตโนมัติหลังเปลี่ยนเข้าสไลด์สุดท้ายครบ 5 วินาที</span>
+                           <span class="or-closing-vdo-cd-sub">เล่นเต็มจอแบบเปิดเสียงอัตโนมัติหลังเปลี่ยนเข้าสไลด์ครบ 5 วินาที</span>
                            <div style="display:flex;gap:6px;flex-wrap:wrap">
-                             <button type="button" class="or-closing-vdo-btn is-primary" data-vdo-action="play-now">▶ เล่นทันที</button>
+                             <button type="button" class="or-closing-vdo-btn is-primary" data-vdo-action="play-now">▶ เล่นเต็มจอทันที</button>
                              <button type="button" class="or-closing-vdo-btn" data-vdo-action="cancel-autoplay">⏸ ยกเลิกนับถอยหลัง</button>
                            </div>
                          </div>
@@ -3734,7 +3763,7 @@
       `;
     }
     return `
-      <article class="or-slide-canvas is-io-pitch${slide.isLiveQuizSlide ? " is-quiz-slide-canvas" : ""}${animCls}" data-io-theme="${ioTheme}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
+      <article class="or-slide-canvas is-io-pitch${slide.isLiveQuizSlide || slide.isLiveLobbySlide ? " is-quiz-slide-canvas" : ""}${animCls}" data-io-theme="${ioTheme}" data-slide-id="${esc(slide.id)}" aria-label="Slide ${idx + 1}: ${esc(slide.title)}">
         <div class="or-sld-inner">
           <header class="or-sld-head">
             <div class="or-sld-eyebrow-row">
@@ -3823,7 +3852,7 @@
           ev.target.closest(
             "button, a, video, input, select, textarea, label, .or-deck-topbar, .or-deck-bottombar, .or-notes-dock, .or-tools-popover, .or-clicker-guide-sheet, .orl-cover-card, .orl-s14-quiz-wrap, .or-prem-tile, [data-prem-ctrl], [data-map-site], [data-s09-jump-site], [data-open-spss-deck], [data-open-attitude-pdf], .fm-tab, .fm-token, .th-map-pin-group, .or-closing-vdo-player-card, .or-closing-vdo-status-bar, [data-vdo-action]"
           );
-        if (!inInteractive && !(curSlide && curSlide.isLiveQuizSlide)) {
+        if (!inInteractive && !(curSlide && (curSlide.isLiveQuizSlide || curSlide.isLiveLobbySlide))) {
           const vpRect = modal.getBoundingClientRect();
           const relX = (ev.clientX - vpRect.left) / Math.max(1, vpRect.width);
           state.autoPlay = false;
@@ -3920,7 +3949,6 @@
         const dx = t1.clientX - touchStartX;
         const dy = t1.clientY - touchStartY;
 
-        // Double-tap on slide figure/canvas (outside buttons & inputs) toggles 1.0x <-> 1.75x zoom!
         if (Math.abs(dx) < 16 && Math.abs(dy) < 16) {
           const isControl =
             ev.target &&
@@ -3973,7 +4001,6 @@
         if (!state.isOpen || modal.hidden) return;
         if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
 
-        // Yield cleanly if Google Drive PDF Preview or Live Participant Overlay is open on top
         const pdfPrev = document.getElementById("gdrivePdfPreviewModal");
         if (pdfPrev && !pdfPrev.hidden) return;
         if (
@@ -3989,7 +4016,6 @@
           tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || Boolean(ev.target && ev.target.isContentEditable);
         if (isTextInput) return;
 
-        // Ensure accidentally focused toolbar buttons never hijack Space / Enter / Arrow keys from clickers!
         if (tag === "BUTTON" && ev.target && modal.contains(ev.target)) {
           if (
             [
@@ -4009,7 +4035,6 @@
           }
         }
 
-        // Blackout curtain: any clicker/key press wakes the stage cleanly
         if (state.blackoutActive) {
           ev.preventDefault();
           ev.stopPropagation();
@@ -4030,7 +4055,9 @@
         if (ev.key === "Escape") {
           ev.preventDefault();
           ev.stopPropagation();
-          if (state.jumpDigits) {
+          if (closingVdoState.fullscreenCinema) {
+            exitClosingVdoFullscreenCinema(modal);
+          } else if (state.jumpDigits) {
             clearJumpBuffer();
             renderModal();
           } else if (state.toolsMenuOpen) {
@@ -4044,7 +4071,6 @@
           return;
         }
 
-        // F5 (standard wireless presentation clicker Play/Fullscreen key) or C toggles Keynote Clicker Stage
         if (ev.key === "F5" || ev.key === "c" || ev.key === "C") {
           ev.preventDefault();
           ev.stopPropagation();
@@ -4052,7 +4078,6 @@
           return;
         }
 
-        // Standard wireless clicker Blackout button sends "." (Period) or "b"/"B"
         if (ev.key === "." || ev.key === "b" || ev.key === "B") {
           if (state.viewMode === "deck") {
             ev.preventDefault();
@@ -4062,7 +4087,6 @@
           }
         }
 
-        // Digit Quick-Jump (e.g. type "8" + Enter -> Slide 08, "17" + Enter -> Slide 17)
         if (/^[0-9]$/.test(ev.key) && state.viewMode === "deck") {
           if (ev.key === "0" && !state.jumpDigits && Math.abs((state.zoomScale || 1) - 1) > 0.04) {
             ev.preventDefault();
@@ -4107,17 +4131,6 @@
           ev.stopPropagation();
           state.autoPlay = false;
           const curSlide = SLIDES[state.slideIdx];
-          if (
-            curSlide &&
-            curSlide.isLiveQuizSlide &&
-            window.RACM_ORIENTATION_LIVE &&
-            typeof window.RACM_ORIENTATION_LIVE.stepQuizWithClicker === "function"
-          ) {
-            const allowStart = ev.key === "Enter" || ev.key === " ";
-            if (window.RACM_ORIENTATION_LIVE.stepQuizWithClicker(allowStart)) {
-              return;
-            }
-          }
           if (curSlide && curSlide.id === "s18-closing-vdo-hss") {
             handleClosingVdoClickerAction();
             return;
@@ -4900,6 +4913,14 @@
     clearS02Timer();
     clearPipeTimer();
     const nextIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
+    const targetSlide = SLIDES[nextIdx];
+    if (
+      (!targetSlide || !targetSlide.isLiveQuizSlide) &&
+      window.RACM_ORIENTATION_LIVE &&
+      typeof window.RACM_ORIENTATION_LIVE.stopKahootCountdownBgm === "function"
+    ) {
+      window.RACM_ORIENTATION_LIVE.stopKahootCountdownBgm();
+    }
     state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = nextIdx;
     state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
@@ -4910,6 +4931,18 @@
     state.toolsMenuOpen = false;
     clearJumpBuffer();
     flashStepToast();
+    if (
+      ROLE === "faculty" &&
+      !window.__RACM_EXPORTING_DECK &&
+      SLIDES[nextIdx] &&
+      SLIDES[nextIdx].id === "s14a-kahoot-qr-lobby" &&
+      window.RACM_ORIENTATION_LIVE &&
+      typeof window.RACM_ORIENTATION_LIVE.getPhase === "function" &&
+      window.RACM_ORIENTATION_LIVE.getPhase() !== "lobby" &&
+      typeof window.RACM_ORIENTATION_LIVE.hostOpenLobby === "function"
+    ) {
+      window.RACM_ORIENTATION_LIVE.hostOpenLobby();
+    }
     syncHostSlideToLive();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
@@ -4923,7 +4956,6 @@
     const d = Number(delta) || 0;
     if (!d) return;
 
-    // If a 2-phase Overview -> Spotlight transition is mid-flight, snap to its target before processing the new click!
     if (state.s02Timer && typeof state.s02PendingTarget === "number") {
       const snapFocus = state.s02PendingTarget;
       clearS02Timer();
@@ -4941,6 +4973,28 @@
     }
 
     const cur = SLIDES[state.slideIdx];
+    if (state.viewMode === "deck" && !window.__RACM_EXPORTING_DECK && cur && d > 0) {
+      if (cur.id === "s14a-kahoot-qr-lobby") {
+        goToSlide(state.slideIdx + 1);
+        if (
+          window.RACM_ORIENTATION_LIVE &&
+          typeof window.RACM_ORIENTATION_LIVE.hostStartQuestionAt === "function"
+        ) {
+          window.RACM_ORIENTATION_LIVE.hostStartQuestionAt(0);
+        }
+        return;
+      }
+      if (
+        cur.isLiveQuizSlide &&
+        window.RACM_ORIENTATION_LIVE &&
+        typeof window.RACM_ORIENTATION_LIVE.stepQuizWithClicker === "function"
+      ) {
+        if (window.RACM_ORIENTATION_LIVE.stepQuizWithClicker(true)) {
+          return;
+        }
+      }
+    }
+
     if (state.viewMode === "deck" && cur && cur.id === "s09-fieldwork-9sites") {
       if (d > 0) {
         if (state.siteFocus < 9) {
@@ -5278,7 +5332,9 @@
     if (state.viewMode === "deck") {
       modal.querySelectorAll("[data-orl-slide-mount]").forEach((mount) => {
         const kind = mount.getAttribute("data-orl-slide-mount");
-        if (kind === "quiz" && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function") {
+        if (kind === "qr-lobby" && typeof window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml === "function") {
+          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
+        } else if (kind === "quiz" && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function") {
           mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
         }
       });
@@ -5843,6 +5899,18 @@
     }
   }
 
+  function exitClosingVdoFullscreenCinema(modal) {
+    closingVdoState.fullscreenCinema = false;
+    const m = modal || document.getElementById("orientationDeckModal");
+    if (m) {
+      m.classList.remove("is-vdo-fullscreen-cinema");
+      m.querySelectorAll("[data-closing-vdo-card]").forEach((c) => c.classList.remove("is-fullscreen-playing"));
+    }
+    if (document.fullscreenElement && !state.presentationMode && !state.clickerStage && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
   function clearClosingVdoTimers(pauseVideo) {
     if (closingVdoState.timerId) {
       clearTimeout(closingVdoState.timerId);
@@ -5852,9 +5920,13 @@
       clearInterval(closingVdoState.tickId);
       closingVdoState.tickId = 0;
     }
+    closingVdoState.unlocking = false;
     if (pauseVideo) {
+      closingVdoState.fullscreenCinema = false;
       const m = document.getElementById("orientationDeckModal");
       if (m) {
+        m.classList.remove("is-vdo-fullscreen-cinema");
+        m.querySelectorAll("[data-closing-vdo-card]").forEach((c) => c.classList.remove("is-fullscreen-playing"));
         m.querySelectorAll("[data-closing-vdo-el]").forEach((v) => {
           try {
             if (!v.paused) v.pause();
@@ -5864,9 +5936,10 @@
     }
   }
 
-  function startClosingVdoPlayback(modal) {
+  function startClosingVdoPlayback(modal, enterFullScreen) {
     clearClosingVdoTimers(false);
     if (!modal || modal.hidden) return;
+    const cardEl = modal.querySelector("[data-closing-vdo-card]");
     const videoEl = modal.querySelector("[data-closing-vdo-el]");
     const overlayEl = modal.querySelector("[data-closing-vdo-overlay]");
     const unmuteBtn = modal.querySelector('[data-vdo-action="unmute"]');
@@ -5874,18 +5947,32 @@
     if (overlayEl) overlayEl.classList.add("is-hidden");
     if (!videoEl) return;
 
+    if (enterFullScreen !== false) {
+      closingVdoState.fullscreenCinema = true;
+      modal.classList.add("is-vdo-fullscreen-cinema");
+      if (cardEl) cardEl.classList.add("is-fullscreen-playing");
+      if (!document.fullscreenElement) {
+        if (modal.requestFullscreen) {
+          modal.requestFullscreen().catch(() => {});
+        } else if (videoEl.requestFullscreen) {
+          videoEl.requestFullscreen().catch(() => {});
+        }
+      }
+    }
+
     videoEl.muted = false;
+    videoEl.volume = 1;
     const playPromise = videoEl.play();
     if (playPromise && typeof playPromise.then === "function") {
       playPromise
         .then(() => {
           if (unmuteBtn) unmuteBtn.hidden = true;
-          if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ Introduction to Health Systems Science (06:53)";
+          if (statusEl) statusEl.textContent = "▶ กำลังเล่นเต็มจอพร้อมเสียง: Introduction to Health Systems Science (06:53)";
         })
         .catch(() => {
           videoEl.muted = true;
           if (unmuteBtn) unmuteBtn.hidden = false;
-          if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ (แตะปุ่มเปิดเสียงหากเบราว์เซอร์ปิดเสียงไว้)";
+          if (statusEl) statusEl.textContent = "▶ กำลังเล่นเต็มจอ (แตะปุ่มเปิดเสียงมุมขวาบน)";
           videoEl.play().catch(() => {});
         });
     }
@@ -5897,11 +5984,11 @@
     const videoEl = modal.querySelector("[data-closing-vdo-el]");
     if (!videoEl) return;
     if (closingVdoState.timerId) {
-      startClosingVdoPlayback(modal);
+      startClosingVdoPlayback(modal, true);
       return;
     }
     if (videoEl.paused) {
-      startClosingVdoPlayback(modal);
+      startClosingVdoPlayback(modal, true);
     } else {
       videoEl.pause();
     }
@@ -5918,17 +6005,19 @@
     if (!videoEl) return;
 
     clearClosingVdoTimers(false);
+    closingVdoState.fullscreenCinema = false;
+    modal.classList.remove("is-vdo-fullscreen-cinema");
     closingVdoState.remainSec = Math.round(CLOSING_VDO_DELAY_MS / 1000);
     if (secEl) secEl.textContent = String(closingVdoState.remainSec);
     if (statusEl) {
-      statusEl.textContent = `⏳ Autoplay ใน ${closingVdoState.remainSec} วินาที...`;
+      statusEl.textContent = `⏳ Autoplay เต็มจอ + เปิดเสียง ใน ${closingVdoState.remainSec} วินาที...`;
     }
 
     closingVdoState.tickId = setInterval(() => {
       closingVdoState.remainSec = Math.max(1, closingVdoState.remainSec - 1);
       if (secEl) secEl.textContent = String(closingVdoState.remainSec);
       if (statusEl && videoEl.paused) {
-        statusEl.textContent = `⏳ Autoplay ใน ${closingVdoState.remainSec} วินาที...`;
+        statusEl.textContent = `⏳ Autoplay เต็มจอ + เปิดเสียง ใน ${closingVdoState.remainSec} วินาที...`;
       }
     }, 1000);
 
@@ -5937,15 +6026,45 @@
       if (!state.isOpen || state.viewMode !== "deck" || state.blackoutActive) return;
       const curNow = SLIDES[state.slideIdx];
       if (!curNow || curNow.id !== "s18-closing-vdo-hss") return;
-      startClosingVdoPlayback(modal);
+      startClosingVdoPlayback(modal, true);
     }, CLOSING_VDO_DELAY_MS);
 
+    // Synchronously bless HTMLMediaElement with the user's "Next Slide" gesture so unmuted play() succeeds 5s later!
+    try {
+      closingVdoState.unlocking = true;
+      videoEl.muted = false;
+      videoEl.volume = 1;
+      const unlockPromise = videoEl.play();
+      if (unlockPromise && typeof unlockPromise.then === "function") {
+        unlockPromise
+          .then(() => {
+            if (closingVdoState.timerId) {
+              videoEl.pause();
+              try {
+                videoEl.currentTime = 0;
+              } catch (_) {}
+            }
+            closingVdoState.unlocking = false;
+          })
+          .catch(() => {
+            closingVdoState.unlocking = false;
+          });
+      } else {
+        if (closingVdoState.timerId) videoEl.pause();
+        closingVdoState.unlocking = false;
+      }
+    } catch (_) {
+      closingVdoState.unlocking = false;
+    }
+
     videoEl.addEventListener("play", () => {
+      if (closingVdoState.unlocking) return;
       clearClosingVdoTimers(false);
       if (overlayEl) overlayEl.classList.add("is-hidden");
       if (statusEl) statusEl.textContent = "▶ กำลังเล่นวิดีโอ Introduction to Health Systems Science (06:53)";
     });
     videoEl.addEventListener("pause", () => {
+      if (closingVdoState.unlocking) return;
       if (!videoEl.ended && statusEl && !closingVdoState.timerId) {
         statusEl.textContent = "⏸ หยุดเล่นชั่วคราว — กดเล่นต่อได้ทันที";
       }
@@ -5954,6 +6073,7 @@
       if (statusEl) statusEl.textContent = "✓ เล่นจบแล้ว — พร้อมส่งต่อเข้าสู่คาบ ST1 (09.30 น.)";
     });
     videoEl.addEventListener("volumechange", () => {
+      if (closingVdoState.unlocking) return;
       if (unmuteBtn) unmuteBtn.hidden = !videoEl.muted;
     });
 
@@ -5963,7 +6083,9 @@
         ev.stopPropagation();
         const act = btn.getAttribute("data-vdo-action");
         if (act === "play-now") {
-          startClosingVdoPlayback(modal);
+          startClosingVdoPlayback(modal, true);
+        } else if (act === "exit-fs-cinema") {
+          exitClosingVdoFullscreenCinema(modal);
         } else if (act === "cancel-autoplay") {
           clearClosingVdoTimers(false);
           if (overlayEl) overlayEl.classList.add("is-hidden");
@@ -5975,7 +6097,7 @@
           if (videoEl.paused) videoEl.play().catch(() => {});
         } else if (act === "toggle-play") {
           if (videoEl.paused) {
-            startClosingVdoPlayback(modal);
+            startClosingVdoPlayback(modal, false);
           } else {
             videoEl.pause();
           }
@@ -5989,13 +6111,7 @@
             requestAnimationFrame(() => fitAllVisibleCanvases());
           }
         } else if (act === "fullscreen") {
-          if (videoEl.requestFullscreen) {
-            videoEl.requestFullscreen().catch(() => {});
-          } else if (videoEl.webkitEnterFullscreen) {
-            try {
-              videoEl.webkitEnterFullscreen();
-            } catch (_) {}
-          }
+          startClosingVdoPlayback(modal, true);
         }
         if (typeof btn.blur === "function") btn.blur();
       });
