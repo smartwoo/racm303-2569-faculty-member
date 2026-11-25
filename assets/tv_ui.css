@@ -2444,18 +2444,24 @@ html[data-theme="dark"] .tv-huc-chip {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 36px;
-  padding: 0 13px;
+  min-height: 36px;
+  height: auto;
+  padding: 4px 13px;
   border-radius: 999px;
   font-family: var(--font-display, "Anuphan", "Plus Jakarta Sans", sans-serif);
   font-size: 13px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.48;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
   user-select: none;
   transition: transform 0.18s var(--tv-ease), background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.racm-unav-btn .racm-unav-lbl {
+  line-height: 1.5;
+  padding-block: 1px;
 }
 
 .racm-unav-btn svg {
@@ -2515,9 +2521,11 @@ html[data-role="faculty"] .racm-unav-btn.is-home {
 
 /* Compact variant for capsule masthead, modal headers, and dense studio bars */
 .racm-unav-pair.is-compact .racm-unav-btn {
-  height: 32px;
-  padding: 0 11px;
+  min-height: 32px;
+  height: auto;
+  padding: 3px 11px;
   font-size: 12.2px;
+  line-height: 1.48;
   gap: 5px;
 }
 
@@ -2550,13 +2558,9 @@ html[data-role="faculty"] .racm-unav-btn.is-home {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
 }
 
-/* Floating top-left HUD inside F5 PPT Fullscreen Slideshow */
+/* Legacy floating Full Screen HUD disabled — replaced by inline non-overlapping Exit Full Screen button */
 .ppt-fs-top-unav-hud {
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top, 12px));
-  left: max(14px, env(safe-area-inset-left, 14px));
-  z-index: 95;
-  pointer-events: auto;
+  display: none !important;
 }
 
 .tv-modal-head-right {
@@ -2567,16 +2571,69 @@ html[data-role="faculty"] .racm-unav-btn.is-home {
   flex-wrap: wrap;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .tv-capsule-left-cluster .racm-unav-pair .racm-unav-btn,
   .racm-unav-pair.is-mobile-tight .racm-unav-btn {
-    padding: 0 9px;
-    height: 31px;
-    font-size: 11.6px;
+    padding: 3px 9px;
+    min-height: 32px;
+    height: auto;
+    font-size: 11.8px;
+    line-height: 1.48;
     gap: 4px;
   }
   .tv-capsule-left-cluster .tv-brand-text {
     display: none;
+  }
+
+  /* Mobile Modal Ergonomics: ALWAYS pin Close Button at Top-Left Corner without clipping */
+  .tv-modal-head,
+  .cal-modal-top,
+  .hsd-km-head,
+  #hsdSpotlightCard > .hsd-tk-header,
+  .ppt-fs-grid-head,
+  .iq-modal-header,
+  .kt-modal-head {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+  }
+
+  .tv-modal-head > .tv-modal-head-right,
+  .cal-modal-top > .tv-modal-head-right,
+  .hsd-km-head > .hsd-km-head-actions,
+  #hsdSpotlightCard > .hsd-tk-header > .tv-modal-head-right,
+  .ppt-fs-grid-head > .tv-modal-head-right,
+  .iq-modal-header > .tv-modal-head-right,
+  .kt-modal-head > .kt-head-controls {
+    order: -1 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .tv-modal-head [data-modal-close="1"],
+  .tv-modal-head .tv-modal-close,
+  .cal-modal-top [data-modal-close="1"],
+  .cal-modal-top .cal-modal-close,
+  .hsd-km-head [data-modal-close="1"],
+  .hsd-km-head .is-modal-top-close,
+  #hsdSpotlightCard > .hsd-tk-header [data-modal-close="1"],
+  #hsdSpotlightCard > .hsd-tk-header .is-modal-top-close,
+  .ppt-fs-grid-head [data-modal-close="1"],
+  .ppt-fs-grid-head .is-modal-top-close,
+  .iq-modal-header .iq-modal-close,
+  .kt-modal-head .kt-close-btn,
+  .is-modal-top-close {
+    order: -10 !important;
+    margin-left: 0 !important;
+    margin-right: 2px !important;
+    line-height: 1.48 !important;
+    min-height: 34px !important;
+    height: auto !important;
   }
 }
 
@@ -2586,4 +2643,5 @@ html[data-role="faculty"] .racm-unav-btn.is-home {
     display: none !important;
   }
 }
+
 

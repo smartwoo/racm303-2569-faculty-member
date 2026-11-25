@@ -979,9 +979,12 @@
 
       bd.innerHTML = `
         <div class="hsd-qr-zoom-dialog">
+          <div class="hsd-qr-zoom-top-bar">
+            <button type="button" class="btn sm is-modal-top-close" id="hsdQrZoomTopCloseBtn" data-modal-close="1">✕ ปิดหน้าต่าง</button>
+          </div>
           <div class="hsd-qr-zoom-box">${qrSvg}</div>
           <div class="hsd-qr-zoom-meta">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <div class="hsd-qr-zoom-meta-head" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px">
               <span class="hsd-qr-zoom-pin">📍 ${escHtml(meta.pinCode)} · ห้องอภิปรายที่ ${meta.roomId}</span>
               <div class="racm-unav-pair is-compact" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
                 <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
@@ -1026,10 +1029,9 @@
       if (csvBtn) {
         csvBtn.addEventListener("click", () => exportRoomCheckinCsv(meta.modCode, meta.roomId));
       }
-      const closeBtn = bd.querySelector("#hsdQrZoomCloseBtn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => closeRoomQrZoomModal());
-      }
+      bd.querySelectorAll("#hsdQrZoomCloseBtn, #hsdQrZoomTopCloseBtn").forEach((btn) => {
+        btn.addEventListener("click", () => closeRoomQrZoomModal());
+      });
     }
 
     renderDialog();

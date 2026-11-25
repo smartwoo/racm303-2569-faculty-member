@@ -20527,8 +20527,9 @@
       hRight.appendChild(csvBtn);
     }
 
-    const closeBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm");
+    const closeBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
     closeBtn.type = "button";
+    closeBtn.dataset.modalClose = "1";
     closeBtn.addEventListener("click", () => closeHsdKahootLobbyModal());
     hRight.prepend(buildUnavPairDOM({ compact: true }));
     hRight.appendChild(closeBtn);
@@ -23437,14 +23438,21 @@
     const layoutW = window.innerWidth || document.documentElement.clientWidth || 1280;
     const layoutH = window.innerHeight || document.documentElement.clientHeight || 800;
     const vvScale = vv && vv.scale ? vv.scale : 1;
-    const w = vv && vvScale <= 1.06 ? Math.round(vv.width) : layoutW;
-    const h = vv && vvScale <= 1.06 ? Math.round(vv.height) : layoutH;
-    const offsetTop = vv && vvScale <= 1.06 ? Math.max(0, Math.round(vv.offsetTop || 0)) : 0;
+    const rawVvH = vv && vvScale <= 1.06 ? Math.round(vv.height) : layoutH;
+    const rawOffsetTop = vv && vvScale <= 1.06 ? Math.max(0, Math.round(vv.offsetTop || 0)) : 0;
     const isCoarse = isCoarseTouchDevice();
     const editFocused = isEditableElementFocusedInOverlay();
+    const screenH = (window.screen && window.screen.height) || layoutH;
     const heightDrop = layoutH - (vv ? vv.height : layoutH);
+    // Detect iOS-style overlay keyboard (layout viewport stays tall while visualViewport shrinks > 68px)
+    // vs Android/Samsung Internet resize-viewport keyboard (layout viewport itself shrinks flush to keyboard;
+    // transient toolbar animation can leave rawVvH 24-48px shorter than layoutH, causing a white gap if not anchored to inset: 0).
+    const isOverlayKbd = Boolean(vv && vvScale <= 1.06 && layoutH - (rawVvH + rawOffsetTop) > 68);
+    const w = vv && vvScale <= 1.06 ? Math.round(vv.width) : layoutW;
+    const h = isOverlayKbd ? rawVvH : layoutH;
+    const offsetTop = isOverlayKbd ? rawOffsetTop : 0;
     const isKbdOpen = Boolean(
-      (editFocused && (isCoarse || h < 580 || heightDrop > 85)) ||
+      (editFocused && (isCoarse || h < 580 || heightDrop > 85 || screenH - layoutH > 220)) ||
       (isCoarse && vvScale <= 1.06 && heightDrop > 135)
     );
     const aspect = h > 0 ? w / h : 1.77;
@@ -23471,6 +23479,7 @@
       w,
       h,
       offsetTop,
+      isOverlayKbd,
       aspect,
       isCoarse,
       isKbdOpen,
@@ -23489,8 +23498,8 @@
       const sRect = paneScroller.getBoundingClientRect();
       const fRect = fieldEl.getBoundingClientRect();
       if (sRect.height > 0) {
-        const padTop = 44;
-        const padBot = 24;
+        const padTop = 36;
+        const padBot = 20;
         if (fRect.top < sRect.top + padTop) {
           paneScroller.scrollBy({ top: fRect.top - (sRect.top + padTop), behavior: "smooth" });
         } else if (fRect.bottom > sRect.bottom - padBot) {
@@ -23519,6 +23528,7 @@
     if (ov && !ov.hidden) {
       ov.style.setProperty("--ppt-vvh", `${env.h}px`);
       ov.style.setProperty("--ppt-vv-top", `${env.offsetTop}px`);
+      ov.classList.toggle("is-vv-overlay-kbd", Boolean(env.isOverlayKbd));
       ov.classList.toggle("is-kbd-open", env.isKbdOpen);
       ov.classList.toggle("is-compact-fs-ui", env.useCompactDock);
       ov.classList.toggle("is-short-landscape", env.isShortLandscape);
@@ -23564,19 +23574,25 @@
       setTimeout(() => syncPptOverlayViewportMetrics(true), 340);
     }, { passive: true });
 
+    const scheduleAnimatedKbdSyncs = () => {
+      syncPptOverlayViewportMetrics(true);
+      [80, 200, 360, 560].forEach((ms) => {
+        setTimeout(() => syncPptOverlayViewportMetrics(true), ms);
+      });
+    };
+
     document.addEventListener("focusin", (ev) => {
       const t = ev.target;
       if (!t || !(t instanceof HTMLElement)) return;
       if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
-      syncPptOverlayViewportMetrics(false);
-      setTimeout(() => syncPptOverlayViewportMetrics(false), 160);
+      scheduleAnimatedKbdSyncs();
     });
 
     document.addEventListener("focusout", (ev) => {
       const t = ev.target;
       if (!t || !(t instanceof HTMLElement)) return;
       if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
-      setTimeout(() => syncPptOverlayViewportMetrics(false), 160);
+      scheduleAnimatedKbdSyncs();
     });
   }
 
@@ -23639,6 +23655,21 @@
     }
   }
 
+  function canAncestorScrollHorizontally(startEl, stopEl, dx) {
+    let el = startEl instanceof Element ? startEl : null;
+    while (el && el !== stopEl && el !== document.body) {
+      if (el.scrollWidth > el.clientWidth + 8) {
+        const ox = window.getComputedStyle(el).overflowX;
+        if (ox === "auto" || ox === "scroll") {
+          if (dx < 0 && el.scrollLeft + el.clientWidth < el.scrollWidth - 4) return true;
+          if (dx > 0 && el.scrollLeft > 4) return true;
+        }
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+
   function attachPptStagePinchZoom(stageWrap, zoomSizer, sheetEl) {
     if (!stageWrap || !zoomSizer || !sheetEl) return;
 
@@ -23650,6 +23681,12 @@
     let lastTapTs = 0;
     let lastTapX = 0;
     let lastTapY = 0;
+    let swipeTracking = false;
+    let swipeAborted = false;
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeStartTs = 0;
+    let swipeStartTarget = null;
 
     const getTouchDist = (t0, t1) => Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
 
@@ -23657,6 +23694,8 @@
       "touchstart",
       (ev) => {
         if (ev.touches.length === 2) {
+          swipeTracking = false;
+          swipeAborted = true;
           const d = getTouchDist(ev.touches[0], ev.touches[1]);
           if (d < 12) return;
           if (ev.cancelable) ev.preventDefault();
@@ -23671,6 +23710,25 @@
         } else if (ev.touches.length === 1 && !pinching) {
           const t = ev.touches[0];
           const target = ev.target;
+          const isEditOrDragTarget =
+            target instanceof Element &&
+            Boolean(target.closest("input, textarea, select, [contenteditable='true'], .hsd-split-resizer"));
+          const isZoomedNow =
+            stageWrap.classList.contains("is-pinch-zoomed") ||
+            stageWrap.classList.contains("is-manual-zoom") ||
+            Math.abs((state.hsdFsZoomScale || 1) - 1) >= 0.04;
+          if (!isEditOrDragTarget && !isZoomedNow) {
+            swipeTracking = true;
+            swipeAborted = false;
+            swipeStartX = t.clientX;
+            swipeStartY = t.clientY;
+            swipeStartTs = Date.now();
+            swipeStartTarget = target;
+          } else {
+            swipeTracking = false;
+            swipeAborted = true;
+          }
+
           const isInteractive =
             target instanceof Element &&
             Boolean(target.closest("button, input, textarea, select, a, label, mark, .hsd-split-resizer"));
@@ -23679,6 +23737,7 @@
             if (now - lastTapTs < 290 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 28) {
               ev.preventDefault();
               lastTapTs = 0;
+              swipeTracking = false;
               const curS = state.hsdFsZoomScale || 1;
               const nextS = curS > 1.08 || curS < 0.94 ? 1 : 1.85;
               const sRect = stageWrap.getBoundingClientRect();
@@ -23704,6 +23763,22 @@
     stageWrap.addEventListener(
       "touchmove",
       (ev) => {
+        if (ev.touches.length > 1) {
+          swipeTracking = false;
+          swipeAborted = true;
+        }
+        if (swipeTracking && !swipeAborted && ev.touches.length === 1) {
+          const t0 = ev.touches[0];
+          const dx = t0.clientX - swipeStartX;
+          const dy = t0.clientY - swipeStartY;
+          if (Math.abs(dy) > 34 && Math.abs(dy) > Math.abs(dx) * 0.85) {
+            swipeAborted = true;
+          } else if (Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 1.45) {
+            if (canAncestorScrollHorizontally(swipeStartTarget, stageWrap, dx)) {
+              swipeAborted = true;
+            }
+          }
+        }
         if (!pinching || ev.touches.length < 2) return;
         ev.preventDefault();
         const curDist = getTouchDist(ev.touches[0], ev.touches[1]);
@@ -23722,6 +23797,30 @@
     );
 
     const endPinch = (ev) => {
+      if (
+        swipeTracking &&
+        !swipeAborted &&
+        !pinching &&
+        ev.changedTouches &&
+        ev.changedTouches.length === 1 &&
+        (!ev.touches || ev.touches.length === 0)
+      ) {
+        const tEnd = ev.changedTouches[0];
+        const dx = tEnd.clientX - swipeStartX;
+        const dy = tEnd.clientY - swipeStartY;
+        const dt = Date.now() - swipeStartTs;
+        swipeTracking = false;
+        if (
+          dt < 750 &&
+          Math.abs(dx) >= 48 &&
+          Math.abs(dx) >= Math.abs(dy) * 1.45 &&
+          !canAncestorScrollHorizontally(swipeStartTarget, stageWrap, dx)
+        ) {
+          stepHsQuestionSlide(dx < 0 ? 1 : -1);
+          return;
+        }
+      }
+      swipeTracking = false;
       if (!pinching) return;
       if (!ev.touches || ev.touches.length < 2) {
         pinching = false;
@@ -23731,7 +23830,10 @@
       }
     };
     stageWrap.addEventListener("touchend", endPinch, { passive: true });
-    stageWrap.addEventListener("touchcancel", endPinch, { passive: true });
+    stageWrap.addEventListener("touchcancel", () => {
+      swipeTracking = false;
+      swipeAborted = true;
+    }, { passive: true });
     stageWrap.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
     stageWrap.addEventListener("gesturechange", (ev) => ev.preventDefault(), { passive: false });
 
@@ -27057,7 +27159,7 @@
       const dispName = s.nickname ? `${s.nickname}` : String(s.name || s.fullName || "").split(" ")[0];
       const chip = make("div", null, `ppt-ok-stu-chip${joined ? " is-joined" : ""}`);
       chip.title = `${sid} · ${s.fullName}${joined ? " (ออนไลน์ในห้องขณะนี้)" : " (ยังไม่ออนไลน์ / ออกจากห้องไปแล้ว)"}`;
-      chip.innerHTML = `<span class="ppt-ok-stu-check">${joined ? "✓" : "•"}</span><span>${escapeHtml(shortCode)} ${escapeHtml(dispName)}</span>`;
+      chip.innerHTML = `<span class="ppt-ok-stu-check">${joined ? "✓" : "•"}</span><span class="ppt-ok-stu-label">${escapeHtml(shortCode)} ${escapeHtml(dispName)}</span>`;
       grid.appendChild(chip);
     });
 
@@ -27070,7 +27172,7 @@
       const gDisp = p.nickname || String(p.fullName || "นักศึกษา").split(" ")[0];
       const chip = make("div", null, "ppt-ok-stu-chip is-joined");
       chip.title = `${sid} · ${p.fullName || gDisp} (ออนไลน์)`;
-      chip.innerHTML = `<span class="ppt-ok-stu-check">✓</span><span>${escapeHtml(sCode)} ${escapeHtml(gDisp)}</span>`;
+      chip.innerHTML = `<span class="ppt-ok-stu-check">✓</span><span class="ppt-ok-stu-label">${escapeHtml(sCode)} ${escapeHtml(gDisp)}</span>`;
       grid.appendChild(chip);
     });
 
@@ -27905,6 +28007,19 @@
     return stage;
   }
 
+  function buildProjectedExitFsBtnDOM(isProjected, exp) {
+    if (!isProjected || exp || state.isPptSlideSharePopup) return null;
+    const btn = make("button", "✕ ออกจาก Full Screen", "ppt-sm-exit-fs-btn hsd-no-print");
+    btn.type = "button";
+    btn.dataset.modalClose = "1";
+    btn.title = "ออกจากโหมด Full Screen กลับสู่หน้าสไลด์ปกติ (Esc)";
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      exitPptFullscreenShow();
+    });
+    return btn;
+  }
+
   function buildPptSlideSheetDOM(cur, slides, isProjected, exportOpts) {
     const exp = exportOpts || null;
     if (cur && (cur.kind === "opening-kahoot" || cur.kind === "opening-room-qr")) {
@@ -27927,6 +28042,8 @@
 
       const mHead = make("div", null, "ppt-slide-master-head");
       const mLeft = make("div", null, "ppt-sm-left");
+      const exitFsBtn0 = buildProjectedExitFsBtnDOM(isProjected, exp);
+      if (exitFsBtn0) mLeft.appendChild(exitFsBtn0);
       mLeft.append(
         make("span", `คาบ ${cur.mod.code} · ห้อง ${headRoomId} (${headRoomCode})`, "ppt-sm-mod"),
         make(
@@ -28000,6 +28117,8 @@
 
       const mHead = make("div", null, "ppt-slide-master-head");
       const mLeft = make("div", null, "ppt-sm-left");
+      const exitFsBtn1 = buildProjectedExitFsBtnDOM(isProjected, exp);
+      if (exitFsBtn1) mLeft.appendChild(exitFsBtn1);
       mLeft.append(
         make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
         make("h4", `Case Scenario #${cur.caseObj.caseNumber}: ${conciseTitle}`, "ppt-sm-title")
@@ -28101,6 +28220,8 @@
 
       const mHead = make("div", null, "ppt-slide-master-head");
       const mLeft = make("div", null, "ppt-sm-left");
+      const exitFsBtn2 = buildProjectedExitFsBtnDOM(isProjected, exp);
+      if (exitFsBtn2) mLeft.appendChild(exitFsBtn2);
       mLeft.append(
         make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
         make("h4", headTitleTxt, "ppt-sm-title")
@@ -28286,6 +28407,8 @@
     // 1. PowerPoint Slide Master Header + Pedagogical Stage Stepper + Theme Toggle + Countdown Timer
     const mHead = make("div", null, "ppt-slide-master-head");
     const mLeft = make("div", null, "ppt-sm-left");
+    const exitFsBtn3 = buildProjectedExitFsBtnDOM(isProjected, exp);
+    if (exitFsBtn3) mLeft.appendChild(exitFsBtn3);
     mLeft.append(
       make("span", `คาบ ${cur.mod.code}`, "ppt-sm-mod"),
       make("h4", cur.caseObj.title, "ppt-sm-title")
@@ -29057,6 +29180,7 @@
     ov.hidden = false;
     ov.style.setProperty("--ppt-vvh", `${envInit.h}px`);
     ov.style.setProperty("--ppt-vv-top", `${envInit.offsetTop}px`);
+    ov.classList.toggle("is-vv-overlay-kbd", Boolean(envInit.isOverlayKbd));
     ov.classList.toggle("is-kbd-open", envInit.isKbdOpen);
     ov.classList.toggle("is-compact-fs-ui", envInit.useCompactDock);
     ov.classList.toggle("is-short-landscape", envInit.isShortLandscape);
@@ -29071,11 +29195,10 @@
       const readTop = make("div", null, "ppt-reading-topbar hsd-no-print");
       const rtLeft = make("div", null, "ppt-reading-top-left");
       rtLeft.append(
-        buildUnavPairDOM({ compact: true, darkHud: true }),
         make("span", "P", "ppt-app-badge"),
         make(
           "span",
-          `${cur.mod.code}.pptx — มุมมองการอ่าน (Reading Mode · Share Slide)`,
+          `${cur.mod.code}.pptx — Full Screen Preview`,
           "ppt-reading-doc-title"
         ),
         make("span", "🟢 ซิงค์สดอัตโนมัติ", "ppt-reading-sync-pill")
@@ -29084,23 +29207,18 @@
       const rtRight = make("div", null, "ppt-reading-top-right");
       rtRight.appendChild(buildPptSlideThemeSwitcherDOM("is-in-reading"));
 
-      const topFsBtn = make("button", "📺 ฉายสไลด์เต็มจอ (F5)", "ppt-reading-top-btn is-slideshow-cta");
+      const topFsBtn = make("button", "⛶ Full Screen", "ppt-reading-top-btn is-slideshow-cta");
       topFsBtn.type = "button";
-      topFsBtn.title = "ฉายสไลด์เต็มหน้าจอแบบไร้หัวแท็บเหมือนกด Slide Show (F5) ใน Microsoft PowerPoint";
       topFsBtn.addEventListener("click", () => toggleReadingTabNativeFullscreen());
 
-      const closeReadBtn = make("button", "✕ ปิดโหมดการอ่าน", "ppt-reading-top-btn");
+      const closeReadBtn = make("button", "✕ ปิดหน้าต่าง", "ppt-reading-top-btn");
       closeReadBtn.type = "button";
-      closeReadBtn.title = "ปิดแท็บ Reading Mode หรือกลับสู่มุมมองแก้ไขปกติ";
+      closeReadBtn.dataset.modalClose = "1";
       closeReadBtn.addEventListener("click", () => exitReadingModeTabOrClose());
 
       rtRight.append(topFsBtn, closeReadBtn);
       readTop.append(rtLeft, rtRight);
       ov.appendChild(readTop);
-    } else {
-      const fsTopUnav = make("div", null, "ppt-fs-top-unav-hud hsd-no-print");
-      fsTopUnav.appendChild(buildUnavPairDOM({ compact: true, darkHud: true }));
-      ov.appendChild(fsTopUnav);
     }
 
     const stageWrap = make("div", null, "ppt-fs-stage-wrap");
@@ -29116,13 +29234,14 @@
         make("h3", `⊞ สไลด์ทั้งหมดในคาบ ${cur.mod.code} (${slides.length} สไลด์)`, "ppt-sm-title"),
         (() => {
           const rWrap = make("div", null, "tv-modal-head-right");
-          const cb = make("button", "✕ ปิดตารางสไลด์ (Esc)", "ppt-fs-tool-btn");
+          const cb = make("button", "✕ ปิดตารางสไลด์", "ppt-fs-tool-btn is-modal-top-close");
           cb.type = "button";
+          cb.dataset.modalClose = "1";
           cb.addEventListener("click", () => {
             state.hsdFsGridOpen = false;
             renderPptPresentationOverlay();
           });
-          rWrap.append(buildUnavPairDOM({ compact: true, darkHud: true }), cb);
+          rWrap.appendChild(cb);
           return rWrap;
         })()
       );
@@ -29150,7 +29269,6 @@
     attachPptStagePinchZoom(stageWrap, zoomSizer, sheet);
 
     if (state.isPptSlideSharePopup && !isNativeFsInReading && !state.hsdShowFullHudInPopup) {
-      // Authentic Microsoft PowerPoint Reading View Bottom Status Bar (with built-in Slide Show function!)
       const readBar = make("div", null, "ppt-reading-statusbar hsd-no-print");
       const rbLeft = make("div", null, "ppt-reading-status-left");
       rbLeft.append(
@@ -29178,7 +29296,7 @@
 
       const rSel = document.createElement("select");
       rSel.className = "ppt-reading-select";
-      rSel.setAttribute("aria-label", "เลือกสไลด์ในโหมดการอ่าน");
+      rSel.setAttribute("aria-label", "เลือกสไลด์");
       slides.forEach((s, idx) => {
         const lbl =
           s.kind === "opening-kahoot"
@@ -29236,59 +29354,37 @@
         renderPptPresentationOverlay();
       });
 
-      const rSlideShow = make("button", "📺 ฉายสไลด์ (F5)", "ppt-reading-nav-btn is-slideshow-launch");
+      const rSlideShow = make("button", "⛶ Full Screen", "ppt-reading-nav-btn is-slideshow-launch");
       rSlideShow.type = "button";
-      rSlideShow.title = "ฉายสไลด์เต็มจอ (Slide Show · F5) ภายในแท็บนี้โดยตัดแถบหัวข้อออกทั้งหมด";
       rSlideShow.addEventListener("click", () => toggleReadingTabNativeFullscreen());
 
       rbRight.append(rLaser, rGrid, buildFsZoomAndCanvasBarDOM(true), rSlideShow);
       readBar.append(rbLeft, rbRight);
       ov.appendChild(readBar);
     } else {
-      // 1. Slim Virtual-Keyboard Helper Bar (ONLY visible when mobile/tablet virtual keyboard opens)
+      // 1. Clean 2-Button Virtual-Keyboard Helper Bar (ONLY "ซ่อนโจทย์" & "พับแป้นพิมพ์", flush right above keyboard)
       const kbdBar = make("div", null, "ppt-fs-kbd-bar hsd-no-print");
-      const kPrev = make("button", "◀", "ppt-fs-tool-btn is-kbd-mini");
-      kPrev.type = "button";
-      kPrev.disabled = state.hsdSlideIdx <= 0;
-      kPrev.addEventListener("mousedown", (e) => e.preventDefault());
-      kPrev.addEventListener("click", () => stepHsQuestionSlide(-1));
-
-      const kSlideLbl = make("span", `${state.hsdSlideIdx + 1}/${slides.length}`, "ppt-fs-kbd-badge");
-
-      const kNext = make("button", "▶", "ppt-fs-tool-btn is-kbd-mini");
-      kNext.type = "button";
-      kNext.disabled = state.hsdSlideIdx >= slides.length - 1;
-      kNext.addEventListener("mousedown", (e) => e.preventDefault());
-      kNext.addEventListener("click", () => stepHsQuestionSlide(1));
-
-      const kJumpScen = make(
-        "button",
-        state.hsdFsScenFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์",
-        "ppt-fs-tool-btn is-kbd-mini"
-      );
-      kJumpScen.type = "button";
-      kJumpScen.addEventListener("mousedown", (e) => e.preventDefault());
-      kJumpScen.addEventListener("click", () => {
-        state.hsdFsScenFolded = !state.hsdFsScenFolded;
-        sheet.classList.toggle("is-mobile-scen-folded", state.hsdFsScenFolded);
-        kJumpScen.textContent = state.hsdFsScenFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
-        const fb = sheet.querySelector(".hsd-msj-btn.is-fold-toggle");
-        if (fb) fb.textContent = state.hsdFsScenFolded ? "▸ แสดงโจทย์" : "▾ ซ่อนโจทย์";
-        markSlideBoxesAutoOptimize("both");
-        autoFitSingleSheetBoxes(sheet, true);
-      });
-
-      const kJumpAns = make("button", "✍️ ช่องตอบ", "ppt-fs-tool-btn is-kbd-mini");
-      kJumpAns.type = "button";
-      kJumpAns.addEventListener("mousedown", (e) => e.preventDefault());
-      kJumpAns.addEventListener("click", () => {
-        if (isEditableElementFocusedInOverlay()) {
-          scrollFocusedFieldIntoSlideView(document.activeElement);
-        } else {
-          const firstTa = sheet.querySelector(".hsd-slide-right textarea, .hsd-slide-right input");
-          if (firstTa) scrollFocusedFieldIntoSlideView(firstTa);
-        }
-      });
+      const hasScenSplitPane = Boolean(sheet.querySelector(".hsd-slide-left") && sheet.querySelector(".hsd-slide-right"));
+      if (hasScenSplitPane) {
+        const kJumpScen = make(
+          "button",
+          state.hsdFsScenFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์",
+          "ppt-fs-tool-btn is-kbd-mini"
+        );
+        kJumpScen.type = "button";
+        kJumpScen.addEventListener("pointerdown", (e) => e.preventDefault());
+        kJumpScen.addEventListener("mousedown", (e) => e.preventDefault());
+        kJumpScen.addEventListener("click", () => {
+          state.hsdFsScenFolded = !state.hsdFsScenFolded;
+          sheet.classList.toggle("is-mobile-scen-folded", state.hsdFsScenFolded);
+          kJumpScen.textContent = state.hsdFsScenFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
+          const fb = sheet.querySelector(".hsd-msj-btn.is-fold-toggle");
+          if (fb) fb.textContent = state.hsdFsScenFolded ? "▸ แสดงโจทย์" : "▾ ซ่อนโจทย์";
+          markSlideBoxesAutoOptimize("both");
+          autoFitSingleSheetBoxes(sheet, true);
+        });
+        kbdBar.appendChild(kJumpScen);
+      }
 
       const kDismissBtn = make("button", "⌨ พับแป้นพิมพ์ ✓", "ppt-fs-tool-btn is-kbd-done");
       kDismissBtn.type = "button";
@@ -29297,14 +29393,13 @@
           document.activeElement.blur();
         }
       });
-
-      kbdBar.append(kPrev, kSlideLbl, kNext, kJumpScen, kJumpAns, kDismissBtn);
+      kbdBar.appendChild(kDismissBtn);
       ov.appendChild(kbdBar);
 
       // 2. Authentic Microsoft PowerPoint Bottom-Left Minimal 6 Circular Outline Buttons HUD (No Subtitle, No Record VDO)
       const fabHud = make("div", null, "ppt-slideshow-fab-hud hsd-no-print");
       fabHud.setAttribute("role", "toolbar");
-      fabHud.setAttribute("aria-label", "แถบควบคุมการฉายสไลด์แบบ Microsoft PowerPoint");
+      fabHud.setAttribute("aria-label", "แถบควบคุมสไลด์ Full Screen");
 
       const makeCircleBtn = (idKey, titleTxt, svgInner, isDisabled) => {
         const b = make("button", null, "ppt-ss-circle-btn");
@@ -29408,7 +29503,7 @@
       const moreAnchor = make("div", null, "ppt-ss-pop-anchor");
       const btnMore = makeCircleBtn(
         "more",
-        "ตัวเลือกการนำเสนอเพิ่มเติม & จบการฉาย (Esc)",
+        "ตัวเลือกเพิ่มเติม & ออกจาก Full Screen (Esc)",
         `<circle cx="7" cy="12" r="1.45"/><circle cx="12" cy="12" r="1.45"/><circle cx="17" cy="12" r="1.45"/>`,
         false
       );
@@ -29527,23 +29622,11 @@
 
       const utilRow = make("div", null, "ppt-ss-menu-row");
       utilRow.appendChild(buildPptSlideThemeSwitcherDOM("is-in-ss-menu"));
-      if (!state.isPptSlideSharePopup) {
-        const readTabBtn = make("button", "📖 Reading Mode ↗", "ppt-ss-menu-chip");
-        readTabBtn.type = "button";
-        readTabBtn.title = "เปิดมุมมองการอ่าน (Reading View) ในแท็บใหม่สำหรับ Share Chrome Tab";
-        readTabBtn.addEventListener("click", () => {
-          morePop.hidden = true;
-          openPptSlideShareWindow();
-        });
-        utilRow.appendChild(readTabBtn);
-      }
       morePop.appendChild(utilRow);
 
       const exitMenuBtn = make(
         "button",
-        state.isPptSlideSharePopup
-          ? "❐ ออกจากโหมดฉายเต็มจอ (Esc)"
-          : "✕ จบการนำเสนอสไลด์ (End Slide Show · Esc)",
+        "✕ ออกจาก Full Screen",
         "ppt-ss-menu-end"
       );
       exitMenuBtn.type = "button";
@@ -30502,19 +30585,9 @@
       menuRight.appendChild(mbNav);
     }
 
-    const mbReadingBtn = make(
-      "button",
-      state.pptPopupConnected ? "🟢 Reading Mode ↗" : "📖 Share Slide (แท็บใหม่ ↗)",
-      `ppt-menubar-reading-btn${state.pptPopupConnected ? " is-sharing-live" : ""}`
-    );
-    mbReadingBtn.type = "button";
-    mbReadingBtn.title = "เปิดโหมดการอ่าน (PowerPoint Reading Mode) ในแท็บใหม่ พร้อมปุ่มฉายสไลด์เต็มจอในแท็บนั้น";
-    mbReadingBtn.addEventListener("click", () => openPptSlideShareWindow());
-    menuRight.appendChild(mbReadingBtn);
-
-    const mbPresentBtn = make("button", "▶ นำเสนอ (F5)", "ppt-menubar-present-btn");
+    const mbPresentBtn = make("button", "⛶ Full Screen", "ppt-menubar-present-btn");
     mbPresentBtn.type = "button";
-    mbPresentBtn.title = "ฉายสไลด์เต็มหน้าจอแบบไร้แถบหัวข้อ (Slide Show · F5)";
+    mbPresentBtn.title = "ขยายสไลด์เต็มหน้าจอ (Full Screen)";
     mbPresentBtn.addEventListener("click", () => enterPptFullscreenShow());
     menuRight.appendChild(mbPresentBtn);
 
@@ -30540,23 +30613,13 @@
     mbRoomPickerBtn.addEventListener("click", () => openHsdKahootLobbyModal());
     menuRight.appendChild(mbRoomPickerBtn);
 
-    const gdriveSwitchBtn = make("button", null, "ppt-gdrive-switch-btn");
-    gdriveSwitchBtn.type = "button";
-    gdriveSwitchBtn.title = "เปิดหน้าต่างเลือกไฟล์สไลด์คาบอื่นจาก Google Drive รายวิชา RACM 303";
-    gdriveSwitchBtn.innerHTML = `${getGoogleDriveLogoSvgHtml(15)} <span>เลือกไฟล์อื่นใน Google Drive</span>`;
-    gdriveSwitchBtn.addEventListener("click", () => openHsdGoogleDrivePickerModal());
-    menuRight.appendChild(gdriveSwitchBtn);
-
     const gdriveFolderBtn = make(
       "button",
-      state.hsUiMode === "drive" ? "📁 โฟลเดอร์ไดรฟ์" : "📚 ← เลือกบทอื่น",
+      "📚 ← เลือกบทอื่น",
       "ppt-gdrive-folder-btn"
     );
     gdriveFolderBtn.type = "button";
-    gdriveFolderBtn.title =
-      state.hsUiMode === "drive"
-        ? "ปิดสไลด์ปัจจุบันกลับไปหน้าโฟลเดอร์ Google Drive รวมทุกไฟล์ (HS1–HS6)"
-        : "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกบทเรียน (โหมดเรียน)";
+    gdriveFolderBtn.title = "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกบทเรียน";
     gdriveFolderBtn.addEventListener("click", () => openHsGoogleDriveFolder());
     menuRight.appendChild(gdriveFolderBtn);
 
@@ -30593,18 +30656,6 @@
     };
 
     if (activeTab === "file") {
-      const gDriveGrp = makeGroup("Google Drive รายวิชา RACM 303");
-      const bOpenDrivePicker = make("button", null, "ppt-rb-cmd is-gdrive-cmd");
-      bOpenDrivePicker.type = "button";
-      bOpenDrivePicker.innerHTML = `${getGoogleDriveLogoSvgHtml(15)} <span>เปิดไฟล์สไลด์อื่นจาก Google Drive...</span>`;
-      bOpenDrivePicker.addEventListener("click", () => openHsdGoogleDrivePickerModal());
-
-      const bBackFolder = make("button", "📁 ปิดไฟล์กลับสู่โฟลเดอร์ไดรฟ์", "ppt-rb-cmd");
-      bBackFolder.type = "button";
-      bBackFolder.addEventListener("click", () => openHsGoogleDriveFolder());
-
-      gDriveGrp.body.append(bOpenDrivePicker, bBackFolder);
-
       const gExport = makeGroup("ส่งออกสไลด์ .pptx & Handout 16:9");
       const bHandoutStudio = make(
         "button",
@@ -30645,7 +30696,7 @@
       });
       gClose.body.appendChild(scrollSwitchBtn);
 
-      ribbon.append(gDriveGrp.grp, gExport.grp, gClose.grp);
+      ribbon.append(gExport.grp, gClose.grp);
     } else if (activeTab === "ref") {
       const gDocs = makeGroup(`เส้นทาง 6 ขั้นตอนคาบ ${cur.mod.code}`);
       if (cur.mod) {
@@ -30724,27 +30775,16 @@
         ribbon.appendChild(gConcept.grp);
       }
     } else if (activeTab === "slideshow") {
-      const gStart = makeGroup("เริ่มการนำเสนอสไลด์ (Start Slide Show)");
-      const bFromBegin = make("button", "📽 ตั้งแต่สไลด์แรก (From Beginning)", "ppt-rb-cmd is-ppt-accent");
+      const gStart = makeGroup("โหมดขยายเต็มหน้าจอ (Full Screen)");
+      const bFromBegin = make("button", "⛶ Full Screen ตั้งแต่สไลด์แรก", "ppt-rb-cmd is-ppt-accent");
       bFromBegin.type = "button";
       bFromBegin.addEventListener("click", () => enterPptFullscreenFromBeginning());
 
-      const bFromCur = make("button", "▶ จากสไลด์ปัจจุบัน (F5)", "ppt-rb-cmd");
+      const bFromCur = make("button", "⛶ Full Screen สไลด์ปัจจุบัน", "ppt-rb-cmd");
       bFromCur.type = "button";
       bFromCur.addEventListener("click", () => enterPptFullscreenShow());
 
-      const bShareWin = make(
-        "button",
-        state.pptPopupConnected
-          ? "🟢 แท็บ Reading Mode เปิดอยู่ ↗"
-          : "📖 Share Slide · Reading Mode (เปิดแท็บใหม่ ↗)",
-        `ppt-rb-cmd${state.pptPopupConnected ? " is-active-green" : ""}`
-      );
-      bShareWin.type = "button";
-      bShareWin.title = "เปิดโหมดการอ่าน (PowerPoint Reading View) ในแท็บใหม่ พร้อมฟังก์ชันฉายสไลด์เต็มจอในแท็บนั้น";
-      bShareWin.addEventListener("click", () => openPptSlideShareWindow());
-
-      gStart.body.append(bFromBegin, bFromCur, bShareWin);
+      gStart.body.append(bFromBegin, bFromCur);
       ribbon.appendChild(gStart.grp);
 
       const gLive = makeGroup("Live Lobby & อุปกรณ์นำเสนอ");
@@ -30778,7 +30818,7 @@
       }
       ribbon.appendChild(gLive.grp);
     } else if (activeTab === "view") {
-      const gViews = makeGroup("มุมมองการนำเสนอ (Presentation Views)");
+      const gViews = makeGroup("มุมมองสไลด์ (Slide Views)");
       const bNormal = make("button", "▣ ปกติ (Normal)", `ppt-rb-cmd${!isSorter ? " is-active" : ""}`);
       bNormal.type = "button";
       bNormal.addEventListener("click", () => {
@@ -30792,15 +30832,6 @@
         state.hsdPptSubView = isSorter ? "normal" : "sorter";
         renderHsDiscussionView();
       });
-
-      const bReadingView = make(
-        "button",
-        state.pptPopupConnected ? "🟢 มุมมองการอ่านเปิดอยู่ ↗" : "📖 มุมมองการอ่าน · เปิดแท็บใหม่ (Reading View)",
-        `ppt-rb-cmd${state.pptPopupConnected ? " is-active-green" : ""}`
-      );
-      bReadingView.type = "button";
-      bReadingView.title = "เปิดสไลด์ในโหมดการอ่าน (PowerPoint Reading Mode) ในแท็บใหม่ พร้อมปุ่มฉายสไลด์เต็มจอ";
-      bReadingView.addEventListener("click", () => openPptSlideShareWindow());
 
       const bNotes = make(
         "button",
@@ -30830,7 +30861,7 @@
         } catch (_) {}
         renderHsDiscussionView();
       });
-      gViews.body.append(bNormal, bSorter, bReadingView, bNotes, bThumbs);
+      gViews.body.append(bNormal, bSorter, bNotes, bThumbs);
 
       const gWin = makeGroup("ขนาดและการแสดงผลหน้าต่าง");
       const bFit = make("button", "⛶ พอดีหน้าต่าง (Fit to Window)", `ppt-rb-cmd${state.hsdPptZoomMode === "fit" ? " is-active" : ""}`);
@@ -31662,8 +31693,9 @@
         "hsd-km-sub"
       )
     );
-    const closeBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm");
+    const closeBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
     closeBtn.type = "button";
+    closeBtn.dataset.modalClose = "1";
     closeBtn.addEventListener("click", () => {
       backdrop.hidden = true;
     });
@@ -31937,17 +31969,10 @@
     const tbLeft = make("div", null, "ppt-titlebar-left");
     const qatShowBtn = make("button", null, "ppt-qat-btn");
     qatShowBtn.type = "button";
-    qatShowBtn.title = "เริ่มนำเสนอสไลด์ตั้งแต่หน้าแรก (Start From Beginning)";
+    qatShowBtn.title = "ขยายสไลด์เต็มหน้าจอ (Full Screen)";
     qatShowBtn.innerHTML =
-      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2.5" width="12" height="8" rx="1"/><path d="M8 10.5v3M5.5 13.5h5"/><polygon points="6.8,4.8 10.2,6.5 6.8,8.2" fill="currentColor" stroke="none"/></svg>`;
-    qatShowBtn.addEventListener("click", () => enterPptFullscreenFromBeginning());
-
-    const qatReadBtn = make("button", null, "ppt-qat-btn");
-    qatReadBtn.type = "button";
-    qatReadBtn.title = "เปิดโหมดการอ่าน (PowerPoint Reading View) ในแท็บใหม่สำหรับ Share Slide";
-    qatReadBtn.innerHTML =
-      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3.5h4.6a1.4 1.4 0 0 1 1.4 1.4v8.1a1.1 1.1 0 0 0-1.1-1.1H2z"/><path d="M14 3.5H9.4A1.4 1.4 0 0 0 8 4.9v8.1a1.1 1.1 0 0 1 1.1-1.1H14z"/></svg>`;
-    qatReadBtn.addEventListener("click", () => openPptSlideShareWindow());
+      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 2 2 6 2"/><polyline points="10 2 14 2 14 6"/><polyline points="14 10 14 14 10 14"/><polyline points="6 14 2 14 2 10"/></svg>`;
+    qatShowBtn.addEventListener("click", () => enterPptFullscreenShow());
 
     const qatExportBtn = make("button", null, "ppt-qat-btn");
     qatExportBtn.type = "button";
@@ -31973,7 +31998,6 @@
       appBadge,
       make("span", "บันทึกอัตโนมัติ", "ppt-autosave-pill"),
       qatShowBtn,
-      qatReadBtn,
       qatExportBtn,
       qatAutoFitBtn
     );
@@ -31985,17 +32009,10 @@
         ? window.RACM_HSD_ROOM_QR.getRoomMeta(cur.mod.code, effTitleRoomId)
         : null;
     const docFileLabel = roomMetaForTitle
-      ? `${cur.mod.code}_Room${roomMetaForTitle.roomId}_${roomMetaForTitle.cleanRoomSlug}.pptx — Case Discussion: ${cur.mod.code} (ห้อง ${roomMetaForTitle.roomCode})  ▾`
-      : `${cur.mod.code}.pptx — ${cur.mod.title}  ▾`;
+      ? `${cur.mod.code}_Room${roomMetaForTitle.roomId}_${roomMetaForTitle.cleanRoomSlug}.pptx — Case Discussion: ${cur.mod.code} (ห้อง ${roomMetaForTitle.roomCode})`
+      : `${cur.mod.code}.pptx — ${cur.mod.title}`;
     const docFileBtn = make("span", docFileLabel, "ppt-doc-filename");
-    docFileBtn.style.cursor = "pointer";
-    docFileBtn.title = "คลิกเพื่อเลือกเปิดชุดสไลด์คาบอื่น หรือเลือกไฟล์ PPT แยกห้อง 1–6";
-    docFileBtn.addEventListener("click", () => openHsdGoogleDrivePickerModal());
     tbCenter.appendChild(docFileBtn);
-
-    if (state.pptPopupConnected) {
-      tbCenter.appendChild(make("span", "📖 Reading Mode เปิดอยู่", "ppt-live-share-pill"));
-    }
 
     const tbRight = make("div", null, "ppt-titlebar-right");
     tbRight.appendChild(buildPptSlideThemeSwitcherDOM("is-in-studio"));
@@ -32388,39 +32405,16 @@
       `<span>Handout / .pptx</span>`;
     handoutBarBtn.addEventListener("click", () => openHsdPptExportStudioModal());
 
-    // Authentic PowerPoint 4-Icon View Strip: [Normal | Slide Sorter | Reading View (New Tab · Share Slide) | Slide Show (F5)]
-    const shareSlideBtn = make(
-      "button",
-      null,
-      `ppt-view-ico-btn is-share-slide-btn${state.pptPopupConnected ? " is-sharing-live" : ""}`
-    );
-    shareSlideBtn.type = "button";
-    shareSlideBtn.dataset.pptBottomShareSlide = "1";
-    shareSlideBtn.setAttribute("aria-pressed", state.pptPopupConnected ? "true" : "false");
-    shareSlideBtn.title = "มุมมองการอ่าน (PowerPoint Reading Mode) — เปิดสไลด์ในแท็บเบราว์เซอร์ใหม่ พร้อมปุ่มฉายสไลด์เต็มจอสำหรับ Share Slide";
-    shareSlideBtn.innerHTML =
-      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.8 3.5h4.7a1.5 1.5 0 0 1 1.5 1.5v8a1.2 1.2 0 0 0-1.2-1.2H1.8z"/><path d="M14.2 3.5H9.5A1.5 1.5 0 0 0 8 5v8a1.2 1.2 0 0 1 1.2-1.2h5z"/></svg>` +
-      `<span>${state.pptPopupConnected ? "Reading Mode ↗" : "Reading Mode ↗"}</span>`;
-    shareSlideBtn.addEventListener("click", () => openPptSlideShareWindow());
-
     const showBarBtn = make("button", null, "ppt-view-ico-btn is-slideshow-btn");
     showBarBtn.type = "button";
     showBarBtn.dataset.pptBottomSlideShow = "1";
-    showBarBtn.title = "ฉายสไลด์เต็มหน้าจอแบบไร้แถบหัวข้อ (Slide Show · F5)";
+    showBarBtn.title = "ขยายสไลด์เต็มหน้าจอ (Full Screen)";
     showBarBtn.innerHTML =
-      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h12v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3z"/><line x1="1" y1="3" x2="15" y2="3"/><line x1="8" y1="11" x2="8" y2="14.2"/><path d="M5.2 14.5L8 12.2l2.8 2.3"/></svg>` +
-      `<span>ฉายสไลด์ (F5)</span>`;
+      `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 2 2 6 2"/><polyline points="10 2 14 2 14 6"/><polyline points="14 10 14 14 10 14"/><polyline points="6 14 2 14 2 10"/></svg>` +
+      `<span>Full Screen</span>`;
     showBarBtn.addEventListener("click", () => enterPptFullscreenShow());
 
-    viewStrip.append(normalViewBtn, sorterViewBtn, shareSlideBtn, showBarBtn);
-
-    if (state.pptPopupConnected) {
-      const stopShareBtn = make("button", "✕ ปิดแท็บ", "ppt-status-stop-share-btn");
-      stopShareBtn.type = "button";
-      stopShareBtn.title = "ปิดแท็บ Reading Mode ที่เปิดแยกออกไป";
-      stopShareBtn.addEventListener("click", () => closePptSlideShareWindow());
-      viewStrip.appendChild(stopShareBtn);
-    }
+    viewStrip.append(normalViewBtn, sorterViewBtn, showBarBtn);
 
     // 5c. Authentic PowerPoint Zoom Slider + % Readout + Fit-to-Window Corner Icon
     const zoomGroup = make("div", null, "ppt-zoom-group");
@@ -32562,15 +32556,10 @@
           broadcastPptPresentationState();
         });
 
-        const fsCaseBtn = make("button", "📺 ฉายสไลด์ Full Screen", "btn sm ppt-launch-fs-btn");
+        const fsCaseBtn = make("button", "⛶ Full Screen", "btn sm ppt-launch-fs-btn");
         fsCaseBtn.type = "button";
-        fsCaseBtn.title = "ฉายกรณีศึกษานี้แบบเต็มหน้าจอไร้แถบหัวข้อเหมือนกด Slide Show ใน PowerPoint";
+        fsCaseBtn.title = "ขยายกรณีศึกษานี้แบบเต็มหน้าจอ (Full Screen)";
         fsCaseBtn.addEventListener("click", () => enterPptFullscreenShow(c.id));
-
-        const popCaseBtn = make("button", "📖 Reading Mode (แท็บใหม่ ↗)", "btn sm ppt-launch-win-btn");
-        popCaseBtn.type = "button";
-        popCaseBtn.title = "เปิดกรณีศึกษานี้ในโหมดการอ่าน (PowerPoint Reading View) ในแท็บใหม่ พร้อมปุ่มฉายสไลด์เต็มจอ";
-        popCaseBtn.addEventListener("click", () => openPptSlideShareWindow(c.id));
 
         const printCaseBtn = make("button", "พิมพ์กรณีนี้", "btn sm");
         printCaseBtn.type = "button";
@@ -32602,7 +32591,7 @@
           broadcastPptPresentationState();
         });
 
-        hRight.append(slideJumpBtn, fsCaseBtn, popCaseBtn, printCaseBtn, clearCaseBtn);
+        hRight.append(slideJumpBtn, fsCaseBtn, printCaseBtn, clearCaseBtn);
         head.append(hLeft, hRight);
         card.appendChild(head);
 
@@ -38126,13 +38115,20 @@
       make("h4", `คำตอบสดรายกล่อง (ห้องที่ ${LIVE.getRoomId()}): ${blockTitle}`, "hsd-tk-title"),
       (() => {
         const rc = make("div", null, "tv-modal-head-right");
+        const topCloseBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
+        topCloseBtn.type = "button";
+        topCloseBtn.dataset.modalClose = "1";
+        topCloseBtn.addEventListener("click", () => {
+          modal.hidden = true;
+        });
         rc.append(
           make(
             "span",
             `ส่งแล้ว ${subCnt} คน · กำลังพิมพ์ ${typCnt} คน`,
             `hsd-resp-status ${subCnt > 0 ? "is-submitted" : "is-typing"}`
           ),
-          buildUnavPairDOM({ compact: true })
+          buildUnavPairDOM({ compact: true }),
+          topCloseBtn
         );
         return rc;
       })()
@@ -38199,6 +38195,12 @@
       make("h4", `กระดาษคำตอบรายบุคคล (ห้องที่ ${LIVE ? LIVE.getRoomId() : 1}) — ${author}`, "hsd-tk-title"),
       (() => {
         const rc = make("div", null, "tv-modal-head-right");
+        const topCloseBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
+        topCloseBtn.type = "button";
+        topCloseBtn.dataset.modalClose = "1";
+        topCloseBtn.addEventListener("click", () => {
+          modal.hidden = true;
+        });
         if (modal._backToCellFn) {
           const backBtn = make("button", "← กลับหน้าดูรวม", "btn sm");
           backBtn.type = "button";
@@ -38215,7 +38217,8 @@
             rec.status === "submitted" ? "✓ ส่งคำตอบแล้ว" : "✍ กำลังพิมพ์สด…",
             `hsd-resp-status ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
           ),
-          buildUnavPairDOM({ compact: true })
+          buildUnavPairDOM({ compact: true }),
+          topCloseBtn
         );
         return rc;
       })()
@@ -38811,6 +38814,12 @@
       ),
       (() => {
         const rc = make("div", null, "tv-modal-head-right");
+        const topCloseBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
+        topCloseBtn.type = "button";
+        topCloseBtn.dataset.modalClose = "1";
+        topCloseBtn.addEventListener("click", () => {
+          modal.hidden = true;
+        });
         [1, 2, 3, 4, 5, 6].forEach((rId) => {
           const rb = make("button", `R${rId}`, `btn sm${rId === roomNum ? " primary" : ""}`);
           rb.type = "button";
@@ -38825,6 +38834,7 @@
           });
           rc.appendChild(rb);
         });
+        rc.appendChild(topCloseBtn);
         return rc;
       })()
     );

@@ -41041,17 +41041,24 @@ html[data-theme="dark"] .ppt-slide-sheet .hsd-slide-right > .hsd-pane-snap-bar {
   top: auto !important;
 }
 
-/* 1. Dynamic Visual Viewport & Safe-Area Fit (tracks mobile browser bars & virtual keyboard) */
+/* 1. Dynamic Visual Viewport & Safe-Area Fit (flush bottom: 0 on Android/Samsung Internet; visualViewport tracking on iOS overlay keyboard) */
 .ppt-presentation-overlay {
-  top: var(--ppt-vv-top, 0px) !important;
+  top: 0 !important;
   left: 0 !important;
   right: 0 !important;
+  bottom: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: env(safe-area-inset-top, 0px);
+  overscroll-behavior: contain;
+}
+
+.ppt-presentation-overlay.is-vv-overlay-kbd {
+  top: var(--ppt-vv-top, 0px) !important;
   bottom: auto !important;
   height: var(--ppt-vvh, 100vh) !important;
   height: var(--ppt-vvh, 100dvh) !important;
   max-height: var(--ppt-vvh, 100dvh) !important;
-  padding-top: env(safe-area-inset-top, 0px);
-  overscroll-behavior: contain;
 }
 
 /* 2. Bounded Stage & Pinch-Zoom Sizer (NEVER scrolls whole slide at 100% zoom!) */
@@ -44915,3 +44922,218 @@ html[data-theme="dark"] .hsd-live-sid-pill.is-submitted {
   border-color: rgba(74, 222, 128, 0.4);
 }
 
+
+/* ==========================================================================
+   Mobile Full Screen Exit Pill, Zero-Gap 2-Button Keyboard Bar, Horizontal
+   Swipe Ergonomics & Thai Vowel/Tone-Mark (สระ/วรรณยุกต์) Fit Optimization
+   ========================================================================== */
+
+/* 1. Dark root backdrop during Full Screen so transient mobile browser bar resizes NEVER flash white */
+html:has(body.is-ppt-fullscreen-open),
+body.is-ppt-fullscreen-open {
+  background-color: #05080f !important;
+}
+
+/* 2. Inline Top-Left "✕ ออกจาก Full Screen" Button inside Slide Master Header (Zero Overlap) */
+.ppt-sm-exit-fs-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 28px;
+  height: auto;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.56);
+  border: 1.25px solid rgba(255, 255, 255, 0.76);
+  color: #ffffff !important;
+  font-family: var(--font-display, "Anuphan", sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  transition: background-color 0.15s ease, transform 0.14s ease, border-color 0.15s ease;
+}
+
+.ppt-sm-exit-fs-btn:hover,
+.ppt-sm-exit-fs-btn:focus-visible {
+  background: #dc2626 !important;
+  border-color: #fecaca !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.ppt-slide-sheet .ppt-sm-mod,
+.ppt-slide-sheet .ppt-sm-title,
+.ppt-slide-sheet .ppt-sm-stage-btn,
+.ppt-slide-sheet .ppt-sm-qpill,
+.ppt-slide-sheet .ppt-sm-casepill {
+  line-height: 1.48 !important;
+}
+
+@media (max-width: 680px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left {
+    flex-wrap: wrap !important;
+    gap: 5px 8px !important;
+    align-items: center !important;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-title {
+    flex: 1 1 175px !important;
+    line-height: 1.48 !important;
+  }
+
+  .ppt-sm-exit-fs-btn {
+    min-height: 27px;
+    padding: 2.5px 10px;
+    font-size: 11.5px;
+  }
+
+  /* Compact single-line Slide Master Header when Virtual Keyboard is open on vertical phone */
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-slide .ppt-sm-left {
+    flex-wrap: nowrap !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-slide .ppt-sm-mod {
+    display: none !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-slide .ppt-sm-title {
+    flex: 1 1 auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+  }
+}
+
+/* 3. Vertical Mobile Virtual Keyboard Bar: ONLY "ซ่อนโจทย์" + "พับแป้นพิมพ์" & Zero White Gap */
+.ppt-presentation-overlay.is-kbd-open {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .hsd-mobile-slide-jumpbar {
+  display: none !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open > .ppt-fs-kbd-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 6px 12px max(6px, env(safe-area-inset-bottom, 0px)) !important;
+  background: #0f172a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+.ppt-fs-kbd-bar .ppt-fs-tool-btn.is-kbd-mini,
+.ppt-fs-kbd-bar .ppt-fs-tool-btn.is-kbd-done {
+  min-height: 34px !important;
+  height: auto !important;
+  padding: 4px 14px !important;
+  border-radius: 999px !important;
+  font-size: 12.8px !important;
+  font-weight: 700 !important;
+  line-height: 1.52 !important;
+}
+
+.ppt-fs-kbd-bar .ppt-fs-tool-btn.is-kbd-mini {
+  background: rgba(30, 41, 59, 0.96) !important;
+  border: 1px solid rgba(148, 163, 184, 0.45) !important;
+  color: #f8fafc !important;
+}
+
+/* 4. Smooth Vertical Scroll + Horizontal Slide Swipe Coexistence on Mobile */
+.ppt-slide-sheet.is-responsive-slide .ppt-concept-summary-stage,
+.ppt-slide-sheet.is-responsive-slide .ppt-cs-matrix-wrap {
+  touch-action: pan-y;
+}
+
+/* 5. Thai Vowel & Tone Mark (สระบน/สระล่าง/วรรณยุกต์) Height & Fit Optimization */
+.ppt-ok-stu-chip {
+  min-height: 34px !important;
+  height: auto !important;
+  padding: 5px 10px !important;
+  line-height: 1.58 !important;
+  overflow: visible !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+.ppt-ok-stu-chip .ppt-ok-stu-label {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.62 !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hsd-msj-btn,
+.hsd-live-sid-pill,
+.hsd-ans-hash-nick,
+.ppt-ok-room-pill,
+.ppt-ok-case-jump-pill,
+.hsd-km-stu-chip,
+.hsd-km-stu-top,
+.hsd-km-stu-name,
+.hsd-km-wait-chip,
+.hsd-km-wait-name {
+  line-height: 1.54 !important;
+  height: auto !important;
+}
+
+.hsd-msj-btn {
+  min-height: 28px !important;
+  padding: 3px 10px !important;
+}
+
+@media (max-width: 820px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-opening-kahoot-stage,
+  .ppt-slide-sheet.is-responsive-slide .ppt-opening-kahoot-stage.is-2col-live-lobby {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-col-qr,
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-left,
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-right,
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-roster-card,
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-roster-grid {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex: 0 0 auto !important;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-stu-chip {
+    min-height: 38px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-ok-roster-grid,
+  .ppt-ok-roster-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+}
