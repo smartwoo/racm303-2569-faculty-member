@@ -2112,7 +2112,29 @@
       backdrop.remove();
       if (isStEp) {
         if (api && api.openSystemsForum) api.openSystemsForum("w1-d1-st");
-      } else if (api && api.openHsDiscussion) {
+        return;
+      }
+      if (ROLE === "student" && window.RACM_HSD_ROOM_QR) {
+        const curState = api && api.getState ? api.getState() : null;
+        const knownStu =
+          (curState && curState.myStudent) ||
+          (typeof window.RACM_HSD_ROOM_QR.getInitialStepPinStudent === "function"
+            ? window.RACM_HSD_ROOM_QR.getInitialStepPinStudent()
+            : null);
+        if (knownStu && knownStu.disc) {
+          const rId = Number(knownStu.disc) || 1;
+          const mUpper = String(mod.code || "HS1").toUpperCase();
+          if (mUpper === "HS1" && typeof window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid === "function") {
+            window.location.href = window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid(mUpper, rId, knownStu);
+            return;
+          }
+          if (api && typeof api.openHsDiscussionRoom === "function") {
+            api.openHsDiscussionRoom(mUpper, rId, knownStu);
+            return;
+          }
+        }
+      }
+      if (api && api.openHsDiscussion) {
         api.openHsDiscussion(mod.code);
       }
     });
@@ -2707,7 +2729,7 @@
 
   function initTvRemoteNavigation() {
     document.addEventListener("keydown", (ev) => {
-      if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      if (ev.isComposing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
 
       const slideOrPreviewOpen =
         ($("orientationDeckModal") && !$("orientationDeckModal").hidden) ||
@@ -2717,6 +2739,11 @@
       if (slideOrPreviewOpen) return;
 
       const openModal = $("tvEpisodeModal") || $("tvProfileModal");
+      const editableTarget = isEditableElement(ev.target)
+        ? ev.target
+        : isEditableElement(document.activeElement)
+          ? document.activeElement
+          : null;
 
       if (ev.key === "Escape") {
         if (openModal) {
@@ -2730,8 +2757,8 @@
           morePop.hidden = true;
           return;
         }
-        if (isEditableElement(ev.target)) {
-          ev.target.blur();
+        if (editableTarget) {
+          editableTarget.blur();
           return;
         }
         const drivePickerEl = $("hsdGoogleDrivePickerModal");
@@ -2778,8 +2805,8 @@
       }
 
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(ev.key)) return;
-      if (isEditableElement(ev.target)) {
-        if (openModal && ev.key === "ArrowDown" && ev.target.id === "tvStudentSearchInput") {
+      if (editableTarget) {
+        if (openModal && ev.key === "ArrowDown" && editableTarget.id === "tvStudentSearchInput") {
           const firstCard = openModal.querySelector("[data-tv-modal-focus]");
           if (firstCard) {
             ev.preventDefault();
