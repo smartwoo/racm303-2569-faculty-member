@@ -1538,6 +1538,7 @@
     state.calScope = shortName ? "group" : "all";
     refreshCalendarStudioUI();
     renderScheduleCurrent();
+    window.dispatchEvent(new CustomEvent("racm:profilechange"));
   }
 
   function updatePersonalBanner() {
@@ -2615,13 +2616,28 @@
       }
       $("calStartWeekBtn").addEventListener("click", () => {
         const curNow = getBangkokNowInfo();
-        const targetWk = curNow.currentCourseWeek || 1;
+        const curCtx = getActivePersonalContext();
+        const nextActive = getFilteredSessions(true).find((s) => {
+          if (s.category === "STAFF" || s.category === "HOLIDAY") return false;
+          const stTemp = getSessionTemporalStatus(s, resolveEffectiveSessionDetails(s, curCtx), curNow);
+          return stTemp === "live" || stTemp === "upcoming";
+        });
+        const targetWk = (nextActive && nextActive.week) || curNow.currentCourseWeek || 1;
         state.calWeek = targetWk;
         if ($("schedWeekFilter")) $("schedWeekFilter").value = "";
         refreshCalendarStudioUI();
         renderScheduleCurrent();
         if (state.schedSub === "week") {
-          requestAnimationFrame(() => scrollToWeekBlock(targetWk, "smooth"));
+          requestAnimationFrame(() => {
+            if (nextActive && nextActive.id) {
+              const el = document.querySelector(`[data-cal-session-id="${nextActive.id}"]`);
+              if (el && el.offsetParent !== null) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+              }
+            }
+            scrollToWeekBlock(targetWk, "smooth");
+          });
         }
       });
     }
@@ -3256,10 +3272,46 @@
 
     if (!state.hasAutoSyncedCurrentWeek && state.activeTab === "schedule" && wrap.offsetParent !== null) {
       state.hasAutoSyncedCurrentWeek = true;
-      if (nowInfo.currentCourseWeek && nowInfo.currentCourseWeek >= 2 && !weekFilterVal) {
-        requestAnimationFrame(() => scrollToWeekBlock(nowInfo.currentCourseWeek, "auto"));
+      if (!weekFilterVal) {
+        const nextActive = filteredSessions.find((s) => {
+          if (s.category === "STAFF" || s.category === "HOLIDAY") return false;
+          const stTemp = getSessionTemporalStatus(s, resolveEffectiveSessionDetails(s, ctx), nowInfo);
+          return stTemp === "live" || stTemp === "upcoming";
+        });
+        const targetWk = (nextActive && nextActive.week) || nowInfo.currentCourseWeek || 1;
+        if (targetWk >= 2) {
+          requestAnimationFrame(() => scrollToWeekBlock(targetWk, "auto"));
+        }
       }
     }
+  }
+
+  function jumpToScheduleSession(sessionOrId) {
+    const targetId = typeof sessionOrId === "object" && sessionOrId ? sessionOrId.id : String(sessionOrId || "");
+    const sess = (SCHED.sessions || []).find((x) => x.id === targetId) || null;
+    if (sess) {
+      state.calWeek = sess.week || 1;
+      state.conciergeDateISO = sess.dateISO || state.conciergeDateISO;
+      state.hasAutoSyncedCurrentWeek = true;
+      if ($("schedWeekFilter") && $("schedWeekFilter").value && $("schedWeekFilter").value !== String(sess.week)) {
+        $("schedWeekFilter").value = "";
+      }
+    }
+    switchTab("schedule", true);
+    requestAnimationFrame(() => {
+      const safeId = targetId.replace(/"/g, '\\"');
+      const matchEl = safeId ? document.querySelector(`[data-cal-session-id="${safeId}"]`) : null;
+      if (matchEl && matchEl.offsetParent !== null) {
+        matchEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        matchEl.style.transition = "box-shadow 0.3s ease";
+        matchEl.style.boxShadow = "0 0 0 3px #f59e0b, 0 12px 28px rgba(15, 23, 42, 0.26)";
+        setTimeout(() => {
+          matchEl.style.boxShadow = "";
+        }, 2200);
+      } else if (sess && sess.week) {
+        scrollToWeekBlock(sess.week, "smooth");
+      }
+    });
   }
 
   /* ---------- View 3: Detailed Agenda / Daily Cards (Full-Card Color Coding for Rapid Skim/Scan) ---------- */
@@ -3324,6 +3376,7 @@
         null,
         `session-card cat-${s.category}${tStatus === "past" ? " is-past-event" : tStatus === "live" ? " is-live-event" : ""}`
       );
+      card.dataset.calSessionId = s.id;
       const main = make("div", null, "session-main");
 
       const timeLabelTxt = isHoliday
@@ -43227,6 +43280,7 @@
     openGlobalSpotlight,
     downloadScheduleIcs,
     openEventModal,
+    jumpToScheduleSession,
     getActivePersonalContext,
     resolveEffectiveSessionDetails
   };

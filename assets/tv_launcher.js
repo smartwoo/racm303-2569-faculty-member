@@ -43,17 +43,97 @@
     return m ? m[0].toUpperCase() : "R";
   }
 
-  function getBangkokTodayISO() {
+  let heroSessionOffset = 0;
+  let lastHeroSyncSignature = "";
+  let heroAutoSyncTimer = null;
+
+  const HERO_TH_DOW_SHORT = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+  const HERO_EN_DOW_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const HERO_TH_MON_SHORT = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  const HERO_EN_MON_SHORT = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  function getBangkokNow() {
+    if (window.__RACM_HERO_MOCK_NOW && typeof window.__RACM_HERO_MOCK_NOW === "object") {
+      const mk = window.__RACM_HERO_MOCK_NOW;
+      return {
+        todayISO: String(mk.todayISO || "2026-11-25"),
+        nowMin: Number.isFinite(mk.nowMin) ? Number(mk.nowMin) : 0,
+        hhmm: String(mk.hhmm || "00.00")
+      };
+    }
+    const now = new Date();
+    let todayISO = "2026-11-25";
+    let nowMin = 0;
+    let hhmm = "00.00";
     try {
-      return new Intl.DateTimeFormat("en-CA", {
+      const parts = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Bangkok",
         year: "numeric",
         month: "2-digit",
-        day: "2-digit"
-      }).format(new Date());
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(now);
+      const get = (k) => (parts.find((p) => p.type === k) || {}).value || "00";
+      const h = Number(get("hour")) % 24;
+      const m = Number(get("minute"));
+      todayISO = `${get("year")}-${get("month")}-${get("day")}`;
+      nowMin = h * 60 + m;
+      hhmm = `${String(h).padStart(2, "0")}.${String(m).padStart(2, "0")}`;
     } catch (_) {
-      return "2026-11-25";
+      const y = now.getFullYear();
+      const mo = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const h = now.getHours();
+      const m = now.getMinutes();
+      todayISO = `${y}-${mo}-${d}`;
+      nowMin = h * 60 + m;
+      hhmm = `${String(h).padStart(2, "0")}.${String(m).padStart(2, "0")}`;
     }
+    return { todayISO, nowMin, hhmm };
+  }
+
+  function getBangkokTodayISO() {
+    return getBangkokNow().todayISO;
+  }
+
+  function parseTimeMin(hhmm, fallbackMin) {
+    const [h, m] = String(hhmm || "").split(":").map(Number);
+    if (!Number.isFinite(h)) return fallbackMin;
+    return h * 60 + (Number.isFinite(m) ? m : 0);
+  }
+
+  function diffDaysISO(targetISO, baseISO) {
+    const m1 = String(targetISO || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const m2 = String(baseISO || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m1 || !m2) return 0;
+    const t1 = Date.UTC(Number(m1[1]), Number(m1[2]) - 1, Number(m1[3]));
+    const t2 = Date.UTC(Number(m2[1]), Number(m2[2]) - 1, Number(m2[3]));
+    return Math.round((t1 - t2) / 86400000);
+  }
+
+  function formatDurationShort(mins) {
+    const clean = Math.max(1, Math.round(Number(mins) || 0));
+    if (clean < 60) return t(`${clean} นาที`, `${clean}m`);
+    const h = Math.floor(clean / 60);
+    const m = clean % 60;
+    if (m === 0) return t(`${h} ชม.`, `${h}h`);
+    return t(`${h} ชม. ${m} นาที`, `${h}h ${m}m`);
+  }
+
+  function formatShortDateLabel(iso) {
+    const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return String(iso || "");
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    const dt = new Date(Date.UTC(y, mo - 1, d));
+    const dow = dt.getUTCDay();
+    if (getLang() === "en") {
+      return `${HERO_EN_DOW_SHORT[dow]} ${d} ${HERO_EN_MON_SHORT[mo]}`;
+    }
+    return `${HERO_TH_DOW_SHORT[dow]} ${d} ${HERO_TH_MON_SHORT[mo]}`;
   }
 
   /* ---------- Crisp Monochrome Vector Icons ---------- */
@@ -413,32 +493,644 @@
     return panel;
   }
 
-  function getNextFeaturedSession() {
+  function doesTeacherMatchHeroSession(s, teacherKey) {
+    if (!teacherKey) return true;
+    if (String(s.lecturers || "").includes(teacherKey)) return true;
+    if (s.hsModule) {
+      const rotMatch = (SCHED.hsRotation || []).some((r) => {
+        const slot = r && r[s.hsModule];
+        const inst = slot && typeof slot === "object" ? slot.instructor : slot;
+        return String(inst || "").includes(teacherKey);
+      });
+      if (rotMatch) return true;
+    }
+    if (s.isFieldGroupSession) {
+      const siteMatch = (SCHED.fieldworkSites || []).some((site) => {
+        const advMatch =
+          String(site.advisors || "").includes(teacherKey) ||
+          (Array.isArray(site.advisorKeys) && site.advisorKeys.includes(teacherKey));
+        if (!advMatch) return false;
+        return !Array.isArray(s.allowedSites) || s.allowedSites.includes(site.id);
+      });
+      if (siteMatch) return true;
+    }
+    return JSON.stringify(s.groupRooms || "").includes(teacherKey);
+  }
+
+  function resolveHeroPrimaryActionSpec(sess, ctx) {
+    const api = getApi();
+    if (!sess) return null;
+
+    if (sess.id === "w1-d1-orient" || sess.code === "ORIENT") {
+      return {
+        label: t("เปิดสไลด์ปฐมนิเทศ (Orientation)", "Open Orientation Slides"),
+        run: () => {
+          if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0);
+          else if (api && api.openEventModal) api.openEventModal(sess);
+          else navigateTvTab("schedule");
+        }
+      };
+    }
+
+    if (sess.id === "w1-d1-st" || sess.code === "ST1") {
+      return {
+        label: t("เปิดสไลด์ & บทเรียน ST1", "Open ST1 Slides & Hub"),
+        run: () => {
+          if (window.RACM_ST1_DECK) window.RACM_ST1_DECK.open(0);
+          else openEpisodeModal("ST1");
+        }
+      };
+    }
+
+    if (sess.hsModule && /^HS[1-6]$/i.test(sess.hsModule)) {
+      const mod = sess.hsModule.toUpperCase();
+      return {
+        label: t(`เปิดโจทย์ & สไลด์ Discussion ${mod}`, `Open ${mod} Discussion Slides`),
+        run: () => {
+          if (api && api.openHsDiscussion) api.openHsDiscussion(mod);
+          else openEpisodeModal(mod);
+        }
+      };
+    }
+
+    const hsDocMatch = String(sess.code || sess.docLink || "").match(/^(HS[1-6])$/i);
+    if (hsDocMatch) {
+      const mod = hsDocMatch[1].toUpperCase();
+      return {
+        label: t(`เปิดบทเรียน & สไลด์ ${mod}`, `Open ${mod} Hub & Slides`),
+        run: () => openEpisodeModal(mod)
+      };
+    }
+
+    if (sess.category === "PANEL") {
+      const hasDeck =
+        window.RACM_PANEL_DECK &&
+        typeof window.RACM_PANEL_DECK.hasDeck === "function" &&
+        window.RACM_PANEL_DECK.hasDeck(sess.id);
+      return {
+        label: hasDeck
+          ? t("เปิดสไลด์เวทีเสวนา", "Open Panel Slides")
+          : t("เปิดรายละเอียดเวทีเสวนา", "Open Panel Hub"),
+        run: () => {
+          if (hasDeck) window.RACM_PANEL_DECK.open(sess.id, 0);
+          else if (api && api.openSystemsForum) api.openSystemsForum(sess.id);
+          else if (api && api.openEventModal) api.openEventModal(sess);
+          else navigateTvTab("systems-forum");
+        }
+      };
+    }
+
+    if (sess.category === "EP") {
+      if (sess.actionUrl && !sess.zoom) {
+        return {
+          label: sess.actionLabel || t("เปิดทำแบบฝึกหัด E-learning ↗", "Open E-learning Exercise ↗"),
+          href: sess.actionUrl
+        };
+      }
+      if (sess.id === "w3-d2-spss") {
+        return {
+          label: t("เปิดสไลด์ & ปฏิบัติการ SPSS", "Open SPSS Workshop Slides"),
+          run: () => {
+            if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.open === "function") {
+              window.RACM_SPSS_DECK.open(0);
+            } else if (api && api.openEpidemiology) {
+              api.openEpidemiology("spss");
+            } else {
+              navigateTvTab("epidemiology");
+            }
+          }
+        };
+      }
+      const epSecMap = {
+        "w1-d3-ep123": { sec: "ep1", label: t("เปิด Video & สไลด์ EP1–EP3", "Open EP1–EP3 Video Studio") },
+        "w2-d3-ep45": { sec: "ep4", label: t("เปิด Video & สไลด์ EP4–EP5", "Open EP4–EP5 Video Studio") },
+        "w2-d3-ex34": { sec: "ep4", label: t("เปิดทบทวน EP4–EP5 & โจทย์", "Open EP4–EP5 Studio") },
+        "w2-d4-ep678": { sec: "ep6", label: t("เปิด Video & สไลด์ EP6–EP8", "Open EP6–EP8 Video Studio") },
+        "w2-d4-ep9-ex56": { sec: "ep9", label: t("เปิด Video & สไลด์ EP9 (EBM)", "Open EP9 EBM Studio") }
+      };
+      const mapped = epSecMap[sess.id] || {
+        sec: "all",
+        label: t("เปิดหมวดระบาดวิทยา (EP1–EP9)", "Open Epidemiology Hub")
+      };
+      return {
+        label: mapped.label,
+        run: () => {
+          if (api && api.openEpidemiology) api.openEpidemiology(mapped.sec);
+          else navigateTvTab("epidemiology");
+        }
+      };
+    }
+
+    if (sess.isFieldGroupSession) {
+      const areaName = (ctx && ctx.areaVal) || "";
+      return {
+        label: areaName
+          ? t(`เปิดข้อมูลกลุ่ม${areaName}`, `Open ${areaName} Site`)
+          : t("เปิดผัง 9 กลุ่มพื้นที่ภาคสนาม", "Open 9 Fieldwork Sites"),
+        run: () => {
+          if (api && api.openFieldworkSite) api.openFieldworkSite(areaName);
+          else navigateTvTab("fieldwork");
+        }
+      };
+    }
+
+    if (sess.category === "EXAM") {
+      if (sess.actionUrl) {
+        return {
+          label: sess.actionLabel || t("เปิดหน้าส่งงาน ↗", "Open Submission Link ↗"),
+          href: sess.actionUrl
+        };
+      }
+      return {
+        label: t("ดูรายละเอียด & เกณฑ์การสอบ", "View Exam Details & Rules"),
+        run: () => {
+          if (api && api.openEventModal) api.openEventModal(sess);
+          else navigateTvTab("schedule");
+        }
+      };
+    }
+
+    if (String(sess.code || "").startsWith("SDL")) {
+      return {
+        label: t("เปิดคลังบทเรียนเตรียมสอบ HS1–HS6", "Open HS1–HS6 Study Hub"),
+        run: () => {
+          if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder("FOLDERS");
+          else navigateTvTab("textbooks");
+        }
+      };
+    }
+
+    return {
+      label: t("ดูรายละเอียดคาบเรียน", "View Session Details"),
+      run: () => {
+        if (api && api.openEventModal) api.openEventModal(sess);
+        else navigateTvTab("schedule");
+      }
+    };
+  }
+
+  function getHeroTimetableSnapshot() {
     const api = getApi();
     const st = api && api.getState ? api.getState() : {};
-    const todayISO = getBangkokTodayISO();
-    const sessions = (SCHED.sessions || []).filter(
+    const now = getBangkokNow();
+    const rawCtx = api && api.getActivePersonalContext ? api.getActivePersonalContext() : {};
+    const activeTeacherKey = ROLE === "faculty" ? st.myTeacherKey || rawCtx.teacherVal || "" : "";
+    const ctx = activeTeacherKey && !rawCtx.teacherVal ? { ...rawCtx, teacherVal: activeTeacherKey } : rawCtx;
+
+    let basePool = (SCHED.sessions || []).filter(
       (s) => (ROLE === "faculty" || s.studentVisible !== false) && s.category !== "STAFF" && s.category !== "HOLIDAY"
     );
 
-    let pool = sessions;
-    if (ROLE === "faculty" && st.myTeacherKey) {
-      const tMatches = sessions.filter((s) => {
-        if (String(s.lecturers || "").includes(st.myTeacherKey)) return true;
-        if (s.hsModule) {
-          return (SCHED.hsRotation || []).some((r) => {
-            const slot = r && r[s.hsModule];
-            const inst = slot && typeof slot === "object" ? slot.instructor : slot;
-            return String(inst || "").includes(st.myTeacherKey);
-          });
-        }
-        return JSON.stringify(s.groupRooms || "").includes(st.myTeacherKey);
-      });
-      if (tMatches.length) pool = tMatches;
+    if (ctx.siteObj && ctx.siteObj.id) {
+      basePool = basePool.filter(
+        (s) => !Array.isArray(s.allowedSites) || s.allowedSites.includes(ctx.siteObj.id)
+      );
     }
 
-    const upcoming = pool.filter((s) => (s.dateISO || "") >= todayISO);
-    return upcoming[0] || pool[0] || null;
+    if (ROLE === "faculty" && activeTeacherKey) {
+      const tMatches = basePool.filter((s) => doesTeacherMatchHeroSession(s, activeTeacherKey));
+      if (tMatches.length) basePool = tMatches;
+    }
+
+    const items = basePool
+      .map((s) => {
+        const eff =
+          api && api.resolveEffectiveSessionDetails ? api.resolveEffectiveSessionDetails(s, ctx) : null;
+        const startISO = (eff && eff.startISO) || s.dateISO || "";
+        const endISO = (eff && eff.endISO) || s.endDateISO || startISO;
+        const isMultiDay = endISO > startISO || s.code === "FIELD";
+        const startMin = parseTimeMin(s.startTime, 8 * 60 + 30);
+        const endMin = parseTimeMin(s.endTime, 17 * 60);
+
+        let temporalStatus = "upcoming";
+        if (endISO < now.todayISO) {
+          temporalStatus = "past";
+        } else if (startISO > now.todayISO) {
+          temporalStatus = "upcoming";
+        } else if (isMultiDay) {
+          if (now.todayISO === endISO && now.nowMin >= endMin) temporalStatus = "past";
+          else if (now.todayISO === startISO && now.nowMin < startMin) temporalStatus = "upcoming";
+          else temporalStatus = "live";
+        } else {
+          if (now.nowMin >= endMin) temporalStatus = "past";
+          else if (now.nowMin >= startMin) temporalStatus = "live";
+          else temporalStatus = "upcoming";
+        }
+
+        return { session: s, eff, startISO, endISO, isMultiDay, startMin, endMin, temporalStatus };
+      })
+      .sort((a, b) => {
+        if (a.startISO !== b.startISO) return a.startISO.localeCompare(b.startISO);
+        if (a.isMultiDay !== b.isMultiDay) return a.isMultiDay ? 1 : -1;
+        return a.startMin - b.startMin;
+      });
+
+    let autoIdx = items.findIndex((x) => x.temporalStatus === "live" && !x.isMultiDay);
+    if (autoIdx < 0) {
+      const soonTimedIdx = items.findIndex(
+        (x) =>
+          x.temporalStatus === "upcoming" &&
+          !x.isMultiDay &&
+          x.startISO === now.todayISO &&
+          x.startMin - now.nowMin <= 90
+      );
+      const liveMultiIdx = items.findIndex((x) => x.temporalStatus === "live" && x.isMultiDay);
+      if (soonTimedIdx >= 0) autoIdx = soonTimedIdx;
+      else if (liveMultiIdx >= 0) autoIdx = liveMultiIdx;
+    }
+    if (autoIdx < 0) {
+      autoIdx = items.findIndex((x) => x.temporalStatus === "upcoming");
+    }
+
+    let courseCompleted = false;
+    if (autoIdx < 0 && items.length > 0) {
+      courseCompleted = true;
+      autoIdx = items.length - 1;
+    }
+
+    const maxOffset = items.length ? items.length - 1 - Math.max(0, autoIdx) : 0;
+    const minOffset = items.length ? -Math.max(0, autoIdx) : 0;
+    if (heroSessionOffset > maxOffset) heroSessionOffset = maxOffset;
+    if (heroSessionOffset < minOffset) heroSessionOffset = minOffset;
+
+    const activeIdx = items.length ? Math.min(items.length - 1, Math.max(0, autoIdx + heroSessionOffset)) : -1;
+    const featured = activeIdx >= 0 ? items[activeIdx] : null;
+    const isPreviewingOther = heroSessionOffset !== 0;
+
+    const hasProfile = Boolean(
+      (ROLE === "student" && st.myStudent) || (ROLE === "faculty" && st.myTeacherKey)
+    );
+
+    let profileBadgeText = "";
+    if (ROLE === "student" && st.myStudent) {
+      const s = st.myStudent;
+      const shortName = s.nickname ? `${s.fullName.split(" ")[0]} (${s.nickname})` : s.fullName;
+      profileBadgeText = `${shortName} · Disc ${s.disc} · ${s.area}`;
+    } else if (ROLE === "student" && ctx.areaVal) {
+      profileBadgeText = t(`กลุ่มพื้นที่ ${ctx.areaVal}`, `Site: ${ctx.areaVal}`);
+    } else if (ROLE === "faculty" && activeTeacherKey) {
+      const foundT = (ROSTER.courseTeachers || []).find((x) => x.key === activeTeacherKey);
+      profileBadgeText = foundT ? foundT.label : `อ.${activeTeacherKey}`;
+    }
+
+    let kickerText = "";
+    let kickerClass = "";
+    let kickerDotHtml = "";
+    let isLiveNow = false;
+    let isStartingSoon = false;
+    let showProgressBar = false;
+    let progressPct = 0;
+
+    if (!featured) {
+      kickerText =
+        ROLE === "faculty"
+          ? t("สำหรับคณาจารย์ · ตารางสอน RACM 303", "Faculty · Timetable")
+          : t("สำหรับนักศึกษา · ตารางเรียน RACM 303", "Student · Timetable");
+    } else if (isPreviewingOther) {
+      const stepDiff = heroSessionOffset;
+      const dirLabel =
+        stepDiff > 0
+          ? t(`ดูล่วงหน้า +${stepDiff} คาบ`, `Preview +${stepDiff}`)
+          : t(`ย้อนดู ${stepDiff} คาบ`, `History ${stepDiff}`);
+      const stateTag =
+        featured.temporalStatus === "past"
+          ? t("ผ่านแล้ว", "Completed")
+          : featured.temporalStatus === "live"
+            ? t("กำลังเรียน", "Live")
+            : formatShortDateLabel(featured.startISO);
+      kickerClass = "is-preview";
+      kickerText = `${dirLabel} · ${stateTag}`;
+    } else if (courseCompleted) {
+      kickerClass = "is-completed";
+      kickerText = t("🏁 สิ้นสุดตารางเรียนรายวิชา RACM 303 ปีการศึกษา 2569", "🏁 RACM 303 Course Timetable Completed");
+    } else if (featured.temporalStatus === "live") {
+      isLiveNow = true;
+      kickerClass = "is-live";
+      kickerDotHtml = `<span class="tv-hero-pulse-dot is-live" aria-hidden="true"></span>`;
+      if (featured.isMultiDay) {
+        const daysLeft = Math.max(0, diffDaysISO(featured.endISO, now.todayISO)) + 1;
+        kickerText = t(
+          `กำลังฝึกปฏิบัติงานภาคสนาม · เหลืออีก ${daysLeft} วัน`,
+          `Fieldwork Live · ${daysLeft}d remaining`
+        );
+      } else {
+        const remainMin = Math.max(1, featured.endMin - now.nowMin);
+        const totalMin = Math.max(1, featured.endMin - featured.startMin);
+        progressPct = Math.min(98, Math.max(5, Math.round(((now.nowMin - featured.startMin) / totalMin) * 100)));
+        showProgressBar = true;
+        kickerText =
+          ROLE === "faculty"
+            ? t(
+                `กำลังสอน / ดำเนินการตอนนี้ · เหลืออีก ${formatDurationShort(remainMin)}`,
+                `LIVE NOW · ${formatDurationShort(remainMin)} left`
+              )
+            : t(
+                `กำลังเรียนอยู่ตอนนี้ · เหลืออีก ${formatDurationShort(remainMin)}`,
+                `LIVE NOW · ${formatDurationShort(remainMin)} left`
+              );
+      }
+    } else {
+      const dDiff = diffDaysISO(featured.startISO, now.todayISO);
+      if (dDiff === 0) {
+        const waitMin = Math.max(1, featured.startMin - now.nowMin);
+        if (waitMin <= 15) {
+          isStartingSoon = true;
+          kickerClass = "is-soon";
+          kickerDotHtml = `<span class="tv-hero-pulse-dot is-soon" aria-hidden="true"></span>`;
+          kickerText =
+            ROLE === "faculty"
+              ? t(`กำลังจะเริ่มสอนในอีก ${waitMin} นาที`, `Starting in ${waitMin}m`)
+              : t(`เปิดเช็คชื่อเข้าเรียนแล้ว · เริ่มในอีก ${waitMin} นาที`, `Check-in Open · Starts in ${waitMin}m`);
+        } else {
+          kickerClass = "is-today-next";
+          kickerDotHtml = `<span class="tv-hero-pulse-dot is-upcoming" aria-hidden="true"></span>`;
+          kickerText =
+            ROLE === "faculty"
+              ? t(`คาบสอนถัดไปวันนี้ · อีก ${formatDurationShort(waitMin)}`, `Up Next Today · In ${formatDurationShort(waitMin)}`)
+              : t(`คาบเรียนถัดไปวันนี้ · อีก ${formatDurationShort(waitMin)}`, `Up Next Today · In ${formatDurationShort(waitMin)}`);
+        }
+      } else {
+        kickerClass = "is-upcoming";
+        const startDisp = String(featured.session.startTime || "08:30").replace(":", ".");
+        const relLabel =
+          dDiff === 1
+            ? t(`พรุ่งนี้ · เริ่ม ${startDisp} น.`, `Tomorrow · ${featured.session.startTime || "08:30"}`)
+            : t(`อีก ${dDiff} วัน (${formatShortDateLabel(featured.startISO)})`, `In ${dDiff} days (${formatShortDateLabel(featured.startISO)})`);
+        kickerText =
+          ROLE === "faculty"
+            ? `${t("คาบสอนถัดไป", "Up Next")} · ${relLabel}`
+            : `${t("คาบเรียนถัดไป", "Up Next")} · ${relLabel}`;
+      }
+    }
+
+    const nextSess = featured ? featured.session : null;
+    const eff = featured ? featured.eff : null;
+    const heroTitle = nextSess
+      ? (eff && eff.title) || nextSess.title
+      : t("เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (RACM 303)", "Community Medicine & Health Systems Science");
+    const heroRoom = (eff && eff.room) || (nextSess && nextSess.room) || "";
+    const heroCheckIn = nextSess && nextSess.checkIn && nextSess.checkIn !== "—" ? nextSess.checkIn : "";
+    const heroMeta = nextSess
+      ? [
+          nextSess.dateTH || nextSess.dateISO,
+          nextSess.timeLabel || "",
+          heroRoom ? `📍 ${heroRoom}` : "",
+          heroCheckIn ? heroCheckIn : ""
+        ]
+          .filter(Boolean)
+          .join("  ·  ")
+      : t("พุธที่ 25 พฤศจิกายน – พุธที่ 30 ธันวาคม 2569", "25 Nov – 30 Dec 2026");
+
+    const zoomUrl = nextSess && nextSess.zoom && nextSess.zoom.url ? nextSess.zoom.url : "";
+    const upNextItems = [];
+    if (featured && items.length > activeIdx + 1) {
+      for (let i = activeIdx + 1; i < Math.min(items.length, activeIdx + 3); i++) {
+        const u = items[i];
+        const sameDate = u.startISO === featured.startISO;
+        const timeCompact = String(u.session.timeLabel || u.session.startTime || "").replace(/\s*น\.$/, "");
+        const whenLabel = sameDate
+          ? timeCompact
+          : `${formatShortDateLabel(u.startISO)} ${String(u.session.startTime || "").replace(":", ".")}`;
+        const rawName = (u.eff && u.eff.title) || u.session.title || u.session.code || "";
+        const cleanShort = rawName.length > 48 ? `${rawName.slice(0, 46).trim()}…` : rawName;
+        upNextItems.push({
+          index: i,
+          sessionId: u.session.id,
+          whenLabel,
+          shortTitle: cleanShort,
+          fullTitle: `${u.session.dateTH || u.startISO} (${u.session.timeLabel || ""}) — ${rawName}`
+        });
+      }
+    }
+
+    return {
+      now,
+      ctx,
+      items,
+      autoAnchorIndex: Math.max(0, autoIdx),
+      activeIdx,
+      featured,
+      nextSess,
+      eff,
+      hasProfile,
+      profileBadgeText,
+      profileSignature: `${profileBadgeText}|${ctx.discVal || ""}|${ctx.areaVal || ""}|${activeTeacherKey}`,
+      kickerText,
+      kickerClass,
+      kickerDotHtml,
+      isLiveNow,
+      isStartingSoon,
+      showProgressBar,
+      progressPct,
+      heroTitle,
+      heroMeta,
+      zoomUrl,
+      primaryAction: resolveHeroPrimaryActionSpec(nextSess, ctx),
+      upNextItems,
+      canStepPrev: activeIdx > 0,
+      canStepNext: activeIdx >= 0 && activeIdx < items.length - 1,
+      syncClockText: t(`ซิงค์เวลา ${now.hhmm} น.`, `Synced ${now.hhmm.replace(".", ":")}`)
+    };
+  }
+
+  function renderHeroStageOnly(opts) {
+    const options = opts || {};
+    const heroEl = $("tvHeroStage");
+    if (!heroEl) return;
+
+    const api = getApi();
+    const snap = getHeroTimetableSnapshot();
+    const sig = [
+      getLang(),
+      ROLE,
+      snap.now.todayISO,
+      snap.now.hhmm,
+      snap.nextSess ? snap.nextSess.id : "none",
+      snap.kickerClass,
+      snap.kickerText,
+      snap.progressPct,
+      heroSessionOffset,
+      snap.profileSignature
+    ].join("||");
+
+    if (!options.force && sig === lastHeroSyncSignature) return;
+    lastHeroSyncSignature = sig;
+
+    const prevFocusedId =
+      options.preserveFocus && document.activeElement && heroEl.contains(document.activeElement)
+        ? document.activeElement.id
+        : "";
+    const wasTvFocused = Boolean(
+      prevFocusedId && document.activeElement && document.activeElement.classList.contains("is-tv-focused")
+    );
+
+    heroEl.classList.toggle("is-hero-live", snap.isLiveNow);
+    heroEl.classList.toggle("is-hero-soon", snap.isStartingSoon);
+
+    const primaryIsGlass = Boolean(snap.zoomUrl && (snap.isLiveNow || snap.isStartingSoon));
+    const primaryBtnHtml = snap.primaryAction
+      ? snap.primaryAction.href
+        ? `<a class="tv-hero-btn ${primaryIsGlass ? "is-glass" : "is-primary"}" id="tvHeroPrimaryBtn" href="${esc(snap.primaryAction.href)}" target="_blank" rel="noopener" data-tv-focus data-tv-row="1">▶ <span>${esc(snap.primaryAction.label)}</span></a>`
+        : `<button type="button" class="tv-hero-btn ${primaryIsGlass ? "is-glass" : "is-primary"}" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(snap.primaryAction.label)}</span></button>`
+      : "";
+
+    const zoomBtnHtml = snap.zoomUrl
+      ? `<a class="tv-hero-btn ${primaryIsGlass ? "is-primary" : "is-glass is-zoom-pill"}" id="tvHeroZoomBtn" href="${esc(snap.zoomUrl)}" target="_blank" rel="noopener" data-tv-focus data-tv-row="1">${ICONS.video} <span>${esc(t("เข้าห้องเรียน Zoom", "Join Zoom Room"))}</span></a>`
+      : "";
+
+    heroEl.innerHTML = `
+      <div class="tv-hero-top-row">
+        <div class="tv-hero-status-cluster">
+          <span class="tv-hero-kicker ${esc(snap.kickerClass)}">${snap.kickerDotHtml}<span>${esc(snap.kickerText)}</span></span>
+          ${
+            snap.profileBadgeText
+              ? `<button type="button" class="tv-hero-profile-chip" id="tvHeroInlineProfileChip" title="${esc(t("คลิกเพื่อเปลี่ยนโปรไฟล์ / กลุ่ม", "Click to switch profile or group"))}">${ICONS.user} <span>${esc(snap.profileBadgeText)}</span></button>`
+              : ""
+          }
+          <span class="tv-hero-sync-pill" role="group" aria-label="${esc(t("ตัวควบคุมซิงค์ตารางเวลา", "Timetable sync controls"))}">
+            <button type="button" class="tv-hero-step-btn" id="tvHeroPrevSessBtn" title="${esc(t("ดูคาบก่อนหน้า", "Previous session"))}" aria-label="${esc(t("ดูคาบก่อนหน้า", "Previous session"))}" ${snap.canStepPrev ? "" : "disabled"}>‹</button>
+            <span class="tv-hero-clock-txt">${esc(snap.syncClockText)}</span>
+            <button type="button" class="tv-hero-step-btn" id="tvHeroNextSessBtn" title="${esc(t("ดูคาบถัดไป", "Next session"))}" aria-label="${esc(t("ดูคาบถัดไป", "Next session"))}" ${snap.canStepNext ? "" : "disabled"}>›</button>
+            ${
+              heroSessionOffset !== 0
+                ? `<button type="button" class="tv-hero-reset-sync-btn" id="tvHeroResetSyncBtn" title="${esc(t("กลับมาซิงค์คาบปัจจุบัน/ถัดไปอัตโนมัติ", "Return to live/up-next sync"))}">${esc(t("↺ ซิงค์ปัจจุบัน", "↺ Live"))}</button>`
+                : ""
+            }
+          </span>
+        </div>
+        <span class="tv-remote-hint"><kbd>◀</kbd><kbd>▲</kbd><kbd>▼</kbd><kbd>▶</kbd> ${esc(t("เลื่อนเลือกเหมือนรีโมต TV", "Arrow keys to navigate"))} · <kbd>Enter</kbd> ${esc(t("เปิด", "Open"))}</span>
+      </div>
+
+      <div class="tv-hero-body">
+        <h1 class="tv-hero-title">${esc(snap.heroTitle)}</h1>
+        <p class="tv-hero-meta">${esc(snap.heroMeta)}</p>
+        ${
+          snap.showProgressBar
+            ? `<div class="tv-hero-live-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${snap.progressPct}" aria-label="${esc(t("ความคืบหน้าเวลาคาบเรียนปัจจุบัน", "Current session time progress"))}"><span class="tv-hero-live-progress-fill" style="width:${snap.progressPct}%"></span></div>`
+            : ""
+        }
+        ${
+          snap.upNextItems.length
+            ? `<div class="tv-hero-upnext-strip">
+                <span class="tv-hero-upnext-lbl">${esc(t("ถัดไป:", "Next:"))}</span>
+                ${snap.upNextItems
+                  .map(
+                    (u) =>
+                      `<button type="button" class="tv-hero-upnext-chip" data-hero-jump-idx="${u.index}" title="${esc(u.fullTitle)}"><span class="tv-huc-when">${esc(u.whenLabel)}</span><span class="tv-huc-name">${esc(u.shortTitle)}</span></button>`
+                  )
+                  .join("")}
+              </div>`
+            : ""
+        }
+      </div>
+
+      <div class="tv-hero-actions">
+        ${primaryIsGlass ? `${zoomBtnHtml}${primaryBtnHtml}` : `${primaryBtnHtml}${zoomBtnHtml}`}
+        <button type="button" class="tv-hero-btn is-glass" id="tvHeroScheduleBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(
+          ROLE === "faculty" ? t("เปิดดูตารางสอน", "Open Schedule") : t("เปิดดูตารางเรียน", "Open Schedule")
+        )}</span></button>
+        ${
+          ROLE === "faculty"
+            ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroUploadBtn" data-tv-focus data-tv-row="1">${ICONS.upload} <span>${esc(
+                t("อัปโหลด Slide / ไฟล์สอน (GitHub)", "Upload Slides / Files")
+              )}</span></button>`
+            : ""
+        }
+        ${
+          snap.hasProfile
+            ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroSyncIcsBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(t("บันทึกเข้าปฏิทินมือถือ (.ics)", "Add to Calendar (.ics)"))}</span></button>
+               <button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.edit} <span>${esc(t("เปลี่ยนโปรไฟล์", "Switch Profile"))}</span></button>`
+            : `<button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.user} <span>${esc(
+                ROLE === "faculty"
+                  ? t("เลือกชื่ออาจารย์ผู้สอน", "Select Faculty Profile")
+                  : t("เลือกชื่อ / กลุ่มของฉัน", "Select My Name or Group")
+              )}</span></button>`
+        }
+      </div>
+    `;
+
+    const heroPrimary = $("tvHeroPrimaryBtn");
+    if (heroPrimary && snap.primaryAction && typeof snap.primaryAction.run === "function") {
+      heroPrimary.addEventListener("click", () => snap.primaryAction.run());
+    }
+
+    const heroSchedBtn = $("tvHeroScheduleBtn");
+    if (heroSchedBtn) {
+      heroSchedBtn.addEventListener("click", () => {
+        hideCourseDriveBrowser();
+        if (snap.nextSess && api && typeof api.jumpToScheduleSession === "function") {
+          api.jumpToScheduleSession(snap.nextSess);
+        } else {
+          navigateTvTab("schedule");
+        }
+      });
+    }
+
+    const heroSyncBtn = $("tvHeroSyncIcsBtn");
+    if (heroSyncBtn) {
+      heroSyncBtn.addEventListener("click", () => {
+        if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
+      });
+    }
+
+    const heroUpBtn = $("tvHeroUploadBtn");
+    if (heroUpBtn) {
+      heroUpBtn.addEventListener("click", () => {
+        openGlobalUploadModal((snap.nextSess && snap.nextSess.id) || "w1-d1-st");
+      });
+    }
+
+    const heroProfBtn = $("tvHeroProfileBtn");
+    if (heroProfBtn) {
+      heroProfBtn.addEventListener("click", () => openProfileModal());
+    }
+
+    const inlineProfChip = $("tvHeroInlineProfileChip");
+    if (inlineProfChip) {
+      inlineProfChip.addEventListener("click", () => openProfileModal());
+    }
+
+    const prevSessBtn = $("tvHeroPrevSessBtn");
+    if (prevSessBtn) {
+      prevSessBtn.addEventListener("click", () => {
+        heroSessionOffset -= 1;
+        renderHeroStageOnly({ force: true });
+      });
+    }
+
+    const nextSessBtn = $("tvHeroNextSessBtn");
+    if (nextSessBtn) {
+      nextSessBtn.addEventListener("click", () => {
+        heroSessionOffset += 1;
+        renderHeroStageOnly({ force: true });
+      });
+    }
+
+    const resetSyncBtn = $("tvHeroResetSyncBtn");
+    if (resetSyncBtn) {
+      resetSyncBtn.addEventListener("click", () => {
+        heroSessionOffset = 0;
+        renderHeroStageOnly({ force: true });
+      });
+    }
+
+    heroEl.querySelectorAll("[data-hero-jump-idx]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const targetIdx = Number(chip.dataset.heroJumpIdx);
+        if (Number.isFinite(targetIdx)) {
+          heroSessionOffset = targetIdx - snap.autoAnchorIndex;
+          renderHeroStageOnly({ force: true });
+        }
+      });
+    });
+
+    if (prevFocusedId) {
+      const restoredEl = $(prevFocusedId);
+      if (restoredEl && typeof restoredEl.focus === "function") {
+        if (wasTvFocused) restoredEl.classList.add("is-tv-focused");
+        restoredEl.focus({ preventScroll: true });
+      }
+    }
   }
 
   function renderHomeLauncher() {
@@ -446,40 +1138,6 @@
     if (!panel) return;
 
     const api = getApi();
-    const st = api && api.getState ? api.getState() : {};
-    const nextSess = getNextFeaturedSession();
-    const ctx = api && api.getActivePersonalContext ? api.getActivePersonalContext() : {};
-    const eff =
-      nextSess && api && api.resolveEffectiveSessionDetails
-        ? api.resolveEffectiveSessionDetails(nextSess, ctx)
-        : null;
-
-    const hasProfile = Boolean(
-      (ROLE === "student" && st.myStudent) || (ROLE === "faculty" && st.myTeacherKey)
-    );
-
-    let heroKicker =
-      ROLE === "faculty"
-        ? t("สำหรับคณาจารย์ · คาบสอนถัดไป", "Faculty · Up Next")
-        : t("สำหรับนักศึกษา · คาบเรียนถัดไป", "For You · Up Next");
-
-    if (ROLE === "student" && st.myStudent) {
-      const s = st.myStudent;
-      heroKicker = `${s.fullName}${s.nickname ? ` (${s.nickname})` : ""} · Discussion ${s.disc} · ${s.area}`;
-    } else if (ROLE === "faculty" && st.myTeacherKey) {
-      const foundT = (ROSTER.courseTeachers || []).find((x) => x.key === st.myTeacherKey);
-      heroKicker = foundT ? foundT.label : `อ.${st.myTeacherKey}`;
-    }
-
-    const heroTitle = nextSess
-      ? nextSess.title
-      : t("เวชศาสตร์ชุมชนและวิทยาศาสตร์ระบบสุขภาพ (RACM 303)", "Community Medicine & Health Systems Science");
-    const heroRoom = (eff && eff.room) || (nextSess && nextSess.room) || "";
-    const heroMeta = nextSess
-      ? `${nextSess.dateTH || nextSess.dateISO}  ·  ${nextSess.timeLabel || ""}${heroRoom ? `  ·  ${heroRoom}` : ""}`
-      : t("พุธที่ 25 พฤศจิกายน – พุธที่ 30 ธันวาคม 2569", "25 Nov – 30 Dec 2026");
-
-    const zoomUrl = nextSess && nextSess.zoom && nextSess.zoom.url ? nextSess.zoom.url : "";
 
     const appTiles =
       ROLE === "faculty"
@@ -738,58 +1396,8 @@
 
     panel.innerHTML = `
       <div class="tv-home-launcher">
-        <!-- HERO STAGE -->
-        <div class="tv-hero-stage" id="tvHeroStage">
-          <div class="tv-hero-top-row">
-            <span class="tv-hero-kicker">${esc(heroKicker)}</span>
-            <span class="tv-remote-hint"><kbd>◀</kbd><kbd>▲</kbd><kbd>▼</kbd><kbd>▶</kbd> ${esc(t("เลื่อนเลือกเหมือนรีโมต TV", "Arrow keys to navigate"))} · <kbd>Enter</kbd> ${esc(t("เปิด", "Open"))}</span>
-          </div>
-
-          <div class="tv-hero-body">
-            <h1 class="tv-hero-title">${esc(heroTitle)}</h1>
-            <p class="tv-hero-meta">${esc(heroMeta)}</p>
-          </div>
-
-          <div class="tv-hero-actions">
-            ${
-              zoomUrl
-                ? `<a class="tv-hero-btn is-primary" href="${esc(zoomUrl)}" target="_blank" rel="noopener" data-tv-focus data-tv-row="1">${ICONS.video} <span>${esc(t("เข้าห้องเรียน Zoom", "Join Zoom Room"))}</span></a>`
-                : nextSess && (nextSess.id === "w1-d1-orient" || nextSess.code === "ORIENT")
-                  ? `<button type="button" class="tv-hero-btn is-primary" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(
-                      t("เปิดสไลด์ปฐมนิเทศ (Orientation)", "Open Orientation Slides")
-                    )}</span></button>
-                     <button type="button" class="tv-hero-btn is-glass" id="tvHeroScheduleBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(
-                      ROLE === "faculty"
-                        ? t("เปิดดูตารางสอน", "Open Schedule")
-                        : t("เปิดดูตารางเรียน", "Open Schedule")
-                    )}</span></button>`
-                  : `<button type="button" class="tv-hero-btn is-primary" id="tvHeroPrimaryBtn" data-tv-focus data-tv-row="1">▶ <span>${esc(
-                      nextSess && nextSess.hsModule
-                        ? t(`เปิดสไลด์ ${nextSess.hsModule}`, `Open ${nextSess.hsModule} Slides`)
-                        : ROLE === "faculty"
-                          ? t("เปิดดูตารางสอน", "Open Schedule")
-                          : t("เปิดดูตารางเรียน", "Open Schedule")
-                    )}</span></button>`
-            }
-            ${
-              ROLE === "faculty"
-                ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroUploadBtn" data-tv-focus data-tv-row="1">${ICONS.upload} <span>${esc(
-                    t("อัปโหลด Slide / ไฟล์สอน (GitHub)", "Upload Slides / Files")
-                  )}</span></button>`
-                : ""
-            }
-            ${
-              hasProfile
-                ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroSyncIcsBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(t("บันทึกเข้าปฏิทินมือถือ (.ics)", "Add to Calendar (.ics)"))}</span></button>
-                   <button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.edit} <span>${esc(t("เปลี่ยนโปรไฟล์", "Switch Profile"))}</span></button>`
-                : `<button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.user} <span>${esc(
-                    ROLE === "faculty"
-                      ? t("เลือกชื่ออาจารย์ผู้สอน", "Select Faculty Profile")
-                      : t("เลือกชื่อ / กลุ่มของฉัน", "Select My Name or Group")
-                  )}</span></button>`
-            }
-          </div>
-        </div>
+        <!-- HERO STAGE (LIVE / UP-NEXT AUTO-SYNCED TIMETABLE) -->
+        <div class="tv-hero-stage" id="tvHeroStage"></div>
 
         ${
           ROLE === "faculty"
@@ -1062,41 +1670,7 @@
       </div>
     `;
 
-    const heroPrimary = $("tvHeroPrimaryBtn");
-    if (heroPrimary) {
-      heroPrimary.addEventListener("click", () => {
-        if (
-          nextSess &&
-          (nextSess.id === "w1-d1-orient" || nextSess.code === "ORIENT") &&
-          window.RACM_ORIENTATION_DECK
-        ) {
-          window.RACM_ORIENTATION_DECK.open(0);
-        } else if (nextSess && nextSess.hsModule && api && api.openHsDiscussion) {
-          api.openHsDiscussion(nextSess.hsModule);
-        } else {
-          navigateTvTab("schedule");
-        }
-      });
-    }
-
-    const heroSchedBtn = $("tvHeroScheduleBtn");
-    if (heroSchedBtn) {
-      heroSchedBtn.addEventListener("click", () => {
-        navigateTvTab("schedule");
-      });
-    }
-
-    const heroSyncBtn = $("tvHeroSyncIcsBtn");
-    if (heroSyncBtn) {
-      heroSyncBtn.addEventListener("click", () => {
-        if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
-      });
-    }
-
-    const heroUpBtn = $("tvHeroUploadBtn");
-    if (heroUpBtn) {
-      heroUpBtn.addEventListener("click", () => openGlobalUploadModal("w1-d1-st"));
-    }
+    renderHeroStageOnly({ force: true });
 
     const homeOpenUpBtn = $("tvHomeOpenUploadCenterBtn");
     if (homeOpenUpBtn) {
@@ -1108,11 +1682,6 @@
         openGlobalUploadModal(chip.dataset.quickUploadSid || "w1-d1-st");
       });
     });
-
-    const heroProfBtn = $("tvHeroProfileBtn");
-    if (heroProfBtn) {
-      heroProfBtn.addEventListener("click", () => openProfileModal());
-    }
 
     appTiles.forEach((tile) => {
       const el = $(tile.id);
@@ -4121,8 +4690,16 @@
     openCourseDriveAtPath,
     openEpisodeModal,
     openGlobalUploadModal,
-    syncUploadCountBadge
+    syncUploadCountBadge,
+    refreshHeroTimetable: (force) => renderHeroStageOnly({ force: Boolean(force), preserveFocus: true }),
+    getHeroTimetableSnapshot
   };
+
+  function tickHeroAutoSync() {
+    const homePanel = $("panel-home");
+    if (!homePanel || homePanel.hidden || document.hidden) return;
+    renderHeroStageOnly({ preserveFocus: true });
+  }
 
   function bootTvInterface() {
     if (document.body.classList.contains("is-ppt-slideshare-window")) return;
@@ -4136,6 +4713,13 @@
     syncSubpageBar();
     syncProfilePill();
     initTvRemoteNavigation();
+
+    if (heroAutoSyncTimer) clearInterval(heroAutoSyncTimer);
+    heroAutoSyncTimer = setInterval(tickHeroAutoSync, 30000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) tickHeroAutoSync();
+    });
+    window.addEventListener("focus", tickHeroAutoSync);
 
     try {
       const urlP = new URLSearchParams(window.location.search);
@@ -4166,6 +4750,10 @@
       syncViewModeSwitchUI();
       syncSubpageBar();
       syncProfilePill();
+      const api = getApi();
+      if (api && api.getState && api.getState().activeTab === "home") {
+        renderHeroStageOnly({ force: true, preserveFocus: true });
+      }
     });
 
     window.addEventListener("racm:hsdstatechange", () => {
@@ -4179,10 +4767,13 @@
     });
 
     window.addEventListener("racm:profilechange", () => {
+      heroSessionOffset = 0;
       syncProfilePill();
       const api = getApi();
       if (!api || !api.getState || api.getState().activeTab === "home") {
         renderHomeLauncher();
+      } else {
+        renderHeroStageOnly({ force: true });
       }
     });
   }
