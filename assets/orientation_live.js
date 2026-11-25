@@ -3160,6 +3160,10 @@
     modal.innerHTML = `
       <div class="orl-m-shell">
         <div class="orl-m-topbar">
+          <div class="racm-unav-pair is-compact is-dark-hud is-mobile-tight" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
+            <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
+            <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
+          </div>
           <span class="orl-live-pill"><span class="orl-dot${cloudOk ? " is-online" : ""}"></span> RACM 303 KAHOOT!</span>
           ${
             canRemote && state.joined
@@ -3265,6 +3269,13 @@
     syncVisualViewportVars();
     el.hidden = false;
 
+    const auxUnavHtml = `
+      <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
+        <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
+        <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
+      </div>
+    `;
+
     if (state.qrZoomOpen) {
       const joinUrl = getJoinUrl();
       const brk = getParticipantRoleBreakdown();
@@ -3272,7 +3283,7 @@
         <div class="orl-qr-zoom-card">
           <div class="orl-qz-top">
             <span class="orl-live-pill is-lg"><span class="orl-dot is-online"></span> สแกน QR แล้วกดรหัสนักศึกษา 3 ตัวท้าย</span>
-            <button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button>
+            <div style="display:inline-flex;align-items:center;gap:8px">${auxUnavHtml}<button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button></div>
           </div>
           <div class="orl-qz-svg-wrap">
             ${buildQrSvg(joinUrl, "is-giant-qr")}
@@ -3295,7 +3306,7 @@
         <form class="orl-custom-form-card" id="orlCustomPollForm">
           <div class="orl-qz-top">
             <strong>➕ เพิ่มคำถามสดด่วน (Quick Kahoot Question)</strong>
-            <button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button>
+            <div style="display:inline-flex;align-items:center;gap:8px">${auxUnavHtml}<button type="button" class="orl-m-close" data-orl-aux-close="1">&times;</button></div>
           </div>
           <label class="orl-m-lbl">โจทย์คำถาม Recheck</label>
           <input name="stem" class="orl-m-input" required placeholder="พิมพ์คำถามที่ต้องการถามผู้เรียนสด…">

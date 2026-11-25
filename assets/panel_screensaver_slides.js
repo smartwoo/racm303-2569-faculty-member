@@ -2898,9 +2898,12 @@
     el.innerHTML = `
       <div class="psv-qac-shell">
         <div class="psv-qac-top">
-          <span class="psv-qac-conn${online ? "" : " is-connecting"}" id="psvQacConnBadge">
-            ${online ? "🟢 เชื่อมต่อเวทีเสวนาสดแล้ว" : "🟡 กำลังเชื่อมต่อสัญญาณสด…"}
-          </span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div>
+            <span class="psv-qac-conn${online ? "" : " is-connecting"}" id="psvQacConnBadge">
+              ${online ? "🟢 เชื่อมต่อเวทีเสวนาสดแล้ว" : "🟡 กำลังเชื่อมต่อสัญญาณสด…"}
+            </span>
+          </div>
           <div style="display:flex;gap:8px;align-items:center">
             ${rightBtnHtml}
             ${!state.isOpen ? `<button type="button" class="psv-pill-btn is-close" data-qac-act="close">✕ ปิด</button>` : ""}
@@ -2998,7 +3001,10 @@
       </div>
 
       <header class="psv-hud-top" id="psvHudTop">
-        <div class="psv-chapter-dots" id="psvChapterDots" role="tablist" aria-label="สารบัญสไลด์เสวนา"></div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+          <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div>
+          <div class="psv-chapter-dots" id="psvChapterDots" role="tablist" aria-label="สารบัญสไลด์เสวนา"></div>
+        </div>
         <div class="psv-hud-foot-right" id="psvFootRight"></div>
       </header>
 
@@ -3023,7 +3029,7 @@
         <aside class="psv-mod-drawer" id="psvModDrawer" hidden aria-label="โพยคำถามต่อยอดสำหรับผู้ดำเนินการอภิปราย">
           <div class="psv-mod-head">
             <strong>🎙️ โพยผู้ดำเนินรายการ (เฉพาะฝั่งอาจารย์)</strong>
-            <button type="button" class="psv-pill-btn" data-psv-act="toggle-mod-drawer">ปิด ✕</button>
+            <div style="display:inline-flex;align-items:center;gap:6px"><div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div><button type="button" class="psv-pill-btn" data-psv-act="toggle-mod-drawer">ปิด ✕</button></div>
           </div>
           <div class="psv-mod-body" id="psvModBody"></div>
         </aside>
@@ -3032,7 +3038,7 @@
         <aside class="psv-mod-drawer psv-stu-drawer" id="psvStuDrawer" hidden aria-label="สมุดจดคำถามและสะท้อนคิดส่วนตัวของนักศึกษา">
           <div class="psv-mod-head">
             <strong>📝 สมุดโน้ต & สะท้อนคิดส่วนตัว (บันทึกในเครื่อง)</strong>
-            <button type="button" class="psv-pill-btn" data-psv-act="toggle-stu-drawer">ปิด ✕</button>
+            <div style="display:inline-flex;align-items:center;gap:6px"><div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div><button type="button" class="psv-pill-btn" data-psv-act="toggle-stu-drawer">ปิด ✕</button></div>
           </div>
           <div class="psv-mod-body" id="psvStuBody"></div>
         </aside>
@@ -3041,6 +3047,7 @@
 
       <div class="psv-qr-modal" id="psvQrModal" hidden>
         <div class="psv-qr-modal-card">
+          <div style="width:100%;display:flex;justify-content:flex-end"><div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div></div>
           <span class="psv-series-pill"><span class="psv-n-bar"></span>SCAN TO ASK LIVE QUESTIONS</span>
           <div class="psv-qr-big" id="psvQrBigBox"></div>
           <div style="font-size:15px;font-weight:700;color:#fff" id="psvQrUrlLabel"></div>
@@ -3297,7 +3304,10 @@
           ${m.roleTag ? `<span class="psv-station-role-tag">${esc(m.roleTag)}</span>` : ""}
           ${logoHtml}
         </div>
-        <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิด (Esc)</button>
+        <div style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div>
+          <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิด (Esc)</button>
+        </div>
       </div>
       ${m.sceneLabel ? `<div style="font-size:13px;font-weight:600;color:#cbd5e1">${esc(m.sceneLabel)}</div>` : ""}
       <h3 style="margin:0;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:#fff;line-height:1.28">${esc(m.headline || "")}</h3>
@@ -3327,7 +3337,10 @@
           <span class="psv-station-pill">✨ ${esc(sl.kicker || "KEY TAKEAWAYS")}</span>
           ${sl.sourceLabel ? `<span class="psv-station-role-tag">${esc(sl.sourceLabel)}</span>` : ""}
         </div>
-        <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิดภาพขยาย (Esc)</button>
+        <div style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div>
+          <button type="button" class="psv-pill-btn is-active" data-psv-act="close-pin-zoom">✕ ปิดภาพขยาย (Esc)</button>
+        </div>
       </div>
       <h3 style="margin:0;font-size:clamp(18px,2vw,25px);font-weight:800;color:#fff;line-height:1.25">${esc(sl.title || "")}</h3>
       <div class="psv-kt-zoom-full-box${matteCls}">

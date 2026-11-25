@@ -450,6 +450,15 @@
       root.appendChild(switcher);
     }
 
+    const unavBackSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`;
+    const unavHomeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+    const studioUnavHtml = `
+      <div class="racm-unav-pair is-compact" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
+        <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้">${unavBackSvg}<span class="racm-unav-lbl">ย้อนกลับ</span></button>
+        <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303">${unavHomeSvg}<span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
+      </div>
+    `;
+
     // 1. Header Banner
     const pdfFilename = ((DATA.meta.pdfDownloadPath || "").split("?")[0]).split("/").pop() || `${modCode}_Slides.pdf`;
     const masterPdfFilename = ((DATA.meta.masterPdfDownloadPath || "").split("?")[0]).split("/").pop() || `${standaloneCode || modCode}_Complete_Slides.pdf`;
@@ -469,6 +478,7 @@
         <p class="ep6-head-sub">${esc(DATA.meta.recordedInfo)} — เล่นวิดีโอบรรยายพร้อมเสียงครบเต็มรูปแบบ ปรับความเร็ว 0.5x–2x ข้าม ±10 วินาที มีคำบรรยายไทย CC แยกใต้จอวิดีโอไม่บังปุ่มควบคุม และรองรับโหมดหน้าต่างลอย PiP อัตโนมัติเมื่อเลื่อนอ่านด้านล่าง</p>
       </div>
       <div class="ep6-head-actions">
+        ${studioUnavHtml}
         ${DATA.meta.pdfDownloadPath ? `<a class="btn sm" href="${esc(DATA.meta.pdfDownloadPath)}" download="${esc(pdfFilename)}">📥 ดาวน์โหลดสไลด์ ${esc(modCode)} (.PDF)</a>` : ""}
         ${DATA.meta.masterPdfDownloadPath ? `<a class="btn sm" href="${esc(DATA.meta.masterPdfDownloadPath)}" download="${esc(masterPdfFilename)}">📚 รวมครบ 6 ตอน (.PDF)</a>` : ""}
         <span class="ep6-protected-pill" title="สตรีมวิดีโอตรงประจำคาบเรียนสำหรับนักศึกษา RACM 303">🔒 สตรีมประจำคาบ ${esc(modCode)}</span>
@@ -484,6 +494,7 @@
     workspaceBar.id = "ep6WorkspaceBar";
     workspaceBar.innerHTML = `
       <div class="ep6-ws-row">
+        ${isCompactEmbed ? studioUnavHtml : ""}
         <div class="ep6-ws-group">
           <span class="ep6-ws-label">📐 จัดรูปแบบ Layout:</span>
           <div class="ep6-mode-group" role="group" aria-label="เลือกรูปแบบการจัดวางหน้าจอ">
@@ -588,6 +599,8 @@
                   <span class="ep6-slide-pill" id="ep6DockHeaderLabel">🎥 ${esc(modCode)} วิดีโอบรรยาย · Slide 1/${TOTAL_SLIDES}</span>
                 </div>
                 <div class="ep6-vdock-actions">
+                  <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้">← ย้อนกลับ</button>
+                  <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303">🏠 หน้าหลักใหญ่</button>
                   <button type="button" class="ep6-dock-icon-btn" id="ep6PinPipBtn" title="เปิด/ปิด โหมดหน้าต่างลอย (Picture-in-Picture)">⧉ PiP</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" id="ep6BrowserPipBtn" title="เปิดโหมดหน้าต่างลอยระดับเบราว์เซอร์ (OS Picture-in-Picture)">⧉ แยกจอ</button>
                   <button type="button" class="ep6-dock-icon-btn ep6-dock-only" data-hide-panel="video" title="ซ่อนส่วนวิดีโอ">ซ่อน</button>

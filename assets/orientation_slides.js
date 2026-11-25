@@ -5260,7 +5260,13 @@
               <span class="or-cg-pill">● APPLE TV × KEYNOTE PITCH · CLICKER READY</span>
               <h3 class="or-cg-title">ควบคุมสไลด์แบบไม่ต้องใช้เมาส์ (Wireless Clicker &amp; Phone Remote)</h3>
             </div>
-            <button type="button" class="or-tool-btn is-close" id="orCloseClickerGuideBtn" aria-label="ปิดหน้าต่างแนะนำ Clicker">&times;</button>
+            <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
+              <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
+                <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
+                <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
+              </div>
+              <button type="button" class="or-tool-btn is-close" id="orCloseClickerGuideBtn" aria-label="ปิดหน้าต่างแนะนำ Clicker">&times;</button>
+            </div>
           </div>
           <div class="or-cg-grid">
             <div class="or-cg-col">
@@ -5473,6 +5479,10 @@
       <div class="or-deck-shell is-io-deck is-appletv-deck${showNotesNow ? " has-notes-open" : ""}${state.clickerStage ? " is-clicker-active" : ""}" data-io-theme="${effectiveIoTheme}">
         <div class="or-deck-topbar is-tv-capsule">
           <div class="or-top-left">
+            <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
+              <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
+              <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
+            </div>
             <span class="or-code-pill is-io-brand-pill">RACM 303</span>
             <div class="or-top-title-wrap">
               <span class="or-top-title">${esc(

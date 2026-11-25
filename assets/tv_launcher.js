@@ -156,8 +156,46 @@
     moon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
     chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
     discussion: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>`,
-    dots: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
+    dots: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`,
+    back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`,
+    home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
   };
+
+  function renderUniversalNavPairHtml(opts) {
+    const o = opts || {};
+    const cls = [
+      "racm-unav-pair",
+      o.compact ? "is-compact" : "",
+      o.darkHud ? "is-dark-hud" : "",
+      o.mobileTight ? "is-mobile-tight" : "",
+      o.extraClass || ""
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const focusAttr = o.modalFocus
+      ? " data-tv-modal-focus"
+      : o.tvRow != null
+        ? ` data-tv-focus data-tv-row="${esc(String(o.tvRow))}"`
+        : o.tvFocus
+          ? " data-tv-focus"
+          : "";
+    const backLbl = esc(t("ย้อนกลับ", "Back"));
+    const homeLbl = esc(t("หน้าหลักใหญ่", "Main Home"));
+    const backTitle = esc(t("ย้อนกลับ 1 หน้าก่อนหน้านี้", "Go back 1 previous screen"));
+    const homeTitle = esc(t("กลับหน้าหลักใหญ่พอร์ทัล RACM 303", "Return to Main RACM 303 Home Page"));
+    return (
+      `<div class="${cls}" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">` +
+      `<button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="${backTitle}"${focusAttr}>${ICONS.back}<span class="racm-unav-lbl">${backLbl}</span></button>` +
+      `<button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="${homeTitle}"${focusAttr}>${ICONS.home}<span class="racm-unav-lbl">${homeLbl}</span></button>` +
+      `</div>`
+    );
+  }
+
+  function createUniversalNavPairDOM(opts) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = renderUniversalNavPairHtml(opts);
+    return tmp.firstElementChild;
+  }
 
   const NAV_GROUP_MAP = {
     home: "home",
@@ -221,13 +259,16 @@
 
     dock.innerHTML = `
       <div class="tv-nav-capsule" role="navigation" aria-label="เมนูนำทางหลัก">
-        <button type="button" class="tv-brand-pill" id="tvBrandHomeBtn" data-tv-focus data-tv-row="0">
-          <span class="tv-brand-badge">${ROLE === "faculty" ? "FAC" : "STU"}</span>
-          <span class="tv-brand-text">
-            <span class="tv-brand-title">RACM 303</span>
-            <span class="tv-brand-role" id="tvBrandRoleLabel">${ROLE === "faculty" ? "อาจารย์" : "นักศึกษา"}</span>
-          </span>
-        </button>
+        <div class="tv-capsule-left-cluster">
+          ${renderUniversalNavPairHtml({ compact: true, tvRow: "0" })}
+          <button type="button" class="tv-brand-pill" id="tvBrandHomeBtn" data-tv-focus data-tv-row="0" title="กลับหน้าหลักใหญ่ RACM 303">
+            <span class="tv-brand-badge">${ROLE === "faculty" ? "FAC" : "STU"}</span>
+            <span class="tv-brand-text">
+              <span class="tv-brand-title">RACM 303</span>
+              <span class="tv-brand-role" id="tvBrandRoleLabel">${ROLE === "faculty" ? "อาจารย์" : "นักศึกษา"}</span>
+            </span>
+          </button>
+        </div>
 
         <div class="tv-pill-nav" id="tvPillNavList">
           <button type="button" class="tv-nav-pill" data-tv-nav="home" data-tv-focus data-tv-row="0" aria-current="page">หน้าหลัก</button>
@@ -436,6 +477,9 @@
     });
     syncViewModeSwitchUI();
     syncProfilePill();
+    if (typeof syncUniversalNavLabels === "function") {
+      syncUniversalNavLabels();
+    }
   }
 
   function syncProfilePill() {
@@ -1952,7 +1996,10 @@
             <h3 class="tv-modal-title">${esc(getLang() === "en" && mod.enTitle ? mod.enTitle : mod.title)}</h3>
             <p class="tv-modal-sub">${esc((flow && flow.profile && flow.profile.thread) || mod.summaryFocus || "")}</p>
           </div>
-          <button type="button" class="tv-modal-close" id="tvCloseEpModalBtn" aria-label="ปิด">✕</button>
+          <div class="tv-modal-head-right">
+            ${renderUniversalNavPairHtml({ compact: true, modalFocus: true })}
+            <button type="button" class="tv-modal-close" id="tvCloseEpModalBtn" aria-label="ปิด">✕</button>
+          </div>
         </div>
 
         <div class="tv-ep-action-list">
@@ -2184,7 +2231,10 @@
               <h3 class="tv-modal-title">${esc(t("เลือกชื่ออาจารย์ผู้สอน", "Select Faculty Profile"))}</h3>
               <p class="tv-modal-sub">${esc(t("ระบบจะกรองตารางสอน ห้องคุมกลุ่ม และลิงก์ปฏิทิน (.ics) เฉพาะของท่านให้อัตโนมัติ", "Automatically tailors your teaching schedule & room assignments"))}</p>
             </div>
-            <button type="button" class="tv-modal-close" id="tvCloseProfModalBtn" aria-label="ปิด">✕</button>
+            <div class="tv-modal-head-right">
+              ${renderUniversalNavPairHtml({ compact: true, modalFocus: true })}
+              <button type="button" class="tv-modal-close" id="tvCloseProfModalBtn" aria-label="ปิด">✕</button>
+            </div>
           </div>
 
           <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
@@ -2258,7 +2308,10 @@
             <h3 class="tv-modal-title">${esc(t("เลือกโปรไฟล์นักศึกษาของคุณ", "Choose Your Student Profile"))}</h3>
             <p class="tv-modal-sub">${esc(t("เลือกโรงพยาบาลภาคสนามด้านล่าง หรือพิมพ์ชื่อ/รหัส 7 หลัก เพื่อผูกตารางเรียนและห้องกลุ่มอัตโนมัติ", "Pick your hospital group or search your name / 7-digit ID"))}</p>
           </div>
-          <button type="button" class="tv-modal-close" id="tvCloseProfModalBtn" aria-label="ปิด">✕</button>
+          <div class="tv-modal-head-right">
+            ${renderUniversalNavPairHtml({ compact: true, modalFocus: true })}
+            <button type="button" class="tv-modal-close" id="tvCloseProfModalBtn" aria-label="ปิด">✕</button>
+          </div>
         </div>
 
         <input type="search" class="tv-profile-search" id="tvStudentSearchInput" placeholder="${esc(t("พิมพ์ชื่อเล่น ชื่อจริง หรือรหัสนักศึกษา 6702xxx…", "Type nickname, name, or 6702xxx…"))}" autocomplete="off">
@@ -2365,7 +2418,7 @@
   }
 
   function closeAllTvModals() {
-    ["tvEpisodeModal", "tvProfileModal"].forEach((id) => {
+    ["tvEpisodeModal", "tvProfileModal", "tvGlobalUploadModal"].forEach((id) => {
       if ($(id)) $(id).remove();
     });
   }
@@ -2539,9 +2592,7 @@
 
       bar.innerHTML = `
         <div class="tv-subpage-left-group">
-          <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn" data-tv-focus>
-            <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
-          </button>
+          ${renderUniversalNavPairHtml({ tvFocus: true })}
         </div>
         ${
           isLiveJoined
@@ -2554,10 +2605,6 @@
             : ""
         }
       `;
-      $("tvSubBackHomeBtn").addEventListener("click", () => {
-        navigateTvTab("home");
-        restoreHomeFocus();
-      });
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
         exitLiveBtn.addEventListener("click", () => {
@@ -2584,9 +2631,9 @@
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
       ];
       bar.innerHTML = `
-        <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-          <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
-        </button>
+        <div class="tv-subpage-left-group">
+          ${renderUniversalNavPairHtml({ tvFocus: true })}
+        </div>
         <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
           ${epPills
             .map(
@@ -2597,10 +2644,6 @@
             .join("")}
         </div>
       `;
-      $("tvSubBackHomeBtn").addEventListener("click", () => {
-        navigateTvTab("home");
-        restoreHomeFocus();
-      });
       bar.querySelectorAll("[data-tv-ep-sec]").forEach((btn) => {
         btn.addEventListener("click", () => {
           if (api && api.setEpidemiologySection) {
@@ -2633,9 +2676,9 @@
     }
 
     bar.innerHTML = `
-      <button type="button" class="tv-back-home-btn" id="tvSubBackHomeBtn">
-        <span>← ${esc(t("หน้าหลัก", "Home"))}</span>
-      </button>
+      <div class="tv-subpage-left-group">
+        ${renderUniversalNavPairHtml({ tvFocus: true })}
+      </div>
       ${
         siblings.length
           ? `<div class="tv-sibling-pills" role="tablist">
@@ -2650,11 +2693,6 @@
           : ""
       }
     `;
-
-    $("tvSubBackHomeBtn").addEventListener("click", () => {
-      navigateTvTab("home");
-      restoreHomeFocus();
-    });
 
     bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
       btn.addEventListener("click", () => navigateTvTab(btn.dataset.tvSib));
@@ -2880,6 +2918,7 @@
   }
 
   function hideCourseDriveBrowser() {
+    const wasActive = driveBrowserActive;
     driveBrowserActive = false;
     const panel = $("portalDriveExplorerPanel");
     if (panel) panel.hidden = true;
@@ -2888,6 +2927,9 @@
     document.querySelectorAll("main.portal-main > .tab-panel").forEach((tp) => {
       tp.hidden = tp.id !== `panel-${activeTab}`;
     });
+    if (wasActive && typeof recordNavStateTransition === "function") {
+      recordNavStateTransition();
+    }
   }
 
   function syncTopNavForDrivePath(pathArr) {
@@ -2911,6 +2953,9 @@
   function openCourseDriveAtPath(pathArr) {
     drivePath = Array.isArray(pathArr) ? [...pathArr] : [];
     driveBrowserActive = true;
+    if (typeof recordNavStateTransition === "function") {
+      recordNavStateTransition();
+    }
     const panel = ensureDrivePanelExists();
     if (!panel) return;
     document.querySelectorAll("main.portal-main > .tab-panel").forEach((tp) => {
@@ -3784,9 +3829,12 @@
     const modeBanner = document.createElement("div");
     modeBanner.className = "portal-drive-mode-banner";
     modeBanner.innerHTML = `
-      <div class="portal-drive-mode-copy">
-        <strong>📁 ${esc(t("มุมมอง Google Drive (File Explorer) — รายวิชา RACM 303 ปีการศึกษา 2569", "Google Drive File Explorer View — RACM 303 (2569)"))}</strong>
-        <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับโหมดเรียนได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Study View anytime."))}</span>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0">
+        ${renderUniversalNavPairHtml()}
+        <div class="portal-drive-mode-copy">
+          <strong>📁 ${esc(t("มุมมอง Google Drive (File Explorer) — รายวิชา RACM 303 ปีการศึกษา 2569", "Google Drive File Explorer View — RACM 303 (2569)"))}</strong>
+          <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับโหมดเรียนได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Study View anytime."))}</span>
+        </div>
       </div>
       <button type="button" class="portal-drive-switch-tv-btn" id="portalDriveBackToTvBtn">📚 <span>${esc(t("สลับเป็นโหมดเรียน", "Switch to Study View"))}</span></button>
     `;
@@ -4467,7 +4515,10 @@
               <h3 class="tv-modal-title">คลังดาวน์โหลด Slide อาจารย์ &amp; เอกสารคำสอนประจำคาบ</h3>
               <p class="tv-modal-sub">รวมเอกสารคำสอน ST1 &amp; HS1–HS6 (PDF / Word) และไฟล์สไลด์ที่คณาจารย์อัปโหลดแล้ว (${uploadedRows.length} คาบ)</p>
             </div>
-            <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+            <div class="tv-modal-head-right">
+              ${renderUniversalNavPairHtml({ compact: true, modalFocus: true })}
+              <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+            </div>
           </div>
           <div class="tv-up-tracks">
             <button type="button" class="tv-hosp-chip" id="stuOpenSt1DeckQuickBtn">🖥️ เปิด Slide ST1 (54 สไลด์ Interactive · 16:9)</button>
@@ -4550,7 +4601,10 @@
             <h3 class="tv-modal-title">มุมอัปโหลด Slide &amp; ไฟล์ประกอบการสอนประจำคาบ (ST1 · HS1–HS6 · EP1–EP9 · เวทีเสวนา)</h3>
             <p class="tv-modal-sub">ลากไฟล์ <code>.pptx</code>, <code>.pdf</code>, <code>.docx</code> หรือวางลิงก์ออนไลน์ — เลือกบันทึกแสดงผลทันที หรืออัปโหลดเข้าคลัง GitHub ทั้ง 2 ฝั่ง (อาจารย์ + นักศึกษา)</p>
           </div>
-          <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+          <div class="tv-modal-head-right">
+            ${renderUniversalNavPairHtml({ compact: true, modalFocus: true })}
+            <button type="button" class="tv-modal-close" id="tvCloseGlobalUpBtn" aria-label="ปิด">✕</button>
+          </div>
         </div>
 
         <div class="tv-up-tracks" id="tvUpTrackBar">
@@ -4936,6 +4990,761 @@
     }
   });
 
+  /* ---------- 8. Universal Back (1 Step) & Main Home Navigation Engine ---------- */
+  const navHistoryStack = [];
+  let lastCapturedNavSnap = null;
+  let isRestoringNavSnap = false;
+  let universalNavDelegationBound = false;
+
+  function captureCurrentNavSnap() {
+    const api = getApi();
+    const st = (api && api.getState && api.getState()) || {};
+    const pracModEl = $("practiceModuleFilter");
+    const discSelEl = $("discGroupSelect");
+    const fieldSelEl = $("fieldAreaSelect");
+    return {
+      kind: driveBrowserActive ? "drive" : "portal",
+      drivePath: Array.isArray(drivePath) ? [...drivePath] : [],
+      activeTab: st.activeTab || "home",
+      textbookSubMode: st.textbookSubMode || "docs-drive",
+      tbDriveScope: st.tbDriveScope || "folders",
+      lsDriveScope: st.lsDriveScope || "folders",
+      vdoDriveScope: st.vdoDriveScope || "folders",
+      activeDocId: st.activeDocId || "HS1",
+      activeHsModule: st.activeHsModule || "HS1",
+      hsdModule: st.hsdModule || "HS1",
+      hsdSlideDeckMod: st.hsdSlideDeckMod || "HS1",
+      hsdViewMode: st.hsdViewMode || "slide",
+      hsdDriveFolderOpen: Boolean(st.hsdDriveFolderOpen),
+      hsdLockedRoomId: Number(st.hsdLockedRoomId) || 0,
+      sfSelectedId: st.sfSelectedId || "",
+      sfSubMode: st.sfSubMode || "",
+      epSection: st.epSection || "all",
+      manualChapterId: st.manualChapterId || "ALL",
+      practiceSub: st.practiceSub || "qa",
+      practiceMod: (pracModEl && pracModEl.value) || "",
+      facultySub: st.facultySub || "guides",
+      activeFacultyDocId: st.activeFacultyDocId || "",
+      discGroup: (discSelEl && discSelEl.value) || "",
+      fieldArea: (fieldSelEl && fieldSelEl.value) || ""
+    };
+  }
+
+  function isSameNavSnap(a, b) {
+    if (!a || !b) return false;
+    if (a.kind !== b.kind) return false;
+    if (a.kind === "drive") {
+      return a.drivePath.join("/") === b.drivePath.join("/");
+    }
+    if (a.activeTab !== b.activeTab) return false;
+    if (a.activeTab === "textbooks") {
+      return (
+        a.textbookSubMode === b.textbookSubMode &&
+        a.tbDriveScope === b.tbDriveScope &&
+        a.lsDriveScope === b.lsDriveScope &&
+        a.vdoDriveScope === b.vdoDriveScope &&
+        a.activeDocId === b.activeDocId &&
+        a.activeHsModule === b.activeHsModule
+      );
+    }
+    if (a.activeTab === "hs-discussion") {
+      return (
+        a.hsdModule === b.hsdModule &&
+        a.hsdSlideDeckMod === b.hsdSlideDeckMod &&
+        a.hsdViewMode === b.hsdViewMode &&
+        a.hsdDriveFolderOpen === b.hsdDriveFolderOpen &&
+        a.hsdLockedRoomId === b.hsdLockedRoomId
+      );
+    }
+    if (a.activeTab === "systems-forum") {
+      return a.sfSelectedId === b.sfSelectedId && a.sfSubMode === b.sfSubMode;
+    }
+    if (a.activeTab === "epidemiology") {
+      return a.epSection === b.epSection;
+    }
+    if (a.activeTab === "manual") {
+      return a.manualChapterId === b.manualChapterId;
+    }
+    if (a.activeTab === "practice") {
+      return a.practiceSub === b.practiceSub && a.practiceMod === b.practiceMod;
+    }
+    if (a.activeTab === "faculty-docs") {
+      return a.facultySub === b.facultySub && a.activeFacultyDocId === b.activeFacultyDocId;
+    }
+    return true;
+  }
+
+  function pushNavSnapToStack(snap) {
+    if (!snap) return;
+    const top = navHistoryStack.length ? navHistoryStack[navHistoryStack.length - 1] : null;
+    if (top && isSameNavSnap(top, snap)) return;
+    navHistoryStack.push(snap);
+    if (navHistoryStack.length > 80) navHistoryStack.shift();
+  }
+
+  function recordNavStateTransition() {
+    if (isRestoringNavSnap) return;
+    const nextSnap = captureCurrentNavSnap();
+    if (!lastCapturedNavSnap) {
+      lastCapturedNavSnap = nextSnap;
+      syncUniversalNavLabels();
+      return;
+    }
+    if (!isSameNavSnap(lastCapturedNavSnap, nextSnap)) {
+      pushNavSnapToStack(lastCapturedNavSnap);
+      lastCapturedNavSnap = nextSnap;
+    }
+    syncUniversalNavLabels();
+  }
+
+  function canStepBackFromCurrentRoot() {
+    if (navHistoryStack.length > 0) return true;
+    if (window.RACM_HSD_ROOM_PAGE || document.body.classList.contains("is-ppt-slideshare-window")) return true;
+    if (driveBrowserActive) return true;
+    const api = getApi();
+    const st = (api && api.getState && api.getState()) || {};
+    if ((st.activeTab || "home") !== "home") return true;
+    return Boolean(window.history.length > 1 && document.referrer);
+  }
+
+  function syncUniversalNavLabels() {
+    const backLbl = t("ย้อนกลับ", "Back");
+    const homeLbl = t("หน้าหลักใหญ่", "Main Home");
+    const backTitle = t("ย้อนกลับ 1 หน้าก่อนหน้านี้", "Go back 1 previous screen");
+    const homeTitle = t("กลับหน้าหลักใหญ่พอร์ทัล RACM 303", "Return to Main RACM 303 Home Page");
+    const atRoot = !canStepBackFromCurrentRoot();
+
+    document.querySelectorAll('[data-racm-nav="back"]').forEach((btn) => {
+      const sp = btn.querySelector(".racm-unav-lbl");
+      if (sp) sp.textContent = backLbl;
+      btn.title = backTitle;
+      if (btn.closest("#tvHeaderDock")) {
+        if (atRoot) btn.setAttribute("data-at-root", "1");
+        else btn.removeAttribute("data-at-root");
+      }
+    });
+    document.querySelectorAll('[data-racm-nav="home"]').forEach((btn) => {
+      const sp = btn.querySelector(".racm-unav-lbl");
+      if (sp) sp.textContent = homeLbl;
+      btn.title = homeTitle;
+    });
+  }
+
+  function restoreNavSnap(snap) {
+    if (!snap) return false;
+    const api = getApi();
+    isRestoringNavSnap = true;
+    try {
+      if (snap.kind === "drive") {
+        openCourseDriveAtPath(snap.drivePath || []);
+      } else {
+        if (driveBrowserActive) hideCourseDriveBrowser();
+        if (api && api.getState) {
+          const st = api.getState();
+          st.textbookSubMode = snap.textbookSubMode || "docs-drive";
+          st.tbDriveScope = snap.tbDriveScope || "folders";
+          st.lsDriveScope = snap.lsDriveScope || "folders";
+          st.vdoDriveScope = snap.vdoDriveScope || "folders";
+          st.activeDocId = snap.activeDocId || "HS1";
+          st.activeHsModule = snap.activeHsModule || "HS1";
+          st.hsdModule = snap.hsdModule || "HS1";
+          st.hsdSlideDeckMod = snap.hsdSlideDeckMod || "HS1";
+          st.hsdViewMode = snap.hsdViewMode || "slide";
+          st.hsdDriveFolderOpen = Boolean(snap.hsdDriveFolderOpen);
+          if (!window.RACM_HSD_ROOM_PAGE) {
+            st.hsdLockedRoomId = Number(snap.hsdLockedRoomId) || 0;
+          }
+          st.sfSelectedId = snap.sfSelectedId || "";
+          st.sfSubMode = snap.sfSubMode || "";
+          st.epSection = snap.epSection || "all";
+          st.manualChapterId = snap.manualChapterId || "ALL";
+          st.practiceSub = snap.practiceSub || "qa";
+          st.facultySub = snap.facultySub || "guides";
+          if (snap.activeFacultyDocId) st.activeFacultyDocId = snap.activeFacultyDocId;
+
+          const pracModEl = $("practiceModuleFilter");
+          if (pracModEl && snap.practiceMod !== undefined) pracModEl.value = snap.practiceMod;
+          document.querySelectorAll("[data-practice-sub]").forEach((b) =>
+            b.setAttribute("aria-pressed", b.dataset.practiceSub === st.practiceSub ? "true" : "false")
+          );
+          document.querySelectorAll("[data-fac-sub]").forEach((b) =>
+            b.setAttribute("aria-pressed", b.dataset.facSub === st.facultySub ? "true" : "false")
+          );
+          api.switchTab(snap.activeTab || "home", true);
+        }
+      }
+      lastCapturedNavSnap = captureCurrentNavSnap();
+      syncSubpageBar();
+      syncUniversalNavLabels();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return true;
+    } finally {
+      isRestoringNavSnap = false;
+    }
+  }
+
+  function isElementOpen(el) {
+    return Boolean(el && !el.hidden && el.isConnected);
+  }
+
+  function closeAllOverlaysForMainHome() {
+    if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+      document.exitFullscreen().catch(() => {});
+    }
+
+    closeAllTvModals();
+
+    if (window.RACM_PDF_PREVIEW && typeof window.RACM_PDF_PREVIEW.close === "function") {
+      try { window.RACM_PDF_PREVIEW.close(); } catch (_) {}
+    }
+    if (window.RACM_ORIENTATION_LIVE) {
+      try {
+        if (typeof window.RACM_ORIENTATION_LIVE.closeTopOverlay === "function") window.RACM_ORIENTATION_LIVE.closeTopOverlay();
+        if (typeof window.RACM_ORIENTATION_LIVE.closeParticipantModal === "function") window.RACM_ORIENTATION_LIVE.closeParticipantModal();
+      } catch (_) {}
+    }
+    if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.close === "function") {
+      try { window.RACM_ORIENTATION_DECK.close(); } catch (_) {}
+    }
+    if (window.RACM_ST1_DECK && typeof window.RACM_ST1_DECK.close === "function") {
+      try { window.RACM_ST1_DECK.close(); } catch (_) {}
+    }
+    if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.close === "function") {
+      try { window.RACM_SPSS_DECK.close(); } catch (_) {}
+    }
+    if (window.RACM_PANEL_DECK && typeof window.RACM_PANEL_DECK.close === "function") {
+      try { window.RACM_PANEL_DECK.close(); } catch (_) {}
+    }
+    const qacEl = $("panelQaComposerModal");
+    if (isElementOpen(qacEl)) {
+      const cBtn = qacEl.querySelector('[data-qac-act="close"]');
+      if (cBtn) cBtn.click();
+      qacEl.hidden = true;
+      document.body.classList.remove("psv-deck-open");
+    }
+    if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.closeRoomQrZoomModal === "function") {
+      try { window.RACM_HSD_ROOM_QR.closeRoomQrZoomModal(); } catch (_) {}
+    } else if ($("hsdRoomQrZoomModal")) {
+      $("hsdRoomQrZoomModal").remove();
+    }
+    if (window.RACM_SECTION_TAKEAWAYS && typeof window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal === "function") {
+      try { window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal(); } catch (_) {}
+    }
+    if (window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.closePlayer === "function") {
+      try { window.RACM_HE_VIDEO_BRIDGE.closePlayer(); } catch (_) {}
+    }
+
+    document.querySelectorAll(".iq-modal-backdrop").forEach((el) => {
+      el.hidden = true;
+    });
+
+    [
+      "imageLightbox",
+      "calendarEventModal",
+      "studentQuickModal",
+      "hsdSpotlightModal",
+      "hsdKahootLobbyModal",
+      "hsdGoogleDrivePickerModal",
+      "hsdPptExportStudioModal",
+      "globalSpotlightModal"
+    ].forEach((id) => {
+      const el = $(id);
+      if (el) el.hidden = true;
+    });
+
+    document.querySelectorAll(".reader-paper.is-deck-theater").forEach((el) => {
+      el.classList.remove("is-deck-theater");
+    });
+
+    const api = getApi();
+    const st = (api && api.getState && api.getState()) || null;
+    if (st) {
+      st.hsdTheater = false;
+      st.hsdFsGridOpen = false;
+      st.hsdPptWindowMax = false;
+      st.hsdLobbyOpen = false;
+    }
+    document.body.classList.remove("is-ppt-fullscreen-open", "is-ppt-window-max-open");
+    const pptOv = $("pptPresentationOverlay");
+    if (pptOv) pptOv.hidden = true;
+  }
+
+  function universalGoHome() {
+    if (window.RACM_HSD_ROOM_PAGE || document.body.classList.contains("is-ppt-slideshare-window")) {
+      if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+        document.exitFullscreen().catch(() => {});
+      }
+      window.location.href = "./";
+      return;
+    }
+
+    const preSnap = captureCurrentNavSnap();
+    if (preSnap.kind === "drive" || preSnap.activeTab !== "home") {
+      pushNavSnapToStack(preSnap);
+    }
+
+    closeAllOverlaysForMainHome();
+    if (driveBrowserActive) {
+      isRestoringNavSnap = true;
+      try {
+        hideCourseDriveBrowser();
+      } finally {
+        isRestoringNavSnap = false;
+      }
+    }
+
+    heroSessionOffset = 0;
+    const api = getApi();
+    isRestoringNavSnap = true;
+    try {
+      if (api && api.switchTab) {
+        api.switchTab("home", true);
+      }
+    } finally {
+      isRestoringNavSnap = false;
+    }
+    lastCapturedNavSnap = captureCurrentNavSnap();
+    renderHomeLauncher();
+    syncSubpageBar();
+    syncUniversalNavLabels();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function universalGoBack(triggerEl) {
+    // 1. Topmost Lightboxes, Popups & Modals (peel 1 layer at a time)
+    const lb = $("imageLightbox");
+    if (isElementOpen(lb)) {
+      lb.hidden = true;
+      return;
+    }
+
+    const roomQrModal = $("hsdRoomQrZoomModal");
+    if (roomQrModal && roomQrModal.isConnected) {
+      if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.closeRoomQrZoomModal === "function") {
+        window.RACM_HSD_ROOM_QR.closeRoomQrZoomModal();
+      } else {
+        roomQrModal.remove();
+      }
+      return;
+    }
+
+    const orAux = $("orientLiveAuxOverlay");
+    if (isElementOpen(orAux)) {
+      if (window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.closeTopOverlay === "function") {
+        window.RACM_ORIENTATION_LIVE.closeTopOverlay();
+      } else {
+        orAux.hidden = true;
+      }
+      return;
+    }
+
+    const orPart = $("orientParticipantModal");
+    if (isElementOpen(orPart)) {
+      if (window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.closeParticipantModal === "function") {
+        window.RACM_ORIENTATION_LIVE.closeParticipantModal();
+      } else {
+        orPart.hidden = true;
+      }
+      return;
+    }
+
+    const pdfPv = $("gdrivePdfPreviewModal");
+    if (isElementOpen(pdfPv)) {
+      if (window.RACM_PDF_PREVIEW && typeof window.RACM_PDF_PREVIEW.close === "function") {
+        window.RACM_PDF_PREVIEW.close();
+      } else {
+        pdfPv.hidden = true;
+      }
+      return;
+    }
+
+    const globSpot = $("globalSpotlightModal");
+    if (isElementOpen(globSpot)) {
+      globSpot.hidden = true;
+      return;
+    }
+
+    const ktModal = $("ktModalBackdrop");
+    if (isElementOpen(ktModal)) {
+      const popCrumb = ktModal.querySelector('[data-kt-pop-history="1"]');
+      if (popCrumb) {
+        popCrumb.click();
+      } else if (window.RACM_SECTION_TAKEAWAYS && typeof window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal === "function") {
+        window.RACM_SECTION_TAKEAWAYS.closeTakeawayModal();
+      } else {
+        ktModal.hidden = true;
+      }
+      return;
+    }
+
+    const iqOpen = document.querySelector(".iq-modal-backdrop:not([hidden])");
+    if (iqOpen) {
+      iqOpen.hidden = true;
+      return;
+    }
+
+    const hsdSpot = $("hsdSpotlightModal");
+    if (isElementOpen(hsdSpot)) {
+      if (typeof hsdSpot._backToCellFn === "function") {
+        const fn = hsdSpot._backToCellFn;
+        hsdSpot._backToCellFn = null;
+        fn();
+      } else {
+        hsdSpot.hidden = true;
+      }
+      return;
+    }
+
+    const pptExp = $("hsdPptExportStudioModal");
+    if (isElementOpen(pptExp)) {
+      pptExp.hidden = true;
+      return;
+    }
+
+    const gdPicker = $("hsdGoogleDrivePickerModal");
+    if (isElementOpen(gdPicker)) {
+      const cBtn = gdPicker.querySelector(".gdrive-modal-close-btn");
+      if (cBtn) cBtn.click();
+      else gdPicker.hidden = true;
+      return;
+    }
+
+    const hsdKahoot = $("hsdKahootLobbyModal");
+    if (isElementOpen(hsdKahoot)) {
+      hsdKahoot.hidden = true;
+      const api = getApi();
+      if (api && api.getState) api.getState().hsdLobbyOpen = false;
+      return;
+    }
+
+    const stuQuick = $("studentQuickModal");
+    if (isElementOpen(stuQuick)) {
+      stuQuick.hidden = true;
+      return;
+    }
+
+    const calEv = $("calendarEventModal");
+    if (isElementOpen(calEv)) {
+      calEv.hidden = true;
+      return;
+    }
+
+    for (const tvMid of ["tvGlobalUploadModal", "tvEpisodeModal", "tvProfileModal"]) {
+      const mEl = $(tvMid);
+      if (mEl && mEl.isConnected) {
+        mEl.remove();
+        restoreHomeFocus();
+        return;
+      }
+    }
+
+    // Companion Video Dock if triggered inside it or when docked full-width
+    const heDock = $("heVdoCompanionDock");
+    if (isElementOpen(heDock) && ((triggerEl && heDock.contains(triggerEl)) || !heDock.classList.contains("is-pip"))) {
+      if (window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.closePlayer === "function") {
+        window.RACM_HE_VIDEO_BRIDGE.closePlayer();
+      } else {
+        heDock.hidden = true;
+      }
+      return;
+    }
+
+    // 2. Fullscreen Slide Decks & Presentation Overlays (peel sub-states first)
+    const qacModal = $("panelQaComposerModal");
+    if (isElementOpen(qacModal)) {
+      const closeQac = qacModal.querySelector('[data-qac-act="close"]');
+      if (closeQac) closeQac.click();
+      else qacModal.hidden = true;
+      return;
+    }
+
+    const psvModal = $("panelDeckModal");
+    if (isElementOpen(psvModal)) {
+      const pinZ = $("psvPinZoomModal");
+      if (isElementOpen(pinZ)) {
+        const cb = pinZ.querySelector('[data-psv-act="close-pin-zoom"]');
+        if (cb) cb.click();
+        else pinZ.hidden = true;
+        return;
+      }
+      const qrM = $("psvQrModal");
+      if (isElementOpen(qrM)) {
+        const cb = qrM.querySelector('[data-psv-act="close-qr-modal"]');
+        if (cb) cb.click();
+        else qrM.hidden = true;
+        return;
+      }
+      const modDr = $("psvModDrawer");
+      if (isElementOpen(modDr)) {
+        const cb = modDr.querySelector('[data-psv-act="toggle-mod-drawer"]');
+        if (cb) cb.click();
+        else modDr.hidden = true;
+        return;
+      }
+      const stuDr = $("psvStuDrawer");
+      if (isElementOpen(stuDr)) {
+        const cb = stuDr.querySelector('[data-psv-act="toggle-stu-drawer"]');
+        if (cb) cb.click();
+        else stuDr.hidden = true;
+        return;
+      }
+      if (window.RACM_PANEL_DECK && typeof window.RACM_PANEL_DECK.close === "function") {
+        window.RACM_PANEL_DECK.close();
+      } else {
+        psvModal.hidden = true;
+      }
+      return;
+    }
+
+    const st1Modal = $("st1DeckModal");
+    if (isElementOpen(st1Modal)) {
+      const st1Qr = $("st1QrZoomBackdrop");
+      if (st1Qr) {
+        const b = $("st1CloseQrZoomBtn");
+        if (b) b.click();
+        return;
+      }
+      const st1Cg = $("st1ClickerGuideBackdrop");
+      if (st1Cg) {
+        const b = $("st1CloseClickerGuideBtn");
+        if (b) b.click();
+        return;
+      }
+      const exitFsBtn = st1Modal.querySelector('[data-st1-vdo-act="exit-fs"]');
+      if (exitFsBtn) {
+        exitFsBtn.click();
+        return;
+      }
+      const activeModeBtn = st1Modal.querySelector("[data-st1-vmode].is-active");
+      const curMode = activeModeBtn ? activeModeBtn.getAttribute("data-st1-vmode") : "deck";
+      if (curMode !== "deck") {
+        const deckBtn = st1Modal.querySelector('[data-st1-vmode="deck"]');
+        if (deckBtn) {
+          deckBtn.click();
+          return;
+        }
+      }
+      if (window.RACM_ST1_DECK && typeof window.RACM_ST1_DECK.close === "function") {
+        window.RACM_ST1_DECK.close();
+      } else {
+        st1Modal.hidden = true;
+      }
+      return;
+    }
+
+    const orModal = $("orientationDeckModal");
+    if (isElementOpen(orModal)) {
+      const orCg = $("orCloseClickerGuideBtn");
+      if (orCg) {
+        orCg.click();
+        return;
+      }
+      if (orModal.classList.contains("is-vdo-fullscreen-cinema")) {
+        const exBtn = orModal.querySelector('[data-vdo-action="exit-fs-cinema"]');
+        if (exBtn) exBtn.click();
+        return;
+      }
+      const activeModeBtn = orModal.querySelector("[data-or-vmode].is-active");
+      const curMode = activeModeBtn ? activeModeBtn.getAttribute("data-or-vmode") : "deck";
+      if (curMode !== "deck") {
+        const deckBtn = orModal.querySelector('[data-or-vmode="deck"]');
+        if (deckBtn) {
+          deckBtn.click();
+          return;
+        }
+      }
+      if (window.RACM_ORIENTATION_DECK && typeof window.RACM_ORIENTATION_DECK.close === "function") {
+        window.RACM_ORIENTATION_DECK.close();
+      } else {
+        orModal.hidden = true;
+      }
+      return;
+    }
+
+    const spssModal = $("spssDeckModal");
+    if (isElementOpen(spssModal)) {
+      const activeModeBtn = spssModal.querySelector("[data-spss-vmode].is-active");
+      const curMode = activeModeBtn ? activeModeBtn.getAttribute("data-spss-vmode") : "deck";
+      if (curMode !== "deck") {
+        const deckBtn = spssModal.querySelector('[data-spss-vmode="deck"]');
+        if (deckBtn) {
+          deckBtn.click();
+          return;
+        }
+      }
+      if (window.RACM_SPSS_DECK && typeof window.RACM_SPSS_DECK.close === "function") {
+        window.RACM_SPSS_DECK.close();
+      } else {
+        spssModal.hidden = true;
+      }
+      return;
+    }
+
+    const pptOv = $("pptPresentationOverlay");
+    if (isElementOpen(pptOv)) {
+      const fsGridClose = pptOv.querySelector(".ppt-fs-grid-head .ppt-fs-tool-btn");
+      if (fsGridClose) {
+        fsGridClose.click();
+        return;
+      }
+      if (document.body.classList.contains("is-ppt-slideshare-window")) {
+        if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+          document.exitFullscreen().catch(() => {});
+          return;
+        }
+        const closeRead = pptOv.querySelector(".ppt-reading-top-right .ppt-reading-top-btn:last-child");
+        if (closeRead) closeRead.click();
+        else if (window.history.length > 1) window.history.back();
+        else window.location.href = "./";
+        return;
+      }
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      return;
+    }
+
+    if (document.body.classList.contains("is-ppt-window-max-open")) {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      return;
+    }
+
+    const proseTheater = document.querySelector(".reader-paper.is-deck-theater");
+    if (proseTheater) {
+      if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+        document.exitFullscreen().catch(() => {});
+      }
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      proseTheater.classList.remove("is-deck-theater");
+      return;
+    }
+
+    if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+      document.exitFullscreen().catch(() => {});
+      return;
+    }
+
+    // 3. Pop 1 Step from In-App Navigation History Stack
+    const curSnap = captureCurrentNavSnap();
+    while (navHistoryStack.length > 0) {
+      const prevSnap = navHistoryStack.pop();
+      if (isSameNavSnap(prevSnap, curSnap)) continue;
+      if (restoreNavSnap(prevSnap)) return;
+    }
+
+    // 4. Smart Hierarchical 1-Step Fallback (when opened via deep link or fresh load)
+    if (driveBrowserActive) {
+      if (drivePath.length > 0) {
+        openCourseDriveAtPath(drivePath.slice(0, -1));
+      } else {
+        hideCourseDriveBrowser();
+        syncSubpageBar();
+        syncUniversalNavLabels();
+      }
+      return;
+    }
+
+    const api = getApi();
+    const st = (api && api.getState && api.getState()) || {};
+    const curTab = st.activeTab || "home";
+
+    if (window.RACM_HSD_ROOM_PAGE) {
+      if (window.history.length > 1 && document.referrer) {
+        window.history.back();
+      } else {
+        window.location.href = "./#hs-discussion";
+      }
+      return;
+    }
+
+    if (curTab === "textbooks") {
+      const subMode = st.textbookSubMode || "docs-drive";
+      if (subMode === "doc-reader") {
+        if (st.activeHsModule === "ST1" && api && api.openSystemsForum) {
+          api.openSystemsForum("w1-d1-st");
+        } else if (api && api.openTextbookDriveFolder) {
+          api.openTextbookDriveFolder(st.activeHsModule || "HS1");
+        }
+        return;
+      }
+      if (
+        (subMode === "docs-drive" && st.tbDriveScope === "module") ||
+        (subMode === "lecture-slides" && st.lsDriveScope === "module") ||
+        (subMode === "vdo-lecture" && st.vdoDriveScope === "module")
+      ) {
+        if (subMode === "lecture-slides" && api && api.openHsLectureSlides) api.openHsLectureSlides("FOLDERS");
+        else if (subMode === "vdo-lecture" && api && api.openHsVdoLecture) api.openHsVdoLecture("FOLDERS");
+        else if (api && api.openTextbookDriveFolder) api.openTextbookDriveFolder("FOLDERS");
+        return;
+      }
+    } else if (curTab === "systems-forum" && st.sfSelectedId) {
+      if (api && api.openSystemsForum) {
+        api.openSystemsForum("");
+        return;
+      }
+    } else if (curTab === "hs-discussion" && !st.hsdDriveFolderOpen) {
+      if (st.hsdLockedRoomId) {
+        st.hsdLockedRoomId = 0;
+        if (api && api.switchTab) api.switchTab("hs-discussion", true);
+        return;
+      }
+      if (api && api.openHsDriveFolder) {
+        api.openHsDriveFolder();
+        return;
+      }
+    } else if (curTab === "epidemiology" && st.epSection && st.epSection !== "all") {
+      if (api && api.setEpidemiologySection) {
+        api.setEpidemiologySection("all");
+        syncSubpageBar();
+        return;
+      }
+    } else if (curTab === "manual" && st.manualChapterId && st.manualChapterId !== "ALL") {
+      st.manualChapterId = "ALL";
+      if (api && api.switchTab) api.switchTab("manual", true);
+      return;
+    }
+
+    if (curTab !== "home") {
+      navigateTvTab("home");
+      restoreHomeFocus();
+      return;
+    }
+
+    if (window.history.length > 1 && document.referrer) {
+      window.history.back();
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function bindUniversalNavDelegation() {
+    if (universalNavDelegationBound) return;
+    universalNavDelegationBound = true;
+    document.addEventListener(
+      "click",
+      (ev) => {
+        const btn = ev.target && ev.target.closest ? ev.target.closest("[data-racm-nav]") : null;
+        if (!btn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const act = btn.getAttribute("data-racm-nav");
+        if (act === "home") {
+          universalGoHome();
+        } else if (act === "back") {
+          universalGoBack(btn);
+        }
+      },
+      true
+    );
+  }
+
+  window.RACM_UNIVERSAL_NAV = {
+    goBack: universalGoBack,
+    goHome: universalGoHome,
+    renderPairHtml: renderUniversalNavPairHtml,
+    createPairDOM: createUniversalNavPairDOM,
+    recordTransition: recordNavStateTransition,
+    syncLabels: syncUniversalNavLabels
+  };
+
   window.RACM_TV_LAUNCHER = {
     openCourseDriveAtPath,
     openEpisodeModal,
@@ -4952,7 +5761,11 @@
   }
 
   function bootTvInterface() {
-    if (document.body.classList.contains("is-ppt-slideshare-window")) return;
+    bindUniversalNavDelegation();
+    if (document.body.classList.contains("is-ppt-slideshare-window")) {
+      syncUniversalNavLabels();
+      return;
+    }
     ensureHomePanelExists();
     ensureDrivePanelExists();
     mountTvTopCapsule();
@@ -4963,6 +5776,8 @@
     syncSubpageBar();
     syncProfilePill();
     initTvRemoteNavigation();
+    lastCapturedNavSnap = captureCurrentNavSnap();
+    syncUniversalNavLabels();
 
     if (heroAutoSyncTimer) clearInterval(heroAutoSyncTimer);
     heroAutoSyncTimer = setInterval(tickHeroAutoSync, 30000);
@@ -4997,6 +5812,7 @@
     } catch (_) {}
 
     window.addEventListener("racm:tabchange", () => {
+      recordNavStateTransition();
       syncViewModeSwitchUI();
       syncSubpageBar();
       syncProfilePill();
@@ -5007,13 +5823,19 @@
     });
 
     window.addEventListener("racm:hsdstatechange", () => {
+      recordNavStateTransition();
       syncViewModeSwitchUI();
       syncSubpageBar();
       syncProfilePill();
     });
 
     window.addEventListener("racm:epstatechange", () => {
+      recordNavStateTransition();
       syncSubpageBar();
+    });
+
+    window.addEventListener("racm:subviewchange", () => {
+      recordNavStateTransition();
     });
 
     window.addEventListener("racm:profilechange", () => {
