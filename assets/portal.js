@@ -8327,8 +8327,13 @@
         icsLink.setAttribute("download", `RACM303_2569_group_${site.id}_${site.slug}.ics`);
         actRow.append(filterBtn, icsLink);
         if (site.id === 1) {
-          const kuchiBtn = make("a", tr("🚂 Presentation กลุ่มกุฉินารายณ์ ↗", "🚂 Kuchinarai Live Presentation ↗"), "btn sm primary");
-          kuchiBtn.href = "https://smartwoo.github.io/racm303-2569-kuchinarai/";
+          const facBtn = make("a", tr("🎛️ Facilitator จอใหญ่ (กุฉินารายณ์) ↗", "🎛️ Kuchinarai Facilitator ↗"), "btn sm primary");
+          facBtn.href = "kuchinarai/facilitator.html";
+          facBtn.target = "_blank";
+          facBtn.rel = "noopener";
+          actRow.appendChild(facBtn);
+          const kuchiBtn = make("a", tr("🚂 ภาพรวม 21 คน ↗", "🚂 21-Member Overview ↗"), "btn sm");
+          kuchiBtn.href = "kuchinarai/";
           kuchiBtn.target = "_blank";
           kuchiBtn.rel = "noopener";
           actRow.appendChild(kuchiBtn);
@@ -8639,8 +8644,13 @@
       if (advBinderPdf && advBinderDocx) actRow.append(lockBtn, advBinderPdf, advBinderDocx, pdfSiteLink, printSiteBtn, icsLink);
       else actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
       if (curSite.id === 1) {
-        const kuchiMapBtn = make("a", tr("🚂 Presentation กลุ่มกุฉินารายณ์ ↗", "🚂 Kuchinarai Live Presentation ↗"), "btn sm primary");
-        kuchiMapBtn.href = "https://smartwoo.github.io/racm303-2569-kuchinarai/";
+        const facMapBtn = make("a", tr("🎛️ Facilitator จอใหญ่ (กุฉินารายณ์) ↗", "🎛️ Kuchinarai Facilitator ↗"), "btn sm primary");
+        facMapBtn.href = "kuchinarai/facilitator.html";
+        facMapBtn.target = "_blank";
+        facMapBtn.rel = "noopener";
+        actRow.appendChild(facMapBtn);
+        const kuchiMapBtn = make("a", tr("🚂 ภาพรวม 21 คน ↗", "🚂 21-Member Overview ↗"), "btn sm");
+        kuchiMapBtn.href = "kuchinarai/";
         kuchiMapBtn.target = "_blank";
         kuchiMapBtn.rel = "noopener";
         actRow.appendChild(kuchiMapBtn);
