@@ -1439,22 +1439,81 @@
     return res.exactSingle || null;
   }
 
-  function clearAllPersonalization() {
+  const PROFILE_SYNC_TAB_ID = `ftab_${Math.random().toString(36).slice(2, 10)}`;
+  let profileSyncChannel = null;
+  let profileSyncBound = false;
+
+  function broadcastProfileSyncEvent(type, payload) {
+    const pkt = Object.assign({ type, senderTabId: PROFILE_SYNC_TAB_ID, ts: Date.now() }, payload || {});
+    if (profileSyncChannel) {
+      try {
+        profileSyncChannel.postMessage(pkt);
+      } catch (_) {}
+    }
+    try {
+      localStorage.setItem("racm303_fac_profile_sync_evt", JSON.stringify(pkt));
+    } catch (_) {}
+  }
+
+  function handleIncomingProfileSyncPacket(pkt) {
+    if (!pkt || pkt.senderTabId === PROFILE_SYNC_TAB_ID) return;
+    if (pkt.type === "profile_clear" && state.myTeacherKey) {
+      clearAllPersonalization({ fromRemoteSync: true });
+    } else if (pkt.type === "teacher_set" && pkt.teacherKey && state.myTeacherKey !== pkt.teacherKey) {
+      selectActiveTeacher(pkt.teacherKey, true, { fromRemoteSync: true });
+    }
+  }
+
+  function initCrossTabProfileSync() {
+    if (profileSyncBound) return;
+    profileSyncBound = true;
+    if (typeof BroadcastChannel !== "undefined") {
+      try {
+        profileSyncChannel = new BroadcastChannel("racm303_fac_profile_sync_v1");
+        profileSyncChannel.onmessage = (ev) => handleIncomingProfileSyncPacket(ev.data);
+      } catch (_) {}
+    }
+    window.addEventListener("storage", (ev) => {
+      if (!ev) return;
+      if (ev.key === "racm303_fac_profile_sync_evt" && ev.newValue) {
+        try {
+          handleIncomingProfileSyncPacket(JSON.parse(ev.newValue));
+        } catch (_) {}
+        return;
+      }
+      if (ev.key === "racm303_my_teacher") {
+        if (!ev.newValue && state.myTeacherKey) {
+          clearAllPersonalization({ fromRemoteSync: true });
+        } else if (ev.newValue && state.myTeacherKey !== ev.newValue) {
+          selectActiveTeacher(ev.newValue, true, { fromRemoteSync: true });
+        }
+      }
+    });
+  }
+
+  function clearAllPersonalization(opts) {
+    const cfg = opts && typeof opts === "object" && !(opts instanceof Event) ? opts : {};
     state.myStudent = null;
     state.myTeacherKey = "";
     state.ramedLoginId = "";
-    localStorage.removeItem("racm303_my_sid");
-    localStorage.removeItem("racm303_my_teacher");
-    localStorage.removeItem("racm303_login_uid");
+    try {
+      localStorage.removeItem("racm303_my_sid");
+      localStorage.removeItem("racm303_my_teacher");
+      localStorage.removeItem("racm303_login_uid");
+      localStorage.removeItem("racm303_hsd_prefill_sid");
+    } catch (_) {}
     ["personalStudentInput", "studioStudentInput", "subStudentQuickInput", "conciergeStudentInput", "ramedMyLoginIdInput", "schedDiscFilter", "schedAreaFilter", "schedTeacherFilter", "studioTeacherSelect", "personalTeacherSelect", "conciergeTeacherSelect"].forEach((id) => {
       if ($(id)) $(id).value = "";
     });
+    if (!cfg.fromRemoteSync) {
+      broadcastProfileSyncEvent("profile_clear", {});
+    }
     updatePersonalBanner();
     refreshCalendarStudioUI();
     if (typeof syncRamedPerUserIdentityUI === "function") syncRamedPerUserIdentityUI();
     if (state.activeTab === "schedule") renderScheduleCurrent();
     if (state.activeTab === "discussion") renderDiscussionView();
-    if (state.activeTab === "hs-discussion") {
+    if (state.activeTab === "hs-discussion" && !cfg.skipRenderHsd) {
       renderHsLiveClassroomBar();
       renderHsDiscussionView();
     }
@@ -20391,6 +20450,26 @@
     refreshHsdKahootLobbyModalDOM();
   }
 
+  function switchPptBreakoutRoom(targetRoomNum, modCodeOpt) {
+    const rTarget = Math.min(6, Math.max(1, Math.floor(Number(targetRoomNum) || 1)));
+    const effMod = /^HS[1-6]$/i.test(String(modCodeOpt || ""))
+      ? String(modCodeOpt).toUpperCase()
+      : state.hsdModule && /^HS[1-6]$/i.test(state.hsdModule)
+      ? state.hsdModule.toUpperCase()
+      : "HS1";
+    if (window.RACM_HSD_ROOM_PAGE && effMod === "HS1") {
+      window.location.href = `hs1-room${rTarget}.html`;
+      return;
+    }
+    if (state.hsdLockedRoomId) state.hsdLockedRoomId = rTarget;
+    if (LIVE) LIVE.setRoom(rTarget, false);
+    renderHsLiveClassroomBar();
+    renderHsDiscussionContextBar();
+    renderHsDiscussionView();
+    broadcastPptPresentationState();
+    if (state.hsdLobbyOpen) refreshHsdKahootLobbyModalDOM();
+  }
+
   function refreshHsdKahootLobbyModalDOM() {
     const modal = $("hsdKahootLobbyModal");
     if (!modal || modal.hidden) return;
@@ -20424,6 +20503,18 @@
     hLeft.append(pinBadge, hTitle, hSub);
 
     const hRight = make("div", null, "hsd-km-head-actions");
+    const hubBtn = make("button", "🚪 ดูครบ 6 ห้อง (Hub)", "btn sm");
+    hubBtn.type = "button";
+    hubBtn.addEventListener("click", () => {
+      closeHsdKahootLobbyModal();
+      if (window.RACM_HSD_ROOM_PAGE) {
+        window.location.href = `./#hs-discussion-drive`;
+        return;
+      }
+      openHsDiscussion("DRIVE");
+    });
+    hRight.appendChild(hubBtn);
+
     if (ROLE === "faculty" && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.exportRoomCheckinCsv === "function") {
       const csvBtn = make("button", `📥 ดาวน์โหลดรายชื่อห้อง ${roomCode} (.csv)`, "btn sm teal");
       csvBtn.type = "button";
@@ -20449,11 +20540,8 @@
       rb.type = "button";
       rb.setAttribute("aria-pressed", rm.id === st.roomId ? "true" : "false");
       rb.addEventListener("click", () => {
-        if (state.hsdLockedRoomId) state.hsdLockedRoomId = rm.id;
-        LIVE.setRoom(rm.id, false);
-        renderHsLiveClassroomBar();
-        renderHsDiscussionContextBar();
-        refreshHsdKahootLobbyModalDOM();
+        if (rm.id === st.roomId) return;
+        switchPptBreakoutRoom(rm.id, activeMod);
       });
       rPills.appendChild(rb);
     });
@@ -27067,7 +27155,7 @@
         "ppt-ok-clean-sub"
       )
     );
-    if (!state.hsdLockedRoomId && !window.RACM_HSD_ROOM_PAGE && !exp && !state.isPptSlideSharePopup) {
+    if (!exp && !state.isPptSlideSharePopup) {
       const roomPills = make("div", null, "ppt-ok-room-pills is-compact-strip");
       [1, 2, 3, 4, 5, 6].forEach((gNum) => {
         const gRot = (SCHED.hsRotation || []).find((r) => r.group === gNum) || {};
@@ -27082,10 +27170,8 @@
           `<span>R${gNum}</span>` +
           (gSt.joinedCount > 0 ? `<span class="ppt-ok-rp-cnt">${gSt.joinedCount}</span>` : "");
         pill.addEventListener("click", () => {
-          if (LIVE) LIVE.setRoom(gNum, false);
-          renderHsLiveClassroomBar();
-          renderHsDiscussionView();
-          broadcastPptPresentationState();
+          if (gNum === roomId) return;
+          switchPptBreakoutRoom(gNum, mod.code);
         });
         roomPills.appendChild(pill);
       });
@@ -30154,6 +30240,17 @@
     mbPresentBtn.addEventListener("click", () => enterPptFullscreenShow());
     menuRight.appendChild(mbPresentBtn);
 
+    const curMenuRoomId = Number(state.hsdLockedRoomId) || (LIVE ? LIVE.getRoomId() : 1) || 1;
+    const mbRoomPickerBtn = make(
+      "button",
+      `🚪 เลือกห้อง R1–R6 (ห้อง ${curMenuRoomId})`,
+      "ppt-gdrive-switch-btn"
+    );
+    mbRoomPickerBtn.type = "button";
+    mbRoomPickerBtn.title = "เลือกสลับห้องย่อย Breakout Room 1–6";
+    mbRoomPickerBtn.addEventListener("click", () => openHsdKahootLobbyModal());
+    menuRight.appendChild(mbRoomPickerBtn);
+
     const gdriveSwitchBtn = make("button", null, "ppt-gdrive-switch-btn");
     gdriveSwitchBtn.type = "button";
     gdriveSwitchBtn.title = "เปิดหน้าต่างเลือกไฟล์สไลด์คาบอื่นจาก Google Drive รายวิชา RACM 303";
@@ -32738,7 +32835,8 @@
     return { roleBadge: "🎤 สอนบรรยาย", badgeCls: session.category === "HS" ? "cat-HS" : "cat-EP", roomText: session.room || "-", assignment: null };
   }
 
-  function selectActiveTeacher(teacherKey, jumpNearestDay = true) {
+  function selectActiveTeacher(teacherKey, jumpNearestDay = true, opts) {
+    const cfg = opts || {};
     state.myTeacherKey = teacherKey || "";
     if (state.myTeacherKey) {
       localStorage.setItem("racm303_my_teacher", state.myTeacherKey);
@@ -32750,9 +32848,15 @@
       if ($("schedAreaFilter")) $("schedAreaFilter").value = "";
       if ($("schedDiscFilter")) $("schedDiscFilter").value = "";
       state.calScope = "teacher";
+      if (!cfg.fromRemoteSync) {
+        broadcastProfileSyncEvent("teacher_set", { teacherKey: state.myTeacherKey });
+      }
     } else {
       localStorage.removeItem("racm303_my_teacher");
       if (!state.myStudent) state.calScope = "all";
+      if (!cfg.fromRemoteSync) {
+        broadcastProfileSyncEvent("profile_clear", {});
+      }
     }
 
     ["schedTeacherFilter", "studioTeacherSelect", "personalTeacherSelect", "conciergeTeacherSelect"].forEach((id) => {
@@ -43380,6 +43484,8 @@
       localStorage.setItem("racm303_moodle_course_url", state.pinnedRamedUrl);
       syncPinnedRamedCourseUI();
     }
+
+    initCrossTabProfileSync();
 
     // Restore saved teacher on Faculty Portal (do not collide with student racm303_my_sid on same origin)
     const savedTeacher = localStorage.getItem("racm303_my_teacher") || "";

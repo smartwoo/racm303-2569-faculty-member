@@ -1266,8 +1266,8 @@
   }
 
   function publishPresence() {
-    // Students only broadcast active green presence when actively inside their joined room
-    if (state.role !== "faculty" && (!state.sessionJoined || !state.joinedRoomId)) {
+    // Students only broadcast active green presence when identified and actively inside their joined room
+    if (state.role !== "faculty" && (!state.sessionJoined || !state.joinedRoomId || !state.studentId)) {
       emit("presence", getPresenceSummary());
       return;
     }
@@ -1333,12 +1333,10 @@
       if (p.role === "faculty") {
         teachers += 1;
         list.push(p);
-      } else if (p.joined !== false) {
-        const sidKey = p.studentId ? String(p.studentId) : "";
-        if (sidKey) {
-          if (seenSids.has(sidKey)) return;
-          seenSids.add(sidKey);
-        }
+      } else if (p.joined !== false && p.studentId) {
+        const sidKey = String(p.studentId);
+        if (seenSids.has(sidKey)) return;
+        seenSids.add(sidKey);
         students += 1;
         list.push(p);
         joinedStudents.push(p);
@@ -1489,26 +1487,46 @@
   }
 
   function setStudentProfile(studentObj, opts) {
-    if (studentObj && studentObj.id) {
+    if (!studentObj || !studentObj.id) {
       const prevPid = state.participantId;
-      state.studentId = String(studentObj.id);
-      state.shortNo = String(studentObj.id).slice(-3);
-      state.participantId = `sid_${studentObj.id}`;
-      if (prevPid && prevPid !== state.participantId) {
-        [1, 2, 3, 4, 5, 6].forEach((rId) => getRoomPresenceMap(rId).delete(prevPid));
+      const prevSid = state.studentId;
+      state.studentId = "";
+      state.shortNo = "";
+      state.nickname = "";
+      state.fullName = "";
+      state.area = "";
+      state.disc = 0;
+      state.photoId = "";
+      state.displayName = "";
+      state.participantId = persistentPid;
+      if (prevPid && prevPid !== persistentPid) {
+        [1, 2, 3, 4, 5, 6].forEach((rId) => {
+          const m = getRoomPresenceMap(rId);
+          m.delete(prevPid);
+          if (prevSid) m.delete(`sid_${prevSid}`);
+        });
       }
-      const nick = String(studentObj.nickname || studentObj.nick || "").trim();
-      state.nickname = nick;
-      state.fullName = String(studentObj.fullName || studentObj.name || "").trim();
-      state.area = studentObj.area || "";
-      state.disc = Number(studentObj.disc) || 0;
-      state.photoId = String(studentObj.photoId || "");
-      const baseName = studentObj.name || studentObj.fullName || studentObj.id;
-      state.displayName = nick ? `${state.shortNo} ${nick} (${baseName})` : `${studentObj.id} ${baseName}`;
-      const skipAutoRoom = Boolean(opts && opts.keepCurrentRoom);
-      if (!skipAutoRoom && studentObj.disc >= 1 && studentObj.disc <= 6) {
-        setRoom(studentObj.disc, true);
-      }
+      emit("presence", getPresenceSummary());
+      return;
+    }
+    const prevPid = state.participantId;
+    state.studentId = String(studentObj.id);
+    state.shortNo = String(studentObj.id).slice(-3);
+    state.participantId = `sid_${studentObj.id}`;
+    if (prevPid && prevPid !== state.participantId) {
+      [1, 2, 3, 4, 5, 6].forEach((rId) => getRoomPresenceMap(rId).delete(prevPid));
+    }
+    const nick = String(studentObj.nickname || studentObj.nick || "").trim();
+    state.nickname = nick;
+    state.fullName = String(studentObj.fullName || studentObj.name || "").trim();
+    state.area = studentObj.area || "";
+    state.disc = Number(studentObj.disc) || 0;
+    state.photoId = String(studentObj.photoId || "");
+    const baseName = studentObj.name || studentObj.fullName || studentObj.id;
+    state.displayName = nick ? `${state.shortNo} ${nick} (${baseName})` : `${studentObj.id} ${baseName}`;
+    const skipAutoRoom = Boolean(opts && opts.keepCurrentRoom);
+    if (!skipAutoRoom && studentObj.disc >= 1 && studentObj.disc <= 6) {
+      setRoom(studentObj.disc, true);
     }
     if (state.sessionJoined && state.joinedRoomId) {
       publishPresence();
@@ -1700,12 +1718,12 @@
     return wasJoined;
   }
 
-  function logoutStudentSession() {
+  function logoutStudentSession(explicitSidOpt, explicitRoomOpt) {
     if (state.role === "faculty") return;
     startEngine();
-    const oldPid = state.participantId;
-    const oldSid = state.studentId;
-    const oldRoom = state.joinedRoomId || state.roomId;
+    const effSid = String(explicitSidOpt || state.studentId || "").trim();
+    const oldPid = effSid ? `sid_${effSid}` : state.participantId;
+    const oldRoom = clampRoom(explicitRoomOpt || state.joinedRoomId || state.disc || state.roomId);
     while (burstTimers.length) {
       clearTimeout(burstTimers.pop());
     }
@@ -1717,11 +1735,24 @@
     state.shortNo = "";
     state.nickname = "";
     state.fullName = "";
+    state.area = "";
+    state.disc = 0;
+    state.photoId = "";
+    state.displayName = "";
     state.participantId = persistentPid;
     safeSetSession("racm303_hsd_session_joined_v1", null);
     safeSetSession("racm303_hsd_team_id_v1", null);
+    safeSetStorage("racm303_live_room_v1", null);
+    safeSetStorage("racm303_live_team_v1", null);
     if (oldPid) {
-      broadcastStudentLeaveFromRoom(oldPid, oldSid, oldRoom, false);
+      broadcastStudentLeaveFromRoom(oldPid, effSid, oldRoom, false);
+      if (effSid) {
+        setTimeout(() => {
+          if (!state.sessionJoined || state.studentId !== effSid) {
+            broadcastStudentLeaveFromRoom(`sid_${effSid}`, effSid, oldRoom, false);
+          }
+        }, 1600);
+      }
     }
     emit("presence", getPresenceSummary());
   }

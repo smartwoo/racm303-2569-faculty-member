@@ -294,6 +294,7 @@
             <span class="tv-profile-avatar" id="tvProfileAvatar">${ICONS.user}</span>
             <span class="tv-profile-label" id="tvProfileLabel">${ROLE === "faculty" ? "เลือกอาจารย์" : "เลือกโปรไฟล์"}</span>
           </button>
+          <button type="button" class="tv-icon-pill" id="tvProfileQuickClearBtn" hidden title="ล้างโปรไฟล์ที่เลือกไว้ / สลับผู้ใช้" aria-label="ล้างโปรไฟล์" style="color:#dc2626;font-weight:700;font-size:13px">✕</button>
           <button type="button" class="tv-icon-pill" id="tvThemeQuickBtn" data-tv-focus data-tv-row="0" title="สลับโหมดสว่าง / โหมดมืด" aria-label="สลับโหมดสี">${ICONS.moon}</button>
           <button type="button" class="tv-icon-pill" id="tvMoreBtn" data-tv-focus data-tv-row="0" aria-expanded="false" title="ตัวเลือกเพิ่มเติม" aria-label="ตัวเลือกเพิ่มเติม">${ICONS.dots}</button>
         </div>
@@ -359,6 +360,22 @@
     });
 
     $("tvProfileBtn").addEventListener("click", () => openProfileModal());
+
+    const quickClrProfBtn = $("tvProfileQuickClearBtn");
+    if (quickClrProfBtn) {
+      quickClrProfBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        selectedProfileAreaFilter = "";
+        const api = getApi();
+        if (api && typeof api.clearAllPersonalization === "function") {
+          api.clearAllPersonalization({ keepCurrentTab: true });
+        }
+        syncProfilePill();
+        if (!api || !api.getState || api.getState().activeTab === "home") {
+          renderHomeLauncher();
+        }
+      });
+    }
 
     $("tvThemeQuickBtn").addEventListener("click", () => {
       const legacyThemeBtn = $("themeToggleBtn");
@@ -490,20 +507,24 @@
     const label = $("tvProfileLabel");
     if (!pill || !avatar || !label) return;
 
+    const quickClr = $("tvProfileQuickClearBtn");
     if (ROLE === "student" && st.myStudent) {
       const s = st.myStudent;
       const nick = s.nickname ? s.nickname : s.name.split(" ")[0];
       pill.classList.add("has-profile");
       avatar.textContent = getCleanMonogram(nick);
       label.textContent = `${nick} · ${s.area}`;
+      if (quickClr) quickClr.hidden = false;
     } else if (ROLE === "faculty" && st.myTeacherKey) {
       pill.classList.add("has-profile");
       avatar.textContent = getCleanMonogram(st.myTeacherKey);
       label.textContent = `อ.${st.myTeacherKey}`;
+      if (quickClr) quickClr.hidden = false;
     } else {
       pill.classList.remove("has-profile");
       avatar.innerHTML = ICONS.user;
       label.textContent = ROLE === "faculty" ? t("เลือกอาจารย์", "Select Faculty") : t("เลือกโปรไฟล์", "My Profile");
+      if (quickClr) quickClr.hidden = true;
     }
 
     const legacyLeaveBadge = $("facTopLeaveBadge");
@@ -2161,26 +2182,6 @@
         if (api && api.openSystemsForum) api.openSystemsForum("w1-d1-st");
         return;
       }
-      if (ROLE === "student" && window.RACM_HSD_ROOM_QR) {
-        const curState = api && api.getState ? api.getState() : null;
-        const knownStu =
-          (curState && curState.myStudent) ||
-          (typeof window.RACM_HSD_ROOM_QR.getInitialStepPinStudent === "function"
-            ? window.RACM_HSD_ROOM_QR.getInitialStepPinStudent()
-            : null);
-        if (knownStu && knownStu.disc) {
-          const rId = Number(knownStu.disc) || 1;
-          const mUpper = String(mod.code || "HS1").toUpperCase();
-          if (mUpper === "HS1" && typeof window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid === "function") {
-            window.location.href = window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid(mUpper, rId, knownStu);
-            return;
-          }
-          if (api && typeof api.openHsDiscussionRoom === "function") {
-            api.openHsDiscussionRoom(mUpper, rId, knownStu);
-            return;
-          }
-        }
-      }
       if (api && api.openHsDiscussion) {
         api.openHsDiscussion(mod.code);
       }
@@ -2314,6 +2315,15 @@
           </div>
         </div>
 
+        ${
+          st.myStudent
+            ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 14px;margin-bottom:10px;border-radius:12px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.28)">
+                 <span style="font-size:13.5px;font-weight:600">กำลังเลือกโปรไฟล์: <strong>${esc(st.myStudent.id)} · ${esc(st.myStudent.nickname || st.myStudent.name)}</strong> (${esc(st.myStudent.area)} · กลุ่มอภิปราย ${esc(String(st.myStudent.disc))})</span>
+                 <button type="button" class="btn sm" id="tvResetStudentProfileTopBtn" style="background:#dc2626;color:#fff;border-color:#dc2626;font-weight:700">✕ ล้างโปรไฟล์ / สลับผู้ใช้ทันที</button>
+               </div>`
+            : ""
+        }
+
         <input type="search" class="tv-profile-search" id="tvStudentSearchInput" placeholder="${esc(t("พิมพ์ชื่อเล่น ชื่อจริง หรือรหัสนักศึกษา 6702xxx…", "Type nickname, name, or 6702xxx…"))}" autocomplete="off">
 
         <div class="tv-hospital-chips" id="tvHospitalChipsBar">
@@ -2347,16 +2357,17 @@
       if (e.target === backdrop) close();
     });
 
-    const resetBtn = $("tvResetStudentProfileBtn");
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        selectedProfileAreaFilter = "";
-        if (api && api.clearAllPersonalization) api.clearAllPersonalization();
-        syncProfilePill();
-        renderHomeLauncher();
-        close();
-      });
-    }
+    const handleResetProfile = () => {
+      selectedProfileAreaFilter = "";
+      if (api && api.clearAllPersonalization) api.clearAllPersonalization({ keepCurrentTab: true });
+      syncProfilePill();
+      renderHomeLauncher();
+      close();
+    };
+    ["tvResetStudentProfileBtn", "tvResetStudentProfileTopBtn"].forEach((id) => {
+      const b = $(id);
+      if (b) b.addEventListener("click", handleResetProfile);
+    });
 
     const searchInput = $("tvStudentSearchInput");
     const grid = $("tvStudentCardsGrid");
