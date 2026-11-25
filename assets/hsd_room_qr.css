@@ -2090,3 +2090,91 @@ html[data-theme="dark"] .hsd-csl-matched {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ---------- Live Multi-Room Check-in Badges (6-Room Cards, Slide 1 R1..R6 Pills & Faculty 6-Group View) ---------- */
+.hsd-srp-html-pill.is-live-checkin-pill {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #065f46;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .hsd-srp-html-pill.is-live-checkin-pill {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #6ee7b7;
+}
+
+.ppt-ok-room-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ppt-ok-rp-cnt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #047857;
+  font-family: var(--font-mono, monospace);
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ppt-ok-room-pill.is-active .ppt-ok-rp-cnt {
+  background: #10b981;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .ppt-ok-rp-cnt {
+  background: rgba(16, 185, 129, 0.24);
+  color: #6ee7b7;
+}
+
+.gsorter-live-checkin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #047857;
+  font-family: var(--font-display, sans-serif);
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .gsorter-live-checkin-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #6ee7b7;
+}
+
+.gsorter-member-chip.is-live-checked-in {
+  box-shadow: inset 0 0 0 1.5px #10b981;
+}
+
+.gsorter-chip-live-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-family: var(--font-display, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.25;
+  flex-shrink: 0;
+}
+

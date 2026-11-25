@@ -608,6 +608,8 @@
         }
       }
     } catch (_) {}
+    // Never prefill student localStorage credentials onto Faculty kiosk screens
+    if (root && root.PORTAL_ROLE === "faculty") return null;
     try {
       const sSid =
         sessionStorage.getItem("racm303_hsd_prefill_sid") ||
@@ -619,7 +621,11 @@
       }
     } catch (_) {}
     try {
-      const pSid = localStorage.getItem("racm303_personal_student") || "";
+      const pSid =
+        localStorage.getItem("racm303_my_sid") ||
+        localStorage.getItem("racm303_login_uid") ||
+        localStorage.getItem("racm303_personal_student") ||
+        "";
       if (pSid) {
         const hit = roster.find((s) => String(s.id) === String(pSid).trim());
         if (hit) return hit;
@@ -628,13 +634,15 @@
     return null;
   }
 
-  function buildStudentCheckinHrefWithSid(modCodeOpt, roomIdOpt, stuObj) {
+  function buildStudentCheckinHrefWithSid(modCodeOpt, roomIdOpt, stuObj, teamIdOpt) {
     const meta = getRoomMeta(modCodeOpt, roomIdOpt);
-    const sidParam = stuObj && stuObj.id ? `sid=${encodeURIComponent(String(stuObj.id))}&` : "";
+    const sidParam = stuObj && stuObj.id ? `sid=${encodeURIComponent(String(stuObj.id))}&autocheckin=1&` : "";
+    const teamParam =
+      Number(teamIdOpt) >= 1 && Number(teamIdOpt) <= 3 ? `team=${Number(teamIdOpt)}&` : "";
     if (meta.isHs1) {
-      return `hs1-room${meta.roomId}.html?${sidParam}checkin=1`;
+      return `hs1-room${meta.roomId}.html?${sidParam}${teamParam}checkin=1`;
     }
-    return `?page=hs-discussion&module=${meta.modCode}&room=${meta.roomId}&${sidParam}checkin=1#hs-discussion-${meta.modCode}-R${meta.roomId}`;
+    return `?page=hs-discussion&module=${meta.modCode}&room=${meta.roomId}&${sidParam}${teamParam}checkin=1#hs-discussion-${meta.modCode}-R${meta.roomId}`;
   }
 
   /* ---------- 3. Student Check-in Persistence (Scoped per Module & Room) ---------- */
@@ -667,32 +675,60 @@
     return Boolean(getStudentCheckinRecord(modCode, roomId));
   }
 
-  function markStudentCheckedIn(modCode, roomId, studentObj, teamId) {
+  function markStudentCheckedIn(modCode, roomId, studentObj, teamId, opts) {
     if (!studentObj || !studentObj.id) return null;
     const now = Date.now();
+    const effMod = String(modCode || "HS1").toUpperCase();
+    const effRoom = clampRoomId(roomId);
+    const effTeam = Number(teamId) >= 1 && Number(teamId) <= 3 ? Number(teamId) : 0;
     const rec = {
-      modCode: String(modCode || "HS1").toUpperCase(),
-      roomId: clampRoomId(roomId),
+      modCode: effMod,
+      roomId: effRoom,
       studentId: String(studentObj.id),
       shortNo: String(studentObj.id).slice(-3),
       fullName: String(studentObj.fullName || studentObj.name || ""),
       nickname: String(studentObj.nickname || ""),
-      assignedDisc: Number(studentObj.disc) || clampRoomId(roomId),
-      teamId: 0,
+      assignedDisc: Number(studentObj.disc) || effRoom,
+      teamId: effTeam,
       checkedInMs: now,
       checkedInISO: new Date(now).toISOString()
     };
-    const key = checkinStorageKey(modCode, roomId);
+    const key = checkinStorageKey(effMod, effRoom);
     const raw = JSON.stringify(rec);
-    try {
-      sessionStorage.setItem(key, raw);
-      sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
-      sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
-    } catch (_) {}
-    try {
-      localStorage.setItem(key, raw);
-    } catch (_) {}
+    const isKiosk = Boolean((opts && opts.kioskMode) || (root && root.PORTAL_ROLE === "faculty"));
+    if (!isKiosk) {
+      try {
+        sessionStorage.setItem(key, raw);
+        sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
+        sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
+      } catch (_) {}
+      try {
+        localStorage.setItem(key, raw);
+        localStorage.setItem("racm303_my_sid", String(studentObj.id));
+        localStorage.setItem("racm303_login_uid", String(studentObj.id));
+      } catch (_) {}
+    }
+    const live = root && root.RACM_LIVE_CLASSROOM;
+    if (live && !(opts && opts.skipLiveBroadcast)) {
+      if (typeof live.checkinStudentToRoom === "function") {
+        live.checkinStudentToRoom(studentObj, effRoom, effMod, effTeam, { kioskMode: isKiosk });
+      } else if (!isKiosk && typeof live.joinSessionWithStudent === "function") {
+        live.joinSessionWithStudent(studentObj, effRoom, effMod, effTeam);
+      }
+    }
     return rec;
+  }
+
+  function syncStudentAutoCheckinToLive(modCodeOpt, roomIdOpt, stuObj) {
+    if (!stuObj || !stuObj.id || (root && root.PORTAL_ROLE === "faculty")) return null;
+    const effMod = /^HS[1-6]$/i.test(String(modCodeOpt || "")) ? String(modCodeOpt).toUpperCase() : "HS1";
+    const effRoom = clampRoomId(roomIdOpt || stuObj.disc || 1);
+    const live = root && root.RACM_LIVE_CLASSROOM;
+    if (live && typeof live.startEngine === "function") {
+      live.startEngine();
+    }
+    saveStepPinPrefillStudent(stuObj);
+    return markStudentCheckedIn(effMod, effRoom, stuObj, 0, { kioskMode: false });
   }
 
   function clearStudentCheckin(modCode, roomId) {
@@ -760,13 +796,16 @@
     };
   }
 
-  /* ---------- 5. Live Room Presence Summary Helper ---------- */
+  /* ---------- 5. Live Room Presence Summary Helper (Works Across All 6 Rooms Simultaneously) ---------- */
   function getLiveRoomJoinedStats(roomId, modCodeOpt) {
     const rMeta = getRoomMeta(modCodeOpt || "HS1", roomId);
     const live = root && root.RACM_LIVE_CLASSROOM;
+    if (live && typeof live.startEngine === "function") {
+      live.startEngine();
+    }
     const pres =
-      live && typeof live.getPresenceSummary === "function" && live.getRoomId() === rMeta.roomId
-        ? live.getPresenceSummary()
+      live && typeof live.getPresenceSummary === "function"
+        ? live.getPresenceSummary(rMeta.roomId)
         : { joinedStudents: [], teamCounts: { 1: 0, 2: 0, 3: 0 } };
     const joinedList = Array.isArray(pres.joinedStudents) ? pres.joinedStudents : [];
     const bySid = new Map();
@@ -1074,8 +1113,18 @@
 
     function triggerNavigateOrCheckin(rId, stuObj) {
       const meta = getRoomMeta(modCode, rId);
+      let syncedTeam = 0;
       if (stuObj && stuObj.id) {
         saveStepPinPrefillStudent(stuObj);
+        if (!isFaculty) {
+          const rec = syncStudentAutoCheckinToLive(modCode, rId, stuObj);
+          syncedTeam = (rec && rec.teamId) || 0;
+          if (root && root.RACM_PORTAL_API && typeof root.RACM_PORTAL_API.applyMyStudent === "function") {
+            try {
+              root.RACM_PORTAL_API.applyMyStudent(stuObj, true);
+            } catch (_) {}
+          }
+        }
       }
       if (isFaculty) {
         if (!meta.isHs1 && typeof cfg.onOpenRoomPpt === "function") {
@@ -1090,14 +1139,14 @@
         return;
       }
       if (meta.isHs1) {
-        window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+        window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj, syncedTeam);
         return;
       }
       if (typeof cfg.onOpenRoomPpt === "function") {
         cfg.onOpenRoomPpt(rId, modCode, stuObj || null);
         return;
       }
-      window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+      window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj, syncedTeam);
     }
 
     function resolveFromPinQuery(rawVal) {
@@ -1117,6 +1166,9 @@
       if (res.all.length === 1) {
         lockedStudent = res.all[0];
         saveStepPinPrefillStudent(lockedStudent);
+        if (!isFaculty) {
+          syncStudentAutoCheckinToLive(modCode, clampRoomId(lockedStudent.disc || 1), lockedStudent);
+        }
       } else if (lockedStudent && !res.all.some((s) => s.id === lockedStudent.id)) {
         lockedStudent = null;
       } else if (!digits && res.all.length !== 1) {
@@ -1174,8 +1226,8 @@
         <h4 class="hsd-srp-title">📊 เลือกห้องเรียน PPT, ใบงานเปล่า 16:9 (.PDF) &amp; QR Check-in — Case Discussion: ${escHtml(modCode)} (แยก 6 ห้อง)</h4>
         <p class="hsd-srp-sub">${
           isFaculty
-            ? `แต่ละห้องมีสไลด์ 16:9, QR Code เช็คชื่อรหัส 3 ตัวท้าย และไฟล์ .PDF ใบงานเปล่า 16:9 (Optimal Font) แยกห้อง หรือดาวน์โหลด PDF กลางรวมได้ที่ปุ่มขวาบน`
-            : `กรอกรหัสนักศึกษา 3 ตัวท้ายด้านล่างเพื่อล็อกห้องเรียนของคุณตามตาราง ${escHtml(modCode)} แล้วกดไป Check-in ทันที หรือดาวน์โหลดใบงานเปล่า .PDF (16:9)`
+            ? `แต่ละห้องมีสไลด์ 16:9, สถานะ Check-in สดแยกห้อง, QR Code เช็คชื่อรหัส 3 ตัวท้าย และไฟล์ .PDF ใบงานเปล่า 16:9 (Optimal Font) หรือดาวน์โหลด PDF กลางรวมได้ที่ปุ่มขวาบน`
+            : `กรอกรหัสนักศึกษา 3 ตัวท้ายด้านล่างเพื่อล็อกห้องและซิงค์สถานะ Check-in เข้าห้องของคุณตามตาราง ${escHtml(modCode)} ทันที หรือดาวน์โหลดใบงานเปล่า .PDF (16:9)`
         }</p>
       `;
 
@@ -1195,6 +1247,9 @@
         const sNo = String(lockedStudent.id).slice(-3);
         const stuRoom = clampRoomId(lockedStudent.disc || 1);
         const lMeta = getRoomMeta(modCode, stuRoom);
+        const stuStats = getLiveRoomJoinedStats(stuRoom, modCode);
+        const myLivePres = stuStats.bySid.get(String(lockedStudent.id));
+        const syncedTeamTxt = myLivePres && myLivePres.teamId ? ` · 🟢 Check-in แล้ว (กลุ่ม ${myLivePres.teamId})` : "";
         lockBar.classList.add("is-locked-ready");
 
         const infoDiv = document.createElement("div");
@@ -1202,7 +1257,7 @@
         infoDiv.innerHTML =
           `<div class="hsd-srp-lock-badge-row">` +
           `<span class="hsd-srp-lock-pill">${manualUnlockedAll ? "🔓 แสดงครบ 6 ห้อง" : `🔒 ล็อกห้อง ${stuRoom} ตาม ${escHtml(modCode)}`}</span>` +
-          `<strong>รหัส ${escHtml(lockedStudent.id)} (ท้าย ${escHtml(sNo)}) · ${escHtml(lockedStudent.nickname ? `${lockedStudent.nickname} (${lockedStudent.fullName || lockedStudent.name})` : (lockedStudent.fullName || lockedStudent.name))}</strong>` +
+          `<strong>รหัส ${escHtml(lockedStudent.id)} (ท้าย ${escHtml(sNo)}) · ${escHtml(lockedStudent.nickname ? `${lockedStudent.nickname} (${lockedStudent.fullName || lockedStudent.name})` : (lockedStudent.fullName || lockedStudent.name))}${escHtml(syncedTeamTxt)}</strong>` +
           `</div>` +
           `<div class="hsd-srp-lock-room-detail">📍 กลุ่มอภิปรายที่ ${stuRoom} · <strong>ห้อง ${escHtml(lMeta.roomCode)}</strong> · อ.ประจำห้อง: ${escHtml(lMeta.instructor)}</div>`;
 
@@ -1214,6 +1269,8 @@
         goCheckinBtn.className = "hsd-srp-go-checkin-btn";
         goCheckinBtn.textContent = isFaculty
           ? `▶ เปิด PPT ห้อง ${stuRoom} (${lMeta.roomCode}) →`
+          : myLivePres
+          ? `🟢 Check-in แล้ว! เข้าห้องเรียน ${stuRoom} (${lMeta.roomCode}) →`
           : `📲 กดไป Check-in ห้อง ${stuRoom} (${lMeta.roomCode}) →`;
         goCheckinBtn.addEventListener("click", () => triggerNavigateOrCheckin(stuRoom, lockedStudent));
 
@@ -1241,7 +1298,7 @@
           const hint = document.createElement("div");
           hint.className = "hsd-srp-lock-idle-hint";
           hint.innerHTML =
-            `พิมพ์ตัวเลข <strong>3 หลักท้าย</strong> ของรหัสนักศึกษา (เช่น <code>056</code>) แล้วระบบจะ<strong>ล็อกห้องเรียนและอาจารย์ประจำห้องตาม ${escHtml(modCode)}</strong> ให้ทันทีเพื่อกดไป Check-in โดยไม่เข้าผิดห้อง`;
+            `พิมพ์ตัวเลข <strong>3 หลักท้าย</strong> ของรหัสนักศึกษา (เช่น <code>056</code>) แล้วระบบจะ<strong>ล็อกห้องเรียนและซิงค์ Check-in ตาม ${escHtml(modCode)}</strong> ขึ้นฝั่งอาจารย์ให้ทันทีโดยไม่เข้าผิดห้อง`;
           lockResultCol.appendChild(hint);
         } else if (/^\d{1,2}$/.test(trimmed)) {
           const padded = trimmed.padStart(3, "0");
@@ -1254,7 +1311,7 @@
           if (res.all.length > 1) {
             const box = document.createElement("div");
             box.className = "hsd-srp-disambig-wrap";
-            box.innerHTML = `<div class="hsd-srp-disambig-lbl">พบรหัส/ชื่อตรงกัน ${res.all.length} คน — แตะเลือกชื่อของคุณเพื่อล็อกห้องทันที:</div>`;
+            box.innerHTML = `<div class="hsd-srp-disambig-lbl">พบรหัส/ชื่อตรงกัน ${res.all.length} คน — แตะเลือกชื่อของคุณเพื่อล็อกห้องและ Check-in ทันที:</div>`;
             const row = document.createElement("div");
             row.className = "hsd-srp-disambig-row";
             res.all.slice(0, 6).forEach((cand) => {
@@ -1269,6 +1326,9 @@
                 pinInput.value = pinQuery;
                 manualUnlockedAll = false;
                 saveStepPinPrefillStudent(cand);
+                if (!isFaculty) {
+                  syncStudentAutoCheckinToLive(modCode, clampRoomId(cand.disc || 1), cand);
+                }
                 syncSectionUI();
               });
               row.appendChild(b);
@@ -1284,10 +1344,12 @@
         }
       }
 
-      // Render 6 Room Cards
+      // Render 6 Room Cards with Live Check-in Counters
       grid.replaceChildren();
       [1, 2, 3, 4, 5, 6].forEach((rId) => {
         const meta = getRoomMeta(modCode, rId);
+        const rStats = getLiveRoomJoinedStats(rId, modCode);
+        const hasCheckedIn = rStats.joinedCount > 0;
         const isMine = myDiscRoom === rId;
         const isCur = activeRoom === rId;
         const isLockedTarget = isRoomLocked && lockedRoomId === rId;
@@ -1316,12 +1378,16 @@
           openRoomQrZoomModal(modCode, rId);
         });
 
+        const liveBadgeHtml = hasCheckedIn
+          ? `<span class="hsd-srp-html-pill is-live-checkin-pill">🟢 Check-in ${rStats.joinedCount}/${rStats.expectedCount} (ก.1:${rStats.teamCounts[1] || 0}·ก.2:${rStats.teamCounts[2] || 0}·ก.3:${rStats.teamCounts[3] || 0})</span>`
+          : `<span class="hsd-srp-html-pill">เช็คชื่อ 0/${rStats.expectedCount}</span>`;
+
         const metaDiv = document.createElement("div");
         metaDiv.className = "hsd-srp-meta";
         metaDiv.innerHTML = `
           <div class="hsd-srp-badges">
             <span class="hsd-srp-pin">${escHtml(meta.pinCode)}</span>
-            ${meta.htmlFile ? `<span class="hsd-srp-html-pill">${escHtml(meta.htmlFile)}</span>` : ""}
+            ${liveBadgeHtml}
             ${isLockedTarget ? `<span class="hsd-srp-html-pill is-locked-mine-pill">🔒 ล็อกห้องของคุณ</span>` : isMine ? `<span class="hsd-srp-html-pill is-locked-mine-pill">★ ห้องของคุณ</span>` : ""}
             ${isLockedOut ? `<span class="hsd-srp-html-pill is-locked-out-pill">🔒 ล็อกไว้ที่ห้อง ${lockedRoomId}</span>` : ""}
           </div>
@@ -1342,7 +1408,7 @@
         openRoomBtn.textContent = isFaculty
           ? `▶ เปิด PPT ห้อง ${rId} (${meta.roomCode})`
           : isLockedTarget
-          ? `📲 กดไป Check-in ห้อง ${rId} (${meta.roomCode}) →`
+          ? `📲 เข้าห้องเรียน ${rId} (${meta.roomCode}) →`
           : `📲 เข้าห้อง ${rId} & Check-in`;
         openRoomBtn.addEventListener("click", () => {
           if (isLockedOut) return;
@@ -1377,7 +1443,23 @@
       });
     }
 
+    const liveRef = root && root.RACM_LIVE_CLASSROOM;
+    if (liveRef && typeof liveRef.startEngine === "function") {
+      liveRef.startEngine();
+    }
+    if (!isFaculty && lockedStudent) {
+      syncStudentAutoCheckinToLive(modCode, clampRoomId(lockedStudent.disc || 1), lockedStudent);
+    }
     syncSectionUI();
+    if (liveRef && typeof liveRef.on === "function") {
+      const unsubPres = liveRef.on("presence", () => {
+        if (!sec.isConnected) {
+          unsubPres();
+          return;
+        }
+        syncSectionUI();
+      });
+    }
     return sec;
   }
 
@@ -1397,7 +1479,7 @@
     const topRow = document.createElement("div");
     topRow.className = "hsd-csl-top";
     topRow.innerHTML =
-      `<span class="hsd-csl-title">🔑 ใส่รหัส 3 ตัวท้ายเพื่อล็อกห้องตาม ${escHtml(modCode)} &amp; กดไป Check-in:</span>` +
+      `<span class="hsd-csl-title">🔑 ใส่รหัส 3 ตัวท้ายเพื่อล็อกห้องตาม ${escHtml(modCode)} &amp; Check-in ขึ้นฝั่งอาจารย์ทันที:</span>` +
       `<div class="hsd-csl-pdfs">` +
       `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF กลางรวม ${escHtml(modCode)} (16:9)</a>` +
       `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.combinedPdfHref)}" download="${escHtml(cPdf.combinedPdfFileName)}">⬇ .PDF รวม HS1–HS6</a>` +
@@ -1420,12 +1502,26 @@
 
     function goRoom(rId, stuObj) {
       const m = getRoomMeta(modCode, rId);
-      if (stuObj) saveStepPinPrefillStudent(stuObj);
+      let syncedTeam = 0;
+      if (stuObj) {
+        saveStepPinPrefillStudent(stuObj);
+        if (!isFaculty) {
+          const rec = syncStudentAutoCheckinToLive(modCode, rId, stuObj);
+          syncedTeam = (rec && rec.teamId) || 0;
+          if (root && root.RACM_PORTAL_API && typeof root.RACM_PORTAL_API.applyMyStudent === "function") {
+            try {
+              root.RACM_PORTAL_API.applyMyStudent(stuObj, true);
+            } catch (_) {}
+          }
+        }
+      }
       if (typeof cfg.onNavigate === "function") {
         cfg.onNavigate(modCode, rId, stuObj, m);
         return;
       }
-      window.location.href = isFaculty ? m.facultyRoomHref : buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+      window.location.href = isFaculty
+        ? m.facultyRoomHref
+        : buildStudentCheckinHrefWithSid(modCode, rId, stuObj, syncedTeam);
     }
 
     function sync() {
@@ -1435,13 +1531,16 @@
         const rId = clampRoomId(curStu.disc || 1);
         const m = getRoomMeta(modCode, rId);
         const sNo = String(curStu.id).slice(-3);
+        const rStats = getLiveRoomJoinedStats(rId, modCode);
+        const myPres = rStats.bySid.get(String(curStu.id));
+        const teamTxt = myPres && myPres.teamId ? ` · 🟢 ก.${myPres.teamId}` : "";
         const badge = document.createElement("span");
         badge.className = "hsd-csl-matched";
-        badge.innerHTML = `🔒 <strong>${escHtml(sNo)} ${escHtml(curStu.nickname || curStu.name)}</strong> → ห้อง ${rId} (${escHtml(m.roomCode)} · ${escHtml(m.instructor)})`;
+        badge.innerHTML = `🔒 <strong>${escHtml(sNo)} ${escHtml(curStu.nickname || curStu.name)}${escHtml(teamTxt)}</strong> → ห้อง ${rId} (${escHtml(m.roomCode)} · ${escHtml(m.instructor)})`;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "hsd-csl-checkin-btn";
-        btn.textContent = isFaculty ? `▶ เปิด PPT ห้อง ${rId}` : `📲 กดไป Check-in ห้อง ${rId} (${m.roomCode}) →`;
+        btn.textContent = isFaculty ? `▶ เปิด PPT ห้อง ${rId}` : `📲 เข้าห้อง ${rId} (${m.roomCode}) · Check-in แล้ว →`;
         btn.addEventListener("click", () => goRoom(rId, curStu));
         const clr = document.createElement("button");
         clr.type = "button";
@@ -1471,6 +1570,9 @@
               curVal = String(cand.id).slice(-3);
               inp.value = curVal;
               saveStepPinPrefillStudent(cand);
+              if (!isFaculty) {
+                syncStudentAutoCheckinToLive(modCode, clampRoomId(cand.disc || 1), cand);
+              }
               sync();
             });
             statusWrap.appendChild(cb);
@@ -1478,17 +1580,19 @@
           return;
         }
       }
-      // Show 6 quick room chips when unlocked
+      // Show 6 quick room chips with live check-in counts when unlocked
       const chips = document.createElement("div");
       chips.className = "hsd-csl-room-chips";
       [1, 2, 3, 4, 5, 6].forEach((rNum) => {
         const rm = getRoomMeta(modCode, rNum);
+        const rSt = getLiveRoomJoinedStats(rNum, modCode);
+        const cntSuffix = rSt.joinedCount > 0 ? ` (🟢 ${rSt.joinedCount}/${rSt.expectedCount})` : "";
         const a = document.createElement("button");
         a.type = "button";
         a.className = "tv-hosp-chip";
         a.style.fontSize = "11.8px";
         a.style.padding = "3px 8px";
-        a.textContent = `ห้อง ${rNum} · ${rm.cleanRoomSlug} ↗`;
+        a.textContent = `ห้อง ${rNum} · ${rm.cleanRoomSlug}${cntSuffix} ↗`;
         a.addEventListener("click", () => goRoom(rNum, null));
         chips.appendChild(a);
       });
@@ -1503,7 +1607,12 @@
       } else {
         const res = matchStudentsBy3DigitPin(q, 1);
         curStu = res.all.length === 1 ? res.all[0] : null;
-        if (curStu) saveStepPinPrefillStudent(curStu);
+        if (curStu) {
+          saveStepPinPrefillStudent(curStu);
+          if (!isFaculty) {
+            syncStudentAutoCheckinToLive(modCode, clampRoomId(curStu.disc || 1), curStu);
+          }
+        }
       }
       sync();
     });
@@ -1528,7 +1637,23 @@
       }
     });
 
+    const liveRef = root && root.RACM_LIVE_CLASSROOM;
+    if (liveRef && typeof liveRef.startEngine === "function") {
+      liveRef.startEngine();
+    }
+    if (!isFaculty && curStu) {
+      syncStudentAutoCheckinToLive(modCode, clampRoomId(curStu.disc || 1), curStu);
+    }
     sync();
+    if (liveRef && typeof liveRef.on === "function") {
+      const unsub = liveRef.on("presence", () => {
+        if (!box.isConnected) {
+          unsub();
+          return;
+        }
+        sync();
+      });
+    }
     return box;
   }
 
@@ -2074,11 +2199,11 @@
       const assignedRoom = clampRoomId(stuDone.disc || roomId);
       if (assignedRoom !== roomId) {
         saveStepPinPrefillStudent(stuDone);
+        const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, 0);
         if (root.RACM_HSD_ROOM_PAGE && modCode === "HS1") {
           window.location.href = buildStudentCheckinHrefWithSid(modCode, assignedRoom, stuDone);
           return;
         }
-        const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, 0);
         if (typeof cfg.onCompletedCheckin === "function") {
           cfg.onCompletedCheckin(stuDone, assignedRoom, 0, recOther);
         }
@@ -2289,6 +2414,7 @@
     getStudentCheckinRecord,
     isStudentCheckedIn,
     markStudentCheckedIn,
+    syncStudentAutoCheckinToLive,
     clearStudentCheckin,
     matchStudentsBy3DigitPin,
     getLiveRoomJoinedStats,
