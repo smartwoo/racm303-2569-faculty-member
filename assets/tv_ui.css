@@ -749,6 +749,18 @@ html[data-role="faculty"] .tv-hero-btn.is-primary {
   backdrop-filter: blur(12px);
 }
 
+.tv-hero-btn.is-glass.is-case-disc-pill {
+  background: rgba(20, 184, 166, 0.28);
+  border-color: rgba(153, 246, 228, 0.65);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.22);
+}
+
+html[data-role="faculty"] .tv-hero-btn.is-glass.is-case-disc-pill {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: rgba(253, 230, 138, 0.68);
+  box-shadow: 0 6px 18px rgba(180, 83, 9, 0.24);
+}
+
 .tv-hero-btn:hover,
 .tv-hero-btn.is-tv-focused,
 .tv-hero-btn:focus-visible {

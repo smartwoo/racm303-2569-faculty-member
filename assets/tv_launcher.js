@@ -155,6 +155,7 @@
     sun: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
     moon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
     chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg>`,
+    discussion: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>`,
     dots: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`
   };
 
@@ -554,8 +555,9 @@
     if (sess.hsModule && /^HS[1-6]$/i.test(sess.hsModule)) {
       const mod = sess.hsModule.toUpperCase();
       return {
-        label: t(`เปิดโจทย์ & สไลด์ Discussion ${mod}`, `Open ${mod} Discussion Slides`),
+        label: t(`เปิด Case Discussion ${mod}`, `Open ${mod} Case Discussion`),
         run: () => {
+          hideCourseDriveBrowser();
           if (api && api.openHsDiscussion) api.openHsDiscussion(mod);
           else openEpisodeModal(mod);
         }
@@ -935,10 +937,78 @@
       heroMeta,
       zoomUrl,
       primaryAction: resolveHeroPrimaryActionSpec(nextSess, ctx),
+      companionAction: resolveHeroCompanionActionSpec(nextSess, featured, items),
       upNextItems,
       canStepPrev: activeIdx > 0,
       canStepNext: activeIdx >= 0 && activeIdx < items.length - 1,
       syncClockText: t(`ซิงค์เวลา ${now.hhmm} น.`, `Synced ${now.hhmm.replace(".", ":")}`)
+    };
+  }
+
+  function resolveHeroCompanionActionSpec(sess, featured, items) {
+    const api = getApi();
+    if (sess && sess.hsModule && /^HS[1-6]$/i.test(sess.hsModule)) {
+      const mod = sess.hsModule.toUpperCase();
+      return {
+        icon: ICONS.book,
+        extraClass: "",
+        label: t(`เปิดบทเรียน & สไลด์ ${mod}`, `Open ${mod} Hub & Slides`),
+        run: () => openEpisodeModal(mod)
+      };
+    }
+
+    const hsDocMatch = sess ? String(sess.code || sess.docLink || "").match(/^(HS[1-6])$/i) : null;
+    if (hsDocMatch) {
+      const mod = hsDocMatch[1].toUpperCase();
+      return {
+        icon: ICONS.discussion,
+        extraClass: "is-case-disc-pill",
+        label: t(`ไปยัง Case Discussion ${mod}`, `Go to ${mod} Case Discussion`),
+        run: () => {
+          hideCourseDriveBrowser();
+          if (api && api.openHsDiscussion) api.openHsDiscussion(mod);
+          else openEpisodeModal(mod);
+        }
+      };
+    }
+
+    const targetISO = (featured && featured.startISO) || getBangkokTodayISO();
+    const sameDayHsItem = Array.isArray(items)
+      ? items.find(
+          (x) =>
+            x.startISO === targetISO &&
+            ((x.session && x.session.hsModule && /^HS[1-6]$/i.test(x.session.hsModule)) ||
+              (x.session && /^(HS[1-6])$/i.test(String(x.session.code || x.session.docLink || ""))))
+        )
+      : null;
+    const sameDayMod = sameDayHsItem
+      ? String(
+          sameDayHsItem.session.hsModule || sameDayHsItem.session.code || sameDayHsItem.session.docLink || ""
+        ).toUpperCase()
+      : "";
+
+    if (/^HS[1-6]$/.test(sameDayMod)) {
+      return {
+        icon: ICONS.discussion,
+        extraClass: "is-case-disc-pill",
+        label: t(`ไปยัง Case Discussion ${sameDayMod}`, `Go to ${sameDayMod} Case Discussion`),
+        run: () => {
+          hideCourseDriveBrowser();
+          if (api && api.openHsDiscussion) api.openHsDiscussion(sameDayMod);
+          else openEpisodeModal(sameDayMod);
+        }
+      };
+    }
+
+    return {
+      icon: ICONS.discussion,
+      extraClass: "is-case-disc-pill",
+      label: t("ไปยัง Case Discussion", "Case Discussion"),
+      run: () => {
+        hideCourseDriveBrowser();
+        if (api && api.openHsDiscussion) api.openHsDiscussion("DRIVE");
+        else navigateTvTab("hs-discussion");
+      }
     };
   }
 
@@ -985,6 +1055,10 @@
 
     const zoomBtnHtml = snap.zoomUrl
       ? `<a class="tv-hero-btn ${primaryIsGlass ? "is-primary" : "is-glass is-zoom-pill"}" id="tvHeroZoomBtn" href="${esc(snap.zoomUrl)}" target="_blank" rel="noopener" data-tv-focus data-tv-row="1">${ICONS.video} <span>${esc(t("เข้าห้องเรียน Zoom", "Join Zoom Room"))}</span></a>`
+      : "";
+
+    const companionBtnHtml = snap.companionAction
+      ? `<button type="button" class="tv-hero-btn is-glass ${esc(snap.companionAction.extraClass || "")}" id="tvHeroCompanionBtn" data-tv-focus data-tv-row="1">${snap.companionAction.icon || ICONS.discussion} <span>${esc(snap.companionAction.label)}</span></button>`
       : "";
 
     heroEl.innerHTML = `
@@ -1035,6 +1109,7 @@
 
       <div class="tv-hero-actions">
         ${primaryIsGlass ? `${zoomBtnHtml}${primaryBtnHtml}` : `${primaryBtnHtml}${zoomBtnHtml}`}
+        ${companionBtnHtml}
         <button type="button" class="tv-hero-btn is-glass" id="tvHeroScheduleBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(
           ROLE === "faculty" ? t("เปิดดูตารางสอน", "Open Schedule") : t("เปิดดูตารางเรียน", "Open Schedule")
         )}</span></button>
@@ -1061,6 +1136,11 @@
     const heroPrimary = $("tvHeroPrimaryBtn");
     if (heroPrimary && snap.primaryAction && typeof snap.primaryAction.run === "function") {
       heroPrimary.addEventListener("click", () => snap.primaryAction.run());
+    }
+
+    const heroCompanion = $("tvHeroCompanionBtn");
+    if (heroCompanion && snap.companionAction && typeof snap.companionAction.run === "function") {
+      heroCompanion.addEventListener("click", () => snap.companionAction.run());
     }
 
     const heroSchedBtn = $("tvHeroScheduleBtn");
@@ -1478,10 +1558,11 @@
         <div class="tv-shelf" aria-label="บทเรียนระบบสุขภาพ HS1 ถึง HS6">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6 (เอกสารคำสอน · Self-Quiz · Slide อาจารย์ · VDO Lecture)", "Health Systems HS1–HS6 (6-Step Learning Hub)"))}</h2>
-              <span class="tv-shelf-sub">${esc(t("คลิก HS1–HS6 เพื่อเปิดอ่านฉบับเต็ม ฉบับย่อ ทำ Self-Quiz ดูสไลด์อาจารย์ Case Discussion และรับชม VDO Lecture (ส่วนคาบ ST1 อยู่ในเวทีคิดเชิงระบบ & เสวนาด้านล่าง)", "Click HS1–HS6 for Full/Abridged docs, Self-Quiz, Slide Upload/Download & VDO Lecture (ST1 is in Systems Thinking & Panels below)"))}</span>
+              <h2 class="tv-shelf-title">${esc(t("ระบบสุขภาพ HS1 – HS6 (เอกสารคำสอน · Self-Quiz · Slide อาจารย์ · Case Discussion · VDO Lecture)", "Health Systems HS1–HS6 (6-Step Learning Hub & Case Discussion)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("คลิก HS1–HS6 เพื่อเปิดอ่านฉบับเต็ม ฉบับย่อ ทำ Self-Quiz ดูสไลด์อาจารย์ Case Discussion และรับชม VDO Lecture (ส่วนคาบ ST1 อยู่ในเวทีคิดเชิงระบบ & เสวนาด้านล่าง)", "Click HS1–HS6 for Full/Abridged docs, Self-Quiz, Slide Upload/Download, Case Discussion & VDO Lecture (ST1 is in Systems Thinking & Panels below)"))}</span>
             </div>
             <div class="tv-shelf-controls">
+              <button type="button" class="tv-pill-action-btn" id="tvOpenAllCaseDiscussionBtn">${ICONS.discussion} <span>${esc(t("ไปยัง Case Discussion →", "Case Discussion →"))}</span></button>
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpisodesTrack" data-scroll-dir="-1" aria-label="เลื่อนซ้าย">‹</button>
               <button type="button" class="tv-paddle-btn" data-scroll-target="tvEpisodesTrack" data-scroll-dir="1" aria-label="เลื่อนขวา">›</button>
             </div>
@@ -1703,6 +1784,16 @@
         openEpisodeModal(card.dataset.epCode);
       });
     });
+
+    const openAllCaseDiscBtn = $("tvOpenAllCaseDiscussionBtn");
+    if (openAllCaseDiscBtn) {
+      openAllCaseDiscBtn.addEventListener("click", () => {
+        lastHomeTileFocusSelector = "#tvOpenAllCaseDiscussionBtn";
+        hideCourseDriveBrowser();
+        if (api && api.openHsDiscussion) api.openHsDiscussion("DRIVE");
+        else navigateTvTab("hs-discussion");
+      });
+    }
 
     const openGlobalPsvBtn = $("tvOpenGlobalPanelScreensaverBtn");
     if (openGlobalPsvBtn) {
