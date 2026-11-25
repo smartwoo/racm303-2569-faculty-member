@@ -863,43 +863,45 @@
       );
       okShapes.push(buildShapeXml(okId++, "HeaderHairline", { x: 0, y: 480000, w: W, h: 12000 }, pal.border, null, ""));
 
-      const leftX = padX;
-      const leftW = 5520000;
-      const rightX = leftX + leftW + 220000;
+      const col1X = padX;
+      const col1W = 2860000;
+      const col2X = col1X + col1W + 160000;
+      const col2W = 3420000;
+      const rightX = col2X + col2W + 160000;
       const rightW = W - padX - rightX;
 
-      // Left Card 1: Clean "Case Discussion: HS1" Hero
+      // Column 1 Top: Clean "Case Discussion: HS1" Hero
       const heroParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="100"/></a:spcAft></a:pPr>` +
-        buildRunXml(schedTxt, { pt: 11, bold: true, color: pal.accent }) +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="70"/></a:spcAft></a:pPr>` +
+        buildRunXml(schedTxt, { pt: 9.2, bold: true, color: pal.accent }) +
         `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="80"/></a:spcAft></a:pPr>` +
-        buildRunXml(`Case Discussion: ${modCode}`, { pt: 27, bold: true, color: pal.ink }) +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="60"/></a:spcAft></a:pPr>` +
+        buildRunXml(`Case Discussion: ${modCode}`, { pt: 20.5, bold: true, color: pal.ink }) +
         `</a:p>` +
         `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(`ห้องอภิปรายที่ ${roomId} · ห้อง ${roomCode} · อ.ประจำห้อง: ${instName}`, { pt: 12, bold: false, color: pal.sub }) +
+        buildRunXml(`ห้อง ${roomId} (${roomCode}) · ${instName}`, { pt: 10.2, bold: false, color: pal.sub }) +
         `</a:p>`;
       okShapes.push(
         buildShapeXml(
           okId++,
           "CleanCaseHeroCard",
-          { x: leftX, y: 610000, w: leftW, h: 1460000, anchor: "ctr" },
+          { x: col1X, y: 610000, w: col1W, h: 1460000, anchor: "ctr" },
           pal.cardBg,
           pal.border,
           heroParas,
           4500,
-          { l: 190000, r: 190000, t: 110000, b: 110000 }
+          { l: 140000, r: 140000, t: 90000, b: 90000 }
         )
       );
 
-      // Left Card 2: Dedicated Room QR Code + 3-Digit Student ID Check-in Instructions
+      // Column 1 Bottom: Dedicated Room QR Code Card
       const qrCardY = 2210000;
       const qrCardH = 4150000;
       okShapes.push(
         buildShapeXml(
           okId++,
           "RoomQrCardBg",
-          { x: leftX, y: qrCardY, w: leftW, h: qrCardH },
+          { x: col1X, y: qrCardY, w: col1W, h: qrCardH },
           pal.cardBg,
           pal.border,
           "",
@@ -907,9 +909,25 @@
         )
       );
 
-      const qrSize = 2780000;
-      const qrX = leftX + 180000;
-      const qrY = qrCardY + Math.round((qrCardH - qrSize) / 2);
+      const qrBadgeP =
+        `<a:p><a:pPr algn="ctr"/>` +
+        buildRunXml(`QR ประจำห้อง ${roomCode}`, { pt: 11, bold: true, color: pal.accent }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "RoomQrLabel",
+          { x: col1X + 90000, y: qrCardY + 120000, w: col1W - 180000, h: 340000, anchor: "ctr" },
+          null,
+          null,
+          qrBadgeP,
+          0
+        )
+      );
+
+      const qrSize = 2360000;
+      const qrX = col1X + Math.round((col1W - qrSize) / 2);
+      const qrY = qrCardY + 520000;
       if (slideSpec.qrPngBytes) {
         okShapes.push(
           buildPictureXml(okId++, `RoomQrCode_${pinCode}`, "rIdQrImg", {
@@ -921,50 +939,182 @@
         );
       }
 
-      const qrInfoX = qrX + qrSize + 150000;
-      const qrInfoW = leftX + leftW - 150000 - qrInfoX;
-      const qrInfoParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="140"/></a:spcAft></a:pPr>` +
-        buildRunXml(`QR CHECK-IN ห้อง ${roomCode}`, { pt: 12.5, bold: true, color: pal.accent }) +
+      const qrUrlP =
+        `<a:p><a:pPr algn="ctr"><a:spcAft><a:spcPts val="60"/></a:spcAft></a:pPr>` +
+        buildRunXml(shortUrl, { pt: 8.8, bold: true, color: pal.ink, font: "Consolas" }) +
         `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
-        buildRunXml(`1. สแกน QR Code ประจำห้อง ${roomCode}`, { pt: 12.2, bold: true, color: pal.ink }) +
-        `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="130"/></a:spcAft></a:pPr>` +
-        buildRunXml(`2. ใส่รหัสนักศึกษา 3 ตัวท้าย (เช่น 056) เพื่อ Check-in เข้าห้องเรียน`, { pt: 12.2, bold: true, color: "047857" }) +
-        `</a:p>` +
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="150"/></a:spcAft></a:pPr>` +
-        buildRunXml(`3. เลือกเข้า กลุ่ม 1 / 2 / 3 ร่วมกันตอบในใบงานกลุ่ม`, { pt: 11.2, bold: false, color: pal.body }) +
-        `</a:p>` +
-        `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(shortUrl, { pt: 10.2, bold: true, color: pal.muted, font: "Consolas" }) +
+        `<a:p><a:pPr algn="ctr"/>` +
+        buildRunXml(`สแกนเข้าห้อง ${roomCode} เพื่อ Check-in`, { pt: 9.5, bold: false, color: pal.sub }) +
         `</a:p>`;
       okShapes.push(
         buildShapeXml(
           okId++,
-          "RoomQrInstructions",
-          { x: qrInfoX, y: qrCardY + 180000, w: qrInfoW, h: qrCardH - 360000, anchor: "ctr" },
+          "RoomQrUrlCaption",
+          { x: col1X + 80000, y: qrY + qrSize + 90000, w: col1W - 160000, h: 950000, anchor: "ctr" },
           null,
           null,
-          qrInfoParas,
-          0,
-          { l: 20000, r: 20000, t: 20000, b: 20000 }
+          qrUrlP,
+          0
         )
       );
 
-      // Right Card 1: Dark Room PIN Banner
+      // Column 2 (Middle — directly beside Check-in Status): 3-Digit Student ID Check-in Card
+      const kpY = 610000;
+      const kpH = 5750000;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CheckinKeypadCardBg",
+          { x: col2X, y: kpY, w: col2W, h: kpH },
+          pal.cardBg,
+          pal.border,
+          "",
+          5000
+        )
+      );
+
+      const kpHeroP =
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="55"/></a:spcAft></a:pPr>` +
+        buildRunXml(`${pinCode} · ห้อง ${roomCode}     Check-in 0/${rosterItems.length} คน`, {
+          pt: 9.2,
+          bold: true,
+          color: "FDE047"
+        }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="40"/></a:spcAft></a:pPr>` +
+        buildRunXml(`Check-in เข้าห้องเรียน (${modCode})`, { pt: 13.5, bold: true, color: "FFFFFF" }) +
+        `</a:p>` +
+        `<a:p><a:pPr algn="l"/>` +
+        buildRunXml(`ห้องอภิปรายที่ ${roomId} (${roomCode}) · ${instName}`, { pt: 9.2, bold: false, color: "DBEAFE" }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CheckinKeypadHero",
+          { x: col2X + 120000, y: kpY + 120000, w: col2W - 240000, h: 1080000, anchor: "ctr" },
+          "1E3A8A",
+          "1E40AF",
+          kpHeroP,
+          4000,
+          { l: 130000, r: 130000, t: 70000, b: 70000 }
+        )
+      );
+
+      const kpStepP =
+        `<a:p><a:pPr algn="ctr"/>` +
+        buildRunXml(`กรอกรหัสนักศึกษา 3 ตัวท้าย (เช่น 056) เพื่อ Check-in`, { pt: 10.2, bold: true, color: pal.ink }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CheckinStepTitle",
+          { x: col2X + 120000, y: kpY + 1260000, w: col2W - 240000, h: 320000, anchor: "ctr" },
+          null,
+          null,
+          kpStepP,
+          0
+        )
+      );
+
+      // 3 PIN Slot Boxes
+      const slotW = 620000;
+      const slotH = 640000;
+      const slotGap = 110000;
+      const slotsStartX = col2X + Math.round((col2W - (slotW * 3 + slotGap * 2)) / 2);
+      for (let sIdx = 0; sIdx < 3; sIdx += 1) {
+        const sP =
+          `<a:p><a:pPr algn="ctr"/>` +
+          buildRunXml("•", { pt: 20, bold: true, color: pal.ink }) +
+          `</a:p>`;
+        okShapes.push(
+          buildShapeXml(
+            okId++,
+            `PinSlot_${sIdx + 1}`,
+            { x: slotsStartX + sIdx * (slotW + slotGap), y: kpY + 1630000, w: slotW, h: slotH, anchor: "ctr" },
+            isDark ? "0F172A" : "F8FAFC",
+            sIdx === 0 ? "2563EB" : "CBD5E1",
+            sP,
+            3500
+          )
+        );
+      }
+
+      const kpHintP =
+        `<a:p><a:pPr algn="ctr"/>` +
+        buildRunXml(`แตะตัวเลข 3 หลักท้ายเพื่อยืนยันชื่อเข้าห้อง ${roomCode}`, { pt: 9.2, bold: false, color: pal.sub }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CheckinVerifyHint",
+          { x: col2X + 140000, y: kpY + 2360000, w: col2W - 280000, h: 420000, anchor: "ctr" },
+          isDark ? "1E293B" : "F1F5F9",
+          null,
+          kpHintP,
+          3000
+        )
+      );
+
+      // 4x3 Numeric Keypad Grid
+      const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ล้าง", "0", "⌫"];
+      const kCols = 3;
+      const kGapX = 80000;
+      const kGapY = 65000;
+      const kPadW = col2W - 280000;
+      const kW = Math.floor((kPadW - kGapX * 2) / 3);
+      const kH = 420000;
+      const kStartX = col2X + 140000;
+      const kStartY = kpY + 2880000;
+      keys.forEach((lbl, kIdx) => {
+        const kr = Math.floor(kIdx / kCols);
+        const kc = kIdx % kCols;
+        const isFn = lbl === "ล้าง" || lbl === "⌫";
+        const kP =
+          `<a:p><a:pPr algn="ctr"/>` +
+          buildRunXml(lbl, { pt: isFn ? 10.5 : 13.5, bold: true, color: isFn ? pal.sub : pal.ink }) +
+          `</a:p>`;
+        okShapes.push(
+          buildShapeXml(
+            okId++,
+            `NumpadKey_${kIdx}`,
+            { x: kStartX + kc * (kW + kGapX), y: kStartY + kr * (kH + kGapY), w: kW, h: kH, anchor: "ctr" },
+            isDark ? "1E293B" : "F8FAFC",
+            pal.border,
+            kP,
+            3000
+          )
+        );
+      });
+
+      const kpSubmitP =
+        `<a:p><a:pPr algn="ctr"/>` +
+        buildRunXml(`Check-in เข้าห้อง ${roomCode} & เลือกกลุ่ม 1 / 2 / 3 →`, { pt: 10.8, bold: true, color: "FFFFFF" }) +
+        `</a:p>`;
+      okShapes.push(
+        buildShapeXml(
+          okId++,
+          "CheckinSubmitBar",
+          { x: col2X + 140000, y: kpY + 4920000, w: col2W - 280000, h: 640000, anchor: "ctr" },
+          "059669",
+          "047857",
+          kpSubmitP,
+          3800
+        )
+      );
+
+      // Column 3 Top: Dark Check-in Status Banner
       const pinParas =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="70"/></a:spcAft></a:pPr>` +
-        buildRunXml(`ROOM PIN · ห้องอภิปรายที่ ${roomId} (แบ่งกลุ่ม 1 · 2 · 3)   |   ${htmlFile}`, {
-          pt: 10.5,
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="60"/></a:spcAft></a:pPr>` +
+        buildRunXml(`CHECK-IN STATUS · ห้องอภิปรายที่ ${roomId}   |   ${htmlFile}`, {
+          pt: 10,
           bold: true,
           color: "60B4FF"
         }) +
         `</a:p>` +
         `<a:p><a:pPr algn="l"/>` +
-        buildRunXml(`${pinCode}`, { pt: 26, bold: true, color: "FFFFFF" }) +
-        buildRunXml(`     ห้อง ${roomCode}  ·  อ.ประจำห้อง (${modCode}): ${instName}`, {
-          pt: 12.2,
+        buildRunXml(`${pinCode}`, { pt: 24, bold: true, color: "FFFFFF" }) +
+        buildRunXml(`    ห้อง ${roomCode} · อ.ประจำห้อง: ${instName}`, {
+          pt: 11.2,
           bold: true,
           color: "E2E8F0"
         }) +
@@ -978,17 +1128,17 @@
           "334155",
           pinParas,
           4500,
-          { l: 190000, r: 190000, t: 90000, b: 90000 }
+          { l: 170000, r: 170000, t: 80000, b: 80000 }
         )
       );
 
-      // Right Card 2: Assigned Room Roster Grid
+      // Column 3 Bottom: Check-in Status Roster Grid
       const rosY = 1970000;
       const rosH = 4390000;
       const rosHeadP =
-        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="90"/></a:spcAft></a:pPr>` +
-        buildRunXml(`สมาชิกห้อง ${roomCode} (${rosterItems.length} คน) · สแกน QR แล้วใส่รหัส 3 ตัวท้ายเพื่อ Check-in`, {
-          pt: 11.8,
+        `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="80"/></a:spcAft></a:pPr>` +
+        buildRunXml(`Check-in Status ห้อง ${roomCode} (0/${rosterItems.length} คน) · แบ่งกลุ่มย่อย 1 · 2 · 3`, {
+          pt: 11.2,
           bold: true,
           color: pal.ink
         }) +
@@ -997,10 +1147,10 @@
       const rowsXml = [];
       for (let i = 0; i < rosterItems.length; i += cols) {
         const chunk = rosterItems.slice(i, i + cols);
-        const lineTxt = chunk.map((it) => `• ${it}`).join("        ");
+        const lineTxt = chunk.map((it) => `• ${it}`).join("      ");
         rowsXml.push(
-          `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="55"/></a:spcBef></a:pPr>` +
-            buildRunXml(lineTxt, { pt: 10.6, bold: false, color: pal.body }) +
+          `<a:p><a:pPr algn="l"><a:spcBef><a:spcPts val="50"/></a:spcBef></a:pPr>` +
+            buildRunXml(lineTxt, { pt: 10.0, bold: false, color: pal.body }) +
             `</a:p>`
         );
       }
@@ -1013,7 +1163,7 @@
           pal.border,
           rosHeadP + rowsXml.join(""),
           4500,
-          { l: 180000, r: 180000, t: 130000, b: 120000 }
+          { l: 160000, r: 160000, t: 120000, b: 110000 }
         )
       );
 

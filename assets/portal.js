@@ -20332,7 +20332,6 @@
   function refreshHsdKahootLobbyModalDOM() {
     const modal = $("hsdKahootLobbyModal");
     if (!modal || modal.hidden) return;
-    modal.replaceChildren();
 
     const st = getKahootRoomRosterStatus();
     const activeMod = state.hsdModule !== "ALL" ? state.hsdModule : (st.activePtr && st.activePtr.module) || "HS1";
@@ -20348,15 +20347,65 @@
     const pct = Math.min(100, Math.round((st.joinedCount / Math.max(1, st.totalExpected)) * 100));
     const maxPerTeam = Math.ceil(st.totalExpected / 3);
 
+    // Preserve active 3-Digit Check-in Card across presence refreshes if same room & module
+    let checkinCardEl =
+      modal._checkinCardEl &&
+      modal._checkinCardRoomId === st.roomId &&
+      modal._checkinCardMod === activeMod
+        ? modal._checkinCardEl
+        : null;
+    if (!checkinCardEl && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.buildRoomCheckinCardElement === "function") {
+      const isKiosk = ROLE === "faculty" || Boolean(state.hsdSessionJoined && state.myStudent);
+      checkinCardEl = window.RACM_HSD_ROOM_QR.buildRoomCheckinCardElement({
+        modCode: activeMod,
+        roomId: st.roomId,
+        variant: "compact",
+        kioskMode: isKiosk,
+        onCompletedCheckin: (stu, rId, finalTeam) => {
+          if (ROLE === "student" && !isKiosk) {
+            const finalRoom = Number(rId) || st.roomId;
+            state.hsdLockedRoomId = finalRoom;
+            state.hsdRoomConfirmed = true;
+            state.hsdSessionJoined = true;
+            state.hsdRequireQrCheckin = false;
+            state.hsdSkipGatePreview = false;
+            try {
+              sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
+              sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
+            } catch (_) {}
+            applyMyStudent(stu, true);
+            if (LIVE) {
+              LIVE.setFollowTeacher(true);
+              if (typeof LIVE.joinSessionWithStudent === "function") {
+                LIVE.joinSessionWithStudent(stu, finalRoom, activeMod, finalTeam);
+              }
+            }
+            if (typeof syncStudentTeamWorksheetFromLive === "function") {
+              syncStudentTeamWorksheetFromLive("*");
+            }
+          }
+          renderHsLiveClassroomBar();
+          refreshOpeningKahootSlideRosterDOM();
+          refreshHsdKahootLobbyModalDOM();
+        }
+      });
+      modal._checkinCardEl = checkinCardEl;
+      modal._checkinCardRoomId = st.roomId;
+      modal._checkinCardMod = activeMod;
+    } else if (checkinCardEl && typeof checkinCardEl._syncUI === "function") {
+      checkinCardEl._syncUI();
+    }
+
+    modal.replaceChildren();
     const dialog = make("div", null, "hsd-kahoot-modal-card");
 
     // 1. Live Check-in Lobby Header
     const head = make("div", null, "hsd-km-head");
     const hLeft = make("div", null, "hsd-km-head-left");
-    const pinBadge = make("div", `ห้อง ${roomCode} (ห้องอภิปรายที่ ${st.roomId}) · แบ่งกลุ่มย่อย 1 / 2 / 3`, "hsd-km-pin-badge");
+    const pinBadge = make("div", `CHECK-IN STATUS · ห้อง ${roomCode} (ห้องอภิปรายที่ ${st.roomId})`, "hsd-km-pin-badge");
     const hTitle = make(
       "h3",
-      `ผังสมาชิก กลุ่ม 1 · กลุ่ม 2 · กลุ่ม 3 — เช็คชื่อแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
+      `Check-in Status ห้อง ${roomCode} — เช็คชื่อแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
       "hsd-km-title"
     );
     const hSub = make(
@@ -20406,10 +20455,12 @@
     const roomStrip = make("div", null, "hsd-km-room-strip");
     const rPills = make("div", null, "hsd-room-pills");
     (LIVE ? LIVE.rooms : []).forEach((rm) => {
+      if (state.hsdLockedRoomId && rm.id !== state.hsdLockedRoomId) return;
       const rb = make("button", `ห้อง ${rm.id} (${rm.roomCode})`, "hsd-room-btn");
       rb.type = "button";
       rb.setAttribute("aria-pressed", rm.id === st.roomId ? "true" : "false");
       rb.addEventListener("click", () => {
+        if (state.hsdLockedRoomId) return;
         LIVE.setRoom(rm.id, false);
         renderHsLiveClassroomBar();
         renderHsDiscussionContextBar();
@@ -20420,14 +20471,17 @@
     const progWrap = make("div", null, "hsd-km-progress-wrap");
     progWrap.innerHTML =
       `<div class="hsd-km-prog-labels">` +
-      `<strong>เข้ากลุ่มย่อยแล้ว ${st.joinedCount} / ${st.totalExpected} คน · กลุ่ม 1 (${st.teamCounts[1]}) · กลุ่ม 2 (${st.teamCounts[2]}) · กลุ่ม 3 (${st.teamCounts[3]})</strong>` +
-      `<span>ยังไม่เลือกกลุ่มอีก ${st.waitingList.length} คน</span>` +
+      `<strong>Check-in แล้ว ${st.joinedCount} / ${st.totalExpected} คน · กลุ่ม 1 (${st.teamCounts[1]}) · กลุ่ม 2 (${st.teamCounts[2]}) · กลุ่ม 3 (${st.teamCounts[3]})</strong>` +
+      `<span>รอเช็คชื่ออีก ${st.waitingList.length} คน</span>` +
       `</div>` +
       `<div class="hsd-km-prog-track"><div class="hsd-km-prog-fill" style="width:${pct}%"></div></div>`;
     roomStrip.append(rPills, progWrap);
     dialog.appendChild(roomStrip);
 
-    // 3. Three Balanced Intra-Room Team Columns (กลุ่ม 1 | กลุ่ม 2 | กลุ่ม 3)
+    // 3. Side-by-Side Body: [Left: 3-Digit Check-in Card] | [Right: 3-Group Check-in Status + Waiting List]
+    const bodySplit = checkinCardEl ? make("div", null, "hsd-km-body-split") : dialog;
+    const rightStatusWrap = checkinCardEl ? make("div", null, "hsd-km-right-status") : dialog;
+
     const teamCols = make("div", null, "hsd-km-team-columns");
     [1, 2, 3].forEach((tid) => {
       const members = st.teamMembers[tid] || [];
@@ -20439,7 +20493,7 @@
         tCol.appendChild(
           make(
             "div",
-            `ยังไม่มีสมาชิกเลือกเข้ากลุ่ม ${tid} — กรอกเบอร์ 3 หลักแล้วกดเลือกกลุ่ม ${tid} ได้ทันที`,
+            `ยังไม่มีสมาชิกเลือกเข้ากลุ่ม ${tid} — กรอกรหัส 3 ตัวท้ายในกรอบ Check-in ข้างๆ ได้ทันที`,
             "hsd-km-empty"
           )
         );
@@ -20464,28 +20518,40 @@
       }
       teamCols.appendChild(tCol);
     });
-    dialog.appendChild(teamCols);
+    rightStatusWrap.appendChild(teamCols);
 
-    // 4. Compact Waiting Strip for Remaining Students in the Room
     const waitCol = make("div", null, "hsd-km-col is-waiting-col");
     waitCol.style.marginTop = "12px";
     waitCol.appendChild(
-      make("h4", `ยังไม่ได้กรอกเบอร์เลือกกลุ่มในห้องนี้ (${st.waitingList.length} คน)`, "hsd-km-col-title")
+      make("h4", `ยังไม่ Check-in ในห้องนี้ (${st.waitingList.length} คน) — แตะชื่อเพื่อส่งรหัส 3 ตัวไปกรอบ Check-in`, "hsd-km-col-title")
     );
     if (!st.waitingList.length) {
-      waitCol.appendChild(make("div", "นักศึกษาในห้องนี้เลือกเข้ากลุ่ม 1 / 2 / 3 ครบทุกคนแล้ว", "hsd-km-empty is-all-in"));
+      waitCol.appendChild(make("div", "นักศึกษาในห้องนี้ Check-in เข้ากลุ่ม 1 / 2 / 3 ครบทุกคนแล้ว", "hsd-km-empty is-all-in"));
     } else {
       const wGrid = make("div", null, "hsd-km-wait-grid");
       st.waitingList.forEach((s) => {
-        const wItem = make("div", null, "hsd-km-wait-chip");
+        const wItem = make("button", null, "hsd-km-wait-chip");
+        wItem.type = "button";
+        wItem.style.cursor = "pointer";
+        wItem.title = `แตะเพื่อเลือกเบอร์ ${String(s.id).slice(-3)} ไปยังกรอบ Check-in ด้านซ้าย`;
         wItem.innerHTML =
           `<span class="hsd-km-wait-id">${escapeHtml(String(s.id).slice(-3))}</span>` +
           `<span class="hsd-km-wait-name">${escapeHtml(s.nickname ? `${s.nickname} (${s.fullName})` : s.fullName)}</span>`;
+        wItem.addEventListener("click", () => {
+          if (checkinCardEl && typeof checkinCardEl._prefillStudent === "function") {
+            checkinCardEl._prefillStudent(s);
+          }
+        });
         wGrid.appendChild(wItem);
       });
       waitCol.appendChild(wGrid);
     }
-    dialog.appendChild(waitCol);
+    rightStatusWrap.appendChild(waitCol);
+
+    if (checkinCardEl) {
+      bodySplit.append(checkinCardEl, rightStatusWrap);
+      dialog.appendChild(bodySplit);
+    }
     modal.appendChild(dialog);
   }
 
@@ -26886,7 +26952,7 @@
     rTitleWrap.appendChild(
       make(
         "span",
-        `สมาชิกห้อง ${st.roomDef.roomCode} · เข้ากลุ่มแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
+        `Check-in Status ห้อง ${st.roomDef.roomCode} · เช็คชื่อแล้ว ${st.joinedCount}/${st.totalExpected} คน`,
         "ppt-ok-roster-count"
       )
     );
@@ -26921,7 +26987,7 @@
           : 0);
       const shortCode = sid.slice(-3);
       const dispName = s.nickname ? `${s.nickname}` : String(s.name || s.fullName || "").split(" ")[0];
-      const tagType = ROLE === "student" && isInteractive && !joined ? "button" : "div";
+      const tagType = isInteractive && !joined ? "button" : "div";
       const chip = make(
         tagType,
         null,
@@ -26929,9 +26995,14 @@
       );
       if (tagType === "button") {
         chip.type = "button";
-        chip.title = `คลิกเพื่อกรอกเบอร์ ${shortCode} (${s.fullName}) แล้วเลือกเข้ากลุ่ม 1 / 2 / 3`;
+        chip.title = `คลิกเพื่อเลือกเบอร์ ${shortCode} (${s.fullName}) ไปยังกรอบ Check-in ข้างๆ`;
         chip.addEventListener("click", () => {
           const stageRoot = cardEl.closest(".ppt-opening-kahoot-stage");
+          const checkinCard = stageRoot && stageRoot.querySelector("[data-hsd-checkin-card='1']");
+          if (checkinCard && typeof checkinCard._prefillStudent === "function") {
+            checkinCard._prefillStudent(s);
+            return;
+          }
           const picker = stageRoot && stageRoot.querySelector("[data-smart-team-picker='1']");
           if (picker && typeof picker._pickStudentFromRoster === "function") {
             picker._pickStudentFromRoster(s);
@@ -26945,7 +27016,7 @@
           }
         });
       } else {
-        chip.title = `${sid} · ${s.fullName}${assignedTeam ? ` (กลุ่ม ${assignedTeam})` : joined ? " (เช็คชื่อแล้ว)" : ""}`;
+        chip.title = `${sid} · ${s.fullName}${assignedTeam ? ` (กลุ่ม ${assignedTeam})` : joined ? " (Check-in แล้ว)" : ""}`;
       }
       const badgeHtml = assignedTeam
         ? `<span class="ppt-ok-stu-team-tag is-team-${assignedTeam}">ก.${assignedTeam}</span>`
@@ -26959,6 +27030,9 @@
   function refreshOpeningKahootSlideRosterDOM() {
     document.querySelectorAll("[data-ppt-ok-roster-mount='1']").forEach((el) => {
       populateOpeningKahootRosterCardDOM(el);
+    });
+    document.querySelectorAll("[data-hsd-checkin-card='1']").forEach((el) => {
+      if (typeof el._syncUI === "function") el._syncUI();
     });
     document.querySelectorAll("[data-ppt-ok-fac-teams='1']").forEach((el) => {
       const st = getKahootRoomRosterStatus();
@@ -27029,10 +27103,10 @@
       }
     };
 
-    const stage = make("div", null, "ppt-opening-kahoot-stage is-16x9-canvas");
+    const stage = make("div", null, "ppt-opening-kahoot-stage is-16x9-canvas is-3col-checkin-stage");
 
-    // Left Column: Clean "Case Discussion: HS1" Title Card + Scannable Room QR Check-in Card
-    const leftCol = make("div", null, "ppt-ok-left");
+    // Column 1 (Left): Clean "Case Discussion: HS1" Card + Scannable Room QR Code Card
+    const colQr = make("div", null, "ppt-ok-col-qr");
     const cleanHeroCard = make("div", null, "ppt-ok-card is-clean-case-hero");
     const schedStr = mod.scheduleDate ? mod.scheduleDate.replace(/^วัน/, "") : "";
     cleanHeroCard.append(
@@ -27044,15 +27118,10 @@
       make("h3", `Case Discussion: ${mod.code}`, "ppt-ok-clean-heading"),
       make(
         "p",
-        `ห้องอภิปรายที่ ${roomId} · ห้อง ${roomCode} · อ.ประจำห้อง: ${instName}`,
+        `ห้อง ${roomId} (${roomCode}) · ${instName}`,
         "ppt-ok-clean-sub"
       )
     );
-    leftCol.appendChild(cleanHeroCard);
-
-    // Card 2: Dedicated Room QR Code + 3-Digit Student ID Check-in Card
-    const qrCard = make("div", null, "ppt-ok-card is-room-qr-checkin-card");
-
     if (!state.hsdLockedRoomId && !window.RACM_HSD_ROOM_PAGE && !exp && !state.isPptSlideSharePopup) {
       const roomPills = make("div", null, "ppt-ok-room-pills is-compact-strip");
       const myGrp = state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0;
@@ -27063,7 +27132,7 @@
         const pill = make("button", null, `ppt-ok-room-pill${roomId === gNum ? " is-active" : ""}`);
         pill.type = "button";
         pill.title = `สลับดู PPT & QR ห้องอภิปรายที่ ${gNum} (${gRoom}) · ${gCell.instructor || "อ.ประจำห้อง"}`;
-        pill.innerHTML = `<span>ห้อง ${gNum}${myGrp === gNum ? " ★" : ""} · ${escapeHtml(gRoom)}</span>`;
+        pill.innerHTML = `<span>R${gNum}${myGrp === gNum ? "★" : ""}</span>`;
         pill.addEventListener("click", () => {
           if (LIVE) LIVE.setRoom(gNum, false);
           renderHsLiveClassroomBar();
@@ -27072,10 +27141,13 @@
         });
         roomPills.appendChild(pill);
       });
-      qrCard.appendChild(roomPills);
+      cleanHeroCard.appendChild(roomPills);
     }
+    colQr.appendChild(cleanHeroCard);
 
-    const qrSplit = make("div", null, "ppt-ok-qr-split");
+    const qrCard = make("div", null, "ppt-ok-card is-compact-qr-only-card");
+    qrCard.appendChild(make("span", `📱 QR ประจำห้อง ${roomCode}`, "ppt-ok-qr-badge"));
+
     const qrFrameBtn = make("button", null, "ppt-ok-qr-frame-btn");
     qrFrameBtn.type = "button";
     qrFrameBtn.title = `แตะเพื่อขยาย QR Code ประจำห้อง ${roomCode} เต็มจอ`;
@@ -27093,116 +27165,83 @@
         }
       });
     }
-
-    const qrInfo = make("div", null, "ppt-ok-qr-info");
-    qrInfo.appendChild(make("span", `📱 QR CHECK-IN ประจำห้อง ${roomCode}`, "ppt-ok-qr-badge"));
-
-    const stepsWrap = make("div", null, "ppt-ok-qr-steps");
-    const step1 = make("div", null, "ppt-ok-qr-step");
-    step1.innerHTML =
-      `<span class="ppt-ok-qr-step-num">1</span>` +
-      `<span>สแกน <strong>QR Code ประจำห้อง ${escapeHtml(roomCode)}</strong> (${escapeHtml(rMeta.htmlFile || pinCode)})</span>`;
-    const step2 = make("div", null, "ppt-ok-qr-step");
-    step2.innerHTML =
-      `<span class="ppt-ok-qr-step-num">2</span>` +
-      `<span>ใส่ <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> (เช่น 056) เพื่อ <strong>Check-in</strong> &amp; เข้ากลุ่ม 1 / 2 / 3</span>`;
-    stepsWrap.append(step1, step2);
-    qrInfo.appendChild(stepsWrap);
+    qrCard.appendChild(qrFrameBtn);
 
     const urlPill = make("div", `🔗 ${rMeta.displayShortUrl}`, "ppt-ok-qr-url-pill");
     urlPill.title = rMeta.studentQrUrl;
-    qrInfo.appendChild(urlPill);
-
-    const stNow = getKahootRoomRosterStatus(roomId);
-    const maxPerTeam = Math.ceil(stNow.totalExpected / 3);
-    const facTeamsRow = make("div", null, "ppt-ok-fac-teams-row");
-    facTeamsRow.setAttribute("data-ppt-ok-fac-teams", "1");
-    [1, 2, 3].forEach((tid) => {
-      const cnt = (stNow.teamCounts && stNow.teamCounts[tid]) || 0;
-      const box = make("div", null, `ppt-ok-fac-team-stat is-team-${tid}`);
-      box.innerHTML = `<strong>กลุ่ม ${tid}</strong><span>${cnt} / ${maxPerTeam} คน</span>`;
-      facTeamsRow.appendChild(box);
-    });
-    qrInfo.appendChild(facTeamsRow);
-
-    qrSplit.append(qrFrameBtn, qrInfo);
-    qrCard.appendChild(qrSplit);
+    qrCard.appendChild(urlPill);
 
     if (!exp && !state.isPptSlideSharePopup) {
-      const bottomBar = make("div", null, "ppt-ok-qr-bottom-bar");
-      if (ROLE === "student") {
-        const myTeam = LIVE && typeof LIVE.getTeamId === "function" ? LIVE.getTeamId() : 0;
-        if (state.hsdSessionJoined && state.myStudent && myTeam >= 1 && myTeam <= 3) {
-          const s = state.myStudent;
-          const sNo = String(s.id || "").slice(-3);
-          const joinedInfo = make(
-            "span",
-            `✓ Check-in แล้ว: เบอร์ ${sNo} ${s.nickname || s.fullName} (กลุ่ม ${myTeam})`,
-            "ppt-ok-roster-count"
-          );
-          const actWrap = make("div", null, "ppt-ok-joined-actions");
-          const openSheetBtn = make("button", `เปิดใบงานกลุ่ม ${myTeam} →`, "ppt-ok-join-cta");
-          openSheetBtn.type = "button";
-          openSheetBtn.addEventListener("click", jumpToFirstQuestion);
-          const switchIdBtn = make("button", "เปลี่ยนรหัส 3 ตัว", "btn sm");
-          switchIdBtn.type = "button";
-          switchIdBtn.addEventListener("click", () => logoutFromHsDiscussionSession());
-          actWrap.append(openSheetBtn, switchIdBtn);
-          bottomBar.append(joinedInfo, actWrap);
-        } else {
-          const checkinNowBtn = make(
-            "button",
-            `📲 กดใส่รหัสนักศึกษา 3 ตัวท้ายเพื่อ Check-in ห้อง ${roomCode} →`,
-            "ppt-ok-join-cta"
-          );
-          checkinNowBtn.type = "button";
-          checkinNowBtn.addEventListener("click", () => {
-            state.hsdRequireQrCheckin = true;
-            renderHsDiscussionView();
-          });
-          bottomBar.appendChild(checkinNowBtn);
-        }
-      } else {
-        const leftBtns = make("div", null, "ppt-ok-join-row");
-        const zoomQrBtn = make("button", "🔍 ขยาย QR", "btn sm");
-        zoomQrBtn.type = "button";
-        zoomQrBtn.addEventListener("click", () => {
-          if (qrApi && typeof qrApi.openRoomQrZoomModal === "function") {
-            qrApi.openRoomQrZoomModal(mod.code, roomId);
-          }
-        });
-
-        const lobbyBtn = make("button", "ผัง 3 กลุ่ม ↗", "btn sm");
-        lobbyBtn.type = "button";
-        lobbyBtn.addEventListener("click", () => openHsdKahootLobbyModal());
-
-        leftBtns.append(zoomQrBtn, lobbyBtn);
-
-        if (qrApi && typeof qrApi.exportRoomCheckinCsv === "function") {
-          const csvBtn = make("button", "📥 CSV เช็คชื่อ", "btn sm");
-          csvBtn.type = "button";
-          csvBtn.title = `ดาวน์โหลดรายชื่อนักศึกษาที่ Check-in ห้อง ${roomCode} (.csv)`;
-          csvBtn.addEventListener("click", () => qrApi.exportRoomCheckinCsv(mod.code, roomId));
-          leftBtns.appendChild(csvBtn);
-        }
-
-        const goQ1Btn = make("button", "▶ เริ่มโจทย์ข้อแรก →", "ppt-ok-join-cta");
-        goQ1Btn.type = "button";
-        goQ1Btn.addEventListener("click", jumpToFirstQuestion);
-
-        bottomBar.append(leftBtns, goQ1Btn);
+      const qrActions = make("div", null, "ppt-ok-join-row");
+      qrActions.style.justifyContent = "center";
+      if (ROLE === "faculty" && qrApi && typeof qrApi.exportRoomCheckinCsv === "function") {
+        const csvBtn = make("button", "📥 CSV", "btn sm");
+        csvBtn.type = "button";
+        csvBtn.title = `ดาวน์โหลดรายชื่อนักศึกษาที่ Check-in ห้อง ${roomCode} (.csv)`;
+        csvBtn.addEventListener("click", () => qrApi.exportRoomCheckinCsv(mod.code, roomId));
+        qrActions.appendChild(csvBtn);
       }
-      qrCard.appendChild(bottomBar);
+      const goQ1Btn = make("button", "▶ เริ่มโจทย์ →", "ppt-ok-join-cta");
+      goQ1Btn.type = "button";
+      goQ1Btn.addEventListener("click", jumpToFirstQuestion);
+      qrActions.appendChild(goQ1Btn);
+      qrCard.appendChild(qrActions);
+    }
+    colQr.appendChild(qrCard);
+
+    // Column 2 (Middle — directly beside Check-in Status!): 3-Digit Student ID Check-in Card
+    const colKeypad = make("div", null, "ppt-ok-col-keypad");
+    if (qrApi && typeof qrApi.buildRoomCheckinCardElement === "function") {
+      const isKiosk = ROLE === "faculty" || Boolean(state.hsdSessionJoined && state.myStudent);
+      const embedCheckinCard = qrApi.buildRoomCheckinCardElement({
+        modCode: mod.code,
+        roomId,
+        variant: "compact",
+        interactive: !exp && !isProjected,
+        kioskMode: isKiosk,
+        onCompletedCheckin: (stu, rId, finalTeam) => {
+          if (ROLE === "student" && !isKiosk) {
+            const finalRoom = Number(rId) || roomId;
+            state.hsdLockedRoomId = finalRoom;
+            state.hsdRoomConfirmed = true;
+            state.hsdSessionJoined = true;
+            state.hsdRequireQrCheckin = false;
+            state.hsdSkipGatePreview = false;
+            try {
+              sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
+              sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");
+            } catch (_) {}
+            applyMyStudent(stu, true);
+            if (LIVE) {
+              LIVE.setFollowTeacher(true);
+              if (typeof LIVE.joinSessionWithStudent === "function") {
+                LIVE.joinSessionWithStudent(stu, finalRoom, mod.code, finalTeam);
+              }
+            }
+            if (typeof syncStudentTeamWorksheetFromLive === "function") {
+              syncStudentTeamWorksheetFromLive("*");
+            }
+            showStudentSlideSyncToast(
+              `✅ Check-in สำเร็จ! เบอร์ ${String(stu.id).slice(-3)} · ${stu.nickname || stu.name} (กลุ่ม ${finalTeam})`
+            );
+            renderHsLiveClassroomBar();
+            renderHsDiscussionView();
+          } else {
+            refreshOpeningKahootSlideRosterDOM();
+            renderHsLiveClassroomBar();
+          }
+          broadcastPptPresentationState();
+        }
+      });
+      colKeypad.appendChild(embedCheckinCard);
     }
 
-    leftCol.appendChild(qrCard);
-
-    // Right Column: Room PIN Hero + Real-Time 3-Team Badged Roster Wall
+    // Column 3 (Right): Check-in Status of Each Room (Room PIN Hero + Live 3-Team Roster Wall)
     const rightCol = make("div", null, "ppt-ok-right");
     const pinHero = make("div", null, "ppt-ok-pin-hero");
     const pinLeft = make("div");
     pinLeft.append(
-      make("div", `ROOM ${roomId} PPT · ห้องอภิปรายที่ ${roomId} (QR CHECK-IN รหัส 3 ตัว)`, "ppt-ok-pin-kicker"),
+      make("div", `CHECK-IN STATUS · ห้องอภิปรายที่ ${roomId}`, "ppt-ok-pin-kicker"),
       make("div", pinCode, "ppt-ok-pin-code")
     );
     const pinRight = make("div", null, "ppt-ok-pin-meta");
@@ -27220,7 +27259,7 @@
     populateOpeningKahootRosterCardDOM(rosterCard);
     rightCol.appendChild(rosterCard);
 
-    stage.append(leftCol, rightCol);
+    stage.append(colQr, colKeypad, rightCol);
     return stage;
   }
 
@@ -32592,6 +32631,7 @@
     const isGateActive =
       ROLE === "student" &&
       !state.isPptSlideSharePopup &&
+      !state.hsdSkipGatePreview &&
       Boolean(
         state.hsdRequireQrCheckin ||
           (window.RACM_HSD_ROOM_PAGE && window.RACM_HSD_ROOM_PAGE.requireCheckin)
@@ -32617,12 +32657,18 @@
         window.RACM_HSD_ROOM_QR.renderStudentQrCheckinGateDOM(container, {
           modCode: effModForGate,
           roomId: effRoomForGate,
+          onPreviewSlides: () => {
+            state.hsdSkipGatePreview = true;
+            state.hsdRequireQrCheckin = false;
+            renderHsDiscussionView();
+          },
           onCompletedCheckin: (stu, rId, finalTeam) => {
             const finalRoom = Number(rId) || effRoomForGate;
             state.hsdLockedRoomId = finalRoom;
             state.hsdRoomConfirmed = true;
             state.hsdSessionJoined = true;
             state.hsdRequireQrCheckin = false;
+            state.hsdSkipGatePreview = false;
             try {
               sessionStorage.setItem("racm303_hsd_room_confirmed", "1");
               sessionStorage.setItem("racm303_hsd_session_joined_v1", "1");

@@ -284,12 +284,16 @@
     }
   }, 250);
 
-  // Prune stale presence entries every 15s & send heartbeat every 20s
+  // Prune stale presence entries every 15s (preserve verified checked-in students for 210m session) & send heartbeat every 20s
   setInterval(() => {
     const now = Date.now();
     let changed = false;
     state.presence.forEach((val, key) => {
-      if (key !== state.participantId && now - (val.lastSeenMs || 0) > 65000) {
+      if (key === state.participantId) return;
+      const isCheckedInStu = val && val.role === "student" && Boolean(val.studentId) && val.joined !== false;
+      const maxAgeMs = isCheckedInStu ? 210 * 60 * 1000 : 65000;
+      const refMs = isCheckedInStu ? val.lastSeenMs || val.joinedWallMs || 0 : val.lastSeenMs || 0;
+      if (now - refMs > maxAgeMs) {
         state.presence.delete(key);
         changed = true;
       }
@@ -683,8 +687,8 @@
         }
         return;
       }
-      // Ignore stale retained MQTT presence from previous class sessions (> 90 min old)
-      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > 90 * 60 * 1000) {
+      // Ignore stale retained MQTT presence from previous class sessions (> 210 min old)
+      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > 210 * 60 * 1000) {
         return;
       }
       if (msg.role !== "faculty" && msg.joined === false) {
@@ -1193,6 +1197,47 @@
     publishPresence();
     requestRoomSnapshot();
     emit("responses", { questionId: "*", teamId: state.teamId });
+  }
+
+  function checkinStudentToRoom(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt, opts) {
+    if (!studentObj || !studentObj.id) return false;
+    const isSharedScreen = Boolean((opts && opts.kioskMode) || state.role === "faculty");
+    if (!isSharedScreen) {
+      joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt);
+      return true;
+    }
+    if (roomNumOpt && clampRoom(roomNumOpt) !== state.roomId) {
+      setRoom(roomNumOpt, false);
+    }
+    const sidStr = String(studentObj.id).slice(0, 16);
+    const pid = `sid_${sidStr}`;
+    const bal = getSmartTeamBalance(sidStr, 28);
+    const teamNum = clampTeam(teamIdOpt || bal.recommendedTeam || 1);
+    const prevPres = state.presence.get(pid) || {};
+    const now = Date.now();
+    const rec = {
+      participantId: pid,
+      role: "student",
+      joined: true,
+      checkedIn: true,
+      teamId: teamNum,
+      studentId: sidStr,
+      shortNo: sidStr.slice(-3),
+      fullName: String(studentObj.fullName || studentObj.name || "").trim().slice(0, 80),
+      nickname: String(studentObj.nickname || studentObj.nick || "").trim().slice(0, 32),
+      area: String(studentObj.area || "").slice(0, 40),
+      disc: Number(studentObj.disc) || state.roomId,
+      photoId: String(studentObj.photoId || "").slice(0, 40),
+      activeModule: String(activeModuleOpt || state.activeModule || "HS1").slice(0, 12),
+      activeQuestionId: String(prevPres.activeQuestionId || "").slice(0, 32),
+      name: `กลุ่ม ${teamNum}`,
+      joinedWallMs: prevPres.joinedWallMs || now,
+      lastSeenMs: now
+    };
+    state.presence.set(pid, rec);
+    publishPacket(`presence/${pid}`, Object.assign({ type: "presence" }, rec), true);
+    emit("presence", getPresenceSummary());
+    return true;
   }
 
   function logoutStudentSession() {
@@ -1935,6 +1980,7 @@
     getSmartTeamBalance,
     setStudentProfile,
     joinSessionWithStudent,
+    checkinStudentToRoom,
     logoutStudentSession,
     isSessionJoined: () => Boolean(state.sessionJoined),
     setActiveStudentSlide,

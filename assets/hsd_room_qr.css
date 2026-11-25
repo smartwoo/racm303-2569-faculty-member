@@ -1074,3 +1074,451 @@ html[data-theme="dark"] .hsd-qcg-team-btn.is-selected {
   transform: translateY(-1px);
   background: linear-gradient(135deg, #047857 0%, #059669 100%);
 }
+
+/* ---------- 6. Side-by-Side Layout: 3-Digit Check-in Card + Room Check-in Status ---------- */
+.hsd-qr-checkin-gate-wrap.is-side-by-side {
+  max-width: 1220px;
+  margin: 8px auto 28px;
+  padding: 0 4px;
+  display: grid;
+  grid-template-columns: minmax(340px, 445px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .hsd-qr-checkin-gate-wrap.is-side-by-side {
+    max-width: 580px;
+    grid-template-columns: 1fr;
+  }
+}
+
+.hsd-qr-status-side-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 24px;
+  padding: clamp(16px, 2.6vw, 24px);
+  box-shadow: 0 20px 50px -22px rgba(15, 23, 42, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+html[data-theme="dark"] .hsd-qr-status-side-card {
+  background: #151923;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.hsd-qsp-head {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 15px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.hsd-qsp-head-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hsd-qsp-kicker {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #fde047;
+}
+
+.hsd-qsp-qr-btn {
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-family: var(--font-display, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hsd-qsp-qr-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.hsd-qsp-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hsd-qsp-title {
+  margin: 0;
+  font-family: var(--font-display, sans-serif);
+  font-size: clamp(16.5px, 2vw, 20px);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.hsd-qsp-wait-badge {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.hsd-qsp-prog-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.hsd-qsp-prog-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  transition: width 0.28s ease;
+}
+
+.hsd-qsp-teams-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hsd-qsp-team-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: var(--font-display, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.hsd-qsp-team-pill.is-team-1 {
+  background: rgba(59, 130, 246, 0.26);
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  color: #dbeafe;
+}
+
+.hsd-qsp-team-pill.is-team-2 {
+  background: rgba(16, 185, 129, 0.26);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  color: #d1fae5;
+}
+
+.hsd-qsp-team-pill.is-team-3 {
+  background: rgba(245, 158, 11, 0.26);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  color: #fef3c7;
+}
+
+.hsd-qsp-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  gap: 8px;
+  max-height: 510px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.hsd-qsp-stu-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  text-align: left;
+  min-width: 0;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+button.hsd-qsp-stu-chip {
+  cursor: pointer;
+}
+
+button.hsd-qsp-stu-chip:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+html[data-theme="dark"] .hsd-qsp-stu-chip {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] button.hsd-qsp-stu-chip:hover {
+  border-color: #60a5fa;
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.hsd-qsp-stu-chip.is-checked-in {
+  border-color: rgba(16, 185, 129, 0.55);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+html[data-theme="dark"] .hsd-qsp-stu-chip.is-checked-in {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+.hsd-qsp-stu-code {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .hsd-qsp-stu-code {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.hsd-qsp-stu-chip.is-checked-in .hsd-qsp-stu-code {
+  background: #059669;
+  color: #ffffff;
+}
+
+.hsd-qsp-stu-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.hsd-qsp-stu-badge {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: var(--font-display, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+html[data-theme="dark"] .hsd-qsp-stu-badge {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+.hsd-qsp-stu-chip.is-checked-in .hsd-qsp-stu-badge {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.hsd-qsp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme="dark"] .hsd-qsp-foot {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.hsd-qsp-foot-hint {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+html[data-theme="dark"] .hsd-qsp-foot-hint {
+  color: #94a3b8;
+}
+
+/* ---------- 7. 16:9 PPT Slide 1 Three-Column Layout (QR | 3-Digit Check-in | Check-in Status) ---------- */
+.ppt-opening-kahoot-stage.is-3col-checkin-stage {
+  grid-template-columns: 23.5% 30.5% minmax(0, 1fr) !important;
+  gap: clamp(10px, 1.25cqw, 16px) !important;
+  padding: clamp(10px, 2.0cqh, 20px) clamp(14px, 2.0cqw, 26px) clamp(10px, 1.8cqh, 18px) !important;
+}
+
+.ppt-ok-col-qr,
+.ppt-ok-col-keypad {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.4cqh, 13px);
+  overflow-y: auto;
+}
+
+.ppt-opening-kahoot-stage.is-3col-checkin-stage .ppt-ok-card.is-clean-case-hero {
+  padding: clamp(10px, 1.6cqh, 15px) clamp(12px, 1.3cqw, 16px) !important;
+  gap: clamp(3px, 0.55cqh, 6px) !important;
+}
+
+.ppt-opening-kahoot-stage.is-3col-checkin-stage .ppt-ok-clean-heading {
+  font-size: clamp(17px, min(1.95cqw, 3.8cqh), 26px) !important;
+}
+
+.ppt-opening-kahoot-stage.is-3col-checkin-stage .ppt-ok-clean-sub {
+  font-size: clamp(10px, min(0.95cqw, 1.85cqh), 13px) !important;
+}
+
+.ppt-ok-card.is-compact-qr-only-card {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: clamp(10px, 1.6cqh, 15px) clamp(11px, 1.25cqw, 16px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: clamp(6px, 1.0cqh, 10px) !important;
+  text-align: center;
+}
+
+.ppt-ok-card.is-compact-qr-only-card .ppt-ok-qr-frame-btn {
+  max-width: clamp(118px, min(14.5cqw, 30cqh), 188px);
+  padding: clamp(5px, 0.8cqh, 8px);
+}
+
+.ppt-ok-card.is-compact-qr-only-card .ppt-ok-qr-url-pill {
+  font-size: clamp(9px, min(0.84cqw, 1.65cqh), 11.5px);
+  padding: 3px 8px;
+}
+
+/* Compact Embedded 3-Digit Check-in Card (fits 16:9 Slide 1 & Check-in Status Modal) */
+.hsd-qr-checkin-card.is-compact-embed {
+  flex: 1 1 auto;
+  min-height: 0;
+  border-radius: clamp(14px, 1.3cqw, 18px);
+  padding: clamp(9px, 1.45cqh, 14px) clamp(10px, 1.2cqw, 15px);
+  gap: clamp(5px, 0.95cqh, 8px);
+  box-shadow: 0 8px 22px -16px rgba(15, 23, 42, 0.2);
+  overflow-y: auto;
+  justify-content: space-between;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-hero {
+  padding: clamp(8px, 1.35cqh, 12px) clamp(10px, 1.15cqw, 13px);
+  border-radius: 13px;
+  gap: 3px;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-pin-pill {
+  font-size: clamp(9.5px, 0.88cqw, 11.5px);
+  padding: 2px 8px;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-live-pill {
+  font-size: clamp(9.5px, 0.86cqw, 11px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-title {
+  font-size: clamp(13.5px, min(1.38cqw, 2.55cqh), 17.5px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-sub {
+  font-size: clamp(9.5px, min(0.88cqw, 1.65cqh), 11.5px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-step-title {
+  font-size: clamp(10.5px, min(0.96cqw, 1.85cqh), 12.5px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-pin-slots {
+  gap: 8px;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-slot {
+  width: clamp(42px, 3.8cqw, 52px);
+  height: clamp(42px, 6.4cqh, 50px);
+  border-radius: 11px;
+  font-size: clamp(18px, 2.9cqh, 24px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-verify-box {
+  padding: clamp(5px, 0.8cqh, 8px) 9px;
+  font-size: clamp(10px, min(0.9cqw, 1.7cqh), 11.8px);
+  line-height: 1.32;
+  border-radius: 10px;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-numpad {
+  gap: clamp(4px, 0.65cqh, 6px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-key {
+  height: clamp(29px, 4.6cqh, 37px);
+  border-radius: 9px;
+  font-size: clamp(13.5px, 2.2cqh, 16.5px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-key.is-fn {
+  font-size: clamp(10.5px, 1.7cqh, 12.5px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-direct-input {
+  max-width: 100%;
+  padding: 4px 9px;
+  font-size: clamp(10px, 0.9cqw, 11.8px);
+  border-radius: 8px;
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-teams-lbl {
+  font-size: clamp(9.5px, 0.85cqw, 11px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-team-btn {
+  padding: 4px 4px;
+  border-radius: 8px;
+  font-size: clamp(9.5px, 0.85cqw, 11px);
+}
+
+.hsd-qr-checkin-card.is-compact-embed .hsd-qcg-submit-btn {
+  min-height: clamp(32px, 5.2cqh, 40px);
+  border-radius: 11px;
+  font-size: clamp(11px, min(1.02cqw, 1.95cqh), 13.2px);
+}
+
+/* ---------- 8. Check-in Lobby Modal 2-Column Split (3-Digit Check-in | Room Check-in Status) ---------- */
+.hsd-km-body-split {
+  display: grid;
+  grid-template-columns: 335px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 4px;
+}
+
+.hsd-km-right-status {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 960px) {
+  .hsd-km-body-split {
+    grid-template-columns: 1fr;
+  }
+}
+
