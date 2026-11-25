@@ -22331,7 +22331,7 @@
     return svg;
   }
 
-  function mountDohArenaArrows(arenaEl, svgEl, badgeLayerEl, getEdgesFn, onCycleEdgeFn) {
+  function mountDohArenaArrows(arenaEl, svgEl, badgeLayerEl, getEdgesFn, onCycleEdgeFn, arrowOpts) {
     if (!arenaEl || !svgEl) return () => {};
     dohInstanceSeq += 1;
     const uid = dohInstanceSeq;
@@ -22371,7 +22371,7 @@
       const H = Math.max(150, arenaEl.offsetHeight || 230);
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       const strokeHex = isDark ? "#60a5fa" : "#2e6eb5";
-      const offHex = isDark ? "#475569" : "#94a3b8";
+      const offHex = isDark ? "#64748b" : "#94a3b8";
 
       const aRect = arenaEl.getBoundingClientRect();
       const sx = aRect.width > 2 ? W / aRect.width : 1;
@@ -22405,12 +22405,13 @@
 
       const edgesMap = (typeof getEdgesFn === "function" ? getEdgesFn() : null) || {};
       const interactive = typeof onCycleEdgeFn === "function";
+      const showOffDashed = !arrowOpts || arrowOpts.showOffDashed !== false;
 
       const edgesSig = DOH_EDGE_DEFS.map((ed) => `${ed.id}:${edgesMap[ed.id] || "off"}`).join(",");
       const boxSig = [ind, soc, out, hsys]
         .map((b) => `${Math.round(b.left)},${Math.round(b.top)},${Math.round(b.width)},${Math.round(b.height)}`)
         .join("|");
-      const drawSig = `${W}x${H}|${isDark ? 1 : 0}|${edgesSig}|${boxSig}`;
+      const drawSig = `${W}x${H}|${isDark ? 1 : 0}|${showOffDashed ? 1 : 0}|${edgesSig}|${boxSig}`;
       if (!mustForce && drawSig === lastDrawSig) return;
       lastDrawSig = drawSig;
 
@@ -22450,48 +22451,50 @@
 
       const topBridgeY = Math.max(12, Math.min(out.top - 12, Math.min(ind.top, soc.top) + 14));
       const midOutY = Math.max(topBridgeY + 22, out.cy);
+      const indDiagX1 = ind.left + ind.width * 0.62;
+      const socDiagX1 = soc.left + soc.width * 0.38;
       const coords = {
         ind_bi_soc: {
           x1: ind.right + 7,
           y1: topBridgeY,
-          x2: soc.left - 7,
+          x2: Math.max(ind.right + 28, soc.left - 7),
           y2: topBridgeY
         },
         ind_to_out: {
           x1: ind.right + 5,
           y1: midOutY,
-          x2: Math.max(ind.right + 28, out.left - 5),
+          x2: Math.max(ind.right + 24, out.left - 5),
           y2: midOutY
         },
         soc_to_out: {
           x1: soc.left - 5,
           y1: midOutY,
-          x2: Math.min(soc.left - 28, out.right + 5),
+          x2: Math.min(soc.left - 24, out.right + 5),
           y2: midOutY
         },
         hsys_to_out: {
           x1: out.cx,
-          y1: hsys.top - 5,
+          y1: Math.max(out.bottom + 22, hsys.top - 5),
           x2: out.cx,
           y2: out.bottom + 6
         },
         ind_bi_hsys: {
-          x1: ind.left + ind.width * 0.64,
+          x1: indDiagX1,
           y1: ind.bottom + 5,
-          x2: hsys.left - 6,
-          y2: hsys.cy
+          x2: Math.max(indDiagX1 + 18, hsys.left - 6),
+          y2: Math.max(ind.bottom + 18, hsys.cy)
         },
         soc_bi_hsys: {
-          x1: soc.left + soc.width * 0.36,
+          x1: socDiagX1,
           y1: soc.bottom + 5,
-          x2: hsys.right + 6,
-          y2: hsys.cy
+          x2: Math.min(socDiagX1 - 18, hsys.right + 6),
+          y2: Math.max(soc.bottom + 18, hsys.cy)
         }
       };
 
       DOH_EDGE_DEFS.forEach((ed) => {
         const dir = edgesMap[ed.id] || "off";
-        if (dir === "off" && !interactive) return;
+        if (dir === "off" && !interactive && !showOffDashed) return;
         const c = coords[ed.id];
         if (!c) return;
 
@@ -22501,11 +22504,11 @@
         ln.setAttribute("x2", c.x2.toFixed(1));
         ln.setAttribute("y2", c.y2.toFixed(1));
         ln.setAttribute("stroke", dir === "off" ? offHex : strokeHex);
-        ln.setAttribute("stroke-width", dir === "off" ? "1.6" : "2.4");
+        ln.setAttribute("stroke-width", dir === "off" ? "1.75" : "2.4");
         ln.setAttribute("stroke-linecap", "round");
         if (dir === "off") {
-          ln.setAttribute("stroke-dasharray", "4 4");
-          ln.setAttribute("opacity", "0.65");
+          ln.setAttribute("stroke-dasharray", "5 4");
+          ln.setAttribute("opacity", "0.75");
         } else {
           if (dir === "fwd" || dir === "bi") {
             ln.setAttribute("marker-end", `url(#dohArrEnd_${uid})`);
@@ -22556,6 +22559,14 @@
             });
             badgeLayerEl.appendChild(btn);
           }
+        } else if (badgeLayerEl && dir !== "off" && Math.hypot(c.x2 - c.x1, c.y2 - c.y1) >= 68) {
+          const midX = ((c.x1 + c.x2) / 2 / W) * 100;
+          const midY = ((c.y1 + c.y2) / 2 / H) * 100;
+          const sym = (ed.syms && ed.syms[dir]) || (dir === "bi" ? "↔" : dir === "fwd" ? "→" : "←");
+          const badge = make("span", sym, "doh-arrow-mid-btn is-readonly-badge");
+          badge.style.left = `${midX.toFixed(2)}%`;
+          badge.style.top = `${midY.toFixed(2)}%`;
+          badgeLayerEl.appendChild(badge);
         }
       });
     };
@@ -26633,7 +26644,9 @@
       const isAuto = isLeft ? state.hsdLeftAutoFit !== false : state.hsdRightAutoFit !== false;
       const manualPct = (isLeft ? state.hsdLeftFontPct : state.hsdRightFontPct) || 100;
       const paneEl = boxEl.closest(".hsd-slide-left, .hsd-slide-right, .hsd-key-slide-stage");
-      const dohShells = Array.from(boxEl.querySelectorAll(".doh-diagram-shell"));
+      const dohShells = Array.from(boxEl.querySelectorAll(".doh-diagram-shell")).filter(
+        (sh) => !sh.hidden && !sh.closest("[hidden]")
+      );
       const hasDohShell = dohShells.length > 0;
       const autoTextareas = Array.from(boxEl.querySelectorAll("textarea"));
       const syncAllBoxTextareas = () => {
@@ -26700,7 +26713,7 @@
         return;
       }
 
-      const fitSig = `${pOffW}x${pOffH}@${fitZ.toFixed(4)}:${isRespSlide ? "rs" : "16x9"}:${isCompactResp ? "c" : "d"}:${isLiveSheetSlide ? "live" : "std"}`;
+      const fitSig = `${pOffW}x${pOffH}@${fitZ.toFixed(4)}:${isRespSlide ? "rs" : "16x9"}:${isCompactResp ? "c" : "d"}:${isLiveSheetSlide ? "live" : "std"}:${hasDohShell ? "doh" : "tbl"}`;
       if (!forceBoxRefit && boxEl._lastFitSig === fitSig) {
         if (hasDohShell) {
           dohShells.forEach((sh) => {
@@ -26730,12 +26743,12 @@
 
         const minAutoPct = isHandout
           ? 24
-          : isLiveSheetSlide
-          ? 86
           : hasDohShell
           ? pOffW > pOffH
             ? 28
             : 64
+          : isLiveSheetSlide
+          ? 86
           : isCompactResp
           ? 100
           : isRespSlide
@@ -26743,7 +26756,7 @@
           : 64;
         const maxAutoPct = isHandout
           ? 118
-          : isLiveSheetSlide
+          : isLiveSheetSlide && !hasDohShell
           ? 100
           : hasDohShell && pOffW < 760
           ? 104
@@ -38321,6 +38334,7 @@
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
+    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
 
     const buildNodeView = (nodeKey, extraCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
@@ -38350,11 +38364,11 @@
     const posHsys = make("div", null, "doh-pos-hsys");
     posHsys.appendChild(buildNodeView("health_sys", ""));
 
-    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
 
-    mountDohArenaArrows(arena, svgEl, null, () => linkSt.edges, null);
+    mountDohArenaArrows(arena, svgEl, badgeLayer, () => linkSt.edges, null);
     return shell;
   }
 
@@ -38385,8 +38399,12 @@
       if (st.outerRing) anyOuterRing = true;
       if (st.innerRing) anyInnerRing = true;
       Object.keys(aggEdges).forEach((ek) => {
-        if (st.edges && st.edges[ek] && st.edges[ek] !== "off" && aggEdges[ek] === "off") {
-          aggEdges[ek] = st.edges[ek];
+        const d = st.edges && st.edges[ek];
+        if (!d || d === "off") return;
+        if (aggEdges[ek] === "off") {
+          aggEdges[ek] = d;
+        } else if (aggEdges[ek] !== d) {
+          aggEdges[ek] = "bi";
         }
       });
     });
@@ -38406,6 +38424,7 @@
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
+    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
 
     const buildAggNodeBox = (nodeKey, extraCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
@@ -38415,12 +38434,16 @@
       const subCnt = items.filter((x) => x.status === "submitted").length;
       const typCnt = items.length - subCnt;
 
-      const card = make("div", null, `doh-node-card${extraCls ? ` ${extraCls}` : ""}`);
+      const card = make(
+        "div",
+        null,
+        `doh-node-card${extraCls ? ` ${extraCls}` : ""}${items.length ? " has-live-items" : ""}`
+      );
       card.setAttribute("data-doh-slot", nodeKey);
 
       const head = make("div", null, "doh-node-head");
       head.style.display = "flex";
-      head.style.justifyContent = "space-between";
+      head.style.justifyContent = items.length > 0 ? "space-between" : "center";
       head.style.alignItems = "center";
       head.style.gap = "6px";
       head.appendChild(make("span", nodeTitle, "doh-node-title"));
@@ -38455,10 +38478,10 @@
         stream.setAttribute("data-live-scroll-cid", cid);
         stream.style.maxHeight =
           nodeKey === "individual" || nodeKey === "soc_env"
-            ? "128px"
+            ? "138px"
             : nodeKey === "outcome"
-            ? "86px"
-            : "76px";
+            ? "90px"
+            : "92px";
         attachLiveStreamScrollGuard(stream);
         items.forEach((it, idx) => {
           const anonNum = (anonMap && anonMap.get(it.participantId)) || idx + 1;
@@ -38491,11 +38514,11 @@
     const posHsys = make("div", null, "doh-pos-hsys");
     posHsys.appendChild(buildAggNodeBox("health_sys", ""));
 
-    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
 
-    const redrawArrows = mountDohArenaArrows(arena, svgEl, null, () => aggEdges, null);
+    const redrawArrows = mountDohArenaArrows(arena, svgEl, badgeLayer, () => aggEdges, null);
     requestAnimationFrame(() => {
       if (typeof redrawArrows === "function") redrawArrows();
     });
@@ -39006,6 +39029,9 @@
       }
     }
 
+    const modeChanged = wallEl._lastLiveWallMode !== mode;
+    wallEl._lastLiveWallMode = mode;
+
     if (diagHolder) diagHolder.hidden = mode !== "diagram";
     if (sheetHolder) sheetHolder.hidden = mode !== "sheet";
     if (grid) grid.hidden = mode !== "people";
@@ -39019,7 +39045,22 @@
       diagHolder.replaceChildren();
       const diagEl = buildAggregatedLiveDohDiagramDOM(qObj, anonMap, prevScrollByCell);
       diagHolder.appendChild(diagEl);
-      requestAnimationFrame(() => syncDohShellScale(diagEl, true));
+      requestAnimationFrame(() => {
+        syncDohShellScale(diagEl, true);
+        const parentSheet = wallEl.closest(".ppt-slide-sheet");
+        if (parentSheet) {
+          const curWallH = wallEl.offsetHeight || 0;
+          if (modeChanged || Math.abs(curWallH - (wallEl._lastLiveWallH || 0)) > 3) {
+            wallEl._lastLiveWallH = curWallH;
+            autoFitSingleSheetBoxes(parentSheet, true);
+          }
+        }
+      });
+    } else if (modeChanged) {
+      requestAnimationFrame(() => {
+        const parentSheet = wallEl.closest(".ppt-slide-sheet");
+        if (parentSheet) autoFitSingleSheetBoxes(parentSheet, true);
+      });
     }
 
     if (mode === "sheet" && sheetHolder) {

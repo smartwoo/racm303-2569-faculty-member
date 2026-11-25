@@ -573,7 +573,6 @@
 
     Object.keys(edgeCoords).forEach((edgeId) => {
       const dir = edges[edgeId] || "off";
-      if (dir === "off" && !isBlank) return;
       const [x1, y1, x2, y2] = edgeCoords[edgeId];
       outShapes.push(
         buildStraightArrowXml(

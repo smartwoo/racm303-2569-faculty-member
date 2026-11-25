@@ -39813,7 +39813,8 @@ html[data-theme="dark"] .doh-toolbar-hint {
 .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg path,
 .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: #fdf8f2;
-  stroke: transparent;
+  stroke: rgba(197, 90, 17, 0.36);
+  stroke-dasharray: 7 5;
 }
 
 html[data-theme="dark"] .doh-oval-bg-svg.is-outer-svg path,
@@ -39832,7 +39833,8 @@ html[data-theme="dark"] .doh-diagram-shell.is-outer-oval-on > .doh-oval-bg-svg.i
 html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg path,
 html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-on) > .doh-oval-bg-svg.is-outer-svg ellipse {
   fill: rgba(15, 23, 42, 0.45);
-  stroke: transparent;
+  stroke: rgba(251, 146, 60, 0.34);
+  stroke-dasharray: 7 5;
 }
 
 .doh-structural-zone {
@@ -39873,8 +39875,9 @@ html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step:not(.is-outer-oval-
 
 .doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg path,
 .doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg ellipse {
-  fill: transparent;
-  stroke: transparent;
+  fill: rgba(255, 255, 255, 0.56);
+  stroke: rgba(43, 84, 126, 0.32);
+  stroke-dasharray: 6 5;
 }
 
 html[data-theme="dark"] .doh-oval-bg-svg.is-inner-svg path,
@@ -39888,6 +39891,13 @@ html[data-theme="dark"] .doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-i
   fill: rgba(21, 128, 61, 0.20);
   stroke: #38bdf8;
   stroke-dasharray: none;
+}
+
+html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg path,
+html[data-theme="dark"] .doh-diagram-shell.is-clean-key-step .doh-inner-oval:not(.is-inner-oval-on) > .doh-oval-bg-svg.is-inner-svg ellipse {
+  fill: rgba(15, 23, 42, 0.45);
+  stroke: rgba(56, 189, 248, 0.30);
+  stroke-dasharray: 6 5;
 }
 
 .doh-inner-arena {
@@ -39940,7 +39950,12 @@ html[data-theme="dark"] .doh-inner-oval.is-inner-oval-on > .doh-oval-bg-svg.is-i
   transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
 
-.doh-arrow-mid-btn:hover {
+.doh-arrow-mid-btn.is-readonly-badge {
+  pointer-events: none;
+  cursor: default;
+}
+
+.doh-arrow-mid-btn:not(.is-readonly-badge):hover {
   transform: translate(-50%, -50%) scale(1.1);
   border-color: #2563eb;
   background: #eff6ff;
@@ -44781,67 +44796,112 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
   gap: 3px;
 }
 
-/* Space-optimized Aggregated Live DOH Diagram (flush left-right inside each node box + scrollable) */
+/* Full-height Optimized Aggregated Live DOH Diagram (matches Blank Answer Sheet & Teacher Answer Key geometry!) */
 .doh-diagram-shell.is-agg-live-diagram {
-  padding: 6px 2% 8px;
-  max-width: 100%;
+  padding: 28px 6.6% 28px;
+  max-width: 1220px;
+  margin: 0 auto;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-structural-zone {
-  max-width: 94%;
-  width: 94%;
-  margin: 0 auto 5px;
+  max-width: 68%;
+  width: 68%;
+  margin: 0 auto 10px;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-inner-oval {
-  padding: 8px 2.4% 8px;
+  padding: 36px 8.8% 28px;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-inner-arena {
-  grid-template-columns: minmax(0, 1.18fr) minmax(225px, 0.94fr) minmax(0, 1.18fr);
-  grid-template-rows: 2px auto auto;
-  gap: 6px 10px;
+  grid-template-columns: minmax(0, 1.06fr) minmax(226px, 0.90fr) minmax(0, 1.06fr);
+  grid-template-rows: minmax(26px, auto) auto auto;
+  gap: 10px 18px;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-pos-out {
-  width: 100%;
-  max-width: 310px;
-  margin: 0;
+  width: 184px;
+  max-width: 100%;
+  margin: 16px 0 12px;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-pos-hsys {
-  width: min(92%, 760px);
-  margin-top: 2px;
+  width: min(52%, 380px);
+  margin-top: 10px;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-node-card,
 .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-structural-card,
 .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.36);
-  border-radius: 8px;
-  padding: 4px 7px;
-  text-align: left !important;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 2px 4px;
+  box-shadow: none;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .doh-node-head {
-  justify-content: space-between !important;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
-.doh-diagram-shell.is-agg-live-diagram .doh-node-title,
-.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .doh-node-title {
-  text-align: left !important;
-  justify-content: flex-start !important;
-  width: auto !important;
-  font-size: 11.8px;
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.has-live-items .doh-node-title,
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card.has-live-items .doh-node-title {
+  text-align: left;
+  justify-content: flex-start;
+  width: auto;
 }
 
 .doh-diagram-shell.is-agg-live-diagram .hsd-live-cell-empty {
+  box-sizing: border-box;
+  min-height: 50px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1.5px dashed rgba(100, 116, 139, 0.42);
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   text-align: left;
-  padding: 4px 2px;
-  font-size: 11.6px;
+  font-size: 11.8px;
+  line-height: 1.38;
+  color: #64748b;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-ind .hsd-live-cell-empty,
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-soc .hsd-live-cell-empty {
+  min-height: 68px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .hsd-live-cell-empty {
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-color: rgba(154, 59, 46, 0.45);
+  background: rgba(255, 250, 245, 0.78);
+}
+
+.doh-diagram-shell.is-agg-live-diagram .hsd-live-cell-stream {
+  box-sizing: border-box;
+  min-height: 50px;
+  padding: 5px 7px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(13, 148, 136, 0.38);
+  background: rgba(255, 255, 255, 0.88);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-ind .hsd-live-cell-stream,
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-soc .hsd-live-cell-stream {
+  min-height: 68px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .hsd-live-cell-stream {
+  min-height: 48px;
+  border-color: rgba(154, 59, 46, 0.45);
+  background: rgba(255, 250, 245, 0.90);
 }
 
 .hsd-live-overview-qstrip {
@@ -44894,11 +44954,24 @@ html[data-theme="dark"] .hsd-cell-ans-chip.is-inline-chip .hsd-cell-ans-text {
   color: #f1f5f9;
 }
 
-html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card,
-html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-structural-card,
-html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card {
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .hsd-live-cell-empty {
+  background: rgba(15, 23, 42, 0.68);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .hsd-live-cell-empty {
+  border-color: rgba(251, 146, 60, 0.45);
+}
+
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .hsd-live-cell-stream {
   background: rgba(15, 23, 42, 0.82);
-  border-color: rgba(148, 163, 184, 0.28);
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .hsd-live-cell-stream {
+  background: rgba(30, 20, 28, 0.85);
+  border-color: rgba(251, 146, 60, 0.45);
 }
 
 html[data-theme="dark"] .hsd-live-sid-strip {
