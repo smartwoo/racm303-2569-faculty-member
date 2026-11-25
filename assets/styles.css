@@ -41213,6 +41213,13 @@ html[data-theme="dark"] .ppt-slide-sheet .hsd-slide-right > .hsd-pane-snap-bar {
   touch-action: pan-y;
 }
 
+.ppt-slide-sheet .hsd-slide-left.is-autofit-measuring:not([hidden]),
+.ppt-slide-sheet .hsd-slide-right.is-autofit-measuring:not([hidden]),
+.ppt-slide-sheet .hsd-key-slide-stage.is-autofit-measuring.is-16x9-canvas {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+}
+
 .ppt-slide-sheet .hsd-split-resizer {
   touch-action: none;
 }

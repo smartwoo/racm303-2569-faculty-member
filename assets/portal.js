@@ -22173,14 +22173,35 @@
 
   const CANON_DOH_SHELL_W = 980;
 
-  function syncDohShellScale(shellEl) {
+  function syncDohShellScale(shellEl, forceRebase) {
     if (!shellEl || !shellEl.isConnected) return false;
     const hostEl = shellEl.parentElement;
     if (!hostEl) return false;
     const csHost = window.getComputedStyle(hostEl);
     const padX = (parseFloat(csHost.paddingLeft) || 0) + (parseFloat(csHost.paddingRight) || 0);
-    const availW = hostEl.clientWidth - padX;
-    if (availW <= 36) return false;
+    const rawAvailW = hostEl.clientWidth - padX;
+    if (rawAvailW <= 36) return false;
+
+    const paneEl = shellEl.closest(".hsd-slide-right, .hsd-slide-left, .hsd-key-slide-stage");
+    const boxEl = shellEl.closest(".hsd-box-zoom-body");
+    const boxZoomStr = boxEl ? boxEl.style.zoom || "1" : "1";
+    const lockSig = paneEl
+      ? `${paneEl.offsetWidth}x${paneEl.offsetHeight}@${boxZoomStr}`
+      : `win:${window.innerWidth || 0}@${boxZoomStr}`;
+
+    let availW = rawAvailW;
+    if (!forceRebase && shellEl._dohLockSig === lockSig && shellEl._dohLockedAvailW > 0) {
+      if (rawAvailW >= shellEl._dohLockedAvailW - 1.5) {
+        availW = shellEl._dohLockedAvailW;
+      } else {
+        availW = rawAvailW;
+        shellEl._dohLockedAvailW = availW;
+      }
+    } else {
+      shellEl._dohLockSig = lockSig;
+      shellEl._dohLockedAvailW = availW;
+    }
+
     let nextW = "100%";
     let nextZoom = "";
     if (availW < CANON_DOH_SHELL_W) {
@@ -22222,21 +22243,31 @@
     const uid = dohInstanceSeq;
     const svgNS = "http://www.w3.org/2000/svg";
     let rafId = 0;
+    let pendingForce = false;
+    let lastDrawSig = "";
     let ro = null;
 
-    const redrawNow = () => {
+    const redrawNow = (forceDraw) => {
       rafId = 0;
-      if (!arenaEl.isConnected) return;
+      const mustForce = Boolean(forceDraw || pendingForce);
+      pendingForce = false;
+      if (!arenaEl.isConnected) {
+        if (ro) {
+          ro.disconnect();
+          ro = null;
+        }
+        return;
+      }
       const shellEl = arenaEl.closest(".doh-diagram-shell");
       if (shellEl) {
         if (!shellEl._syncDohScale) {
-          shellEl._syncDohScale = (redrawImmediate) => {
-            const changed = syncDohShellScale(shellEl);
-            if (redrawImmediate) redrawNow();
-            else if (changed) scheduleRedraw();
+          shellEl._syncDohScale = (redrawImmediate, forceRebase) => {
+            const changed = syncDohShellScale(shellEl, Boolean(forceRebase));
+            if (redrawImmediate) redrawNow(changed);
+            else if (changed) scheduleRedraw(true);
           };
         }
-        syncDohShellScale(shellEl);
+        syncDohShellScale(shellEl, false);
         if (ro && shellEl.parentElement && !shellEl._dohHostObserved) {
           shellEl._dohHostObserved = true;
           ro.observe(shellEl.parentElement);
@@ -22244,43 +22275,9 @@
       }
       const W = Math.max(300, arenaEl.offsetWidth || 540);
       const H = Math.max(150, arenaEl.offsetHeight || 230);
-      svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
-      svgEl.replaceChildren();
-      if (badgeLayerEl) badgeLayerEl.replaceChildren();
-
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       const strokeHex = isDark ? "#60a5fa" : "#2e6eb5";
       const offHex = isDark ? "#475569" : "#94a3b8";
-
-      const defs = document.createElementNS(svgNS, "defs");
-      const mkEnd = document.createElementNS(svgNS, "marker");
-      mkEnd.setAttribute("id", `dohArrEnd_${uid}`);
-      mkEnd.setAttribute("viewBox", "0 0 10 10");
-      mkEnd.setAttribute("refX", "8.6");
-      mkEnd.setAttribute("refY", "5");
-      mkEnd.setAttribute("markerWidth", "5.8");
-      mkEnd.setAttribute("markerHeight", "5.8");
-      mkEnd.setAttribute("orient", "auto");
-      const pEnd = document.createElementNS(svgNS, "path");
-      pEnd.setAttribute("d", "M 0 1.2 L 9.2 5 L 0 8.8 z");
-      pEnd.setAttribute("fill", strokeHex);
-      mkEnd.appendChild(pEnd);
-
-      const mkStart = document.createElementNS(svgNS, "marker");
-      mkStart.setAttribute("id", `dohArrStart_${uid}`);
-      mkStart.setAttribute("viewBox", "0 0 10 10");
-      mkStart.setAttribute("refX", "1.4");
-      mkStart.setAttribute("refY", "5");
-      mkStart.setAttribute("markerWidth", "5.8");
-      mkStart.setAttribute("markerHeight", "5.8");
-      mkStart.setAttribute("orient", "auto");
-      const pStart = document.createElementNS(svgNS, "path");
-      pStart.setAttribute("d", "M 9.2 1.2 L 0 5 L 9.2 8.8 z");
-      pStart.setAttribute("fill", strokeHex);
-      mkStart.appendChild(pStart);
-
-      defs.append(mkEnd, mkStart);
-      svgEl.appendChild(defs);
 
       const aRect = arenaEl.getBoundingClientRect();
       const sx = aRect.width > 2 ? W / aRect.width : 1;
@@ -22311,6 +22308,51 @@
       const soc = getBox("soc_env", { left: W * 0.65, top: 4, width: W * 0.34, height: H * 0.56, right: W * 0.99, bottom: 4 + H * 0.56, cx: W * 0.82, cy: 4 + H * 0.28 });
       const out = getBox("outcome", { left: W * 0.39, top: H * 0.30, width: W * 0.22, height: H * 0.24, right: W * 0.61, bottom: H * 0.54, cx: W * 0.50, cy: H * 0.42 });
       const hsys = getBox("health_sys", { left: W * 0.26, top: H * 0.68, width: W * 0.48, height: H * 0.28, right: W * 0.74, bottom: H * 0.96, cx: W * 0.50, cy: H * 0.82 });
+
+      const edgesMap = (typeof getEdgesFn === "function" ? getEdgesFn() : null) || {};
+      const interactive = typeof onCycleEdgeFn === "function";
+
+      const edgesSig = DOH_EDGE_DEFS.map((ed) => `${ed.id}:${edgesMap[ed.id] || "off"}`).join(",");
+      const boxSig = [ind, soc, out, hsys]
+        .map((b) => `${Math.round(b.left)},${Math.round(b.top)},${Math.round(b.width)},${Math.round(b.height)}`)
+        .join("|");
+      const drawSig = `${W}x${H}|${isDark ? 1 : 0}|${edgesSig}|${boxSig}`;
+      if (!mustForce && drawSig === lastDrawSig) return;
+      lastDrawSig = drawSig;
+
+      svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svgEl.replaceChildren();
+      if (badgeLayerEl) badgeLayerEl.replaceChildren();
+
+      const defs = document.createElementNS(svgNS, "defs");
+      const mkEnd = document.createElementNS(svgNS, "marker");
+      mkEnd.setAttribute("id", `dohArrEnd_${uid}`);
+      mkEnd.setAttribute("viewBox", "0 0 10 10");
+      mkEnd.setAttribute("refX", "8.6");
+      mkEnd.setAttribute("refY", "5");
+      mkEnd.setAttribute("markerWidth", "5.8");
+      mkEnd.setAttribute("markerHeight", "5.8");
+      mkEnd.setAttribute("orient", "auto");
+      const pEnd = document.createElementNS(svgNS, "path");
+      pEnd.setAttribute("d", "M 0 1.2 L 9.2 5 L 0 8.8 z");
+      pEnd.setAttribute("fill", strokeHex);
+      mkEnd.appendChild(pEnd);
+
+      const mkStart = document.createElementNS(svgNS, "marker");
+      mkStart.setAttribute("id", `dohArrStart_${uid}`);
+      mkStart.setAttribute("viewBox", "0 0 10 10");
+      mkStart.setAttribute("refX", "1.4");
+      mkStart.setAttribute("refY", "5");
+      mkStart.setAttribute("markerWidth", "5.8");
+      mkStart.setAttribute("markerHeight", "5.8");
+      mkStart.setAttribute("orient", "auto");
+      const pStart = document.createElementNS(svgNS, "path");
+      pStart.setAttribute("d", "M 9.2 1.2 L 0 5 L 9.2 8.8 z");
+      pStart.setAttribute("fill", strokeHex);
+      mkStart.appendChild(pStart);
+
+      defs.append(mkEnd, mkStart);
+      svgEl.appendChild(defs);
 
       const topBridgeY = Math.max(12, Math.min(out.top - 12, Math.min(ind.top, soc.top) + 14));
       const midOutY = Math.max(topBridgeY + 22, out.cy);
@@ -22352,9 +22394,6 @@
           y2: hsys.cy
         }
       };
-
-      const edgesMap = (typeof getEdgesFn === "function" ? getEdgesFn() : null) || {};
-      const interactive = typeof onCycleEdgeFn === "function";
 
       DOH_EDGE_DEFS.forEach((ed) => {
         const dir = edgesMap[ed.id] || "off";
@@ -22427,21 +22466,22 @@
       });
     };
 
-    const scheduleRedraw = () => {
+    const scheduleRedraw = (forceDraw) => {
+      if (forceDraw) pendingForce = true;
       if (rafId) return;
-      rafId = requestAnimationFrame(redrawNow);
+      rafId = requestAnimationFrame(() => redrawNow(false));
     };
 
     if (typeof ResizeObserver === "function") {
-      ro = new ResizeObserver(() => scheduleRedraw());
+      ro = new ResizeObserver(() => scheduleRedraw(false));
       ro.observe(arenaEl);
     }
     const initShell = arenaEl.closest(".doh-diagram-shell");
     if (initShell) {
-      initShell._syncDohScale = (redrawImmediate) => {
-        const changed = syncDohShellScale(initShell);
-        if (redrawImmediate) redrawNow();
-        else if (changed) scheduleRedraw();
+      initShell._syncDohScale = (redrawImmediate, forceRebase) => {
+        const changed = syncDohShellScale(initShell, Boolean(forceRebase));
+        if (redrawImmediate) redrawNow(changed);
+        else if (changed) scheduleRedraw(true);
       };
       if (ro && initShell.parentElement && !initShell._dohHostObserved) {
         initShell._dohHostObserved = true;
@@ -22450,16 +22490,20 @@
     }
     const onWinResize = () => {
       if (!arenaEl.isConnected) {
+        if (ro) {
+          ro.disconnect();
+          ro = null;
+        }
         window.removeEventListener("resize", onWinResize);
         window.removeEventListener("orientationchange", onWinResize);
         return;
       }
-      scheduleRedraw();
+      scheduleRedraw(false);
     };
     window.addEventListener("resize", onWinResize, { passive: true });
     window.addEventListener("orientationchange", onWinResize, { passive: true });
-    scheduleRedraw();
-    setTimeout(scheduleRedraw, 80);
+    scheduleRedraw(true);
+    setTimeout(() => scheduleRedraw(false), 80);
     return scheduleRedraw;
   }
 
@@ -22632,7 +22676,7 @@
       ta.id = `${idPrefix}${cid}`;
       ta.dataset.inputId = cid;
       ta.maxLength = cellSpec.maxChars || 280;
-      ta.rows = isOutcome ? 1 : nodeKey === "health_sys" ? 2 : 3;
+      ta.rows = isOutcome ? 2 : nodeKey === "health_sys" ? 2 : 3;
       ta.placeholder = nMeta.placeholder || cellSpec.placeholder || "พิมพ์ประเด็นในโหนดนี้…";
       ta.value = savedVal;
 
@@ -22643,19 +22687,29 @@
       );
 
       let composing = false;
-      const fitTa = () => {
+      const fitTa = (skipArrowRedraw) => {
+        const minH = isOutcome ? 42 : 44;
+        const maxH = isOutcome ? 72 : 112;
+        if (!ta.isConnected || ta.clientWidth === 0) {
+          const fbH = `${minH}px`;
+          if (ta.style.height !== fbH) ta.style.height = fbH;
+          return;
+        }
         ta.style.height = "auto";
-        const minH = isOutcome ? 32 : 44;
-        const maxH = isOutcome ? 64 : 112;
         const sh = ta.scrollHeight;
+        const nextH = `${Math.min(maxH, Math.max(minH, sh))}px`;
         ta.style.overflowY = sh > maxH ? "auto" : "hidden";
-        ta.style.height = `${Math.min(maxH, Math.max(minH, sh))}px`;
-        redrawDiagramArrows();
+        ta.style.height = nextH;
+        if (ta._lastAppliedDohH !== nextH) {
+          ta._lastAppliedDohH = nextH;
+          if (!skipArrowRedraw) redrawDiagramArrows(false);
+        }
       };
+      ta._fitDohTaNow = () => fitTa(true);
 
       ta._refreshFromTeamSync = () => {
         mirror.textContent = ta.value.trim() || `(พื้นที่เขียน ${nMeta.title || ""})`;
-        fitTa();
+        fitTa(false);
       };
 
       const onValChange = (clampNow) => {
@@ -22669,7 +22723,7 @@
         container.querySelectorAll(`textarea[data-table-mirror-id="${cid}"]`).forEach((mTa) => {
           if (mTa.value !== ta.value) mTa.value = ta.value;
         });
-        fitTa();
+        fitTa(false);
         if (LIVE && ROLE === "student" && state.hsdSessionJoined) {
           LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), cid);
         }
@@ -22689,7 +22743,8 @@
         }
       });
 
-      requestAnimationFrame(fitTa);
+      fitTa(true);
+      requestAnimationFrame(() => fitTa(false));
       card.append(ta, mirror);
       return card;
     };
@@ -22760,7 +22815,7 @@
       const serialized = serializeDohLinksState(linkState);
       hiddenLinksInput.value = serialized;
       persistHsdDraft(linksInputId, serialized);
-      redrawDiagramArrows();
+      redrawDiagramArrows(true);
       if (broadcastLive && LIVE && ROLE === "student" && state.hsdSessionJoined) {
         LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), linksInputId);
       }
@@ -22772,7 +22827,7 @@
       innerOval.classList.toggle("is-inner-oval-on", Boolean(linkState.innerRing));
       innerOvalBtn.classList.toggle("is-active", Boolean(linkState.innerRing));
       outerOvalBtn.classList.toggle("is-outer-active", Boolean(linkState.outerRing));
-      redrawDiagramArrows();
+      redrawDiagramArrows(true);
     };
 
     const cycleOrder = ["off", "fwd", "bi", "rev"];
@@ -26367,7 +26422,7 @@
       const setBoxZoom = (zNum) => {
         boxEl.style.zoom = zNum.toFixed(4);
         if (hasDohShell) {
-          dohShells.forEach((sh) => syncDohShellScale(sh));
+          dohShells.forEach((sh) => syncDohShellScale(sh, true));
         }
       };
 
@@ -26380,7 +26435,7 @@
         setBoxZoom((manualPct / 100) * fitZ);
         if (hasDohShell) {
           dohShells.forEach((sh) => {
-            if (typeof sh._syncDohScale === "function") sh._syncDohScale(true);
+            if (typeof sh._syncDohScale === "function") sh._syncDohScale(true, false);
           });
         }
         boxEl.dataset.effectivePct = String(manualPct);
@@ -26423,7 +26478,7 @@
       if (!forceBoxRefit && boxEl._lastFitSig === fitSig) {
         if (hasDohShell) {
           dohShells.forEach((sh) => {
-            if (typeof sh._syncDohScale === "function") sh._syncDohScale(false);
+            if (typeof sh._syncDohScale === "function") sh._syncDohScale(false, false);
           });
         }
         return;
@@ -26432,113 +26487,128 @@
       const prevScrollTop = paneEl.scrollTop;
       const prevScrollLeft = paneEl.scrollLeft;
 
-      // Lock overflow hidden during measurement so OS scrollbars never toggle clientWidth/clientHeight
+      if (hasDohShell) {
+        dohShells.forEach((sh) => {
+          sh.querySelectorAll("textarea").forEach((t) => {
+            if (typeof t._fitDohTaNow === "function") t._fitDohTaNow();
+          });
+        });
+      }
+
+      // Lock overflow hidden (via .is-autofit-measuring to override !important pane scroll CSS) so OS scrollbars never toggle clientWidth/clientHeight mid-search
+      paneEl.classList.add("is-autofit-measuring");
       paneEl.style.overflowY = "hidden";
       paneEl.style.overflowX = "hidden";
       paneEl.scrollTop = 0;
       paneEl.scrollLeft = 0;
-      setBoxZoom(fitZ);
 
+      let chosenPct = 100;
       const fitsCleanly = () =>
-        paneEl.scrollHeight <= paneEl.clientHeight + 2 &&
+        paneEl.scrollHeight <= paneEl.clientHeight + (isHandout ? 2 : 0) &&
         boxEl.scrollWidth <= boxEl.clientWidth + 5;
 
-      const minAutoPct = isHandout
-        ? 24
-        : hasDohShell
-        ? pOffW > pOffH
-          ? 28
-          : 64
-        : isCompactResp
-        ? 100
-        : isRespSlide
-        ? 82
-        : 64;
-      const maxAutoPct = isHandout
-        ? 118
-        : hasDohShell && pOffW < 760
-        ? 104
-        : isCompactResp
-        ? isFullSingleSlide
-          ? 168
-          : 136
-        : isPureScenarioSlide
-        ? 235
-        : isFullSingleSlide
-        ? 192
-        : 172;
-      let chosenPct = 100;
+      try {
+        setBoxZoom(fitZ);
 
-      if (!fitsCleanly()) {
-        if (minAutoPct >= 100) {
-          chosenPct = 100;
-        } else {
-          let lo = minAutoPct;
-          let hi = 99;
-          let best = minAutoPct;
-          while (lo <= hi) {
-            const mid = Math.floor((lo + hi) / 2);
-            setBoxZoom((mid / 100) * fitZ);
-            if (fitsCleanly()) {
-              best = mid;
-              lo = mid + 1;
-            } else {
-              hi = mid - 1;
-            }
-          }
-          chosenPct = best;
-          setBoxZoom((chosenPct / 100) * fitZ);
-          if (isHandout) {
-            while (chosenPct > 18 && !fitsCleanly()) {
-              chosenPct -= 1;
-              setBoxZoom((chosenPct / 100) * fitZ);
-            }
-          }
-        }
-      } else {
-        const pRect = paneEl.getBoundingClientRect();
-        const bRect = boxEl.getBoundingClientRect();
-        const usedRatio = pRect.height > 0 ? (bRect.bottom - pRect.top) / pRect.height : 1;
-        if (usedRatio > 0 && usedRatio < 0.90 && maxAutoPct > 100) {
-          let lo = 101;
-          let hi = maxAutoPct;
-          let bestUp = 100;
-          while (lo <= hi) {
-            const mid = Math.floor((lo + hi) / 2);
-            setBoxZoom((mid / 100) * fitZ);
-            if (fitsCleanly()) {
-              const pR2 = paneEl.getBoundingClientRect();
-              const bR2 = boxEl.getBoundingClientRect();
-              const ratio2 = pR2.height > 0 ? (bR2.bottom - pR2.top) / pR2.height : 1;
-              if (ratio2 <= 0.95) {
-                bestUp = mid;
+        const minAutoPct = isHandout
+          ? 24
+          : hasDohShell
+          ? pOffW > pOffH
+            ? 28
+            : 64
+          : isCompactResp
+          ? 100
+          : isRespSlide
+          ? 82
+          : 64;
+        const maxAutoPct = isHandout
+          ? 118
+          : hasDohShell && pOffW < 760
+          ? 104
+          : isCompactResp
+          ? isFullSingleSlide
+            ? 168
+            : 136
+          : isPureScenarioSlide
+          ? 235
+          : isFullSingleSlide
+          ? 192
+          : 172;
+
+        if (!fitsCleanly()) {
+          if (minAutoPct >= 100) {
+            chosenPct = 100;
+          } else {
+            let lo = minAutoPct;
+            let hi = 99;
+            let best = minAutoPct;
+            while (lo <= hi) {
+              const mid = Math.floor((lo + hi) / 2);
+              setBoxZoom((mid / 100) * fitZ);
+              if (fitsCleanly()) {
+                best = mid;
                 lo = mid + 1;
               } else {
                 hi = mid - 1;
               }
-            } else {
-              hi = mid - 1;
+            }
+            chosenPct = best;
+            setBoxZoom((chosenPct / 100) * fitZ);
+            if (isHandout) {
+              while (chosenPct > 18 && !fitsCleanly()) {
+                chosenPct -= 1;
+                setBoxZoom((chosenPct / 100) * fitZ);
+              }
             }
           }
-          chosenPct = bestUp;
+        } else {
+          const pRect = paneEl.getBoundingClientRect();
+          const bRect = boxEl.getBoundingClientRect();
+          const usedRatio = pRect.height > 0 ? (bRect.bottom - pRect.top) / pRect.height : 1;
+          if (usedRatio > 0 && usedRatio < 0.90 && maxAutoPct > 100) {
+            let lo = 101;
+            let hi = maxAutoPct;
+            let bestUp = 100;
+            while (lo <= hi) {
+              const mid = Math.floor((lo + hi) / 2);
+              setBoxZoom((mid / 100) * fitZ);
+              if (fitsCleanly()) {
+                const pR2 = paneEl.getBoundingClientRect();
+                const bR2 = boxEl.getBoundingClientRect();
+                const ratio2 = pR2.height > 0 ? (bR2.bottom - pR2.top) / pR2.height : 1;
+                if (ratio2 <= 0.95) {
+                  bestUp = mid;
+                  lo = mid + 1;
+                } else {
+                  hi = mid - 1;
+                }
+              } else {
+                hi = mid - 1;
+              }
+            }
+            chosenPct = bestUp;
+          }
         }
-      }
 
-      setBoxZoom((chosenPct / 100) * fitZ);
-      if (isHandout) {
-        while (chosenPct > 14 && !fitsCleanly()) {
-          chosenPct -= 1;
-          setBoxZoom((chosenPct / 100) * fitZ);
+        setBoxZoom((chosenPct / 100) * fitZ);
+        if (isHandout) {
+          while (chosenPct > 14 && !fitsCleanly()) {
+            chosenPct -= 1;
+            setBoxZoom((chosenPct / 100) * fitZ);
+          }
         }
-      }
-      if (hasDohShell) {
-        dohShells.forEach((sh) => {
-          if (typeof sh._syncDohScale === "function") sh._syncDohScale(true);
-        });
+      } finally {
+        paneEl.classList.remove("is-autofit-measuring");
       }
 
       if (!isHandout && (isRespSlide || !fitsCleanly())) {
         paneEl.style.overflowY = "auto";
+      }
+
+      if (hasDohShell) {
+        dohShells.forEach((sh) => {
+          if (typeof sh._syncDohScale === "function") sh._syncDohScale(true, false);
+        });
       }
 
       boxEl._lastFitSig = fitSig;
