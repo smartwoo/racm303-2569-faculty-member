@@ -44553,7 +44553,9 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
     padding: 2px 6px;
     font-size: 10.5px;
   }
-/* ---------- Real-Time Student ID Badges & Dedicated Slide 4 Live Answer Sheet ---------- */
+}
+
+/* ---------- Compact #146 อิ๊กเล้ง Inline Chips & Space-Optimized Slide 4 Live Sheet ---------- */
 .hsd-cell-ans-idwrap {
   display: inline-flex;
   align-items: center;
@@ -44562,43 +44564,122 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
   flex-wrap: wrap;
 }
 
+.hsd-ans-hash-nick,
 .hsd-ans-sid-badge {
   display: inline-flex;
   align-items: center;
   background: #0b46a6;
   color: #ffffff;
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 800;
-  padding: 1.5px 7.5px;
+  font-weight: 700;
+  padding: 1px 7px;
   border-radius: 999px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1.35;
+  white-space: nowrap;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(11, 70, 166, 0.18);
+  box-shadow: 0 1px 2px rgba(11, 70, 166, 0.16);
 }
 
-.hsd-ans-sid-badge.is-unknown {
+.hsd-ans-hash-nick.is-unknown,
+.hsd-ans-sid-badge.is-unknown,
+.hsd-ans-hash-nick.is-anon {
   background: #64748b;
 }
 
+.hsd-cell-ans-sid-sub {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 10.8px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Single-row flush-left (#146 อิ๊กเล้ง) + inline answer text + flush-right status badge */
+.hsd-cell-ans-chip.is-inline-chip {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 3.5px 7px;
+  text-align: left !important;
+}
+
+.hsd-cell-ans-chip.is-inline-chip .hsd-cell-ans-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  text-align: left !important;
+  font-size: 12.4px;
+  line-height: 1.38;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.hsd-cell-ans-chip.is-inline-chip .hsd-cell-ans-tag {
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+  white-space: nowrap;
+  line-height: 1.35;
+}
+
+.hsd-cell-ans-tag.is-icon-only {
+  padding: 1px 4.5px;
+  font-size: 10px;
+}
+
+/* Smooth, thin in-box scrollbar when answers overflow box frame */
+.hsd-live-cell-stream {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 148, 136, 0.42) transparent;
+  padding-right: 2px;
+}
+
+.hsd-live-cell-stream::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hsd-live-cell-stream::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hsd-live-cell-stream::-webkit-scrollbar-thumb {
+  background: rgba(13, 148, 136, 0.38);
+  border-radius: 999px;
+}
+
+.hsd-live-cell-stream::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 148, 136, 0.65);
+}
+
+/* Compact 1-line horizontal scrollable student strip so it never eats vertical slide space */
 .hsd-live-sid-strip {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
   gap: 5px;
-  padding: 5px 8px;
-  margin-bottom: 8px;
+  padding: 3.5px 7px;
+  margin-bottom: 6px;
   background: #eff6ff;
   border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: 7px;
 }
 
 .hsd-live-sid-strip-lbl {
-  font-size: 11.4px;
+  font-size: 11px;
   font-weight: 700;
   color: #1e3a8a;
   margin-right: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .hsd-live-sid-pill {
@@ -44606,10 +44687,12 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
   background: #ffffff;
   color: #0f5c54;
   font-family: var(--font-display);
-  font-size: 11.2px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 1.5px 7.5px;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.12s ease;
 }
@@ -44623,6 +44706,135 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
 .hsd-live-sid-pill:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(15, 23, 42, 0.1);
+}
+
+/* Space optimization on Slide 4 (🟢 คำตอบสด นศ., is-layout-live-sheet) */
+.is-layout-live-sheet .hsd-pane-snap-bar {
+  padding: 3px 10px !important;
+  margin-bottom: 4px !important;
+  min-height: 0 !important;
+}
+
+.is-layout-live-sheet .hsd-slide-right .hsd-box-zoom-body {
+  padding-top: 2px !important;
+}
+
+.is-layout-live-sheet .hsd-q-head {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px 10px !important;
+  margin-bottom: 5px !important;
+  padding: 2px 4px 4px !important;
+}
+
+.is-layout-live-sheet .hsd-q-head h5,
+.is-layout-live-sheet .hsd-q-title {
+  margin: 0 !important;
+  font-size: 14.5px !important;
+  line-height: 1.28 !important;
+}
+
+/* Hide verbose multi-line scenario instructions on Slide 4 (already read on Slides 2 & 3) to maximize answer box space */
+.is-layout-live-sheet .hsd-q-head .hsd-q-prompt,
+.is-layout-live-sheet .hsd-q-head .hsd-doc-ref-row {
+  display: none !important;
+}
+
+.is-layout-live-sheet .hsd-live-wall {
+  padding: 5px 8px;
+}
+
+.is-layout-live-sheet .hsd-live-wall-head {
+  margin-bottom: 4px;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.is-layout-live-sheet .hsd-live-wall-title {
+  font-size: 12.4px;
+}
+
+.is-layout-live-sheet .hsd-live-count-badge {
+  font-size: 11px;
+  padding: 1px 7px;
+}
+
+.is-layout-live-sheet .hsd-live-vbtn {
+  font-size: 11px;
+  padding: 2.5px 7px;
+}
+
+.is-layout-live-sheet .hsd-live-sid-strip {
+  padding: 2.5px 6px;
+  margin-bottom: 5px;
+}
+
+.is-layout-live-sheet .hsd-live-cell-stream {
+  gap: 3px;
+}
+
+/* Space-optimized Aggregated Live DOH Diagram (flush left-right inside each node box + scrollable) */
+.doh-diagram-shell.is-agg-live-diagram {
+  padding: 6px 2% 8px;
+  max-width: 100%;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-structural-zone {
+  max-width: 94%;
+  width: 94%;
+  margin: 0 auto 5px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-inner-oval {
+  padding: 8px 2.4% 8px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-inner-arena {
+  grid-template-columns: minmax(0, 1.18fr) minmax(225px, 0.94fr) minmax(0, 1.18fr);
+  grid-template-rows: 2px auto auto;
+  gap: 6px 10px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-out {
+  width: 100%;
+  max-width: 310px;
+  margin: 0;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-pos-hsys {
+  width: min(92%, 760px);
+  margin-top: 2px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card,
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-structural-card,
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 8px;
+  padding: 4px 7px;
+  text-align: left !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-node-head {
+  justify-content: space-between !important;
+  margin-bottom: 3px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .doh-node-title,
+.doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card .doh-node-title {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  width: auto !important;
+  font-size: 11.8px;
+}
+
+.doh-diagram-shell.is-agg-live-diagram .hsd-live-cell-empty {
+  text-align: left;
+  padding: 4px 2px;
+  font-size: 11.6px;
 }
 
 .hsd-live-overview-qstrip {
@@ -44665,13 +44877,21 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
   font-weight: 800;
 }
 
-.is-layout-live-sheet .hsd-live-cell-stream {
-  max-height: 245px;
-}
-
+html[data-theme="dark"] .hsd-ans-hash-nick,
 html[data-theme="dark"] .hsd-ans-sid-badge {
   background: #2563eb;
   color: #ffffff;
+}
+
+html[data-theme="dark"] .hsd-cell-ans-chip.is-inline-chip .hsd-cell-ans-text {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card,
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-structural-card,
+html[data-theme="dark"] .doh-diagram-shell.is-agg-live-diagram .doh-node-card.is-outcome-card {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 html[data-theme="dark"] .hsd-live-sid-strip {
@@ -44694,3 +44914,4 @@ html[data-theme="dark"] .hsd-live-sid-pill.is-submitted {
   color: #86efac;
   border-color: rgba(74, 222, 128, 0.4);
 }
+

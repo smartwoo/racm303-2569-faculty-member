@@ -26517,6 +26517,7 @@
     const isPureScenarioSlide =
       sheetEl.classList.contains("is-layout-case-scenario") ||
       sheetEl.classList.contains("is-layout-scenario");
+    const isLiveSheetSlide = sheetEl.classList.contains("is-layout-live-sheet");
     const isFullSingleSlide =
       isPureScenarioSlide ||
       sheetEl.classList.contains("is-layout-sheet") ||
@@ -26585,7 +26586,7 @@
         return;
       }
 
-      const fitSig = `${pOffW}x${pOffH}@${fitZ.toFixed(4)}:${isRespSlide ? "rs" : "16x9"}:${isCompactResp ? "c" : "d"}`;
+      const fitSig = `${pOffW}x${pOffH}@${fitZ.toFixed(4)}:${isRespSlide ? "rs" : "16x9"}:${isCompactResp ? "c" : "d"}:${isLiveSheetSlide ? "live" : "std"}`;
       if (!forceBoxRefit && boxEl._lastFitSig === fitSig) {
         if (hasDohShell) {
           dohShells.forEach((sh) => {
@@ -26623,6 +26624,8 @@
 
         const minAutoPct = isHandout
           ? 24
+          : isLiveSheetSlide
+          ? 86
           : hasDohShell
           ? pOffW > pOffH
             ? 28
@@ -26634,6 +26637,8 @@
           : 64;
         const maxAutoPct = isHandout
           ? 118
+          : isLiveSheetSlide
+          ? 100
           : hasDohShell && pOffW < 760
           ? 104
           : isCompactResp
@@ -26712,7 +26717,7 @@
         paneEl.classList.remove("is-autofit-measuring");
       }
 
-      if (!isHandout && (isRespSlide || !fitsCleanly())) {
+      if (!isHandout && (isLiveSheetSlide || isRespSlide || !fitsCleanly())) {
         paneEl.style.overflowY = "auto";
       }
 
@@ -37948,6 +37953,7 @@
         nick: "",
         fullName: "",
         disc: 0,
+        shortHashNick: "นศ.",
         idBadgeText: "ไม่ระบุรหัส",
         authorNameText: "ผู้เรียน",
         fullTitleText: "ผู้เรียน"
@@ -37972,10 +37978,18 @@
     ).trim();
     const disc = Number((rosterStu && rosterStu.disc) || itOrRec.disc || 0) || 0;
 
+    const cleanFirstName = fullName
+      ? fullName.replace(/^(นาย|นางสาว|น\.ส\.|นาง)\s*/, "").trim().split(/\s+/)[0] || ""
+      : "";
+    const nickOrFirst = nick || cleanFirstName;
+    const shortHashNick = shortNo
+      ? `#${shortNo}${nickOrFirst ? ` ${nickOrFirst}` : ""}`
+      : nickOrFirst || String(itOrRec.editorLabel || itOrRec.displayName || "นศ.").trim();
+
     const idBadgeText = sid
       ? `รหัส ${sid}`
       : shortNo
-      ? `ท้าย #${shortNo}`
+      ? `#${shortNo}`
       : `ยังไม่ระบุรหัส`;
     const authorNameText = sid
       ? `${shortNo ? `#${shortNo} ` : ""}${nick ? `${nick}` : ""}${nick && fullName ? ` (${fullName})` : fullName ? fullName : ""}`.trim()
@@ -37990,6 +38004,7 @@
       nick,
       fullName,
       disc,
+      shortHashNick,
       idBadgeText,
       authorNameText: authorNameText || (sid ? `นศพ. ${sid}` : "ผู้เรียน"),
       fullTitleText
@@ -38007,15 +38022,18 @@
     const meta = make("div", null, "hsd-cell-ans-meta");
     const leftIdWrap = make("div", null, "hsd-cell-ans-idwrap");
     if (isAnon) {
-      leftIdWrap.appendChild(make("span", `ผู้ตอบนิรนาม #${fallbackIdx || 1}`, "hsd-cell-ans-author"));
+      leftIdWrap.appendChild(make("span", `#นิรนาม ${fallbackIdx || 1}`, "hsd-ans-hash-nick is-anon"));
     } else {
       const sm = resolveResponseStudentMeta(itOrRec);
-      const idBadge = make("span", sm.idBadgeText, `hsd-ans-sid-badge${sm.sid ? "" : " is-unknown"}`);
-      const nameSpan = make("span", sm.authorNameText, "hsd-cell-ans-author");
-      leftIdWrap.append(idBadge, nameSpan);
+      const hashBadge = make("span", sm.shortHashNick, `hsd-ans-hash-nick${sm.sid ? "" : " is-unknown"}`);
+      hashBadge.title = sm.fullTitleText;
+      leftIdWrap.appendChild(hashBadge);
+      if (tagLabelsOpt && tagLabelsOpt.showFullSid && sm.sid) {
+        leftIdWrap.appendChild(make("span", `รหัส ${sm.sid}`, "hsd-cell-ans-sid-sub"));
+      }
     }
     const lblSub = (tagLabelsOpt && tagLabelsOpt.submitted) || "✓ ส่งแล้ว";
-    const lblTyp = (tagLabelsOpt && tagLabelsOpt.typing) || "✍ กำลังพิมพ์…";
+    const lblTyp = (tagLabelsOpt && tagLabelsOpt.typing) || "✍ พิมพ์สด";
     const tagEl = make(
       "span",
       statusStr === "submitted" ? lblSub : lblTyp,
@@ -38023,6 +38041,59 @@
     );
     meta.append(leftIdWrap, tagEl);
     return meta;
+  }
+
+  function attachLiveStreamScrollGuard(streamEl) {
+    if (!streamEl) return;
+    streamEl.addEventListener(
+      "wheel",
+      (ev) => {
+        if (ev.ctrlKey || ev.metaKey) return;
+        if (streamEl.scrollHeight > streamEl.clientHeight + 1) {
+          ev.stopPropagation();
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  function buildInlineStudentAnswerChipDOM(it, isAnon, anonNum, opts) {
+    const options = opts || {};
+    const isSub = it && it.status === "submitted";
+    const sm = resolveResponseStudentMeta(it);
+    const chip = make(
+      "div",
+      null,
+      `hsd-cell-ans-chip is-inline-chip ${isSub ? "is-submitted" : "is-typing"}`
+    );
+    const labelTxt = isAnon ? `#นิรนาม ${anonNum || 1}` : sm.shortHashNick;
+    const badgeEl = make(
+      "span",
+      labelTxt,
+      `hsd-ans-hash-nick${isAnon ? " is-anon" : sm.sid ? "" : " is-unknown"}`
+    );
+    const cleanText = String((it && it.text) || "").trim();
+    const textEl = make("span", cleanText, "hsd-cell-ans-text");
+    if (options.fontSize) {
+      textEl.style.fontSize = options.fontSize;
+    }
+    const tagTxt = options.compactTag
+      ? isSub
+        ? "✓"
+        : "✍"
+      : isSub
+      ? options.submittedLabel || "✓ ส่งแล้ว"
+      : options.typingLabel || "✍ พิมพ์สด";
+    const tagEl = make(
+      "span",
+      tagTxt,
+      `hsd-cell-ans-tag ${isSub ? "is-submitted" : "is-typing"}${options.compactTag ? " is-icon-only" : ""}`
+    );
+    tagEl.title = isSub ? "ส่งคำตอบช่องนี้แล้ว" : "กำลังพิมพ์สดแบบ Real-time";
+    const tipTitle = isAnon ? `ผู้ตอบนิรนาม #${anonNum || 1}` : sm.fullTitleText;
+    chip.title = options.hintSuffix ? `${tipTitle} · ${options.hintSuffix}` : tipTitle;
+    chip.append(badgeEl, textEl, tagEl);
+    return chip;
   }
 
   function openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel) {
@@ -38067,24 +38138,18 @@
     } else {
       const listWrap = make("div", null, "hsd-live-cell-stream");
       listWrap.style.maxHeight = "56vh";
-      listWrap.style.gap = "8px";
+      listWrap.style.gap = "7px";
+      attachLiveStreamScrollGuard(listWrap);
       items.forEach((it, idx) => {
-        const chip = make(
-          "div",
-          null,
-          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}`
-        );
-        chip.style.padding = "10px 14px";
         const anonNum = anonMap.get(it.participantId) || idx + 1;
-        const meta = buildStudentIdentityChipHeaderDOM(it, isAnon, anonNum, it.status, {
-          submitted: "✓ ส่งช่องนี้แล้ว",
-          typing: "✍ กำลังพิมพ์สด…"
+        const chip = buildInlineStudentAnswerChipDOM(it, isAnon, anonNum, {
+          fontSize: "15px",
+          submittedLabel: "✓ ส่งช่องนี้แล้ว",
+          typingLabel: "✍ กำลังพิมพ์สด…",
+          hintSuffix: "คลิกเพื่อดูกระดาษคำตอบทุกช่องของนักศึกษาคนนี้"
         });
-        const txtEl = make("div", it.text, "hsd-cell-ans-text");
-        txtEl.style.fontSize = "15px";
-        chip.append(meta, txtEl);
+        chip.style.padding = "8px 12px";
         if (it.fullRecord) {
-          chip.title = "คลิกเพื่อดูกระดาษคำตอบทุกช่องของนักศึกษาคนนี้";
           chip.addEventListener("click", () => {
             modal._backToCellFn = () => openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel);
             openStudentResponseSpotlight(it.fullRecord, qObj, (anonNum || 1) - 1);
@@ -38374,22 +38439,19 @@
       } else {
         const stream = make("div", null, "hsd-live-cell-stream");
         stream.setAttribute("data-live-scroll-cid", cid);
-        stream.style.maxHeight = nodeKey === "outcome" ? "110px" : "148px";
+        stream.style.maxHeight =
+          nodeKey === "individual" || nodeKey === "soc_env"
+            ? "128px"
+            : nodeKey === "outcome"
+            ? "86px"
+            : "76px";
+        attachLiveStreamScrollGuard(stream);
         items.forEach((it, idx) => {
-          const chip = make(
-            "div",
-            null,
-            `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}`
-          );
-          chip.title = "คลิกเพื่อขยายดูคำตอบโหนดนี้เต็มจอ";
           const anonNum = (anonMap && anonMap.get(it.participantId)) || idx + 1;
-          chip.append(
-            buildStudentIdentityChipHeaderDOM(it, isAnon, anonNum, it.status, {
-              submitted: "✓ ส่งแล้ว",
-              typing: "✍ พิมพ์สด"
-            }),
-            make("div", it.text, "hsd-cell-ans-text")
-          );
+          const chip = buildInlineStudentAnswerChipDOM(it, isAnon, anonNum, {
+            compactTag: true,
+            hintSuffix: "คลิกเพื่อขยายดูคำตอบโหนดนี้เต็มจอ"
+          });
           chip.addEventListener("click", () => {
             openCellResponsesSpotlight(qObj, cid, nodeTitle, "");
           });
@@ -38419,7 +38481,10 @@
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
 
-    mountDohArenaArrows(arena, svgEl, null, () => aggEdges, null);
+    const redrawArrows = mountDohArenaArrows(arena, svgEl, null, () => aggEdges, null);
+    requestAnimationFrame(() => {
+      if (typeof redrawArrows === "function") redrawArrows();
+    });
     return shell;
   }
 
@@ -38481,6 +38546,16 @@
   function populateLiveAnswerSheetCells(sheetHolder, qObj, anonMap) {
     if (!sheetHolder || !LIVE) return;
     const isAnon = LIVE.getAnonymousWall();
+    const wsRows = (qObj && qObj.worksheet && qObj.worksheet.rows) || [];
+    const visibleRowCount = wsRows.filter((r) => !r.isDiagramLinksRow).length || 1;
+    const streamMaxHeight =
+      visibleRowCount <= 1
+        ? "300px"
+        : visibleRowCount === 2
+        ? "188px"
+        : visibleRowCount === 3
+        ? "136px"
+        : "106px";
 
     sheetHolder.querySelectorAll("[data-live-cell-id]").forEach((td) => {
       const cellId = td.getAttribute("data-live-cell-id");
@@ -38504,10 +38579,10 @@
       const cellHead = make("div", null, "hsd-live-cell-head");
       const statText =
         subCnt && typCnt
-          ? `✓ ส่งแล้ว ${subCnt} คน · ✍ พิมพ์สด ${typCnt} คน`
+          ? `✓ ส่ง ${subCnt} · ✍ สด ${typCnt} คน`
           : subCnt
           ? `✓ ส่งแล้ว ${subCnt} คน`
-          : `✍ กำลังพิมพ์สด ${typCnt} คน`;
+          : `✍ พิมพ์สด ${typCnt} คน`;
       const statEl = make("span", statText, "hsd-live-cell-stat");
 
       const zoomBtn = make("button", "⤢ ขยาย", "hsd-cell-zoom-btn");
@@ -38520,21 +38595,15 @@
       cellHead.append(statEl, zoomBtn);
 
       const stream = make("div", null, "hsd-live-cell-stream");
+      stream.style.maxHeight = streamMaxHeight;
+      attachLiveStreamScrollGuard(stream);
       items.forEach((it, idx) => {
-        const chip = make(
-          "div",
-          null,
-          `hsd-cell-ans-chip ${it.status === "submitted" ? "is-submitted" : "is-typing"}`
-        );
-        chip.title = "คลิกเพื่อขยายดูคำตอบช่องนี้เต็มจอ";
         const anonNum = anonMap.get(it.participantId) || idx + 1;
-        chip.append(
-          buildStudentIdentityChipHeaderDOM(it, isAnon, anonNum, it.status, {
-            submitted: "✓ ส่งแล้ว",
-            typing: "✍ พิมพ์สด"
-          }),
-          make("div", it.text, "hsd-cell-ans-text")
-        );
+        const chip = buildInlineStudentAnswerChipDOM(it, isAnon, anonNum, {
+          submittedLabel: "✓ ส่งแล้ว",
+          typingLabel: "✍ พิมพ์สด",
+          hintSuffix: "คลิกเพื่อขยายดูคำตอบช่องนี้เต็มจอ"
+        });
         chip.addEventListener("click", () => {
           openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel);
         });
@@ -38876,39 +38945,40 @@
 
     if (countBadge) {
       countBadge.textContent = list.length
-        ? `ห้อง ${roomNum} (${rmDef.roomCode}): พิมพ์/ส่งแล้ว ${list.length}/${expectedTotal} คน (✓ ส่งแล้ว ${subStudents} · ✍ กำลังพิมพ์ ${typStudents} · 🟢 ออนไลน์ ${pres.students} คน)`
-        : `ห้อง ${roomNum} (${rmDef.roomCode}): ออนไลน์ ${pres.students}/${expectedTotal} คน · รอคำตอบสดแบบ Real-time จากนักศึกษา…`;
+        ? `ห้อง ${roomNum} (${rmDef.roomCode}): ตอบแล้ว ${list.length}/${expectedTotal} คน (✓ ${subStudents} · ✍ ${typStudents} · 🟢 ออนไลน์ ${pres.students})`
+        : `ห้อง ${roomNum} (${rmDef.roomCode}): ออนไลน์ ${pres.students}/${expectedTotal} คน · รอคำตอบสด…`;
     }
     if (anonBtn) {
-      anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดงรหัสนักศึกษา" : "🙈 ซ่อนรหัส/ชื่อ";
+      anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดง #รหัส/ชื่อเล่น" : "🙈 ซ่อนชื่อ";
     }
 
     const anonMap = buildAnonIndexMap(qObj.id);
     const isAnon = LIVE.getAnonymousWall();
 
-    // Quick Student ID overview strip showing everyone who has typed/submitted in this question
+    // Compact 1-line horizontal strip showing everyone who has typed/submitted in this question (#146 อิ๊กเล้ง)
     if (sidStrip) {
       sidStrip.replaceChildren();
       if (!list.length) {
         sidStrip.hidden = true;
       } else {
         sidStrip.hidden = false;
-        sidStrip.appendChild(make("span", "ผู้ส่ง/พิมพ์สด:", "hsd-live-sid-strip-lbl"));
+        sidStrip.appendChild(make("span", "ผู้ตอบสด:", "hsd-live-sid-strip-lbl"));
         list.forEach((rec, idx) => {
           const anonNum = anonMap.get(rec.participantId) || idx + 1;
           const sm = resolveResponseStudentMeta(rec);
+          const icon = rec.status === "submitted" ? "✓" : "✍";
           const lbl = isAnon
-            ? `นิรนาม #${anonNum}`
-            : sm.sid
-            ? `${rec.status === "submitted" ? "✓" : "✍"} รหัส ${sm.sid}${sm.nick ? ` (${sm.nick})` : ""}`
-            : `${rec.status === "submitted" ? "✓" : "✍"} ${sm.authorNameText}`;
+            ? `${icon} #นิรนาม ${anonNum}`
+            : `${icon} ${sm.shortHashNick}`;
           const pill = make(
             "button",
             lbl,
             `hsd-live-sid-pill ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
           );
           pill.type = "button";
-          pill.title = "คลิกเพื่อเปิดดูกระดาษคำตอบทุกช่องของนักศึกษาคนนี้";
+          pill.title = isAnon
+            ? `คลิกเพื่อเปิดดูกระดาษคำตอบของ #นิรนาม ${anonNum}`
+            : `${sm.fullTitleText} · คลิกเพื่อเปิดดูกระดาษคำตอบรายคน`;
           pill.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, (anonNum || 1) - 1));
           sidStrip.appendChild(pill);
         });
@@ -38926,7 +38996,9 @@
         if (el.scrollTop > 0) prevScrollByCell.set(el.getAttribute("data-live-scroll-cid"), el.scrollTop);
       });
       diagHolder.replaceChildren();
-      diagHolder.appendChild(buildAggregatedLiveDohDiagramDOM(qObj, anonMap, prevScrollByCell));
+      const diagEl = buildAggregatedLiveDohDiagramDOM(qObj, anonMap, prevScrollByCell);
+      diagHolder.appendChild(diagEl);
+      requestAnimationFrame(() => syncDohShellScale(diagEl, true));
     }
 
     if (mode === "sheet" && sheetHolder) {
@@ -38952,8 +39024,9 @@
           );
 
           const top = buildStudentIdentityChipHeaderDOM(rec, isAnon, anonNum, rec.status, {
+            showFullSid: true,
             submitted: "✓ ส่งคำตอบแล้ว",
-            typing: "✍ กำลังพิมพ์สด…"
+            typing: "✍ พิมพ์สด"
           });
           card.appendChild(top);
 
@@ -38997,17 +39070,17 @@
     const titleWrap = make("div", null, "hsd-live-wall-title");
     const badge = make("span", "", "hsd-live-count-badge");
     badge.setAttribute("data-live-count", "1");
-    titleWrap.append(make("span", "🟢 คำตอบสด Real-time รายกล่อง (ระบุรหัสนักศึกษา)"), badge);
+    titleWrap.append(make("span", "🟢 คำตอบสดรายกล่อง"), badge);
 
     const acts = make("div", null, "hsd-timer-controls");
 
     const isDohDiagram = Boolean(qObj && qObj.worksheet && qObj.worksheet.type === "doh-diagram");
     const viewSeg = make("div", null, "hsd-live-view-seg");
     const modesList = [
-      ...(isDohDiagram ? [{ id: "diagram", label: "🗺️ รวมในผัง Diagram สด" }] : []),
-      { id: "sheet", label: "▦ รวมในตารางใบงานสด" },
-      { id: "people", label: "👥 กระดาษคำตอบรายคน" },
-      { id: "roster", label: "📋 เช็คสถานะทั้งห้อง" }
+      ...(isDohDiagram ? [{ id: "diagram", label: "🗺️ ผังสด" }] : []),
+      { id: "sheet", label: "▦ ตารางสด" },
+      { id: "people", label: "👥 รายคน" },
+      { id: "roster", label: "📋 ทั้งห้อง" }
     ];
     const rawInitMode = isDohDiagram ? state.hsdLiveWallDiagMode || "diagram" : state.hsdLiveWallMode || "sheet";
     const initMode = modesList.some((m) => m.id === rawInitMode)
@@ -39032,7 +39105,7 @@
       viewSeg.appendChild(b);
     });
 
-    const allRoomBtn = make("button", "📊 ภาพรวมทุกข้อ", "hsd-tbtn");
+    const allRoomBtn = make("button", "📊 ภาพรวม", "hsd-tbtn");
     allRoomBtn.type = "button";
     allRoomBtn.title = "ดูตารางภาพรวมการส่งกระดาษคำตอบของนักศึกษาทุกคนในห้องนี้ครบทุกข้อในคาบ";
     allRoomBtn.addEventListener("click", () => openFacultyRoomOverviewModal());
@@ -39045,8 +39118,9 @@
       LIVE.setAnonymousWall(!LIVE.getAnonymousWall());
     });
 
-    const clrBtn = make("button", "ล้างคำตอบข้อนี้", "hsd-tbtn");
+    const clrBtn = make("button", "🗑 ล้าง", "hsd-tbtn");
     clrBtn.type = "button";
+    clrBtn.title = "ล้างคำตอบสดทั้งหมดในข้อนี้ของห้องนี้";
     clrBtn.addEventListener("click", () => {
       if (!LIVE) return;
       if (!window.confirm(`ต้องการล้างคำตอบสดทั้งหมดใน "${qObj.label}" (ห้องที่ ${LIVE.getRoomId()}) หรือไม่?`)) return;
