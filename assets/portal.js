@@ -23287,8 +23287,10 @@
             }
           });
 
-          requestAnimationFrame(refreshMetricsAndFit);
+          ta._fitWsTaNow = refreshMetricsAndFit;
           td.append(ta, foot, mirror);
+          refreshMetricsAndFit();
+          requestAnimationFrame(refreshMetricsAndFit);
         }
         tr.appendChild(td);
       });
@@ -26531,10 +26533,20 @@
       const paneEl = boxEl.closest(".hsd-slide-left, .hsd-slide-right, .hsd-key-slide-stage");
       const dohShells = Array.from(boxEl.querySelectorAll(".doh-diagram-shell"));
       const hasDohShell = dohShells.length > 0;
+      const autoTextareas = Array.from(boxEl.querySelectorAll("textarea"));
+      const syncAllBoxTextareas = () => {
+        autoTextareas.forEach((t) => {
+          if (typeof t._fitDohTaNow === "function") t._fitDohTaNow();
+          if (typeof t._fitWsTaNow === "function") t._fitWsTaNow();
+        });
+      };
       const setBoxZoom = (zNum) => {
         boxEl.style.zoom = zNum.toFixed(4);
         if (hasDohShell) {
           dohShells.forEach((sh) => syncDohShellScale(sh, true));
+        }
+        if (autoTextareas.length) {
+          syncAllBoxTextareas();
         }
       };
 
@@ -26598,14 +26610,6 @@
 
       const prevScrollTop = paneEl.scrollTop;
       const prevScrollLeft = paneEl.scrollLeft;
-
-      if (hasDohShell) {
-        dohShells.forEach((sh) => {
-          sh.querySelectorAll("textarea").forEach((t) => {
-            if (typeof t._fitDohTaNow === "function") t._fitDohTaNow();
-          });
-        });
-      }
 
       // Lock overflow hidden (via .is-autofit-measuring to override !important pane scroll CSS) so OS scrollbars never toggle clientWidth/clientHeight mid-search
       paneEl.classList.add("is-autofit-measuring");
@@ -26752,9 +26756,16 @@
     fitSlideSheetToStage(stageEl, sheetEl, useZoomState, true);
     requestAnimationFrame(() => {
       if (sheetEl && sheetEl.isConnected) {
-        fitSlideSheetToStage(stageEl, sheetEl, useZoomState, false);
+        fitSlideSheetToStage(stageEl, sheetEl, useZoomState, true);
       }
     });
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
+      document.fonts.ready.then(() => {
+        if (sheetEl && sheetEl.isConnected) {
+          fitSlideSheetToStage(stageEl, sheetEl, useZoomState, true);
+        }
+      });
+    }
   }
 
   function buildBoxFontSizeCtrlDOM(side) {
