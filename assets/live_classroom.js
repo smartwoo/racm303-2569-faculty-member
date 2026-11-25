@@ -108,9 +108,7 @@
   const state = {
     role: window.PORTAL_ROLE === "faculty" ? "faculty" : "student",
     roomId: clampRoom(safeGetStorage("racm303_live_room_v1", "1")),
-    teamId: clampTeamOrZero(
-      safeGetSession("racm303_hsd_team_id_v1", safeGetStorage("racm303_live_team_v1", "0"))
-    ),
+    teamId: 0,
     participantId: persistentPid,
     sessionJoined:
       window.PORTAL_ROLE === "faculty" ||
@@ -1178,16 +1176,9 @@
     state.joinedWallMs = Date.now();
     safeSetSession("racm303_hsd_session_joined_v1", "1");
     if (activeModuleOpt) state.activeModule = String(activeModuleOpt);
-    if (teamIdOpt !== undefined && teamIdOpt !== null) {
-      state.teamId = clampTeam(teamIdOpt);
-      safeSetSession("racm303_hsd_team_id_v1", String(state.teamId));
-      safeSetStorage("racm303_live_team_v1", String(state.teamId));
-    } else if (!state.teamId) {
-      const bal = getSmartTeamBalance(studentObj && studentObj.id, 28);
-      state.teamId = bal.recommendedTeam;
-      safeSetSession("racm303_hsd_team_id_v1", String(state.teamId));
-      safeSetStorage("racm303_live_team_v1", String(state.teamId));
-    }
+    state.teamId = clampTeamOrZero(teamIdOpt);
+    safeSetSession("racm303_hsd_team_id_v1", state.teamId ? String(state.teamId) : null);
+    safeSetStorage("racm303_live_team_v1", state.teamId ? String(state.teamId) : "0");
     if (studentObj && studentObj.id) {
       setStudentProfile(studentObj, { keepCurrentRoom: Boolean(roomNumOpt) });
     }
@@ -1203,18 +1194,21 @@
     if (!studentObj || !studentObj.id) return false;
     const isSharedScreen = Boolean((opts && opts.kioskMode) || state.role === "faculty");
     if (!isSharedScreen) {
-      joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt);
+      joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, clampTeamOrZero(teamIdOpt));
       return true;
     }
     if (roomNumOpt && clampRoom(roomNumOpt) !== state.roomId) {
       setRoom(roomNumOpt, false);
     }
     const sidStr = String(studentObj.id).slice(0, 16);
+    const shortNo = sidStr.slice(-3);
     const pid = `sid_${sidStr}`;
-    const bal = getSmartTeamBalance(sidStr, 28);
-    const teamNum = clampTeam(teamIdOpt || bal.recommendedTeam || 1);
+    const teamNum = clampTeamOrZero(teamIdOpt);
     const prevPres = state.presence.get(pid) || {};
     const now = Date.now();
+    const nick = String(studentObj.nickname || studentObj.nick || "").trim().slice(0, 32);
+    const fullName = String(studentObj.fullName || studentObj.name || "").trim().slice(0, 80);
+    const dispLabel = nick ? `${shortNo} ${nick} (${fullName})` : `${sidStr} ${fullName}`;
     const rec = {
       participantId: pid,
       role: "student",
@@ -1222,15 +1216,15 @@
       checkedIn: true,
       teamId: teamNum,
       studentId: sidStr,
-      shortNo: sidStr.slice(-3),
-      fullName: String(studentObj.fullName || studentObj.name || "").trim().slice(0, 80),
-      nickname: String(studentObj.nickname || studentObj.nick || "").trim().slice(0, 32),
+      shortNo,
+      fullName,
+      nickname: nick,
       area: String(studentObj.area || "").slice(0, 40),
       disc: Number(studentObj.disc) || state.roomId,
       photoId: String(studentObj.photoId || "").slice(0, 40),
       activeModule: String(activeModuleOpt || state.activeModule || "HS1").slice(0, 12),
       activeQuestionId: String(prevPres.activeQuestionId || "").slice(0, 32),
-      name: `กลุ่ม ${teamNum}`,
+      name: dispLabel.slice(0, 80),
       joinedWallMs: prevPres.joinedWallMs || now,
       lastSeenMs: now
     };
@@ -1893,10 +1887,12 @@
 
   function getMyTeamResponse(questionId) {
     if (!questionId) return null;
-    const tid = clampTeamOrZero(state.teamId);
-    if (!tid) return null;
     const qMap = state.responsesByQuestion.get(questionId);
-    return (qMap && qMap.get(`team_${tid}`)) || null;
+    if (!qMap) return null;
+    const tid = clampTeamOrZero(state.teamId);
+    if (tid && qMap.has(`team_${tid}`)) return qMap.get(`team_${tid}`);
+    if (state.participantId && qMap.has(state.participantId)) return qMap.get(state.participantId);
+    return null;
   }
 
   function getCellResponses(questionId, inputId) {

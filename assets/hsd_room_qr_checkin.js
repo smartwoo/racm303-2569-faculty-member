@@ -678,7 +678,7 @@
       fullName: String(studentObj.fullName || studentObj.name || ""),
       nickname: String(studentObj.nickname || ""),
       assignedDisc: Number(studentObj.disc) || clampRoomId(roomId),
-      teamId: Number(teamId) >= 1 && Number(teamId) <= 3 ? Number(teamId) : 1,
+      teamId: 0,
       checkedInMs: now,
       checkedInISO: new Date(now).toISOString()
     };
@@ -761,8 +761,8 @@
   }
 
   /* ---------- 5. Live Room Presence Summary Helper ---------- */
-  function getLiveRoomJoinedStats(roomId) {
-    const rMeta = getRoomMeta("HS1", roomId);
+  function getLiveRoomJoinedStats(roomId, modCodeOpt) {
+    const rMeta = getRoomMeta(modCodeOpt || "HS1", roomId);
     const live = root && root.RACM_LIVE_CLASSROOM;
     const pres =
       live && typeof live.getPresenceSummary === "function" && live.getRoomId() === rMeta.roomId
@@ -790,7 +790,7 @@
   function exportRoomCheckinCsv(modCodeOpt, roomIdOpt) {
     if (typeof document === "undefined") return;
     const meta = getRoomMeta(modCodeOpt, roomIdOpt);
-    const stats = getLiveRoomJoinedStats(meta.roomId);
+    const stats = getLiveRoomJoinedStats(meta.roomId, meta.modCode);
     const rows = [
       [
         "ลำดับ",
@@ -800,7 +800,6 @@
         "ชื่อเล่น",
         "ห้องอภิปราย",
         "สถานะ Check-in",
-        "กลุ่มย่อยในห้อง",
         "เวลา Check-in"
       ]
     ];
@@ -820,7 +819,6 @@
         stu.nickname || "",
         `${meta.pinCode} (${meta.roomCode})`,
         pres ? "Check-in แล้ว" : "ยังไม่ Check-in",
-        pres && pres.teamId ? `กลุ่ม ${pres.teamId}` : "-",
         timeStr
       ]);
     });
@@ -840,7 +838,6 @@
         p.nickname || "",
         `${meta.pinCode} (${meta.roomCode})`,
         "Check-in แล้ว (ต่างห้อง)",
-        p.teamId ? `กลุ่ม ${p.teamId}` : "-",
         timeStr
       ]);
     });
@@ -914,7 +911,7 @@
     }
 
     function renderDialog() {
-      const stats = getLiveRoomJoinedStats(meta.roomId);
+      const stats = getLiveRoomJoinedStats(meta.roomId, meta.modCode);
       const qrSvg = buildQrSvg(
         meta.studentQrUrl,
         "is-giant-modal-qr",
@@ -924,8 +921,7 @@
         ? stats.joinedList
             .map((p) => {
               const sNo = p.shortNo || (p.studentId ? String(p.studentId).slice(-3) : "");
-              const tTag = p.teamId ? `ก.${p.teamId} ` : "";
-              return `<span class="hsd-qr-zoom-stu-pill">✓ ${escHtml(tTag)}${escHtml(sNo)} ${escHtml(p.nickname || p.fullName || "")}</span>`;
+              return `<span class="hsd-qr-zoom-stu-pill">✓ ${escHtml(sNo)} ${escHtml(p.nickname || p.fullName || "")}</span>`;
             })
             .join("")
         : `<span style="font-size:13px;opacity:0.8">รอนักศึกษาสแกน QR Code และกรอกรหัส 3 ตัวท้าย…</span>`;
@@ -939,11 +935,11 @@
             <div class="hsd-qr-zoom-room">ห้อง ${escHtml(meta.roomCode)} · อ.ประจำห้อง: ${escHtml(meta.instructor)}</div>
             <div class="ppt-ok-qr-steps" style="text-align:left">
               <div class="ppt-ok-qr-step"><span class="ppt-ok-qr-step-num">1</span><span>ใช้กล้องมือถือหรือ LINE สแกน <strong>QR Code ประจำห้อง ${escHtml(meta.roomCode)}</strong> ด้านซ้าย</span></div>
-              <div class="ppt-ok-qr-step"><span class="ppt-ok-qr-step-num">2</span><span>กรอก <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> (เช่น 056) เพื่อ <strong>Check-in เข้าห้องเรียน</strong> และแบ่งกลุ่มย่อย 1 / 2 / 3</span></div>
+              <div class="ppt-ok-qr-step"><span class="ppt-ok-qr-step-num">2</span><span>กรอก <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> (เช่น 056) เพื่อ <strong>Check-in เข้าห้องเรียน</strong></span></div>
             </div>
             <div class="hsd-qr-zoom-url" title="${escHtml(meta.studentQrUrl)}">🔗 ${escHtml(meta.studentQrUrl)}</div>
             <div class="hsd-qr-zoom-live-box" id="hsdQrZoomLiveBox">
-              <div class="hsd-qr-zoom-live-count">🟢 Check-in เข้าห้อง ${escHtml(meta.roomCode)} แล้ว ${stats.joinedCount} / ${stats.expectedCount} คน (ก.1: ${stats.teamCounts[1] || 0} · ก.2: ${stats.teamCounts[2] || 0} · ก.3: ${stats.teamCounts[3] || 0})</div>
+              <div class="hsd-qr-zoom-live-count">🟢 Check-in เข้าห้อง ${escHtml(meta.roomCode)} แล้ว ${stats.joinedCount} / ${stats.expectedCount} คน</div>
               <div class="hsd-qr-zoom-live-pills">${pillsHtml}</div>
             </div>
             <div class="hsd-qr-zoom-actions">
@@ -1537,14 +1533,57 @@
   }
 
   /* ---------- 9. Reusable 3-Digit Student ID Check-in Card + Side-by-Side Room Check-in Status ---------- */
-  let activeCheckinKeyHandler = null;
   let activeCheckinPresUnsub = null;
+  let globalCheckinKeyRouterInstalled = false;
+
+  function findActiveVisibleCheckinCard() {
+    if (typeof document === "undefined" || typeof document.querySelectorAll !== "function") return null;
+    const modalCard = document.querySelector("#hsdKahootLobbyModal:not([hidden]) [data-hsd-checkin-card='1'][data-interactive='1']");
+    if (modalCard) return modalCard;
+    const gateCard = document.querySelector(".hsd-qr-checkin-gate-wrap [data-hsd-checkin-card='1'][data-interactive='1']");
+    if (gateCard && gateCard.offsetParent !== null) return gateCard;
+    const allCards = document.querySelectorAll("[data-hsd-checkin-card='1'][data-interactive='1']");
+    for (let i = 0; i < allCards.length; i += 1) {
+      const el = allCards[i];
+      if (el && el.isConnected && el.offsetParent !== null) return el;
+    }
+    return null;
+  }
+
+  function ensureGlobalCheckinKeyListener() {
+    if (globalCheckinKeyRouterInstalled || typeof window === "undefined") return;
+    globalCheckinKeyRouterInstalled = true;
+    window.addEventListener(
+      "keydown",
+      (ev) => {
+        if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+        const t = ev.target;
+        const tag = t && t.tagName ? String(t.tagName).toUpperCase() : "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) {
+          return;
+        }
+        const activeCard = findActiveVisibleCheckinCard();
+        if (!activeCard) return;
+        if (/^[0-9]$/.test(ev.key)) {
+          ev.preventDefault();
+          activeCard._pushDigit(ev.key);
+        } else if (ev.key === "Backspace" && activeCard._hasDigits && activeCard._hasDigits()) {
+          ev.preventDefault();
+          activeCard._popDigit();
+        } else if ((ev.key === "Delete" || ev.key === "Escape") && activeCard._hasDigits && activeCard._hasDigits()) {
+          ev.preventDefault();
+          if (typeof activeCard._clearDigits === "function") activeCard._clearDigits();
+        } else if (ev.key === "Enter" && activeCard._canSubmit && activeCard._canSubmit()) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          activeCard._submitCheckin();
+        }
+      },
+      true
+    );
+  }
 
   function teardownCheckinGateListeners() {
-    if (activeCheckinKeyHandler && typeof window !== "undefined") {
-      window.removeEventListener("keydown", activeCheckinKeyHandler);
-      activeCheckinKeyHandler = null;
-    }
     if (activeCheckinPresUnsub) {
       activeCheckinPresUnsub();
       activeCheckinPresUnsub = null;
@@ -1561,20 +1600,34 @@
     const interactive = cfg.interactive !== false;
     const kioskMode = Boolean(cfg.kioskMode);
 
+    if (interactive) {
+      ensureGlobalCheckinKeyListener();
+    }
+
     const prefillStu = !kioskMode ? (cfg.prefillStudent || getInitialStepPinStudent()) : null;
     let pinDigits = prefillStu ? String(prefillStu.id).slice(-3) : "";
-    let searchFallbackText = "";
     let pickedStudent = prefillStu || null;
-    let selectedTeam = 0;
     let flashSuccessMsg = "";
     let flashTimer = null;
+    const keyBtnMap = new Map();
+
+    function flashNumpadKey(keyId) {
+      const btn = keyBtnMap.get(String(keyId));
+      if (!btn || !btn.classList) return;
+      btn.classList.add("is-key-pressed");
+      if (btn._pressTimer) clearTimeout(btn._pressTimer);
+      btn._pressTimer = setTimeout(() => {
+        btn.classList.remove("is-key-pressed");
+      }, 150);
+    }
 
     const card = document.createElement("div");
     card.className = `hsd-qr-checkin-card${isCompact ? " is-compact-embed" : ""}`;
     card.setAttribute("data-hsd-checkin-card", "1");
+    card.setAttribute("data-interactive", interactive ? "1" : "0");
     card.setAttribute("data-room-id", String(roomId));
 
-    // 1. Room Banner (matches screenshot: 📍 HS1-RX · ห้อง 1C1-0Y | 🟢 Check-in แล้ว X/28 คน)
+    // 1. Room Banner (📍 HS1-RX · ห้อง 1C1-0Y | 🟢 Check-in แล้ว X/28 คน)
     const hero = document.createElement("div");
     hero.className = "hsd-qcg-hero";
     const heroTop = document.createElement("div");
@@ -1598,7 +1651,7 @@
     hero.append(heroTop, hTitle, hSub);
     card.appendChild(hero);
 
-    // 2. Step Title + 3-Digit Slots
+    // 2. Step Title + Direct-Typeable 3-Digit PIN Slots [•] [•] [•]
     const stepLbl = document.createElement("div");
     stepLbl.className = "hsd-qcg-step-title";
     stepLbl.textContent = "กรอกรหัสนักศึกษา 3 ตัวท้าย (เช่น 056) เพื่อ Check-in";
@@ -1606,9 +1659,129 @@
 
     const slotsRow = document.createElement("div");
     slotsRow.className = "hsd-qcg-pin-slots";
-    const slotEls = [0, 1, 2].map(() => {
-      const s = document.createElement("div");
+    const slotEls = [0, 1, 2].map((idx) => {
+      const s = document.createElement("input");
+      s.type = "text";
+      s.inputMode = "numeric";
+      s.pattern = "[0-9]*";
+      s.autocomplete = "off";
       s.className = "hsd-qcg-slot";
+      s.placeholder = "•";
+      s.setAttribute("aria-label", `รหัสนักศึกษาหลักที่ ${idx + 1}`);
+      if (idx === 0) {
+        s.setAttribute("data-ppt-ok-sid-input", "1");
+      }
+      if (!interactive) {
+        s.disabled = true;
+      } else {
+        s.addEventListener("focus", () => {
+          if (idx > pinDigits.length && slotEls[pinDigits.length] && typeof slotEls[pinDigits.length].focus === "function") {
+            slotEls[pinDigits.length].focus();
+            return;
+          }
+          if (typeof s.select === "function") s.select();
+        });
+        s.addEventListener("keydown", (ev) => {
+          if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+          if (/^[0-9]$/.test(ev.key)) {
+            ev.preventDefault();
+            if (pinDigits.length === 3 && (idx === 0 || idx === 2)) {
+              flashNumpadKey(ev.key);
+              flashSuccessMsg = "";
+              pickedStudent = null;
+              pinDigits = ev.key;
+              autoResolveCandidate();
+              syncUI();
+              if (slotEls[1] && typeof slotEls[1].focus === "function") slotEls[1].focus();
+              return;
+            }
+            setDigitAtSlot(idx, ev.key);
+            const nextIdx = Math.min(2, pinDigits.length);
+            if (slotEls[nextIdx] && nextIdx !== idx && typeof slotEls[nextIdx].focus === "function") {
+              slotEls[nextIdx].focus();
+            }
+          } else if (ev.key === "Backspace") {
+            ev.preventDefault();
+            flashNumpadKey("back");
+            if (idx < pinDigits.length) {
+              pinDigits = pinDigits.slice(0, idx) + pinDigits.slice(idx + 1);
+              pickedStudent = null;
+              autoResolveCandidate();
+              syncUI();
+              const prevIdx = Math.max(0, idx - (idx >= pinDigits.length ? 1 : 0));
+              if (slotEls[prevIdx] && typeof slotEls[prevIdx].focus === "function") {
+                slotEls[prevIdx].focus();
+              }
+            } else {
+              popDigit();
+              const prevIdx = Math.max(0, pinDigits.length);
+              if (slotEls[prevIdx] && typeof slotEls[prevIdx].focus === "function") {
+                slotEls[prevIdx].focus();
+              }
+            }
+          } else if (ev.key === "ArrowLeft" && idx > 0) {
+            ev.preventDefault();
+            if (slotEls[idx - 1] && typeof slotEls[idx - 1].focus === "function") slotEls[idx - 1].focus();
+          } else if (ev.key === "ArrowRight" && idx < 2) {
+            ev.preventDefault();
+            if (slotEls[idx + 1] && typeof slotEls[idx + 1].focus === "function") slotEls[idx + 1].focus();
+          } else if (ev.key === "Delete" || ev.key === "Escape") {
+            ev.preventDefault();
+            clearAllDigits();
+            if (slotEls[0] && typeof slotEls[0].focus === "function") slotEls[0].focus();
+          } else if (ev.key === "Enter") {
+            ev.preventDefault();
+            ev.stopPropagation();
+            submitCheckin();
+          }
+        });
+        s.addEventListener("input", () => {
+          const digits = String(s.value || "").replace(/\D/g, "");
+          if (!digits) {
+            if (idx < pinDigits.length) {
+              pinDigits = pinDigits.slice(0, idx) + pinDigits.slice(idx + 1);
+              pickedStudent = null;
+              autoResolveCandidate();
+            }
+            syncUI();
+            return;
+          }
+          if (digits.length >= 3) {
+            flashSuccessMsg = "";
+            pinDigits = digits.slice(-3);
+            flashNumpadKey(pinDigits.slice(-1));
+            pickedStudent = null;
+            autoResolveCandidate();
+            syncUI();
+            if (slotEls[2] && typeof slotEls[2].focus === "function") slotEls[2].focus();
+            return;
+          }
+          const ch = digits.slice(-1);
+          if ((pinDigits[idx] || "") !== ch) {
+            setDigitAtSlot(idx, ch);
+            if (idx < 2 && slotEls[idx + 1] && typeof slotEls[idx + 1].focus === "function") {
+              slotEls[idx + 1].focus();
+            }
+          } else {
+            syncUI();
+          }
+        });
+        s.addEventListener("paste", (ev) => {
+          ev.preventDefault();
+          const pasted = String((ev.clipboardData && ev.clipboardData.getData("text")) || "").trim();
+          const onlyNums = pasted.replace(/\D/g, "");
+          if (onlyNums.length >= 1) {
+            flashSuccessMsg = "";
+            pinDigits = onlyNums.slice(-3);
+            flashNumpadKey(pinDigits.slice(-1));
+            pickedStudent = null;
+            autoResolveCandidate();
+            syncUI();
+            const targetSlot = slotEls[Math.min(2, Math.max(0, pinDigits.length - 1))];
+            if (targetSlot && typeof targetSlot.focus === "function") targetSlot.focus();
+          }
+        });
+      }
       slotsRow.appendChild(s);
       return s;
     });
@@ -1619,7 +1792,7 @@
     verifyBox.className = "hsd-qcg-verify-box is-idle";
     card.appendChild(verifyBox);
 
-    // Tactile Mobile Numeric Keypad (0-9, Clear, Backspace)
+    // Tactile Numeric Keypad (0-9, Clear, Backspace — syncs with physical keyboard & touch)
     const numpad = document.createElement("div");
     numpad.className = "hsd-qcg-numpad";
     numpad.setAttribute("role", "group");
@@ -1630,29 +1803,33 @@
       b.type = "button";
       b.className = "hsd-qcg-key";
       b.textContent = d;
+      keyBtnMap.set(d, b);
       if (interactive) b.addEventListener("click", () => pushDigit(d));
       numpad.appendChild(b);
     });
+
+    function clearAllDigits() {
+      flashNumpadKey("clear");
+      flashSuccessMsg = "";
+      pinDigits = "";
+      pickedStudent = null;
+      syncUI();
+    }
 
     const clearBtn = document.createElement("button");
     clearBtn.type = "button";
     clearBtn.className = "hsd-qcg-key is-fn";
     clearBtn.textContent = "ล้าง";
+    keyBtnMap.set("clear", clearBtn);
     if (interactive) {
-      clearBtn.addEventListener("click", () => {
-        flashSuccessMsg = "";
-        pinDigits = "";
-        searchFallbackText = "";
-        directInput.value = "";
-        pickedStudent = null;
-        syncUI();
-      });
+      clearBtn.addEventListener("click", clearAllDigits);
     }
 
     const zeroBtn = document.createElement("button");
     zeroBtn.type = "button";
     zeroBtn.className = "hsd-qcg-key";
     zeroBtn.textContent = "0";
+    keyBtnMap.set("0", zeroBtn);
     if (interactive) zeroBtn.addEventListener("click", () => pushDigit("0"));
 
     const backBtn = document.createElement("button");
@@ -1660,91 +1837,21 @@
     backBtn.className = "hsd-qcg-key is-fn";
     backBtn.setAttribute("aria-label", "ลบตัวท้าย");
     backBtn.textContent = "⌫";
+    keyBtnMap.set("back", backBtn);
     if (interactive) backBtn.addEventListener("click", () => popDigit());
 
     numpad.append(clearBtn, zeroBtn, backBtn);
     card.appendChild(numpad);
 
-    // Optional Keyboard / Name Search Fallback Input
-    const directWrap = document.createElement("div");
-    directWrap.className = "hsd-qcg-direct-input-wrap";
-    const directInput = document.createElement("input");
-    directInput.type = "search";
-    directInput.inputMode = "search";
-    directInput.autocomplete = "off";
-    directInput.className = "hsd-qcg-direct-input";
-    directInput.placeholder = "หรือพิมพ์รหัส 3 ตัว / รหัส 7 หลัก / ชื่อเล่นที่นี่…";
-    directInput.setAttribute("data-ppt-ok-sid-input", "1");
-    if (interactive) {
-      directInput.addEventListener("input", () => {
-        flashSuccessMsg = "";
-        const val = directInput.value.trim();
-        const onlyNums = val.replace(/\D/g, "");
-        if (/^\d{1,3}$/.test(val)) {
-          pinDigits = val;
-          searchFallbackText = "";
-          autoResolveCandidate();
-        } else {
-          searchFallbackText = val;
-          if (onlyNums.length === 7) {
-            pinDigits = onlyNums.slice(-3);
-          }
-          autoResolveCandidate();
-        }
-        syncUI();
-      });
-      directInput.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          submitCheckin();
-        }
-      });
-    } else {
-      directInput.disabled = true;
-    }
-    directWrap.appendChild(directInput);
-    card.appendChild(directWrap);
-
-    // Sub-Group 1 / 2 / 3 Balanced Selector
-    const teamsWrap = document.createElement("div");
-    teamsWrap.className = "hsd-qcg-teams-wrap";
-    const teamsLbl = document.createElement("div");
-    teamsLbl.className = "hsd-qcg-teams-lbl";
-    teamsLbl.textContent = isCompact
-      ? "เลือกเข้ากลุ่มย่อย 1 / 2 / 3 (เกลี่ยอัตโนมัติ)"
-      : "กลุ่มย่อยในห้องเรียน (ระบบเกลี่ยคนเข้ากลุ่ม 1 / 2 / 3 ให้อัตโนมัติ หรือแตะเลือกกลุ่มได้)";
-    const teamsRow = document.createElement("div");
-    teamsRow.className = "hsd-qcg-teams-row";
-    teamsWrap.append(teamsLbl, teamsRow);
-    card.appendChild(teamsWrap);
-
-    // Big Check-in Submit Button
+    // Big Check-in Submit Button (no bottom text input bar, no subgroup 1/2/3 selection)
     const submitBtn = document.createElement("button");
     submitBtn.type = "button";
     submitBtn.className = "hsd-qcg-submit-btn";
     if (interactive) submitBtn.addEventListener("click", () => submitCheckin());
     card.appendChild(submitBtn);
 
-    function computeBalance() {
-      const bal =
-        live && typeof live.getSmartTeamBalance === "function"
-          ? live.getSmartTeamBalance(pickedStudent && pickedStudent.id, meta.expectedCount)
-          : {
-              recommendedTeam: 1,
-              teams: {
-                1: { id: 1, otherCount: 0, maxQuota: Math.ceil(meta.expectedCount / 3), locked: false, isRecommended: true },
-                2: { id: 2, otherCount: 0, maxQuota: Math.ceil(meta.expectedCount / 3), locked: false, isRecommended: false },
-                3: { id: 3, otherCount: 0, maxQuota: Math.ceil(meta.expectedCount / 3), locked: false, isRecommended: false }
-              }
-            };
-      if (!selectedTeam || (bal.teams[selectedTeam] && bal.teams[selectedTeam].locked)) {
-        selectedTeam = bal.recommendedTeam || 1;
-      }
-      return bal;
-    }
-
     function autoResolveCandidate() {
-      const query = searchFallbackText || (pinDigits.length === 3 ? pinDigits : "");
+      const query = pinDigits.length === 3 ? pinDigits : "";
       if (!query) {
         pickedStudent = null;
         return;
@@ -1761,55 +1868,65 @@
       }
     }
 
-    function pushDigit(d) {
+    function setDigitAtSlot(slotIdx, d) {
+      flashNumpadKey(d);
       flashSuccessMsg = "";
-      searchFallbackText = "";
+      pickedStudent = null;
+      if (pinDigits.length === 3 && slotIdx === 0) {
+        pinDigits = d;
+      } else if (slotIdx >= pinDigits.length) {
+        pinDigits = (pinDigits + d).slice(0, 3);
+      } else {
+        pinDigits = (pinDigits.slice(0, slotIdx) + d + pinDigits.slice(slotIdx + 1)).slice(0, 3);
+      }
+      autoResolveCandidate();
+      syncUI();
+    }
+
+    function pushDigit(d) {
+      flashNumpadKey(d);
+      flashSuccessMsg = "";
       if (pinDigits.length >= 3) {
         pinDigits = d;
         pickedStudent = null;
       } else {
         pinDigits += d;
       }
-      directInput.value = pinDigits;
       autoResolveCandidate();
       syncUI();
     }
 
     function popDigit() {
+      flashNumpadKey("back");
       flashSuccessMsg = "";
-      if (searchFallbackText) {
-        searchFallbackText = "";
-        directInput.value = "";
-      }
       pinDigits = pinDigits.slice(0, -1);
-      directInput.value = pinDigits;
       pickedStudent = null;
       autoResolveCandidate();
       syncUI();
     }
 
     function syncUI() {
-      const stats = getLiveRoomJoinedStats(roomId);
+      const stats = getLiveRoomJoinedStats(roomId, modCode);
       livePill.textContent = `🟢 Check-in แล้ว ${stats.joinedCount}/${stats.expectedCount} คน`;
 
       slotEls.forEach((el, idx) => {
         const ch = pinDigits[idx] || "";
-        el.textContent = ch || "•";
+        if (el.value !== ch) el.value = ch;
         el.classList.toggle("is-filled", Boolean(ch));
-        el.classList.toggle("is-active-cursor", pinDigits.length === idx);
+        el.classList.toggle("is-active-cursor", pinDigits.length === idx || (pinDigits.length === 3 && idx === 2));
       });
 
       verifyBox.replaceChildren();
-      const query = searchFallbackText || pinDigits;
+      const query = pinDigits;
       if (flashSuccessMsg && !query) {
         verifyBox.className = "hsd-qcg-verify-box is-matched";
         verifyBox.innerHTML = flashSuccessMsg;
-      } else if (!query || (!searchFallbackText && pinDigits.length < 3)) {
+      } else if (!query || pinDigits.length < 3) {
         verifyBox.className = "hsd-qcg-verify-box is-idle";
         verifyBox.textContent =
           pinDigits.length > 0
-            ? `กรอกอีก ${3 - pinDigits.length} หลัก (หรือกด Check-in หากเป็นเลข ${pinDigits.padStart(3, "0")})`
-            : `แตะตัวเลข 3 หลักท้ายของรหัสนักศึกษาบนแป้นด้านล่างเพื่อยืนยันชื่อเข้าห้อง ${meta.roomCode}`;
+            ? `กรอกอีก ${3 - pinDigits.length} หลัก (หรือกด Enter / Check-in หากเป็นเลข ${pinDigits.padStart(3, "0")})`
+            : `คลิกพิมพ์ที่ช่อง • • • หรือกดแป้นตัวเลขเพื่อยืนยันชื่อเข้าห้อง ${meta.roomCode}`;
       } else {
         const res = matchStudentsBy3DigitPin(query, roomId);
         if (pickedStudent) {
@@ -1852,7 +1969,6 @@
               cb.addEventListener("click", () => {
                 pickedStudent = cand;
                 pinDigits = String(cand.id).slice(-3);
-                directInput.value = pinDigits;
                 syncUI();
               });
               candList.appendChild(cb);
@@ -1876,8 +1992,6 @@
             cb.addEventListener("click", () => {
               pickedStudent = cand;
               pinDigits = String(cand.id).slice(-3);
-              searchFallbackText = "";
-              directInput.value = pinDigits;
               syncUI();
             });
             candList.appendChild(cb);
@@ -1889,29 +2003,6 @@
         }
       }
 
-      const bal = computeBalance();
-      teamsRow.replaceChildren();
-      [1, 2, 3].forEach((tid) => {
-        const tInfo = bal.teams[tid];
-        const isSel = selectedTeam === tid && !tInfo.locked;
-        const tb = document.createElement("button");
-        tb.type = "button";
-        tb.className = `hsd-qcg-team-btn${isSel ? " is-selected" : ""}`;
-        tb.disabled = !interactive || Boolean(tInfo.locked);
-        const tag = tInfo.locked ? "เต็ม" : tInfo.isRecommended ? "แนะนำ" : "เลือกได้";
-        tb.innerHTML =
-          `<strong>กลุ่ม ${tid} (${tag})</strong>` +
-          `<span>${tInfo.otherCount}/${tInfo.maxQuota} คน</span>`;
-        if (interactive) {
-          tb.addEventListener("click", () => {
-            if (tInfo.locked) return;
-            selectedTeam = tid;
-            syncUI();
-          });
-        }
-        teamsRow.appendChild(tb);
-      });
-
       if (pickedStudent) {
         const sNo = String(pickedStudent.id).slice(-3);
         const nick = pickedStudent.nickname ? ` ${pickedStudent.nickname}` : "";
@@ -1922,7 +2013,7 @@
           submitBtn.textContent = `🔒 ล็อกห้องตามตาราง ${modCode}: กดไป Check-in ห้อง ${assignedRoom} (${trueMeta.roomCode}) · เบอร์ ${sNo}${nick} →`;
         } else {
           submitBtn.className = "hsd-qcg-submit-btn is-ready";
-          submitBtn.textContent = `✅ Check-in ห้อง ${meta.roomCode} · เบอร์ ${sNo}${nick} (กลุ่ม ${selectedTeam}) →`;
+          submitBtn.textContent = `✅ Check-in ห้อง ${meta.roomCode} · เบอร์ ${sNo}${nick} →`;
         }
       } else {
         submitBtn.className = "hsd-qcg-submit-btn";
@@ -1953,30 +2044,21 @@
         return;
       }
 
-      const bal = computeBalance();
-      const finalTeam =
-        selectedTeam && bal.teams[selectedTeam] && !bal.teams[selectedTeam].locked
-          ? selectedTeam
-          : bal.recommendedTeam || 1;
-
       const stuDone = pickedStudent;
       const sNo = String(stuDone.id).slice(-3);
       const nick = stuDone.nickname || stuDone.name || "";
 
       if (kioskMode) {
         if (live && typeof live.checkinStudentToRoom === "function") {
-          live.checkinStudentToRoom(stuDone, roomId, modCode, finalTeam, { kioskMode: true });
+          live.checkinStudentToRoom(stuDone, roomId, modCode, 0, { kioskMode: true });
         } else if (live && typeof live.joinSessionWithStudent === "function") {
-          live.joinSessionWithStudent(stuDone, roomId, modCode, finalTeam);
+          live.joinSessionWithStudent(stuDone, roomId, modCode, 0);
         }
         pinDigits = "";
-        searchFallbackText = "";
-        directInput.value = "";
         pickedStudent = null;
-        selectedTeam = 0;
         flashSuccessMsg =
-          `<div><strong>✅ Check-in สำเร็จ! เบอร์ ${escHtml(sNo)} · ${escHtml(nick)} → กลุ่ม ${finalTeam}</strong></div>` +
-          `<div>อัปเดตขึ้น Check-in Status ห้อง ${escHtml(meta.roomCode)} แล้ว (กรอกรหัสคนถัดไปได้เลย)</div>`;
+          `<div><strong>✅ Check-in สำเร็จ! เบอร์ ${escHtml(sNo)} · ${escHtml(nick)}</strong></div>` +
+          `<div>อัปเดตขึ้น Check-in Status ห้อง ${escHtml(meta.roomCode)} แล้ว (กดรหัสคนถัดไปได้เลย)</div>`;
         if (flashTimer) clearTimeout(flashTimer);
         flashTimer = setTimeout(() => {
           flashSuccessMsg = "";
@@ -1984,7 +2066,7 @@
         }, 4500);
         syncUI();
         if (typeof cfg.onCompletedCheckin === "function") {
-          cfg.onCompletedCheckin(stuDone, roomId, finalTeam, null);
+          cfg.onCompletedCheckin(stuDone, roomId, 0, null);
         }
         return;
       }
@@ -1996,20 +2078,15 @@
           window.location.href = buildStudentCheckinHrefWithSid(modCode, assignedRoom, stuDone);
           return;
         }
-        const balOther =
-          live && typeof live.getSmartTeamBalance === "function"
-            ? live.getSmartTeamBalance(stuDone.id, getRoomMeta(modCode, assignedRoom).expectedCount)
-            : { recommendedTeam: 1 };
-        const teamOther = balOther.recommendedTeam || 1;
-        const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, teamOther);
+        const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, 0);
         if (typeof cfg.onCompletedCheckin === "function") {
-          cfg.onCompletedCheckin(stuDone, assignedRoom, teamOther, recOther);
+          cfg.onCompletedCheckin(stuDone, assignedRoom, 0, recOther);
         }
         return;
       }
-      const rec = markStudentCheckedIn(modCode, roomId, stuDone, finalTeam);
+      const rec = markStudentCheckedIn(modCode, roomId, stuDone, 0);
       if (typeof cfg.onCompletedCheckin === "function") {
-        cfg.onCompletedCheckin(stuDone, roomId, finalTeam, rec);
+        cfg.onCompletedCheckin(stuDone, roomId, 0, rec);
       }
     }
 
@@ -2018,22 +2095,26 @@
       flashSuccessMsg = "";
       pickedStudent = stu;
       pinDigits = String(stu.id).slice(-3);
-      searchFallbackText = "";
-      directInput.value = pinDigits;
       syncUI();
     };
     card._syncUI = syncUI;
     card._pushDigit = pushDigit;
     card._popDigit = popDigit;
+    card._clearDigits = clearAllDigits;
     card._submitCheckin = submitCheckin;
+    card._hasDigits = () => Boolean(pinDigits.length > 0);
+    card._canSubmit = () => Boolean(pickedStudent || (pinDigits.length >= 1 && pinDigits.length <= 3));
     card._hasPickedStudent = () => Boolean(pickedStudent);
 
     syncUI();
     return card;
   }
 
-  function buildRoomCheckinStatusPanelDOM(opts) {
-    const cfg = opts || {};
+  function buildRoomCheckinStatusPanelDOM(arg1, arg2, arg3) {
+    const cfg =
+      arg1 && typeof arg1 === "object"
+        ? arg1
+        : Object.assign({}, arg3 || {}, { modCode: arg1, roomId: arg2 });
     const modCode = String(cfg.modCode || "HS1").toUpperCase();
     const roomId = clampRoomId(cfg.roomId || 1);
     const meta = getRoomMeta(modCode, roomId);
@@ -2043,8 +2124,7 @@
     panel.setAttribute("data-hsd-checkin-status-panel", "1");
 
     function renderPanel() {
-      const stats = getLiveRoomJoinedStats(roomId);
-      const maxPerTeam = Math.max(2, Math.ceil(stats.expectedCount / 3));
+      const stats = getLiveRoomJoinedStats(roomId, modCode);
       const pct = Math.min(100, Math.round((stats.joinedCount / Math.max(1, stats.expectedCount)) * 100));
       panel.replaceChildren();
 
@@ -2083,17 +2163,7 @@
       progFill.style.width = `${pct}%`;
       progTrack.appendChild(progFill);
 
-      const teamRow = document.createElement("div");
-      teamRow.className = "hsd-qsp-teams-row";
-      [1, 2, 3].forEach((tid) => {
-        const cnt = (stats.teamCounts && stats.teamCounts[tid]) || 0;
-        const tp = document.createElement("span");
-        tp.className = `hsd-qsp-team-pill is-team-${tid}`;
-        tp.textContent = `กลุ่ม ${tid}: ${cnt}/${maxPerTeam} คน`;
-        teamRow.appendChild(tp);
-      });
-
-      head.append(headTop, titleRow, progTrack, teamRow);
+      head.append(headTop, titleRow, progTrack);
       panel.appendChild(head);
 
       // 2. Live 28/29-Student Check-in Status Grid
@@ -2104,21 +2174,20 @@
         const sNo = sid.slice(-3);
         const pres = stats.bySid.get(sid);
         const joined = Boolean(pres);
-        const teamId = pres && pres.teamId ? Number(pres.teamId) : 0;
         const dispName = stu.nickname
           ? `${stu.nickname} (${String(stu.name || stu.fullName || "").split(" ")[0]})`
           : String(stu.name || stu.fullName || "").split(" ")[0];
 
         const item = document.createElement(joined ? "div" : "button");
         if (!joined) item.type = "button";
-        item.className = `hsd-qsp-stu-chip${joined ? ` is-checked-in${teamId ? ` is-team-${teamId}` : ""}` : " is-waiting"}`;
+        item.className = `hsd-qsp-stu-chip${joined ? " is-checked-in" : " is-waiting"}`;
         item.title = joined
-          ? `${sid} · ${stu.fullName || stu.name} — Check-in แล้ว${teamId ? ` (กลุ่ม ${teamId})` : ""}`
-          : `แตะเพื่อเลือกเบอร์ ${sNo} (${stu.nickname || stu.name}) ไปยังแป้น Check-in ด้านซ้าย`;
+          ? `${sid} · ${stu.fullName || stu.name} — Check-in แล้ว`
+          : `แตะเพื่อเลือกเบอร์ ${sNo} (${stu.nickname || stu.name}) ไปยังช่อง Check-in ด้านซ้าย`;
         item.innerHTML =
           `<span class="hsd-qsp-stu-code">${escHtml(sNo)}</span>` +
           `<span class="hsd-qsp-stu-name">${escHtml(dispName)}</span>` +
-          `<span class="hsd-qsp-stu-badge">${joined ? (teamId ? `✓ ก.${teamId}` : "✓ มาแล้ว") : "รอเช็คชื่อ"}</span>`;
+          `<span class="hsd-qsp-stu-badge">${joined ? "✓ มาแล้ว" : "รอเช็คชื่อ"}</span>`;
         if (!joined && typeof cfg.onPickStudent === "function") {
           item.addEventListener("click", () => cfg.onPickStudent(stu));
         }
@@ -2131,7 +2200,7 @@
       foot.className = "hsd-qsp-foot";
       const hint = document.createElement("span");
       hint.className = "hsd-qsp-foot-hint";
-      hint.textContent = "💡 แตะชื่อตัวเองในตารางนี้ หรือกดรหัส 3 ตัวท้ายในกรอบ Check-in ข้างๆ ได้ทันที";
+      hint.textContent = "💡 แตะชื่อตัวเองในตารางนี้ หรือพิมพ์/กดรหัส 3 ตัวท้ายในกรอบ Check-in ข้างๆ ได้ทันที";
       foot.appendChild(hint);
       if (typeof cfg.onPreviewSlides === "function") {
         const slideBtn = document.createElement("button");
@@ -2191,29 +2260,6 @@
     });
 
     wrap.append(checkinCard, statusPanel);
-
-    activeCheckinKeyHandler = (ev) => {
-      if (!wrap.isConnected) {
-        teardownCheckinGateListeners();
-        return;
-      }
-      const tag = ev.target && ev.target.tagName ? ev.target.tagName.toUpperCase() : "";
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
-      if (/^[0-9]$/.test(ev.key)) {
-        ev.preventDefault();
-        checkinCard._pushDigit(ev.key);
-      } else if (ev.key === "Backspace") {
-        ev.preventDefault();
-        checkinCard._popDigit();
-      } else if (ev.key === "Enter" && checkinCard._hasPickedStudent()) {
-        ev.preventDefault();
-        checkinCard._submitCheckin();
-      }
-    };
-    if (typeof window !== "undefined") {
-      window.addEventListener("keydown", activeCheckinKeyHandler);
-    }
 
     if (live && typeof live.on === "function") {
       activeCheckinPresUnsub = live.on("presence", () => {

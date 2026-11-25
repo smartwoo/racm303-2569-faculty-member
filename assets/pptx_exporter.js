@@ -1041,7 +1041,7 @@
 
       const kpHintP =
         `<a:p><a:pPr algn="ctr"/>` +
-        buildRunXml(`แตะตัวเลข 3 หลักท้ายเพื่อยืนยันชื่อเข้าห้อง ${roomCode}`, { pt: 9.2, bold: false, color: pal.sub }) +
+        buildRunXml(`พิมพ์คีย์บอร์ดหรือแตะตัวเลข 3 หลักท้ายเพื่อยืนยันชื่อเข้าห้อง ${roomCode}`, { pt: 9.2, bold: false, color: pal.sub }) +
         `</a:p>`;
       okShapes.push(
         buildShapeXml(
@@ -1088,7 +1088,7 @@
 
       const kpSubmitP =
         `<a:p><a:pPr algn="ctr"/>` +
-        buildRunXml(`Check-in เข้าห้อง ${roomCode} & เลือกกลุ่ม 1 / 2 / 3 →`, { pt: 10.8, bold: true, color: "FFFFFF" }) +
+        buildRunXml(`Check-in เข้าห้อง ${roomCode} →`, { pt: 11.2, bold: true, color: "FFFFFF" }) +
         `</a:p>`;
       okShapes.push(
         buildShapeXml(
@@ -1137,7 +1137,7 @@
       const rosH = 4390000;
       const rosHeadP =
         `<a:p><a:pPr algn="l"><a:spcAft><a:spcPts val="80"/></a:spcAft></a:pPr>` +
-        buildRunXml(`Check-in Status ห้อง ${roomCode} (0/${rosterItems.length} คน) · แบ่งกลุ่มย่อย 1 · 2 · 3`, {
+        buildRunXml(`Check-in Status ห้อง ${roomCode} (0/${rosterItems.length} คน)`, {
           pt: 11.2,
           bold: true,
           color: pal.ink
@@ -1728,7 +1728,7 @@
           `Case Discussion: ${sSpec.moduleCode || "HS1"} · ${sSpec.pinCode || ""} (ห้อง ${sSpec.roomCode || ""})`,
           `• อ.ประจำห้อง: ${sSpec.instructor || ""}`,
           `• สแกน QR ประจำห้อง (${sSpec.shortUrl || ""})`,
-          `• ใส่รหัสนักศึกษา 3 ตัวท้ายเพื่อ Check-in & แบ่งกลุ่ม 1 / 2 / 3`
+          `• กรอกรหัสนักศึกษา 3 ตัวท้ายเพื่อ Check-in เข้าห้องเรียน`
         ];
         const okP = okLines
           .map((ln, lIdx) =>

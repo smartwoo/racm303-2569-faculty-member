@@ -808,30 +808,50 @@ html[data-theme="dark"] .hsd-qcg-step-title {
 }
 
 .hsd-qcg-slot {
+  appearance: none;
+  -webkit-appearance: none;
   width: 66px;
   height: 72px;
+  padding: 0;
+  margin: 0;
   border-radius: 16px;
   border: 2px solid #cbd5e1;
   background: #f8fafc;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-family: var(--font-mono, monospace);
   font-size: 32px;
   font-weight: 800;
+  line-height: 1;
   color: #0f172a;
-  transition: border-color 0.14s ease, background 0.14s ease, transform 0.14s ease;
+  caret-color: #2563eb;
+  cursor: text;
+  outline: none;
+  transition: border-color 0.14s ease, background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.hsd-qcg-slot::placeholder {
+  color: #94a3b8;
+  opacity: 0.72;
 }
 
 html[data-theme="dark"] .hsd-qcg-slot {
   background: #0f172a;
   border-color: #334155;
   color: #ffffff;
+  caret-color: #60a5fa;
 }
 
+html[data-theme="dark"] .hsd-qcg-slot::placeholder {
+  color: #64748b;
+}
+
+.hsd-qcg-slot:focus,
 .hsd-qcg-slot.is-active-cursor {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22);
   transform: translateY(-1px);
 }
 
@@ -839,6 +859,11 @@ html[data-theme="dark"] .hsd-qcg-slot {
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.08);
   color: #065f46;
+}
+
+.hsd-qcg-slot.is-filled:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.24);
 }
 
 html[data-theme="dark"] .hsd-qcg-slot.is-filled {
@@ -974,9 +999,19 @@ html[data-theme="dark"] .hsd-qcg-key {
   color: #f8fafc;
 }
 
-.hsd-qcg-key:active {
+.hsd-qcg-key:active,
+.hsd-qcg-key.is-key-pressed {
   transform: scale(0.96);
-  background: #e2e8f0;
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+html[data-theme="dark"] .hsd-qcg-key:active,
+html[data-theme="dark"] .hsd-qcg-key.is-key-pressed {
+  background: rgba(37, 99, 235, 0.34);
+  border-color: #60a5fa;
+  color: #ffffff;
 }
 
 .hsd-qcg-key.is-fn {
