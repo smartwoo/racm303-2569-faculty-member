@@ -1413,14 +1413,14 @@
             ? (() => {
                 const quickMods = [
                   { code: "ST1", sid: "w1-d1-st", label: "ST1 · Systems Thinking" },
-                  { code: "HS1", sid: "w1-d2-hs1", label: "HS1" },
-                  { code: "HS2", sid: "w2-d1-hs2", label: "HS2" },
-                  { code: "HS3", sid: "w2-d1-hs3", label: "HS3" },
-                  { code: "HS4", sid: "w2-d2-hs4", label: "HS4" },
-                  { code: "HS5", sid: "w2-d2-hs5", label: "HS5" },
-                  { code: "HS6", sid: "w3-d1-hs6", label: "HS6" },
+                  { code: "HS1", sid: "w1-d2-hs1-lec", label: "HS1" },
+                  { code: "HS2", sid: "w2-d1-hs2-lec", label: "HS2" },
+                  { code: "HS3", sid: "w2-d1-hs3-lec", label: "HS3" },
+                  { code: "HS4", sid: "w2-d2-hs4-lec", label: "HS4" },
+                  { code: "HS5", sid: "w2-d2-hs5-lec", label: "HS5" },
+                  { code: "HS6", sid: "w2-d5-hs6-lec", label: "HS6" },
                   { code: "EP", sid: "w1-d3-ep123", label: "EP1–EP9" },
-                  { code: "PANEL", sid: "w1-d1-panel", label: "เวทีเสวนา (6 คาบ)" }
+                  { code: "PANEL", sid: "w1-d1-global", label: "เวทีเสวนา (6 คาบ)" }
                 ];
                 const chipsHtml = quickMods
                   .map((qm) => {
@@ -1932,6 +1932,16 @@
 
         <div class="tv-ep-secondary-row" style="flex-wrap:wrap;gap:8px">
           <button type="button" class="tv-hosp-chip" id="tvEpActHub" data-tv-modal-focus>🧭 ${esc(t(`เปิดหน้าภาพรวม 6 ขั้นตอน (${mod.code})`, `Open 6-Step Hub (${mod.code})`))}</button>
+          ${
+            epSlideInf.uploaded && epSlideInf.record && (epSlideInf.record.repoPath || epSlideInf.record.pdfHref)
+              ? `<a class="tv-hosp-chip" href="${esc(epSlideInf.record.pdfHref || epSlideInf.record.repoPath)}" download="${esc(epSlideInf.record.fileName || `${mod.code}_Slide.pdf`)}" style="text-decoration:none">📊 ${esc(t(`เปิดดู / ดาวน์โหลด Slide ${mod.code} (.${epSlideInf.extBadge || "PDF"})`, `Open / Download ${mod.code} Slides`))}</a>`
+              : ""
+          }
+          ${
+            epSlideInf.uploaded && epSlideInf.record && epSlideInf.record.driveUrl
+              ? `<a class="tv-hosp-chip" href="${esc(epSlideInf.record.driveUrl)}" target="_blank" rel="noopener" style="text-decoration:none">🔗 Google Drive Slide ↗</a>`
+              : ""
+          }
           <a class="tv-hosp-chip" href="exports/pdf/${encodeURIComponent(mod.docId || mod.code)}.pdf" download="RACM303_${esc(mod.docId || mod.code)}_Full.pdf" style="text-decoration:none">⬇ PDF ฉบับเต็ม</a>
           <a class="tv-hosp-chip" href="exports/docx/${encodeURIComponent(mod.docId || mod.code)}.docx" download="RACM303_${esc(mod.docId || mod.code)}_Full.docx" style="text-decoration:none">⬇ Word ฉบับเต็ม</a>
           ${
@@ -2924,7 +2934,14 @@
         isPending: !mSlideInf.uploaded,
         icoCls: mSlideInf.icoCls || "is-pptx is-muted-pptx",
         icoTxt: mSlideInf.uploaded ? (mSlideInf.icoTxt || "④") : "④",
-        ...(m.code === "ST1" ? { pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf" } : {}),
+        ...(m.code === "ST1"
+          ? { pdfHref: "exports/pdf/RACM303_2569_ST1_Slides.pdf" }
+          : mSlideInf.uploaded && mSlideInf.record && (mSlideInf.record.pdfHref || mSlideInf.record.repoPath)
+          ? {
+              downloadHref: mSlideInf.record.pdfHref || mSlideInf.record.repoPath,
+              downloadName: mSlideInf.record.fileName || `${m.code}_Slide.pdf`
+            }
+          : {}),
         onOpen: openFileAction(() => {
           if (api && api.openHsLectureSlides) api.openHsLectureSlides(m.code);
         })
