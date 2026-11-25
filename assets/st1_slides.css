@@ -988,4 +988,847 @@ body.st1-deck-open {
   body.is-printing-st1-deck .st1-step-bar {
     display: none !important;
   }
+  body.is-printing-st1-deck .st1-lo-grid {
+    display: grid !important;
+    grid-template-columns: 0.96fr 1.04fr !important;
+  }
+}
+
+/* ---------- Slide 02: 7 Learning Objectives Balanced 2-Column Layout ---------- */
+.st1-lo-grid {
+  display: grid;
+  grid-template-columns: 0.96fr 1.04fr;
+  gap: 0.78cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-lo-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.52cqw;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-lo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.64cqw;
+  flex: 1;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.62cqw 0.82cqw;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  min-height: 0;
+}
+
+.st1-lo-item.is-lo-1 { border-left: 4.5px solid #0d9488; background: #f0fdfa; }
+.st1-lo-item.is-lo-2 { border-left: 4.5px solid #2563eb; background: #eff6ff; }
+.st1-lo-item.is-lo-3 { border-left: 4.5px solid #d97706; background: #fffbeb; }
+.st1-lo-item.is-lo-4 { border-left: 4.5px solid #7c3aed; background: #f5f3ff; }
+.st1-lo-item.is-lo-5 { border-left: 4.5px solid #e11d48; background: #fff1f2; }
+.st1-lo-item.is-lo-6 { border-left: 4.5px solid #0284c7; background: #f0f9ff; }
+.st1-lo-item.is-lo-7 { border-left: 4.5px solid #059669; background: #ecfdf5; }
+
+.st1-lo-num {
+  flex: 0 0 auto;
+  width: clamp(22px, 1.72cqw, 30px);
+  height: clamp(22px, 1.72cqw, 30px);
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: clamp(11px, 0.88cqw, 15px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.st1-lo-text {
+  margin: 0;
+  font-size: clamp(13px, 1.12cqw, 18.5px);
+  line-height: 1.44;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* ---------- Slide 03: Pure 3-Image Playbook Stage (Zero Body Text) ---------- */
+.st1-wj-trio-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.1cqw 1.8cqw;
+}
+
+.st1-wj-trio-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4.2cqw;
+  flex: 1 1 68%;
+  width: 100%;
+  min-height: 0;
+}
+
+.st1-wj-trio-top img.is-book-cover {
+  height: 100%;
+  max-height: 100%;
+  width: auto;
+  max-width: 38%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.st1-wj-trio-top img.is-juggle-sketch {
+  height: 100%;
+  max-height: 100%;
+  width: auto;
+  max-width: 44%;
+  object-fit: contain;
+}
+
+.st1-wj-trio-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 28%;
+  width: 100%;
+  min-height: 0;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 0.65cqw;
+}
+
+.st1-wj-trio-bottom img {
+  max-height: 100%;
+  width: auto;
+  max-width: 92%;
+  object-fit: contain;
+}
+
+[data-io-theme="dark"] .st1-lo-item {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+[data-io-theme="dark"] .st1-lo-text {
+  color: #f8fafc;
+}
+[data-io-theme="dark"] .st1-lo-num {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+@media (max-width: 860px) {
+  .st1-lo-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .st1-wj-trio-top {
+    gap: 16px;
+  }
+}
+
+/* ---------- Slide 05: Verbatim 9-Item Warped Juggle Instructions ---------- */
+.st1-inst9-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 0.72cqw 1.25cqw;
+  gap: 0.36cqw;
+}
+
+.st1-inst9-row {
+  display: flex;
+  align-items: center;
+  gap: 0.76cqw;
+  padding: 0.36cqw 0.68cqw;
+  border-radius: 11px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  min-height: 0;
+}
+
+.st1-inst9-row:nth-child(odd) {
+  background: #ffffff;
+}
+
+.st1-inst9-num {
+  flex: 0 0 auto;
+  width: clamp(24px, 1.85cqw, 32px);
+  height: clamp(24px, 1.85cqw, 32px);
+  border-radius: 999px;
+  background: #1e3a8a;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: clamp(11.5px, 0.92cqw, 15.5px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.st1-inst9-txt {
+  margin: 0;
+  font-size: clamp(12px, calc(1.06cqw * var(--fit-scale, 1)), 18px);
+  line-height: 1.36;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* ---------- Slide 06: Warped Juggle Live Competition Arena, Giant Timer, VAR & Dual-Series Plot ---------- */
+.st1-arena-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-arena-groupbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55cqw;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 0.42cqw 0.72cqw;
+}
+
+.st1-grp-pills-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.36cqw;
+  flex-wrap: wrap;
+}
+
+.st1-grp-pill {
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 0.24cqw 0.68cqw;
+  font-size: clamp(10.5px, 0.84cqw, 13.5px);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.st1-grp-pill:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.st1-grp-pill.is-active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+}
+
+.st1-grp-pill.is-done-2 {
+  border-color: #10b981;
+}
+
+.st1-grp-pill.is-active.is-done-2 {
+  background: #059669;
+  border-color: #059669;
+}
+
+.st1-winner-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8cqw;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 52%, #d1fae5 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 14px;
+  padding: 0.48cqw 0.88cqw;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.18);
+}
+
+.st1-winner-title {
+  font-size: clamp(12.5px, 1.08cqw, 18px);
+  font-weight: 900;
+  color: #78350f;
+}
+
+.st1-winner-podium {
+  display: flex;
+  align-items: center;
+  gap: 0.45cqw;
+  flex-wrap: wrap;
+  font-size: clamp(11px, 0.86cqw, 14px);
+  font-weight: 800;
+  color: #065f46;
+}
+
+.st1-arena-grid {
+  display: grid;
+  grid-template-columns: 0.94fr 1.06fr;
+  gap: 0.72cqw;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-arena-left,
+.st1-arena-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52cqw;
+  min-height: 0;
+  min-width: 0;
+}
+
+.st1-goal-box {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: 14px;
+  padding: 0.50cqw 0.75cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.36cqw;
+}
+
+.st1-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5cqw;
+  flex-wrap: wrap;
+}
+
+.st1-goal-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 2px 10px;
+}
+
+.st1-goal-input {
+  width: 68px;
+  border: none;
+  outline: none;
+  font-family: "JetBrains Mono", monospace;
+  font-size: clamp(14px, 1.15cqw, 19px);
+  font-weight: 900;
+  color: #b45309;
+  text-align: right;
+  background: transparent;
+}
+
+.st1-preset-chip {
+  border: 1px solid #f59e0b;
+  background: #ffffff;
+  color: #92400e;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: clamp(10px, 0.78cqw, 12.5px);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.st1-preset-chip:hover {
+  background: #fef3c7;
+}
+
+.st1-giant-clock-card {
+  flex: 1;
+  min-height: 0;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  border: 2px solid #93c5fd;
+  border-radius: 18px;
+  padding: 0.68cqw 0.92cqw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  gap: 0.42cqw;
+}
+
+.st1-giant-clock-card.is-running {
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+  border-color: #34d399;
+}
+
+.st1-giant-digits-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45cqw;
+}
+
+.st1-giant-digits {
+  font-family: "JetBrains Mono", "Plus Jakarta Sans", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(46px, 5.1cqw, 84px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #1d4ed8;
+}
+
+.st1-giant-clock-card.is-running .st1-giant-digits {
+  color: #059669;
+}
+
+.st1-giant-unit {
+  font-family: "JetBrains Mono", monospace;
+  font-size: clamp(18px, 1.75cqw, 28px);
+  font-weight: 800;
+  color: #475569;
+}
+
+.st1-live-delta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: clamp(11px, 0.88cqw, 14px);
+  font-weight: 800;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.st1-live-delta-pill.is-under {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.st1-live-delta-pill.is-over {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
+.st1-clock-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.48cqw;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.st1-btn-startstop {
+  border: none;
+  border-radius: 999px;
+  padding: 0.48cqw 1.25cqw;
+  font-size: clamp(12.5px, 1.02cqw, 16.5px);
+  font-weight: 900;
+  cursor: pointer;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+}
+
+.st1-btn-startstop.is-stop {
+  background: #dc2626;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.32);
+}
+
+.st1-var-result-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 0.50cqw 0.78cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.36cqw;
+}
+
+.st1-var-delta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: clamp(11.5px, 0.94cqw, 15px);
+}
+
+.st1-var-delta-badge.is-under {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.st1-var-delta-badge.is-over {
+  background: #ffe4e6;
+  color: #9f1239;
+  border: 1px solid #fda4af;
+}
+
+.st1-var-delta-badge.is-exact {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.st1-var-switch {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #f1f5f9;
+  padding: 2px;
+  border: 1px solid #cbd5e1;
+  gap: 2px;
+}
+
+.st1-var-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: clamp(10.5px, 0.82cqw, 13px);
+  font-weight: 800;
+  color: #475569;
+  cursor: pointer;
+}
+
+.st1-var-btn.is-nofoul-on {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.st1-var-btn.is-foul-on {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.st1-plot-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 0.52cqw 0.78cqw;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 54%;
+  min-height: 0;
+}
+
+.st1-logbook-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 0.48cqw 0.75cqw;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 46%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.st1-logbook-scroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.st1-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(10.5px, 0.82cqw, 13px);
+}
+
+.st1-log-table th {
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1.5px solid #cbd5e1;
+  color: #475569;
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+}
+
+.st1-log-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.st1-log-table tr.is-foul-row td {
+  color: #94a3b8;
+}
+
+/* ---------- Slide 09: Open Minimalist Debrief & Reflection Whiteboard ---------- */
+.st1-open-reflect-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 1.5cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  background: radial-gradient(circle at 50% 35%, #f8fafc 0%, #ffffff 72%);
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 22px;
+  padding: 2.2cqw 3.4cqw;
+}
+
+.st1-open-reflect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: clamp(12px, 1.02cqw, 16px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.st1-open-reflect-q1 {
+  margin: 0;
+  max-width: 86%;
+  font-size: clamp(20px, 2.15cqw, 36px);
+  line-height: 1.38;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.st1-open-reflect-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqw;
+  flex-wrap: wrap;
+}
+
+.st1-reflect-factor-pill {
+  padding: 0.72cqw 1.45cqw;
+  border-radius: 16px;
+  font-size: clamp(13px, 1.18cqw, 20px);
+  font-weight: 800;
+}
+
+.st1-reflect-factor-pill.is-enabler {
+  background: #ecfdf5;
+  border: 2px solid #6ee7b7;
+  color: #065f46;
+}
+
+.st1-reflect-factor-pill.is-barrier {
+  background: #fff1f2;
+  border: 2px solid #fda4af;
+  color: #9f1239;
+}
+
+.st1-reflect-notes-pad {
+  width: min(860px, 90%);
+  min-height: 82px;
+  border-radius: 14px;
+  border: 1.5px solid #93c5fd;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: clamp(13px, 1.05cqw, 17px);
+  color: #0f172a;
+  background: #ffffff;
+  resize: vertical;
+}
+
+/* ---------- Slide 35 (Closing Video): 5s Autoplay Full-Screen YouTube + Clicker HUD ---------- */
+.st1-closing-vdo-wrap {
+  display: grid;
+  grid-template-columns: 1.38fr 0.62fr;
+  gap: 0.85cqw;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+
+.st1-closing-vdo-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 2px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.st1-closing-vdo-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.88;
+}
+
+.st1-closing-vdo-cd-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.88) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6cqw;
+  text-align: center;
+  color: #ffffff;
+  gap: 0.8cqw;
+}
+
+.st1-vdo-cd-pill {
+  background: rgba(37, 99, 235, 0.95);
+  border: 1.5px solid rgba(147, 197, 253, 0.65);
+  color: #ffffff;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: clamp(14px, 1.35cqw, 22px);
+  font-weight: 900;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.st1-vdo-cd-track {
+  width: min(440px, 78%);
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.st1-vdo-cd-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #34d399);
+  width: 100%;
+  transform-origin: left center;
+  animation: st1VdoCountdownBar 5s linear forwards;
+}
+
+@keyframes st1VdoCountdownBar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.st1-vdo-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2400;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.st1-vdo-fullscreen-iframe {
+  width: 100vw;
+  height: 100vh;
+  border: 0;
+  display: block;
+}
+
+.st1-vdo-fs-clicker-bar {
+  position: fixed;
+  right: 24px;
+  bottom: 22px;
+  z-index: 2460;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+.st1-vdo-fs-btn {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(30, 41, 59, 0.9);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.st1-vdo-fs-btn:hover {
+  background: rgba(51, 65, 85, 0.98);
+}
+
+.st1-vdo-fs-btn.is-next-clicker {
+  background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+  border-color: rgba(167, 243, 208, 0.7);
+  color: #ffffff;
+  padding: 9px 20px;
+  font-size: 15px;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* ---------- Slides 36–46: Full-Bleed 16:9 Verbatim Finale Slides ---------- */
+.or-slide-canvas.is-fullbleed-canvas {
+  padding: 0 !important;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.or-slide-canvas.is-fullbleed-canvas .st1-fullbleed-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  display: block;
+}
+
+.or-slide-canvas.is-fullbleed-canvas .st1-fullbleed-num {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  background: rgba(15, 23, 42, 0.58);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 999px;
+  pointer-events: none;
 }
