@@ -17560,6 +17560,15 @@
         btnDlPdf.addEventListener("click", () => openSessionSlide(sInfo.sessionId, true));
         heroActions.appendChild(btnDlPdf);
       }
+
+      if (rec && rec.driveUrl) {
+        const aDrive = make("a", `🔗 เปิดบน Google Drive ↗`, "tv-hero-btn is-glass");
+        aDrive.href = rec.driveUrl;
+        aDrive.target = "_blank";
+        aDrive.rel = "noopener";
+        aDrive.style.textDecoration = "none";
+        heroActions.appendChild(aDrive);
+      }
     } else if (ROLE === "faculty" && facultyInlineFileInput) {
       const btnQuickPick = make("button", `📤 เลือกไฟล์ PPTX / PDF อัปโหลด (${curMod.code})`, "tv-hero-btn is-primary");
       btnQuickPick.type = "button";
@@ -17845,6 +17854,14 @@
       dlPdfBtn.type = "button";
       dlPdfBtn.addEventListener("click", () => openSessionSlide(sInfo.sessionId, true));
       pdfActs.append(fsPdfBtn, newTabBtn, dlPdfBtn);
+      if (rec.driveUrl) {
+        const gDriveBtn = make("a", "🔗 Google Drive ↗", "btn sm");
+        gDriveBtn.href = rec.driveUrl;
+        gDriveBtn.target = "_blank";
+        gDriveBtn.rel = "noopener";
+        gDriveBtn.style.textDecoration = "none";
+        pdfActs.appendChild(gDriveBtn);
+      }
       pdfHead.appendChild(pdfActs);
 
       const iframe = document.createElement("iframe");
@@ -35113,7 +35130,7 @@
     }
     if (rec.repoPath) {
       const lowerPath = String(rec.repoPath).toLowerCase();
-      if (lowerPath.endsWith(".pdf") && window.RACM_PDF_PREVIEW) {
+      if (!forceDownload && lowerPath.endsWith(".pdf") && window.RACM_PDF_PREVIEW) {
         window.RACM_PDF_PREVIEW.open(rec.repoPath, {
           title: rec.fileName || rec.repoPath.split("/").pop(),
           downloadName: rec.fileName || rec.repoPath.split("/").pop()
@@ -35126,6 +35143,7 @@
       }
       const a = document.createElement("a");
       a.href = rec.repoPath;
+      a.dataset.bypassPdfPreview = "1";
       a.download = rec.fileName || rec.repoPath.split("/").pop() || `${sessionId}_slide`;
       document.body.appendChild(a);
       a.click();
@@ -35657,8 +35675,7 @@
     }
 
     const sessions = getTeachableSlideSessions();
-    const reg = getSlidesRegistry();
-    const uploadedCount = sessions.filter((s) => Boolean(reg[s.id] || s.slideUrl)).length;
+    const uploadedCount = sessions.filter((s) => Boolean(getSessionSlideRecord(s.id))).length;
     const selectedId =
       preselectSessionId ||
       (mount.querySelector("#slideTargetSessionSelect") && mount.querySelector("#slideTargetSessionSelect").value) ||
