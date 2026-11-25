@@ -44553,4 +44553,144 @@ html[data-theme="dark"] .ppt-ok-case-jump-pill:hover {
     padding: 2px 6px;
     font-size: 10.5px;
   }
+/* ---------- Real-Time Student ID Badges & Dedicated Slide 4 Live Answer Sheet ---------- */
+.hsd-cell-ans-idwrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.hsd-ans-sid-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #0b46a6;
+  color: #ffffff;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1.5px 7.5px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(11, 70, 166, 0.18);
+}
+
+.hsd-ans-sid-badge.is-unknown {
+  background: #64748b;
+}
+
+.hsd-live-sid-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+  background: #eff6ff;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 7px;
+}
+
+.hsd-live-sid-strip-lbl {
+  font-size: 11.4px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-right: 2px;
+}
+
+.hsd-live-sid-pill {
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  background: #ffffff;
+  color: #0f5c54;
+  font-family: var(--font-display);
+  font-size: 11.2px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.12s ease;
+}
+
+.hsd-live-sid-pill.is-submitted {
+  background: #dcfce7;
+  border-color: rgba(22, 163, 74, 0.42);
+  color: #166534;
+}
+
+.hsd-live-sid-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.1);
+}
+
+.hsd-live-overview-qstrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.hsd-live-overview-qpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  color: var(--ink);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hsd-live-overview-qpill:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.hsd-roster-overview-tbl tr.is-row-submitted td {
+  background: rgba(220, 252, 231, 0.35);
+}
+
+.hsd-roster-overview-tbl tr.is-row-typing td {
+  background: rgba(204, 251, 241, 0.32);
+}
+
+.ppt-thumb-flag.is-live-flag {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid rgba(22, 163, 74, 0.4);
+  font-weight: 800;
+}
+
+.is-layout-live-sheet .hsd-live-cell-stream {
+  max-height: 245px;
+}
+
+html[data-theme="dark"] .hsd-ans-sid-badge {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .hsd-live-sid-strip {
+  background: rgba(30, 58, 138, 0.24);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+html[data-theme="dark"] .hsd-live-sid-strip-lbl {
+  color: #93c5fd;
+}
+
+html[data-theme="dark"] .hsd-live-sid-pill {
+  background: #1e293b;
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+html[data-theme="dark"] .hsd-live-sid-pill.is-submitted {
+  background: rgba(22, 163, 74, 0.24);
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.4);
 }

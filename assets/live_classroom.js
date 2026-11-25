@@ -292,6 +292,126 @@
   hydratePresenceRegistryFromStorage(false);
 
   const RETAINED_STALE_MS = 90 * 60 * 1000;
+  const ROOM_RESP_STORAGE_PREFIX = "racm303_live_room_resps_v2_r";
+
+  function persistRoomResponsesToStorage(roomIdOpt) {
+    try {
+      const rId = clampRoom(roomIdOpt || state.roomId);
+      if (rId !== state.roomId) return;
+      const now = Date.now();
+      const questionsObj = {};
+      state.responsesByQuestion.forEach((qMap, qid) => {
+        if (!qMap || !qid) return;
+        const arr = [];
+        qMap.forEach((rec) => {
+          if (!rec || !rec.participantId || !rec.cells) return;
+          if (String(rec.participantId).startsWith("team_")) return;
+          const uMs = Number(rec.updatedWallMs || 0);
+          if (uMs && now - uMs > RETAINED_STALE_MS) return;
+          if (!Object.keys(rec.cells).length) return;
+          arr.push(rec);
+        });
+        if (arr.length) questionsObj[qid] = arr;
+      });
+      const clearedObj = {};
+      state.clearedAtByQuestion.forEach((ts, qid) => {
+        if (ts && now - ts <= RETAINED_STALE_MS) clearedObj[qid] = ts;
+      });
+      // Merge with existing room storage if current tab is a student (so Student B doesn't overwrite Student A's stored answer for Faculty)
+      let mergedQuestions = questionsObj;
+      if (state.role !== "faculty") {
+        const prevRaw = safeGetStorage(`${ROOM_RESP_STORAGE_PREFIX}${rId}`, "");
+        if (prevRaw) {
+          try {
+            const prevParsed = JSON.parse(prevRaw);
+            const prevQs = (prevParsed && prevParsed.questions) || {};
+            mergedQuestions = {};
+            const allQids = new Set([...Object.keys(prevQs), ...Object.keys(questionsObj)]);
+            const myPid = state.studentId ? `sid_${state.studentId}` : state.participantId;
+            allQids.forEach((qid) => {
+              const mapByPid = new Map();
+              (Array.isArray(prevQs[qid]) ? prevQs[qid] : []).forEach((oldRec) => {
+                if (!oldRec || !oldRec.participantId || String(oldRec.participantId).startsWith("team_")) return;
+                const uMs = Number(oldRec.updatedWallMs || 0);
+                if (uMs && now - uMs > RETAINED_STALE_MS) return;
+                const cTs = Number(clearedObj[qid] || (prevParsed.clearedAt && prevParsed.clearedAt[qid]) || 0);
+                if (cTs && uMs <= cTs) return;
+                if (oldRec.participantId === myPid) return; // replaced by current tab's latest state for myPid
+                mapByPid.set(oldRec.participantId, oldRec);
+              });
+              (Array.isArray(questionsObj[qid]) ? questionsObj[qid] : []).forEach((curRec) => {
+                if (curRec && curRec.participantId) mapByPid.set(curRec.participantId, curRec);
+              });
+              const mergedArr = Array.from(mapByPid.values());
+              if (mergedArr.length) mergedQuestions[qid] = mergedArr;
+            });
+          } catch (_) {}
+        }
+      }
+      localStorage.setItem(
+        `${ROOM_RESP_STORAGE_PREFIX}${rId}`,
+        JSON.stringify({ updatedMs: now, roomId: rId, questions: mergedQuestions, clearedAt: clearedObj })
+      );
+    } catch (_) {}
+  }
+
+  function hydrateRoomResponsesFromStorage(roomIdOpt, shouldEmit) {
+    let changed = false;
+    try {
+      const rId = clampRoom(roomIdOpt || state.roomId);
+      if (rId !== state.roomId) return false;
+      const raw = safeGetStorage(`${ROOM_RESP_STORAGE_PREFIX}${rId}`, "");
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return false;
+      const now = Date.now();
+      const clearedObj = parsed.clearedAt || {};
+      Object.keys(clearedObj).forEach((qid) => {
+        const cTs = Number(clearedObj[qid] || 0);
+        if (cTs > (state.clearedAtByQuestion.get(qid) || 0)) {
+          state.clearedAtByQuestion.set(qid, cTs);
+          const qMap = state.responsesByQuestion.get(qid);
+          if (qMap) {
+            qMap.forEach((rec, pid) => {
+              if ((rec.updatedWallMs || 0) <= cTs) {
+                qMap.delete(pid);
+                changed = true;
+              }
+            });
+          }
+        }
+      });
+      const questionsObj = parsed.questions || {};
+      const myOwnPid = state.studentId ? `sid_${state.studentId}` : "";
+      Object.keys(questionsObj).forEach((qid) => {
+        const arr = Array.isArray(questionsObj[qid]) ? questionsObj[qid] : [];
+        const cTs = state.clearedAtByQuestion.get(qid) || 0;
+        arr.forEach((rec) => {
+          if (!rec || !rec.participantId || !rec.cells) return;
+          if (String(rec.participantId).startsWith("team_")) return;
+          // Students NEVER load other students' answers — strictly isolated per student!
+          if (state.role !== "faculty") {
+            if (!myOwnPid || rec.participantId !== myOwnPid) return;
+          }
+          const uMs = Number(rec.updatedWallMs || 0);
+          if (!uMs || now - uMs > RETAINED_STALE_MS || uMs <= cTs) return;
+          if (!state.responsesByQuestion.has(qid)) {
+            state.responsesByQuestion.set(qid, new Map());
+          }
+          const qMap = state.responsesByQuestion.get(qid);
+          const prev = qMap.get(rec.participantId);
+          if (!prev || (Number(prev.updatedWallMs) || 0) < uMs) {
+            qMap.set(rec.participantId, rec);
+            changed = true;
+          }
+        });
+      });
+    } catch (_) {}
+    if (changed && shouldEmit) {
+      emit("responses", { questionId: "*" });
+    }
+    return changed;
+  }
 
   const listeners = {
     timer: new Set(),
@@ -641,6 +761,7 @@
             if ((rec.updatedWallMs || 0) <= clearTs) qMap.delete(pid);
           });
         }
+        persistRoomResponsesToStorage(pktRoom);
         emit("responses", { questionId: qid });
       }
       return;
@@ -653,7 +774,55 @@
       const incomingTeamId = clampTeamOrZero(
         msg.teamId || (rawPid.startsWith("team_") ? rawPid.slice(5) : 0)
       );
-      const pid = incomingTeamId ? `team_${incomingTeamId}` : rawPid;
+      const sidFromPid = rawPid.startsWith("sid_") ? rawPid.slice(4).trim() : "";
+      const sidFromSender =
+        msg.senderPid && String(msg.senderPid).startsWith("sid_")
+          ? String(msg.senderPid).slice(4).trim()
+          : "";
+      const sidClean = String(msg.studentId || sidFromPid || sidFromSender || "").trim().slice(0, 16);
+      // Every student has their own individual answer sheet keyed by sid_<studentId> (never merged into team_1..3)
+      const pid = sidClean
+        ? `sid_${sidClean}`
+        : msg.senderPid && !String(msg.senderPid).startsWith("team_")
+        ? String(msg.senderPid).slice(0, 48)
+        : rawPid;
+
+      // Refresh sender student's individual presence so Live Lobby stays accurate
+      const senderPid = sidClean ? `sid_${sidClean}` : (!pid.startsWith("team_") ? pid : "");
+      if (senderPid && sidClean) {
+        const rMap = getRoomPresenceMap(pktRoom);
+        const prevPres = rMap.get(senderPid) || {};
+        rMap.set(
+          senderPid,
+          Object.assign({}, prevPres, {
+            participantId: senderPid,
+            role: "student",
+            joined: true,
+            checkedIn: true,
+            roomId: pktRoom,
+            teamId: clampTeamOrZero(incomingTeamId || prevPres.teamId),
+            studentId: sidClean,
+            shortNo: String(msg.shortNo || prevPres.shortNo || sidClean.slice(-3)).slice(0, 6),
+            fullName: String(msg.fullName || prevPres.fullName || "").slice(0, 80),
+            nickname: String(msg.nickname || prevPres.nickname || "").slice(0, 32),
+            area: String(msg.area || prevPres.area || "").slice(0, 40),
+            disc: Number(msg.disc || prevPres.disc || pktRoom) || pktRoom,
+            name: String(msg.senderName || msg.editorLabel || prevPres.name || `รหัส ${sidClean}`).slice(0, 80),
+            activeQuestionId: qid,
+            lastSeenMs: Date.now()
+          })
+        );
+        persistPresenceRegistryToStorage();
+        emit("presence", getPresenceSummary());
+      }
+
+      // Strictly isolate student answer sheets: a student client NEVER absorbs another student's answers
+      if (state.role !== "faculty") {
+        if (!sidClean || !state.studentId || sidClean !== String(state.studentId)) {
+          return;
+        }
+      }
+
       const updatedMs = Number(msg.updatedWallMs) || Number(msg.sentWallMs) || Date.now();
       const clearedAt = state.clearedAtByQuestion.get(qid) || 0;
       if (updatedMs <= clearedAt) return;
@@ -666,7 +835,7 @@
       }
       const qMap = state.responsesByQuestion.get(qid);
       const existing = qMap.get(pid);
-      if (!incomingTeamId && existing && (existing.updatedWallMs || 0) > updatedMs) return;
+      if (existing && (existing.updatedWallMs || 0) > updatedMs) return;
 
       const rawCellStatuses =
         msg.cellStatuses && typeof msg.cellStatuses === "object" ? msg.cellStatuses : {};
@@ -677,13 +846,10 @@
       const dirtyCells =
         msg.dirtyCells && typeof msg.dirtyCells === "object" ? msg.dirtyCells : null;
 
-      const cleanCells = incomingTeamId && existing && existing.cells ? Object.assign({}, existing.cells) : {};
-      const cleanCellStatuses =
-        incomingTeamId && existing && existing.cellStatuses ? Object.assign({}, existing.cellStatuses) : {};
-      const cleanCellUpdatedMs =
-        incomingTeamId && existing && existing.cellUpdatedMs ? Object.assign({}, existing.cellUpdatedMs) : {};
-      const cleanCellEditors =
-        incomingTeamId && existing && existing.cellEditors ? Object.assign({}, existing.cellEditors) : {};
+      const cleanCells = {};
+      const cleanCellStatuses = {};
+      const cleanCellUpdatedMs = {};
+      const cleanCellEditors = {};
 
       const candidateKeys = new Set();
       if (msg.cells && typeof msg.cells === "object") {
@@ -696,9 +862,6 @@
       let syncedSubmittedChange = false;
       candidateKeys.forEach((k) => {
         const cellTs = Number(rawCellUpdatedMs[k] || updatedMs);
-        const prevTs = Number(cleanCellUpdatedMs[k] || 0);
-        if (incomingTeamId && cellTs < prevTs) return;
-
         const rawVal =
           msg.cells && Object.prototype.hasOwnProperty.call(msg.cells, k)
             ? msg.cells[k]
@@ -714,28 +877,24 @@
               : "typing"
             : msg.status === "submitted"
             ? "submitted"
-            : cleanCellStatuses[k] === "submitted" && existing && existing.cells && existing.cells[k] === val
+            : existing && existing.cellStatuses && existing.cellStatuses[k] === "submitted" && existing.cells && existing.cells[k] === val
             ? "submitted"
             : "typing";
           cleanCellStatuses[k] = cStat;
           cleanCellUpdatedMs[k] = cellTs;
-          const ed = String(rawCellEditors[k] || msg.editorLabel || "").slice(0, 60);
+          const ed = String(rawCellEditors[k] || msg.editorLabel || (sidClean ? `รหัส ${sidClean}` : "")).slice(0, 60);
           if (ed) cleanCellEditors[k] = ed;
 
           if (
-            incomingTeamId &&
             state.role === "student" &&
-            state.teamId === incomingTeamId &&
+            sidClean &&
+            state.studentId === sidClean &&
             cStat === "submitted" &&
             submittedTextByCell[k] !== val.trim()
           ) {
             submittedTextByCell[k] = val.trim();
             syncedSubmittedChange = true;
           }
-        } else if (!incomingTeamId || (dirtyCells && Object.prototype.hasOwnProperty.call(dirtyCells, k))) {
-          delete cleanCells[k];
-          delete cleanCellStatuses[k];
-          cleanCellUpdatedMs[k] = cellTs;
         }
       });
 
@@ -750,20 +909,27 @@
         qMap.delete(pid);
       } else {
         const prevLatest = existing ? existing.updatedWallMs || 0 : 0;
+        const shortNo = String(msg.shortNo || (existing && existing.shortNo) || (sidClean ? sidClean.slice(-3) : "")).slice(0, 6);
+        const fullName = String(msg.fullName || (existing && existing.fullName) || "").slice(0, 80);
+        const nick = String(msg.nickname || (existing && existing.nickname) || "").slice(0, 32);
+        const defaultLabel = sidClean
+          ? `รหัส ${sidClean}${nick ? ` (${nick})` : fullName ? ` (${fullName})` : ""}`
+          : String(msg.displayName || "นักศึกษาในห้อง").slice(0, 80);
         const latestEditor =
           updatedMs >= prevLatest
-            ? String(msg.editorLabel || (existing && existing.editorLabel) || "").slice(0, 60)
-            : String((existing && existing.editorLabel) || msg.editorLabel || "").slice(0, 60);
+            ? String(msg.editorLabel || defaultLabel).slice(0, 60)
+            : String((existing && existing.editorLabel) || msg.editorLabel || defaultLabel).slice(0, 60);
         qMap.set(pid, {
           participantId: pid,
           teamId: incomingTeamId || 0,
-          studentId: String(msg.studentId || (existing && existing.studentId) || "").slice(0, 16),
-          displayName: incomingTeamId
-            ? `กลุ่ม ${incomingTeamId}`
-            : String(msg.displayName || "นักศึกษาในห้อง").slice(0, 80),
+          studentId: sidClean,
+          shortNo,
+          fullName,
+          displayName: sidClean ? defaultLabel : String(msg.displayName || defaultLabel).slice(0, 80),
           editorLabel: latestEditor,
-          nickname: String(msg.nickname || (existing && existing.nickname) || "").slice(0, 32),
+          nickname: nick,
           area: String(msg.area || (existing && existing.area) || "").slice(0, 40),
+          disc: Number(msg.disc || (existing && existing.disc) || pktRoom) || pktRoom,
           questionId: qid,
           cells: cleanCells,
           cellStatuses: cleanCellStatuses,
@@ -774,34 +940,8 @@
         });
       }
 
-      // Refresh sender student's individual presence (never create a fake presence entry for "team_X")
-      const senderPid = String(msg.senderPid || (!incomingTeamId ? rawPid : "") || "").slice(0, 48);
-      if (senderPid && !senderPid.startsWith("team_")) {
-        const rMap = getRoomPresenceMap(pktRoom);
-        const prevPres = rMap.get(senderPid) || {};
-        const sidClean = String(msg.studentId || prevPres.studentId || "").slice(0, 16);
-        rMap.set(
-          senderPid,
-          Object.assign({}, prevPres, {
-            participantId: senderPid,
-            role: "student",
-            joined: true,
-            checkedIn: Boolean(sidClean || prevPres.checkedIn),
-            roomId: pktRoom,
-            teamId: clampTeamOrZero(incomingTeamId || prevPres.teamId),
-            studentId: sidClean,
-            shortNo: String(msg.shortNo || prevPres.shortNo || (sidClean ? sidClean.slice(-3) : "")).slice(0, 6),
-            nickname: String(msg.nickname || prevPres.nickname || "").slice(0, 32),
-            area: String(msg.area || prevPres.area || "").slice(0, 40),
-            name: String(msg.senderName || msg.editorLabel || prevPres.name || "นักศึกษา").slice(0, 80),
-            activeQuestionId: qid,
-            lastSeenMs: Date.now()
-          })
-        );
-        if (sidClean) persistPresenceRegistryToStorage();
-      }
-      emit("responses", { questionId: qid, participantId: pid, teamId: incomingTeamId || 0 });
-      emit("presence", getPresenceSummary());
+      persistRoomResponsesToStorage(pktRoom);
+      emit("responses", { questionId: qid, participantId: pid, studentId: sidClean, teamId: incomingTeamId || 0 });
       return;
     }
 
@@ -812,6 +952,32 @@
         (state.role !== "faculty" && state.sessionJoined && pktRoom === (state.joinedRoomId || state.roomId))
       ) {
         publishPresence();
+      }
+      // If a joined student has active answers in this room, re-publish their individual answer sheet so newly opened Faculty views get it immediately
+      if (
+        state.role !== "faculty" &&
+        state.sessionJoined &&
+        state.studentId &&
+        pktRoom === (state.joinedRoomId || state.roomId)
+      ) {
+        const myPid = `sid_${state.studentId}`;
+        state.responsesByQuestion.forEach((qMap, qid) => {
+          const myRec = qMap && qMap.get(myPid);
+          if (!myRec || !myRec.cells || !Object.keys(myRec.cells).length) return;
+          publishPacket(
+            `resp/${qid}/${myPid}`,
+            Object.assign({ type: "resp" }, myRec, {
+              participantId: myPid,
+              senderPid: myPid,
+              senderName: state.displayName || myRec.editorLabel,
+              studentId: state.studentId,
+              shortNo: state.shortNo || String(state.studentId).slice(-3),
+              fullName: state.fullName || ""
+            }),
+            true,
+            pktRoom
+          );
+        });
       }
       if (pktRoom === state.roomId && state.role === "faculty") {
         Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
@@ -1468,8 +1634,13 @@
     if (state.role === "faculty") {
       return state.displayName || "อาจารย์ประจำกลุ่ม";
     }
-    if (state.teamId >= 1 && state.teamId <= 3) {
-      return `กลุ่ม ${state.teamId}`;
+    if (state.studentId) {
+      const sn = state.shortNo || String(state.studentId).slice(-3);
+      const base = state.fullName || "";
+      if (state.nickname) {
+        return `รหัส ${state.studentId} (${sn} · ${state.nickname}${base ? ` ${base}` : ""})`;
+      }
+      return `รหัส ${state.studentId}${base ? ` (${base})` : ""}`;
     }
     if (state.displayName && state.displayName.trim()) {
       return state.displayName.trim();
@@ -1478,12 +1649,18 @@
   }
 
   function getEditorShortDisplay() {
-    const sn = state.shortNo || (state.studentId ? String(state.studentId).slice(-3) : "");
-    if (sn && state.nickname) return `${sn} ${state.nickname}`;
+    if (state.studentId) {
+      const sn = state.shortNo || String(state.studentId).slice(-3);
+      if (state.nickname) return `รหัส ${state.studentId} (#${sn} ${state.nickname})`;
+      if (state.fullName) return `รหัส ${state.studentId} (${state.fullName})`;
+      return `รหัส ${state.studentId}`;
+    }
+    const sn = state.shortNo || "";
+    if (sn && state.nickname) return `#${sn} ${state.nickname}`;
     if (sn) return `เบอร์ ${sn}`;
     if (state.nickname) return state.nickname;
     if (state.fullName) return state.fullName;
-    return state.teamId ? `สมาชิกกลุ่ม ${state.teamId}` : "นักศึกษา";
+    return "นักศึกษา";
   }
 
   function setStudentProfile(studentObj, opts) {
@@ -1499,6 +1676,13 @@
       state.photoId = "";
       state.displayName = "";
       state.participantId = persistentPid;
+      if (state.role !== "faculty") {
+        state.responsesByQuestion.clear();
+        lastPublishedLocalCellsByQ.clear();
+        pendingCellsByQuestion.clear();
+        pendingDirtyCellsByQ.clear();
+        reloadSubmittedCellsForActiveStudent();
+      }
       if (prevPid && prevPid !== persistentPid) {
         [1, 2, 3, 4, 5, 6].forEach((rId) => {
           const m = getRoomPresenceMap(rId);
@@ -1510,9 +1694,11 @@
       return;
     }
     const prevPid = state.participantId;
-    state.studentId = String(studentObj.id);
-    state.shortNo = String(studentObj.id).slice(-3);
-    state.participantId = `sid_${studentObj.id}`;
+    const prevSid = state.studentId;
+    const nextSid = String(studentObj.id).trim();
+    state.studentId = nextSid;
+    state.shortNo = nextSid.slice(-3);
+    state.participantId = `sid_${nextSid}`;
     if (prevPid && prevPid !== state.participantId) {
       [1, 2, 3, 4, 5, 6].forEach((rId) => getRoomPresenceMap(rId).delete(prevPid));
     }
@@ -1522,11 +1708,23 @@
     state.area = studentObj.area || "";
     state.disc = Number(studentObj.disc) || 0;
     state.photoId = String(studentObj.photoId || "");
-    const baseName = studentObj.name || studentObj.fullName || studentObj.id;
-    state.displayName = nick ? `${state.shortNo} ${nick} (${baseName})` : `${studentObj.id} ${baseName}`;
+    const baseName = studentObj.name || studentObj.fullName || nextSid;
+    state.displayName = nick
+      ? `รหัส ${nextSid} (${state.shortNo} · ${nick} ${baseName})`
+      : `รหัส ${nextSid} (${baseName})`;
+    if (state.role !== "faculty" && prevSid !== nextSid) {
+      state.responsesByQuestion.clear();
+      lastPublishedLocalCellsByQ.clear();
+      pendingCellsByQuestion.clear();
+      pendingDirtyCellsByQ.clear();
+      reloadSubmittedCellsForActiveStudent();
+    }
     const skipAutoRoom = Boolean(opts && opts.keepCurrentRoom);
     if (!skipAutoRoom && studentObj.disc >= 1 && studentObj.disc <= 6) {
       setRoom(studentObj.disc, true);
+    }
+    if (state.role !== "faculty") {
+      hydrateRoomResponsesFromStorage(state.roomId, false);
     }
     if (state.sessionJoined && state.joinedRoomId) {
       publishPresence();
@@ -1537,25 +1735,9 @@
 
   function setTeam(teamNum, silentSave) {
     const next = clampTeam(teamNum);
-    const prev = state.teamId;
     state.teamId = next;
     safeSetSession("racm303_hsd_team_id_v1", String(next));
     if (!silentSave) safeSetStorage("racm303_live_team_v1", String(next));
-    if (prev !== next) {
-      let changed = false;
-      state.responsesByQuestion.forEach((qMap) => {
-        const tRec = qMap.get(`team_${next}`);
-        if (tRec && tRec.cells && tRec.cellStatuses) {
-          Object.keys(tRec.cells).forEach((cid) => {
-            if (tRec.cellStatuses[cid] === "submitted" && tRec.cells[cid]) {
-              submittedTextByCell[cid] = String(tRec.cells[cid]).trim();
-              changed = true;
-            }
-          });
-        }
-      });
-      if (changed) saveSubmittedCellsStore();
-    }
     if (state.sessionJoined && state.joinedRoomId) {
       publishPresence();
       schedulePresenceBurst();
@@ -1633,6 +1815,8 @@
     }
     if (targetRoom !== state.roomId) {
       setRoom(targetRoom, false);
+    } else {
+      hydrateRoomResponsesFromStorage(targetRoom, false);
     }
     publishPresence();
     schedulePresenceBurst();
@@ -1661,7 +1845,7 @@
     const now = Date.now();
     const nick = String(studentObj.nickname || studentObj.nick || "").trim().slice(0, 32);
     const fullName = String(studentObj.fullName || studentObj.name || "").trim().slice(0, 80);
-    const dispLabel = nick ? `${shortNo} ${nick} (${fullName})` : `${sidStr} ${fullName}`;
+    const dispLabel = nick ? `รหัส ${sidStr} (${shortNo} · ${nick} ${fullName})` : `รหัส ${sidStr} (${fullName})`;
     const rec = {
       participantId: pid,
       role: "student",
@@ -1740,6 +1924,11 @@
     state.photoId = "";
     state.displayName = "";
     state.participantId = persistentPid;
+    state.responsesByQuestion.clear();
+    lastPublishedLocalCellsByQ.clear();
+    pendingCellsByQuestion.clear();
+    pendingDirtyCellsByQ.clear();
+    reloadSubmittedCellsForActiveStudent();
     safeSetSession("racm303_hsd_session_joined_v1", null);
     safeSetSession("racm303_hsd_team_id_v1", null);
     safeSetStorage("racm303_live_room_v1", null);
@@ -1817,6 +2006,7 @@
       };
     }
 
+    hydrateRoomResponsesFromStorage(next, false);
     state.mqttClients.forEach((c) => subscribeCurrentRoomMqtt(c));
     if (initialized) {
       initPeerForRoom();
@@ -2052,21 +2242,37 @@
     return out;
   }
 
-  /* ---------- Student Per-Cell Live Typing & Per-Block Submission ---------- */
+  /* ---------- Student Per-Cell Live Typing & Per-Block Submission (Strictly Per-Student) ---------- */
   const debounceTimers = new Map();
   const lastSentAtByQuestion = new Map();
   const pendingCellsByQuestion = new Map();
-  let submittedTextByCell = (function () {
-    try {
-      return JSON.parse(safeGetStorage("racm303_hs_disc_submitted_cells_v1", "{}")) || {};
-    } catch (_) {
-      return {};
+  let submittedTextByCell = {};
+
+  function getSubmittedCellsStorageKey() {
+    const sid = String(state.studentId || "").trim();
+    return sid ? `racm303_hs_disc_submitted_cells_stu_${sid}` : "";
+  }
+
+  function reloadSubmittedCellsForActiveStudent() {
+    const key = getSubmittedCellsStorageKey();
+    if (!key) {
+      submittedTextByCell = {};
+      return;
     }
-  })();
+    try {
+      submittedTextByCell = JSON.parse(safeGetStorage(key, "{}")) || {};
+    } catch (_) {
+      submittedTextByCell = {};
+    }
+  }
 
   function saveSubmittedCellsStore() {
-    safeSetStorage("racm303_hs_disc_submitted_cells_v1", JSON.stringify(submittedTextByCell));
+    const key = getSubmittedCellsStorageKey();
+    if (!key) return;
+    safeSetStorage(key, JSON.stringify(submittedTextByCell));
   }
+
+  reloadSubmittedCellsForActiveStudent();
 
   function getCellSubmissionState(inputId, currentVal) {
     const trimmed = String(currentVal || "").trim();
@@ -2104,9 +2310,12 @@
 
   function publishStudentQuestionCells(questionId, cellsObj, forceSubmitAll, dirtyKeysOpt) {
     if (!questionId || !cellsObj) return;
+    const sidClean = String(state.studentId || "").trim();
     const activeTeamId = state.role === "student" ? clampTeamOrZero(state.teamId) : 0;
-    const targetPid = activeTeamId ? `team_${activeTeamId}` : state.participantId;
+    // Always key by individual student (sid_<studentId>), never merging into team_1..3
+    const targetPid = sidClean ? `sid_${sidClean}` : state.participantId;
     const editorLabel = getEditorShortDisplay();
+    const shortNo = state.shortNo || (sidClean ? sidClean.slice(-3) : "");
     const updatedMs = Date.now();
     lastSentAtByQuestion.set(questionId, updatedMs);
 
@@ -2114,7 +2323,6 @@
       state.responsesByQuestion.set(questionId, new Map());
     }
     const qMap = state.responsesByQuestion.get(questionId);
-    const existing = activeTeamId ? qMap.get(targetPid) : null;
 
     const prevLocal = lastPublishedLocalCellsByQ.get(questionId) || {};
     const dirtySet = new Set(Array.isArray(dirtyKeysOpt) ? dirtyKeysOpt : []);
@@ -2136,22 +2344,19 @@
       });
     }
 
-    const cleanCells = activeTeamId && existing && existing.cells ? Object.assign({}, existing.cells) : {};
-    const cleanCellStatuses =
-      activeTeamId && existing && existing.cellStatuses ? Object.assign({}, existing.cellStatuses) : {};
-    const cleanCellUpdatedMs =
-      activeTeamId && existing && existing.cellUpdatedMs ? Object.assign({}, existing.cellUpdatedMs) : {};
-    const cleanCellEditors =
-      activeTeamId && existing && existing.cellEditors ? Object.assign({}, existing.cellEditors) : {};
+    const cleanCells = {};
+    const cleanCellStatuses = {};
+    const cleanCellUpdatedMs = {};
+    const cleanCellEditors = {};
     const dirtyCellsPayload = {};
 
-    const keysToProcess = activeTeamId ? Array.from(dirtySet) : Object.keys(cellsObj);
-    keysToProcess.forEach((k) => {
+    Object.keys(cellsObj).forEach((k) => {
       const v = String(cellsObj[k] || "").slice(0, 500);
       const trimmed = v.trim();
-      dirtyCellsPayload[k] = v;
-      localCellUpdatedMs[k] = updatedMs;
-      cleanCellUpdatedMs[k] = updatedMs;
+      if (dirtySet.has(k)) {
+        dirtyCellsPayload[k] = v;
+        localCellUpdatedMs[k] = updatedMs;
+      }
       if (trimmed) {
         cleanCells[k] = v;
         if (forceSubmitAll) {
@@ -2159,29 +2364,15 @@
         }
         const isCellSub = submittedTextByCell[k] === trimmed;
         cleanCellStatuses[k] = isCellSub ? "submitted" : "typing";
+        cleanCellUpdatedMs[k] = localCellUpdatedMs[k] || updatedMs;
         cleanCellEditors[k] = editorLabel;
-      } else {
-        delete cleanCells[k];
-        delete cleanCellStatuses[k];
       }
     });
-
-    // Also include any non-empty local cells if team record didn't have them yet
-    if (activeTeamId) {
-      Object.keys(cellsObj).forEach((k) => {
-        if (cleanCells[k]) return;
-        if (dirtySet.has(k)) return;
-        const v = String(cellsObj[k] || "").slice(0, 500);
-        const trimmed = v.trim();
-        if (trimmed && !cleanCellUpdatedMs[k]) {
-          cleanCells[k] = v;
-          if (forceSubmitAll) submittedTextByCell[k] = trimmed;
-          cleanCellStatuses[k] = submittedTextByCell[k] === trimmed ? "submitted" : "typing";
-          cleanCellUpdatedMs[k] = localCellUpdatedMs[k] || updatedMs;
-          cleanCellEditors[k] = editorLabel;
-        }
-      });
-    }
+    dirtySet.forEach((k) => {
+      if (!Object.prototype.hasOwnProperty.call(cleanCells, k)) {
+        dirtyCellsPayload[k] = "";
+      }
+    });
 
     if (forceSubmitAll) saveSubmittedCellsStore();
     lastPublishedLocalCellsByQ.set(questionId, Object.assign({}, cleanCells));
@@ -2197,11 +2388,14 @@
       qMap.set(targetPid, {
         participantId: targetPid,
         teamId: activeTeamId || 0,
-        studentId: state.studentId,
-        displayName: activeTeamId ? `กลุ่ม ${activeTeamId}` : getEffectiveDisplayName(),
+        studentId: sidClean,
+        shortNo,
+        fullName: state.fullName || "",
+        displayName: getEffectiveDisplayName(),
         editorLabel,
-        nickname: state.nickname,
-        area: state.area,
+        nickname: state.nickname || "",
+        area: state.area || "",
+        disc: state.disc || state.roomId || 0,
         questionId,
         cells: cleanCells,
         cellStatuses: cleanCellStatuses,
@@ -2212,20 +2406,24 @@
       });
     }
 
+    persistRoomResponsesToStorage(state.roomId);
+
     publishPacket(
       `resp/${questionId}/${targetPid}`,
       {
         type: "resp",
         participantId: targetPid,
-        senderPid: state.participantId,
+        senderPid: targetPid,
         senderName: state.displayName || editorLabel,
         teamId: activeTeamId || 0,
-        studentId: state.studentId,
-        shortNo: state.shortNo || (state.studentId ? String(state.studentId).slice(-3) : ""),
-        displayName: activeTeamId ? `กลุ่ม ${activeTeamId}` : getEffectiveDisplayName(),
+        studentId: sidClean,
+        shortNo,
+        fullName: state.fullName || "",
+        displayName: getEffectiveDisplayName(),
         editorLabel,
-        nickname: state.nickname,
-        area: state.area,
+        nickname: state.nickname || "",
+        area: state.area || "",
+        disc: state.disc || state.roomId || 0,
         questionId,
         cells: cleanCells,
         dirtyCells: dirtyCellsPayload,
@@ -2237,7 +2435,13 @@
       },
       true
     );
-    emit("responses", { questionId, participantId: targetPid, teamId: activeTeamId || 0, localOrigin: true });
+    emit("responses", {
+      questionId,
+      participantId: targetPid,
+      studentId: sidClean,
+      teamId: activeTeamId || 0,
+      localOrigin: true
+    });
   }
 
   function queueLiveTyping(questionId, cellsObj, editedCellIdOpt) {
@@ -2338,6 +2542,7 @@
     state.clearedAtByQuestion.set(questionId, now);
     const qMap = state.responsesByQuestion.get(questionId);
     if (qMap) qMap.clear();
+    persistRoomResponsesToStorage(state.roomId);
     publishPacket(
       `clear/${questionId}`,
       {
@@ -2354,23 +2559,22 @@
     const qMap = state.responsesByQuestion.get(questionId);
     if (!qMap) return [];
     return Array.from(qMap.values()).sort((a, b) => {
-      const ta = clampTeamOrZero(a.teamId);
-      const tb = clampTeamOrZero(b.teamId);
-      if (ta && tb && ta !== tb) return ta - tb;
-      if (ta && !tb) return -1;
-      if (!ta && tb) return 1;
       if (a.status !== b.status) return a.status === "submitted" ? -1 : 1;
-      return (b.updatedWallMs || 0) - (a.updatedWallMs || 0);
+      const diffTs = (b.updatedWallMs || 0) - (a.updatedWallMs || 0);
+      if (Math.abs(diffTs) > 1000) return diffTs;
+      return String(a.studentId || a.participantId || "").localeCompare(String(b.studentId || b.participantId || ""));
     });
   }
 
+  // Strictly returns ONLY the active student's own response (never another student's or shared team sheet)
   function getMyTeamResponse(questionId) {
     if (!questionId) return null;
     const qMap = state.responsesByQuestion.get(questionId);
     if (!qMap) return null;
-    const tid = clampTeamOrZero(state.teamId);
-    if (tid && qMap.has(`team_${tid}`)) return qMap.get(`team_${tid}`);
-    if (state.participantId && qMap.has(state.participantId)) return qMap.get(state.participantId);
+    const sid = String(state.studentId || "").trim();
+    if (sid) {
+      return qMap.get(`sid_${sid}`) || null;
+    }
     return null;
   }
 
@@ -2392,26 +2596,83 @@
       items.push({
         participantId: rec.participantId,
         teamId: clampTeamOrZero(rec.teamId),
-        studentId: rec.studentId,
+        studentId: rec.studentId || "",
+        shortNo: rec.shortNo || (rec.studentId ? String(rec.studentId).slice(-3) : ""),
+        fullName: rec.fullName || "",
         displayName: rec.displayName,
         editorLabel: cellEditor,
-        nickname: rec.nickname,
-        area: rec.area,
+        nickname: rec.nickname || "",
+        area: rec.area || "",
+        disc: rec.disc || 0,
         questionId,
         inputId,
         text: String(txt).trim(),
         status: cStat === "submitted" ? "submitted" : "typing",
-        updatedWallMs: rec.updatedWallMs || 0,
+        updatedWallMs: (rec.cellUpdatedMs && rec.cellUpdatedMs[inputId]) || rec.updatedWallMs || 0,
         fullRecord: rec
       });
     });
     return items.sort((a, b) => {
-      if (a.teamId && b.teamId && a.teamId !== b.teamId) return a.teamId - b.teamId;
-      if (a.teamId && !b.teamId) return -1;
-      if (!a.teamId && b.teamId) return 1;
       if (a.status !== b.status) return a.status === "submitted" ? -1 : 1;
-      return (b.updatedWallMs || 0) - (a.updatedWallMs || 0);
+      const diffTs = (b.updatedWallMs || 0) - (a.updatedWallMs || 0);
+      if (Math.abs(diffTs) > 1000) return diffTs;
+      return String(a.studentId || a.participantId || "").localeCompare(String(b.studentId || b.participantId || ""));
     });
+  }
+
+  function getRoomRespondedStudentsSummary(questionIdsOpt) {
+    const targetQIds =
+      Array.isArray(questionIdsOpt) && questionIdsOpt.length
+        ? questionIdsOpt
+        : Array.from(state.responsesByQuestion.keys());
+    const byPid = new Map();
+    const countByQuestion = {};
+    targetQIds.forEach((qid) => {
+      const list = getQuestionResponses(qid);
+      countByQuestion[qid] = {
+        total: list.length,
+        submitted: list.filter((r) => r.status === "submitted").length,
+        typing: list.filter((r) => r.status !== "submitted").length
+      };
+      list.forEach((rec) => {
+        if (!rec || !rec.participantId) return;
+        let entry = byPid.get(rec.participantId);
+        if (!entry) {
+          entry = {
+            participantId: rec.participantId,
+            studentId: rec.studentId || "",
+            shortNo: rec.shortNo || (rec.studentId ? String(rec.studentId).slice(-3) : ""),
+            fullName: rec.fullName || "",
+            nickname: rec.nickname || "",
+            displayName: rec.displayName || "",
+            editorLabel: rec.editorLabel || "",
+            area: rec.area || "",
+            disc: rec.disc || 0,
+            questions: {},
+            answeredQuestionCount: 0,
+            submittedQuestionCount: 0,
+            latestUpdatedMs: 0
+          };
+          byPid.set(rec.participantId, entry);
+        }
+        entry.questions[qid] = rec;
+        entry.answeredQuestionCount += 1;
+        if (rec.status === "submitted") entry.submittedQuestionCount += 1;
+        if ((rec.updatedWallMs || 0) > entry.latestUpdatedMs) {
+          entry.latestUpdatedMs = rec.updatedWallMs || 0;
+        }
+      });
+    });
+    const students = Array.from(byPid.values()).sort((a, b) =>
+      String(a.studentId || a.participantId).localeCompare(String(b.studentId || b.participantId))
+    );
+    return {
+      roomId: state.roomId,
+      totalRespondedStudents: students.length,
+      students,
+      byPid,
+      countByQuestion
+    };
   }
 
   function setFollowTeacher(flag) {
@@ -2435,6 +2696,7 @@
     if (initialized) return;
     initialized = true;
     hydratePresenceRegistryFromStorage(false);
+    hydrateRoomResponsesFromStorage(state.roomId, false);
     initBroadcastChannel();
     initMqttBrokers();
     initPeerForRoom();
@@ -2443,9 +2705,13 @@
         if (!ev || !ev.key || ev.key === PRESENCE_STORAGE_KEY) {
           hydratePresenceRegistryFromStorage(true);
         }
+        if (!ev || !ev.key || String(ev.key).startsWith(ROOM_RESP_STORAGE_PREFIX)) {
+          hydrateRoomResponsesFromStorage(state.roomId, true);
+        }
       });
       window.addEventListener("online", () => {
         hydratePresenceRegistryFromStorage(true);
+        hydrateRoomResponsesFromStorage(state.roomId, true);
         publishPresence();
         requestRoomSnapshot();
       });
@@ -2460,6 +2726,7 @@
         document.addEventListener("visibilitychange", () => {
           if (!document.hidden) {
             hydratePresenceRegistryFromStorage(true);
+            hydrateRoomResponsesFromStorage(state.roomId, true);
             publishPresence();
             if (state.role === "faculty") {
               requestAllRoomsSnapshot();
@@ -2485,6 +2752,7 @@
     on,
     getRoomId: () => state.roomId,
     getJoinedRoomId: () => state.joinedRoomId || 0,
+    getStudentId: () => state.studentId || "",
     getRoomDef: (id) => ROOM_DEFS.find((r) => r.id === clampRoom(id || state.roomId)) || ROOM_DEFS[0],
     setRoom,
     getTeamId: () => clampTeamOrZero(state.teamId),
@@ -2508,7 +2776,10 @@
     getPresenceSummary,
     getAllRoomsPresenceSummary,
     findStudentLivePresence,
-    syncFromStorage: () => hydratePresenceRegistryFromStorage(true),
+    syncFromStorage: () => {
+      hydratePresenceRegistryFromStorage(true);
+      hydrateRoomResponsesFromStorage(state.roomId, true);
+    },
     getTimerSnapshot,
     startTimer,
     togglePauseTimer,
@@ -2530,7 +2801,9 @@
     clearQuestionResponses,
     getQuestionResponses,
     getMyTeamResponse,
+    getMyOwnResponse: getMyTeamResponse,
     getCellResponses,
+    getRoomRespondedStudentsSummary,
     getFollowTeacher: () => state.followTeacher,
     setFollowTeacher,
     getAnonymousWall: () => state.anonymousWall,
