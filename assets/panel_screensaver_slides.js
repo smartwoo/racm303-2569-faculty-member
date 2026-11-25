@@ -1,20 +1,34 @@
 /* ==========================================================================
    RACM 303 (2569) — Apple TV Aerial & Netflix Idle Screensaver Slide Engine
-   Reusable Multi-Panel Stage + Complete 14-Slide Deck for GLOBAL (25 Nov 2569)
+   Reusable Multi-Panel Stage + Complete 16-Slide Deck for GLOBAL (25 Nov 2569)
    Works seamlessly across Faculty Member (Red) and Student (Blue) Portals
    ========================================================================== */
 (function () {
   "use strict";
 
   const ROLE = window.PORTAL_ROLE === "faculty" ? "faculty" : "student";
-  const ASSET_VER = "20261125global10";
+  const ASSET_VER = "20261125global11";
   const IMG_DIR = "assets/images/panel_screensaver";
   const MODERATOR_PPTX_HREF =
     ROLE === "faculty" ? `exports/pptx/RACM303_2569_Physician_Roles_Moderator.pptx?v=${ASSET_VER}` : "";
 
   const PROD_STUDENT_BASE = "https://smartwoo.github.io/racm303-2569-student/";
+  const QA_HASH_SLUG = "panel-qa";
   const SYNC_BC_NAME = "racm303_panel_deck_sync_v1";
+  const QA_BC_NAME = "racm303_panel_live_qa_v1";
   const MQTT_TOPIC = "racm303/2569/panel_deck_sync/v1";
+  const QA_MQTT_NS = "racm303/2569/panel_qa/v1";
+  const MQTT_BROKERS = [
+    "wss://mqtt.eclipseprojects.io:443/mqtt",
+    "wss://broker.emqx.io:8084/mqtt"
+  ];
+  const STALE_QA_MS = 14 * 24 * 60 * 60 * 1000;
+  const QA_TARGET_OPTIONS = [
+    "วิทยากรทุกท่าน",
+    "นพ.ทักษพล",
+    "นพ.วิรุฬ",
+    "ศ.พญ.สุวรรณา"
+  ];
   const IDLE_HIDE_MS = 3600;
   const AMBIENT_CYCLE_MS = 12000;
   const STATION_CYCLE_MS = 5800;
@@ -257,7 +271,7 @@
       sessionMeta: "วันพุธที่ 25 พฤศจิกายน 2569 · 13.30 – 17.00 น. · ห้อง 2C2-03",
       sessionLimitMin: 150,
       pptxHref: MODERATOR_PPTX_HREF,
-      qaLoopRange: [6, 11], // Slides 07..12 (0-indexed 6..11)
+      qaLoopRange: [7, 12], // Slides 08..13 (0-indexed 7..12: Q1..Q4, Live Q&A, Q5)
       slides: [
         {
           id: "g-s01",
@@ -451,7 +465,7 @@
               quote: "บ่มเพาะแพทย์รุ่นใหม่ให้มองเห็นทั้งคนไข้ตรงหน้าและโครงสร้างระบบสุขภาพที่โอบอุ้มสังคม"
             }
           ],
-          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 14",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 15",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: นพ.ทักษพล ธรรมรังสี (ผู้อำนวยการมูลนิธิไชน่าเมดิคอลบอร์ด China Medical Board (CMB) Foundation) — แสดงครบทั้ง 6 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
@@ -589,7 +603,7 @@
               quote: "“We have no choice but to be hopeful — แต่ความหวังอย่างเดียวไม่พอ ต้องกล้าลงมือทำ”"
             }
           ],
-          footnote: "คลิกที่ภาพข่าว VOA / เวทีสาธารณะเพื่อขยายใหญ่ · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 14",
+          footnote: "คลิกที่ภาพข่าว VOA / เวทีสาธารณะเพื่อขยายใหญ่ · กดลูกศร → / Space 1 คลิกเพื่อไปยังวิทยากรท่านถัดไป · อ้างอิงหน้า 15",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: นพ.วิรุฬ ลิ้มสวาท หัวหน้ากลุ่มงานวิจัยสังคมและสุขภาพ กระทรวงสาธารณสุข — รวมภาพชุด VOA Thai ทั้งผ่าตัดสมอง 2 ครั้ง ชุดครุย Harvard วิจัยชายแดน คลองเตยโมเดล และเวทีอากาศสะอาดครบในคลิกเดียว",
             bullets: [
@@ -705,7 +719,7 @@
               quote: "แพทย์ในฐานะ Change Agent ต้องสานพลังทุกภาคส่วนทั้งในและนอกระบบสุขภาพ เพื่อปกป้องอนาคตของเยาวชนร่วมกัน"
             }
           ],
-          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังสไลด์ถัดไป · อ้างอิงหน้า 14",
+          footnote: "คลิกที่การ์ดแต่ละสถานีเพื่อขยายอ่านรายละเอียด · กดลูกศร → / Space 1 คลิกเพื่อไปยังสไลด์ถัดไป · อ้างอิงหน้า 15",
           moderatorNotes: {
             lead: "กล่าวแนะนำ: ศาสตราจารย์เกียรติคุณ พญ.สุวรรณา เรืองกาญจนเศรษฐ์ รองผู้อำนวยการฝ่ายบริหาร ศูนย์วิจัยและจัดการความรู้เพื่อการควบคุมยาสูบ (ศจย.) — แสดงครบทั้ง 5 สถานีพร้อมโลโก้หน่วยงานในคลิกเดียว",
             bullets: [
@@ -729,20 +743,20 @@
           kb: "kb-a",
           orbs: ["rgba(56,189,248,0.26)", "rgba(251,191,36,0.22)", "rgba(99,102,241,0.22)"],
           kicker: "โครงสร้างวงเสวนา · รวม 150 นาที",
-          kickerSub: "แนวคำถามกึ่งโครงสร้าง (Semi-Structured Panel Questions · Q1–Q5) เชื่อมสู่ช่วงแลกเปลี่ยนกับนักศึกษา",
+          kickerSub: "เสวนาแนวคำถาม Q1–Q4 → เปิดฟลอร์ Live Q&A จากนักศึกษา → ปิดท้ายด้วย Q5 และสะท้อนคิด",
           title: "ลำดับจังหวะการสนทนาและแลกเปลี่ยน",
           phases: [
             { min: "00 – 15 นาที", title: "เปิดวงและเส้นทางวิทยากร", desc: "แนะนำหัวข้อ วัตถุประสงค์ LO 1–4 และเส้นทางอาชีพวิทยากรทั้ง 3 ท่าน" },
-            { min: "15 – 85 นาที", title: "เสวนาด้วยแนวคำถาม Q1–Q5", desc: "สำรวจจุดเปลี่ยน มุมมองเชิงระบบ–โลก สมรรถนะ คำแนะนำ และบทเรียนฝากแพทย์รุ่นใหม่", featured: true },
-            { min: "85 – 145 นาที", title: "Q&A จากนักศึกษา (60 นาที)", desc: "เปิดฟลอร์ให้นักศึกษาแพทย์ปี 3 ถามต่อยอดและแลกเปลี่ยนมุมมองเต็มเวลา", featured: true },
-            { min: "145 – 150 นาที", title: "สะท้อนคิดและปิดวง", desc: "ตกผลึกแนวทางพัฒนาตนเองด้าน HSS & SBP และสิ่งที่จะนำไปลองทำในก้าวถัดไป" }
+            { min: "15 – 71 นาที", title: "เสวนาแนวคำถาม Q1–Q4", desc: "สำรวจจุดเปลี่ยน มุมมองเชิงระบบ–โลก สมรรถนะ และโอกาสสำหรับแพทย์รุ่นใหม่", featured: true },
+            { min: "71 – 131 นาที", title: "Live Q&A จากฟลอร์ (60 นาที)", desc: "สแกน QR ส่งคำถามสดจากฟลอร์ แลกเปลี่ยนมุมมองกับวิทยากรเต็มเวลา", featured: true },
+            { min: "131 – 150 นาที", title: "Q5 ข้อคิดฝากอนาคต & สะท้อนคิด", desc: "บทเรียนเข็มทิศวิชาชีพหลังฟังเสียงนักศึกษา (Q5) และตกผลึกก้าวถัดไปด้าน HSS & SBP" }
           ],
           moderatorNotes: {
-            lead: "เปิดประมาณ 3 นาที แนะนำไทม์ไลน์วิทยากรท่านละ ~4 นาที จากนั้นเดินแนวคำถามกึ่งโครงสร้าง Q1–Q5 ข้อละ ~14 นาที แล้วเริ่ม Q&A ที่นาที 85 ให้ครบ 60 นาที จบด้วยสะท้อนคิดนาที 145",
+            lead: "เปิดประมาณ 3 นาที แนะนำไทม์ไลน์วิทยากรท่านละ ~4 นาที เดินคำถามหลัก Q1–Q4 ข้อละ ~14 นาที (นาที 15–71) → เปิดฟลอร์ Live Q&A เต็ม 60 นาที (นาที 71–131) → เชิญฝากข้อคิด Q5 (นาที 131–145) และสะท้อนคิดปิดวงนาที 145–150",
             bullets: [
               "สลับผู้ตอบคนแรกในแต่ละข้อ และเชิญทุกท่านเติมมุมมองตามความถนัดและประสบการณ์จริง",
-              "Q1 เส้นทาง & จุดเปลี่ยน → Q2 มุมมองเชิงระบบ/สังคม/โลก/สิ่งแวดล้อม → Q3 สมรรถนะ & การบ่มเพาะ → Q4 คำแนะนำ ความท้าทาย & โอกาส → Q5 ข้อคิดเข็มทิศวิชาชีพ",
-              "หากเข้าใกล้นาที 85 ให้รวบคำถามต่อยอดเพื่อรักษาเวลา Q&A 60 นาทีให้นักศึกษา"
+              "ลำดับใหม่: Q1 จุดเปลี่ยน → Q2 มุมมองเชิงระบบ/โลก/สิ่งแวดล้อม → Q3 สมรรถนะ → Q4 คำแนะนำ & โอกาส → Live Q&A จากฟลอร์ → Q5 ข้อคิดเข็มทิศวิชาชีพปิดท้าย",
+              "หากเข้าใกล้นาที 71 ให้รวบคำถามต่อยอดเพื่อส่งเข้าช่วงสแกน QR Live Q&A บน Slide 12 เต็ม 60 นาที"
             ],
             refs: [
               { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" },
@@ -751,16 +765,80 @@
           }
         },
         {
-          id: "g-s06",
+          id: "g-s06-outline",
           num: "07",
-          navLabel: "07 · Q1 จุดเปลี่ยนสำคัญ",
+          navLabel: "07 · โครงคำถาม Q1–Q5",
+          type: "outline",
+          bg: "bg_04_youth_city_canopy.jpg",
+          kb: "kb-d",
+          orbs: ["rgba(56,189,248,0.28)", "rgba(245,158,11,0.26)", "rgba(16,185,129,0.22)"],
+          kicker: "PANEL DISCUSSION OUTLINE · โครงคำถามหลักเวทีเสวนา",
+          kickerSub: "4 Core Questions (Q1–Q4) → Open-Floor Live Q&A → Closing Wisdom (Q5)",
+          title: "Panel Outline: Q1–Q4 → Live Q&A → Closing Q5",
+          coreQuestions: [
+            {
+              badge: "Q1",
+              phase: "Slide 08 · Min 15–29",
+              targetSlideIdx: 7,
+              en: "Career Pathways & Pivotal Turning Points",
+              th: "สำรวจเส้นทางจากข้างเตียงผู้ป่วยสู่เวชปฏิบัติฐานระบบ (SBP) และเหตุการณ์จุดเปลี่ยนสำคัญของอาจารย์"
+            },
+            {
+              badge: "Q2",
+              phase: "Slide 09 · Min 29–43",
+              targetSlideIdx: 8,
+              en: "Shifting Lenses: Systems, Global & Planetary Health",
+              th: "มุมมองต่อผู้ป่วยและบทบาทแพทย์ที่เปลี่ยนไป เมื่อทำงานเชื่อมสังคม นโยบาย สุขภาพโลก และสิ่งแวดล้อม"
+            },
+            {
+              badge: "Q3",
+              phase: "Slide 10 · Min 43–57",
+              targetSlideIdx: 9,
+              en: "Core Competencies & Real-World Cultivation",
+              th: "สมรรถนะและทักษะสำคัญในการสานพลังสหวิชาชีพและภาคส่วนต่าง ๆ พร้อมวิธีบ่มเพาะจากสนามทำงานจริง"
+            },
+            {
+              badge: "Q4",
+              phase: "Slide 11 · Min 57–71",
+              targetSlideIdx: 10,
+              en: "Future Pathways: Challenges & Emerging Opportunities",
+              th: "คำแนะนำในการเริ่มต้น ความท้าทายที่ควรรู้เท่าทัน และโอกาสใหม่ของแพทย์รุ่นใหม่ในทุกสายวิชาชีพ"
+            }
+          ],
+          qaBridge: {
+            badge: "💬 LIVE Q&A",
+            phase: "Slide 12 · Min 71–131 (60 Min)",
+            targetSlideIdx: 11,
+            en: "Live Questions & Open Dialogue from the Floor",
+            th: "เปิดฟลอร์สแกน QR พิมพ์ส่งคำถามสดขึ้นจอ แลกเปลี่ยนต่อยอดมุมมองร่วมกับวิทยากรทั้ง 3 ท่าน"
+          },
+          closingQuestion: {
+            badge: "Q5 · Finale",
+            phase: "Slide 13 · Min 131–145 (After Q&A)",
+            targetSlideIdx: 12,
+            en: "Closing Wisdom & Compass for Future Generations",
+            th: "บทเรียนหลักและข้อคิดเข็มทิศวิชาชีพฝากถึงแพทย์รุ่นอนาคต หลังได้แลกเปลี่ยนกับนักศึกษาแพทย์"
+          },
+          moderatorNotes: {
+            lead: "ใช้สไลด์นี้ปูภาพรวมโครงคำถามสั้น ๆ ~1 นาที เพื่อให้นักศึกษาและวิทยากรเห็นจังหวะการเดินเรื่องร่วมกันก่อนเริ่ม Q1",
+            bullets: [
+              "ชี้ให้เห็นว่าเราจะคุย 4 คำถามหลัก (Q1–Q4) ก่อน แล้วเปิดเวทีให้น้อง ๆ สแกน QR ส่งคำถามสดบน Slide 12 เต็มเวลา ก่อนปิดท้ายด้วย Q5 ข้อคิดฝากแพทย์รุ่นอนาคต",
+              "ผู้ดำเนินรายการสามารถคลิกที่การ์ดแต่ละข้อบนหน้าจอเพื่อกระโดดไปยังสไลด์ข้อนั้นได้โดยตรง"
+            ],
+            refs: []
+          }
+        },
+        {
+          id: "g-s06",
+          num: "08",
+          navLabel: "08 · Q1 จุดเปลี่ยนสำคัญ",
           type: "prompt",
           qStep: 1,
           bg: "bg_05_compass_crossroads.jpg",
           kb: "kb-b",
           orbs: ["rgba(245,158,11,0.28)", "rgba(56,189,248,0.22)", "rgba(30,64,175,0.28)"],
-          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 1 / 5",
-          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 15–29",
+          kicker: "แนวคำถามกึ่งโครงสร้างช่วงที่ 1 · คำถามข้อที่ 1 / 5",
+          kickerSub: "Semi-Structured Panel Questions (Q1–Q4 ก่อนช่วง Q&A) · นาทีที่ 15–29",
           title: "Q1: สำรวจเส้นทางวิชาชีพและจุดเปลี่ยนสำคัญ",
           enHeading: "(Career Path Exploration & Turning Points)",
           subQuestions: [
@@ -780,15 +858,15 @@
         },
         {
           id: "g-s07",
-          num: "08",
-          navLabel: "08 · Q2 มุมมองเชิงระบบ",
+          num: "09",
+          navLabel: "09 · Q2 มุมมองเชิงระบบ",
           type: "prompt",
           qStep: 2,
           bg: "bg_06_ripples_perspective.jpg",
           kb: "kb-c",
           orbs: ["rgba(56,189,248,0.28)", "rgba(20,184,166,0.22)", "rgba(99,102,241,0.22)"],
-          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 2 / 5",
-          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 29–43",
+          kicker: "แนวคำถามกึ่งโครงสร้างช่วงที่ 1 · คำถามข้อที่ 2 / 5",
+          kickerSub: "Semi-Structured Panel Questions (Q1–Q4 ก่อนช่วง Q&A) · นาทีที่ 29–43",
           title: "Q2: มุมมองที่เปลี่ยนไปจากการทำงานเชิงระบบสู่สังคม โลก และสิ่งแวดล้อม",
           enHeading: "(Understanding Shifts in Viewpoints through Systems-Based Work)",
           subQuestions: [
@@ -808,15 +886,15 @@
         },
         {
           id: "g-s08",
-          num: "09",
-          navLabel: "09 · Q3 สมรรถนะ & ทักษะ",
+          num: "10",
+          navLabel: "10 · Q3 สมรรถนะ & ทักษะ",
           type: "prompt",
           qStep: 3,
           bg: "bg_03_border_anthropology.jpg",
           kb: "kb-d",
           orbs: ["rgba(16,185,129,0.28)", "rgba(245,158,11,0.22)", "rgba(56,189,248,0.2)"],
-          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 3 / 5",
-          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 43–57",
+          kicker: "แนวคำถามกึ่งโครงสร้างช่วงที่ 1 · คำถามข้อที่ 3 / 5",
+          kickerSub: "Semi-Structured Panel Questions (Q1–Q4 ก่อนช่วง Q&A) · นาทีที่ 43–57",
           title: "Q3: สมรรถนะและทักษะสำคัญที่บ่มเพาะขึ้นระหว่างทาง",
           enHeading: "(Competencies Developed Through Evolving Perspectives)",
           subQuestions: [
@@ -836,15 +914,15 @@
         },
         {
           id: "g-s09",
-          num: "10",
-          navLabel: "10 · Q4 คำแนะนำ & โอกาส",
+          num: "11",
+          navLabel: "11 · Q4 คำแนะนำ & โอกาส",
           type: "prompt",
           qStep: 4,
           bg: "bg_07_lantern_purpose.jpg",
           kb: "kb-a",
           orbs: ["rgba(245,158,11,0.3)", "rgba(99,102,241,0.25)", "rgba(14,165,233,0.2)"],
-          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 4 / 5",
-          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 57–71",
+          kicker: "แนวคำถามกึ่งโครงสร้างช่วงที่ 1 · คำถามข้อที่ 4 / 5",
+          kickerSub: "Semi-Structured Panel Questions (Q1–Q4 ก่อนส่งเข้า Live Q&A) · นาทีที่ 57–71",
           title: "Q4: คำแนะนำ ความท้าทาย และโอกาสสำหรับแพทย์รุ่นใหม่",
           enHeading: "(Advice for Aspiring Professionals: Challenges & Opportunities)",
           subQuestions: [
@@ -852,10 +930,10 @@
             "บนเส้นทางดังกล่าวมีความท้าทายใดที่ควรรู้เท่าทัน และมีโอกาสใหม่ ๆ ด้านใดบ้างที่กำลังเปิดกว้างให้ค้นพบ?"
           ],
           moderatorNotes: {
-            lead: "ลำดับเปิดแนะนำ: เริ่มที่ นพ.ทักษพล → นพ.วิรุฬ → ศ.เกียรติคุณ พญ.สุวรรณา",
+            lead: "ลำดับเปิดแนะนำ: เริ่มที่ นพ.ทักษพล → นพ.วิรุฬ → ศ.เกียรติคุณ พญ.สุวรรณา (ก่อนส่งเข้าช่วงสแกน QR Live Q&A บน Slide 12 ที่นาที 71)",
             bullets: [
               "ย้ำว่า SBP และ HSS ไม่ได้จำกัดเฉพาะคนทำนโยบาย แต่แพทย์คลินิกเฉพาะทาง แพทย์ชุมชน และอาจารย์แพทย์ล้วนใช้สร้างการเปลี่ยนแปลงได้",
-              "ชวนชี้ให้เห็นโอกาสใหม่ ๆ ของแพทย์รุ่นใหม่ ทั้งระดับพื้นที่ ประเทศ ภูมิภาค และระดับโลก"
+              "เมื่อครบทั้ง 3 ท่าน ชวนนักศึกษาหยิบมือถือเตรียมสแกน QR บนสไลด์ถัดไป (Slide 12) เพื่อส่งคำถามสดจากฟลอร์"
             ],
             refs: [
               { label: "AMA • Health Systems Science", url: "https://www.ama-assn.org/education/changemeded-initiative/give-your-medical-students-head-start-health-systems-science" }
@@ -863,25 +941,48 @@
           }
         },
         {
+          id: "g-s11",
+          num: "12",
+          navLabel: "12 · Live Q&A 60 นาที",
+          type: "qa",
+          bg: "bg_08_dialogue_constellation.jpg",
+          kb: "kb-c",
+          orbs: ["rgba(245,158,11,0.26)", "rgba(56,189,248,0.24)", "rgba(139,92,246,0.22)"],
+          kicker: "นาทีที่ 71–131 · 60 นาทีเต็ม · LIVE QUESTIONS FROM THE FLOOR",
+          kickerSub: "สแกน QR เพื่อส่งคำถามสดขึ้นจอ · Clicker เลื่อนทีละคำถามจนครบ หรือคลิกเมาส์เพื่อไป Q5 ทันที",
+          title: "“เรื่องไหนที่คุณอยากชวนอาจารย์คิดต่อจากสิ่งที่เพิ่งได้ฟัง?”",
+          logline: "สแกน QR Code ด้านขวาเพื่อพิมพ์ส่งคำถามสดจากมือถือหรือไอแพด — คำถามจากฟลอร์จะปรากฏขึ้นบนจอนี้แบบเรียลไทม์",
+          moderatorNotes: {
+            lead: "นาทีที่ 71–131 (60 นาที): เชิญนักศึกษาสแกน QR Code ด้านขวาบนจอเพื่อพิมพ์ส่งคำถามสด (และเปิดไมค์ถามสดควบคู่กันได้เลย)",
+            bullets: [
+              "การควบคุมด้วย Clicker (→ / PageDown / Space): จะเลื่อนแสดงทีละคำถาม (#1 → #2 → ... → #N) จนครบทุกข้อก่อน จึงจะข้ามไป Slide 13 (Q5)",
+              "การข้ามด้วยเมาส์ (Mouse Override): หากต้องการข้ามไป Slide 13 (Q5) ทันทีโดยไม่รอเลื่อนครบทุกข้อ คลิกปุ่ม ‘🖱️ ไปสไลด์ถัดไป (Q5) ›’ หรือลูกศรขอบขวาจอได้เลย",
+              "สามารถคลิกที่ QR Code เพื่อขยายใหญ่เต็มจอได้หากต้องการให้นักศึกษาแถวหลังสแกนพร้อมกัน"
+            ],
+            refs: []
+          }
+        },
+        {
           id: "g-s10",
-          num: "11",
-          navLabel: "11 · Q5 ข้อคิดฝากอนาคต",
+          num: "13",
+          navLabel: "13 · Q5 ข้อคิดฝากอนาคต",
           type: "prompt",
           qStep: 5,
+          afterQa: true,
           bg: "bg_01_bedside_horizon.jpg",
           kb: "kb-b",
           orbs: ["rgba(56,189,248,0.28)", "rgba(16,185,129,0.24)", "rgba(245,158,11,0.22)"],
-          kicker: "แนวคำถามกึ่งโครงสร้างสำหรับเวทีเสวนา · คำถามข้อที่ 5 / 5",
-          kickerSub: "Semi-Structured Panel Questions · นาทีที่ 71–85",
+          kicker: "แนวคำถามปิดท้ายหลังช่วง Q&A · คำถามข้อที่ 5 / 5",
+          kickerSub: "Closing Panel Question (หลังรับฟังคำถามจากฟลอร์) · นาทีที่ 131–145",
           title: "Q5: ข้อคิดและบทเรียนสำคัญฝากถึงแพทย์รุ่นอนาคต",
           enHeading: "(Wisdom for Future Generations)",
           subQuestions: [
             "เมื่อมองย้อนกลับไปตลอดเส้นทางการทำงานและการเติบโตทางความคิดที่ผ่านมา อะไรคือ “บทเรียนสำคัญ” หรือข้อคิดหลัก ที่อาจารย์อยากฝากไว้ให้แก่นักศึกษาแพทย์รุ่นใหม่ เพื่อเป็นเข็มทิศในการดูแลผู้ป่วยและร่วมสร้างสรรค์สังคมด้วยจิตสาธารณะต่อไปในอนาคต?"
           ],
           moderatorNotes: {
-            lead: "ลำดับเปิดแนะนำ: เชิญทั้ง 3 ท่านฝากบทเรียนเข็มทิศวิชาชีพสั้น ๆ ท่านละ 2–3 นาที ก่อนส่งไมค์เข้าช่วง Q&A จากนักศึกษาเต็ม 60 นาที (นาทีที่ 85)",
+            lead: "นาทีที่ 131–145 (หลังจบช่วง Q&A จากนักศึกษา): เชิญทั้ง 3 ท่านฝากบทเรียนเข็มทิศวิชาชีพปิดท้ายท่านละ ~3–4 นาที ก่อนส่งเข้าสู่ช่วงสะท้อนคิดปิดวงนาทีที่ 145",
             bullets: [
-              "เชื่อมเข้าสู่วัตถุประสงค์ข้อที่ 4: การมององค์รวมและการคิดเชิงระบบ ความใฝ่รู้ตลอดชีวิต คุณธรรมจริยธรรม และจิตสาธารณะเพื่อชุมชนและสังคม"
+              "เชื่อมโยงเสียงคำถามของนักศึกษาเมื่อสักครู่เข้าสู่วัตถุประสงค์ข้อที่ 4: การมององค์รวมและการคิดเชิงระบบ ความใฝ่รู้ตลอดชีวิต คุณธรรมจริยธรรม และจิตสาธารณะเพื่อชุมชนและสังคม"
             ],
             refs: [
               { label: "University of Edinburgh • What? So what? Now what?", url: "https://reflection.ed.ac.uk/reflectors-toolkit/reflecting-on-experience/what-so-what-now-what" }
@@ -889,32 +990,9 @@
           }
         },
         {
-          id: "g-s11",
-          num: "12",
-          navLabel: "12 · Q&A 60 นาที",
-          type: "qa",
-          bg: "bg_08_dialogue_constellation.jpg",
-          kb: "kb-c",
-          orbs: ["rgba(245,158,11,0.26)", "rgba(56,189,248,0.24)", "rgba(139,92,246,0.22)"],
-          kicker: "นาทีที่ 85–145 · 60 นาทีเต็ม · OPEN FLOOR DIALOGUE",
-          kickerSub: "ช่วงแลกเปลี่ยนและตั้งคำถามจากนักศึกษาแพทย์ชั้นปีที่ 3",
-          title: "“เรื่องไหนที่คุณอยากชวนอาจารย์คิดต่อจากสิ่งที่เพิ่งได้ฟัง?”",
-          logline: "ถามต่อยอดจากเรื่องเล่าที่ได้ฟัง หรือเชื่อมกับคำถามที่คุณกำลังค้นหาความหมายด้วยตนเอง",
-          moderatorNotes: {
-            lead: "กันเวลานาทีที่ 85–145 เต็ม 60 นาทีสำหรับนักศึกษา เปิดไมค์ทันทีเมื่อมีคนพร้อม หรือให้เวลาจดคำถาม 1–2 นาทีแล้วชวนเริ่ม",
-            bullets: [
-              "จังหวะแนะนำ: 5 นาทีเปิดรับคำถามชุดแรก · 20 นาทีคำถามจากเรื่องเล่า · 20 นาทีเชื่อมกรอบคิด/ทีม/ระบบ · 15 นาทีคำถามที่อยากฟังวิทยากรต่อยอดกัน",
-              "ให้นักศึกษาถามกระชับ ~45–60 วินาที · ผู้ถูกถามตอบก่อน ~2 นาที แล้วเชิญอีกท่านเมื่อมีมุมต่าง",
-              "ถ้าห้องเงียบ ใช้คำชวนสั้น ๆ: ‘คำตอบไหนเมื่อสักครู่ทำให้เราอยากถามว่า เพราะอะไร ต่ออีกครั้ง?’",
-              "เคล็ดลับจอห้อง 2C2-03: สามารถกดปุ่ม ‘🌊 หมุนภาพ Q&A Loop’ เพื่อให้จอฉายทวนคำถาม 1–5 สลับกับหน้า Q&A แบบ Screensaver ช้า ๆ ได้"
-            ],
-            refs: []
-          }
-        },
-        {
           id: "g-s12",
-          num: "13",
-          navLabel: "13 · สะท้อนคิดปิดวง",
+          num: "14",
+          navLabel: "14 · สะท้อนคิดปิดวง",
           type: "reflection",
           bg: "bg_07_lantern_purpose.jpg",
           kb: "kb-d",
@@ -938,8 +1016,8 @@
         },
         {
           id: "g-s13",
-          num: "14",
-          navLabel: "14 · หลักฐานประวัติ",
+          num: "15",
+          navLabel: "15 · หลักฐานประวัติ",
           type: "sources",
           bg: "bg_02_nahwa_to_world.jpg",
           kb: "kb-a",
@@ -980,8 +1058,8 @@
         },
         {
           id: "g-s14",
-          num: "15",
-          navLabel: "15 · กรอบสะท้อนคิด",
+          num: "16",
+          navLabel: "16 · กรอบสะท้อนคิด",
           type: "sources",
           bg: "bg_06_ripples_perspective.jpg",
           kb: "kb-b",
@@ -1026,11 +1104,18 @@
     deckId: "w1-d1-global",
     slideIdx: 0,
     stationIdx: 0,
+    qaFocusIdx: 0,
+    qaViewedIds: new Set(),
+    qaComposerOpen: false,
+    qaComposerStandalone: false,
+    qaSelectedTarget: QA_TARGET_OPTIONS[0],
+    qaToastMsg: "",
+    qaToastTimer: null,
     backdropMode: localStorage.getItem("racm303_psv_backdrop") === "aurora" ? "aurora" : "cinema",
     ambientCycle: false,
     qaLoopOnly: false,
     idleClean: false,
-    showQrOnCover: true,
+    showQrOnCover: false,
     qrLightboxOpen: false,
     modDrawerOpen: false,
     stuDrawerOpen: false,
@@ -1081,35 +1166,384 @@
     });
   }
 
-  /* ---------- Live Sync (BroadcastChannel + MQTT) ---------- */
+  /* ---------- Live Sync & Real-Time Floor Q&A Engine (BroadcastChannel + Dual MQTT WSS + LocalStorage) ---------- */
   let bc = null;
-  let mqttClient = null;
+  let qaBc = null;
+  const mqttClients = [];
+  const connectedBrokers = new Set();
+  const pendingQaPublishes = [];
+  const qaBuckets = Object.create(null);
+
+  function getDeviceId() {
+    try {
+      let id = localStorage.getItem("racm303_psv_device_id");
+      if (!id) {
+        id = "dev_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem("racm303_psv_device_id", id);
+      }
+      return id;
+    } catch (_) {
+      return "dev_anon";
+    }
+  }
+
+  function getSavedQaAuthor() {
+    try {
+      return localStorage.getItem("racm303_psv_qa_author") || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function saveQaAuthor(name) {
+    try {
+      localStorage.setItem("racm303_psv_qa_author", String(name || "").trim());
+    } catch (_) {}
+  }
+
+  function getQaScanUrl() {
+    try {
+      const host = window.location.hostname || "";
+      if (host === "localhost" || host === "127.0.0.1") {
+        return `${window.location.origin}${window.location.pathname}#${QA_HASH_SLUG}`;
+      }
+    } catch (_) {}
+    return `${PROD_STUDENT_BASE}#${QA_HASH_SLUG}`;
+  }
+
+  function ensureQaBucket(deckId) {
+    const key = deckId || "w1-d1-global";
+    if (qaBuckets[key]) return qaBuckets[key];
+    const bucket = {
+      items: new Map(),
+      hiddenIds: new Set(),
+      likes: new Map(),
+      clearedBeforeTs: 0
+    };
+    try {
+      const raw = localStorage.getItem(`racm303_panel_live_qa_v1_${key}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          if (typeof parsed.clearedBeforeTs === "number") {
+            bucket.clearedBeforeTs = parsed.clearedBeforeTs;
+          }
+          if (Array.isArray(parsed.hiddenIds)) {
+            parsed.hiddenIds.forEach((id) => id && bucket.hiddenIds.add(String(id)));
+          }
+          if (Array.isArray(parsed.items)) {
+            parsed.items.forEach((it) => {
+              if (it && it.id && it.text) bucket.items.set(String(it.id), it);
+            });
+          }
+          if (parsed.likes && typeof parsed.likes === "object") {
+            Object.keys(parsed.likes).forEach((qId) => {
+              const arr = parsed.likes[qId];
+              if (Array.isArray(arr)) bucket.likes.set(qId, new Set(arr));
+            });
+          }
+        }
+      }
+    } catch (_) {}
+    qaBuckets[key] = bucket;
+    return bucket;
+  }
+
+  function persistQaBucket(deckId) {
+    const key = deckId || "w1-d1-global";
+    const bucket = ensureQaBucket(key);
+    try {
+      const likesObj = {};
+      bucket.likes.forEach((set, qId) => {
+        likesObj[qId] = Array.from(set);
+      });
+      const payload = {
+        clearedBeforeTs: bucket.clearedBeforeTs,
+        hiddenIds: Array.from(bucket.hiddenIds),
+        items: Array.from(bucket.items.values()).slice(-150),
+        likes: likesObj
+      };
+      localStorage.setItem(`racm303_panel_live_qa_v1_${key}`, JSON.stringify(payload));
+    } catch (_) {}
+  }
+
+  function getVisibleQaList(deckId) {
+    const bucket = ensureQaBucket(deckId || state.deckId);
+    const now = Date.now();
+    const myId = getDeviceId();
+    const out = [];
+    bucket.items.forEach((it) => {
+      if (!it || !it.id || !it.text) return;
+      if (bucket.hiddenIds.has(it.id)) return;
+      const ts = Number(it.ts) || 0;
+      if (bucket.clearedBeforeTs && ts <= bucket.clearedBeforeTs) return;
+      if (ts > 0 && now - ts > STALE_QA_MS) return;
+      const likeSet = bucket.likes.get(it.id);
+      out.push({
+        id: String(it.id),
+        deckId: it.deckId || deckId || "w1-d1-global",
+        text: String(it.text).trim(),
+        target: String(it.target || QA_TARGET_OPTIONS[0]).trim(),
+        author: String(it.author || "").trim(),
+        senderId: String(it.senderId || ""),
+        ts,
+        likeCount: likeSet ? likeSet.size : 0,
+        likedByMe: Boolean(likeSet && likeSet.has(myId))
+      });
+    });
+    out.sort((a, b) => (a.ts - b.ts) || a.id.localeCompare(b.id));
+    return out;
+  }
+
+  function formatQaTimeAgo(ts) {
+    if (!ts) return "";
+    try {
+      return new Intl.DateTimeFormat("th-TH", {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(new Date(ts)) + " น.";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function publishQaMqtt(subtopic, obj, retain) {
+    const fullTopic = `${QA_MQTT_NS}/${subtopic}`;
+    const str = JSON.stringify(obj);
+    let sentAny = false;
+    mqttClients.forEach((cl) => {
+      if (cl && cl.connected) {
+        try {
+          cl.publish(fullTopic, str, { qos: 0, retain: Boolean(retain) });
+          sentAny = true;
+        } catch (_) {}
+      }
+    });
+    if (!sentAny) {
+      pendingQaPublishes.push({ topic: fullTopic, payload: str, retain: Boolean(retain) });
+      if (pendingQaPublishes.length > 80) pendingQaPublishes.shift();
+    }
+  }
+
+  function ingestQaPacket(kind, data) {
+    if (!data || typeof data !== "object") return;
+    const deckId = data.deckId || "w1-d1-global";
+    const bucket = ensureQaBucket(deckId);
+    const prevList = getVisibleQaList(deckId);
+    const prevCurrentId = prevList[state.qaFocusIdx] ? prevList[state.qaFocusIdx].id : "";
+    let changed = false;
+
+    if (kind === "question" && data.id && data.text) {
+      const cleanText = String(data.text).trim().slice(0, 420);
+      if (!cleanText) return;
+      const existing = bucket.items.get(String(data.id));
+      if (!existing || existing.text !== cleanText) {
+        bucket.items.set(String(data.id), {
+          id: String(data.id),
+          deckId,
+          text: cleanText,
+          target: String(data.target || QA_TARGET_OPTIONS[0]).trim().slice(0, 60),
+          author: String(data.author || "").trim().slice(0, 60),
+          senderId: String(data.senderId || ""),
+          ts: Number(data.ts) || Date.now()
+        });
+        changed = true;
+      }
+    } else if (kind === "mod" && data.id) {
+      const qId = String(data.id);
+      if (data.hidden && !bucket.hiddenIds.has(qId)) {
+        bucket.hiddenIds.add(qId);
+        changed = true;
+      }
+    } else if (kind === "clear" && typeof data.clearedBeforeTs === "number") {
+      if (data.clearedBeforeTs > bucket.clearedBeforeTs) {
+        bucket.clearedBeforeTs = data.clearedBeforeTs;
+        changed = true;
+      }
+    } else if (kind === "like" && data.id && data.voterId) {
+      const qId = String(data.id);
+      const voter = String(data.voterId);
+      let set = bucket.likes.get(qId);
+      if (!set) {
+        set = new Set();
+        bucket.likes.set(qId, set);
+      }
+      if (data.liked && !set.has(voter)) {
+        set.add(voter);
+        changed = true;
+      } else if (!data.liked && set.has(voter)) {
+        set.delete(voter);
+        changed = true;
+      }
+    }
+
+    if (!changed) return;
+    persistQaBucket(deckId);
+    refreshQaComposerFeedOnly();
+
+    if (state.isOpen && state.deckId === deckId && getCurrentSlide().type === "qa") {
+      const nextList = getVisibleQaList(deckId);
+      if (prevList.length === 0 && nextList.length > 0) {
+        state.qaFocusIdx = 0;
+        state.qaViewedIds.add(nextList[0].id);
+        updateStageView();
+      } else if (nextList.length === 0) {
+        state.qaFocusIdx = 0;
+        updateStageView();
+      } else {
+        const preservedIdx = prevCurrentId ? nextList.findIndex((x) => x.id === prevCurrentId) : -1;
+        if (preservedIdx >= 0) {
+          state.qaFocusIdx = preservedIdx;
+          refreshLiveQaStageChromeInPlace(nextList);
+        } else {
+          state.qaFocusIdx = Math.max(0, Math.min(nextList.length - 1, state.qaFocusIdx));
+          if (nextList[state.qaFocusIdx]) state.qaViewedIds.add(nextList[state.qaFocusIdx].id);
+          updateStageView();
+        }
+      }
+    }
+  }
+
+  function submitLiveFloorQuestion(deckId, rawText, rawAuthor, rawTarget) {
+    const text = String(rawText || "").replace(/\s+/g, " ").trim().slice(0, 420);
+    if (text.length < 2) return null;
+    const author = String(rawAuthor || "").trim().slice(0, 50);
+    const target = String(rawTarget || QA_TARGET_OPTIONS[0]).trim().slice(0, 50);
+    saveQaAuthor(author);
+
+    const qObj = {
+      id: "fq_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7),
+      deckId: deckId || "w1-d1-global",
+      text,
+      target,
+      author,
+      senderId: getDeviceId(),
+      ts: Date.now()
+    };
+
+    initLiveSync();
+    ingestQaPacket("question", qObj);
+    if (qaBc) {
+      try { qaBc.postMessage({ kind: "question", data: qObj }); } catch (_) {}
+    }
+    publishQaMqtt(`${qObj.deckId}/q/${qObj.id}`, qObj, true);
+    return qObj;
+  }
+
+  function toggleLikeFloorQuestion(deckId, qId) {
+    const bucket = ensureQaBucket(deckId);
+    const myId = getDeviceId();
+    const set = bucket.likes.get(qId);
+    const nextLiked = !(set && set.has(myId));
+    const pkt = {
+      deckId: deckId || "w1-d1-global",
+      id: qId,
+      voterId: myId,
+      liked: nextLiked,
+      ts: Date.now()
+    };
+    initLiveSync();
+    ingestQaPacket("like", pkt);
+    if (qaBc) {
+      try { qaBc.postMessage({ kind: "like", data: pkt }); } catch (_) {}
+    }
+    publishQaMqtt(`${pkt.deckId}/like/${qId}/${myId}`, pkt, true);
+  }
+
+  function hideFloorQuestion(deckId, qId) {
+    if (!qId) return;
+    const pkt = {
+      deckId: deckId || "w1-d1-global",
+      id: qId,
+      hidden: true,
+      ts: Date.now()
+    };
+    initLiveSync();
+    ingestQaPacket("mod", pkt);
+    if (qaBc) {
+      try { qaBc.postMessage({ kind: "mod", data: pkt }); } catch (_) {}
+    }
+    publishQaMqtt(`${pkt.deckId}/mod/${qId}`, pkt, true);
+  }
 
   function initLiveSync() {
+    ensureQaBucket(state.deckId || "w1-d1-global");
+
     if (typeof BroadcastChannel !== "undefined" && !bc) {
       try {
         bc = new BroadcastChannel(SYNC_BC_NAME);
         bc.onmessage = (ev) => handleIncomingSync(ev.data);
       } catch (_) {}
     }
-    if (window.mqtt && !mqttClient) {
+    if (typeof BroadcastChannel !== "undefined" && !qaBc) {
       try {
-        mqttClient = window.mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
-          clientId: "racm_psv_" + Math.random().toString(36).slice(2, 10),
-          clean: true,
-          reconnectPeriod: 5000
-        });
-        mqttClient.on("connect", () => {
-          try {
-            mqttClient.subscribe(MQTT_TOPIC);
-          } catch (_) {}
-        });
-        mqttClient.on("message", (_topic, payload) => {
-          try {
-            handleIncomingSync(JSON.parse(payload.toString()));
-          } catch (_) {}
-        });
+        qaBc = new BroadcastChannel(QA_BC_NAME);
+        qaBc.onmessage = (ev) => {
+          if (ev && ev.data && ev.data.kind) {
+            ingestQaPacket(ev.data.kind, ev.data.data);
+          }
+        };
       } catch (_) {}
+    }
+    if (window.mqtt && typeof window.mqtt.connect === "function" && mqttClients.length === 0) {
+      MQTT_BROKERS.forEach((brokerUrl, bIdx) => {
+        try {
+          const tag = `b${bIdx + 1}`;
+          const client = window.mqtt.connect(brokerUrl, {
+            clientId: `racm_psv_${tag}_` + Math.random().toString(36).slice(2, 10),
+            clean: true,
+            connectTimeout: 7000,
+            reconnectPeriod: 5000,
+            keepalive: 45
+          });
+          client.on("connect", () => {
+            connectedBrokers.add(tag);
+            try {
+              client.subscribe(MQTT_TOPIC, { qos: 0 });
+              client.subscribe(`${QA_MQTT_NS}/#`, { qos: 0 });
+            } catch (_) {}
+            if (pendingQaPublishes.length > 0) {
+              const batch = pendingQaPublishes.splice(0, pendingQaPublishes.length);
+              batch.forEach((item) => {
+                try {
+                  client.publish(item.topic, item.payload, { qos: 0, retain: item.retain });
+                } catch (_) {}
+              });
+            }
+            refreshQaConnBadge();
+          });
+          client.on("close", () => {
+            connectedBrokers.delete(tag);
+            refreshQaConnBadge();
+          });
+          client.on("error", () => {
+            connectedBrokers.delete(tag);
+            refreshQaConnBadge();
+          });
+          client.on("message", (topic, payload) => {
+            try {
+              const rawStr = payload ? payload.toString() : "";
+              if (!rawStr) return;
+              if (topic === MQTT_TOPIC) {
+                handleIncomingSync(JSON.parse(rawStr));
+                return;
+              }
+              if (topic.startsWith(`${QA_MQTT_NS}/`)) {
+                const sub = topic.slice(QA_MQTT_NS.length + 1);
+                const parts = sub.split("/");
+                const parsed = JSON.parse(rawStr);
+                if (parts[1] === "q") ingestQaPacket("question", parsed);
+                else if (parts[1] === "mod") ingestQaPacket("mod", parsed);
+                else if (parts[1] === "like") ingestQaPacket("like", parsed);
+                else if (parts[1] === "clear") ingestQaPacket("clear", parsed);
+              }
+            } catch (_) {}
+          });
+          mqttClients.push(client);
+        } catch (_) {}
+      });
     }
   }
 
@@ -1120,15 +1554,18 @@
       deckId: state.deckId,
       slideIdx: state.slideIdx,
       stationIdx: state.stationIdx,
+      qaFocusIdx: state.qaFocusIdx,
       backdropMode: state.backdropMode,
       ts: Date.now()
     };
     if (bc) {
       try { bc.postMessage(msg); } catch (_) {}
     }
-    if (mqttClient && mqttClient.connected) {
-      try { mqttClient.publish(MQTT_TOPIC, JSON.stringify(msg)); } catch (_) {}
-    }
+    mqttClients.forEach((cl) => {
+      if (cl && cl.connected) {
+        try { cl.publish(MQTT_TOPIC, JSON.stringify(msg)); } catch (_) {}
+      }
+    });
   }
 
   function handleIncomingSync(msg) {
@@ -1138,16 +1575,22 @@
     if (msg.deckId && PANEL_DECKS[msg.deckId] && msg.deckId !== state.deckId) {
       state.deckId = msg.deckId;
       state.stationIdx = 0;
+      state.qaFocusIdx = 0;
       changed = true;
     }
     const deck = getCurrentDeck();
     if (typeof msg.slideIdx === "number" && msg.slideIdx >= 0 && msg.slideIdx < deck.slides.length && msg.slideIdx !== state.slideIdx) {
       state.slideIdx = msg.slideIdx;
       state.stationIdx = 0;
+      state.qaFocusIdx = 0;
       changed = true;
     }
     if (typeof msg.stationIdx === "number" && msg.stationIdx >= 0 && msg.stationIdx !== state.stationIdx) {
       state.stationIdx = msg.stationIdx;
+      changed = true;
+    }
+    if (typeof msg.qaFocusIdx === "number" && msg.qaFocusIdx >= 0 && msg.qaFocusIdx !== state.qaFocusIdx) {
+      state.qaFocusIdx = msg.qaFocusIdx;
       changed = true;
     }
     if (msg.backdropMode && msg.backdropMode !== state.backdropMode) {
@@ -1223,9 +1666,9 @@
       if (modal) modal.classList.remove("is-idle-clean");
     }
     clearIdleTimer();
-    if (state.modDrawerOpen || state.stuDrawerOpen || state.qrLightboxOpen) return;
+    if (state.modDrawerOpen || state.stuDrawerOpen || state.qrLightboxOpen || state.qaComposerOpen) return;
     state.idleTimer = setTimeout(() => {
-      if (!state.isOpen || state.modDrawerOpen || state.stuDrawerOpen || state.qrLightboxOpen) return;
+      if (!state.isOpen || state.modDrawerOpen || state.stuDrawerOpen || state.qrLightboxOpen || state.qaComposerOpen) return;
       const activeTag = document.activeElement && document.activeElement.tagName;
       if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") return;
       state.idleClean = true;
@@ -1301,7 +1744,7 @@
     scheduleNextAmbientTick();
   }
 
-  /* ---------- Bidirectional Auto-Fit + A-/A+ Font Scale ---------- */
+  /* ---------- Bidirectional Auto-Fit + Live Question Font Optimizer ---------- */
   function setFontScale(nextScale) {
     const clamped = Math.max(0.78, Math.min(1.38, Math.round(nextScale * 100) / 100));
     state.fontScale = clamped;
@@ -1317,6 +1760,43 @@
     scheduleFitSlideBody();
   }
 
+  function fitLiveQaSpotlightText() {
+    const viewportEl = document.getElementById("psvQaTextViewport");
+    const textEl = document.getElementById("psvQaSpotlightText");
+    if (!viewportEl || !textEl) return;
+
+    const scale = state.fontScale || 1;
+    const len = (textEl.textContent || "").trim().length;
+
+    if (window.innerWidth <= 960) {
+      const mobPx = len <= 70 ? 24 : len <= 150 ? 20 : len <= 260 ? 18 : 16;
+      textEl.style.fontSize = `${Math.round(mobPx * scale)}px`;
+      textEl.style.lineHeight = "1.38";
+      return;
+    }
+
+    const availH = viewportEl.clientHeight - 8;
+    const availW = viewportEl.clientWidth - 4;
+    if (availH < 48 || availW < 120) return;
+
+    const maxCeil = len <= 55 ? 52 : len <= 110 ? 46 : len <= 190 ? 40 : len <= 290 ? 34 : 29;
+    let lo = 15;
+    let hi = Math.max(18, Math.round(maxCeil * scale));
+
+    for (let i = 0; i < 11; i += 1) {
+      const mid = (lo + hi) * 0.5;
+      const lh = mid >= 38 ? 1.25 : mid >= 28 ? 1.32 : 1.4;
+      textEl.style.fontSize = `${mid.toFixed(2)}px`;
+      textEl.style.lineHeight = String(lh);
+      const fits = textEl.scrollHeight <= availH && textEl.scrollWidth <= availW + 2;
+      if (fits) lo = mid;
+      else hi = mid;
+    }
+    const finalPx = Math.max(15, lo * 0.97);
+    textEl.style.fontSize = `${finalPx.toFixed(1)}px`;
+    textEl.style.lineHeight = String(finalPx >= 38 ? 1.25 : finalPx >= 28 ? 1.32 : 1.4);
+  }
+
   function fitCurrentSlideBody() {
     const modal = document.getElementById("panelDeckModal");
     const viewport = document.getElementById("psvStageViewport");
@@ -1327,6 +1807,12 @@
     const hudH = hudTop ? Math.ceil(hudTop.offsetHeight || 44) : 44;
     const topClear = Math.max(46, hudH + 10);
     modal.style.setProperty("--psv-top-clear", `${topClear}px`);
+
+    if (body.classList.contains("is-qa-live-mode")) {
+      modal.style.setProperty("--psv-fit-scale", "1");
+      fitLiveQaSpotlightText();
+      return;
+    }
 
     if (window.innerWidth <= 960) {
       modal.style.setProperty("--psv-fit-scale", "1");
@@ -1377,6 +1863,7 @@
 
     const isTimelineAll = Boolean(slide.type === "timeline" && Array.isArray(slide.milestones) && slide.milestones.length);
     modal.classList.toggle("is-multi-station-bg", isTimelineAll);
+    modal.classList.toggle("is-qa-stage", slide.type === "qa");
 
     const multiWall = document.getElementById("psvMultiBgWall");
     if (multiWall) {
@@ -1485,9 +1972,85 @@
     } catch (_) {}
   }
 
-  function renderSlideInnerHtml(deck, slide) {
-    const qrJoinUrl = `${PROD_STUDENT_BASE}#${deck.hashSlug}`;
+  function buildQaSpotTopHtml(qList, focusIdx) {
+    const total = qList.length;
+    if (total === 0) {
+      return `
+        <div class="psv-qa-spot-meta-left">
+          <span class="psv-qa-live-pill"><span class="psv-qa-live-dot"></span>LIVE FLOOR Q&amp;A</span>
+          <span class="psv-qa-author-badge">กำลังเปิดรับคำถามสดจากฟลอร์ (0 ข้อ)</span>
+        </div>
+        <span class="psv-qa-clicker-status is-all-done">🖱️ คลิกเมาส์ หรือกด Clicker (→) เพื่อไป Q5</span>
+      `;
+    }
+    const cur = qList[focusIdx] || qList[0];
+    const remaining = Math.max(0, total - 1 - focusIdx);
+    const authorTxt = cur.author ? `👩‍⚕️ ${cur.author}` : "👩‍⚕️ นักศึกษาแพทย์จากฟลอร์";
+    const timeTxt = formatQaTimeAgo(cur.ts);
+    const likeBadge = cur.likeCount > 0 ? `<span class="psv-qa-author-badge">❤️ ${cur.likeCount}</span>` : "";
+    const statusHtml =
+      remaining > 0
+        ? `<span class="psv-qa-clicker-status">🕹️ Clicker (→) คำถามถัดไป · เหลืออีก ${remaining} ข้อ</span>`
+        : `<span class="psv-qa-clicker-status is-all-done">✓ ครบทุกคำถามแล้ว · Clicker (→) ไปสไลด์ถัดไป (Q5)</span>`;
 
+    return `
+      <div class="psv-qa-spot-meta-left">
+        <span class="psv-qa-live-pill"><span class="psv-qa-live-dot"></span>LIVE</span>
+        <span class="psv-qa-counter-pill">คำถามที่ ${focusIdx + 1} / ${total}</span>
+        ${cur.target ? `<span class="psv-qa-target-badge">🎤 ถึง: ${esc(cur.target)}</span>` : ""}
+        <span class="psv-qa-author-badge">${esc(authorTxt)}${timeTxt ? ` · ${esc(timeTxt)}` : ""}</span>
+        ${likeBadge}
+      </div>
+      ${statusHtml}
+    `;
+  }
+
+  function buildQaSpotFootHtml(qList, focusIdx) {
+    const total = qList.length;
+    const pillsHtml =
+      total > 0
+        ? qList
+            .map((q, idx) => {
+              const isCur = idx === focusIdx;
+              const isViewed = state.qaViewedIds.has(q.id);
+              const cls = isCur ? " is-current" : isViewed ? " is-viewed" : " is-unread";
+              return `<button type="button" class="psv-qa-q-pill${cls}" data-psv-qa-idx="${idx}" title="${esc(q.text.slice(0, 80))}">#${idx + 1}${isViewed && !isCur ? " ✓" : ""}</button>`;
+            })
+            .join("")
+        : `<span style="font-size:12px;color:#94a3b8;font-weight:600">สแกน QR ขวามือเพื่อส่งคำถามแรกขึ้นบนเวทีเสวนา</span>`;
+
+    const cur = total > 0 ? qList[focusIdx] : null;
+    const stepBtnsHtml =
+      total > 1
+        ? `
+          <button type="button" class="psv-qa-step-btn" data-psv-act="qa-prev-item" ${focusIdx <= 0 ? "disabled" : ""} title="ดูคำถามก่อนหน้า">‹ ก่อนหน้า</button>
+          <button type="button" class="psv-qa-step-btn" data-psv-act="qa-next-item" ${focusIdx >= total - 1 ? "disabled" : ""} title="ดูคำถามถัดไป">ถัดไป ›</button>
+        `
+        : "";
+    const hideBtnHtml =
+      cur && ROLE === "faculty"
+        ? `<button type="button" class="psv-qa-step-btn" data-psv-act="hide-current-qa" title="ซ่อนคำถามข้อนี้จากหน้าจอ">✕ ซ่อน</button>`
+        : "";
+
+    return `
+      <div class="psv-qa-queue-strip" id="psvQaQueueStrip">${pillsHtml}</div>
+      <div class="psv-qa-mouse-actions">
+        ${stepBtnsHtml}
+        <button type="button" class="psv-qa-step-btn psv-qa-ask-btn" data-psv-act="open-qa-composer" title="เปิดหน้าต่างพิมพ์ส่งคำถามสดขึ้นจอ">✍️ ส่งคำถามสด</button>
+        ${hideBtnHtml}
+        <button type="button" class="psv-qa-skip-slide-btn" data-psv-act="force-next-slide" title="คลิกเมาส์เพื่อข้ามไปสไลด์ถัดไป (Slide 13 · Q5) ได้ทันทีโดยไม่ต้องเลื่อนครบทุกคำถาม">🖱️ ไปสไลด์ถัดไป (Q5) ›</button>
+      </div>
+    `;
+  }
+
+  function refreshLiveQaStageChromeInPlace(qList) {
+    const topEl = document.getElementById("psvQaSpotTop");
+    const footEl = document.getElementById("psvQaSpotFoot");
+    if (topEl) topEl.innerHTML = buildQaSpotTopHtml(qList, state.qaFocusIdx);
+    if (footEl) footEl.innerHTML = buildQaSpotFootHtml(qList, state.qaFocusIdx);
+  }
+
+  function renderSlideInnerHtml(deck, slide) {
     if (slide.type === "cover") {
       const castHtml = (slide.cast || [])
         .map((c) => {
@@ -1509,18 +2072,9 @@
         })
         .join("");
 
-      const qrHtml = state.showQrOnCover
-        ? `
-          <div class="psv-qr-plaque" data-psv-act="open-qr-modal" title="คลิกเพื่อขยาย QR Code ขนาดใหญ่สำหรับสแกนเข้าคาบเสวนา">
-            <div class="psv-qr-box">${buildQrSvg(qrJoinUrl)}</div>
-            <div class="psv-qr-caption">📱 สแกนเปิดสไลด์คู่ขนาน<br/><span style="opacity:0.75;font-weight:500">#${esc(deck.hashSlug)}</span></div>
-          </div>
-        `
-        : "";
-
       const titleCls = slide.bilingualCover ? "psv-hero-title is-bilingual-cover" : "psv-hero-title";
       return `
-        <div class="psv-cover-split">
+        <div class="psv-cover-split is-no-qr">
           <div style="display:flex;flex-direction:column;gap:calc(10px * var(--psv-eff-scale));min-width:0">
             <div class="psv-kicker-row">
               <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
@@ -1531,7 +2085,6 @@
             ${slide.subtitle ? `<p class="psv-logline">${esc(slide.subtitle)}</p>` : ""}
             <div class="psv-cast-strip">${castHtml}</div>
           </div>
-          ${qrHtml}
         </div>
       `;
     }
@@ -1704,11 +2257,63 @@
       `;
     }
 
+    if (slide.type === "outline") {
+      const qCardsHtml = (slide.coreQuestions || [])
+        .map(
+          (item) => `
+          <button type="button" class="psv-outline-card" data-psv-idx="${item.targetSlideIdx}">
+            <div class="psv-outline-head">
+              <span class="psv-outline-badge">${esc(item.badge)}</span>
+              ${item.phase ? `<span class="psv-outline-phase">${esc(item.phase)}</span>` : ""}
+            </div>
+            <h3 class="psv-outline-en">${esc(item.en)}</h3>
+            <p class="psv-outline-th">${esc(item.th)}</p>
+          </button>
+        `
+        )
+        .join("");
+
+      const qa = slide.qaBridge || {};
+      const q5 = slide.closingQuestion || {};
+      return `
+        <div class="psv-kicker-row">
+          <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
+          ${slide.kickerSub ? `<span class="psv-kicker-sub">${esc(slide.kickerSub)}</span>` : ""}
+        </div>
+        <h2 class="psv-hero-title is-compact-title">${esc(slide.title)}</h2>
+        <div class="psv-outline-wrap">
+          <div class="psv-outline-q-grid">${qCardsHtml}</div>
+          <div class="psv-outline-flow-row">
+            <button type="button" class="psv-outline-card is-qa-bridge" data-psv-idx="${qa.targetSlideIdx || 11}">
+              <div class="psv-outline-head">
+                <span class="psv-outline-badge">${esc(qa.badge || "LIVE Q&A")}</span>
+                ${qa.phase ? `<span class="psv-outline-phase">${esc(qa.phase)}</span>` : ""}
+              </div>
+              <h3 class="psv-outline-en">${esc(qa.en || "")}</h3>
+              <p class="psv-outline-th">${esc(qa.th || "")}</p>
+            </button>
+            <div class="psv-outline-arrow" aria-hidden="true">→</div>
+            <button type="button" class="psv-outline-card is-q5-finale" data-psv-idx="${q5.targetSlideIdx || 12}">
+              <div class="psv-outline-head">
+                <span class="psv-outline-badge">${esc(q5.badge || "Q5")}</span>
+                ${q5.phase ? `<span class="psv-outline-phase">${esc(q5.phase)}</span>` : ""}
+              </div>
+              <h3 class="psv-outline-en">${esc(q5.en || "")}</h3>
+              <p class="psv-outline-th">${esc(q5.th || "")}</p>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     if (slide.type === "prompt") {
       const total = slide.totalSteps || 5;
       const cur = slide.qStep || 1;
       let pips = "";
       for (let i = 1; i <= total; i += 1) {
+        if (i === 5) {
+          pips += `<span class="psv-q-qa-tag">Q&amp;A</span>`;
+        }
         const cls = i === cur ? " is-current" : i < cur ? " is-done" : "";
         pips += `<span class="psv-q-pip${cls}"></span>`;
       }
@@ -1746,26 +2351,53 @@
     }
 
     if (slide.type === "qa") {
-      const savedQ = getSavedStudentNote(`${deck.id}_qa`);
-      const qaActionHtml =
-        ROLE === "student"
-          ? `
-            <div class="psv-student-pad">
-              <div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:6px">💬 สมุดทดประเด็นคำถามส่วนตัวของคุณ (บันทึกอัตโนมัติในเครื่อง)</div>
-              <div class="psv-pad-row">
-                <input type="text" class="psv-pad-input" id="psvStudentQaInput" value="${esc(savedQ)}" placeholder="จดคำถามหรือประเด็นที่อยากแลกเปลี่ยนกับวิทยากร…" />
-              </div>
-            </div>
-          `
-          : "";
+      const qList = getVisibleQaList(deck.id);
+      if (qList.length > 0) {
+        state.qaFocusIdx = Math.max(0, Math.min(qList.length - 1, state.qaFocusIdx));
+        state.qaViewedIds.add(qList[state.qaFocusIdx].id);
+      } else {
+        state.qaFocusIdx = 0;
+      }
+      const activeQ = qList.length > 0 ? qList[state.qaFocusIdx] : null;
+      const qrAskUrl = getQaScanUrl();
+
+      const centerHtml = activeQ
+        ? `<p class="psv-qa-spotlight-text" id="psvQaSpotlightText">“${esc(activeQ.text)}”</p>`
+        : `
+          <div class="psv-qa-empty-box">
+            <h2 class="psv-qa-empty-title">${esc(slide.title)}</h2>
+            ${slide.logline ? `<p class="psv-qa-empty-sub">${esc(slide.logline)}</p>` : ""}
+          </div>
+        `;
+
       return `
         <div class="psv-kicker-row">
           <span class="psv-kicker-badge"><span class="psv-k-bar"></span>${esc(slide.kicker)}</span>
           ${slide.kickerSub ? `<span class="psv-kicker-sub">${esc(slide.kickerSub)}</span>` : ""}
         </div>
-        <h2 class="psv-hero-title is-prompt-quote">${esc(slide.title)}</h2>
-        ${slide.logline ? `<p class="psv-logline">${esc(slide.logline)}</p>` : ""}
-        ${qaActionHtml}
+        <div class="psv-qa-stage-grid">
+          <section class="psv-qa-spotlight-card${activeQ ? " has-active-q" : ""}" aria-live="polite">
+            <div class="psv-qa-spot-top" id="psvQaSpotTop">
+              ${buildQaSpotTopHtml(qList, state.qaFocusIdx)}
+            </div>
+            <div class="psv-qa-text-viewport" id="psvQaTextViewport">
+              ${centerHtml}
+            </div>
+            <div class="psv-qa-spot-foot" id="psvQaSpotFoot">
+              ${buildQaSpotFootHtml(qList, state.qaFocusIdx)}
+            </div>
+          </section>
+
+          <aside class="psv-qa-qr-dock" data-psv-act="open-qr-modal" title="คลิกเพื่อขยาย QR Code ขนาดใหญ่สำหรับสแกนส่งคำถามสด">
+            <span class="psv-qa-qr-kicker">SCAN TO ASK LIVE</span>
+            <div class="psv-qa-qr-svg-box">${buildQrSvg(qrAskUrl)}</div>
+            <div>
+              <div class="psv-qa-qr-title">📱 สแกนพิมพ์คำถามสด</div>
+              <div class="psv-qa-qr-sub">กดส่งแล้วขึ้นจอใหญ่ทันที</div>
+              <div class="psv-qa-qr-slug" style="margin-top:4px">#${esc(QA_HASH_SLUG)}</div>
+            </div>
+          </aside>
+        </div>
       `;
     }
 
@@ -1864,6 +2496,252 @@
     `;
   }
 
+  /* ---------- Dedicated Mobile Scan-to-Ask Live Floor Q&A Composer (#panel-qa) ---------- */
+  function refreshQaConnBadge() {
+    const el = document.getElementById("psvQacConnBadge");
+    if (!el) return;
+    const online = connectedBrokers.size > 0;
+    el.className = `psv-qac-conn${online ? "" : " is-connecting"}`;
+    el.textContent = online ? "🟢 เชื่อมต่อเวทีเสวนาสดแล้ว" : "🟡 กำลังเชื่อมต่อสัญญาณสด…";
+  }
+
+  function renderQaComposerFeedHtml(deckId) {
+    const qList = getVisibleQaList(deckId);
+    const myId = getDeviceId();
+    if (qList.length === 0) {
+      return `
+        <div class="psv-qac-feed-head">
+          <span>💬 คำถามจากฟลอร์ล่าสุด (0 ข้อ)</span>
+        </div>
+        <div class="psv-qac-feed-item" style="text-align:center;color:#94a3b8;font-size:13.5px">
+          ยังไม่มีคำถามจากฟลอร์ — มาร่วมเปิดประเด็นคำถามแรกกันเลย!
+        </div>
+      `;
+    }
+    const itemsHtml = qList
+      .slice()
+      .reverse()
+      .map((q) => {
+        const origNum = qList.findIndex((x) => x.id === q.id) + 1;
+        const isMine = q.senderId === myId;
+        const authorTxt = q.author ? q.author : "ไม่ระบุชื่อ";
+        const timeTxt = formatQaTimeAgo(q.ts);
+        return `
+          <article class="psv-qac-feed-item${isMine ? " is-mine" : ""}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="psv-qa-counter-pill" style="font-size:11.5px;padding:2px 9px">#${origNum}</span>
+                <span class="psv-qa-target-badge" style="font-size:11.5px;padding:2px 9px">🎤 ${esc(q.target)}</span>
+                ${isMine ? `<span style="font-size:11px;font-weight:800;color:#7dd3fc">★ คำถามของคุณ</span>` : ""}
+              </div>
+              <span style="font-size:11.5px;color:#94a3b8">${esc(authorTxt)}${timeTxt ? ` · ${esc(timeTxt)}` : ""}</span>
+            </div>
+            <p style="margin:0;font-size:15px;font-weight:600;line-height:1.48;color:#f8fafc">${esc(q.text)}</p>
+            <div style="display:flex;justify-content:flex-end">
+              <button type="button" class="psv-qac-like-btn${q.likedByMe ? " is-liked" : ""}" data-qac-like="${esc(q.id)}">
+                ❤️ ชวนฟัง${q.likeCount > 0 ? ` (${q.likeCount})` : ""}
+              </button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="psv-qac-feed-head">
+        <span>💬 คำถามสดจากฟลอร์ทั้งหมด (${qList.length} ข้อ)</span>
+        <span style="font-size:11.5px;font-weight:500;color:#cbd5e1">อัปเดตเรียลไทม์</span>
+      </div>
+      <div class="psv-qac-feed-list">${itemsHtml}</div>
+    `;
+  }
+
+  function refreshQaComposerFeedOnly() {
+    const wrap = document.getElementById("psvQacFeedWrap");
+    if (!wrap || !state.qaComposerOpen) return;
+    wrap.innerHTML = renderQaComposerFeedHtml(state.deckId || "w1-d1-global");
+  }
+
+  function ensureQaComposerElement() {
+    let el = document.getElementById("panelQaComposerModal");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "panelQaComposerModal";
+    el.className = "psv-qac-modal";
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+    el.hidden = true;
+    document.body.appendChild(el);
+
+    el.addEventListener("click", (ev) => {
+      const targetBtn = ev.target.closest("[data-qac-target]");
+      if (targetBtn) {
+        state.qaSelectedTarget = targetBtn.getAttribute("data-qac-target") || QA_TARGET_OPTIONS[0];
+        el.querySelectorAll("[data-qac-target]").forEach((b) => {
+          b.classList.toggle("is-selected", b.getAttribute("data-qac-target") === state.qaSelectedTarget);
+        });
+        return;
+      }
+      const likeBtn = ev.target.closest("[data-qac-like]");
+      if (likeBtn) {
+        toggleLikeFloorQuestion(state.deckId || "w1-d1-global", likeBtn.getAttribute("data-qac-like"));
+        return;
+      }
+      const actBtn = ev.target.closest("[data-qac-act]");
+      if (!actBtn) return;
+      const act = actBtn.getAttribute("data-qac-act");
+      if (act === "close") {
+        closeQaComposerModal();
+      } else if (act === "open-slides") {
+        const wasStandalone = state.qaComposerStandalone;
+        closeQaComposerModal(true);
+        if (wasStandalone || !state.isOpen) {
+          openDeck(state.deckId || "w1-d1-global", 11);
+        }
+      }
+    });
+
+    el.addEventListener("submit", (ev) => {
+      if (ev.target && ev.target.id === "psvQacForm") {
+        ev.preventDefault();
+        const txtEl = document.getElementById("psvQacTextarea");
+        const authEl = document.getElementById("psvQacAuthor");
+        const countEl = document.getElementById("psvQacCharCount");
+        if (!txtEl) return;
+        const val = txtEl.value.trim();
+        if (val.length < 2) {
+          txtEl.focus();
+          return;
+        }
+        const sent = submitLiveFloorQuestion(
+          state.deckId || "w1-d1-global",
+          val,
+          authEl ? authEl.value : "",
+          state.qaSelectedTarget
+        );
+        if (sent) {
+          txtEl.value = "";
+          if (countEl) countEl.textContent = "0 / 420";
+          const toastEl = document.getElementById("psvQacToast");
+          if (toastEl) {
+            toastEl.hidden = false;
+            toastEl.textContent = "✅ ส่งคำถามขึ้นจอเวทีเสวนาเรียบร้อยแล้ว! สามารถพิมพ์ส่งประเด็นเพิ่มได้อีก";
+            if (state.qaToastTimer) clearTimeout(state.qaToastTimer);
+            state.qaToastTimer = setTimeout(() => {
+              const t = document.getElementById("psvQacToast");
+              if (t) t.hidden = true;
+            }, 5000);
+          }
+          refreshQaComposerFeedOnly();
+        }
+      }
+    });
+
+    el.addEventListener("input", (ev) => {
+      if (ev.target && ev.target.id === "psvQacTextarea") {
+        const countEl = document.getElementById("psvQacCharCount");
+        if (countEl) countEl.textContent = `${ev.target.value.length} / 420`;
+      }
+    });
+
+    return el;
+  }
+
+  function openQaComposerModal(deckId, standalone) {
+    initLiveSync();
+    if (deckId) state.deckId = resolveDeckId(deckId);
+    state.qaComposerOpen = true;
+    state.qaComposerStandalone = Boolean(standalone);
+    clearIdleTimer();
+
+    const deck = getCurrentDeck();
+    const el = ensureQaComposerElement();
+    const online = connectedBrokers.size > 0;
+    const savedAuthor = getSavedQaAuthor();
+
+    const targetsHtml = QA_TARGET_OPTIONS.map(
+      (t) =>
+        `<button type="button" class="psv-qac-target-chip${t === state.qaSelectedTarget ? " is-selected" : ""}" data-qac-target="${esc(t)}">${esc(t)}</button>`
+    ).join("");
+
+    const rightBtnHtml = state.isOpen
+      ? `<button type="button" class="psv-pill-btn is-active" data-qac-act="close">✕ กลับสู่สไลด์</button>`
+      : `<button type="button" class="psv-pill-btn" data-qac-act="open-slides">🎬 ดูสไลด์เสวนา</button>`;
+
+    el.innerHTML = `
+      <div class="psv-qac-shell">
+        <div class="psv-qac-top">
+          <span class="psv-qac-conn${online ? "" : " is-connecting"}" id="psvQacConnBadge">
+            ${online ? "🟢 เชื่อมต่อเวทีเสวนาสดแล้ว" : "🟡 กำลังเชื่อมต่อสัญญาณสด…"}
+          </span>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${rightBtnHtml}
+            ${!state.isOpen ? `<button type="button" class="psv-pill-btn is-close" data-qac-act="close">✕ ปิด</button>` : ""}
+          </div>
+        </div>
+
+        <form class="psv-qac-card" id="psvQacForm">
+          <div>
+            <div style="font-size:11.5px;font-weight:800;letter-spacing:0.06em;color:#fbbf24;text-transform:uppercase;margin-bottom:4px">${esc(deck.code)} · LIVE FLOOR QUESTIONS</div>
+            <h2 class="psv-qac-title">ส่งคำถามสดขึ้นเวทีเสวนา</h2>
+            <p class="psv-qac-sub">พิมพ์คำถามหรือประเด็นที่อยากแลกเปลี่ยนกับอาจารย์วิทยากร — เมื่อกดส่งจะปรากฏแบบเรียลไทม์บนจอ Slide 12 ทันที</p>
+          </div>
+
+          <div>
+            <span class="psv-qac-label">🎤 อยากฝากคำถามถึงท่านใด</span>
+            <div class="psv-qac-targets">${targetsHtml}</div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <label class="psv-qac-label" for="psvQacTextarea">💬 คำถามของคุณ</label>
+              <span style="font-size:11.5px;color:#94a3b8" id="psvQacCharCount">0 / 420</span>
+            </div>
+            <textarea class="psv-qac-textarea" id="psvQacTextarea" maxlength="420" required placeholder="พิมพ์คำถามหรือประเด็นที่อยากชวนอาจารย์คิดต่อ…"></textarea>
+          </div>
+
+          <div>
+            <label class="psv-qac-label" for="psvQacAuthor">👩‍⚕️ ชื่อเล่น / กลุ่ม (ไม่บังคับ — เว้นว่างเพื่อไม่ระบุชื่อได้)</label>
+            <input type="text" class="psv-qac-input" id="psvQacAuthor" maxlength="50" value="${esc(savedAuthor)}" placeholder="เช่น นศพ.กลุ่ม 3 หรือเว้นว่างไว้" />
+          </div>
+
+          <button type="submit" class="psv-qac-send-btn">🚀 ส่งคำถามขึ้นจอสด (Send Live)</button>
+          <div class="psv-qac-toast" id="psvQacToast" hidden></div>
+        </form>
+
+        <div id="psvQacFeedWrap">
+          ${renderQaComposerFeedHtml(deck.id)}
+        </div>
+      </div>
+    `;
+
+    el.hidden = false;
+    document.body.classList.add("psv-deck-open");
+    setTimeout(() => {
+      const ta = document.getElementById("psvQacTextarea");
+      if (ta && window.innerWidth > 768) ta.focus();
+    }, 60);
+  }
+
+  function closeQaComposerModal(keepBodyLock) {
+    state.qaComposerOpen = false;
+    state.qaComposerStandalone = false;
+    const el = document.getElementById("panelQaComposerModal");
+    if (el) el.hidden = true;
+    if (!state.isOpen && !keepBodyLock) {
+      document.body.classList.remove("psv-deck-open");
+      const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+      if (h === QA_HASH_SLUG || h === "panel-global-qa") {
+        try {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        } catch (_) {}
+      }
+    } else if (state.isOpen) {
+      resetIdleActivity();
+      updateStageView();
+    }
+  }
+
   /* ---------- Build & Update Modal DOM ---------- */
   function ensureModalElement() {
     let modal = document.getElementById("panelDeckModal");
@@ -1897,8 +2775,8 @@
         <div class="psv-hud-foot-right" id="psvFootRight"></div>
       </header>
 
-      <button type="button" class="psv-edge-nav is-prev" data-psv-act="prev" aria-label="สไลด์ก่อนหน้า" title="สไลด์ก่อนหน้า (←)">‹</button>
-      <button type="button" class="psv-edge-nav is-next" data-psv-act="next" aria-label="สไลด์ถัดไป" title="สไลด์ถัดไป (→)">›</button>
+      <button type="button" class="psv-edge-nav is-prev" data-psv-act="prev" aria-label="สไลด์ก่อนหน้า" title="คลิกเมาส์ไปสไลด์ก่อนหน้า">‹</button>
+      <button type="button" class="psv-edge-nav is-next" data-psv-act="next" aria-label="สไลด์ถัดไป" title="คลิกเมาส์ไปสไลด์ถัดไปทันที">›</button>
 
       <div class="psv-upnext-card" id="psvUpNextCard" data-psv-act="next" title="คลิกเพื่อข้ามไปยังสไลด์ถัดไปทันที">
         <div class="psv-upnext-thumb" id="psvUpNextThumb"></div>
@@ -1936,10 +2814,10 @@
 
       <div class="psv-qr-modal" id="psvQrModal" hidden>
         <div class="psv-qr-modal-card">
-          <span class="psv-series-pill"><span class="psv-n-bar"></span>SCAN TO JOIN PANEL COMPANION</span>
+          <span class="psv-series-pill"><span class="psv-n-bar"></span>SCAN TO ASK LIVE QUESTIONS</span>
           <div class="psv-qr-big" id="psvQrBigBox"></div>
           <div style="font-size:15px;font-weight:700;color:#fff" id="psvQrUrlLabel"></div>
-          <p style="margin:0;font-size:13px;color:#cbd5e1">นักศึกษาสามารถสแกนเพื่อดูไทม์ไลน์ คำถามเสวนา ลิงก์หลักฐาน และบันทึกสะท้อนคิดบนไอแพดหรือมือถือ</p>
+          <p style="margin:0;font-size:13px;color:#cbd5e1">สแกนด้วยกล้องมือถือหรือไอแพดเพื่อพิมพ์คำถามสดส่งขึ้นจอ Slide 12 แบบเรียลไทม์</p>
           <button type="button" class="psv-pill-btn is-active" data-psv-act="close-qr-modal">ปิดหน้าต่าง QR (Esc)</button>
         </div>
       </div>
@@ -2000,7 +2878,7 @@
         <button type="button" class="psv-font-btn" data-psv-act="font-up" title="เพิ่มขนาดตัวอักษร (A+)">A+</button>
       </div>
       ${roleControlHtml}
-      <button type="button" class="psv-pill-btn" data-psv-act="open-qr-modal" title="แสดง QR Code เข้าสไลด์">📱 QR</button>
+      <button type="button" class="psv-pill-btn" data-psv-act="open-qr-modal" title="แสดง QR Code ส่งคำถามสด">📱 QR Q&amp;A</button>
       <button type="button" class="psv-pill-btn" data-psv-act="clean-now" title="ซ่อนแถบปุ่มทั้งหมดทันทีเพื่อฉายขึ้นจอแบบ Clean Screensaver (กด H)">👁️ ซ่อนปุ่ม</button>
       <button type="button" class="psv-pill-btn" data-psv-act="fullscreen" title="ฉายเต็มจอ (กด F)">⛶ เต็มจอ</button>
       ${pptxBtn}
@@ -2043,11 +2921,16 @@
     const slideBody = document.getElementById("psvSlideBody");
     if (slideBody) {
       slideBody.classList.toggle("is-railway-mode", Boolean(slide.type === "timeline" && slide.dicutImg));
+      slideBody.classList.toggle("is-qa-live-mode", slide.type === "qa");
       slideBody.innerHTML = renderSlideInnerHtml(deck, slide);
       wireStudentInputs(deck);
       const activeStop = slideBody.querySelector(".psv-rail-stop.is-active");
       if (activeStop && activeStop.scrollIntoView) {
         activeStop.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+      }
+      const activeQaPill = slideBody.querySelector(".psv-qa-q-pill.is-current");
+      if (activeQaPill && activeQaPill.scrollIntoView) {
+        activeQaPill.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
       }
     }
 
@@ -2105,32 +2988,25 @@
     if (qrModal) {
       qrModal.hidden = !state.qrLightboxOpen;
       if (state.qrLightboxOpen) {
-        const joinUrl = `${PROD_STUDENT_BASE}#${deck.hashSlug}`;
+        const askUrl = getQaScanUrl();
         const qrBox = document.getElementById("psvQrBigBox");
         const qrLbl = document.getElementById("psvQrUrlLabel");
-        if (qrBox) qrBox.innerHTML = buildQrSvg(joinUrl);
-        if (qrLbl) qrLbl.textContent = `smartwoo.github.io/racm303-2569-student/#${deck.hashSlug}`;
+        if (qrBox) qrBox.innerHTML = buildQrSvg(askUrl);
+        if (qrLbl) qrLbl.textContent = `smartwoo.github.io/racm303-2569-student/#${QA_HASH_SLUG}`;
       }
     }
 
+    fitCurrentSlideBody();
     scheduleFitSlideBody();
     scheduleNextAmbientTick();
     broadcastHostState();
   }
 
   function wireStudentInputs(deck) {
-    const qaIn = document.getElementById("psvStudentQaInput");
     const qaDr = document.getElementById("psvStuDrawerQa");
-    if (qaIn) {
-      qaIn.addEventListener("input", () => {
-        saveStudentNote(`${deck.id}_qa`, qaIn.value);
-        if (qaDr && qaDr !== document.activeElement) qaDr.value = qaIn.value;
-      });
-    }
     if (qaDr) {
       qaDr.addEventListener("input", () => {
         saveStudentNote(`${deck.id}_qa`, qaDr.value);
-        if (qaIn && qaIn !== document.activeElement) qaIn.value = qaDr.value;
       });
     }
     const refIn = document.getElementById("psvStudentRefInput");
@@ -2221,20 +3097,64 @@
     return false;
   }
 
-  function goToSlide(idx, fromAutoCycle) {
+  function goToSlide(idx, fromAutoCycle, initialQaFocusIdx) {
     const deck = getCurrentDeck();
     const clean = Math.max(0, Math.min(deck.slides.length - 1, idx));
     state.slideIdx = clean;
     state.stationIdx = 0;
+    state.qaFocusIdx = typeof initialQaFocusIdx === "number" ? Math.max(0, initialQaFocusIdx) : 0;
     closePinZoomLightbox();
     if (!fromAutoCycle) resetIdleActivity();
     updateStageView();
   }
 
+  /* Mouse / Direct Slide Navigation — skips remaining Q&A items immediately */
   function stepSlide(delta) {
     const deck = getCurrentDeck();
     const next = (state.slideIdx + delta + deck.slides.length) % deck.slides.length;
-    goToSlide(next, false);
+    goToSlide(next, false, 0);
+  }
+
+  /* Clicker / Keyboard Navigation — steps through every Floor Question on Slide 12 before advancing */
+  function stepSlideByClicker(delta) {
+    const deck = getCurrentDeck();
+    const curSlide = getCurrentSlide();
+    if (curSlide && curSlide.type === "qa") {
+      const qList = getVisibleQaList(deck.id);
+      if (delta > 0) {
+        if (qList.length > 0 && state.qaFocusIdx < qList.length - 1) {
+          state.qaFocusIdx += 1;
+          state.qaViewedIds.add(qList[state.qaFocusIdx].id);
+          resetIdleActivity();
+          updateStageView();
+          return;
+        }
+        stepSlide(1);
+        return;
+      }
+      if (delta < 0) {
+        if (qList.length > 0 && state.qaFocusIdx > 0) {
+          state.qaFocusIdx -= 1;
+          resetIdleActivity();
+          updateStageView();
+          return;
+        }
+        stepSlide(-1);
+        return;
+      }
+    }
+
+    if (delta < 0) {
+      const prevIdx = (state.slideIdx - 1 + deck.slides.length) % deck.slides.length;
+      const prevSlide = deck.slides[prevIdx];
+      if (prevSlide && prevSlide.type === "qa") {
+        const qList = getVisibleQaList(deck.id);
+        goToSlide(prevIdx, false, Math.max(0, qList.length - 1));
+        return;
+      }
+    }
+
+    stepSlide(delta);
   }
 
   function applyPinHoverHighlight(modal, pinIdx, orgKey) {
@@ -2265,7 +3185,7 @@
     }
   }
 
-  /* ---------- Event Delegation & Keyboard / Touch Navigation ---------- */
+  /* ---------- Event Delegation & Clicker / Mouse / Touch Navigation ---------- */
   function bindModalEvents(modal) {
     ["mousemove", "mousedown", "touchstart", " wheel"].forEach((evName) => {
       modal.addEventListener(evName.trim(), () => resetIdleActivity(), { passive: true });
@@ -2293,6 +3213,7 @@
         if (PANEL_DECKS[nextId]) {
           state.deckId = nextId;
           state.slideIdx = 0;
+          state.qaFocusIdx = 0;
           state.qaLoopOnly = false;
           updateStageView();
         }
@@ -2302,6 +3223,18 @@
     modal.addEventListener("click", (ev) => {
       if (ev.target && ev.target.id === "psvPinZoomModal") {
         closePinZoomLightbox();
+        return;
+      }
+      const qaPill = ev.target.closest("[data-psv-qa-idx]");
+      if (qaPill) {
+        if (qaPill.blur) qaPill.blur();
+        const qIdx = parseInt(qaPill.getAttribute("data-psv-qa-idx"), 10) || 0;
+        const qList = getVisibleQaList(state.deckId);
+        if (qList[qIdx]) {
+          state.qaFocusIdx = qIdx;
+          state.qaViewedIds.add(qList[qIdx].id);
+          updateStageView();
+        }
         return;
       }
       const zoomTrig = ev.target.closest("[data-psv-zoom-pin]");
@@ -2322,27 +3255,57 @@
       }
       const idxBtn = ev.target.closest("[data-psv-idx]");
       if (idxBtn) {
+        if (idxBtn.blur) idxBtn.blur();
         goToSlide(parseInt(idxBtn.getAttribute("data-psv-idx"), 10) || 0, false);
         return;
       }
       const actEl = ev.target.closest("[data-psv-act]");
       if (!actEl) return;
+      if (actEl.blur) actEl.blur();
       const act = actEl.getAttribute("data-psv-act");
-      if (act === "prev") stepSlide(-1);
-      else if (act === "next") stepSlide(1);
-      else if (act === "close-pin-zoom") {
+      const isKeyboardTriggered = ev.detail === 0;
+
+      if (act === "prev") {
+        if (isKeyboardTriggered) stepSlideByClicker(-1);
+        else stepSlide(-1);
+      } else if (act === "next" || act === "force-next-slide") {
+        if (isKeyboardTriggered) stepSlideByClicker(1);
+        else stepSlide(1);
+      } else if (act === "qa-prev-item") {
+        if (state.qaFocusIdx > 0) {
+          state.qaFocusIdx -= 1;
+          updateStageView();
+        }
+      } else if (act === "qa-next-item") {
+        const qList = getVisibleQaList(state.deckId);
+        if (state.qaFocusIdx < qList.length - 1) {
+          state.qaFocusIdx += 1;
+          state.qaViewedIds.add(qList[state.qaFocusIdx].id);
+          updateStageView();
+        }
+      } else if (act === "open-qa-composer") {
+        openQaComposerModal(state.deckId, false);
+      } else if (act === "hide-current-qa") {
+        const qList = getVisibleQaList(state.deckId);
+        const curQ = qList[state.qaFocusIdx];
+        if (curQ) hideFloorQuestion(state.deckId, curQ.id);
+      } else if (act === "close-pin-zoom") {
         closePinZoomLightbox();
-      }
-      else if (act === "toggle-ambient") toggleAmbientCycle(false);
-      else if (act === "toggle-qa-loop") toggleAmbientCycle(true);
-      else if (act === "toggle-backdrop") {
+      } else if (act === "toggle-ambient") {
+        toggleAmbientCycle(false);
+      } else if (act === "toggle-qa-loop") {
+        toggleAmbientCycle(true);
+      } else if (act === "toggle-backdrop") {
         state.backdropMode = state.backdropMode === "cinema" ? "aurora" : "cinema";
         try { localStorage.setItem("racm303_psv_backdrop", state.backdropMode); } catch (_) {}
         updateStageView();
-      } else if (act === "font-down") setFontScale(state.fontScale - 0.08);
-      else if (act === "font-up") setFontScale(state.fontScale + 0.08);
-      else if (act === "font-reset") setFontScale(1);
-      else if (act === "toggle-mod-drawer" && ROLE === "faculty") {
+      } else if (act === "font-down") {
+        setFontScale(state.fontScale - 0.08);
+      } else if (act === "font-up") {
+        setFontScale(state.fontScale + 0.08);
+      } else if (act === "font-reset") {
+        setFontScale(1);
+      } else if (act === "toggle-mod-drawer" && ROLE === "faculty") {
         state.modDrawerOpen = !state.modDrawerOpen;
         if (!state.modDrawerOpen) resetIdleActivity();
         else clearIdleTimer();
@@ -2397,7 +3360,7 @@
       }
     });
 
-    // Touch Swipe Left/Right (tvOS Remote Feel)
+    // Touch Swipe Left/Right
     let touchStartX = 0;
     let touchStartY = 0;
     modal.addEventListener("touchstart", (ev) => {
@@ -2411,8 +3374,8 @@
       const dx = ev.changedTouches[0].clientX - touchStartX;
       const dy = ev.changedTouches[0].clientY - touchStartY;
       if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        if (dx < 0) stepSlide(1);
-        else stepSlide(-1);
+        if (dx < 0) stepSlideByClicker(1);
+        else stepSlideByClicker(-1);
       }
     }, { passive: true });
 
@@ -2421,6 +3384,13 @@
     });
 
     document.addEventListener("keydown", (ev) => {
+      if (state.qaComposerOpen) {
+        if (ev.key === "Escape") {
+          ev.preventDefault();
+          closeQaComposerModal();
+        }
+        return;
+      }
       if (!state.isOpen) return;
       const tag = ev.target && ev.target.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
@@ -2453,12 +3423,12 @@
         return;
       }
       resetIdleActivity();
-      if (ev.key === "ArrowRight" || ev.key === "PageDown" || ev.key === " ") {
+      if (ev.key === "ArrowRight" || ev.key === "PageDown" || ev.key === " " || ev.key === "ArrowDown") {
         ev.preventDefault();
-        stepSlide(1);
-      } else if (ev.key === "ArrowLeft" || ev.key === "PageUp") {
+        stepSlideByClicker(1);
+      } else if (ev.key === "ArrowLeft" || ev.key === "PageUp" || ev.key === "ArrowUp") {
         ev.preventDefault();
-        stepSlide(-1);
+        stepSlideByClicker(-1);
       } else if (ev.key === "p" || ev.key === "P") {
         toggleAmbientCycle(false);
       } else if (ev.key === "b" || ev.key === "B") {
@@ -2515,6 +3485,7 @@
     const deck = getCurrentDeck();
     state.slideIdx = Math.max(0, Math.min(deck.slides.length - 1, targetIdx || 0));
     state.stationIdx = typeof options.stationIdx === "number" ? options.stationIdx : 0;
+    state.qaFocusIdx = typeof options.qaFocusIdx === "number" ? options.qaFocusIdx : 0;
     state.isOpen = true;
     state.idleClean = false;
     state.qrLightboxOpen = false;
@@ -2565,7 +3536,9 @@
       clearInterval(state.clockTimer);
       state.clockTimer = null;
     }
-    document.body.classList.remove("psv-deck-open");
+    if (!state.qaComposerOpen) {
+      document.body.classList.remove("psv-deck-open");
+    }
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});
     }
@@ -2573,7 +3546,7 @@
     if (modal) modal.hidden = true;
 
     const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
-    if (h.startsWith("panel-")) {
+    if (h.startsWith("panel-") && h !== QA_HASH_SLUG) {
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }
   }
@@ -2604,6 +3577,7 @@
         sl.enSubtitle ||
         sl.enHeading ||
         sl.roleSubtitle ||
+        (Array.isArray(sl.coreQuestions) && "Q1–Q4 Core Panel Questions → Live Floor Q&A → Q5 Closing Wisdom") ||
         (Array.isArray(sl.subQuestions) && sl.subQuestions[0]) ||
         sl.stemLead ||
         sl.logline ||
@@ -2704,8 +3678,12 @@
   window.RACM_PANEL_DECK = {
     open: openDeck,
     close: closeDeck,
+    openQaComposer: openQaComposerModal,
+    submitLiveQuestion: submitLiveFloorQuestion,
+    getLiveQuestions: getVisibleQaList,
     goToSlide,
     stepSlide,
+    stepSlideByClicker,
     setFontScale,
     toggleAmbientCycle,
     mountInlineShelf,
@@ -2718,6 +3696,12 @@
     const params = new URLSearchParams(window.location.search);
     const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
     const slideParam = (params.get("slides") || params.get("panel") || "").toUpperCase();
+    const qaParam = (params.get("qa") || params.get("ask") || "").toLowerCase();
+
+    if (h === QA_HASH_SLUG || h === "panel-global-qa" || qaParam === "global" || qaParam === "1") {
+      setTimeout(() => openQaComposerModal("w1-d1-global", true), 60);
+      return;
+    }
     if ((h === "panel-global" || slideParam === "GLOBAL") && PANEL_DECKS["w1-d1-global"]) {
       setTimeout(() => openDeck("w1-d1-global", 0), 70);
     }
