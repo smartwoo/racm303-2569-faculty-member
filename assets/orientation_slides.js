@@ -2767,58 +2767,6 @@
       `
     },
     {
-      id: "s14a-kahoot-qr-lobby",
-      num: "27",
-      section: "evaluation",
-      sectionLabel: "Act IV · QR Code & Live Lobby",
-      actClass: "is-act-4",
-      actLabel: "KAHOOT! LIVE LOBBY · PIN 3 DIGITS",
-      timeWindow: "09.23 – 09.24 น. (สแกน QR เข้าห้องสด)",
-      kicker: "04 · KAHOOT! LIVE LOBBY · SCAN QR CODE & 3-DIGIT STUDENT ID LOGIN",
-      title: "สแกน QR Code และกดรหัสนักศึกษา 3 ตัวท้ายเข้า Live Lobby ก่อนเริ่ม Kahoot! Quiz",
-      keyTag: "PIN 3 ตัวท้าย",
-      keyMessageHtml:
-        "เปิดกล้องสแกน <strong>QR Code</strong> แล้วกด <strong>รหัสนักศึกษา 3 ตัวท้าย</strong> เพื่อ Login เข้าห้องสดทันที — สไลด์ถัดไปพบกับ <strong>Kahoot! Quiz 6 ข้อ (ข้อละ 10 วินาที · ตอบถูก + เร็วสุด ชิง Podium Rank 1 · 2 · 3)</strong>",
-      notes:
-        "ให้นักศึกษาและคณาจารย์สแกน QR Code เข้าห้องรอสด (Live Lobby) โดยนักศึกษาเพียงกดเลขรหัสนักศึกษา 3 ตัวท้ายบนแป้นตัวเลขเพื่อผูกชื่อและกลุ่ม รพ. ทันที เมื่อพร้อมแล้วกดปุ่มเริ่มเกมหรือกด Next Slide เพื่อเข้าสู่สไลด์ Kahoot! Quiz ทั้ง 6 ข้อ",
-      isLiveLobbySlide: true,
-      render: () => `
-        <div class="orl-s14-quiz-wrap" data-orl-slide-mount="qr-lobby">
-          ${
-            window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml === "function"
-              ? window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml({ viewMode: state.viewMode })
-              : ""
-          }
-        </div>
-      `
-    },
-    {
-      id: "s14-quiz-osmu",
-      num: "28",
-      section: "evaluation",
-      sectionLabel: "Act IV · Kahoot! Quiz (6 ข้อ · 10s)",
-      actClass: "is-act-4",
-      actLabel: "KAHOOT! QUIZ · 10s · SPEED + ACCURACY",
-      timeWindow: "09.24 – 09.27 น. (Kahoot! 6 ข้อ)",
-      kicker: "04 · KAHOOT! CHALLENGE · 5 HSS OBJECTIVES (6 CHOICES) + 5 BEHAVIORAL SCENARIOS (O · S · M · U)",
-      title: "Kahoot! Live Quiz (6 ข้อ · ข้อละ 10 วินาที): 5 วัตถุประสงค์ระบบฯ และสถานการณ์ตัดสิน O · S · M · U",
-      keyTag: "ถูก + เร็วสุด = Podium",
-      keyMessageHtml:
-        "โจทย์ข้อละ <strong>10 วินาที</strong> พร้อมเสียงดนตรี Kahoot! และเสียงฉาบหมดเวลา — วัดความเข้าใจ <strong>5 วัตถุประสงค์ระบบสุขภาพ (6 ตัวเลือก)</strong> + <strong>5 สถานการณ์จริง O / S / M / U</strong> แล้วสรุป <strong>Rank 1 · 2 · 3 พร้อมแต้มรวม</strong>!",
-      notes:
-        "ดำเนินกิจกรรม Kahoot! สด 6 ข้อ (ข้อละ 10 วินาที): ข้อ 1 ถามว่าอะไรไม่อยู่ใน 5 วัตถุประสงค์ของหมวดระบบสุขภาพ (6 ตัวเลือก) และข้อ 2–6 เป็นสถานการณ์จำลองพฤติกรรมนักศึกษาแพทย์ (ลาเกิน 3 วัน = 6 คาบเช้า-บ่าย, สาย > 15 นาที/ชุดนอกพื้นที่ครั้งแรกได้ M, โพสต์ข้อมูลผู้ป่วย/ฝากเช็คชื่อ/ซ้ำหลังได้ M ได้ U, สอบซ่อม 1 ครั้งผ่านได้ S กระทบเกียรตินิยม, และเกณฑ์ได้ O) ปิดท้ายด้วย Podium แสดงผู้ชนะอันดับ 1, 2, 3 พร้อมคะแนนรวม",
-      isLiveQuizSlide: true,
-      render: () => `
-        <div class="orl-s14-quiz-wrap" data-orl-slide-mount="quiz">
-          ${
-            window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function"
-              ? window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode })
-              : ""
-          }
-        </div>
-      `
-    },
-    {
       id: "s15-osmu-criteria",
       num: "29",
       section: "evaluation",
@@ -3092,7 +3040,7 @@
     { id: "intro", labelTh: `เปิดเรื่องรายวิชา (${countSlidesInSection("intro")})`, labelEn: `Course Opening (${countSlidesInSection("intro")})` },
     { id: "objectives", labelTh: `Act I · รากฐานและเป้าหมาย (${countSlidesInSection("objectives")})`, labelEn: `Act I · Heritage & Why (${countSlidesInSection("objectives")})` },
     { id: "experience", labelTh: `Act II · ตารางเรียน & เส้นทางเรียนรู้ (${countSlidesInSection("experience")})`, labelEn: `Act II · Schedule & Journey (${countSlidesInSection("experience")})` },
-    { id: "evaluation", labelTh: `Act III · วัดผล เกณฑ์ & Quiz O/S/M/U (${countSlidesInSection("evaluation")})`, labelEn: `Act III · Rubrics & O/S/M/U (${countSlidesInSection("evaluation")})` },
+    { id: "evaluation", labelTh: `Act III · วัดผลและเกณฑ์ O/S/M/U (${countSlidesInSection("evaluation")})`, labelEn: `Act III · Rubrics & O/S/M/U (${countSlidesInSection("evaluation")})` },
     { id: "action", labelTh: `Act IV · เวลาเรียน & ก้าวแรก (${countSlidesInSection("action")})`, labelEn: `Act IV · Conduct & Launch (${countSlidesInSection("action")})` }
   ];
 
@@ -3427,11 +3375,7 @@
   }
 
   function fitSingleSlideCanvas(canvas) {
-    if (
-      !canvas ||
-      canvas.classList.contains("is-live-canvas") ||
-      canvas.getAttribute("data-slide-id") === "s14-quiz-osmu"
-    ) {
+    if (!canvas || canvas.classList.contains("is-live-canvas")) {
       return;
     }
     protectThaiCompounds(canvas);
@@ -4003,13 +3947,6 @@
 
         const pdfPrev = document.getElementById("gdrivePdfPreviewModal");
         if (pdfPrev && !pdfPrev.hidden) return;
-        if (
-          window.RACM_ORIENTATION_LIVE &&
-          typeof window.RACM_ORIENTATION_LIVE.hasOpenOverlay === "function" &&
-          window.RACM_ORIENTATION_LIVE.hasOpenOverlay()
-        ) {
-          return;
-        }
 
         const tag = (ev.target && ev.target.tagName) || "";
         const isTextInput =
@@ -4195,13 +4132,6 @@
           ev.preventDefault();
           ev.stopPropagation();
           state.laserActive = !state.laserActive;
-          renderModal();
-        } else if (ev.key === "k" || ev.key === "K") {
-          ev.preventDefault();
-          ev.stopPropagation();
-          state.autoPlay = false;
-          state.viewMode = state.viewMode === "live" ? "deck" : "live";
-          state.zoomScale = 1;
           renderModal();
         } else if (ev.key === "t" || ev.key === "T") {
           ev.preventDefault();
@@ -4498,11 +4428,7 @@
     applyZoomToCurrentSlide(oldZ, focalX, focalY);
   }
 
-  function syncHostSlideToLive() {
-    if (window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.notifyHostSlide === "function") {
-      window.RACM_ORIENTATION_LIVE.notifyHostSlide(state.slideIdx, SLIDES[state.slideIdx]);
-    }
-  }
+  function syncHostSlideToLive() {}
 
   function clearS02Timer() {
     if (state.s02Timer) {
@@ -4913,14 +4839,6 @@
     clearS02Timer();
     clearPipeTimer();
     const nextIdx = Math.max(0, Math.min(SLIDES.length - 1, idx));
-    const targetSlide = SLIDES[nextIdx];
-    if (
-      (!targetSlide || !targetSlide.isLiveQuizSlide) &&
-      window.RACM_ORIENTATION_LIVE &&
-      typeof window.RACM_ORIENTATION_LIVE.stopKahootCountdownBgm === "function"
-    ) {
-      window.RACM_ORIENTATION_LIVE.stopKahootCountdownBgm();
-    }
     state.transitionDir = nextIdx < state.slideIdx ? "prev" : "next";
     state.slideIdx = nextIdx;
     state.s02Focus = typeof o.s02Focus === "number" ? o.s02Focus : 0;
@@ -4931,19 +4849,6 @@
     state.toolsMenuOpen = false;
     clearJumpBuffer();
     flashStepToast();
-    if (
-      ROLE === "faculty" &&
-      !window.__RACM_EXPORTING_DECK &&
-      SLIDES[nextIdx] &&
-      SLIDES[nextIdx].id === "s14a-kahoot-qr-lobby" &&
-      window.RACM_ORIENTATION_LIVE &&
-      typeof window.RACM_ORIENTATION_LIVE.getPhase === "function" &&
-      window.RACM_ORIENTATION_LIVE.getPhase() !== "lobby" &&
-      typeof window.RACM_ORIENTATION_LIVE.hostOpenLobby === "function"
-    ) {
-      window.RACM_ORIENTATION_LIVE.hostOpenLobby();
-    }
-    syncHostSlideToLive();
     renderModal();
     const vp = document.getElementById("orDeckViewport");
     if (vp) {
@@ -4973,28 +4878,6 @@
     }
 
     const cur = SLIDES[state.slideIdx];
-    if (state.viewMode === "deck" && !window.__RACM_EXPORTING_DECK && cur && d > 0) {
-      if (cur.id === "s14a-kahoot-qr-lobby") {
-        goToSlide(state.slideIdx + 1);
-        if (
-          window.RACM_ORIENTATION_LIVE &&
-          typeof window.RACM_ORIENTATION_LIVE.hostStartQuestionAt === "function"
-        ) {
-          window.RACM_ORIENTATION_LIVE.hostStartQuestionAt(0);
-        }
-        return;
-      }
-      if (
-        cur.isLiveQuizSlide &&
-        window.RACM_ORIENTATION_LIVE &&
-        typeof window.RACM_ORIENTATION_LIVE.stepQuizWithClicker === "function"
-      ) {
-        if (window.RACM_ORIENTATION_LIVE.stepQuizWithClicker(true)) {
-          return;
-        }
-      }
-    }
-
     if (state.viewMode === "deck" && cur && cur.id === "s09-fieldwork-9sites") {
       if (d > 0) {
         if (state.siteFocus < 9) {
@@ -5245,20 +5128,13 @@
 
   function renderClickerGuideHtml() {
     if (!state.clickerGuideOpen) return "";
-    const liveApi = window.RACM_ORIENTATION_LIVE;
-    const remoteUrl =
-      liveApi && typeof liveApi.getJoinUrl === "function"
-        ? liveApi.getJoinUrl()
-        : window.location.origin + window.location.pathname + "#live";
-    const qrHtml =
-      liveApi && typeof liveApi.buildQrSvg === "function" ? liveApi.buildQrSvg(remoteUrl, "is-clicker-qr") : "";
     return `
-      <div class="or-clicker-guide-backdrop" role="dialog" aria-modal="true" aria-label="Keynote Clicker & Wireless Remote Guide">
+      <div class="or-clicker-guide-backdrop" role="dialog" aria-modal="true" aria-label="Keynote Clicker & Keyboard Guide">
         <div class="or-clicker-guide-sheet">
           <div class="or-cg-head">
             <div>
               <span class="or-cg-pill">● APPLE TV × KEYNOTE PITCH · CLICKER READY</span>
-              <h3 class="or-cg-title">ควบคุมสไลด์แบบไม่ต้องใช้เมาส์ (Wireless Clicker &amp; Phone Remote)</h3>
+              <h3 class="or-cg-title">ควบคุมสไลด์แบบไม่ต้องใช้เมาส์ (Wireless Presentation Clicker &amp; Keyboard)</h3>
             </div>
             <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
               <div class="racm-unav-pair is-compact is-dark-hud" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
@@ -5268,9 +5144,9 @@
               <button type="button" class="or-tool-btn is-close" id="orCloseClickerGuideBtn" aria-label="ปิดหน้าต่างแนะนำ Clicker">&times;</button>
             </div>
           </div>
-          <div class="or-cg-grid">
+          <div class="or-cg-grid is-single-col">
             <div class="or-cg-col">
-              <div class="or-cg-kicker">1 · USB / BLUETOOTH PRESENTATION CLICKER &amp; KEYBOARD</div>
+              <div class="or-cg-kicker">USB / BLUETOOTH PRESENTATION CLICKER &amp; KEYBOARD SHORTCUTS</div>
               <div class="or-cg-keymap">
                 <div class="or-cg-krow"><kbd>PageDown</kbd> <kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>Enter</kbd><span>สไลด์ถัดไป (Next Slide)</span></div>
                 <div class="or-cg-krow"><kbd>PageUp</kbd> <kbd>&larr;</kbd> <kbd>Backspace</kbd><span>สไลด์ก่อนหน้า (Previous Slide)</span></div>
@@ -5284,11 +5160,6 @@
                 <button type="button" class="or-tool-btn" id="orGuideBlackoutBtn">⬛ ทดสอบพักจอดำ (B)</button>
               </div>
             </div>
-            <div class="or-cg-col is-qr-col">
-              <div class="or-cg-kicker">2 · ใช้มือถือ / iPad เป็น WIRELESS CLICKER</div>
-              <div class="or-cg-qr-box">${qrHtml}</div>
-              <p class="or-cg-qr-desc">สแกน QR เลือกชื่ออาจารย์ แล้วเปิดแท็บ <strong>🎛️ รีโมต</strong> เพื่อกด <strong>NEXT SLIDE ▶ / ◀ PREV / ⬛ พักจอดำ / ยิง Quiz</strong> จากกลางห้องบรรยายได้ทันที</p>
-            </div>
           </div>
         </div>
       </div>
@@ -5300,7 +5171,7 @@
     state.autoPlay = false;
     state.toolsMenuOpen = false;
     state.zoomScale = 1;
-    state.viewMode = "live";
+    state.viewMode = "deck";
     renderModal();
   }
 
@@ -5309,43 +5180,10 @@
     state.toolsMenuOpen = false;
     state.zoomScale = 1;
     state.viewMode = "deck";
-    if (state.slideIdx === 0 && SLIDES.length > 1) {
-      state.slideIdx = 1;
-    }
-    syncHostSlideToLive();
     renderModal();
   }
 
-  function refreshLiveSurface() {
-    if (!state.isOpen || !window.RACM_ORIENTATION_LIVE) return;
-    const modal = document.getElementById("orientationDeckModal");
-    if (!modal || modal.hidden) return;
-    const count = window.RACM_ORIENTATION_LIVE.getParticipantCount
-      ? window.RACM_ORIENTATION_LIVE.getParticipantCount()
-      : 0;
-    modal.querySelectorAll("[data-orl-participant-count]").forEach((el) => {
-      el.textContent = String(count);
-    });
-    if (state.viewMode === "live") {
-      const liveCanvas = modal.querySelector(".or-slide-canvas.is-live-canvas");
-      if (liveCanvas) {
-        liveCanvas.innerHTML = window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false);
-        return;
-      }
-      renderModal();
-      return;
-    }
-    if (state.viewMode === "deck") {
-      modal.querySelectorAll("[data-orl-slide-mount]").forEach((mount) => {
-        const kind = mount.getAttribute("data-orl-slide-mount");
-        if (kind === "qr-lobby" && typeof window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml === "function") {
-          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderQrLobbySlideHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
-        } else if (kind === "quiz" && typeof window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml === "function") {
-          mount.innerHTML = window.RACM_ORIENTATION_LIVE.renderEmbeddedQuizSlideHtml({ viewMode: state.viewMode, ioTheme: getEffectiveIoTheme() });
-        }
-      });
-    }
-  }
+  function refreshLiveSurface() {}
 
   function renderModal() {
     const modal = ensureModalElement();
@@ -5363,6 +5201,10 @@
     modal.classList.toggle("is-presentation-mode", state.presentationMode);
     modal.classList.toggle("is-clicker-stage", state.clickerStage);
     modal.classList.toggle("is-hud-idle", Boolean((state.clickerStage || state.presentationMode) && state.hudIdle));
+
+    if (state.viewMode === "live") {
+      state.viewMode = "deck";
+    }
 
     const cur = SLIDES[state.slideIdx] || SLIDES[0];
     const onPremSlideNow =
@@ -5392,15 +5234,6 @@
     const progressPct = (((state.slideIdx + 1) / Math.max(1, SLIDES.length)) * 100).toFixed(1);
     const showNotesNow = state.viewMode === "deck" && state.showNotes;
     const notesLabel = ROLE === "faculty" ? t("โน้ตผู้สอน", "Presenter Notes") : t("คำอธิบายสไลด์", "Slide Notes");
-    const liveCount =
-      window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.getParticipantCount === "function"
-        ? window.RACM_ORIENTATION_LIVE.getParticipantCount()
-        : 0;
-
-    const followOn =
-      window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.isFollowEnabled === "function"
-        ? window.RACM_ORIENTATION_LIVE.isFollowEnabled()
-        : false;
     const zoomPct = Math.round((state.zoomScale || 1) * 100);
     const effectiveIoTheme = getEffectiveIoTheme();
     const isIoDark = effectiveIoTheme === "dark";
@@ -5412,20 +5245,6 @@
         <div class="or-slide-frame-wrap">
           <div class="or-slide-zoom-sizer">
             ${renderSingleSlideCanvasHtml(cur, state.slideIdx, true)}
-          </div>
-        </div>
-      `;
-    } else if (state.viewMode === "live") {
-      viewportHtml = `
-        <div class="or-slide-frame-wrap">
-          <div class="or-slide-zoom-sizer">
-            <article class="or-slide-canvas is-io-pitch is-live-canvas" data-io-theme="${effectiveIoTheme}" aria-label="Live Orientation Lobby and Kahoot Recheck">
-              ${
-                window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml === "function"
-                  ? window.RACM_ORIENTATION_LIVE.renderDeckLiveStageHtml(false)
-                  : ""
-              }
-            </article>
           </div>
         </div>
       `;
@@ -5497,7 +5316,6 @@
 
           <div class="or-top-center" role="tablist" aria-label="สลับมุมมองสไลด์">
             <button type="button" class="or-mode-btn${state.viewMode === "deck" ? " is-active" : ""}" data-or-vmode="deck">${SVG.slides} <span>Slide</span></button>
-            <button type="button" class="or-mode-btn is-live-tab${state.viewMode === "live" ? " is-active" : ""}" data-or-vmode="live" title="เปิดห้องรอผู้เข้าร่วม (Live Waiting Lobby) และยิงคำถาม Kahoot Recheck (กด K)"><span class="or-live-tab-dot"></span><span>Live (${liveCount})</span></button>
             <button type="button" class="or-mode-btn${state.viewMode === "sorter" ? " is-active" : ""}" data-or-vmode="sorter">${SVG.grid} <span>Sorter</span></button>
             <button type="button" class="or-mode-btn${state.viewMode === "handout" ? " is-active" : ""}" data-or-vmode="handout">${SVG.handout} <span>Handout</span></button>
           </div>
@@ -5505,7 +5323,7 @@
           <div class="or-top-right">
             <div class="or-desktop-tools">
               <button type="button" class="or-tool-btn is-clicker-pill${state.clickerStage ? " is-active-toggle" : ""}" id="orClickerStageBtn" title="โหมด Keynote / Google I/O Pitch Stage — กดด้วย Wireless Clicker / Space / ลูกศร / คลิกที่จอ โดยไม่ต้องเล็งเมาส์ (กด F5 หรือ C)">${SVG.clicker} <span>${state.clickerStage ? "Pitch On" : "Clicker"}</span></button>
-              <button type="button" class="or-tool-btn is-clicker-help-btn" id="orClickerGuideBtn" title="ดูปุ่มลัด Presentation Clicker และสแกน QR ใช้มือถือเป็นรีโมตไร้สาย (กด ?)">🎛️</button>
+              <button type="button" class="or-tool-btn is-clicker-help-btn" id="orClickerGuideBtn" title="ดูปุ่มลัด Presentation Clicker และคีย์บอร์ด (กด ?)">🎛️</button>
               <button type="button" class="or-tool-btn is-io-theme-toggle" id="orIoThemeBtn" title="สลับโทนสไลด์ Clean Light / Dark (พร้อมเปลี่ยนภาพ PNG เป็น Dark BG อัตโนมัติ · กด T)"><span>${isIoDark ? "🌙 Dark" : "☀️ Light"}</span></button>
               ${
                 ROLE === "faculty"
@@ -5525,7 +5343,7 @@
               <button type="button" class="or-tool-btn or-compact-more-btn${state.toolsMenuOpen || state.autoPlay || state.showNotes || state.clickerStage ? " is-active-toggle" : ""}" id="orMoreToolsBtn" aria-expanded="${state.toolsMenuOpen ? "true" : "false"}" title="เครื่องมือสไลด์เพิ่มเติม">${SVG.more}</button>
               <div class="or-tools-popover" ${state.toolsMenuOpen ? "" : "hidden"}>
                 <button type="button" class="or-pop-item${state.clickerStage ? " is-active" : ""}" id="orPopClickerStageBtn">${SVG.clicker} <span>${state.clickerStage ? "ออกจากโหมด Keynote Pitch" : "โหมด Keynote Pitch / Clicker (F5)"}</span></button>
-                <button type="button" class="or-pop-item" id="orPopClickerGuideBtn"><span>🎛️ คู่มือ Clicker &amp; QR มือถือเป็นรีโมต (?)</span></button>
+                <button type="button" class="or-pop-item" id="orPopClickerGuideBtn"><span>🎛️ คู่มือ Presentation Clicker &amp; คีย์บอร์ด (?)</span></button>
                 <button type="button" class="or-pop-item" id="orPopBlackoutBtn"><span>⬛ พักหน้าจอดำ Blackout (B / .)</span></button>
                 <button type="button" class="or-pop-item" id="orPopIoThemeBtn"><span>${isIoDark ? "☀️ สลับเป็นโหมด Clean Light" : "🌙 สลับเป็นโหมด Clean Dark"}</span></button>
                 ${
@@ -5550,7 +5368,7 @@
           </div>
         </div>
 
-        <div class="or-deck-viewport${state.viewMode !== "deck" && state.viewMode !== "live" ? " is-scrollable-mode" : ""}" id="orDeckViewport">
+        <div class="or-deck-viewport${state.viewMode !== "deck" ? " is-scrollable-mode" : ""}" id="orDeckViewport">
           ${viewportHtml}
         </div>
 
@@ -5606,32 +5424,21 @@
         }
 
         ${
-          state.viewMode === "deck" || state.viewMode === "live"
+          state.viewMode === "deck"
             ? `
           <div class="or-deck-bottombar is-tv-capsule">
             <div class="or-nav-cluster">
-              ${
-                state.viewMode === "deck"
-                  ? `
-                <button type="button" class="or-tool-btn or-prevnext-btn" id="orPrevBtn" ${state.slideIdx === 0 ? "disabled" : ""}>&larr; <span class="or-nav-word">${esc(t("ก่อนหน้า", "Prev"))}</span></button>
-                <select class="or-slide-select" id="orSlideSelect" aria-label="เลือกสไลด์">
-                  ${SLIDES.map(
-                    (s, i) =>
-                      `<option value="${i}" ${i === state.slideIdx ? "selected" : ""}>${s.num}/${SLIDES.length} · ${esc(s.title)}</option>`
-                  ).join("")}
-                </select>
-                <button type="button" class="or-tool-btn is-primary or-prevnext-btn" id="orNextBtn" ${state.slideIdx === SLIDES.length - 1 ? "disabled" : ""}><span class="or-nav-word">${esc(t("ถัดไป", "Next"))}</span> &rarr;</button>
-              `
-                  : `<button type="button" class="or-tool-btn is-primary" id="orBackToSlidesBtn">&larr; กลับไปยังสไลด์ (${cur.num}/${SLIDES.length})</button>`
-              }
+              <button type="button" class="or-tool-btn or-prevnext-btn" id="orPrevBtn" ${state.slideIdx === 0 ? "disabled" : ""}>&larr; <span class="or-nav-word">${esc(t("ก่อนหน้า", "Prev"))}</span></button>
+              <select class="or-slide-select" id="orSlideSelect" aria-label="เลือกสไลด์">
+                ${SLIDES.map(
+                  (s, i) =>
+                    `<option value="${i}" ${i === state.slideIdx ? "selected" : ""}>${s.num}/${SLIDES.length} · ${esc(s.title)}</option>`
+                ).join("")}
+              </select>
+              <button type="button" class="or-tool-btn is-primary or-prevnext-btn" id="orNextBtn" ${state.slideIdx === SLIDES.length - 1 ? "disabled" : ""}><span class="or-nav-word">${esc(t("ถัดไป", "Next"))}</span> &rarr;</button>
             </div>
 
             <div class="or-zoom-sync-cluster">
-              ${
-                ROLE === "student"
-                  ? `<button type="button" class="or-follow-pill${followOn ? " is-on" : ""}" id="orFollowLiveBtn" title="ซิงค์เปลี่ยนหน้าสไลด์ตามจอผู้สอนอัตโนมัติ">📡 ${followOn ? "ซิงค์สด On" : "ซิงค์สด Off"}</button>`
-                  : ""
-              }
               <div class="or-zoom-pill" role="group" aria-label="ย่อขยายสไลด์ (Pinch-Zoom ได้)">
                 <button type="button" class="or-zoom-btn" id="orZoomOutBtn" title="ซูมออก (−)">&minus;</button>
                 <button type="button" class="or-zoom-lbl" id="orZoomResetBtn" data-or-zoom-label title="แตะเพื่อรีเซ็ตขนาด 100% (หรือใช้ 2 นิ้วถ่างซูมบนจอ)">${zoomPct}%</button>
@@ -5639,18 +5446,12 @@
               </div>
             </div>
 
-            ${
-              state.viewMode === "deck"
-                ? `
-              <div class="or-filmstrip" role="navigation" aria-label="แถบลำดับสไลด์">
-                ${SLIDES.map(
-                  (s, i) =>
-                    `<button type="button" class="or-film-dot${i === state.slideIdx ? " is-active" : ""}${s.isLiveQuizSlide ? " is-quiz-dot" : ""}" data-or-jump="${i}" title="${s.num}. ${esc(s.title)}">${s.num}</button>`
-                ).join("")}
-              </div>
-            `
-                : ""
-            }
+            <div class="or-filmstrip" role="navigation" aria-label="แถบลำดับสไลด์">
+              ${SLIDES.map(
+                (s, i) =>
+                  `<button type="button" class="or-film-dot${i === state.slideIdx ? " is-active" : ""}" data-or-jump="${i}" title="${s.num}. ${esc(s.title)}">${s.num}</button>`
+              ).join("")}
+            </div>
           </div>
         `
             : ""
@@ -5864,29 +5665,12 @@
       });
     }
 
-    const backToSlidesBtn = document.getElementById("orBackToSlidesBtn");
-    if (backToSlidesBtn) {
-      backToSlidesBtn.addEventListener("click", () => {
-        state.viewMode = "deck";
-        state.zoomScale = 1;
-        renderModal();
-      });
-    }
-
     const zoomOutBtn = document.getElementById("orZoomOutBtn");
     if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => setZoomScale((state.zoomScale || 1) - 0.25));
     const zoomInBtn = document.getElementById("orZoomInBtn");
     if (zoomInBtn) zoomInBtn.addEventListener("click", () => setZoomScale((state.zoomScale || 1) + 0.25));
     const zoomResetBtn = document.getElementById("orZoomResetBtn");
     if (zoomResetBtn) zoomResetBtn.addEventListener("click", () => setZoomScale(1));
-
-    const followBtn = document.getElementById("orFollowLiveBtn");
-    if (followBtn && window.RACM_ORIENTATION_LIVE && typeof window.RACM_ORIENTATION_LIVE.toggleFollowHostSlide === "function") {
-      followBtn.addEventListener("click", () => {
-        window.RACM_ORIENTATION_LIVE.toggleFollowHostSlide();
-        renderModal();
-      });
-    }
 
     // Run Per-Frame Auto-Fit Typography synchronously before paint & re-verify on image decode!
     fitAllVisibleCanvases();

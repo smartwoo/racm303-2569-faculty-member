@@ -36187,10 +36187,10 @@
     const quickTools = [
       {
         cat: "บทเรียน & คาบสอนหลัก",
-        icon: "🎮",
-        title: "Orientation Kahoot Recheck (QR Scan · Do's & Don'ts · O/S/M/U)",
-        sub: "เวทีคำถามสดแบบ Kahoot บนสไลด์หน้าปกปฐมนิเทศ ทบทวนข้อควรทำ-ข้อห้ามและเกณฑ์ O / S / M / U ตามคู่มือนักศึกษา",
-        hay: "kahoot orientation qr code pin 2569 do dont osmu คู่มือนักศึกษา ปฐมนิเทศ สแกน",
+        icon: "🧭",
+        title: "Course Orientation Slides · ปฐมนิเทศรายวิชาและเกณฑ์ O/S/M/U",
+        sub: "สไลด์ปฐมนิเทศรายวิชา RACM 303 ตารางเรียน 6 สัปดาห์ และเกณฑ์การประเมิน O / S / M / U ตามคู่มือนักศึกษา",
+        hay: "orientation 2569 do dont osmu คู่มือนักศึกษา ปฐมนิเทศ สไลด์",
         run: () => { if (window.RACM_ORIENTATION_DECK) window.RACM_ORIENTATION_DECK.open(0); }
       },
       {
