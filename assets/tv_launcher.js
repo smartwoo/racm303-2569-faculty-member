@@ -1915,19 +1915,7 @@
             <span>→</span>
           </button>
 
-          ${
-            mod.code === "HS1"
-              ? `<div style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px 8px;background:rgba(15,23,42,.04);border-radius:10px;border:1px dashed rgba(15,23,42,.15)">
-                  <span style="width:100%;font-size:12px;font-weight:700;opacity:.85">📱 เปิด PPT &amp; QR Check-in แยกตามห้องตัวเอง (Each PPT · Different HTML):</span>
-                  ${[1, 2, 3, 4, 5, 6]
-                    .map(
-                      (rNum) =>
-                        `<a class="tv-hosp-chip" href="hs1-room${rNum}.html" style="text-decoration:none;font-size:12px;padding:4px 9px" data-tv-modal-focus>ห้อง ${rNum} · 1C1-0${rNum + 1} ↗</a>`
-                    )
-                    .join("")}
-                </div>`
-              : ""
-          }
+          ${!isStEp ? `<div id="tvEpStep5PinLockMount"></div>` : ""}
 
           <button type="button" class="tv-ep-action-btn ${epVdoInf.uploaded ? "is-slide-ready-action" : "is-slide-pending-action"}" id="tvEpActVdoLec" data-tv-modal-focus>
             <span>
@@ -1963,6 +1951,38 @@
     };
 
     $("tvCloseEpModalBtn").addEventListener("click", close);
+    const step5PinMount = $("tvEpStep5PinLockMount");
+    if (
+      step5PinMount &&
+      !isStEp &&
+      window.RACM_HSD_ROOM_QR &&
+      typeof window.RACM_HSD_ROOM_QR.buildCompactStepPinLockDOM === "function"
+    ) {
+      step5PinMount.appendChild(
+        window.RACM_HSD_ROOM_QR.buildCompactStepPinLockDOM(mod.code, {
+          onNavigate: (mCode, rId, stuObj, rMeta) => {
+            backdrop.remove();
+            if (ROLE === "faculty") {
+              if (rMeta && rMeta.isHs1) {
+                window.location.href = rMeta.facultyRoomHref;
+              } else if (api && api.openHsDiscussionRoom) {
+                api.openHsDiscussionRoom(mCode, rId, stuObj);
+              } else if (api && api.openHsDiscussion) {
+                api.openHsDiscussion(mCode);
+              }
+              return;
+            }
+            if (rMeta && rMeta.isHs1) {
+              window.location.href = window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid(mCode, rId, stuObj);
+            } else if (api && api.openHsDiscussionRoom) {
+              api.openHsDiscussionRoom(mCode, rId, stuObj);
+            } else {
+              window.location.href = window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid(mCode, rId, stuObj);
+            }
+          }
+        })
+      );
+    }
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) close();
     });
@@ -2932,35 +2952,89 @@
         files.push({
           id: `hsppt:${m.id}`,
           folderPath: ["health-systems", m.id],
-          name: `05_${m.code}_Case_Discussion_in_Class.pptx`,
-          title: `Case Discussion: ${m.code} (หน้ารวมครบ 6 ห้อง)`,
+          name: `05_${m.code}_Case_Discussion_in_Class_16x9.pdf`,
+          title: `Case Discussion: ${m.code} (สไลด์ 16:9 + QR Check-in รหัส 3 ตัว & ใบงานเปล่า .PDF)`,
           sub:
             (flow && flow.steps[4] && flow.steps[4].desc) ||
             (ROLE === "faculty"
-              ? `สไลด์เปิดคาบ QR เช็คชื่อแยก 6 ห้อง + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
-              : `สไลด์เปิดคาบ QR เช็คชื่อแยก 6 ห้อง + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
+              ? `สไลด์เปิดคาบ QR เช็คชื่อแยก 6 ห้อง + ใบงานเปล่า .PDF (16:9 Optimal Font) + ${modCases.length} กรณีศึกษา (${qCount} ข้อ) พร้อมเฉลย Teacher Key`
+              : `ใส่รหัส 3 ตัวล็อกห้อง + ใบงานเปล่า .PDF (16:9 Optimal Font) + ${modCases.length} กรณีศึกษา (${qCount} ข้อ)`),
           meta: `${m.discTime || ""} · สอบ ${m.examWeight || ""}`,
           badge: ROLE === "faculty" ? `⑤ Case + เฉลย` : `⑤ Case 16:9`,
-          icoCls: "is-pptx",
+          icoCls: "is-pdf",
           icoTxt: "⑤",
+          downloadHref: `exports/pdf/RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`,
+          downloadName: `RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`,
           onOpen: openFileAction(() => {
             if (api && api.openHsDiscussion) api.openHsDiscussion(m.code);
           })
         });
-        if (m.code === "HS1" && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getAllHs1RoomMetas === "function") {
-          window.RACM_HSD_ROOM_QR.getAllHs1RoomMetas().forEach((rm) => {
+        files.push({
+          id: `hspdf16x9:${m.id}`,
+          folderPath: ["health-systems", m.id],
+          name: `05_${m.code}_Blank_Worksheet_16x9_กลางรวม.pdf`,
+          title: `ใบงานเปล่ากลางรวม 16:9 (.PDF) — Case Discussion: ${m.code} (Optimal Font)`,
+          sub: `ไฟล์ .PDF สไลด์ 16:9 ใบงานเปล่ากลางรวมประจำคาบ ${m.code} (${modCases.length} กรณีศึกษา · ${qCount} ข้อคำถาม) อ่านชัดเต็มจอและเขียนบน iPad ได้ทันที`,
+          meta: `16:9 Blank Worksheet · ${m.code}`,
+          badge: `⬇ PDF กลางรวม ${m.code}`,
+          icoCls: "is-pdf",
+          icoTxt: "PDF",
+          downloadHref: `exports/pdf/RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`,
+          downloadName: `RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`,
+          onOpen: openFileAction(() => {
+            const a = document.createElement("a");
+            a.href = `exports/pdf/RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`;
+            a.download = `RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          })
+        });
+        if (m.code === "HS1") {
+          files.push({
+            id: `hspdf16x9:ALL`,
+            folderPath: ["health-systems"],
+            name: `00_HS1-HS6_Blank_Worksheet_16x9_กลางรวมครบทุกคาบ.pdf`,
+            title: `PDF กลางรวมครบทุกคาบ (HS1–HS6) — 16:9 Blank Worksheet (12 กรณี · 23 ข้อ)`,
+            sub: `ดาวน์โหลดไฟล์ .PDF ใบงานเปล่า 16:9 Optimal Font กลางรวมครบทั้ง 6 คาบ (HS1–HS6) ในไฟล์เดียว`,
+            meta: `48 หน้าสไลด์ 16:9 · ครบ 6 คาบ`,
+            badge: `⬇ PDF กลางรวม HS1–HS6`,
+            icoCls: "is-pdf",
+            icoTxt: "ALL",
+            downloadHref: `exports/pdf/RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`,
+            downloadName: `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`,
+            onOpen: openFileAction(() => {
+              const a = document.createElement("a");
+              a.href = `exports/pdf/RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
+              a.download = `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            })
+          });
+        }
+        if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getAllModuleRoomMetas === "function") {
+          window.RACM_HSD_ROOM_QR.getAllModuleRoomMetas(m.code).forEach((rm) => {
             files.push({
-              id: `hsppt:HS1:R${rm.roomId}`,
-              folderPath: ["health-systems", "HS1"],
-              name: `05_R${rm.roomId}_HS1_Room${rm.roomId}_${rm.cleanRoomSlug}_QR_Checkin.html`,
-              title: `Case Discussion: HS1 — ห้องย่อยที่ ${rm.roomId} (ห้อง ${rm.roomCode}) · QR Check-in รหัส 3 ตัว`,
-              sub: `PPT & HTML แยกเฉพาะห้อง ${rm.roomCode} (${rm.htmlFile}) · อ.ประจำห้อง: ${rm.instructor} · สแกน QR แล้วใส่รหัส นศ. 3 ตัวท้าย`,
+              id: `hsppt:${m.code}:R${rm.roomId}`,
+              folderPath: ["health-systems", m.id],
+              name: `05_R${rm.roomId}_${m.code}_Room${rm.roomId}_${rm.cleanRoomSlug}_Blank_Worksheet_16x9.pdf`,
+              title: `Case Discussion: ${m.code} — ห้องย่อยที่ ${rm.roomId} (ห้อง ${rm.roomCode}) · QR Check-in & .PDF 16:9`,
+              sub: `เปิดห้อง ${rm.roomCode} · อ.ประจำห้อง: ${rm.instructor} · สแกน QR / ใส่รหัส นศ. 3 ตัวท้าย และดาวน์โหลดใบงานเปล่า .PDF 16:9 ประจำห้อง`,
               meta: `${rm.pinCode} · ${rm.assignedStudents.length} คน`,
-              badge: `📱 ห้อง ${rm.roomId} (${rm.roomCode})`,
-              icoCls: "is-pptx",
+              badge: `📱 ห้อง ${rm.roomId} (${rm.cleanRoomSlug})`,
+              icoCls: "is-pdf",
               icoTxt: `R${rm.roomId}`,
+              downloadHref: rm.staticRoomPdfHref,
+              downloadName: rm.roomPdfFileName,
               onOpen: openFileAction(() => {
-                window.location.href = rm.htmlFile;
+                if (rm.isHs1) {
+                  window.location.href = ROLE === "faculty" ? rm.facultyRoomHref : rm.studentRoomHref;
+                } else if (api && api.openHsDiscussionRoom) {
+                  api.openHsDiscussionRoom(m.code, rm.roomId, null);
+                } else if (api && api.openHsDiscussion) {
+                  api.openHsDiscussion(m.code);
+                }
               })
             });
           });

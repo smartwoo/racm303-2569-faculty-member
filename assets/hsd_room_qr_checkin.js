@@ -520,6 +520,12 @@
       : `?page=hs-discussion&module=${modCode}&room=${roomId}&checkin=1#hs-discussion-${modCode}-R${roomId}`;
     const pptxFileName = `RACM303_2569_${modCode}_Room${roomId}_${cleanRoomSlug}.pptx`;
     const staticPptxHref = isHs1 ? `exports/pptx/${pptxFileName}` : "";
+    const roomPdfFileName = `RACM303_2569_${modCode}_Room${roomId}_${cleanRoomSlug}_Blank_Worksheet_16x9.pdf`;
+    const staticRoomPdfHref = `exports/pdf/${roomPdfFileName}`;
+    const centralModulePdfFileName = `RACM303_2569_${modCode}_Blank_Worksheet_16x9.pdf`;
+    const centralModulePdfHref = `exports/pdf/${centralModulePdfFileName}`;
+    const centralCombinedPdfFileName = `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
+    const centralCombinedPdfHref = `exports/pdf/${centralCombinedPdfFileName}`;
 
     return {
       modCode,
@@ -537,12 +543,98 @@
       facultyRoomHref,
       studentRoomHref,
       pptxFileName,
-      staticPptxHref
+      staticPptxHref,
+      roomPdfFileName,
+      staticRoomPdfHref,
+      centralModulePdfFileName,
+      centralModulePdfHref,
+      centralCombinedPdfFileName,
+      centralCombinedPdfHref
     };
   }
 
+  function getCentralPdfMeta(modCodeOpt) {
+    const m = getRoomMeta(modCodeOpt || "HS1", 1);
+    return {
+      modCode: m.modCode,
+      modulePdfFileName: m.centralModulePdfFileName,
+      modulePdfHref: m.centralModulePdfHref,
+      combinedPdfFileName: m.centralCombinedPdfFileName,
+      combinedPdfHref: m.centralCombinedPdfHref
+    };
+  }
+
+  function getAllModuleRoomMetas(modCodeOpt) {
+    const mc = /^HS[1-6]$/i.test(String(modCodeOpt || "")) ? String(modCodeOpt).toUpperCase() : "HS1";
+    return [1, 2, 3, 4, 5, 6].map((r) => getRoomMeta(mc, r));
+  }
+
   function getAllHs1RoomMetas() {
-    return [1, 2, 3, 4, 5, 6].map((r) => getRoomMeta("HS1", r));
+    return getAllModuleRoomMetas("HS1");
+  }
+
+  function saveStepPinPrefillStudent(stu) {
+    if (!stu || !stu.id) return;
+    const sid = String(stu.id);
+    try {
+      sessionStorage.setItem("racm303_hsd_prefill_sid", sid);
+      sessionStorage.setItem("racm303_hsd_step5_pin_sid", sid);
+    } catch (_) {}
+  }
+
+  function clearStepPinPrefillStudent() {
+    try {
+      sessionStorage.removeItem("racm303_hsd_prefill_sid");
+      sessionStorage.removeItem("racm303_hsd_step5_pin_sid");
+    } catch (_) {}
+  }
+
+  function getInitialStepPinStudent() {
+    const roster = ((root && root.RACM_ROSTER_DATA && root.RACM_ROSTER_DATA.students) || []);
+    if (!roster.length) return null;
+    try {
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const sp = new URLSearchParams(window.location.search);
+        const qSid = (sp.get("sid") || "").trim();
+        if (qSid) {
+          const hit = roster.find((s) => String(s.id) === qSid);
+          if (hit) return hit;
+        }
+        const qPin = (sp.get("pin") || "").trim();
+        if (/^\d{1,3}$/.test(qPin)) {
+          const padded = qPin.padStart(3, "0");
+          const hits = roster.filter((s) => String(s.id).slice(-3) === padded);
+          if (hits.length === 1) return hits[0];
+        }
+      }
+    } catch (_) {}
+    try {
+      const sSid =
+        sessionStorage.getItem("racm303_hsd_prefill_sid") ||
+        sessionStorage.getItem("racm303_hsd_step5_pin_sid") ||
+        "";
+      if (sSid) {
+        const hit = roster.find((s) => String(s.id) === String(sSid).trim());
+        if (hit) return hit;
+      }
+    } catch (_) {}
+    try {
+      const pSid = localStorage.getItem("racm303_personal_student") || "";
+      if (pSid) {
+        const hit = roster.find((s) => String(s.id) === String(pSid).trim());
+        if (hit) return hit;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  function buildStudentCheckinHrefWithSid(modCodeOpt, roomIdOpt, stuObj) {
+    const meta = getRoomMeta(modCodeOpt, roomIdOpt);
+    const sidParam = stuObj && stuObj.id ? `sid=${encodeURIComponent(String(stuObj.id))}&` : "";
+    if (meta.isHs1) {
+      return `hs1-room${meta.roomId}.html?${sidParam}checkin=1`;
+    }
+    return `?page=hs-discussion&module=${meta.modCode}&room=${meta.roomId}&${sidParam}checkin=1#hs-discussion-${meta.modCode}-R${meta.roomId}`;
   }
 
   /* ---------- 3. Student Check-in Persistence (Scoped per Module & Room) ---------- */
@@ -898,113 +990,550 @@
     }
   }
 
-  /* ---------- 8. Dedicated 6-Room PPT & HTML Selector Section (HS1) ---------- */
+  /* ---------- 8. Dedicated 6-Room PPT, 16:9 Blank Worksheet PDF & 3-Digit Room-Lock Section (HS1–HS6) ---------- */
   function buildSixRoomPptsSectionDOM(modCodeOpt, opts) {
     const cfg = opts || {};
-    const modCode = String(modCodeOpt || "HS1").toUpperCase();
+    let modCode = /^HS[1-6]$/i.test(String(modCodeOpt || "")) ? String(modCodeOpt).toUpperCase() : "HS1";
     const isFaculty = root.PORTAL_ROLE === "faculty";
-    const myDiscRoom = Number(cfg.myStudentDisc) || 0;
     const activeRoom = Number(cfg.activeRoomId) || 0;
+
+    // Resolve pre-known student if available
+    const initStu = cfg.myStudent && cfg.myStudent.id ? cfg.myStudent : getInitialStepPinStudent();
+    let pinQuery = initStu ? String(initStu.id).slice(-3) : "";
+    let lockedStudent = initStu || null;
+    let manualUnlockedAll = false;
 
     const sec = document.createElement("section");
     sec.className = "hsd-six-room-ppts-section hsd-no-print";
-    sec.setAttribute("aria-label", `PPT และ QR Code แยกตามห้องเรียน ${modCode} (6 ห้อง)`);
+    sec.setAttribute("aria-label", `เลือกห้องเรียน QR Check-in และดาวน์โหลดใบงาน 16:9 PDF ประจำคาบ ${modCode}`);
 
     const head = document.createElement("div");
     head.className = "hsd-srp-head";
-    head.innerHTML = `
-      <div>
-        <h4 class="hsd-srp-title">📊 เลือกเปิดไฟล์ PPT &amp; QR Code ประจำห้องเรียน — Case Discussion: ${escHtml(modCode)} (แยก 6 ห้อง · 6 HTML)</h4>
-        <p class="hsd-srp-sub">${
-          isFaculty
-            ? "แต่ละห้องมีไฟล์ HTML และสไลด์ PPT (.pptx) ของห้องตัวเองพร้อม QR Code เช็คชื่อด้วยรหัสนักศึกษา 3 ตัวท้ายแยกแต่ละห้อง"
-            : "เลือกห้องอภิปรายของคุณ (ห้อง 1–6) หรือสแกน QR Code หน้าห้องเรียนเพื่อกรอกรหัสนักศึกษา 3 ตัวท้าย Check-in เข้าห้อง"
-        }</p>
-      </div>
-    `;
+    const headLeft = document.createElement("div");
+    headLeft.className = "hsd-srp-head-copy";
+    const headRight = document.createElement("div");
+    headRight.className = "hsd-srp-central-pdf-bar";
+    head.append(headLeft, headRight);
     sec.appendChild(head);
+
+    if (cfg.allowModuleSwitch) {
+      const modStrip = document.createElement("div");
+      modStrip.className = "hsd-srp-mod-strip";
+      ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].forEach((mc) => {
+        const mb = document.createElement("button");
+        mb.type = "button";
+        mb.className = `hsd-srp-mod-pill${mc === modCode ? " is-active" : ""}`;
+        mb.dataset.srpMod = mc;
+        mb.textContent = `คาบ ${mc}`;
+        mb.addEventListener("click", () => {
+          modCode = mc;
+          modStrip.querySelectorAll(".hsd-srp-mod-pill").forEach((el) => {
+            el.classList.toggle("is-active", el.dataset.srpMod === modCode);
+          });
+          syncSectionUI();
+        });
+        modStrip.appendChild(mb);
+      });
+      sec.appendChild(modStrip);
+    }
+
+    // 3-Digit Student ID Room-Lock & Instant Check-in Bar at This Step
+    const lockBar = document.createElement("div");
+    lockBar.className = "hsd-srp-pin-lock-bar";
+
+    const lockFormCol = document.createElement("div");
+    lockFormCol.className = "hsd-srp-pin-form-col";
+    const lockLabel = document.createElement("label");
+    lockLabel.className = "hsd-srp-pin-label";
+    const inputRow = document.createElement("div");
+    inputRow.className = "hsd-srp-pin-input-row";
+
+    const pinInput = document.createElement("input");
+    pinInput.type = "text";
+    pinInput.inputMode = "numeric";
+    pinInput.autocomplete = "off";
+    pinInput.maxLength = 24;
+    pinInput.className = "hsd-srp-pin-input";
+    pinInput.placeholder = "ใส่รหัส 3 ตัวท้าย (เช่น 056)…";
+    pinInput.value = pinQuery;
+
+    const clearPinBtn = document.createElement("button");
+    clearPinBtn.type = "button";
+    clearPinBtn.className = "hsd-srp-pin-clear-btn";
+    clearPinBtn.textContent = "✕ ล้าง / ปลดล็อก";
+    clearPinBtn.hidden = !pinQuery;
+
+    inputRow.append(pinInput, clearPinBtn);
+    lockFormCol.append(lockLabel, inputRow);
+
+    const lockResultCol = document.createElement("div");
+    lockResultCol.className = "hsd-srp-lock-result";
+
+    lockBar.append(lockFormCol, lockResultCol);
+    sec.appendChild(lockBar);
 
     const grid = document.createElement("div");
     grid.className = "hsd-srp-grid";
+    sec.appendChild(grid);
 
-    [1, 2, 3, 4, 5, 6].forEach((rId) => {
+    function triggerNavigateOrCheckin(rId, stuObj) {
       const meta = getRoomMeta(modCode, rId);
-      const isMine = myDiscRoom === rId;
-      const isCur = activeRoom === rId;
-
-      const card = document.createElement("div");
-      card.className = `hsd-srp-card${isMine ? " is-my-assigned-room" : ""}${isCur ? " is-active-room" : ""}`;
-
-      const top = document.createElement("div");
-      top.className = "hsd-srp-top";
-
-      const qrBtn = document.createElement("button");
-      qrBtn.type = "button";
-      qrBtn.className = "hsd-srp-qr-btn";
-      qrBtn.title = `คลิกเพื่อขยาย QR Code ประจำห้อง ${meta.roomCode} (${meta.displayShortUrl})`;
-      qrBtn.innerHTML = buildQrSvg(meta.studentQrUrl, "", `QR ห้อง ${meta.roomCode}`);
-      qrBtn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        openRoomQrZoomModal(modCode, rId);
-      });
-
-      const metaDiv = document.createElement("div");
-      metaDiv.className = "hsd-srp-meta";
-      metaDiv.innerHTML = `
-        <div class="hsd-srp-badges">
-          <span class="hsd-srp-pin">${escHtml(meta.pinCode)}</span>
-          ${meta.htmlFile ? `<span class="hsd-srp-html-pill">${escHtml(meta.htmlFile)}</span>` : ""}
-          ${isMine ? `<span class="hsd-srp-html-pill" style="background:rgba(16,185,129,0.15);color:#047857">★ ห้องของคุณ</span>` : ""}
-        </div>
-        <div class="hsd-srp-room-name">ห้อง ${rId} · ${escHtml(meta.roomCode)} (${meta.expectedCount} คน)</div>
-        <div class="hsd-srp-inst" title="${escHtml(meta.instructor)}">อ.ประจำห้อง: ${escHtml(meta.instructor)}</div>
-      `;
-
-      top.append(qrBtn, metaDiv);
-      card.appendChild(top);
-
-      const acts = document.createElement("div");
-      acts.className = "hsd-srp-actions";
-
-      const openHtmlLink = document.createElement("a");
-      openHtmlLink.className = "hsd-srp-act-btn is-primary";
-      openHtmlLink.href = isFaculty ? meta.facultyRoomHref : meta.studentRoomHref;
-      openHtmlLink.textContent = isFaculty
-        ? `▶ เปิด PPT ห้อง ${rId} (${meta.roomCode})`
-        : `📲 เข้าห้อง ${rId} & Check-in`;
-
-      const qrZoomBtn = document.createElement("button");
-      qrZoomBtn.type = "button";
-      qrZoomBtn.className = "hsd-srp-act-btn";
-      qrZoomBtn.textContent = "📱 QR";
-      qrZoomBtn.title = `แสดง QR Code สำหรับห้อง ${meta.roomCode}`;
-      qrZoomBtn.addEventListener("click", () => openRoomQrZoomModal(modCode, rId));
-
-      acts.append(openHtmlLink, qrZoomBtn);
-
-      if (meta.staticPptxHref) {
-        const dlA = document.createElement("a");
-        dlA.className = "hsd-srp-act-btn";
-        dlA.href = meta.staticPptxHref;
-        dlA.download = meta.pptxFileName;
-        dlA.textContent = "⬇ .pptx";
-        dlA.title = `ดาวน์โหลดไฟล์ ${meta.pptxFileName} ประจำห้อง ${meta.roomCode}`;
-        acts.appendChild(dlA);
-      } else if (typeof cfg.onDownloadRoomPptx === "function") {
-        const dlB = document.createElement("button");
-        dlB.type = "button";
-        dlB.className = "hsd-srp-act-btn";
-        dlB.textContent = "⬇ .pptx";
-        dlB.addEventListener("click", () => cfg.onDownloadRoomPptx(modCode, rId));
-        acts.appendChild(dlB);
+      if (stuObj && stuObj.id) {
+        saveStepPinPrefillStudent(stuObj);
       }
+      if (isFaculty) {
+        if (!meta.isHs1 && typeof cfg.onOpenRoomPpt === "function") {
+          cfg.onOpenRoomPpt(rId, modCode, stuObj || null);
+          return;
+        }
+        window.location.href = meta.facultyRoomHref;
+        return;
+      }
+      if (typeof cfg.onGoCheckinRoom === "function" && !meta.isHs1) {
+        cfg.onGoCheckinRoom(modCode, rId, stuObj || null);
+        return;
+      }
+      if (meta.isHs1) {
+        window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+        return;
+      }
+      if (typeof cfg.onOpenRoomPpt === "function") {
+        cfg.onOpenRoomPpt(rId, modCode, stuObj || null);
+        return;
+      }
+      window.location.href = buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+    }
 
-      card.appendChild(acts);
-      grid.appendChild(card);
+    function resolveFromPinQuery(rawVal) {
+      const q = String(rawVal || "").trim();
+      manualUnlockedAll = false;
+      if (!q) {
+        lockedStudent = null;
+        return;
+      }
+      const digits = q.replace(/\D/g, "");
+      if (/^\d{1,2}$/.test(q)) {
+        // Wait until 3rd digit unless user presses Enter
+        lockedStudent = null;
+        return;
+      }
+      const res = matchStudentsBy3DigitPin(q, 1);
+      if (res.all.length === 1) {
+        lockedStudent = res.all[0];
+        saveStepPinPrefillStudent(lockedStudent);
+      } else if (lockedStudent && !res.all.some((s) => s.id === lockedStudent.id)) {
+        lockedStudent = null;
+      } else if (!digits && res.all.length !== 1) {
+        lockedStudent = null;
+      }
+    }
+
+    pinInput.addEventListener("input", () => {
+      pinQuery = pinInput.value;
+      resolveFromPinQuery(pinQuery);
+      syncSectionUI();
     });
 
-    sec.appendChild(grid);
+    pinInput.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        const trimmed = pinInput.value.trim();
+        if (/^\d{1,3}$/.test(trimmed)) {
+          pinQuery = trimmed.padStart(3, "0");
+          pinInput.value = pinQuery;
+          const res = matchStudentsBy3DigitPin(pinQuery, 1);
+          if (res.all.length === 1) {
+            lockedStudent = res.all[0];
+            saveStepPinPrefillStudent(lockedStudent);
+            syncSectionUI();
+            const targetRoom = clampRoomId(lockedStudent.disc || 1);
+            triggerNavigateOrCheckin(targetRoom, lockedStudent);
+            return;
+          }
+          syncSectionUI();
+        } else if (lockedStudent) {
+          const targetRoom = clampRoomId(lockedStudent.disc || 1);
+          triggerNavigateOrCheckin(targetRoom, lockedStudent);
+        }
+      }
+    });
+
+    clearPinBtn.addEventListener("click", () => {
+      pinQuery = "";
+      pinInput.value = "";
+      lockedStudent = null;
+      manualUnlockedAll = true;
+      clearStepPinPrefillStudent();
+      syncSectionUI();
+      pinInput.focus();
+    });
+
+    function syncSectionUI() {
+      const cPdf = getCentralPdfMeta(modCode);
+      const isRoomLocked = Boolean(lockedStudent && !manualUnlockedAll);
+      const lockedRoomId = isRoomLocked ? clampRoomId(lockedStudent.disc || 1) : 0;
+      const myDiscRoom = lockedRoomId || Number(cfg.myStudentDisc) || 0;
+
+      headLeft.innerHTML = `
+        <h4 class="hsd-srp-title">📊 เลือกห้องเรียน PPT, ใบงานเปล่า 16:9 (.PDF) &amp; QR Check-in — Case Discussion: ${escHtml(modCode)} (แยก 6 ห้อง)</h4>
+        <p class="hsd-srp-sub">${
+          isFaculty
+            ? `แต่ละห้องมีสไลด์ 16:9, QR Code เช็คชื่อรหัส 3 ตัวท้าย และไฟล์ .PDF ใบงานเปล่า 16:9 (Optimal Font) แยกห้อง หรือดาวน์โหลด PDF กลางรวมได้ที่ปุ่มขวาบน`
+            : `กรอกรหัสนักศึกษา 3 ตัวท้ายด้านล่างเพื่อล็อกห้องเรียนของคุณตามตาราง ${escHtml(modCode)} แล้วกดไป Check-in ทันที หรือดาวน์โหลดใบงานเปล่า .PDF (16:9)`
+        }</p>
+      `;
+
+      headRight.innerHTML = `
+        <a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF กลางรวม ${escHtml(modCode)} (16:9 ใบงานเปล่า)</a>
+        <a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.combinedPdfHref)}" download="${escHtml(cPdf.combinedPdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมครบทุกคาบ HS1–HS6 (16:9 Optimal Font)">⬇ PDF กลางรวม HS1–HS6 (ครบ 6 คาบ)</a>
+      `;
+
+      lockLabel.innerHTML = `🔑 <span>ใส่รหัสนักศึกษา <strong>3 ตัวท้าย</strong> เพื่อล็อกห้องตามตาราง <strong>Case Discussion: ${escHtml(modCode)}</strong></span>`;
+      clearPinBtn.hidden = !pinQuery && !lockedStudent;
+
+      // Render Lock Result Zone
+      lockResultCol.replaceChildren();
+      const trimmed = String(pinQuery || "").trim();
+
+      if (lockedStudent) {
+        const sNo = String(lockedStudent.id).slice(-3);
+        const stuRoom = clampRoomId(lockedStudent.disc || 1);
+        const lMeta = getRoomMeta(modCode, stuRoom);
+        lockBar.classList.add("is-locked-ready");
+
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "hsd-srp-lock-matched-info";
+        infoDiv.innerHTML =
+          `<div class="hsd-srp-lock-badge-row">` +
+          `<span class="hsd-srp-lock-pill">${manualUnlockedAll ? "🔓 แสดงครบ 6 ห้อง" : `🔒 ล็อกห้อง ${stuRoom} ตาม ${escHtml(modCode)}`}</span>` +
+          `<strong>รหัส ${escHtml(lockedStudent.id)} (ท้าย ${escHtml(sNo)}) · ${escHtml(lockedStudent.nickname ? `${lockedStudent.nickname} (${lockedStudent.fullName || lockedStudent.name})` : (lockedStudent.fullName || lockedStudent.name))}</strong>` +
+          `</div>` +
+          `<div class="hsd-srp-lock-room-detail">📍 กลุ่มอภิปรายที่ ${stuRoom} · <strong>ห้อง ${escHtml(lMeta.roomCode)}</strong> · อ.ประจำห้อง: ${escHtml(lMeta.instructor)}</div>`;
+
+        const ctaWrap = document.createElement("div");
+        ctaWrap.className = "hsd-srp-lock-cta-wrap";
+
+        const goCheckinBtn = document.createElement("button");
+        goCheckinBtn.type = "button";
+        goCheckinBtn.className = "hsd-srp-go-checkin-btn";
+        goCheckinBtn.textContent = isFaculty
+          ? `▶ เปิด PPT ห้อง ${stuRoom} (${lMeta.roomCode}) →`
+          : `📲 กดไป Check-in ห้อง ${stuRoom} (${lMeta.roomCode}) →`;
+        goCheckinBtn.addEventListener("click", () => triggerNavigateOrCheckin(stuRoom, lockedStudent));
+
+        const roomPdfA = document.createElement("a");
+        roomPdfA.className = "hsd-srp-act-btn is-pdf-btn";
+        roomPdfA.href = lMeta.staticRoomPdfHref;
+        roomPdfA.download = lMeta.roomPdfFileName;
+        roomPdfA.textContent = `⬇ .PDF ห้อง ${stuRoom}`;
+        roomPdfA.title = `ดาวน์โหลดใบงานเปล่า 16:9 (.PDF) ประจำห้อง ${lMeta.roomCode}`;
+
+        const toggleAllBtn = document.createElement("button");
+        toggleAllBtn.type = "button";
+        toggleAllBtn.className = "hsd-srp-unlock-view-btn";
+        toggleAllBtn.textContent = manualUnlockedAll ? `🔒 ล็อกเฉพาะห้อง ${stuRoom}` : "ดูครบ 6 ห้อง";
+        toggleAllBtn.addEventListener("click", () => {
+          manualUnlockedAll = !manualUnlockedAll;
+          syncSectionUI();
+        });
+
+        ctaWrap.append(goCheckinBtn, roomPdfA, toggleAllBtn);
+        lockResultCol.append(infoDiv, ctaWrap);
+      } else {
+        lockBar.classList.remove("is-locked-ready");
+        if (!trimmed) {
+          const hint = document.createElement("div");
+          hint.className = "hsd-srp-lock-idle-hint";
+          hint.innerHTML =
+            `พิมพ์ตัวเลข <strong>3 หลักท้าย</strong> ของรหัสนักศึกษา (เช่น <code>056</code>) แล้วระบบจะ<strong>ล็อกห้องเรียนและอาจารย์ประจำห้องตาม ${escHtml(modCode)}</strong> ให้ทันทีเพื่อกดไป Check-in โดยไม่เข้าผิดห้อง`;
+          lockResultCol.appendChild(hint);
+        } else if (/^\d{1,2}$/.test(trimmed)) {
+          const padded = trimmed.padStart(3, "0");
+          const hint = document.createElement("div");
+          hint.className = "hsd-srp-lock-idle-hint";
+          hint.innerHTML = `กรอกอีก ${3 - trimmed.length} หลัก (หรือกด <strong>Enter</strong> หากเป็นรหัสท้าย <code>${escHtml(padded)}</code>)`;
+          lockResultCol.appendChild(hint);
+        } else {
+          const res = matchStudentsBy3DigitPin(trimmed, 1);
+          if (res.all.length > 1) {
+            const box = document.createElement("div");
+            box.className = "hsd-srp-disambig-wrap";
+            box.innerHTML = `<div class="hsd-srp-disambig-lbl">พบรหัส/ชื่อตรงกัน ${res.all.length} คน — แตะเลือกชื่อของคุณเพื่อล็อกห้องทันที:</div>`;
+            const row = document.createElement("div");
+            row.className = "hsd-srp-disambig-row";
+            res.all.slice(0, 6).forEach((cand) => {
+              const cMeta = getRoomMeta(modCode, cand.disc || 1);
+              const b = document.createElement("button");
+              b.type = "button";
+              b.className = "hsd-srp-disambig-btn";
+              b.innerHTML = `🎓 ${escHtml(cand.id)} <strong>${escHtml(cand.nickname || cand.name)}</strong> · ห้อง ${cand.disc} (${escHtml(cMeta.roomCode)})`;
+              b.addEventListener("click", () => {
+                lockedStudent = cand;
+                pinQuery = String(cand.id).slice(-3);
+                pinInput.value = pinQuery;
+                manualUnlockedAll = false;
+                saveStepPinPrefillStudent(cand);
+                syncSectionUI();
+              });
+              row.appendChild(b);
+            });
+            box.appendChild(row);
+            lockResultCol.appendChild(box);
+          } else {
+            const err = document.createElement("div");
+            err.className = "hsd-srp-lock-err";
+            err.textContent = `ไม่พบรหัส "${trimmed}" ในรายชื่อนักศึกษา 169 คน — กรุณาตรวจสอบรหัส 3 ตัวท้ายอีกครั้ง`;
+            lockResultCol.appendChild(err);
+          }
+        }
+      }
+
+      // Render 6 Room Cards
+      grid.replaceChildren();
+      [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const meta = getRoomMeta(modCode, rId);
+        const isMine = myDiscRoom === rId;
+        const isCur = activeRoom === rId;
+        const isLockedTarget = isRoomLocked && lockedRoomId === rId;
+        const isLockedOut = isRoomLocked && lockedRoomId !== rId;
+
+        const card = document.createElement("div");
+        card.className =
+          `hsd-srp-card` +
+          `${isMine ? " is-my-assigned-room" : ""}` +
+          `${isCur ? " is-active-room" : ""}` +
+          `${isLockedTarget ? " is-locked-target" : ""}` +
+          `${isLockedOut ? " is-locked-other" : ""}`;
+
+        const top = document.createElement("div");
+        top.className = "hsd-srp-top";
+
+        const qrBtn = document.createElement("button");
+        qrBtn.type = "button";
+        qrBtn.className = "hsd-srp-qr-btn";
+        qrBtn.disabled = isLockedOut;
+        qrBtn.title = `คลิกเพื่อขยาย QR Code ประจำห้อง ${meta.roomCode} (${meta.displayShortUrl})`;
+        qrBtn.innerHTML = buildQrSvg(meta.studentQrUrl, "", `QR ห้อง ${meta.roomCode}`);
+        qrBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          if (isLockedOut) return;
+          openRoomQrZoomModal(modCode, rId);
+        });
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "hsd-srp-meta";
+        metaDiv.innerHTML = `
+          <div class="hsd-srp-badges">
+            <span class="hsd-srp-pin">${escHtml(meta.pinCode)}</span>
+            ${meta.htmlFile ? `<span class="hsd-srp-html-pill">${escHtml(meta.htmlFile)}</span>` : ""}
+            ${isLockedTarget ? `<span class="hsd-srp-html-pill is-locked-mine-pill">🔒 ล็อกห้องของคุณ</span>` : isMine ? `<span class="hsd-srp-html-pill is-locked-mine-pill">★ ห้องของคุณ</span>` : ""}
+            ${isLockedOut ? `<span class="hsd-srp-html-pill is-locked-out-pill">🔒 ล็อกไว้ที่ห้อง ${lockedRoomId}</span>` : ""}
+          </div>
+          <div class="hsd-srp-room-name">ห้อง ${rId} · ${escHtml(meta.roomCode)} (${meta.expectedCount} คน)</div>
+          <div class="hsd-srp-inst" title="${escHtml(meta.instructor)}">อ.ประจำห้อง: ${escHtml(meta.instructor)}</div>
+        `;
+
+        top.append(qrBtn, metaDiv);
+        card.appendChild(top);
+
+        const acts = document.createElement("div");
+        acts.className = "hsd-srp-actions";
+
+        const openRoomBtn = document.createElement("button");
+        openRoomBtn.type = "button";
+        openRoomBtn.className = `hsd-srp-act-btn is-primary${isLockedTarget ? " is-checkin-pulse" : ""}`;
+        openRoomBtn.disabled = isLockedOut;
+        openRoomBtn.textContent = isFaculty
+          ? `▶ เปิด PPT ห้อง ${rId} (${meta.roomCode})`
+          : isLockedTarget
+          ? `📲 กดไป Check-in ห้อง ${rId} (${meta.roomCode}) →`
+          : `📲 เข้าห้อง ${rId} & Check-in`;
+        openRoomBtn.addEventListener("click", () => {
+          if (isLockedOut) return;
+          triggerNavigateOrCheckin(rId, isLockedTarget ? lockedStudent : null);
+        });
+
+        const qrZoomBtn = document.createElement("button");
+        qrZoomBtn.type = "button";
+        qrZoomBtn.className = "hsd-srp-act-btn";
+        qrZoomBtn.disabled = isLockedOut;
+        qrZoomBtn.textContent = "📱 QR";
+        qrZoomBtn.title = `แสดง QR Code สำหรับห้อง ${meta.roomCode}`;
+        qrZoomBtn.addEventListener("click", () => {
+          if (isLockedOut) return;
+          openRoomQrZoomModal(modCode, rId);
+        });
+
+        const dlPdfA = document.createElement("a");
+        dlPdfA.className = "hsd-srp-act-btn is-pdf-btn is-full-row-dl";
+        dlPdfA.href = meta.staticRoomPdfHref;
+        dlPdfA.download = meta.roomPdfFileName;
+        dlPdfA.textContent = "⬇ .PDF (ใบงานเปล่า 16:9)";
+        dlPdfA.title = `ดาวน์โหลดไฟล์ ${meta.roomPdfFileName} (16:9 Optimal Font Blank Worksheet) ประจำห้อง ${meta.roomCode}`;
+        if (isLockedOut) {
+          dlPdfA.setAttribute("tabindex", "-1");
+          dlPdfA.setAttribute("aria-disabled", "true");
+        }
+
+        acts.append(openRoomBtn, qrZoomBtn, dlPdfA);
+        card.appendChild(acts);
+        grid.appendChild(card);
+      });
+    }
+
+    syncSectionUI();
     return sec;
+  }
+
+  /* ---------- 8b. Compact 3-Digit Room-Lock & PDF Strip for Episode Modal (Step 05) ---------- */
+  function buildCompactStepPinLockDOM(modCodeOpt, opts) {
+    const cfg = opts || {};
+    const modCode = /^HS[1-6]$/i.test(String(modCodeOpt || "")) ? String(modCodeOpt).toUpperCase() : "HS1";
+    const isFaculty = root.PORTAL_ROLE === "faculty";
+    const cPdf = getCentralPdfMeta(modCode);
+    const initStu = getInitialStepPinStudent();
+    let curStu = initStu || null;
+    let curVal = curStu ? String(curStu.id).slice(-3) : "";
+
+    const box = document.createElement("div");
+    box.className = "hsd-compact-step-lock";
+
+    const topRow = document.createElement("div");
+    topRow.className = "hsd-csl-top";
+    topRow.innerHTML =
+      `<span class="hsd-csl-title">🔑 ใส่รหัส 3 ตัวท้ายเพื่อล็อกห้องตาม ${escHtml(modCode)} &amp; กดไป Check-in:</span>` +
+      `<div class="hsd-csl-pdfs">` +
+      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF กลางรวม ${escHtml(modCode)} (16:9)</a>` +
+      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.combinedPdfHref)}" download="${escHtml(cPdf.combinedPdfFileName)}">⬇ .PDF รวม HS1–HS6</a>` +
+      `</div>`;
+
+    const midRow = document.createElement("div");
+    midRow.className = "hsd-csl-mid";
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.inputMode = "numeric";
+    inp.maxLength = 16;
+    inp.className = "hsd-csl-input";
+    inp.placeholder = "รหัส 3 ตัว (เช่น 056)";
+    inp.value = curVal;
+
+    const statusWrap = document.createElement("div");
+    statusWrap.className = "hsd-csl-status";
+    midRow.append(inp, statusWrap);
+    box.append(topRow, midRow);
+
+    function goRoom(rId, stuObj) {
+      const m = getRoomMeta(modCode, rId);
+      if (stuObj) saveStepPinPrefillStudent(stuObj);
+      if (typeof cfg.onNavigate === "function") {
+        cfg.onNavigate(modCode, rId, stuObj, m);
+        return;
+      }
+      window.location.href = isFaculty ? m.facultyRoomHref : buildStudentCheckinHrefWithSid(modCode, rId, stuObj);
+    }
+
+    function sync() {
+      statusWrap.replaceChildren();
+      const q = String(curVal || "").trim();
+      if (curStu) {
+        const rId = clampRoomId(curStu.disc || 1);
+        const m = getRoomMeta(modCode, rId);
+        const sNo = String(curStu.id).slice(-3);
+        const badge = document.createElement("span");
+        badge.className = "hsd-csl-matched";
+        badge.innerHTML = `🔒 <strong>${escHtml(sNo)} ${escHtml(curStu.nickname || curStu.name)}</strong> → ห้อง ${rId} (${escHtml(m.roomCode)} · ${escHtml(m.instructor)})`;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "hsd-csl-checkin-btn";
+        btn.textContent = isFaculty ? `▶ เปิด PPT ห้อง ${rId}` : `📲 กดไป Check-in ห้อง ${rId} (${m.roomCode}) →`;
+        btn.addEventListener("click", () => goRoom(rId, curStu));
+        const clr = document.createElement("button");
+        clr.type = "button";
+        clr.className = "hsd-csl-clear";
+        clr.textContent = "✕";
+        clr.title = "ล้างรหัส";
+        clr.addEventListener("click", () => {
+          curStu = null;
+          curVal = "";
+          inp.value = "";
+          clearStepPinPrefillStudent();
+          sync();
+        });
+        statusWrap.append(badge, btn, clr);
+        return;
+      }
+      if (q.length >= 3) {
+        const res = matchStudentsBy3DigitPin(q, 1);
+        if (res.all.length > 1) {
+          res.all.slice(0, 4).forEach((cand) => {
+            const cb = document.createElement("button");
+            cb.type = "button";
+            cb.className = "hsd-csl-cand-btn";
+            cb.textContent = `${cand.id} ${cand.nickname || cand.name} (ห้อง ${cand.disc})`;
+            cb.addEventListener("click", () => {
+              curStu = cand;
+              curVal = String(cand.id).slice(-3);
+              inp.value = curVal;
+              saveStepPinPrefillStudent(cand);
+              sync();
+            });
+            statusWrap.appendChild(cb);
+          });
+          return;
+        }
+      }
+      // Show 6 quick room chips when unlocked
+      const chips = document.createElement("div");
+      chips.className = "hsd-csl-room-chips";
+      [1, 2, 3, 4, 5, 6].forEach((rNum) => {
+        const rm = getRoomMeta(modCode, rNum);
+        const a = document.createElement("button");
+        a.type = "button";
+        a.className = "tv-hosp-chip";
+        a.style.fontSize = "11.8px";
+        a.style.padding = "3px 8px";
+        a.textContent = `ห้อง ${rNum} · ${rm.cleanRoomSlug} ↗`;
+        a.addEventListener("click", () => goRoom(rNum, null));
+        chips.appendChild(a);
+      });
+      statusWrap.appendChild(chips);
+    }
+
+    inp.addEventListener("input", () => {
+      curVal = inp.value;
+      const q = curVal.trim();
+      if (!q || /^\d{1,2}$/.test(q)) {
+        curStu = null;
+      } else {
+        const res = matchStudentsBy3DigitPin(q, 1);
+        curStu = res.all.length === 1 ? res.all[0] : null;
+        if (curStu) saveStepPinPrefillStudent(curStu);
+      }
+      sync();
+    });
+
+    inp.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        const q = inp.value.trim();
+        if (/^\d{1,3}$/.test(q)) {
+          curVal = q.padStart(3, "0");
+          inp.value = curVal;
+          const res = matchStudentsBy3DigitPin(curVal, 1);
+          if (res.all.length === 1) {
+            curStu = res.all[0];
+            saveStepPinPrefillStudent(curStu);
+            sync();
+            goRoom(clampRoomId(curStu.disc || 1), curStu);
+          }
+        } else if (curStu) {
+          goRoom(clampRoomId(curStu.disc || 1), curStu);
+        }
+      }
+    });
+
+    sync();
+    return box;
   }
 
   /* ---------- 9. Reusable 3-Digit Student ID Check-in Card + Side-by-Side Room Check-in Status ---------- */
@@ -1032,9 +1561,10 @@
     const interactive = cfg.interactive !== false;
     const kioskMode = Boolean(cfg.kioskMode);
 
-    let pinDigits = "";
+    const prefillStu = !kioskMode ? (cfg.prefillStudent || getInitialStepPinStudent()) : null;
+    let pinDigits = prefillStu ? String(prefillStu.id).slice(-3) : "";
     let searchFallbackText = "";
-    let pickedStudent = null;
+    let pickedStudent = prefillStu || null;
     let selectedTeam = 0;
     let flashSuccessMsg = "";
     let flashTimer = null;
@@ -1385,8 +1915,15 @@
       if (pickedStudent) {
         const sNo = String(pickedStudent.id).slice(-3);
         const nick = pickedStudent.nickname ? ` ${pickedStudent.nickname}` : "";
-        submitBtn.className = "hsd-qcg-submit-btn is-ready";
-        submitBtn.textContent = `✅ Check-in ห้อง ${meta.roomCode} · เบอร์ ${sNo}${nick} (กลุ่ม ${selectedTeam}) →`;
+        const assignedRoom = clampRoomId(pickedStudent.disc || roomId);
+        if (!kioskMode && assignedRoom !== roomId) {
+          const trueMeta = getRoomMeta(modCode, assignedRoom);
+          submitBtn.className = "hsd-qcg-submit-btn is-ready";
+          submitBtn.textContent = `🔒 ล็อกห้องตามตาราง ${modCode}: กดไป Check-in ห้อง ${assignedRoom} (${trueMeta.roomCode}) · เบอร์ ${sNo}${nick} →`;
+        } else {
+          submitBtn.className = "hsd-qcg-submit-btn is-ready";
+          submitBtn.textContent = `✅ Check-in ห้อง ${meta.roomCode} · เบอร์ ${sNo}${nick} (กลุ่ม ${selectedTeam}) →`;
+        }
       } else {
         submitBtn.className = "hsd-qcg-submit-btn";
         submitBtn.textContent = `กรอกรหัส 3 ตัวท้ายเพื่อ Check-in ห้อง ${meta.roomCode}`;
@@ -1452,6 +1989,24 @@
         return;
       }
 
+      const assignedRoom = clampRoomId(stuDone.disc || roomId);
+      if (assignedRoom !== roomId) {
+        saveStepPinPrefillStudent(stuDone);
+        if (root.RACM_HSD_ROOM_PAGE && modCode === "HS1") {
+          window.location.href = buildStudentCheckinHrefWithSid(modCode, assignedRoom, stuDone);
+          return;
+        }
+        const balOther =
+          live && typeof live.getSmartTeamBalance === "function"
+            ? live.getSmartTeamBalance(stuDone.id, getRoomMeta(modCode, assignedRoom).expectedCount)
+            : { recommendedTeam: 1 };
+        const teamOther = balOther.recommendedTeam || 1;
+        const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, teamOther);
+        if (typeof cfg.onCompletedCheckin === "function") {
+          cfg.onCompletedCheckin(stuDone, assignedRoom, teamOther, recOther);
+        }
+        return;
+      }
       const rec = markStudentCheckedIn(modCode, roomId, stuDone, finalTeam);
       if (typeof cfg.onCompletedCheckin === "function") {
         cfg.onCompletedCheckin(stuDone, roomId, finalTeam, rec);
@@ -1678,7 +2233,13 @@
     buildQrSvg,
     buildQrPngBytes,
     getRoomMeta,
+    getCentralPdfMeta,
+    getAllModuleRoomMetas,
     getAllHs1RoomMetas,
+    saveStepPinPrefillStudent,
+    clearStepPinPrefillStudent,
+    getInitialStepPinStudent,
+    buildStudentCheckinHrefWithSid,
     getStudentCheckinRecord,
     isStudentCheckedIn,
     markStudentCheckedIn,
@@ -1689,6 +2250,7 @@
     openRoomQrZoomModal,
     closeRoomQrZoomModal,
     buildSixRoomPptsSectionDOM,
+    buildCompactStepPinLockDOM,
     buildRoomCheckinCardElement,
     buildRoomCheckinStatusPanelDOM,
     renderStudentQrCheckinGateDOM,

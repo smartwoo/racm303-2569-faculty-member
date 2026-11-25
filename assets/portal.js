@@ -1673,6 +1673,71 @@
     });
   }
 
+  function downloadHsBlankWorksheet16x9Pdf(modIdOrAll, roomIdOpt) {
+    const rawMod = String(modIdOrAll || "").toUpperCase();
+    const isAll = rawMod === "ALL" || rawMod === "HS1-HS6";
+    let href = "exports/pdf/RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf";
+    let fileName = "RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf";
+    if (!isAll) {
+      const cleanMod = /^HS[1-6]$/.test(rawMod) ? rawMod : getActiveSlideSessionMod() || "HS1";
+      const rNum = Number(roomIdOpt) || 0;
+      if (rNum >= 1 && rNum <= 6 && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getRoomMeta === "function") {
+        const rm = window.RACM_HSD_ROOM_QR.getRoomMeta(cleanMod, rNum);
+        href = rm.staticRoomPdfHref;
+        fileName = rm.roomPdfFileName;
+      } else {
+        fileName = `RACM303_2569_${cleanMod}_Blank_Worksheet_16x9.pdf`;
+        href = `exports/pdf/${fileName}`;
+      }
+    }
+    const a = document.createElement("a");
+    a.href = href;
+    a.setAttribute("download", fileName);
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 400);
+    return true;
+  }
+
+  function openHsDiscussionRoom(mod, roomIdOpt, stuObj) {
+    const cleanMod = /^HS[1-6]$/i.test(String(mod || "")) ? String(mod).toUpperCase() : "HS1";
+    const rNum = Math.min(6, Math.max(1, Math.floor(Number(roomIdOpt) || (stuObj && stuObj.disc) || 1)));
+    if (stuObj && stuObj.id && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.saveStepPinPrefillStudent === "function") {
+      window.RACM_HSD_ROOM_QR.saveStepPinPrefillStudent(stuObj);
+    }
+    if (cleanMod === "HS1" && !window.RACM_HSD_ROOM_PAGE) {
+      if (ROLE === "student") {
+        const targetUrl =
+          window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid === "function"
+            ? window.RACM_HSD_ROOM_QR.buildStudentCheckinHrefWithSid("HS1", rNum, stuObj)
+            : `hs1-room${rNum}.html?checkin=1`;
+        window.location.href = targetUrl;
+        return;
+      }
+      window.location.href = `hs1-room${rNum}.html`;
+      return;
+    }
+    state.hsdModule = cleanMod;
+    state.hsdSlideDeckMod = cleanMod;
+    state.hsdLockedRoomId = rNum;
+    state.hsdViewMode = "slide";
+    state.hsdDriveFolderOpen = false;
+    state.hsdSlideIdx = 0;
+    state.hsdLastSelectedQId = "";
+    if (ROLE === "student" && window.RACM_HSD_ROOM_QR && !window.RACM_HSD_ROOM_QR.isStudentCheckedIn(cleanMod, rNum)) {
+      state.hsdRequireQrCheckin = true;
+    }
+    if (LIVE) LIVE.setRoom(rNum, false);
+    if ($("hsdModuleSelect")) $("hsdModuleSelect").value = cleanMod;
+    switchTab(`hs-discussion-${cleanMod}-R${rNum}`, false);
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#hs-discussion-${cleanMod}-R${rNum}`);
+    }
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
   window.addEventListener("hashchange", () => {
     const rawHash = (window.location.hash || "").replace(/^#/, "");
     const nextTab = normalizeTabId(rawHash);
@@ -13463,12 +13528,12 @@
           make("span", item.fileName, "gdrive-card-filename")
         );
         const qActs = make("div", null, "gdrive-card-quick-acts");
-        const dlBtn = make("button", ".pptx", "gdrive-icon-act-btn is-mini-badge");
+        const dlBtn = make("button", ".PDF 16:9", "gdrive-icon-act-btn is-mini-badge");
         dlBtn.type = "button";
-        dlBtn.title = `ดาวน์โหลดไฟล์ ${item.fileName}`;
+        dlBtn.title = `ดาวน์โหลดใบงานเปล่า 16:9 (.PDF Optimal Font) ประจำคาบ ${m.code}`;
         dlBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          if (typeof downloadSingleModulePptx === "function") downloadSingleModulePptx(m.id);
+          downloadHsBlankWorksheet16x9Pdf(m.id, 0);
         });
         qActs.appendChild(dlBtn);
         cHead.appendChild(qActs);
@@ -13842,11 +13907,11 @@
             ev.stopPropagation();
             item.onOpen();
           });
-          const dlBtn = make("button", "⬇ .pptx", "gdrive-row-sec-btn");
+          const dlBtn = make("button", "⬇ .PDF (16:9)", "gdrive-row-sec-btn");
           dlBtn.type = "button";
           dlBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            if (typeof downloadSingleModulePptx === "function") downloadSingleModulePptx(item.mod.id);
+            downloadHsBlankWorksheet16x9Pdf(item.mod.id, 0);
           });
           actRow.append(openBtn, dlBtn);
         } else if (item.entryType === "lecture-slide") {
@@ -17157,13 +17222,19 @@
           ev.stopPropagation();
           openCaseDiscussionScrollForModule(curMod.code);
         });
-        const pptBtn = make("button", "⬇ .pptx", "hs-atv-mini-dl");
-        pptBtn.type = "button";
-        pptBtn.addEventListener("click", (ev) => {
+        const pdfBtn = make("button", "⬇ .PDF (16:9 ใบงานเปล่า)", "hs-atv-mini-dl");
+        pdfBtn.type = "button";
+        pdfBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          downloadSingleModulePptx(curMod.id);
+          downloadHsBlankWorksheet16x9Pdf(curMod.id, 0);
         });
-        foot.append(scrollBtn, pptBtn);
+        const allPdfBtn = make("button", "⬇ PDF กลางรวม HS1–6", "hs-atv-mini-dl");
+        allPdfBtn.type = "button";
+        allPdfBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          downloadHsBlankWorksheet16x9Pdf("ALL", 0);
+        });
+        foot.append(scrollBtn, pdfBtn, allPdfBtn);
       } else if (step.key === "vdo-lecture") {
         const compClips = (step.vdoInfo && step.vdoInfo.companionHeClips) || [];
         if (compClips.length > 0 && window.RACM_HE_VIDEO_BRIDGE && typeof window.RACM_HE_VIDEO_BRIDGE.open === "function") {
@@ -18253,9 +18324,13 @@
       openCaseDiscussionScrollForModule(curMod.id);
     });
 
-    const dlPptxBtn = make("button", "⬇ ดาวน์โหลดสไลด์ .pptx", "tv-hero-btn is-glass");
-    dlPptxBtn.type = "button";
-    dlPptxBtn.addEventListener("click", () => downloadSingleModulePptx(curMod.id));
+    const dlPdfModBtn = make("button", `⬇ .PDF ใบงานเปล่า 16:9 (${curMod.code})`, "tv-hero-btn is-glass");
+    dlPdfModBtn.type = "button";
+    dlPdfModBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf(curMod.id, 0));
+
+    const dlPdfAllBtn = make("button", "⬇ PDF กลางรวม HS1–HS6 (16:9)", "tv-hero-btn is-glass");
+    dlPdfAllBtn.type = "button";
+    dlPdfAllBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf("ALL", 0));
 
     const backSlideBtn = make(
       "button",
@@ -18281,20 +18356,22 @@
     backQuizBtn.type = "button";
     backQuizBtn.addEventListener("click", () => openSelfQuizForModule(curMod.code, "qa"));
 
-    heroActions.append(playSlidesBtn, scrollModeBtn, dlPptxBtn, backSlideBtn, nextVdoBtn, backQuizBtn);
+    heroActions.append(playSlidesBtn, scrollModeBtn, dlPdfModBtn, dlPdfAllBtn, backSlideBtn, nextVdoBtn, backQuizBtn);
     hero.append(heroTop, heroBody, heroActions);
     stage.appendChild(hero);
 
     if (
-      curMod.code === "HS1" &&
+      /^HS[1-6]$/i.test(curMod.code) &&
       window.RACM_HSD_ROOM_QR &&
       typeof window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM === "function"
     ) {
       stage.appendChild(
         window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM(curMod.code, {
+          myStudent: state.myStudent || null,
           myStudentDisc: state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0,
           activeRoomId: LIVE ? LIVE.getRoomId() : 1,
-          onDownloadRoomPptx: (mCode, rId) => downloadSingleModulePptx(mCode, rId)
+          onOpenRoomPpt: (rId, mCode, stuObj) => openHsDiscussionRoom(mCode || curMod.code, rId, stuObj),
+          onGoCheckinRoom: (mCode, rId, stuObj) => openHsDiscussionRoom(mCode || curMod.code, rId, stuObj)
         })
       );
     }
@@ -29414,20 +29491,7 @@
   }
 
   function downloadSingleModulePptx(modId, roomIdOpt) {
-    const effRoom = Number(roomIdOpt) || Number(state.hsdLockedRoomId) || (LIVE ? LIVE.getRoomId() : 1) || 1;
-    return exportHsdSlidesToNativePptx(
-      {
-        scope: "current",
-        targetMod: modId,
-        roomId: effRoom,
-        explicitRoomDeck: Boolean(roomIdOpt || state.hsdLockedRoomId || modId === "HS1"),
-        contentMode: ROLE === "faculty" && state.hsdFacultyMode !== "student" ? "key-unhide-all" : "student-draft",
-        pageOrient: "landscape",
-        gridId: "2x2",
-        slideSplit: "current"
-      },
-      false
-    );
+    return downloadHsBlankWorksheet16x9Pdf(modId, roomIdOpt);
   }
 
   function buildGoogleDriveExplorerDOM(opts) {
@@ -29820,39 +29884,40 @@
       const matchedMods = getMatchingModules();
       if (
         sec === "decks" &&
-        matchedMods.some((m) => m.id === "HS1") &&
+        matchedMods.length > 0 &&
         window.RACM_HSD_ROOM_QR &&
         typeof window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM === "function"
       ) {
-        const hs1SixBox = window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM("HS1", {
+        const initModForSix = matchedMods.some((m) => m.id === activeDeckMod) ? activeDeckMod : matchedMods[0].code;
+        const hsSixBox = window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM(initModForSix, {
           role: ROLE,
-          onOpenRoomPpt: (rId) => {
+          allowModuleSwitch: matchedMods.length > 1,
+          myStudent: state.myStudent || null,
+          myStudentDisc: state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0,
+          activeRoomId: LIVE ? LIVE.getRoomId() : 1,
+          onOpenRoomPpt: (rId, mCode, stuObj) => {
             closeHsdGoogleDrivePickerModal();
-            state.hsdModule = "HS1";
-            state.hsdSlideDeckMod = "HS1";
-            state.hsdLockedRoomId = rId;
-            state.hsdViewMode = "slide";
-            state.hsdDriveFolderOpen = false;
-            state.hsdSlideIdx = 0;
-            if (LIVE) LIVE.setRoom(rId, false);
-            if ($("hsdModuleSelect")) $("hsdModuleSelect").value = "HS1";
-            renderHsLiveClassroomBar();
-            renderHsDiscussionView();
+            openHsDiscussionRoom(mCode || initModForSix, rId, stuObj);
           },
-          onDownloadRoomPptx: (rId) => {
-            downloadSingleModulePptx("HS1", rId);
+          onGoCheckinRoom: (mCode, rId, stuObj) => {
+            closeHsdGoogleDrivePickerModal();
+            openHsDiscussionRoom(mCode || initModForSix, rId, stuObj);
           }
         });
-        canvas.appendChild(hs1SixBox);
+        canvas.appendChild(hsSixBox);
       }
 
       const secHead = make("div", null, "gdrive-section-head");
+      const dlCentralAllBtn = make("button", "⬇ PDF กลางรวมครบทุกคาบ (HS1–HS6 · 16:9 ใบงานเปล่า)", "btn sm teal");
+      dlCentralAllBtn.type = "button";
+      dlCentralAllBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf("ALL", 0));
       secHead.append(
         make(
           "span",
-          `ไฟล์งานนำเสนอ Microsoft PowerPoint ประจำคาบ (${matchedMods.length} ไฟล์)`,
+          `ชุดสไลด์อภิปราย 16:9 & ใบงานเปล่า .PDF ประจำคาบ (${matchedMods.length} คาบ)`,
           "gdrive-section-label"
-        )
+        ),
+        dlCentralAllBtn
       );
       canvas.appendChild(secHead);
 
@@ -29911,12 +29976,12 @@
             });
             qActs.appendChild(docBtn);
           }
-          const dlBtn = make("button", "⬇", "gdrive-icon-act-btn");
+          const dlBtn = make("button", "⬇ .PDF", "gdrive-icon-act-btn is-mini-badge");
           dlBtn.type = "button";
-          dlBtn.title = `ดาวน์โหลดไฟล์ ${fileName} ลงเครื่อง`;
+          dlBtn.title = `ดาวน์โหลดใบงานเปล่า 16:9 (.PDF) ประจำคาบ ${m.code}`;
           dlBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            downloadSingleModulePptx(m.id);
+            downloadHsBlankWorksheet16x9Pdf(m.id, 0);
           });
           qActs.appendChild(dlBtn);
           cHead.appendChild(qActs);
@@ -30039,11 +30104,11 @@
             ev.stopPropagation();
             selectHsSessionDeck(m.id);
           });
-          const dlBtn = make("button", "⬇ .pptx", "gdrive-row-sec-btn");
+          const dlBtn = make("button", "⬇ .PDF (16:9)", "gdrive-row-sec-btn");
           dlBtn.type = "button";
           dlBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            downloadSingleModulePptx(m.id);
+            downloadHsBlankWorksheet16x9Pdf(m.id, 0);
           });
           actRow.append(openBtn, dlBtn);
           if (m.conciseDocId) {
@@ -30821,10 +30886,10 @@
       snapMenuWrap.append(snapMenuBtn, snapPopover);
       gTools.body.appendChild(snapMenuWrap);
 
-      const exportStudioBtn = make("button", "📤 Handout / .pptx", "ppt-rb-cmd is-ppt-accent");
+      const exportStudioBtn = make("button", "📤 ใบงาน .PDF 16:9 / Handout", "ppt-rb-cmd is-ppt-accent");
       exportStudioBtn.type = "button";
       exportStudioBtn.dataset.pptRibbonExportBtn = "1";
-      exportStudioBtn.title = "พิมพ์สไลด์แบบ Handout 16:9 (แนวตั้ง/แนวนอน, 1×1 ถึง 4×4) หรือส่งออกไฟล์ .pptx";
+      exportStudioBtn.title = "ดาวน์โหลดใบงานเปล่า .PDF (16:9 Optimal Font) ประจำคาบ / กลางรวม HS1–HS6 หรือพิมพ์สไลด์ Handout";
       exportStudioBtn.addEventListener("click", () => openHsdPptExportStudioModal());
       gTools.body.appendChild(exportStudioBtn);
 
@@ -31578,27 +31643,25 @@
       printHsdSlidesAs16x9Handout(cfg);
     });
 
-    const btnPptxFull = make("button", "Export as .pptx (16:9 มาตรฐาน)", "btn ppt-launch-fs-btn");
-    btnPptxFull.type = "button";
-    btnPptxFull.dataset.expActionPptx = "1";
-    btnPptxFull.addEventListener("click", () => {
-      const ok = exportHsdSlidesToNativePptx(cfg, false);
-      if (ok) {
-        statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ .pptx (${cfg.slideTheme === "dark" ? "Dark Theme" : "Light Theme"} · 16:9) เรียบร้อยแล้ว!`;
-      }
+    const btnPdfMod = make("button", `⬇ ดาวน์โหลด .PDF ใบงานเปล่า 16:9 (คาบ ${getActiveSlideSessionMod()})`, "btn ppt-launch-fs-btn");
+    btnPdfMod.type = "button";
+    btnPdfMod.dataset.expActionPdfMod = "1";
+    btnPdfMod.addEventListener("click", () => {
+      const targetScope = cfg.scope === "all" ? "ALL" : getActiveSlideSessionMod();
+      const effRm = cfg.scope === "all" ? 0 : (Number(state.hsdLockedRoomId) || 0);
+      downloadHsBlankWorksheet16x9Pdf(targetScope, effRm);
+      statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ .PDF (16:9 Optimal Font Blank Worksheet) เรียบร้อยแล้ว!`;
     });
 
-    const btnPptxHandout = make("button", "Export Handout .pptx (ตามตารางที่เลือก)", "btn teal");
-    btnPptxHandout.type = "button";
-    btnPptxHandout.dataset.expActionPptxGrid = "1";
-    btnPptxHandout.addEventListener("click", () => {
-      const ok = exportHsdSlidesToNativePptx(cfg, true);
-      if (ok) {
-        statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ Handout .pptx (${cfg.slideTheme === "dark" ? "Dark Theme" : "Light Theme"}) เรียบร้อยแล้ว!`;
-      }
+    const btnPdfCentralAll = make("button", "⬇ PDF กลางรวมครบทุกคาบ (HS1–HS6 · 16:9)", "btn teal");
+    btnPdfCentralAll.type = "button";
+    btnPdfCentralAll.dataset.expActionPdfAll = "1";
+    btnPdfCentralAll.addEventListener("click", () => {
+      downloadHsBlankWorksheet16x9Pdf("ALL", 0);
+      statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ PDF กลางรวม HS1–HS6 (16:9 Blank Worksheet) เรียบร้อยแล้ว!`;
     });
 
-    actBtns.append(btnPptxFull, btnPptxHandout, btnPrintHandout);
+    actBtns.append(btnPdfMod, btnPdfCentralAll, btnPrintHandout);
     foot.append(statusMsg, actBtns);
     card.appendChild(foot);
     backdrop.appendChild(card);
@@ -32600,11 +32663,15 @@
           window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(effModForGate, effRoomForGate);
         });
 
-        const dlPptBtn = make("a", `⬇ PPT ห้อง ${rMeta.roomId} (.pptx)`, "hsd-drr-link");
-        dlPptBtn.href = `exports/pptx/RACM303_2569_HS1_Room${rMeta.roomId}_${rMeta.cleanRoomSlug}.pptx`;
-        dlPptBtn.setAttribute("download", `RACM303_2569_HS1_Room${rMeta.roomId}_${rMeta.cleanRoomSlug}.pptx`);
+        const dlPdfRoomBtn = make("a", `⬇ .PDF ห้อง ${rMeta.roomId} (16:9)`, "hsd-drr-btn");
+        dlPdfRoomBtn.href = rMeta.staticRoomPdfHref;
+        dlPdfRoomBtn.setAttribute("download", rMeta.roomPdfFileName);
 
-        rightWrap.append(roomSel, qrZoomBtn, dlPptBtn);
+        const dlPdfCentralBtn = make("a", `⬇ PDF กลางรวม ${effModForGate}`, "hsd-drr-btn");
+        dlPdfCentralBtn.href = rMeta.centralModulePdfHref;
+        dlPdfCentralBtn.setAttribute("download", rMeta.centralModulePdfFileName);
+
+        rightWrap.append(roomSel, qrZoomBtn, dlPdfRoomBtn, dlPdfCentralBtn);
         if (window.RACM_HSD_ROOM_PAGE) {
           const backPortalLink = make("a", "← หน้าหลักพอร์ทัลรวม", "hsd-drr-link");
           backPortalLink.href = "./";
@@ -43548,7 +43615,7 @@
           if (LIVE) {
             LIVE.setFollowTeacher(true);
             if (typeof LIVE.joinSessionWithStudent === "function") {
-              LIVE.joinSessionWithStudent(matchedStu, rId, mCode, Number(savedRec.subTeam) || 1);
+              LIVE.joinSessionWithStudent(matchedStu, rId, mCode, Number(savedRec.teamId || savedRec.subTeam) || 1);
             }
           }
         } else {
@@ -43690,6 +43757,8 @@
     openPanelDeck: (id, idx, opts) => window.RACM_PANEL_DECK && window.RACM_PANEL_DECK.open(id, idx, opts),
     mountSlideFieldworkSiteStage: (hostEl, siteId, opts) => mountSlideFieldworkSiteStage(hostEl, siteId, opts),
     openHsDiscussion,
+    openHsDiscussionRoom,
+    downloadHsBlankWorksheet16x9Pdf,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),
     selectHsSessionDeck,
