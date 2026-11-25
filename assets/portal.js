@@ -158,7 +158,12 @@
     hsdPptSubView: "normal", // normal | sorter
     hsdPptActiveRibbonTab: "home", // file | home | ref | slideshow | view
     hsdPptRibbonCollapsed: true,
-    hsdPptShowThumbs: localStorage.getItem("racm303_hsd_ppt_thumbs") === "1",
+    hsdPptShowThumbs: (() => {
+      const saved = localStorage.getItem("racm303_hsd_ppt_thumbs");
+      if (saved === "1") return true;
+      if (saved === "0") return false;
+      return typeof window !== "undefined" && (window.innerWidth || 1280) >= 1024;
+    })(),
     hsdPptShowNotes: localStorage.getItem("racm303_hsd_ppt_notes") === "1",
     hsdPptZoomMode: "fit", // fit | manual
     hsdPptZoomPct: 100,
@@ -27220,6 +27225,18 @@
       goQ1Btn.addEventListener("click", jumpToFirstQuestion);
       qrActions.appendChild(goQ1Btn);
       qrCard.appendChild(qrActions);
+      const okCases = collectModuleCasesFromSlides(cur, slides);
+      if (okCases.length > 1) {
+        const caseRow = make("div", null, "ppt-ok-case-jump-row");
+        okCases.forEach((cObj) => {
+          const cb = make("button", `Case #${cObj.caseNumber}`, "ppt-ok-case-jump-pill");
+          cb.type = "button";
+          cb.title = `เปิด Case Scenario #${cObj.caseNumber}: ${cObj.coverTitle || cObj.subtitle || cObj.title}`;
+          cb.addEventListener("click", () => jumpToCaseScenarioInSlides(cObj, cur, slides));
+          caseRow.appendChild(cb);
+        });
+        qrCard.appendChild(caseRow);
+      }
     }
     colQr.appendChild(qrCard);
 
@@ -27248,6 +27265,98 @@
 
     stage.append(colQr, rightCol);
     return stage;
+  }
+
+  function collectModuleCasesFromSlides(cur, slides) {
+    const modId = cur && cur.mod && cur.mod.id ? cur.mod.id : "";
+    if (cur && Array.isArray(cur.modCases) && cur.modCases.length > 0) {
+      return cur.modCases;
+    }
+    const seen = new Set();
+    const out = [];
+    (slides || []).forEach((s) => {
+      if (!s || !s.caseObj || !s.caseObj.id) return;
+      if (modId && s.mod && s.mod.id !== modId) return;
+      if (!seen.has(s.caseObj.id)) {
+        seen.add(s.caseObj.id);
+        out.push(s.caseObj);
+      }
+    });
+    if (!out.length && modId) {
+      (HSD_DATA.cases || []).forEach((c) => {
+        if (c.module === modId && !seen.has(c.id)) {
+          seen.add(c.id);
+          out.push(c);
+        }
+      });
+    }
+    return out;
+  }
+
+  function jumpToCaseScenarioInSlides(cObj, cur, slides) {
+    if (!cObj || !Array.isArray(slides) || !slides.length) return;
+    const isSameCaseNow = Boolean(cur && cur.caseObj && cur.caseObj.id === cObj.id && cur.kind !== "opening-kahoot");
+    let targetIdx = -1;
+    if (isSameCaseNow && cur.kind === "case-cover") {
+      targetIdx = slides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === cObj.id);
+      if (targetIdx < 0) {
+        targetIdx = slides.findIndex((s) => s.kind === "question" && s.caseObj && s.caseObj.id === cObj.id);
+      }
+    } else if (isSameCaseNow && (cur.kind === "case-scenario" || cur.kind === "concept-summary")) {
+      targetIdx = slides.findIndex(
+        (s) => s.kind === "question" && s.caseObj && s.caseObj.id === cObj.id && (s.pedStage === 2 || s.pedStage === 1)
+      );
+    }
+    if (targetIdx < 0) {
+      targetIdx = slides.findIndex((s) => s.kind === "case-cover" && s.caseObj && s.caseObj.id === cObj.id);
+    }
+    if (targetIdx < 0) {
+      targetIdx = slides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === cObj.id);
+    }
+    if (targetIdx < 0) {
+      targetIdx = slides.findIndex((s) => s.caseObj && s.caseObj.id === cObj.id);
+    }
+    if (targetIdx < 0) return;
+    state.hsdSlideIdx = targetIdx;
+    state.hsdSinglePaneOverride = "";
+    state.hsdFocusedConceptStep = 0;
+    state.hsdFsZoomScale = 1;
+    state.hsdFsScenFolded = false;
+    const chosen = slides[targetIdx];
+    if (chosen && chosen.qObj) {
+      state.hsdLastSelectedQId = chosen.qObj.id;
+      pauseFollowTeacherIfDiverged(chosen.qObj.id);
+    }
+    markSlideBoxesAutoOptimize("both");
+    renderHsDiscussionView();
+    broadcastPptPresentationState();
+    if (ROLE === "faculty" && typeof broadcastActiveFacultySlideToStudents === "function") {
+      broadcastActiveFacultySlideToStudents(false);
+    }
+  }
+
+  function buildSlideCaseScenarioSwitcherDOM(cur, slides) {
+    const modCases = collectModuleCasesFromSlides(cur, slides);
+    if (modCases.length <= 1) return null;
+    const wrap = make("div", null, "ppt-sm-casepills hsd-no-print");
+    wrap.setAttribute("role", "group");
+    wrap.setAttribute("aria-label", `เลือก Case Scenario ทั้ง ${modCases.length} กรณี`);
+    modCases.forEach((cObj) => {
+      const isAct = Boolean(cur && cur.caseObj && cur.caseObj.id === cObj.id && cur.kind !== "opening-kahoot");
+      const qArr = Array.isArray(cObj.questions) ? cObj.questions : [];
+      const allDone = qArr.length > 0 && qArr.every((q) => isHsQuestionAnswered(q));
+      const btn = make(
+        "button",
+        `${allDone ? "✓ " : ""}Case ${cObj.caseNumber}`,
+        `ppt-sm-casepill${isAct ? " is-current" : ""}`
+      );
+      btn.type = "button";
+      btn.setAttribute("aria-pressed", isAct ? "true" : "false");
+      btn.title = `Case Scenario #${cObj.caseNumber}: ${cObj.coverTitle || cObj.subtitle || cObj.title} (${qArr.length} ข้อย่อย)`;
+      btn.addEventListener("click", () => jumpToCaseScenarioInSlides(cObj, cur, slides));
+      wrap.appendChild(btn);
+    });
+    return wrap;
   }
 
   function buildPptSlideThemeSwitcherDOM(extraClass) {
@@ -27312,12 +27421,70 @@
         schedPill.appendChild(make("span", uInfo.remainLabel, "ppt-hsg-countdown"));
       }
       card.append(iconBox, badge, hTitle, desc, schedPill);
-      if (!exp && !state.isPptSlideSharePopup && cur.qObj) {
-        const backBtn = make("button", `← กลับไปทำใบงานข้อ ${cur.shortNum}`, "btn sm primary");
-        backBtn.type = "button";
-        backBtn.style.marginTop = "6px";
-        backBtn.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, 1));
-        card.appendChild(backBtn);
+      if (!exp && !state.isPptSlideSharePopup) {
+        const curIdx = Array.isArray(slides) ? slides.indexOf(cur) : -1;
+        const nextUnlockedIdx =
+          curIdx >= 0 ? slides.findIndex((s, sIdx) => sIdx > curIdx && !s.isHiddenSlide) : -1;
+        const actRow = make("div", null, "ppt-hsg-actions");
+        if (cur.qObj) {
+          const backBtn = make(
+            "button",
+            `← กลับไปทำใบงานข้อ ${cur.shortNum}`,
+            nextUnlockedIdx >= 0 ? "btn sm" : "btn sm primary"
+          );
+          backBtn.type = "button";
+          backBtn.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, 2));
+          actRow.appendChild(backBtn);
+        }
+        if (nextUnlockedIdx >= 0) {
+          const nextS = slides[nextUnlockedIdx];
+          const isNextNewCase = Boolean(
+            nextS.caseObj && (!cur.caseObj || nextS.caseObj.id !== cur.caseObj.id)
+          );
+          const nextLabel = isNextNewCase
+            ? `เข้าสู่ Case Scenario #${nextS.caseObj.caseNumber} →`
+            : nextS.qObj
+            ? `ไปทำใบงานข้อ ${nextS.shortNum} →`
+            : "สไลด์ถัดไป →";
+          const nextBtn = make("button", nextLabel, "btn sm primary");
+          nextBtn.type = "button";
+          nextBtn.addEventListener("click", () => {
+            state.hsdSlideIdx = nextUnlockedIdx;
+            state.hsdSinglePaneOverride = "";
+            state.hsdFocusedConceptStep = 0;
+            state.hsdFsZoomScale = 1;
+            state.hsdFsScenFolded = false;
+            if (nextS.qObj) {
+              state.hsdLastSelectedQId = nextS.qObj.id;
+              pauseFollowTeacherIfDiverged(nextS.qObj.id);
+            }
+            markSlideBoxesAutoOptimize("both");
+            renderHsDiscussionView();
+            broadcastPptPresentationState();
+          });
+          actRow.appendChild(nextBtn);
+        }
+        if (actRow.childNodes.length > 0) {
+          card.appendChild(actRow);
+        }
+        const hsgCases = collectModuleCasesFromSlides(cur, slides);
+        if (hsgCases.length > 1) {
+          const caseJumpRow = make("div", null, "ppt-hsg-case-row");
+          caseJumpRow.appendChild(make("span", `โจทย์ในคาบ ${cur.mod.code}:`, "ppt-hsg-case-label"));
+          hsgCases.forEach((cObj) => {
+            const isCurCase = Boolean(cur.caseObj && cur.caseObj.id === cObj.id);
+            const cb = make(
+              "button",
+              `Case Scenario #${cObj.caseNumber}`,
+              `ppt-hsg-case-pill${isCurCase ? " is-current" : ""}`
+            );
+            cb.type = "button";
+            cb.title = `${cObj.coverTitle || cObj.subtitle || cObj.title}`;
+            cb.addEventListener("click", () => jumpToCaseScenarioInSlides(cObj, cur, slides));
+            caseJumpRow.appendChild(cb);
+          });
+          card.appendChild(caseJumpRow);
+        }
       }
       gate.appendChild(card);
       return gate;
@@ -27754,6 +27921,10 @@
       );
 
       const mRight = make("div", null, "ppt-sm-right");
+      if (!exp && !state.isPptSlideSharePopup) {
+        const caseSw = buildSlideCaseScenarioSwitcherDOM(cur, slides);
+        if (caseSw) mRight.appendChild(caseSw);
+      }
       if (!exp && window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.openRoomQrZoomModal === "function") {
         const qrHeadBtn = make("button", `📱 QR ห้อง ${headRoomCode}`, "ppt-sm-qpill");
         qrHeadBtn.type = "button";
@@ -27819,6 +27990,10 @@
       );
 
       const mRight = make("div", null, "ppt-sm-right");
+      if (!exp && !state.isPptSlideSharePopup) {
+        const caseSw = buildSlideCaseScenarioSwitcherDOM(cur, slides);
+        if (caseSw) mRight.appendChild(caseSw);
+      }
       if (!exp && slides.length > 1) {
         const nextScenBtn = make("button", "อ่านเนื้อหาโจทย์ →", "ppt-sm-qpill is-current");
         nextScenBtn.type = "button";
@@ -27916,6 +28091,10 @@
       );
 
       const mRight = make("div", null, "ppt-sm-right");
+      if (!exp && !state.isPptSlideSharePopup) {
+        const caseSw = buildSlideCaseScenarioSwitcherDOM(cur, slides);
+        if (caseSw) mRight.appendChild(caseSw);
+      }
       if (ROLE === "faculty" && state.hsdFacultyMode !== "student" && !state.isPptSlideSharePopup && !exp && cur.qObj) {
         const stageBar = make("div", null, "ppt-sm-stage-pills hsd-no-print");
         const circNums = ["⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
@@ -28093,6 +28272,10 @@
     );
 
     const mRight = make("div", null, "ppt-sm-right");
+    if (!exp && !state.isPptSlideSharePopup) {
+      const caseSw = buildSlideCaseScenarioSwitcherDOM(cur, slides);
+      if (caseSw) mRight.appendChild(caseSw);
+    }
     if (!state.isPptSlideSharePopup && !exp && cur.qObj) {
       const stageBar = make("div", null, "ppt-sm-stage-pills hsd-no-print");
       const hasCs = Boolean(cur.qObj && cur.qObj.conceptSummarySlide);
@@ -30222,7 +30405,76 @@
       tabsLeft.appendChild(btn);
     });
 
+    const formatSlidePickerLabel = (s, idx) => {
+      const prefix = `${idx + 1}/${slides.length} · `;
+      if (s.kind === "opening-kahoot") {
+        return `${prefix}สไลด์เปิดคาบ & เช็คชื่อ (${s.mod.code})`;
+      }
+      if (s.kind === "case-cover") {
+        return `${prefix}[Case Scenario #${s.caseObj.caseNumber}] ${s.caseObj.coverTitle || s.caseObj.subtitle || s.caseObj.title}`;
+      }
+      if (s.kind === "case-scenario") {
+        return `${prefix}[เนื้อหาโจทย์เต็มจอ] กรณีที่ ${s.caseObj.caseNumber}: ${s.caseObj.subtitle || s.caseObj.title}`;
+      }
+      if (s.kind === "concept-summary") {
+        if (s.isHiddenSlide) {
+          const uShort = (s.unlockInfo && s.unlockInfo.shortLabel) || "จบคาบ";
+          return `${prefix}[🔒 Hide Slide] ข้อ ${s.shortNum} (ปลดล็อกหลัง ${uShort})`;
+        }
+        const csTitle =
+          (s.frameworkVisual && s.frameworkVisual.title) ||
+          (s.followUpSlide && s.followUpSlide.title) ||
+          (s.conceptSummary && s.conceptSummary.title) ||
+          "Key Takeaway";
+        return `${prefix}[${s.pedShort || "Key Takeaway"}] ข้อ ${s.shortNum}: ${csTitle}`;
+      }
+      const doneMark = isHsQuestionAnswered(s.qObj) ? "✓ " : "";
+      const stagePrefix = s.pedShort ? `[${s.pedShort}] ` : "";
+      return `${prefix}${doneMark}${stagePrefix}${getClearQuestionHeadingLabel(s.qObj, idx)}: ${s.qObj.title}`;
+    };
+
     const menuRight = make("div", null, "ppt-menu-right");
+
+    if (slides.length > 1) {
+      const mbNav = make("div", null, "ppt-menubar-slidenav");
+      const mbPrev = make("button", "◀", "ppt-menubar-step-btn");
+      mbPrev.type = "button";
+      mbPrev.disabled = state.hsdSlideIdx <= 0;
+      mbPrev.title = "สไลด์ก่อนหน้า (ArrowLeft)";
+      mbPrev.addEventListener("click", () => stepHsQuestionSlide(-1));
+
+      const mbSel = document.createElement("select");
+      mbSel.className = "ppt-menubar-slideselect";
+      mbSel.setAttribute("aria-label", `เลือกโจทย์และสไลด์ในคาบ ${cur.mod.code}`);
+      slides.forEach((s, idx) => {
+        mbSel.add(new Option(formatSlidePickerLabel(s, idx), String(idx), false, idx === state.hsdSlideIdx));
+      });
+      mbSel.addEventListener("change", () => {
+        const nextIdx = Number(mbSel.value) || 0;
+        state.hsdSlideIdx = nextIdx;
+        state.hsdSinglePaneOverride = "";
+        state.hsdFocusedConceptStep = 0;
+        if (slides[nextIdx] && slides[nextIdx].qObj) {
+          state.hsdLastSelectedQId = slides[nextIdx].qObj.id;
+          pauseFollowTeacherIfDiverged(slides[nextIdx].qObj.id);
+        }
+        markSlideBoxesAutoOptimize("both");
+        renderHsDiscussionView();
+        broadcastPptPresentationState();
+        if (ROLE === "faculty" && typeof broadcastActiveFacultySlideToStudents === "function") {
+          broadcastActiveFacultySlideToStudents(false);
+        }
+      });
+
+      const mbNext = make("button", "▶", "ppt-menubar-step-btn");
+      mbNext.type = "button";
+      mbNext.disabled = state.hsdSlideIdx >= slides.length - 1;
+      mbNext.title = "สไลด์ถัดไป (ArrowRight)";
+      mbNext.addEventListener("click", () => stepHsQuestionSlide(1));
+
+      mbNav.append(mbPrev, mbSel, mbNext);
+      menuRight.appendChild(mbNav);
+    }
 
     const mbReadingBtn = make(
       "button",
@@ -30600,49 +30852,7 @@
       picker.className = "ppt-q-select is-compact";
       picker.setAttribute("aria-label", "เลือกสไลด์ในคาบนี้");
       slides.forEach((s, idx) => {
-        if (s.kind === "opening-kahoot") {
-          picker.add(
-            new Option(
-              `สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย (${s.mod.code})`,
-              String(idx),
-              false,
-              idx === state.hsdSlideIdx
-            )
-          );
-        } else if (s.kind === "concept-summary") {
-          if (s.isHiddenSlide) {
-            const uShort = (s.unlockInfo && s.unlockInfo.shortLabel) || "จบคาบ";
-            picker.add(
-              new Option(
-                `[🔒 Hide Slide] ข้อ ${s.shortNum} — ปลดล็อกอัตโนมัติหลัง ${uShort}`,
-                String(idx),
-                false,
-                idx === state.hsdSlideIdx
-              )
-            );
-          } else {
-            const csTitle = ((s.frameworkVisual && s.frameworkVisual.title) || (s.conceptSummary && s.conceptSummary.title)) || "Key Takeaway";
-            picker.add(
-              new Option(
-                `[${s.pedShort || "Key Takeaway #1"}] ข้อ ${s.shortNum}: ${csTitle}`,
-                String(idx),
-                false,
-                idx === state.hsdSlideIdx
-              )
-            );
-          }
-        } else {
-          const doneMark = isHsQuestionAnswered(s.qObj) ? "✓ " : "";
-          const stagePrefix = s.pedShort ? `[${s.pedShort}] ` : "";
-          picker.add(
-            new Option(
-              `${doneMark}${stagePrefix}${getClearQuestionHeadingLabel(s.qObj, idx)}: ${s.qObj.title}`,
-              String(idx),
-              false,
-              idx === state.hsdSlideIdx
-            )
-          );
-        }
+        picker.add(new Option(formatSlidePickerLabel(s, idx), String(idx), false, idx === state.hsdSlideIdx));
       });
       picker.addEventListener("change", () => {
         const nextIdx = Number(picker.value) || 0;
@@ -32054,10 +32264,14 @@
         "span",
         cur.kind === "opening-kahoot"
           ? `คาบ ${cur.mod.code} · สไลด์เปิดคาบ & เช็คชื่อกลุ่มย่อย`
+          : cur.kind === "case-cover"
+          ? `คาบ ${cur.mod.code} · Case Scenario #${cur.caseObj.caseNumber}`
+          : cur.kind === "case-scenario"
+          ? `คาบ ${cur.mod.code} · กรณีที่ ${cur.caseObj.caseNumber} (เนื้อหาโจทย์)`
           : cur.kind === "concept-summary"
           ? cur.isHiddenSlide
             ? `คาบ ${cur.mod.code} · 🔒 Hide Slide (ปลดล็อกเป็น Unhide Slide หลัง ${(cur.unlockInfo && cur.unlockInfo.shortLabel) || "จบคาบ"})`
-            : `คาบ ${cur.mod.code} · ${(cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"}`
+            : `คาบ ${cur.mod.code} · ${(cur.followUpSlide && cur.followUpSlide.kicker) || (cur.frameworkVisual && cur.frameworkVisual.kicker) || (cur.conceptSummary && cur.conceptSummary.kicker) || "Key Takeaway #1"}: ${(cur.followUpSlide && cur.followUpSlide.title) || (cur.frameworkVisual && cur.frameworkVisual.title) || (cur.conceptSummary && cur.conceptSummary.title) || "Key Takeaway"}`
           : `คาบ ${cur.mod.code} · กรณีที่ ${cur.caseObj.caseNumber} (ข้อ ${cur.shortNum})`
       ),
       make("span", "|", "ppt-status-sep"),
