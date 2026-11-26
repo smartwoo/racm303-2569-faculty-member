@@ -306,8 +306,8 @@
   function buildDohDiagramShapesXml(startId, box, diagSpec, isDark) {
     let nextId = startId;
     const outShapes = [];
-    const outerOn = Boolean(diagSpec && diagSpec.outerRing);
-    const innerOn = Boolean(diagSpec && diagSpec.innerRing);
+    const outerOn = diagSpec && typeof diagSpec.outerRing === "boolean" ? diagSpec.outerRing : true;
+    const innerOn = diagSpec && typeof diagSpec.innerRing === "boolean" ? diagSpec.innerRing : true;
     const nodes = (diagSpec && diagSpec.nodes) || {};
     const edges = (diagSpec && diagSpec.edges) || {};
     const isBlank = diagSpec && diagSpec.mode === "blank-sheet";
@@ -533,23 +533,24 @@
       )
     );
 
-    // 5. Six Directional Straight Arrow Connectors
+    // 5. Six Bidirectional Straight Arrow Connectors
     const arrowHex = isDark ? "60A5FA" : "2E6EB5";
     const ghostHex = isDark ? "475569" : "CBD5E1";
     const topBridgeY = iy + Math.round(ih * 0.155);
+    const midOutY = outBox.y + Math.round(outBox.h * 0.48);
     const edgeCoords = {
       ind_bi_soc: [indBox.x + indBox.w + 14000, topBridgeY, socBox.x - 14000, topBridgeY],
       ind_to_out: [
         indBox.x + indBox.w + 12000,
-        iy + Math.round(ih * 0.30),
+        midOutY,
         outBox.x - 14000,
-        outBox.y + Math.round(outBox.h * 0.44)
+        midOutY
       ],
       soc_to_out: [
         socBox.x - 12000,
-        iy + Math.round(ih * 0.30),
+        midOutY,
         outBox.x + outBox.w + 14000,
-        outBox.y + Math.round(outBox.h * 0.44)
+        midOutY
       ],
       hsys_to_out: [
         outBox.x + Math.round(outBox.w / 2),
@@ -572,7 +573,8 @@
     };
 
     Object.keys(edgeCoords).forEach((edgeId) => {
-      const dir = edges[edgeId] || "off";
+      const dir = edges[edgeId] || "bi";
+      if (dir === "off") return;
       const [x1, y1, x2, y2] = edgeCoords[edgeId];
       outShapes.push(
         buildStraightArrowXml(

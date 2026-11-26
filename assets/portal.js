@@ -22215,26 +22215,27 @@
 
   let dohInstanceSeq = 0;
   const DOH_EDGE_DEFS = [
-    { id: "ind_to_out", label: "ปัจเจก→ปัญหา", revLabel: "ปัญหา→ปัจเจก", biLabel: "ปัจเจก↔ปัญหา", std: "fwd", syms: { fwd: "↘", rev: "↖", bi: "↖↘" } },
-    { id: "soc_to_out", label: "สังคม→ปัญหา", revLabel: "ปัญหา→สังคม", biLabel: "สังคม↔ปัญหา", std: "fwd", syms: { fwd: "↙", rev: "↗", bi: "↙↗" } },
-    { id: "hsys_to_out", label: "บริการ→ปัญหา", revLabel: "ปัญหา→บริการ", biLabel: "บริการ↔ปัญหา", std: "fwd", syms: { fwd: "↑", rev: "↓", bi: "↕" } },
+    { id: "ind_to_out", label: "ปัจเจก→ปัญหา", revLabel: "ปัญหา→ปัจเจก", biLabel: "ปัจเจก↔ปัญหา", std: "bi", syms: { fwd: "↘", rev: "↖", bi: "↖↘" } },
+    { id: "soc_to_out", label: "สังคม→ปัญหา", revLabel: "ปัญหา→สังคม", biLabel: "สังคม↔ปัญหา", std: "bi", syms: { fwd: "↙", rev: "↗", bi: "↙↗" } },
+    { id: "hsys_to_out", label: "บริการ→ปัญหา", revLabel: "ปัญหา→บริการ", biLabel: "บริการ↔ปัญหา", std: "bi", syms: { fwd: "↑", rev: "↓", bi: "↕" } },
     { id: "ind_bi_soc", label: "ปัจเจก→สังคม", revLabel: "สังคม→ปัจเจก", biLabel: "ปัจเจก↔สังคม", std: "bi", syms: { fwd: "→", rev: "←", bi: "↔" } },
     { id: "ind_bi_hsys", label: "ปัจเจก→บริการ", revLabel: "บริการ→ปัจเจก", biLabel: "ปัจเจก↔บริการ", std: "bi", syms: { fwd: "↘", rev: "↖", bi: "↖↘" } },
     { id: "soc_bi_hsys", label: "สังคม→บริการ", revLabel: "บริการ→สังคม", biLabel: "สังคม↔บริการ", std: "bi", syms: { fwd: "↙", rev: "↗", bi: "↙↗" } }
   ];
+  const STATIC_DOH_BI_EDGES = Object.freeze({
+    ind_to_out: "bi",
+    soc_to_out: "bi",
+    hsys_to_out: "bi",
+    ind_bi_soc: "bi",
+    ind_bi_hsys: "bi",
+    soc_bi_hsys: "bi"
+  });
 
   function parseDohLinksString(raw) {
     const st = {
-      edges: {
-        ind_to_out: "off",
-        soc_to_out: "off",
-        hsys_to_out: "off",
-        ind_bi_soc: "off",
-        ind_bi_hsys: "off",
-        soc_bi_hsys: "off"
-      },
-      innerRing: false,
-      outerRing: false
+      edges: { ...STATIC_DOH_BI_EDGES },
+      innerRing: true,
+      outerRing: true
     };
     const str = String(raw || "").trim();
     if (!str) return st;
@@ -22644,7 +22645,7 @@
           "span",
           teamRecOnMount && teamRecOnMount.editorLabel
             ? `อัปเดตล่าสุดโดย ${teamRecOnMount.editorLabel}`
-            : "พิมพ์และลากลูกศรเพื่อส่งขึ้นจอห้องเรียน",
+            : "พิมพ์คำตอบในกรอบแผนภาพเพื่อส่งขึ้นจอห้องเรียน",
           "hsd-tsb-editor"
         );
         editorTag.setAttribute("data-team-live-editor", qObj.id);
@@ -22681,7 +22682,6 @@
 
     const meta = ws.diagramMeta || {};
     const nodesMeta = meta.nodes || {};
-    const linksInputId = meta.linksInputId || "c1b_q1_links";
 
     // Map each inputId to its cell spec in ws.rows
     const cellSpecById = {};
@@ -22702,66 +22702,19 @@
       }
     });
 
-    let linkState = parseDohLinksString(state.hsdDrafts[linksInputId] || "");
     const cellSyncCallbacks = [];
     let redrawDiagramArrows = () => {};
 
     const container = make("div", null, "doh-ws-container");
 
-    // Hidden input for linksInputId so syncStudentTeamWorksheetFromLive updates arrows & rings seamlessly!
-    const hiddenLinksInput = document.createElement("input");
-    hiddenLinksInput.type = "hidden";
-    hiddenLinksInput.id = `${idPrefix}${linksInputId}`;
-    hiddenLinksInput.dataset.inputId = linksInputId;
-    hiddenLinksInput.value = state.hsdDrafts[linksInputId] || "";
-    container.appendChild(hiddenLinksInput);
-
-    // Interactive Toolbar (Mode toggle + Concentric Ovals + Quick Arrow Controls)
-    const toolbar = make("div", null, "doh-ws-toolbar hsd-no-print");
-    const leftTools = make("div", null, "doh-toolbar-group");
-    const rightTools = make("div", null, "doh-toolbar-group");
-
-    const viewDiagBtn = make("button", "🗺️ สร้างผัง Diagram", "doh-tool-pill is-active");
-    viewDiagBtn.type = "button";
-    const viewTblBtn = make("button", "▦ มุมมองตาราง", "doh-tool-pill");
-    viewTblBtn.type = "button";
-
-    const innerOvalBtn = make("button", "⭕ วงล้อมชั้นใน", "doh-tool-pill");
-    innerOvalBtn.type = "button";
-    innerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นในเชื่อมโยงปัจจัยด้านปัจเจก–สังคมสิ่งแวดล้อม–ระบบบริการสุขภาพ";
-
-    const outerOvalBtn = make("button", "🟠 วงล้อมโครงสร้าง", "doh-tool-pill");
-    outerOvalBtn.type = "button";
-    outerOvalBtn.title = "เปิด/ปิดวงล้อมชั้นนอกของปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ";
-
-    const autoArrowsBtn = make("button", "⚡ เชื่อมลูกศรครบวงจร", "doh-tool-pill");
-    autoArrowsBtn.type = "button";
-    autoArrowsBtn.title = "ลากลูกศรเชื่อมโยงทั้ง 6 เส้นพร้อมเปิดวงล้อมทั้ง 2 ชั้นอัตโนมัติ (คลิกแก้รายเส้นต่อได้)";
-
-    const clearArrowsBtn = make("button", "↺ ล้างเส้น", "doh-tool-pill");
-    clearArrowsBtn.type = "button";
-    clearArrowsBtn.title = "ล้างลูกศรและวงล้อมทั้งหมดเพื่อฝึกวาดใหม่";
-
-    leftTools.append(viewDiagBtn, viewTblBtn, innerOvalBtn, outerOvalBtn);
-    rightTools.append(
-      make("span", "คลิกปุ่ม + บนเส้นประเพื่อเชื่อม/เปลี่ยนทิศทางลูกศร", "doh-toolbar-hint"),
-      autoArrowsBtn,
-      clearArrowsBtn
-    );
-    toolbar.append(leftTools, rightTools);
-    if (!state.isPptSlideSharePopup) {
-      container.appendChild(toolbar);
-    }
-
-    // Concentric Diagram Canvas
-    const shell = make("div", null, "doh-diagram-shell");
+    // Static Concentric Diagram Canvas (2 Ovals + 6 Bidirectional Arrows ON from the start)
+    const shell = make("div", null, "doh-diagram-shell is-outer-oval-on");
     const structZone = make("div", null, "doh-structural-zone");
-    const innerOval = make("div", null, "doh-inner-oval");
+    const innerOval = make("div", null, "doh-inner-oval is-inner-oval-on");
     const arena = make("div", null, "doh-inner-arena");
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
-    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
 
     const buildEditableNodeCard = (nodeKey, extraCardCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
@@ -22824,10 +22777,6 @@
         }
         mirror.textContent = ta.value.trim() || `(พื้นที่เขียน ${nMeta.title || ""})`;
         persistHsdDraft(cid, ta.value);
-        // Sync companion table textarea if mounted
-        container.querySelectorAll(`textarea[data-table-mirror-id="${cid}"]`).forEach((mTa) => {
-          if (mTa.value !== ta.value) mTa.value = ta.value;
-        });
         fitTa(false);
         if (LIVE && ROLE === "student" && state.hsdSessionJoined) {
           LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), cid);
@@ -22865,136 +22814,19 @@
     const posHsys = make("div", null, "doh-pos-hsys");
     posHsys.appendChild(buildEditableNodeCard("health_sys", ""));
 
-    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
     container.appendChild(shell);
 
-    // Companion Table View (for optional quick tabular editing)
-    const tblViewWrap = make("div", null, "hsd-ws-wrap");
-    tblViewWrap.hidden = true;
-    const cmpTbl = make("table", null, "hsd-ws-table");
-    const thead = document.createElement("thead");
-    const hr = document.createElement("tr");
-    (ws.headers || []).forEach((h) => hr.appendChild(make("th", h)));
-    thead.appendChild(hr);
-    const tbody = document.createElement("tbody");
-    (ws.rows || []).forEach((r) => {
-      if (r.isDiagramLinksRow) return;
-      const trEl = document.createElement("tr");
-      (r.cells || []).forEach((cell) => {
-        const td = document.createElement("td");
-        if (cell.static) {
-          td.className = "hsd-ws-static";
-          td.innerHTML = escapeHtml(cell.static).replace(/\n/g, "<br>");
-        } else if (cell.inputId) {
-          const mTa = document.createElement("textarea");
-          mTa.className = `hsd-input${cell.compact ? " is-compact" : ""}`;
-          mTa.dataset.tableMirrorId = cell.inputId;
-          mTa.maxLength = cell.maxChars || 280;
-          mTa.rows = cell.compact ? 1 : 2;
-          mTa.placeholder = cell.placeholder || "";
-          mTa.value = state.hsdDrafts[cell.inputId] || "";
-          mTa.addEventListener("input", () => {
-            const diagTa = shell.querySelector(`textarea[data-input-id="${cell.inputId}"]`);
-            if (diagTa) {
-              diagTa.value = mTa.value;
-              diagTa.dispatchEvent(new Event("input", { bubbles: true }));
-            }
-          });
-          td.appendChild(mTa);
-        }
-        trEl.appendChild(td);
-      });
-      tbody.appendChild(trEl);
-    });
-    cmpTbl.append(thead, tbody);
-    tblViewWrap.appendChild(cmpTbl);
-    container.appendChild(tblViewWrap);
-
-    const syncVisualLinkState = (broadcastLive) => {
-      shell.classList.toggle("is-outer-oval-on", Boolean(linkState.outerRing));
-      innerOval.classList.toggle("is-inner-oval-on", Boolean(linkState.innerRing));
-      innerOvalBtn.classList.toggle("is-active", Boolean(linkState.innerRing));
-      outerOvalBtn.classList.toggle("is-outer-active", Boolean(linkState.outerRing));
-      const serialized = serializeDohLinksState(linkState);
-      hiddenLinksInput.value = serialized;
-      persistHsdDraft(linksInputId, serialized);
-      redrawDiagramArrows(true);
-      if (broadcastLive && LIVE && ROLE === "student" && state.hsdSessionJoined) {
-        LIVE.queueLiveTyping(qObj.id, collectQuestionCellsMap(qObj), linksInputId);
-      }
-    };
-
-    hiddenLinksInput._refreshFromTeamSync = () => {
-      linkState = parseDohLinksString(hiddenLinksInput.value || "");
-      shell.classList.toggle("is-outer-oval-on", Boolean(linkState.outerRing));
-      innerOval.classList.toggle("is-inner-oval-on", Boolean(linkState.innerRing));
-      innerOvalBtn.classList.toggle("is-active", Boolean(linkState.innerRing));
-      outerOvalBtn.classList.toggle("is-outer-active", Boolean(linkState.outerRing));
-      redrawDiagramArrows(true);
-    };
-
-    const cycleOrder = ["off", "fwd", "bi", "rev"];
     redrawDiagramArrows = mountDohArenaArrows(
       arena,
       svgEl,
-      state.isPptSlideSharePopup ? null : badgeLayer,
-      () => linkState.edges,
-      state.isPptSlideSharePopup
-        ? null
-        : (edgeId) => {
-            const curDir = linkState.edges[edgeId] || "off";
-            const nextDir = cycleOrder[(cycleOrder.indexOf(curDir) + 1) % cycleOrder.length];
-            linkState.edges[edgeId] = nextDir;
-            syncVisualLinkState(true);
-          }
+      null,
+      () => STATIC_DOH_BI_EDGES,
+      null
     );
-
-    innerOvalBtn.addEventListener("click", () => {
-      linkState.innerRing = !linkState.innerRing;
-      syncVisualLinkState(true);
-    });
-    outerOvalBtn.addEventListener("click", () => {
-      linkState.outerRing = !linkState.outerRing;
-      syncVisualLinkState(true);
-    });
-    autoArrowsBtn.addEventListener("click", () => {
-      DOH_EDGE_DEFS.forEach((ed) => {
-        linkState.edges[ed.id] = ed.std;
-      });
-      linkState.innerRing = true;
-      linkState.outerRing = true;
-      syncVisualLinkState(true);
-    });
-    clearArrowsBtn.addEventListener("click", () => {
-      DOH_EDGE_DEFS.forEach((ed) => {
-        linkState.edges[ed.id] = "off";
-      });
-      linkState.innerRing = false;
-      linkState.outerRing = false;
-      syncVisualLinkState(true);
-    });
-
-    viewDiagBtn.addEventListener("click", () => {
-      shell.hidden = false;
-      tblViewWrap.hidden = true;
-      viewDiagBtn.classList.add("is-active");
-      viewTblBtn.classList.remove("is-active");
-      redrawDiagramArrows();
-      const parentSheet = container.closest(".ppt-slide-sheet");
-      if (parentSheet) autoFitSingleSheetBoxes(parentSheet, true);
-    });
-    viewTblBtn.addEventListener("click", () => {
-      shell.hidden = true;
-      tblViewWrap.hidden = false;
-      viewTblBtn.classList.add("is-active");
-      viewDiagBtn.classList.remove("is-active");
-      const parentSheet = container.closest(".ppt-slide-sheet");
-      if (parentSheet) autoFitSingleSheetBoxes(parentSheet, true);
-    });
-
-    syncVisualLinkState(false);
+    redrawDiagramArrows(true);
     frag.appendChild(container);
 
     if (LIVE && ROLE === "student" && !forceInteractive) {
@@ -23003,7 +22835,7 @@
       const hint = make(
         "span",
         state.hsdSessionJoined
-          ? `● แผนภาพ Diagram (ห้อง ${rNum}) — พิมพ์และลากลูกศรแล้วกดส่งขึ้นจอห้องเรียนได้ทันที`
+          ? `● แผนภาพ Diagram (ห้อง ${rNum}) — พิมพ์คำตอบในแผนภาพแล้วกดส่งขึ้นจอห้องเรียนได้ทันที`
           : `● พิมพ์รหัสนักศึกษา 3 ตัวท้ายด้านบนเพื่อ Check-in และส่งแผนภาพขึ้นจอ`,
         "hsd-live-sync-hint"
       );
@@ -31182,8 +31014,6 @@
     if (!ws || ws.type !== "doh-diagram") return null;
     const meta = ws.diagramMeta || {};
     const nodesMeta = meta.nodes || {};
-    const linksCid = meta.linksInputId || "c1b_q1_links";
-    const linkSt = includeDrafts ? parseDohLinksString(state.hsdDrafts[linksCid] || "") : parseDohLinksString("");
     const readNodeDraft = (nodeKey) => {
       const nMeta = nodesMeta[nodeKey] || {};
       const cid = nMeta.inputId || `c1b_q1_${nodeKey}`;
@@ -31192,9 +31022,9 @@
     const outcomeVal = readNodeDraft("outcome");
     return {
       mode: includeDrafts ? "student-draft" : "blank-sheet",
-      outerRing: includeDrafts ? Boolean(linkSt.outerRing) : false,
-      innerRing: includeDrafts ? Boolean(linkSt.innerRing) : false,
-      edges: includeDrafts ? linkSt.edges : {},
+      outerRing: true,
+      innerRing: true,
+      edges: { ...STATIC_DOH_BI_EDGES },
       outcome: {
         title: outcomeVal || "ปัญหาสุขภาพตรงกลาง",
         sub: outcomeVal ? "" : "(ระบุภาวะสุขภาพหลักของ ด.ช.โมโน)"
@@ -31203,7 +31033,7 @@
         structural: {
           title: (nodesMeta.structural && nodesMeta.structural.title) || "ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ",
           text: readNodeDraft("structural"),
-          placeholder: "ระบุปัจจัยโครงสร้าง/นโยบาย/ค่านิยม/โฆษณา และวาดวงล้อมชั้นนอก…"
+          placeholder: "ระบุปัจจัยเชิงโครงสร้าง/นโยบาย/ผังเมือง/ค่านิยม/โฆษณา…"
         },
         individual: {
           title: (nodesMeta.individual && nodesMeta.individual.title) || "ปัจจัยด้านปัจเจก",
@@ -38315,26 +38145,23 @@
     const ws = (qObj && qObj.worksheet) || {};
     const meta = ws.diagramMeta || {};
     const nodesMeta = meta.nodes || {};
-    const linksInputId = meta.linksInputId || "c1b_q1_links";
     const cells = (rec && rec.cells) || {};
-    const linkSt = parseDohLinksString(cells[linksInputId] || "");
 
     const shell = make(
       "div",
       null,
-      `doh-diagram-shell doh-live-diagram-readonly${linkSt.outerRing ? " is-outer-oval-on" : ""}`
+      "doh-diagram-shell doh-live-diagram-readonly is-outer-oval-on"
     );
     const structZone = make("div", null, "doh-structural-zone");
     const innerOval = make(
       "div",
       null,
-      `doh-inner-oval${linkSt.innerRing ? " is-inner-oval-on" : ""}`
+      "doh-inner-oval is-inner-oval-on"
     );
     const arena = make("div", null, "doh-inner-arena");
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
-    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
 
     const buildNodeView = (nodeKey, extraCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
@@ -38364,11 +38191,11 @@
     const posHsys = make("div", null, "doh-pos-hsys");
     posHsys.appendChild(buildNodeView("health_sys", ""));
 
-    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
 
-    mountDohArenaArrows(arena, svgEl, badgeLayer, () => linkSt.edges, null);
+    mountDohArenaArrows(arena, svgEl, null, () => STATIC_DOH_BI_EDGES, null);
     return shell;
   }
 
@@ -38377,54 +38204,23 @@
     const ws = (qObj && qObj.worksheet) || {};
     const meta = ws.diagramMeta || {};
     const nodesMeta = meta.nodes || {};
-    const linksInputId = meta.linksInputId || "c1b_q1_links";
     const isAnon = Boolean(LIVE && LIVE.getAnonymousWall());
-    const allRecs = LIVE ? LIVE.getQuestionResponses(qObj.id) : [];
-
-    // Aggregate consensus/active edges across students who drew arrows so the diagram frame stays informative
-    const aggEdges = {
-      ind_to_out: "off",
-      soc_to_out: "off",
-      hsys_to_out: "off",
-      ind_bi_soc: "off",
-      ind_bi_hsys: "off",
-      soc_bi_hsys: "off"
-    };
-    let anyOuterRing = false;
-    let anyInnerRing = false;
-    allRecs.forEach((rec) => {
-      const rawLnk = rec && rec.cells && rec.cells[linksInputId];
-      if (!rawLnk) return;
-      const st = parseDohLinksString(rawLnk);
-      if (st.outerRing) anyOuterRing = true;
-      if (st.innerRing) anyInnerRing = true;
-      Object.keys(aggEdges).forEach((ek) => {
-        const d = st.edges && st.edges[ek];
-        if (!d || d === "off") return;
-        if (aggEdges[ek] === "off") {
-          aggEdges[ek] = d;
-        } else if (aggEdges[ek] !== d) {
-          aggEdges[ek] = "bi";
-        }
-      });
-    });
 
     const shell = make(
       "div",
       null,
-      `doh-diagram-shell doh-live-diagram-readonly is-agg-live-diagram${anyOuterRing ? " is-outer-oval-on" : ""}`
+      "doh-diagram-shell doh-live-diagram-readonly is-agg-live-diagram is-outer-oval-on"
     );
     const structZone = make("div", null, "doh-structural-zone");
     const innerOval = make(
       "div",
       null,
-      `doh-inner-oval${anyInnerRing ? " is-inner-oval-on" : ""}`
+      "doh-inner-oval is-inner-oval-on"
     );
     const arena = make("div", null, "doh-inner-arena");
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
-    const badgeLayer = make("div", null, "doh-arrow-badges-layer");
 
     const buildAggNodeBox = (nodeKey, extraCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
@@ -38514,11 +38310,11 @@
     const posHsys = make("div", null, "doh-pos-hsys");
     posHsys.appendChild(buildAggNodeBox("health_sys", ""));
 
-    arena.append(svgEl, posInd, posOut, posSoc, posHsys, badgeLayer);
+    arena.append(svgEl, posInd, posOut, posSoc, posHsys);
     innerOval.append(createDohOvalBgSvg(false), arena);
     shell.append(createDohOvalBgSvg(true), structZone, innerOval);
 
-    const redrawArrows = mountDohArenaArrows(arena, svgEl, badgeLayer, () => aggEdges, null);
+    const redrawArrows = mountDohArenaArrows(arena, svgEl, null, () => STATIC_DOH_BI_EDGES, null);
     requestAnimationFrame(() => {
       if (typeof redrawArrows === "function") redrawArrows();
     });
@@ -40063,29 +39859,18 @@
       return visSet ? visSet.has(stNum) : step >= stNum;
     };
 
-    let showInnerOval = false;
-    let showOuterOval = false;
-    const activeEdges = {};
-    dk.steps.forEach((sDef) => {
-      if (!isStepRevealed(sDef.step)) return;
-      if (sDef.showInnerOval) showInnerOval = true;
-      if (sDef.showOuterOval) showOuterOval = true;
-      (sDef.arrows || []).forEach((edgeId) => {
-        const ed = DOH_EDGE_DEFS.find((x) => x.id === edgeId);
-        activeEdges[edgeId] = ed ? ed.std : "fwd";
-      });
-    });
+    const activeEdges = STATIC_DOH_BI_EDGES;
 
     const shell = make(
       "div",
       null,
-      `doh-diagram-shell is-clean-key-step${showOuterOval ? " is-outer-oval-on" : ""}`
+      "doh-diagram-shell is-clean-key-step is-outer-oval-on"
     );
     const structZone = make("div", null, "doh-structural-zone");
     const innerOval = make(
       "div",
       null,
-      `doh-inner-oval${showInnerOval ? " is-inner-oval-on" : ""}`
+      "doh-inner-oval is-inner-oval-on"
     );
     const arena = make("div", null, "doh-inner-arena");
     const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -40101,24 +39886,33 @@
 
     if (outStep > 0 && !outRevealed) {
       const showOutMask = Boolean(canClickReveal && !state.isPptSlideSharePopup);
-      const outMask = make(
-        "div",
-        null,
-        `doh-key-masked-slot is-outcome-mask${showOutMask ? "" : " is-ghost-hidden"}`
-      );
-      outMask.setAttribute("data-doh-slot", "outcome");
-      outMask.dataset.keyRowMasked = String(outStep);
-      outMask.appendChild(
-        make("span", "+ คลิกเปิดภาวะสุขภาพหลัก (Health Status)", "ppt-key-mask-pill")
-      );
-      if (showOutMask && typeof toggleHsKeySingleStep === "function") {
-        outMask.title = "คลิกเพื่อเปิดแสดงภาวะสุขภาพหลักตรงกลางแผนภาพพร้อมไฮไลต์หลักฐานในโจทย์";
-        outMask.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          toggleHsKeySingleStep(qObj.id, outStep, true);
-        });
+      if (!showOutMask) {
+        const outCard = make("div", null, "doh-node-card is-outcome-card");
+        outCard.setAttribute("data-doh-slot", "outcome");
+        const outHead = make("div", null, "doh-node-head");
+        outHead.appendChild(make("span", "ปัญหา / ภาวะสุขภาพหลัก", "doh-node-title"));
+        outCard.appendChild(outHead);
+        posOut.appendChild(outCard);
+      } else {
+        const outMask = make(
+          "div",
+          null,
+          "doh-key-masked-slot is-outcome-mask"
+        );
+        outMask.setAttribute("data-doh-slot", "outcome");
+        outMask.dataset.keyRowMasked = String(outStep);
+        outMask.appendChild(
+          make("span", "+ คลิกเปิดภาวะสุขภาพหลัก (Health Status)", "ppt-key-mask-pill")
+        );
+        if (typeof toggleHsKeySingleStep === "function") {
+          outMask.title = "คลิกเพื่อเปิดแสดงภาวะสุขภาพหลักตรงกลางแผนภาพพร้อมไฮไลต์หลักฐานในโจทย์";
+          outMask.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            toggleHsKeySingleStep(qObj.id, outStep, true);
+          });
+        }
+        posOut.appendChild(outMask);
       }
-      posOut.appendChild(outMask);
     } else {
       const outBox = make(
         "div",
@@ -40210,10 +40004,18 @@
 
       if (!revealed) {
         const showClickableMask = Boolean(canClickReveal && !state.isPptSlideSharePopup);
+        if (!showClickableMask) {
+          const cleanSlot = make("div", null, `doh-key-node${sDef.nodeId === "structural" ? " is-structural-key" : ""}`);
+          cleanSlot.setAttribute("data-doh-slot", sDef.nodeId);
+          const cleanHead = make("div", null, "doh-key-head");
+          cleanHead.appendChild(make("span", sDef.title, "doh-key-heading"));
+          cleanSlot.appendChild(cleanHead);
+          return cleanSlot;
+        }
         const mask = make(
           "div",
           null,
-          `doh-key-masked-slot${showClickableMask ? "" : " is-ghost-hidden"}`
+          "doh-key-masked-slot"
         );
         mask.setAttribute("data-doh-slot", sDef.nodeId);
         mask.dataset.keyRowMasked = String(stNum);
@@ -40223,8 +40025,8 @@
           "ppt-key-mask-pill"
         );
         mask.appendChild(pill);
-        if (showClickableMask && typeof toggleHsKeySingleStep === "function") {
-          mask.title = `คลิกเพื่อเปิดแสดงขั้นที่ ${stNum} (${sDef.title}) พร้อมลูกศรและไฮไลต์หลักฐาน`;
+        if (typeof toggleHsKeySingleStep === "function") {
+          mask.title = `คลิกเพื่อเปิดแสดงขั้นที่ ${stNum} (${sDef.title}) พร้อมไฮไลต์หลักฐาน`;
           mask.addEventListener("click", (ev) => {
             ev.stopPropagation();
             toggleHsKeySingleStep(qObj.id, stNum, true);
@@ -40740,10 +40542,10 @@
   const QUESTION_PROMPT_HIGHLIGHTS = {
     "q-hs1-2": [
       "กรอบแนวคิดปัจจัยกำหนดสุขภาพ (Determinants of Health Framework)",
-      "สร้างเป็นแผนภาพความเชื่อมโยง (Diagram)",
+      "เติมข้อมูลลงในแผนภาพความเชื่อมโยง (Diagram)",
       "(1) ภาวะ/ปัญหาสุขภาพหลักตรงกลางแผนภาพ",
       "(2) ปัจจัยกำหนดสุขภาพในแต่ละหมวด",
-      "(3) ทิศทางลูกศรความสัมพันธ์และวงล้อมเชิงระบบ"
+      "พร้อมข้อมูลสนับสนุนจากสถานการณ์"
     ],
     "q-hs1-anc-1": [
       "การคัดกรอง urine amphetamine ในหญิงที่มาฝากครรภ์ทุกราย",
@@ -41788,23 +41590,18 @@
     if (tk.diagramKey && Array.isArray(tk.diagramKey.steps)) {
       const dk = tk.diagramKey;
       const nodesObj = {};
-      const edgesObj = {};
       dk.steps.forEach((sDef) => {
         nodesObj[sDef.nodeId] = {
           title: sDef.title,
           bullets: Array.isArray(sDef.bullets) ? sDef.bullets : [],
           text: (sDef.bullets || []).map((b) => `• ${b}`).join("\n")
         };
-        (sDef.arrows || []).forEach((edgeId) => {
-          const ed = DOH_EDGE_DEFS.find((x) => x.id === edgeId);
-          edgesObj[edgeId] = ed ? ed.std : "fwd";
-        });
       });
       diagramSpec = {
         mode: "teacher-key",
         outerRing: true,
         innerRing: true,
-        edges: edgesObj,
+        edges: { ...STATIC_DOH_BI_EDGES },
         outcome: {
           title: (dk.outcome && dk.outcome.title) || "ภาวะอ้วนในเด็ก",
           sub: (dk.outcome && dk.outcome.sub) || ""
