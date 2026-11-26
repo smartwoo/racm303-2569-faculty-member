@@ -110,9 +110,12 @@
     return false;
   }
 
+  const bootRoomAttr =
+    (typeof document !== "undefined" && document.body && document.body.getAttribute("data-hsd-room")) || "";
+
   const state = {
     role: window.PORTAL_ROLE === "faculty" ? "faculty" : "student",
-    roomId: clampRoom(safeGetStorage("racm303_live_room_v1", "1")),
+    roomId: clampRoom(bootRoomAttr || safeGetStorage("racm303_live_room_v1", "1")),
     teamId: 0,
     participantId: persistentPid,
     sessionJoined: window.PORTAL_ROLE === "faculty",
@@ -145,6 +148,7 @@
       hasStarted: false,
       hasConfigured: false,
       timedOutInCurrentRun: false,
+      receivedLiveInSession: false,
       configuredDurationSec: 300,
       durationSec: 300,
       baseRemainingMs: 300000,
@@ -554,6 +558,24 @@
     if (state.role === "faculty" || state.sessionJoined) {
       publishPresence();
     }
+    if (state.role === "faculty" && state.timer.running) {
+      publishPacket(
+        "timer",
+        {
+          type: "timer",
+          seq: state.timer.seq,
+          running: true,
+          hasStarted: true,
+          hasConfigured: true,
+          configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
+          durationSec: state.timer.durationSec,
+          remainingMs: getTimerRemainingMs(),
+          questionId: state.timer.questionId,
+          label: state.timer.label
+        },
+        true
+      );
+    }
   }, HEARTBEAT_INTERVAL_MS);
 
   function publishPacket(subpath, payload, retain, targetRoomOpt) {
@@ -575,9 +597,9 @@
       } catch (_) {}
     }
 
-    // 2. MQTT over WSS (QoS 1 for presence so check-in/login delivery is broker-acknowledged)
+    // 2. MQTT over WSS (QoS 1 for timer & presence so countdown and check-in delivery is broker-acknowledged)
     const fullTopic = roomTopic(subpath, targetRoom);
-    const qosLevel = String(subpath || "").startsWith("presence") ? 1 : 0;
+    const qosLevel = subpath === "timer" || String(subpath || "").startsWith("presence") ? 1 : 0;
     state.mqttClients.forEach((client) => {
       try {
         if (client && client.connected) {
@@ -643,12 +665,17 @@
     }
 
     if (msg.type === "timer") {
+      if (isRetained && state.timer.receivedLiveInSession) {
+        return;
+      }
       const maxRetainedAgeMs = msg.running ? RETAINED_STALE_MS : 10 * 60 * 1000;
       if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > maxRetainedAgeMs) {
         return;
       }
+      if (!isRetained) {
+        state.timer.receivedLiveInSession = true;
+      }
       const seq = Number(msg.seq) || 0;
-      if (seq < state.timer.seq && msg.sentWallMs < (state.timer.lastWallMs || 0)) return;
       let rem = Math.max(0, Number(msg.remainingMs) || 0);
       if (msg.running && isRetained && msg.sentWallMs) {
         const wallElapsed = Math.max(0, Date.now() - Number(msg.sentWallMs));
@@ -656,10 +683,10 @@
       }
       const durSec = Math.max(1, Number(msg.durationSec) || 300);
       const cfgSec = Math.max(1, Number(msg.configuredDurationSec) || durSec);
-      // Never turn any incoming 0-remaining packet (MQTT retained, PeerJS sync, or BroadcastChannel) into a red Time-Up state
+      // Never turn any incoming retained 0-remaining packet into a red Time-Up state
       if (rem === 0) {
-        const wasActivelyRunningHere = Boolean(state.timer.running);
-        state.timer.seq = wasActivelyRunningHere ? Math.max(state.timer.seq + 1, seq) : 0;
+        const wasActivelyRunningHere = Boolean(state.timer.running) || Boolean(!isRetained && msg.timedOutInCurrentRun);
+        state.timer.seq = wasActivelyRunningHere ? Math.max(state.timer.seq, seq) : 0;
         state.timer.configuredDurationSec = cfgSec;
         state.timer.durationSec = durSec;
         state.timer.baseRemainingMs = wasActivelyRunningHere ? 0 : durSec * 1000;
@@ -668,11 +695,11 @@
         state.timer.hasStarted = wasActivelyRunningHere;
         state.timer.hasConfigured = wasActivelyRunningHere;
         state.timer.timedOutInCurrentRun = wasActivelyRunningHere;
-        state.timer.lastWallMs = Number(msg.sentWallMs) || Date.now();
+        state.timer.lastWallMs = Date.now();
         emit("timer", getTimerSnapshot());
         return;
       }
-      state.timer.seq = Math.max(state.timer.seq + 1, seq);
+      state.timer.seq = Math.max(state.timer.seq, seq);
       state.timer.configuredDurationSec = cfgSec;
       state.timer.durationSec = durSec;
       state.timer.baseRemainingMs = rem;
@@ -692,7 +719,7 @@
       }
       state.timer.label = String(msg.label || "จับเวลาอภิปรายกลุ่มย่อย").slice(0, 100);
       state.timer.questionId = String(msg.questionId || "").slice(0, 32);
-      state.timer.lastWallMs = Number(msg.sentWallMs) || Date.now();
+      state.timer.lastWallMs = Date.now();
       if (rem > 0) state.timer.chimePlayedForSeq = -1;
       emit("timer", getTimerSnapshot());
       return;
@@ -989,6 +1016,30 @@
         });
       }
       if (pktRoom === state.roomId && state.role === "faculty") {
+        if (
+          state.timer.running ||
+          state.timer.hasConfigured ||
+          state.timer.hasStarted ||
+          state.timer.timedOutInCurrentRun
+        ) {
+          publishPacket(
+            "timer",
+            {
+              type: "timer",
+              seq: state.timer.seq,
+              running: state.timer.running,
+              hasStarted: state.timer.hasStarted,
+              hasConfigured: state.timer.hasConfigured,
+              timedOutInCurrentRun: state.timer.timedOutInCurrentRun,
+              configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
+              durationSec: state.timer.durationSec,
+              remainingMs: getTimerRemainingMs(),
+              questionId: state.timer.questionId,
+              label: state.timer.label
+            },
+            true
+          );
+        }
         Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
           const rec = state.unlockedConceptSummaries[qid];
           if (!rec) return;
@@ -1331,6 +1382,10 @@
                   roomId: state.roomId,
                   seq: state.timer.seq,
                   running: state.timer.running,
+                  hasStarted: state.timer.hasStarted,
+                  hasConfigured: state.timer.hasConfigured,
+                  timedOutInCurrentRun: state.timer.timedOutInCurrentRun,
+                  configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
                   durationSec: state.timer.durationSec,
                   remainingMs: getTimerRemainingMs(),
                   label: state.timer.label,
@@ -2014,6 +2069,8 @@
         hasStarted: false,
         hasConfigured: false,
         timedOutInCurrentRun: false,
+        receivedLiveInSession: false,
+        configuredDurationSec: 300,
         durationSec: 300,
         baseRemainingMs: 300000,
         anchorPerfNow: performance.now(),
@@ -2036,13 +2093,15 @@
     emit("concept_unlock", { questionId: "*", unlocked: false, roomChanged: true });
   }
 
-  /* ---------- Teacher Timer & Slide Pointer Controls ---------- */
+  /* ---------- Teacher Timer & Slide Pointer Controls (Facilitator Only) ---------- */
   function startTimer(durationSec, questionId, label) {
+    if (state.role !== "faculty") return;
     const sec = Math.max(
       1,
       Math.min(10800, Math.round(Number(durationSec) || state.timer.configuredDurationSec || state.timer.durationSec || 300))
     );
     state.timer.seq += 1;
+    state.timer.receivedLiveInSession = true;
     state.timer.configuredDurationSec = sec;
     state.timer.durationSec = sec;
     state.timer.baseRemainingMs = sec * 1000;
@@ -2075,8 +2134,10 @@
   }
 
   function togglePauseTimer() {
+    if (state.role !== "faculty") return;
     const rem = getTimerRemainingMs();
     state.timer.seq += 1;
+    state.timer.receivedLiveInSession = true;
     if (state.timer.running) {
       state.timer.running = false;
       state.timer.baseRemainingMs = rem;
@@ -2112,10 +2173,12 @@
   }
 
   function addTimerSeconds(deltaSec) {
+    if (state.role !== "faculty") return;
     const cur = getTimerRemainingMs();
     const delta = Number.isFinite(Number(deltaSec)) ? Number(deltaSec) : 60;
     const nextMs = Math.max(0, Math.min(10800 * 1000, cur + delta * 1000));
     state.timer.seq += 1;
+    state.timer.receivedLiveInSession = true;
     state.timer.baseRemainingMs = nextMs;
     state.timer.anchorPerfNow = performance.now();
     if (nextMs > 0) {
@@ -2144,9 +2207,11 @@
   }
 
   function resetTimer(durationSec, isSetReady) {
+    if (state.role !== "faculty") return;
     const fallbackSec = isSetReady ? state.timer.configuredDurationSec || 300 : 300;
     const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || fallbackSec)));
     state.timer.seq += 1;
+    state.timer.receivedLiveInSession = true;
     state.timer.running = false;
     state.timer.hasStarted = false;
     state.timer.hasConfigured = Boolean(isSetReady);
@@ -2176,6 +2241,7 @@
   }
 
   function clearTimeUpAlert() {
+    if (state.role !== "faculty") return;
     if (!state.timer.timedOutInCurrentRun) return;
     const sec = state.timer.configuredDurationSec || 300;
     state.timer.timedOutInCurrentRun = false;

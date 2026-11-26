@@ -19813,17 +19813,7 @@
   /* ---------- 6-Room Live Bar & Shared / On-Slide Interactive Countdown Timer UI ---------- */
   let liveSubscriptionsBound = false;
   const stuLocalTimer = {
-    active: false,
-    running: false,
-    hasStarted: false,
-    hasConfigured: false,
-    timedOutInCurrentRun: false,
-    configuredDurationSec: 300,
-    durationSec: 300,
-    baseRemainingMs: 300000,
-    anchorPerfNow: 0,
-    chimePlayed: false,
-    intervalId: 0
+    active: false
   };
 
   const floatingTimerPopState = {
@@ -19835,72 +19825,7 @@
     isTypingDraft: false
   };
 
-  function playLocalTimerChime() {
-    if (LIVE && LIVE.getSoundMuted && LIVE.getSoundMuted()) return;
-    try {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      const ctx = new Ctx();
-      [587.33, 880].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.14, ctx.currentTime + i * 0.16);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.16 + 0.36);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + i * 0.16);
-        osc.stop(ctx.currentTime + i * 0.16 + 0.38);
-      });
-    } catch (_) {}
-  }
-
-  function getStuLocalTimerRemainingMs() {
-    if (!stuLocalTimer.running) return Math.max(0, stuLocalTimer.baseRemainingMs);
-    const elapsed = Math.max(0, performance.now() - stuLocalTimer.anchorPerfNow);
-    return Math.max(0, stuLocalTimer.baseRemainingMs - elapsed);
-  }
-
-  function ensureStuLocalTimerTicker() {
-    if (stuLocalTimer.intervalId) return;
-    stuLocalTimer.intervalId = setInterval(() => {
-      if (!stuLocalTimer.active || !stuLocalTimer.running) return;
-      const rem = getStuLocalTimerRemainingMs();
-      if (rem <= 0) {
-        stuLocalTimer.running = false;
-        stuLocalTimer.baseRemainingMs = 0;
-        stuLocalTimer.timedOutInCurrentRun = true;
-        if (!stuLocalTimer.chimePlayed) {
-          stuLocalTimer.chimePlayed = true;
-          playLocalTimerChime();
-        }
-      }
-      syncTimerWidgetDOM();
-    }, 250);
-  }
-
   function getEffectiveSlideTimerSnapshot(snapOpt) {
-    if (ROLE === "student" && stuLocalTimer.active) {
-      const remMs = getStuLocalTimerRemainingMs();
-      const durMs = Math.max(1000, (stuLocalTimer.durationSec || 300) * 1000);
-      const totalSec = Math.ceil(remMs / 1000);
-      const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
-      const ss = String(totalSec % 60).padStart(2, "0");
-      return {
-        running: stuLocalTimer.running && remMs > 0,
-        remainingMs: remMs,
-        durationSec: stuLocalTimer.durationSec || 300,
-        configuredDurationSec: stuLocalTimer.configuredDurationSec || stuLocalTimer.durationSec || 300,
-        formatted: `${mm}:${ss}`,
-        pct: Math.max(0, Math.min(100, (remMs / durMs) * 100)),
-        isWarning: Boolean(stuLocalTimer.running) && totalSec > 15 && totalSec <= 60,
-        isUrgent: Boolean(stuLocalTimer.running) && totalSec > 0 && totalSec <= 15,
-        isTimeUp: Boolean(stuLocalTimer.timedOutInCurrentRun) && !stuLocalTimer.running && remMs === 0,
-        hasStarted: Boolean(stuLocalTimer.hasStarted),
-        hasConfigured: Boolean(stuLocalTimer.hasConfigured)
-      };
-    }
     if (snapOpt) return snapOpt;
     return LIVE
       ? LIVE.getTimerSnapshot()
@@ -19919,141 +19844,77 @@
   const slideTimerCtrl = {
     getSnapshot: () => getEffectiveSlideTimerSnapshot(),
     clearTimeUp() {
-      if (ROLE === "faculty" && LIVE && typeof LIVE.clearTimeUpAlert === "function") {
+      if (ROLE !== "faculty") return;
+      if (LIVE && typeof LIVE.clearTimeUpAlert === "function") {
         LIVE.clearTimeUpAlert();
-      }
-      if (stuLocalTimer.timedOutInCurrentRun) {
-        const sec = stuLocalTimer.configuredDurationSec || 300;
-        stuLocalTimer.timedOutInCurrentRun = false;
-        stuLocalTimer.hasStarted = false;
-        stuLocalTimer.hasConfigured = false;
-        stuLocalTimer.durationSec = sec;
-        stuLocalTimer.baseRemainingMs = sec * 1000;
       }
       syncTimerWidgetDOM();
     },
     start(durationSec) {
+      if (ROLE !== "faculty") return;
       const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || 300)));
-      if (ROLE === "faculty" && LIVE) {
+      if (LIVE) {
         LIVE.startTimer(sec, state.hsdLastSelectedQId || "", "จับเวลาอภิปรายกลุ่มย่อย");
-      } else {
-        stuLocalTimer.active = true;
-        stuLocalTimer.configuredDurationSec = sec;
-        stuLocalTimer.durationSec = sec;
-        stuLocalTimer.baseRemainingMs = sec * 1000;
-        stuLocalTimer.anchorPerfNow = performance.now();
-        stuLocalTimer.running = true;
-        stuLocalTimer.hasStarted = true;
-        stuLocalTimer.hasConfigured = true;
-        stuLocalTimer.timedOutInCurrentRun = false;
-        stuLocalTimer.chimePlayed = false;
-        ensureStuLocalTimerTicker();
       }
       syncTimerWidgetDOM();
     },
     setReady(durationSec) {
+      if (ROLE !== "faculty") return;
       const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || 300)));
-      if (ROLE === "faculty" && LIVE) {
+      if (LIVE) {
         LIVE.resetTimer(sec, true);
-      } else {
-        stuLocalTimer.active = true;
-        stuLocalTimer.running = false;
-        stuLocalTimer.hasStarted = false;
-        stuLocalTimer.hasConfigured = true;
-        stuLocalTimer.timedOutInCurrentRun = false;
-        stuLocalTimer.configuredDurationSec = sec;
-        stuLocalTimer.durationSec = sec;
-        stuLocalTimer.baseRemainingMs = sec * 1000;
-        stuLocalTimer.chimePlayed = false;
       }
       syncTimerWidgetDOM();
     },
     togglePause() {
-      if (ROLE === "faculty" && LIVE) {
+      if (ROLE !== "faculty") return;
+      if (LIVE) {
         LIVE.togglePauseTimer();
-      } else {
-        const curSnap = getEffectiveSlideTimerSnapshot();
-        if (!stuLocalTimer.active) {
-          stuLocalTimer.active = true;
-          stuLocalTimer.configuredDurationSec = curSnap.configuredDurationSec || curSnap.durationSec || 300;
-          stuLocalTimer.durationSec = curSnap.durationSec || 300;
-          stuLocalTimer.baseRemainingMs =
-            curSnap.remainingMs !== undefined ? curSnap.remainingMs : stuLocalTimer.durationSec * 1000;
-        }
-        const rem = getStuLocalTimerRemainingMs();
-        if (stuLocalTimer.running) {
-          stuLocalTimer.baseRemainingMs = rem;
-          stuLocalTimer.running = false;
-        } else {
-          const fallbackSec = stuLocalTimer.configuredDurationSec || stuLocalTimer.durationSec || 300;
-          stuLocalTimer.baseRemainingMs = rem > 0 ? rem : fallbackSec * 1000;
-          if (rem <= 0) stuLocalTimer.durationSec = fallbackSec;
-          stuLocalTimer.anchorPerfNow = performance.now();
-          stuLocalTimer.running = true;
-          stuLocalTimer.hasStarted = true;
-          stuLocalTimer.hasConfigured = true;
-          stuLocalTimer.timedOutInCurrentRun = false;
-          stuLocalTimer.chimePlayed = false;
-          ensureStuLocalTimerTicker();
-        }
       }
       syncTimerWidgetDOM();
     },
     addSeconds(deltaSec) {
+      if (ROLE !== "faculty") return;
       const delta = Number.isFinite(Number(deltaSec)) ? Number(deltaSec) : 60;
-      if (ROLE === "faculty" && LIVE) {
+      if (LIVE) {
         LIVE.addTimerSeconds(delta);
-      } else {
-        const curSnap = getEffectiveSlideTimerSnapshot();
-        if (!stuLocalTimer.active) {
-          stuLocalTimer.active = true;
-          stuLocalTimer.configuredDurationSec = curSnap.configuredDurationSec || curSnap.durationSec || 300;
-          stuLocalTimer.durationSec = curSnap.durationSec || 300;
-          stuLocalTimer.baseRemainingMs =
-            curSnap.remainingMs !== undefined ? curSnap.remainingMs : stuLocalTimer.durationSec * 1000;
-        }
-        const rem = getStuLocalTimerRemainingMs();
-        const nextMs = Math.max(0, Math.min(10800 * 1000, rem + delta * 1000));
-        stuLocalTimer.baseRemainingMs = nextMs;
-        stuLocalTimer.anchorPerfNow = performance.now();
-        stuLocalTimer.durationSec = Math.max(stuLocalTimer.durationSec, Math.ceil(nextMs / 1000) || 1);
-        if (nextMs > 0) {
-          stuLocalTimer.chimePlayed = false;
-          stuLocalTimer.hasConfigured = true;
-          stuLocalTimer.timedOutInCurrentRun = false;
-        }
       }
       syncTimerWidgetDOM();
     },
     reset(defaultSecOpt) {
+      if (ROLE !== "faculty") return;
       const dur = Math.max(1, Math.min(10800, Math.round(Number(defaultSecOpt) || 300)));
-      if (ROLE === "faculty" && LIVE) {
+      if (LIVE) {
         LIVE.resetTimer(dur, false);
-      } else {
-        stuLocalTimer.active = false;
-        stuLocalTimer.running = false;
-        stuLocalTimer.hasStarted = false;
-        stuLocalTimer.hasConfigured = false;
-        stuLocalTimer.timedOutInCurrentRun = false;
-        stuLocalTimer.configuredDurationSec = dur;
-        stuLocalTimer.durationSec = dur;
-        stuLocalTimer.baseRemainingMs = dur * 1000;
-        stuLocalTimer.chimePlayed = false;
       }
       syncTimerWidgetDOM();
     },
     syncWithRoom() {
-      stuLocalTimer.active = false;
-      stuLocalTimer.running = false;
-      stuLocalTimer.hasStarted = false;
-      stuLocalTimer.hasConfigured = false;
-      stuLocalTimer.timedOutInCurrentRun = false;
       syncTimerWidgetDOM();
     }
   };
 
+  function ensureStudentLiveBroadcastHudDOM() {
+    let hud = document.getElementById("stuLiveBroadcastTimerHud");
+    if (hud) return hud;
+    hud = make("div", null, "stu-live-broadcast-timer-hud hsd-no-print");
+    hud.id = "stuLiveBroadcastTimerHud";
+    hud.hidden = true;
+    const txt = make("span", "⏱ 05:00", "stu-lbth-digits");
+    txt.setAttribute("data-stu-hud-text", "1");
+    const track = make("div", null, "stu-lbth-track");
+    const fill = make("div", null, "stu-lbth-fill");
+    fill.setAttribute("data-stu-hud-prog", "1");
+    fill.style.width = "100%";
+    track.appendChild(fill);
+    hud.append(txt, track);
+    document.body.appendChild(hud);
+    return hud;
+  }
+
   function syncTimerWidgetDOM(snap) {
     const s = getEffectiveSlideTimerSnapshot(snap);
+    const isTeacherTimerActive = Boolean(s.running || s.hasConfigured || s.hasStarted || s.isTimeUp);
 
     document.querySelectorAll("[data-ppt-mirror-timer]").forEach((el) => {
       const hasCaret = el.dataset.pptHasCaret === "1";
@@ -20069,6 +19930,56 @@
       el.classList.toggle("is-timeup", Boolean(s.isTimeUp));
     });
 
+    const stuClockLabel = s.isTimeUp
+      ? "⏰ หมดเวลา 00:00"
+      : s.running
+      ? `⏱ ${s.formatted}`
+      : s.hasStarted
+      ? `⏸ พัก ${s.formatted}`
+      : `⏱ ตั้งเวลา ${s.formatted}`;
+
+    let anySlideStudentPillVisible = false;
+    document.querySelectorAll("[data-ppt-student-timer-pill]").forEach((el) => {
+      el.hidden = !isTeacherTimerActive;
+      if (isTeacherTimerActive) {
+        el.textContent = stuClockLabel;
+        el.classList.toggle("is-running", Boolean(s.running));
+        el.classList.toggle("is-warning", Boolean(s.isWarning));
+        el.classList.toggle("is-urgent", Boolean(s.isUrgent));
+        el.classList.toggle("is-timeup", Boolean(s.isTimeUp));
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < (window.innerHeight || 900)) {
+          anySlideStudentPillVisible = true;
+        }
+      }
+    });
+
+    if (ROLE !== "faculty") {
+      const inHsdTab = Boolean(
+        state.isPptSlideSharePopup ||
+          (document.body && document.body.hasAttribute("data-hsd-room")) ||
+          (state.activeTab && String(state.activeTab).startsWith("hs-discussion")) ||
+          ($("panel-hs-discussion") && !$("panel-hs-discussion").hidden)
+      );
+      if (isTeacherTimerActive && inHsdTab && !anySlideStudentPillVisible) {
+        const hud = ensureStudentLiveBroadcastHudDOM();
+        const host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
+        if (hud.parentElement !== host) host.appendChild(hud);
+        hud.hidden = false;
+        hud.classList.toggle("is-running", Boolean(s.running));
+        hud.classList.toggle("is-warning", Boolean(s.isWarning));
+        hud.classList.toggle("is-urgent", Boolean(s.isUrgent));
+        hud.classList.toggle("is-timeup", Boolean(s.isTimeUp));
+        const txtEl = hud.querySelector("[data-stu-hud-text]");
+        if (txtEl) txtEl.textContent = stuClockLabel;
+        const progEl = hud.querySelector("[data-stu-hud-prog]");
+        if (progEl) progEl.style.width = `${s.pct}%`;
+      } else {
+        const existingHud = document.getElementById("stuLiveBroadcastTimerHud");
+        if (existingHud) existingHud.hidden = true;
+      }
+    }
+
     document.querySelectorAll("[data-ppt-big-clock]").forEach((el) => {
       el.textContent = s.isTimeUp ? "00:00" : s.formatted;
     });
@@ -20078,7 +19989,9 @@
         ? "⏰ หมดเวลาอภิปราย!"
         : s.running
         ? `⏱ กำลังนับถอยหลังสด (${s.formatted})`
-        : `⏱ เวลาที่ตั้ง ${s.formatted} · กด ▶ เริ่มนับ`;
+        : ROLE === "faculty"
+        ? `⏱ เวลาที่ตั้ง ${s.formatted} · กด ▶ เริ่มนับ`
+        : `⏱ เวลากลุ่ม ${s.formatted}`;
     });
 
     document.querySelectorAll("[data-ppt-timer-playbtn]").forEach((el) => {
@@ -20119,7 +20032,11 @@
         ? "หมดเวลาอภิปราย!"
         : s.running
         ? "กำลังจับเวลาสด"
-        : "คลิกตั้งเวลา · กด ▶ เริ่ม";
+        : ROLE === "faculty"
+        ? "คลิกตั้งเวลา · กด ▶ เริ่ม"
+        : s.hasConfigured || s.hasStarted
+        ? "อาจารย์ตั้งเวลาไว้"
+        : "เวลากลุ่ม (อาจารย์คุม)";
     }
     if (bar) {
       bar.style.width = `${s.pct}%`;
@@ -20833,12 +20750,16 @@
     const right = make("div", null, "hsd-live-right");
     const timerW = make("div", null, "hsd-timer-widget");
     timerW.id = "hsdTimerWidget";
-    timerW.style.cursor = "pointer";
-    timerW.title = "คลิกเพื่อพิมพ์/ตั้งเวลา นาที:วินาที (±1 นาที / ±15 วินาที)";
-    timerW.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      openFloatingSlideTimerPopover(timerW, false);
-    });
+    if (ROLE === "faculty") {
+      timerW.style.cursor = "pointer";
+      timerW.title = "คลิกเพื่อพิมพ์/ตั้งเวลา นาที:วินาที (±1 นาที / ±15 วินาที)";
+      timerW.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openFloatingSlideTimerPopover(timerW, false);
+      });
+    } else {
+      timerW.title = "เวลากลุ่ม (ควบคุมโดยอาจารย์ประจำกลุ่ม · แสดงผลเรียลไทม์)";
+    }
     const tSub = make("span", tr("นาฬิกาห้องกลุ่ม", "Room Timer"), "hsd-timer-sub");
     tSub.id = "hsdTimerSub";
     const tClk = make("span", "05:00", "hsd-timer-clock");
@@ -20869,15 +20790,12 @@
       ppBtn.id = "hsdTimerPlayPauseBtn";
       ppBtn.addEventListener("click", () => LIVE.togglePauseTimer());
 
-      const plusBtn = make("button", "+1 นาที", "hsd-tbtn");
-      plusBtn.type = "button";
-      plusBtn.addEventListener("click", () => LIVE.addTimerSeconds(60));
-
-      const rstBtn = make("button", "↺ รีเซ็ต", "hsd-tbtn");
+      const rstBtn = make("button", "Reset", "hsd-tbtn");
       rstBtn.type = "button";
+      rstBtn.title = "รีเซ็ตเวลากลับเป็น 05:00";
       rstBtn.addEventListener("click", () => LIVE.resetTimer(300));
 
-      ctrls.append(ppBtn, plusBtn, rstBtn);
+      ctrls.append(ppBtn, rstBtn);
       right.appendChild(ctrls);
     }
 
@@ -26140,22 +26058,13 @@
       broadcastPptPresentationState();
     });
 
-    const syncRoomBtn = make("button", "ซิงค์เวลาห้องอาจารย์", "ppt-stp-step-btn");
-    syncRoomBtn.type = "button";
-    syncRoomBtn.hidden = !(ROLE === "student" && stuLocalTimer.active);
-    syncRoomBtn.addEventListener("click", () => {
-      slideTimerCtrl.syncWithRoom();
-      closeFloatingSlideTimerPopover();
-    });
-
-    acts.append(ppBtn, bigToggleBtn, syncRoomBtn);
+    acts.append(ppBtn, bigToggleBtn);
     pop.appendChild(acts);
 
     pop._syncDynamicMeta = () => {
       bigToggleBtn.textContent = state.hsdBigSlideTimer
         ? "✕ ย่อนาฬิกาใหญ่"
         : "⤢ ขยายนาฬิกาใหญ่ในสไลด์";
-      syncRoomBtn.hidden = !(ROLE === "student" && stuLocalTimer.active);
     };
     pop._focusMinInput = () => {
       if (!isCoarseTouchDevice()) {
@@ -26171,6 +26080,7 @@
   }
 
   function openFloatingSlideTimerPopover(triggerEl, preferDropUp) {
+    if (ROLE !== "faculty") return;
     const pop = ensureFloatingSlideTimerPopoverDOM();
     if (!pop.hidden && floatingTimerPopState.triggerEl === triggerEl) {
       closeFloatingSlideTimerPopover();
@@ -26233,6 +26143,14 @@
   }
 
   function buildInteractiveSlideHeaderTimerDOM() {
+    if (ROLE !== "faculty") {
+      const stuPill = make("span", "⏱ 05:00", "ppt-sm-timer is-student-live-clock hsd-no-print");
+      stuPill.setAttribute("data-ppt-student-timer-pill", "1");
+      stuPill.title = "เวลาอภิปรายกลุ่ม (ซิงค์สดจากอาจารย์ประจำกลุ่ม)";
+      stuPill.hidden = true;
+      return stuPill;
+    }
+
     const anchor = make("div", null, "ppt-timer-pop-anchor hsd-no-print");
     const cluster = make("div", null, "ppt-sm-timer-cluster");
 
@@ -26257,12 +26175,12 @@
       openFloatingSlideTimerPopover(clockBtn, false);
     });
 
-    const add1mBtn = make("button", "+1m", "ppt-sm-tbtn");
-    add1mBtn.type = "button";
-    add1mBtn.title = "เพิ่มเวลา +1 นาที";
-    add1mBtn.addEventListener("click", (ev) => {
+    const resetBtn = make("button", "Reset", "ppt-sm-tbtn is-reset-btn");
+    resetBtn.type = "button";
+    resetBtn.title = "รีเซ็ตเวลากลับเป็น 05:00";
+    resetBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
-      slideTimerCtrl.addSeconds(60);
+      slideTimerCtrl.reset(300);
     });
 
     const expandBtn = make("button", "⤢", "ppt-sm-tbtn");
@@ -26277,7 +26195,7 @@
       broadcastPptPresentationState();
     });
 
-    cluster.append(playBtn, clockBtn, add1mBtn, expandBtn);
+    cluster.append(playBtn, clockBtn, resetBtn, expandBtn);
     anchor.appendChild(cluster);
     return anchor;
   }
@@ -26291,50 +26209,54 @@
     statusLbl.setAttribute("data-ppt-timer-status", "1");
     top.appendChild(statusLbl);
 
-    const minBtn = make("button", "✕ ย่อ", "ppt-bst-btn");
-    minBtn.type = "button";
-    minBtn.addEventListener("click", () => {
-      state.hsdBigSlideTimer = false;
-      renderHsDiscussionView();
-      broadcastPptPresentationState();
-    });
-    top.appendChild(minBtn);
+    if (ROLE === "faculty") {
+      const minBtn = make("button", "✕ ย่อ", "ppt-bst-btn");
+      minBtn.type = "button";
+      minBtn.addEventListener("click", () => {
+        state.hsdBigSlideTimer = false;
+        renderHsDiscussionView();
+        broadcastPptPresentationState();
+      });
+      top.appendChild(minBtn);
 
-    // Allow dragging the big countdown clock anywhere inside the 16:9 slide!
-    top.addEventListener("pointerdown", (ev) => {
-      if (ev.target.closest("button")) return;
-      ev.preventDefault();
-      top.setPointerCapture(ev.pointerId);
-      const sRect = sheetEl.getBoundingClientRect();
-      const cRect = card.getBoundingClientRect();
-      const offX = ev.clientX - cRect.left;
-      const offY = ev.clientY - cRect.top;
-      const onMove = (mev) => {
-        const leftPx = Math.max(8, Math.min(sRect.width - cRect.width - 8, mev.clientX - sRect.left - offX));
-        const topPx = Math.max(8, Math.min(sRect.height - cRect.height - 8, mev.clientY - sRect.top - offY));
-        card.style.right = "auto";
-        card.style.left = `${Math.round(leftPx)}px`;
-        card.style.top = `${Math.round(topPx)}px`;
-      };
-      const onUp = () => {
-        top.removeEventListener("pointermove", onMove);
-        top.removeEventListener("pointerup", onUp);
-        top.removeEventListener("pointercancel", onUp);
-      };
-      top.addEventListener("pointermove", onMove);
-      top.addEventListener("pointerup", onUp);
-      top.addEventListener("pointercancel", onUp);
-    });
+      // Allow dragging the big countdown clock anywhere inside the 16:9 slide!
+      top.addEventListener("pointerdown", (ev) => {
+        if (ev.target.closest("button")) return;
+        ev.preventDefault();
+        top.setPointerCapture(ev.pointerId);
+        const sRect = sheetEl.getBoundingClientRect();
+        const cRect = card.getBoundingClientRect();
+        const offX = ev.clientX - cRect.left;
+        const offY = ev.clientY - cRect.top;
+        const onMove = (mev) => {
+          const leftPx = Math.max(8, Math.min(sRect.width - cRect.width - 8, mev.clientX - sRect.left - offX));
+          const topPx = Math.max(8, Math.min(sRect.height - cRect.height - 8, mev.clientY - sRect.top - offY));
+          card.style.right = "auto";
+          card.style.left = `${Math.round(leftPx)}px`;
+          card.style.top = `${Math.round(topPx)}px`;
+        };
+        const onUp = () => {
+          top.removeEventListener("pointermove", onMove);
+          top.removeEventListener("pointerup", onUp);
+          top.removeEventListener("pointercancel", onUp);
+        };
+        top.addEventListener("pointermove", onMove);
+        top.addEventListener("pointerup", onUp);
+        top.addEventListener("pointercancel", onUp);
+      });
+    }
     card.appendChild(top);
 
     const clkRow = make("div", null, "ppt-bst-clock-row");
-    const digits = make("span", "05:00", "ppt-bst-digits is-clickable-digits");
+    const digits = make("span", "05:00", ROLE === "faculty" ? "ppt-bst-digits is-clickable-digits" : "ppt-bst-digits");
     digits.setAttribute("data-ppt-big-clock", "1");
-    digits.title = "คลิกตัวเลขเพื่อพิมพ์ตั้งเวลา นาที:วินาที";
-    digits.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      openFloatingSlideTimerPopover(digits, false);
-    });
+    if (ROLE === "faculty") {
+      digits.title = "คลิกตัวเลขเพื่อพิมพ์ตั้งเวลา นาที:วินาที";
+      digits.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openFloatingSlideTimerPopover(digits, false);
+      });
+    }
     clkRow.appendChild(digits);
     card.appendChild(clkRow);
 
@@ -26345,53 +26267,63 @@
     track.appendChild(fill);
     card.appendChild(track);
 
-    const ctrls = make("div", null, "ppt-bst-ctrls");
-    const pp = make("button", "▶ เริ่ม", "ppt-bst-btn is-primary");
-    pp.type = "button";
-    pp.setAttribute("data-ppt-timer-playbtn", "1");
-    pp.dataset.pptWithLabel = "1";
-    pp.addEventListener("click", () => slideTimerCtrl.togglePause());
+    if (ROLE === "faculty") {
+      const ctrls = make("div", null, "ppt-bst-ctrls");
+      const pp = make("button", "▶ เริ่ม", "ppt-bst-btn is-primary");
+      pp.type = "button";
+      pp.setAttribute("data-ppt-timer-playbtn", "1");
+      pp.dataset.pptWithLabel = "1";
+      pp.addEventListener("click", () => slideTimerCtrl.togglePause());
 
-    const sub1m = make("button", "−1m", "ppt-bst-btn");
-    sub1m.type = "button";
-    sub1m.title = "ลดเวลา 1 นาที";
-    sub1m.addEventListener("click", () => slideTimerCtrl.addSeconds(-60));
+      const sub1m = make("button", "−1m", "ppt-bst-btn");
+      sub1m.type = "button";
+      sub1m.title = "ลดเวลา 1 นาที";
+      sub1m.addEventListener("click", () => slideTimerCtrl.addSeconds(-60));
 
-    const plus1m = make("button", "+1m", "ppt-bst-btn");
-    plus1m.type = "button";
-    plus1m.title = "เพิ่มเวลา 1 นาที";
-    plus1m.addEventListener("click", () => slideTimerCtrl.addSeconds(60));
+      const plus1m = make("button", "+1m", "ppt-bst-btn");
+      plus1m.type = "button";
+      plus1m.title = "เพิ่มเวลา 1 นาที";
+      plus1m.addEventListener("click", () => slideTimerCtrl.addSeconds(60));
 
-    const sub15s = make("button", "−15s", "ppt-bst-btn");
-    sub15s.type = "button";
-    sub15s.title = "ลดเวลา 15 วินาที";
-    sub15s.addEventListener("click", () => slideTimerCtrl.addSeconds(-15));
+      const sub15s = make("button", "−15s", "ppt-bst-btn");
+      sub15s.type = "button";
+      sub15s.title = "ลดเวลา 15 วินาที";
+      sub15s.addEventListener("click", () => slideTimerCtrl.addSeconds(-15));
 
-    const plus15s = make("button", "+15s", "ppt-bst-btn");
-    plus15s.type = "button";
-    plus15s.title = "เพิ่มเวลา 15 วินาที";
-    plus15s.addEventListener("click", () => slideTimerCtrl.addSeconds(15));
+      const plus15s = make("button", "+15s", "ppt-bst-btn");
+      plus15s.type = "button";
+      plus15s.title = "เพิ่มเวลา 15 วินาที";
+      plus15s.addEventListener("click", () => slideTimerCtrl.addSeconds(15));
 
-    const editBtn = make("button", "⌨ ตั้งเวลา", "ppt-bst-btn");
-    editBtn.type = "button";
-    editBtn.title = "พิมพ์กำหนดนาทีและวินาทีเอง";
-    editBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      openFloatingSlideTimerPopover(editBtn, false);
-    });
+      const editBtn = make("button", "⌨ ตั้งเวลา", "ppt-bst-btn");
+      editBtn.type = "button";
+      editBtn.title = "พิมพ์กำหนดนาทีและวินาทีเอง";
+      editBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openFloatingSlideTimerPopover(editBtn, false);
+      });
 
-    const rst = make("button", "↺", "ppt-bst-btn");
-    rst.type = "button";
-    rst.title = "รีเซ็ตเป็น 05:00";
-    rst.addEventListener("click", () => slideTimerCtrl.reset(300));
+      const rst = make("button", "Reset", "ppt-bst-btn");
+      rst.type = "button";
+      rst.title = "รีเซ็ตเวลากลับเป็น 05:00";
+      rst.addEventListener("click", () => slideTimerCtrl.reset(300));
 
-    ctrls.append(pp, sub1m, plus1m, sub15s, plus15s, editBtn, rst);
-    card.appendChild(ctrls);
+      ctrls.append(pp, sub1m, plus1m, sub15s, plus15s, editBtn, rst);
+      card.appendChild(ctrls);
+    }
 
     return card;
   }
 
   function buildControlBarTimerDockDOM(isDropUp) {
+    if (ROLE !== "faculty") {
+      const stuPill = make("span", "⏱ 05:00", "ppt-sm-timer is-student-live-clock hsd-no-print");
+      stuPill.setAttribute("data-ppt-student-timer-pill", "1");
+      stuPill.title = "เวลาอภิปรายกลุ่ม (ซิงค์สดจากอาจารย์ประจำกลุ่ม)";
+      stuPill.hidden = true;
+      return stuPill;
+    }
+
     const dock = make("div", null, "ppt-big-clicker-dock is-timer-dock");
     const head = make("div", null, "ppt-dock-header");
     head.append(
@@ -26422,10 +26354,10 @@
     });
     anchor.appendChild(clockBtn);
 
-    const plusBtn = make("button", "+1m", "ppt-big-btn");
-    plusBtn.type = "button";
-    plusBtn.title = "เพิ่มเวลา +1 นาที";
-    plusBtn.addEventListener("click", () => slideTimerCtrl.addSeconds(60));
+    const resetBtn = make("button", "Reset", "ppt-big-btn");
+    resetBtn.type = "button";
+    resetBtn.title = "รีเซ็ตเวลากลับเป็น 05:00";
+    resetBtn.addEventListener("click", () => slideTimerCtrl.reset(300));
 
     const bigSlideBtn = make("button", state.hsdBigSlideTimer ? "⤢ ย่อจอใหญ่" : "⤢ จอใหญ่", "ppt-big-btn");
     bigSlideBtn.type = "button";
@@ -26436,7 +26368,7 @@
       broadcastPptPresentationState();
     });
 
-    ctrls.append(playBtn, anchor, plusBtn, bigSlideBtn);
+    ctrls.append(playBtn, anchor, resetBtn, bigSlideBtn);
     dock.appendChild(ctrls);
     return dock;
   }

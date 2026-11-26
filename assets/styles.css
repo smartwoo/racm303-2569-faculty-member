@@ -45461,3 +45461,121 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
   }
 }
 
+.ppt-sm-tbtn.is-reset-btn {
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* Student Read-Only Live Broadcast Countdown Clock (Slide Header & Floating HUD) */
+.ppt-sm-timer.is-student-live-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+.ppt-sm-timer.is-student-live-clock[hidden] {
+  display: none !important;
+}
+
+.ppt-sm-timer.is-student-live-clock.is-running {
+  background: #0d9488;
+  border-color: rgba(153, 246, 228, 0.75);
+  color: #ffffff;
+}
+
+.ppt-sm-timer.is-student-live-clock.is-warning {
+  background: #d97706;
+  border-color: rgba(253, 230, 138, 0.85);
+  color: #ffffff;
+}
+
+.ppt-sm-timer.is-student-live-clock.is-urgent,
+.ppt-sm-timer.is-student-live-clock.is-timeup {
+  background: #dc2626;
+  border-color: rgba(254, 202, 202, 0.9);
+  color: #ffffff;
+}
+
+.stu-live-broadcast-timer-hud {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 10020;
+  pointer-events: none;
+  user-select: none;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  border: 1.5px solid rgba(45, 212, 191, 0.65);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 118px;
+  text-align: center;
+}
+
+.stu-live-broadcast-timer-hud[hidden] {
+  display: none !important;
+}
+
+.stu-live-broadcast-timer-hud .stu-lbth-digits {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.stu-live-broadcast-timer-hud .stu-lbth-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.stu-live-broadcast-timer-hud .stu-lbth-fill {
+  height: 100%;
+  background: #2dd4bf;
+  transition: width 0.25s linear;
+}
+
+.stu-live-broadcast-timer-hud.is-running {
+  background: rgba(13, 148, 136, 0.95);
+  border-color: #99f6e4;
+}
+
+.stu-live-broadcast-timer-hud.is-warning {
+  background: rgba(217, 119, 6, 0.96);
+  border-color: #fde68a;
+}
+
+.stu-live-broadcast-timer-hud.is-warning .stu-lbth-fill {
+  background: #fef08a;
+}
+
+.stu-live-broadcast-timer-hud.is-urgent,
+.stu-live-broadcast-timer-hud.is-timeup {
+  background: rgba(220, 38, 38, 0.96);
+  border-color: #fecaca;
+}
+
+.stu-live-broadcast-timer-hud.is-urgent .stu-lbth-fill,
+.stu-live-broadcast-timer-hud.is-timeup .stu-lbth-fill {
+  background: #fecaca;
+}
+
+
