@@ -23498,14 +23498,21 @@
     }
   }
 
-  function canAncestorScrollHorizontally(startEl, stopEl, dx) {
-    let el = startEl instanceof Element ? startEl : null;
-    while (el && el !== stopEl && el !== document.body) {
-      if (el.scrollWidth > el.clientWidth + 8) {
+  let lastPptSwipeNavTs = 0;
+
+  function canAncestorScrollHorizontally(startNode, stopEl, dx) {
+    let el =
+      startNode instanceof Element
+        ? startNode
+        : startNode && startNode.parentElement instanceof Element
+        ? startNode.parentElement
+        : null;
+    while (el && el !== stopEl && el !== document.body && el !== document.documentElement) {
+      if (el.scrollWidth > el.clientWidth + 16) {
         const ox = window.getComputedStyle(el).overflowX;
         if (ox === "auto" || ox === "scroll") {
-          if (dx < 0 && el.scrollLeft + el.clientWidth < el.scrollWidth - 4) return true;
-          if (dx > 0 && el.scrollLeft > 4) return true;
+          if (dx < 0 && el.scrollLeft + el.clientWidth < el.scrollWidth - 6) return true;
+          if (dx > 0 && el.scrollLeft > 6) return true;
         }
       }
       el = el.parentElement;
@@ -23513,8 +23520,281 @@
     return false;
   }
 
+  function bindHorizontalSlideSwipeContainer(containerEl, isOverlayRoot) {
+    if (!containerEl || containerEl._hasPptSwipeBound) return;
+    containerEl._hasPptSwipeBound = true;
+
+    let tracking = false;
+    let multiTouch = false;
+    let axis = "";
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let startTs = 0;
+    let startTarget = null;
+    let activePtrId = null;
+
+    const getActiveSheet = () => containerEl.querySelector(".ppt-slide-sheet");
+
+    const clearDragVisual = () => {
+      const sh = getActiveSheet();
+      if (sh && Math.abs((state.hsdFsZoomScale || 1) - 1) < 0.04) {
+        sh.style.transform = "";
+        sh.style.transition = "";
+      }
+    };
+
+    const applyDragVisual = (dx) => {
+      const sh = getActiveSheet();
+      if (!sh || Math.abs((state.hsdFsZoomScale || 1) - 1) >= 0.04) return;
+      const damped = Math.max(-44, Math.min(44, dx * 0.28));
+      sh.style.transition = "none";
+      sh.style.transform = `translate3d(${damped.toFixed(1)}px, 0, 0)`;
+    };
+
+    const isZoomedOrBlocked = (targetNode) => {
+      if (isOverlayRoot && containerEl.hidden) return true;
+      if (state.hsdFsGridOpen) return true;
+      const stageEl = isOverlayRoot ? containerEl.querySelector(".ppt-fs-stage-wrap") : containerEl;
+      if (
+        (stageEl && (stageEl.classList.contains("is-pinch-zoomed") || stageEl.classList.contains("is-manual-zoom"))) ||
+        Math.abs((state.hsdFsZoomScale || 1) - 1) >= 0.04
+      ) {
+        return true;
+      }
+      const el =
+        targetNode instanceof Element
+          ? targetNode
+          : targetNode && targetNode.parentElement instanceof Element
+          ? targetNode.parentElement
+          : null;
+      if (!el) return false;
+      return Boolean(
+        el.closest(
+          "input, textarea, select, [contenteditable='true'], .hsd-split-resizer, .ppt-slideshow-fab-hud, .ppt-ss-popover, .ppt-fs-kbd-bar, .ppt-fs-grid-backdrop, .ppt-reading-topbar, .ppt-reading-statusbar"
+        )
+      );
+    };
+
+    const commitSwipeIfValid = (endX, endY, allowCancelCommit) => {
+      if (!tracking || multiTouch) {
+        tracking = false;
+        axis = "";
+        clearDragVisual();
+        return false;
+      }
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const dt = Date.now() - startTs;
+      const lockedX = axis === "x";
+      const blockedAxis = axis === "y" || axis === "scroll-x";
+      tracking = false;
+      axis = "";
+      activePtrId = null;
+      clearDragVisual();
+
+      if (blockedAxis) return false;
+      if (allowCancelCommit && !lockedX) return false;
+      if (Date.now() - lastPptSwipeNavTs < 240) return false;
+
+      const minDx = allowCancelCommit ? 44 : 36;
+      if (
+        dt < 950 &&
+        Math.abs(dx) >= minDx &&
+        Math.abs(dx) >= Math.abs(dy) * 1.18 &&
+        !canAncestorScrollHorizontally(startTarget, containerEl, dx)
+      ) {
+        lastPptSwipeNavTs = Date.now();
+        stepHsQuestionSlide(dx < 0 ? 1 : -1);
+        return true;
+      }
+      return false;
+    };
+
+    containerEl.addEventListener(
+      "touchstart",
+      (ev) => {
+        if (!ev.touches) return;
+        if (ev.touches.length >= 2) {
+          multiTouch = true;
+          tracking = false;
+          axis = "";
+          clearDragVisual();
+          return;
+        }
+        if (ev.touches.length === 1) {
+          multiTouch = false;
+          if (isZoomedOrBlocked(ev.target)) {
+            tracking = false;
+            axis = "";
+            return;
+          }
+          const t0 = ev.touches[0];
+          tracking = true;
+          axis = "";
+          startX = t0.clientX;
+          startY = t0.clientY;
+          lastX = startX;
+          lastY = startY;
+          startTs = Date.now();
+          startTarget = ev.target;
+        }
+      },
+      { passive: true }
+    );
+
+    containerEl.addEventListener(
+      "touchmove",
+      (ev) => {
+        if (!ev.touches) return;
+        if (ev.touches.length >= 2) {
+          multiTouch = true;
+          tracking = false;
+          axis = "";
+          clearDragVisual();
+          return;
+        }
+        if (!tracking || multiTouch || ev.touches.length !== 1) return;
+        const t0 = ev.touches[0];
+        lastX = t0.clientX;
+        lastY = t0.clientY;
+        const dx = lastX - startX;
+        const dy = lastY - startY;
+
+        if (!axis && Math.hypot(dx, dy) >= 8) {
+          if (Math.abs(dx) >= Math.abs(dy) * 1.12) {
+            axis = canAncestorScrollHorizontally(startTarget, containerEl, dx) ? "scroll-x" : "x";
+          } else if (Math.abs(dy) > Math.abs(dx) * 1.22) {
+            axis = "y";
+          }
+        }
+
+        if (axis === "x") {
+          if (ev.cancelable) ev.preventDefault();
+          applyDragVisual(dx);
+        }
+      },
+      { passive: false }
+    );
+
+    containerEl.addEventListener(
+      "touchend",
+      (ev) => {
+        if (multiTouch) {
+          if (!ev.touches || ev.touches.length === 0) multiTouch = false;
+          tracking = false;
+          axis = "";
+          clearDragVisual();
+          return;
+        }
+        if (!tracking) return;
+        const tEnd = ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0] : { clientX: lastX, clientY: lastY };
+        commitSwipeIfValid(tEnd.clientX, tEnd.clientY, false);
+      },
+      { passive: true }
+    );
+
+    containerEl.addEventListener(
+      "touchcancel",
+      () => {
+        if (tracking && axis === "x") {
+          commitSwipeIfValid(lastX, lastY, true);
+        } else {
+          tracking = false;
+          axis = "";
+          clearDragVisual();
+        }
+      },
+      { passive: true }
+    );
+
+    // Stylus / S-Pen & hybrid touch-pointer fallback (deduplicated with TouchEvents via lastPptSwipeNavTs)
+    containerEl.addEventListener(
+      "pointerdown",
+      (ev) => {
+        if (ev.pointerType !== "pen" && ev.pointerType !== "touch") return;
+        if (ev.pointerType === "touch" && "ontouchstart" in window) return;
+        if (isZoomedOrBlocked(ev.target)) return;
+        tracking = true;
+        multiTouch = false;
+        axis = "";
+        activePtrId = ev.pointerId;
+        startX = ev.clientX;
+        startY = ev.clientY;
+        lastX = startX;
+        lastY = startY;
+        startTs = Date.now();
+        startTarget = ev.target;
+      },
+      { passive: true }
+    );
+
+    containerEl.addEventListener(
+      "pointermove",
+      (ev) => {
+        if (!tracking || activePtrId === null || ev.pointerId !== activePtrId) return;
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+        const dx = lastX - startX;
+        const dy = lastY - startY;
+        if (!axis && Math.hypot(dx, dy) >= 8) {
+          if (Math.abs(dx) >= Math.abs(dy) * 1.12) {
+            axis = canAncestorScrollHorizontally(startTarget, containerEl, dx) ? "scroll-x" : "x";
+          } else if (Math.abs(dy) > Math.abs(dx) * 1.22) {
+            axis = "y";
+          }
+        }
+        if (axis === "x") {
+          applyDragVisual(dx);
+        }
+      },
+      { passive: true }
+    );
+
+    containerEl.addEventListener(
+      "pointerup",
+      (ev) => {
+        if (!tracking || activePtrId === null || ev.pointerId !== activePtrId) return;
+        commitSwipeIfValid(ev.clientX, ev.clientY, false);
+      },
+      { passive: true }
+    );
+
+    containerEl.addEventListener(
+      "pointercancel",
+      (ev) => {
+        if (!tracking || activePtrId === null || ev.pointerId !== activePtrId) return;
+        if (axis === "x") commitSwipeIfValid(lastX, lastY, true);
+        else {
+          tracking = false;
+          axis = "";
+          activePtrId = null;
+          clearDragVisual();
+        }
+      },
+      { passive: true }
+    );
+
+    // Suppress accidental synthetic click (e.g. Case Cover click-to-advance) right after a horizontal swipe
+    containerEl.addEventListener(
+      "click",
+      (ev) => {
+        if (Date.now() - lastPptSwipeNavTs < 380) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+      },
+      true
+    );
+  }
+
   function attachPptStagePinchZoom(stageWrap, zoomSizer, sheetEl) {
     if (!stageWrap || !zoomSizer || !sheetEl) return;
+
+    if (!stageWrap.closest("#pptPresentationOverlay")) {
+      bindHorizontalSlideSwipeContainer(stageWrap, false);
+    }
 
     let pinching = false;
     let startDist = 0;
@@ -23524,12 +23804,6 @@
     let lastTapTs = 0;
     let lastTapX = 0;
     let lastTapY = 0;
-    let swipeTracking = false;
-    let swipeAborted = false;
-    let swipeStartX = 0;
-    let swipeStartY = 0;
-    let swipeStartTs = 0;
-    let swipeStartTarget = null;
 
     const getTouchDist = (t0, t1) => Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
 
@@ -23537,8 +23811,6 @@
       "touchstart",
       (ev) => {
         if (ev.touches.length === 2) {
-          swipeTracking = false;
-          swipeAborted = true;
           const d = getTouchDist(ev.touches[0], ev.touches[1]);
           if (d < 12) return;
           if (ev.cancelable) ev.preventDefault();
@@ -23553,25 +23825,6 @@
         } else if (ev.touches.length === 1 && !pinching) {
           const t = ev.touches[0];
           const target = ev.target;
-          const isEditOrDragTarget =
-            target instanceof Element &&
-            Boolean(target.closest("input, textarea, select, [contenteditable='true'], .hsd-split-resizer"));
-          const isZoomedNow =
-            stageWrap.classList.contains("is-pinch-zoomed") ||
-            stageWrap.classList.contains("is-manual-zoom") ||
-            Math.abs((state.hsdFsZoomScale || 1) - 1) >= 0.04;
-          if (!isEditOrDragTarget && !isZoomedNow) {
-            swipeTracking = true;
-            swipeAborted = false;
-            swipeStartX = t.clientX;
-            swipeStartY = t.clientY;
-            swipeStartTs = Date.now();
-            swipeStartTarget = target;
-          } else {
-            swipeTracking = false;
-            swipeAborted = true;
-          }
-
           const isInteractive =
             target instanceof Element &&
             Boolean(target.closest("button, input, textarea, select, a, label, mark, .hsd-split-resizer"));
@@ -23580,7 +23833,6 @@
             if (now - lastTapTs < 290 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 28) {
               ev.preventDefault();
               lastTapTs = 0;
-              swipeTracking = false;
               const curS = state.hsdFsZoomScale || 1;
               const nextS = curS > 1.08 || curS < 0.94 ? 1 : 1.85;
               const sRect = stageWrap.getBoundingClientRect();
@@ -23606,22 +23858,6 @@
     stageWrap.addEventListener(
       "touchmove",
       (ev) => {
-        if (ev.touches.length > 1) {
-          swipeTracking = false;
-          swipeAborted = true;
-        }
-        if (swipeTracking && !swipeAborted && ev.touches.length === 1) {
-          const t0 = ev.touches[0];
-          const dx = t0.clientX - swipeStartX;
-          const dy = t0.clientY - swipeStartY;
-          if (Math.abs(dy) > 34 && Math.abs(dy) > Math.abs(dx) * 0.85) {
-            swipeAborted = true;
-          } else if (Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 1.45) {
-            if (canAncestorScrollHorizontally(swipeStartTarget, stageWrap, dx)) {
-              swipeAborted = true;
-            }
-          }
-        }
         if (!pinching || ev.touches.length < 2) return;
         ev.preventDefault();
         const curDist = getTouchDist(ev.touches[0], ev.touches[1]);
@@ -23640,30 +23876,6 @@
     );
 
     const endPinch = (ev) => {
-      if (
-        swipeTracking &&
-        !swipeAborted &&
-        !pinching &&
-        ev.changedTouches &&
-        ev.changedTouches.length === 1 &&
-        (!ev.touches || ev.touches.length === 0)
-      ) {
-        const tEnd = ev.changedTouches[0];
-        const dx = tEnd.clientX - swipeStartX;
-        const dy = tEnd.clientY - swipeStartY;
-        const dt = Date.now() - swipeStartTs;
-        swipeTracking = false;
-        if (
-          dt < 750 &&
-          Math.abs(dx) >= 48 &&
-          Math.abs(dx) >= Math.abs(dy) * 1.45 &&
-          !canAncestorScrollHorizontally(swipeStartTarget, stageWrap, dx)
-        ) {
-          stepHsQuestionSlide(dx < 0 ? 1 : -1);
-          return;
-        }
-      }
-      swipeTracking = false;
       if (!pinching) return;
       if (!ev.touches || ev.touches.length < 2) {
         pinching = false;
@@ -23673,10 +23885,7 @@
       }
     };
     stageWrap.addEventListener("touchend", endPinch, { passive: true });
-    stageWrap.addEventListener("touchcancel", () => {
-      swipeTracking = false;
-      swipeAborted = true;
-    }, { passive: true });
+    stageWrap.addEventListener("touchcancel", endPinch, { passive: true });
     stageWrap.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
     stageWrap.addEventListener("gesturechange", (ev) => ev.preventDefault(), { passive: false });
 
@@ -28980,6 +29189,7 @@
       ov.addEventListener("pointerdown", kickIdleHud, { passive: true });
       document.body.appendChild(ov);
     }
+    bindHorizontalSlideSwipeContainer(ov, true);
     return ov;
   }
 

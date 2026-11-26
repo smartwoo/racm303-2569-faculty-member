@@ -45210,3 +45210,35 @@ body.is-ppt-fullscreen-open {
     gap: 7px !important;
   }
 }
+
+/* ==========================================================================
+   Full-Screen Touch-Action & Compositor Swipe Alignment (iOS WebKit + Android Blink)
+   ========================================================================== */
+html:has(body.is-ppt-fullscreen-open),
+body.is-ppt-fullscreen-open,
+.ppt-presentation-overlay {
+  overscroll-behavior-x: none !important;
+}
+
+.ppt-fs-stage-wrap:not(.is-pinch-zoomed),
+.hsd-slide-shell .ppt-canvas-stage:not(.is-pinch-zoomed):not(.is-manual-zoom):not(.is-sorter-stage),
+.ppt-slide-sheet:not(.is-handout-sheet) {
+  touch-action: pan-y !important;
+  overscroll-behavior-x: none;
+}
+
+.ppt-slide-sheet .hsd-split-resizer {
+  touch-action: none !important;
+}
+
+@media (max-width: 649px) {
+  .ppt-slide-sheet.is-auto-horiz-split .clean-table-wrap {
+    touch-action: pan-y !important;
+  }
+
+  .ppt-slide-sheet.is-auto-horiz-split .hsd-tk-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed;
+  }
+}
