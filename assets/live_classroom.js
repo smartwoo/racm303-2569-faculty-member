@@ -54,7 +54,8 @@
 
   function safeSetStorage(key, val) {
     try {
-      localStorage.setItem(key, val);
+      if (val === null || val === undefined) localStorage.removeItem(key);
+      else localStorage.setItem(key, val);
     } catch (_) {}
   }
 
@@ -77,6 +78,30 @@
   function clampRoom(n) {
     const num = Number(n);
     return num >= 1 && num <= 6 ? Math.floor(num) : 1;
+  }
+
+  function normalizeModuleId(modStr) {
+    const s = String(modStr || "").trim().toUpperCase();
+    return /^HS[1-6]$/.test(s) ? s : "HS1";
+  }
+
+  function createFreshTimerObj() {
+    return {
+      seq: 0,
+      running: false,
+      hasStarted: false,
+      hasConfigured: false,
+      timedOutInCurrentRun: false,
+      receivedLiveInSession: false,
+      configuredDurationSec: 300,
+      durationSec: 300,
+      baseRemainingMs: 300000,
+      anchorPerfNow: performance.now(),
+      questionId: "",
+      label: "จับเวลาอภิปรายกลุ่มย่อย",
+      chimePlayedForSeq: -1,
+      lastWallMs: 0
+    };
   }
 
   function clampTeamOrZero(n) {
@@ -112,6 +137,10 @@
 
   const bootRoomAttr =
     (typeof document !== "undefined" && document.body && document.body.getAttribute("data-hsd-room")) || "";
+  const bootModInit = normalizeModuleId(
+    (typeof window !== "undefined" && window.RACM_HSD_ROOM_PAGE && window.RACM_HSD_ROOM_PAGE.module) ||
+      safeGetStorage("racm303_hsd_deck_mod", "HS1")
+  );
 
   const state = {
     role: window.PORTAL_ROLE === "faculty" ? "faculty" : "student",
@@ -128,7 +157,7 @@
     area: "",
     disc: 0,
     photoId: "",
-    activeModule: "",
+    activeModule: bootModInit,
     activeQuestionId: "",
     joinedWallMs: 0,
     followTeacher: false,
@@ -141,22 +170,8 @@
     hostConn: null,
     bc: null,
 
-    // Shared Timer State (drift-free via performance.now())
-    timer: {
-      seq: 0,
-      running: false,
-      hasStarted: false,
-      hasConfigured: false,
-      timedOutInCurrentRun: false,
-      receivedLiveInSession: false,
-      configuredDurationSec: 300,
-      durationSec: 300,
-      baseRemainingMs: 300000,
-      anchorPerfNow: performance.now(),
-      questionId: "",
-      label: "จับเวลาอภิปรายกลุ่มย่อย",
-      chimePlayedForSeq: -1
-    },
+    // Per-(roomId, moduleId) isolated timer states ("1:HS1" .. "6:HS6")
+    timersByScope: new Map(),
 
     // Teacher Active Question / Slide Pointer
     teacherPointer: {
@@ -553,8 +568,20 @@
     } catch (_) {}
   }
 
-  function getTimerRemainingMs() {
-    const t = state.timer;
+  function getScopeTimer(roomIdOpt, modOpt) {
+    const r = clampRoom(roomIdOpt || state.roomId);
+    const m = normalizeModuleId(modOpt || state.activeModule);
+    const key = `${r}:${m}`;
+    let t = state.timersByScope.get(key);
+    if (!t) {
+      t = createFreshTimerObj();
+      state.timersByScope.set(key, t);
+    }
+    return t;
+  }
+
+  function getTimerRemainingMs(tOpt) {
+    const t = tOpt || getScopeTimer();
     if (!t.running) return Math.max(0, Math.round(t.baseRemainingMs));
     const elapsed = Math.max(0, performance.now() - t.anchorPerfNow);
     return Math.max(0, Math.round(t.baseRemainingMs - elapsed));
@@ -567,41 +594,94 @@
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
-  function getTimerSnapshot() {
-    const remMs = getTimerRemainingMs();
-    const durMs = Math.max(1000, (state.timer.durationSec || 300) * 1000);
+  function getTimerSnapshot(modOpt, roomIdOpt) {
+    const effRoom = clampRoom(roomIdOpt || state.roomId);
+    const effMod = normalizeModuleId(modOpt || state.activeModule);
+    const t = getScopeTimer(effRoom, effMod);
+    const remMs = getTimerRemainingMs(t);
+    const durMs = Math.max(1000, (t.durationSec || 300) * 1000);
     return {
-      running: state.timer.running && remMs > 0,
+      roomId: effRoom,
+      moduleId: effMod,
+      running: t.running && remMs > 0,
       remainingMs: remMs,
-      durationSec: state.timer.durationSec || 300,
-      configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
+      durationSec: t.durationSec || 300,
+      configuredDurationSec: t.configuredDurationSec || t.durationSec || 300,
       pct: Math.max(0, Math.min(100, (remMs / durMs) * 100)),
       formatted: formatMs(remMs),
-      isWarning: Boolean(state.timer.running) && remMs > 0 && remMs <= 60000,
-      isUrgent: Boolean(state.timer.running) && remMs > 0 && remMs <= 15000,
-      isTimeUp: Boolean(state.timer.timedOutInCurrentRun) && !state.timer.running && remMs === 0,
-      hasStarted: Boolean(state.timer.hasStarted),
-      hasConfigured: Boolean(state.timer.hasConfigured),
-      label: state.timer.label || "",
-      questionId: state.timer.questionId || ""
+      isWarning: Boolean(t.running) && remMs > 0 && remMs <= 60000,
+      isUrgent: Boolean(t.running) && remMs > 0 && remMs <= 15000,
+      isTimeUp: Boolean(t.timedOutInCurrentRun) && !t.running && remMs === 0,
+      hasStarted: Boolean(t.hasStarted),
+      hasConfigured: Boolean(t.hasConfigured),
+      label: t.label || "",
+      questionId: t.questionId || ""
     };
   }
 
-  // Tick loop every 250ms so countdown updates smoothly across Student & Teacher
+  // Tick loop every 250ms across all active (room, module) scopes
   setInterval(() => {
-    if (state.timer.running) {
-      const rem = getTimerRemainingMs();
+    const curKey = `${clampRoom(state.roomId)}:${normalizeModuleId(state.activeModule)}`;
+    state.timersByScope.forEach((t, key) => {
+      if (!t.running) return;
+      const rem = getTimerRemainingMs(t);
       if (rem <= 0) {
-        state.timer.running = false;
-        state.timer.baseRemainingMs = 0;
-        state.timer.timedOutInCurrentRun = true;
-        if (state.timer.chimePlayedForSeq !== state.timer.seq) {
-          state.timer.chimePlayedForSeq = state.timer.seq;
+        const [rStr, mStr] = key.split(":");
+        const scopeRoom = clampRoom(rStr);
+        const scopeMod = normalizeModuleId(mStr);
+        t.running = false;
+        t.baseRemainingMs = 0;
+        t.timedOutInCurrentRun = true;
+        if (key === curKey && t.chimePlayedForSeq !== t.seq) {
+          t.chimePlayedForSeq = t.seq;
           playTimerChime();
         }
+        // Clear retained countdown on broker so future visitors never receive an expired Time-Up alert
+        if (state.role === "faculty" && scopeRoom === state.roomId) {
+          publishPacket(
+            `timer/${scopeMod.toLowerCase()}`,
+            {
+              type: "timer",
+              moduleId: scopeMod,
+              seq: t.seq,
+              running: false,
+              hasStarted: true,
+              hasConfigured: true,
+              timedOutInCurrentRun: true,
+              configuredDurationSec: t.configuredDurationSec || 300,
+              durationSec: t.durationSec || 300,
+              remainingMs: 0,
+              questionId: t.questionId,
+              label: t.label
+            },
+            false,
+            scopeRoom
+          );
+          publishPacket(
+            `timer/${scopeMod.toLowerCase()}`,
+            {
+              type: "timer",
+              moduleId: scopeMod,
+              seq: t.seq,
+              running: false,
+              hasStarted: false,
+              hasConfigured: false,
+              timedOutInCurrentRun: false,
+              configuredDurationSec: t.configuredDurationSec || 300,
+              durationSec: t.configuredDurationSec || 300,
+              remainingMs: (t.configuredDurationSec || 300) * 1000,
+              questionId: t.questionId,
+              label: t.label
+            },
+            true,
+            scopeRoom
+          );
+        }
       }
-      emit("timer", getTimerSnapshot());
-    }
+      if (key === curKey) {
+        emit("timer", getTimerSnapshot());
+      }
+    });
   }, 250);
 
   // Prune offline/disconnected presence entries across all 6 rooms every 5s & send active room heartbeat every 12s
@@ -635,23 +715,32 @@
     if (state.role === "faculty" || state.sessionJoined) {
       publishPresence();
     }
-    if (state.role === "faculty" && state.timer.running) {
-      publishPacket(
-        "timer",
-        {
-          type: "timer",
-          seq: state.timer.seq,
-          running: true,
-          hasStarted: true,
-          hasConfigured: true,
-          configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
-          durationSec: state.timer.durationSec,
-          remainingMs: getTimerRemainingMs(),
-          questionId: state.timer.questionId,
-          label: state.timer.label
-        },
-        true
-      );
+    if (state.role === "faculty") {
+      state.timersByScope.forEach((t, key) => {
+        if (!t.running) return;
+        const [rStr, mStr] = key.split(":");
+        const scopeRoom = clampRoom(rStr);
+        const scopeMod = normalizeModuleId(mStr);
+        if (scopeRoom !== state.roomId) return;
+        publishPacket(
+          `timer/${scopeMod.toLowerCase()}`,
+          {
+            type: "timer",
+            moduleId: scopeMod,
+            seq: t.seq,
+            running: true,
+            hasStarted: true,
+            hasConfigured: true,
+            configuredDurationSec: t.configuredDurationSec || t.durationSec || 300,
+            durationSec: t.durationSec,
+            remainingMs: getTimerRemainingMs(t),
+            questionId: t.questionId,
+            label: t.label
+          },
+          true,
+          scopeRoom
+        );
+      });
     }
   }, HEARTBEAT_INTERVAL_MS);
 
@@ -676,10 +765,11 @@
 
     // 2. MQTT over WSS (QoS 1 for timer, checkin_reset & presence so countdown and check-in delivery is broker-acknowledged)
     const fullTopic = roomTopic(subpath, targetRoom);
+    const subStr = String(subpath || "");
     const qosLevel =
-      subpath === "timer" ||
-      subpath === "checkin_reset" ||
-      String(subpath || "").startsWith("presence")
+      subStr.startsWith("timer") ||
+      subStr === "checkin_reset" ||
+      subStr.startsWith("presence")
         ? 1
         : 0;
     state.mqttClients.forEach((client) => {
@@ -780,6 +870,7 @@
     state.displayName = "";
     state.participantId = persistentPid;
     state.responsesByQuestion.clear();
+    state.timersByScope.clear();
     lastPublishedLocalCellsByQ.clear();
     pendingCellsByQuestion.clear();
     pendingDirtyCellsByQ.clear();
@@ -800,6 +891,7 @@
       broadcastStudentLeaveFromRoom(oldPid, oldSid, pktRoom, false);
     }
     emit("presence", getPresenceSummary());
+    emit("timer", getTimerSnapshot());
     emit("checkin_reset", {
       roomId: pktRoom,
       modCode: modCode || state.activeModule || "HS1",
@@ -835,10 +927,12 @@
       return;
     }
 
-    const pktRoom = clampRoom(msg.roomId || state.roomId);
     const isMultiRoomPresencePkt =
       msg.type === "presence" || msg.type === "who_is_here" || msg.type === "checkin_reset";
-    if (!isMultiRoomPresencePkt && pktRoom !== state.roomId) return;
+    if (!isMultiRoomPresencePkt) {
+      if (!msg.roomId || clampRoom(msg.roomId) !== state.roomId) return;
+    }
+    const pktRoom = clampRoom(msg.roomId || state.roomId);
 
     // If faculty receives from a PeerJS student on active room, relay to other PeerJS students
     if (pktRoom === state.roomId && state.role === "faculty" && state.peerConns.size > 1) {
@@ -896,7 +990,13 @@
     }
 
     if (msg.type === "timer") {
-      if (isRetained && state.timer.receivedLiveInSession) {
+      // Strictly require explicit moduleId (HS1..HS6) so legacy unscoped retained packets and other modules never leak
+      if (!msg.moduleId || !/^HS[1-6]$/i.test(String(msg.moduleId).trim())) {
+        return;
+      }
+      const pktMod = normalizeModuleId(msg.moduleId);
+      const t = getScopeTimer(pktRoom, pktMod);
+      if (isRetained && t.receivedLiveInSession) {
         return;
       }
       const maxRetainedAgeMs = msg.running ? RETAINED_STALE_MS : 10 * 60 * 1000;
@@ -904,7 +1004,7 @@
         return;
       }
       if (!isRetained) {
-        state.timer.receivedLiveInSession = true;
+        t.receivedLiveInSession = true;
       }
       const seq = Number(msg.seq) || 0;
       let rem = Math.max(0, Number(msg.remainingMs) || 0);
@@ -914,45 +1014,46 @@
       }
       const durSec = Math.max(1, Number(msg.durationSec) || 300);
       const cfgSec = Math.max(1, Number(msg.configuredDurationSec) || durSec);
+      const isActiveScope = pktRoom === state.roomId && pktMod === normalizeModuleId(state.activeModule);
+
       // Never turn any incoming retained 0-remaining packet into a red Time-Up state
       if (rem === 0) {
-        const wasActivelyRunningHere = Boolean(state.timer.running) || Boolean(!isRetained && msg.timedOutInCurrentRun);
-        state.timer.seq = wasActivelyRunningHere ? Math.max(state.timer.seq, seq) : 0;
-        state.timer.configuredDurationSec = cfgSec;
-        state.timer.durationSec = durSec;
-        state.timer.baseRemainingMs = wasActivelyRunningHere ? 0 : durSec * 1000;
-        state.timer.anchorPerfNow = performance.now();
-        state.timer.running = false;
-        state.timer.hasStarted = wasActivelyRunningHere;
-        state.timer.hasConfigured = wasActivelyRunningHere;
-        state.timer.timedOutInCurrentRun = wasActivelyRunningHere;
-        state.timer.lastWallMs = Date.now();
-        emit("timer", getTimerSnapshot());
+        const wasActivelyRunningHere = Boolean(t.running) || Boolean(!isRetained && msg.timedOutInCurrentRun);
+        t.seq = wasActivelyRunningHere ? Math.max(t.seq, seq) : 0;
+        t.configuredDurationSec = cfgSec;
+        t.durationSec = durSec;
+        t.baseRemainingMs = wasActivelyRunningHere ? 0 : durSec * 1000;
+        t.anchorPerfNow = performance.now();
+        t.running = false;
+        t.hasStarted = wasActivelyRunningHere;
+        t.hasConfigured = wasActivelyRunningHere;
+        t.timedOutInCurrentRun = wasActivelyRunningHere;
+        t.lastWallMs = Date.now();
+        if (isActiveScope) emit("timer", getTimerSnapshot());
         return;
       }
-      state.timer.seq = Math.max(state.timer.seq, seq);
-      state.timer.configuredDurationSec = cfgSec;
-      state.timer.durationSec = durSec;
-      state.timer.baseRemainingMs = rem;
-      state.timer.anchorPerfNow = performance.now();
-      state.timer.running = Boolean(msg.running) && rem > 0;
-      state.timer.timedOutInCurrentRun = false;
-      if (state.timer.running) {
-        state.timer.hasStarted = true;
-        state.timer.hasConfigured = true;
+      t.seq = Math.max(t.seq, seq);
+      t.configuredDurationSec = cfgSec;
+      t.durationSec = durSec;
+      t.baseRemainingMs = rem;
+      t.anchorPerfNow = performance.now();
+      t.running = Boolean(msg.running) && rem > 0;
+      t.timedOutInCurrentRun = false;
+      if (t.running) {
+        t.hasStarted = true;
+        t.hasConfigured = true;
       } else if (!isRetained) {
-        state.timer.hasStarted = Boolean(msg.hasStarted);
-        state.timer.hasConfigured =
-          msg.hasConfigured !== undefined ? Boolean(msg.hasConfigured) : rem > 0;
+        t.hasStarted = Boolean(msg.hasStarted);
+        t.hasConfigured = msg.hasConfigured !== undefined ? Boolean(msg.hasConfigured) : rem > 0;
       } else {
-        state.timer.hasStarted = false;
-        state.timer.hasConfigured = Boolean(msg.hasConfigured);
+        t.hasStarted = false;
+        t.hasConfigured = Boolean(msg.hasConfigured);
       }
-      state.timer.label = String(msg.label || "จับเวลาอภิปรายกลุ่มย่อย").slice(0, 100);
-      state.timer.questionId = String(msg.questionId || "").slice(0, 32);
-      state.timer.lastWallMs = Date.now();
-      if (rem > 0) state.timer.chimePlayedForSeq = -1;
-      emit("timer", getTimerSnapshot());
+      t.label = String(msg.label || "จับเวลาอภิปรายกลุ่มย่อย").slice(0, 100);
+      t.questionId = String(msg.questionId || "").slice(0, 32);
+      t.lastWallMs = Date.now();
+      if (rem > 0) t.chimePlayedForSeq = -1;
+      if (isActiveScope) emit("timer", getTimerSnapshot());
       return;
     }
 
@@ -1268,30 +1369,35 @@
             pktRoom
           );
         }
-        if (
-          state.timer.running ||
-          state.timer.hasConfigured ||
-          state.timer.hasStarted ||
-          state.timer.timedOutInCurrentRun
-        ) {
-          publishPacket(
-            "timer",
-            {
-              type: "timer",
-              seq: state.timer.seq,
-              running: state.timer.running,
-              hasStarted: state.timer.hasStarted,
-              hasConfigured: state.timer.hasConfigured,
-              timedOutInCurrentRun: state.timer.timedOutInCurrentRun,
-              configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
-              durationSec: state.timer.durationSec,
-              remainingMs: getTimerRemainingMs(),
-              questionId: state.timer.questionId,
-              label: state.timer.label
-            },
-            true
-          );
-        }
+        state.timersByScope.forEach((t, key) => {
+          const [rStr, mStr] = key.split(":");
+          const scopeRoom = clampRoom(rStr);
+          const scopeMod = normalizeModuleId(mStr);
+          if (scopeRoom !== state.roomId) return;
+          const remNow = getTimerRemainingMs(t);
+          if (remNow <= 0) return;
+          if (t.running || t.hasConfigured || t.hasStarted) {
+            publishPacket(
+              `timer/${scopeMod.toLowerCase()}`,
+              {
+                type: "timer",
+                moduleId: scopeMod,
+                seq: t.seq,
+                running: t.running,
+                hasStarted: t.hasStarted,
+                hasConfigured: t.hasConfigured,
+                timedOutInCurrentRun: false,
+                configuredDurationSec: t.configuredDurationSec || t.durationSec || 300,
+                durationSec: t.durationSec,
+                remainingMs: remNow,
+                questionId: t.questionId,
+                label: t.label
+              },
+              true,
+              scopeRoom
+            );
+          }
+        });
         Object.keys(state.unlockedConceptSummaries || {}).forEach((qid) => {
           const rec = state.unlockedConceptSummaries[qid];
           if (!rec) return;
@@ -1639,23 +1745,34 @@
           state.peerConns.set(conn.peer, conn);
           conn.on("open", () => {
             try {
-              conn.send({
-                subpath: "timer",
-                msg: {
-                  type: "timer",
-                  msgId: randomId("sync"),
-                  roomId: state.roomId,
-                  seq: state.timer.seq,
-                  running: state.timer.running,
-                  hasStarted: state.timer.hasStarted,
-                  hasConfigured: state.timer.hasConfigured,
-                  timedOutInCurrentRun: state.timer.timedOutInCurrentRun,
-                  configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
-                  durationSec: state.timer.durationSec,
-                  remainingMs: getTimerRemainingMs(),
-                  label: state.timer.label,
-                  questionId: state.timer.questionId,
-                  sentWallMs: Date.now()
+              state.timersByScope.forEach((t, key) => {
+                const [rStr, mStr] = key.split(":");
+                const scopeRoom = clampRoom(rStr);
+                const scopeMod = normalizeModuleId(mStr);
+                if (scopeRoom !== state.roomId) return;
+                const remNow = getTimerRemainingMs(t);
+                if (remNow <= 0) return;
+                if (t.running || t.hasConfigured || t.hasStarted) {
+                  conn.send({
+                    subpath: `timer/${scopeMod.toLowerCase()}`,
+                    msg: {
+                      type: "timer",
+                      msgId: randomId("sync"),
+                      roomId: scopeRoom,
+                      moduleId: scopeMod,
+                      seq: t.seq,
+                      running: t.running,
+                      hasStarted: t.hasStarted,
+                      hasConfigured: t.hasConfigured,
+                      timedOutInCurrentRun: false,
+                      configuredDurationSec: t.configuredDurationSec || t.durationSec || 300,
+                      durationSec: t.durationSec,
+                      remainingMs: remNow,
+                      label: t.label,
+                      questionId: t.questionId,
+                      sentWallMs: Date.now()
+                    }
+                  });
                 }
               });
               if (state.teacherPointer.questionId) {
@@ -2254,11 +2371,15 @@
     state.joinedRoomId = 0;
     state.joinedWallMs = 0;
     state.ackResetId = "";
+    state.timersByScope.clear();
     safeSetSession("racm303_hsd_session_joined_v1", null);
     if (wasJoined && oldPid) {
       broadcastStudentLeaveFromRoom(oldPid, oldSid, oldRoom, Boolean(opts && opts.fromUnload));
     }
     emit("presence", getPresenceSummary());
+    if (!opts || !opts.fromUnload) {
+      emit("timer", getTimerSnapshot());
+    }
     return wasJoined;
   }
 
@@ -2286,6 +2407,7 @@
     state.displayName = "";
     state.participantId = persistentPid;
     state.responsesByQuestion.clear();
+    state.timersByScope.clear();
     lastPublishedLocalCellsByQ.clear();
     pendingCellsByQuestion.clear();
     pendingDirtyCellsByQ.clear();
@@ -2305,14 +2427,28 @@
       }
     }
     emit("presence", getPresenceSummary());
+    emit("timer", getTimerSnapshot());
+  }
+
+  function setActiveModule(modId) {
+    const nextMod = normalizeModuleId(modId);
+    if (state.activeModule === nextMod) return;
+    state.activeModule = nextMod;
+    emit("timer", getTimerSnapshot());
   }
 
   function setActiveStudentSlide(moduleId, questionId) {
-    const nextMod = String(moduleId || "");
+    const nextMod = /^HS[1-6]$/i.test(String(moduleId || "").trim())
+      ? normalizeModuleId(moduleId)
+      : state.activeModule;
     const nextQ = String(questionId || "");
-    if (state.activeModule === nextMod && state.activeQuestionId === nextQ) return;
+    const modChanged = state.activeModule !== nextMod;
+    if (!modChanged && state.activeQuestionId === nextQ) return;
     state.activeModule = nextMod;
     state.activeQuestionId = nextQ;
+    if (modChanged) {
+      emit("timer", getTimerSnapshot());
+    }
     if (state.role !== "faculty" && state.sessionJoined && state.joinedRoomId) {
       publishPresence();
     }
@@ -2337,7 +2473,7 @@
     state.presence = getRoomPresenceMap(next);
     if (!silentSave) safeSetStorage("racm303_live_room_v1", String(next));
 
-    // Reset room-scoped question/timer caches when switching rooms (NEVER wipe multi-room presenceByRoom!)
+    // Reset room-scoped question/timer caches for old room when switching rooms (NEVER wipe multi-room presenceByRoom!)
     if (next !== prev) {
       state.responsesByQuestion.clear();
       state.clearedAtByQuestion.clear();
@@ -2352,21 +2488,12 @@
         forceSync: false,
         sentWallMs: 0
       };
-      state.timer = {
-        seq: 0,
-        running: false,
-        hasStarted: false,
-        hasConfigured: false,
-        timedOutInCurrentRun: false,
-        receivedLiveInSession: false,
-        configuredDurationSec: 300,
-        durationSec: 300,
-        baseRemainingMs: 300000,
-        anchorPerfNow: performance.now(),
-        questionId: "",
-        label: "จับเวลาอภิปรายกลุ่มย่อย",
-        chimePlayedForSeq: -1
-      };
+      // Clear cached timers for non-active rooms on students so switching rooms always starts clean until live sync arrives
+      if (state.role !== "faculty") {
+        Array.from(state.timersByScope.keys()).forEach((k) => {
+          if (!k.startsWith(`${next}:`)) state.timersByScope.delete(k);
+        });
+      }
     }
 
     hydrateRoomResponsesFromStorage(next, false);
@@ -2382,162 +2509,190 @@
     emit("concept_unlock", { questionId: "*", unlocked: false, roomChanged: true });
   }
 
-  /* ---------- Teacher Timer & Slide Pointer Controls (Facilitator Only) ---------- */
-  function startTimer(durationSec, questionId, label) {
+  /* ---------- Teacher Timer & Slide Pointer Controls (Facilitator Only · Scoped per Room & Module) ---------- */
+  function resolveModuleFromQuestionOrActive(questionId, explicitModOpt) {
+    if (explicitModOpt && /^HS[1-6]$/i.test(String(explicitModOpt).trim())) {
+      return normalizeModuleId(explicitModOpt);
+    }
+    const qStr = String(questionId || "").trim();
+    const mMatch = qStr.match(/^(HS[1-6])\b/i) || qStr.match(/(hs[1-6])/i);
+    if (mMatch) return normalizeModuleId(mMatch[1]);
+    return normalizeModuleId(state.activeModule);
+  }
+
+  function startTimer(durationSec, questionId, label, moduleIdOpt) {
     if (state.role !== "faculty") return;
+    const mod = resolveModuleFromQuestionOrActive(questionId, moduleIdOpt);
+    state.activeModule = mod;
+    const t = getScopeTimer(state.roomId, mod);
     const sec = Math.max(
       1,
-      Math.min(10800, Math.round(Number(durationSec) || state.timer.configuredDurationSec || state.timer.durationSec || 300))
+      Math.min(10800, Math.round(Number(durationSec) || t.configuredDurationSec || t.durationSec || 300))
     );
-    state.timer.seq += 1;
-    state.timer.receivedLiveInSession = true;
-    state.timer.configuredDurationSec = sec;
-    state.timer.durationSec = sec;
-    state.timer.baseRemainingMs = sec * 1000;
-    state.timer.anchorPerfNow = performance.now();
-    state.timer.running = true;
-    state.timer.hasStarted = true;
-    state.timer.hasConfigured = true;
-    state.timer.timedOutInCurrentRun = false;
-    state.timer.chimePlayedForSeq = -1;
-    if (questionId !== undefined) state.timer.questionId = questionId;
-    if (label !== undefined) state.timer.label = label;
+    t.seq += 1;
+    t.receivedLiveInSession = true;
+    t.configuredDurationSec = sec;
+    t.durationSec = sec;
+    t.baseRemainingMs = sec * 1000;
+    t.anchorPerfNow = performance.now();
+    t.running = true;
+    t.hasStarted = true;
+    t.hasConfigured = true;
+    t.timedOutInCurrentRun = false;
+    t.chimePlayedForSeq = -1;
+    if (questionId !== undefined) t.questionId = questionId;
+    if (label !== undefined) t.label = label;
 
     publishPacket(
-      "timer",
+      `timer/${mod.toLowerCase()}`,
       {
         type: "timer",
-        seq: state.timer.seq,
+        moduleId: mod,
+        seq: t.seq,
         running: true,
         hasStarted: true,
         hasConfigured: true,
         configuredDurationSec: sec,
         durationSec: sec,
         remainingMs: sec * 1000,
-        questionId: state.timer.questionId,
-        label: state.timer.label
+        questionId: t.questionId,
+        label: t.label
       },
       true
     );
     emit("timer", getTimerSnapshot());
   }
 
-  function togglePauseTimer() {
+  function togglePauseTimer(moduleIdOpt) {
     if (state.role !== "faculty") return;
-    const rem = getTimerRemainingMs();
-    state.timer.seq += 1;
-    state.timer.receivedLiveInSession = true;
-    if (state.timer.running) {
-      state.timer.running = false;
-      state.timer.baseRemainingMs = rem;
+    const mod = normalizeModuleId(moduleIdOpt || state.activeModule);
+    state.activeModule = mod;
+    const t = getScopeTimer(state.roomId, mod);
+    const rem = getTimerRemainingMs(t);
+    t.seq += 1;
+    t.receivedLiveInSession = true;
+    if (t.running) {
+      t.running = false;
+      t.baseRemainingMs = rem;
     } else {
-      const fallbackSec = state.timer.configuredDurationSec || state.timer.durationSec || 300;
+      const fallbackSec = t.configuredDurationSec || t.durationSec || 300;
       const nextMs = rem > 0 ? rem : fallbackSec * 1000;
-      if (rem <= 0) state.timer.durationSec = fallbackSec;
-      state.timer.baseRemainingMs = nextMs;
-      state.timer.anchorPerfNow = performance.now();
-      state.timer.running = true;
-      state.timer.hasStarted = true;
-      state.timer.hasConfigured = true;
-      state.timer.timedOutInCurrentRun = false;
-      state.timer.chimePlayedForSeq = -1;
+      if (rem <= 0) t.durationSec = fallbackSec;
+      t.baseRemainingMs = nextMs;
+      t.anchorPerfNow = performance.now();
+      t.running = true;
+      t.hasStarted = true;
+      t.hasConfigured = true;
+      t.timedOutInCurrentRun = false;
+      t.chimePlayedForSeq = -1;
     }
     publishPacket(
-      "timer",
+      `timer/${mod.toLowerCase()}`,
       {
         type: "timer",
-        seq: state.timer.seq,
-        running: state.timer.running,
-        hasStarted: state.timer.hasStarted,
-        hasConfigured: state.timer.hasConfigured,
-        configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
-        durationSec: state.timer.durationSec,
-        remainingMs: state.timer.baseRemainingMs,
-        questionId: state.timer.questionId,
-        label: state.timer.label
+        moduleId: mod,
+        seq: t.seq,
+        running: t.running,
+        hasStarted: t.hasStarted,
+        hasConfigured: t.hasConfigured,
+        configuredDurationSec: t.configuredDurationSec || t.durationSec || 300,
+        durationSec: t.durationSec,
+        remainingMs: t.baseRemainingMs,
+        questionId: t.questionId,
+        label: t.label
       },
       true
     );
     emit("timer", getTimerSnapshot());
   }
 
-  function addTimerSeconds(deltaSec) {
+  function addTimerSeconds(deltaSec, moduleIdOpt) {
     if (state.role !== "faculty") return;
-    const cur = getTimerRemainingMs();
+    const mod = normalizeModuleId(moduleIdOpt || state.activeModule);
+    state.activeModule = mod;
+    const t = getScopeTimer(state.roomId, mod);
+    const cur = getTimerRemainingMs(t);
     const delta = Number.isFinite(Number(deltaSec)) ? Number(deltaSec) : 60;
     const nextMs = Math.max(0, Math.min(10800 * 1000, cur + delta * 1000));
-    state.timer.seq += 1;
-    state.timer.receivedLiveInSession = true;
-    state.timer.baseRemainingMs = nextMs;
-    state.timer.anchorPerfNow = performance.now();
+    t.seq += 1;
+    t.receivedLiveInSession = true;
+    t.baseRemainingMs = nextMs;
+    t.anchorPerfNow = performance.now();
     if (nextMs > 0) {
-      state.timer.chimePlayedForSeq = -1;
-      state.timer.hasConfigured = true;
-      state.timer.timedOutInCurrentRun = false;
+      t.chimePlayedForSeq = -1;
+      t.hasConfigured = true;
+      t.timedOutInCurrentRun = false;
     }
-    state.timer.durationSec = Math.max(state.timer.durationSec, Math.ceil(nextMs / 1000) || 1);
+    t.durationSec = Math.max(t.durationSec, Math.ceil(nextMs / 1000) || 1);
     publishPacket(
-      "timer",
+      `timer/${mod.toLowerCase()}`,
       {
         type: "timer",
-        seq: state.timer.seq,
-        running: state.timer.running,
-        hasStarted: state.timer.hasStarted,
-        hasConfigured: state.timer.hasConfigured,
-        configuredDurationSec: state.timer.configuredDurationSec || 300,
-        durationSec: state.timer.durationSec,
+        moduleId: mod,
+        seq: t.seq,
+        running: t.running,
+        hasStarted: t.hasStarted,
+        hasConfigured: t.hasConfigured,
+        configuredDurationSec: t.configuredDurationSec || 300,
+        durationSec: t.durationSec,
         remainingMs: nextMs,
-        questionId: state.timer.questionId,
-        label: state.timer.label
+        questionId: t.questionId,
+        label: t.label
       },
       true
     );
     emit("timer", getTimerSnapshot());
   }
 
-  function resetTimer(durationSec, isSetReady) {
+  function resetTimer(durationSec, isSetReady, moduleIdOpt) {
     if (state.role !== "faculty") return;
-    const fallbackSec = isSetReady ? state.timer.configuredDurationSec || 300 : 300;
+    const mod = normalizeModuleId(moduleIdOpt || state.activeModule);
+    state.activeModule = mod;
+    const t = getScopeTimer(state.roomId, mod);
+    const fallbackSec = isSetReady ? t.configuredDurationSec || 300 : 300;
     const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || fallbackSec)));
-    state.timer.seq += 1;
-    state.timer.receivedLiveInSession = true;
-    state.timer.running = false;
-    state.timer.hasStarted = false;
-    state.timer.hasConfigured = Boolean(isSetReady);
-    state.timer.timedOutInCurrentRun = false;
-    state.timer.configuredDurationSec = sec;
-    state.timer.durationSec = sec;
-    state.timer.baseRemainingMs = sec * 1000;
-    state.timer.anchorPerfNow = performance.now();
-    state.timer.chimePlayedForSeq = -1;
+    t.seq += 1;
+    t.receivedLiveInSession = true;
+    t.running = false;
+    t.hasStarted = false;
+    t.hasConfigured = Boolean(isSetReady);
+    t.timedOutInCurrentRun = false;
+    t.configuredDurationSec = sec;
+    t.durationSec = sec;
+    t.baseRemainingMs = sec * 1000;
+    t.anchorPerfNow = performance.now();
+    t.chimePlayedForSeq = -1;
     publishPacket(
-      "timer",
+      `timer/${mod.toLowerCase()}`,
       {
         type: "timer",
-        seq: state.timer.seq,
+        moduleId: mod,
+        seq: t.seq,
         running: false,
         hasStarted: false,
         hasConfigured: Boolean(isSetReady),
         configuredDurationSec: sec,
         durationSec: sec,
         remainingMs: sec * 1000,
-        questionId: state.timer.questionId,
-        label: state.timer.label
+        questionId: t.questionId,
+        label: t.label
       },
       true
     );
     emit("timer", getTimerSnapshot());
   }
 
-  function clearTimeUpAlert() {
+  function clearTimeUpAlert(moduleIdOpt) {
     if (state.role !== "faculty") return;
-    if (!state.timer.timedOutInCurrentRun) return;
-    const sec = state.timer.configuredDurationSec || 300;
-    state.timer.timedOutInCurrentRun = false;
-    state.timer.hasStarted = false;
-    state.timer.hasConfigured = false;
-    state.timer.durationSec = sec;
-    state.timer.baseRemainingMs = sec * 1000;
+    const mod = normalizeModuleId(moduleIdOpt || state.activeModule);
+    const t = getScopeTimer(state.roomId, mod);
+    if (!t.timedOutInCurrentRun) return;
+    const sec = t.configuredDurationSec || 300;
+    t.timedOutInCurrentRun = false;
+    t.hasStarted = false;
+    t.hasConfigured = false;
+    t.durationSec = sec;
+    t.baseRemainingMs = sec * 1000;
     emit("timer", getTimerSnapshot());
   }
 
@@ -3289,6 +3444,8 @@
     getRoomCheckinResetId,
     getRoomCheckinResetAt,
     isSessionJoined: () => Boolean(state.sessionJoined),
+    setActiveModule,
+    getActiveModule: () => normalizeModuleId(state.activeModule),
     setActiveStudentSlide,
     requestRoomSnapshot,
     requestAllRoomsSnapshot,
