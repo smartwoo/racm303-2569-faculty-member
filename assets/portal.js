@@ -19894,21 +19894,323 @@
     }
   };
 
+  const STU_PIP_MIN_SCALE = 0.7;
+  const STU_PIP_MAX_SCALE = 1.75;
+  const stuPipState = {
+    el: null,
+    watchersBound: false,
+    rafId: 0,
+    minimized: (() => {
+      try {
+        return sessionStorage.getItem("racm303_stu_pip_min_v1") === "1";
+      } catch (_) {
+        return false;
+      }
+    })(),
+    lastWasTimeUp: false,
+    scale: (() => {
+      try {
+        const v = parseFloat(localStorage.getItem("racm303_stu_pip_scale_v1") || "1");
+        if (Number.isFinite(v)) return Math.min(STU_PIP_MAX_SCALE, Math.max(STU_PIP_MIN_SCALE, v));
+      } catch (_) {}
+      return 1;
+    })(),
+    posRatio: (() => {
+      try {
+        const raw = JSON.parse(localStorage.getItem("racm303_stu_pip_pos_v1") || "null");
+        if (raw && Number.isFinite(raw.x) && Number.isFinite(raw.y)) {
+          return { x: Math.min(1, Math.max(0, raw.x)), y: Math.min(1, Math.max(0, raw.y)) };
+        }
+      } catch (_) {}
+      return { x: 0.98, y: 0.02 };
+    })()
+  };
+
+  function getStuPipViewportMetrics() {
+    const vv = window.visualViewport;
+    const vLeft = vv ? vv.offsetLeft : 0;
+    const vTop = vv ? vv.offsetTop : 0;
+    const vW = vv ? vv.width : window.innerWidth || document.documentElement.clientWidth || 390;
+    const vH = vv ? vv.height : window.innerHeight || document.documentElement.clientHeight || 780;
+    return { vLeft, vTop, vW, vH, vRight: vLeft + vW, vBottom: vTop + vH };
+  }
+
+  function clampAndApplyStuPipPosition(hud) {
+    if (!hud || hud.hidden) return;
+    const { vLeft, vTop, vW, vH } = getStuPipViewportMetrics();
+    const margin = 8;
+    const elW = hud.offsetWidth || (stuPipState.minimized ? 92 : 156);
+    const elH = hud.offsetHeight || (stuPipState.minimized ? 32 : 76);
+    const availX = Math.max(0, vW - elW - margin * 2);
+    const availY = Math.max(0, vH - elH - margin * 2);
+    const leftPx = vLeft + margin + availX * stuPipState.posRatio.x;
+    const topPx = vTop + margin + availY * stuPipState.posRatio.y;
+    hud.style.right = "auto";
+    hud.style.bottom = "auto";
+    hud.style.left = `${Math.round(leftPx)}px`;
+    hud.style.top = `${Math.round(topPx)}px`;
+  }
+
+  function applyStuPipScale(nextScale, skipSave) {
+    const clamped = Math.min(STU_PIP_MAX_SCALE, Math.max(STU_PIP_MIN_SCALE, Math.round(nextScale * 100) / 100));
+    stuPipState.scale = clamped;
+    if (!skipSave) {
+      try {
+        localStorage.setItem("racm303_stu_pip_scale_v1", String(clamped));
+      } catch (_) {}
+    }
+    const hud = stuPipState.el || document.getElementById("stuLiveBroadcastTimerHud");
+    if (hud) {
+      hud.style.setProperty("--stu-pip-scale", String(clamped));
+      const decBtn = hud.querySelector('[data-stu-pip-act="smaller"]');
+      const incBtn = hud.querySelector('[data-stu-pip-act="bigger"]');
+      if (decBtn) decBtn.disabled = clamped <= STU_PIP_MIN_SCALE + 0.01;
+      if (incBtn) incBtn.disabled = clamped >= STU_PIP_MAX_SCALE - 0.01;
+      clampAndApplyStuPipPosition(hud);
+    }
+  }
+
+  function setStuPipMinimized(minFlag, skipSave) {
+    stuPipState.minimized = Boolean(minFlag);
+    if (!skipSave) {
+      try {
+        sessionStorage.setItem("racm303_stu_pip_min_v1", stuPipState.minimized ? "1" : "0");
+      } catch (_) {}
+    }
+    const hud = stuPipState.el || document.getElementById("stuLiveBroadcastTimerHud");
+    if (hud) {
+      hud.classList.toggle("is-pip-minimized", stuPipState.minimized);
+      clampAndApplyStuPipPosition(hud);
+      requestAnimationFrame(() => clampAndApplyStuPipPosition(hud));
+    }
+  }
+
+  function scheduleStuPipViewportCheck() {
+    if (ROLE === "faculty" || stuPipState.rafId) return;
+    stuPipState.rafId = requestAnimationFrame(() => {
+      stuPipState.rafId = 0;
+      syncTimerWidgetDOM();
+    });
+  }
+
+  function bindStuPipScrollAndViewportWatchers() {
+    if (stuPipState.watchersBound || ROLE === "faculty") return;
+    stuPipState.watchersBound = true;
+    window.addEventListener("scroll", scheduleStuPipViewportCheck, { passive: true });
+    document.addEventListener("scroll", scheduleStuPipViewportCheck, { capture: true, passive: true });
+    window.addEventListener("resize", scheduleStuPipViewportCheck, { passive: true });
+    window.addEventListener("racm:hsdstatechange", scheduleStuPipViewportCheck);
+    document.addEventListener("fullscreenchange", scheduleStuPipViewportCheck);
+    document.addEventListener("webkitfullscreenchange", scheduleStuPipViewportCheck);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", scheduleStuPipViewportCheck, { passive: true });
+      window.visualViewport.addEventListener("scroll", scheduleStuPipViewportCheck, { passive: true });
+    }
+    if (typeof MutationObserver === "function") {
+      const mo = new MutationObserver(scheduleStuPipViewportCheck);
+      const pEl = $("panel-hs-discussion");
+      const oEl = $("pptPresentationOverlay");
+      if (pEl) mo.observe(pEl, { attributes: true, attributeFilter: ["hidden", "class"] });
+      if (oEl) mo.observe(oEl, { attributes: true, attributeFilter: ["hidden", "class"] });
+    }
+  }
+
   function ensureStudentLiveBroadcastHudDOM() {
     let hud = document.getElementById("stuLiveBroadcastTimerHud");
-    if (hud) return hud;
+    if (hud) {
+      stuPipState.el = hud;
+      return hud;
+    }
     hud = make("div", null, "stu-live-broadcast-timer-hud hsd-no-print");
     hud.id = "stuLiveBroadcastTimerHud";
     hud.hidden = true;
-    const txt = make("span", "⏱ 05:00", "stu-lbth-digits");
+    hud.style.setProperty("--stu-pip-scale", String(stuPipState.scale));
+    hud.classList.toggle("is-pip-minimized", Boolean(stuPipState.minimized));
+
+    const cardView = make("div", null, "stu-pip-card-view");
+    const head = make("div", null, "stu-pip-head");
+    const dragLbl = make("span", null, "stu-pip-drag-lbl");
+    dragLbl.title = "แตะค้างแล้วลากเพื่อย้ายตำแหน่ง PiP Timer";
+    const badgeEl = make("span", "TIMER");
+    badgeEl.setAttribute("data-stu-pip-badge", "1");
+    dragLbl.append(document.createTextNode("⠿ "), badgeEl);
+
+    const ctrls = make("div", null, "stu-pip-ctrls");
+    const btnSmaller = make("button", "−", "stu-pip-btn");
+    btnSmaller.type = "button";
+    btnSmaller.setAttribute("data-stu-pip-act", "smaller");
+    btnSmaller.title = "ลดขนาด PiP Timer";
+    btnSmaller.setAttribute("aria-label", "ลดขนาด PiP Timer");
+
+    const btnBigger = make("button", "+", "stu-pip-btn");
+    btnBigger.type = "button";
+    btnBigger.setAttribute("data-stu-pip-act", "bigger");
+    btnBigger.title = "เพิ่มขนาด PiP Timer";
+    btnBigger.setAttribute("aria-label", "เพิ่มขนาด PiP Timer");
+
+    const btnHide = make("button", "ซ่อน", "stu-pip-btn is-hide-btn");
+    btnHide.type = "button";
+    btnHide.setAttribute("data-stu-pip-act", "hide");
+    btnHide.title = "ซ่อนหน้าต่างลอย (พับเก็บเป็นปุ่มเล็ก)";
+    btnHide.setAttribute("aria-label", "ซ่อน PiP Timer");
+
+    [btnSmaller, btnBigger, btnHide].forEach((b) => {
+      b.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+    });
+    btnSmaller.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      applyStuPipScale(stuPipState.scale - 0.15);
+    });
+    btnBigger.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      applyStuPipScale(stuPipState.scale + 0.15);
+    });
+    btnHide.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      setStuPipMinimized(true);
+    });
+
+    ctrls.append(btnSmaller, btnBigger, btnHide);
+    head.append(dragLbl, ctrls);
+
+    const txt = make("div", "05:00", "stu-lbth-digits");
     txt.setAttribute("data-stu-hud-text", "1");
+
+    const sub = make("div", "เวลากลุ่ม · ลากย้ายได้", "stu-pip-sub");
+    sub.setAttribute("data-stu-hud-sub", "1");
+
     const track = make("div", null, "stu-lbth-track");
     const fill = make("div", null, "stu-lbth-fill");
     fill.setAttribute("data-stu-hud-prog", "1");
     fill.style.width = "100%";
     track.appendChild(fill);
-    hud.append(txt, track);
+
+    cardView.append(head, txt, sub, track);
+
+    const resizeGrip = make("span", "◢", "stu-pip-resize-grip");
+    resizeGrip.title = "ลากมุมนี้เพื่อย่อ/ขยายขนาด PiP Timer";
+    resizeGrip.addEventListener("pointerdown", (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      try {
+        resizeGrip.setPointerCapture(ev.pointerId);
+      } catch (_) {}
+      const startX = ev.clientX;
+      const startY = ev.clientY;
+      const startScale = stuPipState.scale;
+      const onMove = (mev) => {
+        const delta = (mev.clientX - startX + (mev.clientY - startY)) / 180;
+        applyStuPipScale(startScale + delta);
+      };
+      const onUp = () => {
+        resizeGrip.removeEventListener("pointermove", onMove);
+        resizeGrip.removeEventListener("pointerup", onUp);
+        resizeGrip.removeEventListener("pointercancel", onUp);
+      };
+      resizeGrip.addEventListener("pointermove", onMove);
+      resizeGrip.addEventListener("pointerup", onUp);
+      resizeGrip.addEventListener("pointercancel", onUp);
+    });
+
+    const miniPill = make("div", null, "stu-pip-mini-pill");
+    miniPill.title = "แตะเพื่อแสดง PiP Timer (หรือลากเพื่อย้ายมุม)";
+    const miniDot = make("span", null, "stu-pip-mini-dot");
+    const miniTxt = make("span", "⏱ แสดงเวลา");
+    miniTxt.setAttribute("data-stu-pip-mini-txt", "1");
+    miniPill.append(miniDot, miniTxt);
+
+    hud.append(cardView, resizeGrip, miniPill);
+
+    const activePtrs = new Map();
+    let dragOrigin = null;
+    let pinchStartDist = 0;
+    let pinchStartScale = 1;
+
+    hud.addEventListener("pointerdown", (ev) => {
+      if (ev.target.closest("button") || ev.target.closest(".stu-pip-resize-grip")) return;
+      ev.preventDefault();
+      try {
+        hud.setPointerCapture(ev.pointerId);
+      } catch (_) {}
+      activePtrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+      if (activePtrs.size === 1) {
+        const curLeft = parseFloat(hud.style.left) || hud.getBoundingClientRect().left;
+        const curTop = parseFloat(hud.style.top) || hud.getBoundingClientRect().top;
+        dragOrigin = {
+          ptrId: ev.pointerId,
+          startX: ev.clientX,
+          startY: ev.clientY,
+          origLeft: curLeft,
+          origTop: curTop,
+          maxDist: 0
+        };
+      } else if (activePtrs.size === 2) {
+        dragOrigin = null;
+        const pts = Array.from(activePtrs.values());
+        pinchStartDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) || 1;
+        pinchStartScale = stuPipState.scale;
+      }
+    });
+
+    hud.addEventListener("pointermove", (ev) => {
+      if (!activePtrs.has(ev.pointerId)) return;
+      activePtrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+      if (activePtrs.size >= 2 && !stuPipState.minimized) {
+        const pts = Array.from(activePtrs.values());
+        const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+        if (pinchStartDist > 12) {
+          applyStuPipScale(pinchStartScale * (dist / pinchStartDist));
+        }
+        return;
+      }
+
+      if (dragOrigin && dragOrigin.ptrId === ev.pointerId) {
+        const dx = ev.clientX - dragOrigin.startX;
+        const dy = ev.clientY - dragOrigin.startY;
+        dragOrigin.maxDist = Math.max(dragOrigin.maxDist, Math.hypot(dx, dy));
+
+        const { vLeft, vTop, vW, vH } = getStuPipViewportMetrics();
+        const margin = 8;
+        const elW = hud.offsetWidth || 120;
+        const elH = hud.offsetHeight || 48;
+        const minL = vLeft + margin;
+        const maxL = Math.max(minL, vLeft + vW - elW - margin);
+        const minT = vTop + margin;
+        const maxT = Math.max(minT, vTop + vH - elH - margin);
+        const nextL = Math.min(maxL, Math.max(minL, dragOrigin.origLeft + dx));
+        const nextT = Math.min(maxT, Math.max(minT, dragOrigin.origTop + dy));
+        hud.style.left = `${Math.round(nextL)}px`;
+        hud.style.top = `${Math.round(nextT)}px`;
+        stuPipState.posRatio = {
+          x: maxL > minL ? (nextL - minL) / (maxL - minL) : 1,
+          y: maxT > minT ? (nextT - minT) / (maxT - minT) : 0
+        };
+      }
+    });
+
+    const finishPointer = (ev) => {
+      if (!activePtrs.has(ev.pointerId)) return;
+      activePtrs.delete(ev.pointerId);
+      if (dragOrigin && dragOrigin.ptrId === ev.pointerId) {
+        const wasTap = dragOrigin.maxDist < 7;
+        dragOrigin = null;
+        if (wasTap && stuPipState.minimized) {
+          setStuPipMinimized(false);
+          return;
+        }
+        try {
+          localStorage.setItem("racm303_stu_pip_pos_v1", JSON.stringify(stuPipState.posRatio));
+        } catch (_) {}
+      }
+    };
+    hud.addEventListener("pointerup", finishPointer);
+    hud.addEventListener("pointercancel", finishPointer);
+
     document.body.appendChild(hud);
+    stuPipState.el = hud;
+    applyStuPipScale(stuPipState.scale, true);
     return hud;
   }
 
@@ -19936,44 +20238,119 @@
       ? `⏱ ${s.formatted}`
       : s.hasStarted
       ? `⏸ พัก ${s.formatted}`
-      : `⏱ ตั้งเวลา ${s.formatted}`;
+      : `⏱ ${s.formatted}`;
 
-    let anySlideStudentPillVisible = false;
     document.querySelectorAll("[data-ppt-student-timer-pill]").forEach((el) => {
-      el.hidden = !isTeacherTimerActive;
-      if (isTeacherTimerActive) {
-        el.textContent = stuClockLabel;
-        el.classList.toggle("is-running", Boolean(s.running));
-        el.classList.toggle("is-warning", Boolean(s.isWarning));
-        el.classList.toggle("is-urgent", Boolean(s.isUrgent));
-        el.classList.toggle("is-timeup", Boolean(s.isTimeUp));
-        const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < (window.innerHeight || 900)) {
-          anySlideStudentPillVisible = true;
-        }
-      }
+      el.hidden = false;
+      el.textContent = stuClockLabel;
+      el.classList.toggle("is-running", Boolean(s.running));
+      el.classList.toggle("is-warning", Boolean(s.isWarning));
+      el.classList.toggle("is-urgent", Boolean(s.isUrgent));
+      el.classList.toggle("is-timeup", Boolean(s.isTimeUp));
     });
 
     if (ROLE !== "faculty") {
-      const inHsdTab = Boolean(
-        state.isPptSlideSharePopup ||
-          (document.body && document.body.hasAttribute("data-hsd-room")) ||
-          (state.activeTab && String(state.activeTab).startsWith("hs-discussion")) ||
-          ($("panel-hs-discussion") && !$("panel-hs-discussion").hidden)
-      );
-      if (isTeacherTimerActive && inHsdTab && !anySlideStudentPillVisible) {
+      bindStuPipScrollAndViewportWatchers();
+      const ov = $("pptPresentationOverlay");
+      const isOvOpen = Boolean(ov && !ov.hidden);
+      const panelEl = $("panel-hs-discussion");
+      const isPanelOpen = Boolean(panelEl && !panelEl.hidden);
+      const inHsdActiveView = Boolean(state.isPptSlideSharePopup || isOvOpen || isPanelOpen);
+
+      const { vLeft, vTop, vRight, vBottom } = getStuPipViewportMetrics();
+      let effectiveTopBound = vTop;
+      if (isOvOpen) {
+        const fsTopBar = ov.querySelector(".ppt-fs-topbar");
+        if (fsTopBar) {
+          const tbR = fsTopBar.getBoundingClientRect();
+          if (tbR.height > 0) effectiveTopBound = Math.max(vTop, tbR.bottom);
+        }
+      }
+
+      let hasAnyRenderedInlineTimer = false;
+      let isAnyInlineTimerVisible = false;
+      let isScrolledPastInlineTimer = false;
+      const checkInlineEl = (el) => {
+        if (!el || el.hidden || el.offsetParent === null) return;
+        const r = el.getBoundingClientRect();
+        if (r.width <= 4 || r.height <= 4) return;
+        hasAnyRenderedInlineTimer = true;
+        if (r.bottom > effectiveTopBound + 6 && r.top < vBottom - 6 && r.right > vLeft + 4 && r.left < vRight - 4) {
+          isAnyInlineTimerVisible = true;
+        } else if (r.bottom <= effectiveTopBound + 6) {
+          isScrolledPastInlineTimer = true;
+        }
+      };
+
+      if (isOvOpen) {
+        ov.querySelectorAll("[data-ppt-student-timer-pill]").forEach(checkInlineEl);
+      } else if (isPanelOpen) {
+        checkInlineEl($("hsdTimerWidget"));
+        document.querySelectorAll("[data-ppt-student-timer-pill]").forEach((el) => {
+          if (ov && ov.contains(el)) return;
+          checkInlineEl(el);
+        });
+      }
+      if (!hasAnyRenderedInlineTimer && (window.scrollY || document.documentElement.scrollTop || 0) > 120) {
+        isScrolledPastInlineTimer = true;
+      }
+
+      const shouldShowPip =
+        inHsdActiveView &&
+        !isAnyInlineTimerVisible &&
+        (isScrolledPastInlineTimer || isTeacherTimerActive);
+
+      if (s.isTimeUp && !stuPipState.lastWasTimeUp && stuPipState.minimized) {
+        stuPipState.minimized = false;
+      }
+      stuPipState.lastWasTimeUp = Boolean(s.isTimeUp);
+
+      if (shouldShowPip) {
         const hud = ensureStudentLiveBroadcastHudDOM();
         const host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
         if (hud.parentElement !== host) host.appendChild(hud);
+        const wasHidden = hud.hidden;
         hud.hidden = false;
+        hud.classList.toggle("is-pip-minimized", Boolean(stuPipState.minimized));
         hud.classList.toggle("is-running", Boolean(s.running));
         hud.classList.toggle("is-warning", Boolean(s.isWarning));
         hud.classList.toggle("is-urgent", Boolean(s.isUrgent));
         hud.classList.toggle("is-timeup", Boolean(s.isTimeUp));
+
+        const badgeEl = hud.querySelector("[data-stu-pip-badge]");
+        if (badgeEl) {
+          badgeEl.textContent = s.isTimeUp ? "TIME UP" : s.running ? "LIVE" : s.hasStarted ? "PAUSED" : "TIMER";
+        }
         const txtEl = hud.querySelector("[data-stu-hud-text]");
-        if (txtEl) txtEl.textContent = stuClockLabel;
+        if (txtEl) txtEl.textContent = s.isTimeUp ? "00:00" : s.formatted;
+        const subEl = hud.querySelector("[data-stu-hud-sub]");
+        if (subEl) {
+          subEl.textContent = s.isTimeUp
+            ? "⏰ หมดเวลาอภิปราย!"
+            : s.running
+            ? "กำลังนับถอยหลังสด"
+            : s.hasStarted
+            ? "พักเวลาชั่วคราว"
+            : s.hasConfigured
+            ? "อาจารย์ตั้งเวลาไว้"
+            : "เวลากลุ่ม · ลากย้ายได้";
+        }
         const progEl = hud.querySelector("[data-stu-hud-prog]");
         if (progEl) progEl.style.width = `${s.pct}%`;
+        const miniTxtEl = hud.querySelector("[data-stu-pip-mini-txt]");
+        if (miniTxtEl) {
+          miniTxtEl.textContent = s.isTimeUp
+            ? "⏰ หมดเวลา! · แสดง"
+            : s.running
+            ? `⏱ ${s.formatted} · แสดง`
+            : "⏱ แสดงเวลา";
+        }
+        if (wasHidden) {
+          clampAndApplyStuPipPosition(hud);
+          requestAnimationFrame(() => clampAndApplyStuPipPosition(hud));
+        } else {
+          clampAndApplyStuPipPosition(hud);
+        }
       } else {
         const existingHud = document.getElementById("stuLiveBroadcastTimerHud");
         if (existingHud) existingHud.hidden = true;
@@ -26298,7 +26675,6 @@
       const stuPill = make("span", "⏱ 05:00", "ppt-sm-timer is-student-live-clock hsd-no-print");
       stuPill.setAttribute("data-ppt-student-timer-pill", "1");
       stuPill.title = "เวลาอภิปรายกลุ่ม (ซิงค์สดจากอาจารย์ประจำกลุ่ม)";
-      stuPill.hidden = true;
       return stuPill;
     }
 
