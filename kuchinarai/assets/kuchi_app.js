@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  const APP_BUILD_VER = "20261126tv14";
+  const APP_BUILD_VER = "20261126tv15";
   try {
     if (typeof window.fetch === "function") {
       window
@@ -495,6 +495,12 @@
     } catch (_) {}
   }
 
+  function sRemove(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (_) {}
+  }
+
   function getBaseDirUrl() {
     if (typeof window !== "undefined" && /^https?:/i.test(window.location.protocol)) {
       const clean = window.location.href.split("#")[0].split("?")[0];
@@ -545,7 +551,8 @@
   const NAV_ICONS = {
     back: `<svg class="tv-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`,
     home: `<svg class="tv-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-    grid: `<svg class="tv-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>`
+    grid: `<svg class="tv-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>`,
+    logout: `<svg class="tv-nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`
   };
 
   function isPureEmoji(str) {
@@ -869,11 +876,15 @@
 
   /* ---------- 4. Role & State Initialization ---------- */
   const cliId = randId("cli");
-  const persistentPid = (function () {
-    let p = sGet("kuchi2569_pid", "");
+  const isFacBoot =
+    String(window.KUCHI_ROLE || "").toLowerCase() === "facilitator" ||
+    /facilitator\.html$/i.test(String((window.location && window.location.pathname) || ""));
+  const pidStorageKey = isFacBoot ? "kuchi2569_fac_pid" : "kuchi2569_pid";
+  let persistentPid = (function () {
+    let p = sGet(pidStorageKey, "");
     if (!p) {
-      p = randId("p");
-      sSet("kuchi2569_pid", p);
+      p = randId(isFacBoot ? "fac" : "p");
+      sSet(pidStorageKey, p);
     }
     return p;
   })();
@@ -1880,6 +1891,8 @@
     return changed;
   }
 
+  const presenceTombstones = new Map();
+
   function handleIncoming(topicSuffix, msg, isRetained) {
     if (!msg || typeof msg !== "object") return;
     if (msg.senderCli === cliId) return;
@@ -1894,14 +1907,38 @@
     }
 
     if (msg.type === "presence") {
+      if (msg.pid && msg.loggedOut) {
+        const outTs = Number(msg.ts || msg.sentMs || Date.now());
+        if (outTs > Number(presenceTombstones.get(msg.pid) || 0)) {
+          presenceTombstones.set(msg.pid, outTs);
+        }
+        const deleted = state.presence.delete(msg.pid);
+        if (deleted) {
+          if (
+            (state.role === "facilitator" && state.view === "lobby") ||
+            (state.role !== "participant" &&
+              (state.view === "overview" || state.view === "rating_overview" || state.view === "team_message_overview"))
+          ) {
+            renderPreservingFocus();
+          } else {
+            updateConnBadgeOnly();
+          }
+        }
+        return;
+      }
       if (msg.pid && msg.nick) {
+        const inTs = Number(msg.ts || msg.sentMs || 0);
+        const tombTs = Number(presenceTombstones.get(msg.pid) || 0);
+        if (tombTs > 0 && inTs > 0 && inTs <= tombTs) {
+          return;
+        }
         const hadUid = Array.from(state.presence.values()).some((p) => p.memberUid && p.memberUid === msg.memberUid);
         state.presence.set(msg.pid, {
           pid: msg.pid,
           memberUid: msg.memberUid || "",
           nick: msg.nick,
           photo: msg.photo || "",
-          ts: Date.now()
+          ts: inTs || Date.now()
         });
         if (state.role === "facilitator" && state.view === "lobby") {
           if (!hadUid && msg.memberUid && !isRetained) {
@@ -2091,6 +2128,18 @@
       } else if (ev.key === storageKeyForSession(state.sessionId)) {
         loadSessionStore(state.sessionId);
         syncLiveDataUi();
+      } else if (ev.key === "kuchi2569_my_uid" && state.role !== "facilitator") {
+        const nextUid = ev.newValue && MEMBER_MAP.has(ev.newValue) ? ev.newValue : "";
+        if (nextUid !== state.myMemberUid) {
+          state.myMemberUid = nextUid;
+          if (!nextUid) {
+            state.myGuestName = "";
+            state.phonePickingIdentity = false;
+            state.phoneComposeOpen = false;
+            state.pcComposeModalOpen = false;
+          }
+          renderPreservingFocus();
+        }
       }
     });
 
@@ -2280,7 +2329,7 @@
     const mp = state.wordsByTarget.get(targetId);
     if (!mp) return [];
     return Array.from(mp.values())
-      .filter((w) => w && w.pid === persistentPid)
+      .filter((w) => w && (state.myMemberUid ? w.memberUid === state.myMemberUid : w.pid === persistentPid))
       .map((w) => w.text);
   }
 
@@ -2439,6 +2488,18 @@
 
   function applyIdentityLogin(memberObj) {
     if (!memberObj) return;
+    const prevUid = state.myMemberUid;
+    if (prevUid && prevUid !== memberObj.uid) {
+      const oldPid = persistentPid;
+      state.presence.delete(oldPid);
+      publishPacket(
+        "global/presence",
+        { type: "presence", pid: oldPid, loggedOut: true, memberUid: "", nick: "", photo: "", role: state.role, ts: Date.now() },
+        false
+      );
+      persistentPid = randId("p");
+      sSet(pidStorageKey, persistentPid);
+    }
     state.myMemberUid = memberObj.uid;
     state.myGuestName = "";
     state.pinDraft = "";
@@ -2452,10 +2513,100 @@
     render();
   }
 
+  function applyIdentityLogout() {
+    const oldPid = persistentPid;
+    state.presence.delete(oldPid);
+    publishPacket(
+      "global/presence",
+      {
+        type: "presence",
+        pid: oldPid,
+        loggedOut: true,
+        memberUid: "",
+        nick: "",
+        photo: "",
+        role: state.role,
+        ts: Date.now()
+      },
+      false
+    );
+
+    persistentPid = randId("p");
+    sSet(pidStorageKey, persistentPid);
+
+    state.myMemberUid = "";
+    state.myGuestName = "";
+    state.pinDraft = "";
+    state.pinError = "";
+    state.showAllNamesFallback = false;
+    sRemove("kuchi2569_my_uid");
+    sRemove("kuchi2569_guest_name");
+
+    state.identityModalOpen = false;
+    state.pcComposeModalOpen = false;
+    state.phonePickingIdentity = false;
+    state.phoneComposeOpen = false;
+    state.phoneComposeMode = "";
+    state.phonePickedTargetId = "";
+    state.phoneJustSubmittedTargetId = "";
+    state.phoneSelfRatedDone = false;
+    state.phoneTeamMsgDone = false;
+    state.phoneManualOverride = false;
+
+    if (state.role === "participant" && state.hasSeenFacilitator) {
+      const hostStage = computeFacilitatorMainStage(state.hostView, state.hostTargetId, "overview");
+      if (hostStage === "lobby") {
+        state.view = "lobby";
+      } else if (hostStage === "hf_board") {
+        state.view = "detail";
+        state.activeTargetId = TOPIC_HF_BOARD_ID;
+      } else if (hostStage === "trip") {
+        state.view = "detail";
+        state.activeTargetId = TOPIC_TRIP_ID;
+      } else if (hostStage === "team_message_overview") {
+        state.view = "team_message_overview";
+      } else if (hostStage === "rating_overview") {
+        state.view = "rating_overview";
+      } else {
+        state.view = "overview";
+      }
+    }
+
+    playChime([659.25, 440], 0.09, "sine", 0.045);
+    render();
+  }
+
   /* ---------- 11. Reusable 3-Digit Student ID Login & Miro Affinity Renderers ---------- */
   function renderPin3LoginWidgetHtml() {
     const matched = matchMemberByCode(state.pinDraft);
+    const curMem = MEMBER_MAP.get(state.myMemberUid);
+    const hasCurIdentity = Boolean(curMem || state.myGuestName);
+    const curAccountBarHtml = hasCurIdentity
+      ? `
+        <div class="pin3-current-user-bar">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+            ${
+              curMem
+                ? `<img src="${esc(curMem.photo)}" alt="${esc(curMem.nickname)}" />`
+                : `<div style="width:42px;height:42px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👤</div>`
+            }
+            <div style="min-width:0;text-align:left">
+              <div style="font-size:11.5px;font-weight:800;color:#2563eb">กำลังเข้าสู่ระบบในชื่อ</div>
+              <div style="font-size:15px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(
+                curMem ? `${curMem.mentiName}${curMem.kind === "student" ? ` (${curMem.shortNo})` : ""}` : state.myGuestName
+              )}</div>
+            </div>
+          </div>
+          <button type="button" class="tv-pill-btn is-logout" data-act="logout-identity">
+            ${NAV_ICONS.logout}
+            <span>ออกจากระบบ</span>
+          </button>
+        </div>
+      `
+      : "";
+
     return `
+      ${curAccountBarHtml}
       <form data-form="pin3-login" class="pin3-box">
         <div style="font-size:15px;font-weight:800;color:#1e3a8a">
           🔢 กรอกรหัส นศพ. 3 ตัวท้ายของคุณ (เช่น 006, 035, 166)
@@ -2479,14 +2630,14 @@
           <button
             type="button"
             class="tv-pill-btn"
-            style="height:40px;padding:0 18px;background:#ffffff;border-color:#93c5fd;color:#1d4ed8"
+            style="max-width:100%;white-space:normal;height:auto;min-height:40px;padding:6px 16px;line-height:1.3;text-align:center;background:#ffffff;border-color:#93c5fd;color:#1d4ed8"
             data-act="select-identity"
             data-uid="m_smart"
           >
             👨‍⚕️ สำหรับอาจารย์: เข้าสู่ระบบในชื่อ 'พี่สมาร์ท (ณัฐวุฒิ)'
           </button>
 
-          <button type="button" class="tv-pill-btn" style="height:32px;font-size:12px;color:#64748b" data-act="toggle-all-names">
+          <button type="button" class="tv-pill-btn" style="max-width:100%;white-space:normal;height:auto;min-height:32px;padding:4px 12px;font-size:12px;color:#64748b" data-act="toggle-all-names">
             ${state.showAllNamesFallback ? "▲ ซ่อนรายชื่อทั้งหมด" : "จำรหัสไม่ได้? แตะเลือกรูปจากรายชื่อทั้ง 21 คน"}
           </button>
         </div>
@@ -2748,8 +2899,10 @@
       return { hasScore: false, score: 0, scorePct: 0, reason: "", nick: "", record: null };
     }
     const list = Array.from(rMap.values());
-    const ownerRec = list.find((r) => r && (r.isOwner || r.memberUid === uid));
-    const chosen = ownerRec || list[list.length - 1];
+    const ownerRecs = list
+      .filter((r) => r && (r.isOwner || r.memberUid === uid))
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    const chosen = ownerRecs[0] || list[list.length - 1];
     if (!chosen || !Number.isFinite(Number(chosen.score))) {
       return { hasScore: false, score: 0, scorePct: 0, reason: "", nick: "", record: null };
     }
@@ -2887,6 +3040,16 @@
                   <button type="button" class="tv-pill-btn" data-act="open-identity" title="ยืนยันตัวตนด้วยรหัส นศพ. 3 ตัวท้าย">
                     👤 <span>${esc(myLabel)}</span>
                   </button>
+                  ${
+                    myMem || state.myGuestName
+                      ? `
+                        <button type="button" class="tv-pill-btn is-logout" data-act="logout-identity" title="ออกจากระบบ (Log out)">
+                          ${NAV_ICONS.logout}
+                          <span>ออกจากระบบ</span>
+                        </button>
+                      `
+                      : ""
+                  }
                 `
                 : `
                   <button
@@ -3352,6 +3515,7 @@
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span class="zm-fac-stat-pill">💬 ส่งเข้ามาแล้ว ${agg.totalSubmissions} คำ (${agg.uniqueRespondents} คน)</span>
             <button type="button" class="tv-pill-btn" data-act="open-identity">👤 สลับผู้ใช้งาน</button>
+            <button type="button" class="tv-pill-btn is-logout" data-act="logout-identity">${NAV_ICONS.logout} <span>ออกจากระบบ</span></button>
           </div>
         </div>
       `;
@@ -4029,8 +4193,12 @@
             ${
               hasIdentity
                 ? `
-                  <button type="button" class="tv-pill-btn" data-act="phone-pick-name" title="แตะเพื่อเปลี่ยนรหัสผู้ตอบ">
+                  <button type="button" class="tv-pill-btn" data-act="phone-pick-name" title="แตะเพื่อสลับรหัสผู้ตอบ">
                     👤 <span>${esc(myDisplayName)}</span>
+                  </button>
+                  <button type="button" class="tv-pill-btn is-logout" data-act="logout-identity" title="ออกจากระบบ (Log out)">
+                    ${NAV_ICONS.logout}
+                    <span>ออกจากระบบ</span>
                   </button>
                 `
                 : ""
@@ -4100,9 +4268,13 @@
                 </p>
               </div>
 
-              <div style="border-top:1px dashed #e2e8f0;padding-top:12px;text-align:center">
+              <div style="border-top:1px dashed #e2e8f0;padding-top:12px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap">
                 <button type="button" class="tv-pill-btn" data-act="phone-enable-manual">
                   เข้าหน้าเลือกหัวข้อ / เลือกคนพิมพ์ล่วงหน้า →
+                </button>
+                <button type="button" class="tv-pill-btn is-logout" data-act="logout-identity">
+                  ${NAV_ICONS.logout}
+                  <span>ออกจากระบบ</span>
                 </button>
               </div>
             </section>
@@ -5008,10 +5180,12 @@
       clearAllModals();
       state.identityModalOpen = true;
       render();
-      setTimeout(() => {
-        const pInp = document.getElementById("pin3Input");
-        if (pInp) pInp.focus();
-      }, 40);
+      if (!state.myMemberUid && !state.myGuestName && (window.innerWidth || 1024) > 768) {
+        setTimeout(() => {
+          const pInp = document.getElementById("pin3Input");
+          if (pInp) pInp.focus();
+        }, 40);
+      }
     } else if (act === "open-roadmap") {
       if (!state.roadmapModalOpen) pushNavHistory();
       clearAllModals();
@@ -5030,6 +5204,8 @@
       const uid = btn.getAttribute("data-uid") || "";
       const mem = MEMBER_MAP.get(uid);
       if (mem) applyIdentityLogin(mem);
+    } else if (act === "logout-identity") {
+      applyIdentityLogout();
     } else if (act === "phone-pick-name") {
       state.phoneComposeOpen = false;
       state.phonePickingIdentity = true;
