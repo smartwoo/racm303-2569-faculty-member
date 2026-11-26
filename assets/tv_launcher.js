@@ -2829,22 +2829,6 @@
         if (!otherDialogsOpen && st && st.hsdLobbyOpen) {
           return;
         }
-        if (
-          !otherDialogsOpen &&
-          curTab === "hs-discussion" &&
-          st &&
-          st.hsdViewMode === "slide" &&
-          !st.hsdDriveFolderOpen &&
-          !st.hsdShowJoinGate &&
-          !st.hsdTheater &&
-          !st.hsdPptWindowMax &&
-          api &&
-          api.openHsDriveFolder
-        ) {
-          ev.preventDefault();
-          api.openHsDriveFolder();
-          return;
-        }
         if (!otherDialogsOpen && curTab !== "home") {
           ev.preventDefault();
           navigateTvTab("home");
@@ -5695,10 +5679,6 @@
       if (st.hsdLockedRoomId) {
         st.hsdLockedRoomId = 0;
         if (api && api.switchTab) api.switchTab("hs-discussion", true);
-        return;
-      }
-      if (api && api.openHsDriveFolder) {
-        api.openHsDriveFolder();
         return;
       }
     } else if (curTab === "epidemiology" && st.epSection && st.epSection !== "all") {

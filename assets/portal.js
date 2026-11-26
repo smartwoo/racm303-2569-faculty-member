@@ -156,7 +156,7 @@
     hsdDriveFilterChip: "all", // all | wk1 | wk2 | special
     hsdDriveSearchQuery: "",
     hsdPptSubView: "normal", // normal | sorter
-    hsdPptActiveRibbonTab: "home", // file | home | ref | slideshow | view
+    hsdPptActiveRibbonTab: "home", // file | home | slideshow | view
     hsdPptRibbonCollapsed: true,
     hsdPptShowThumbs: (() => {
       const saved = localStorage.getItem("racm303_hsd_ppt_thumbs");
@@ -30313,7 +30313,8 @@
   }
 
   function buildPptDesktopMenuAndRibbonDOM(cur, slides) {
-    const activeTab = state.hsdPptActiveRibbonTab || "home";
+    const rawRibbonTab = state.hsdPptActiveRibbonTab || "home";
+    const activeTab = rawRibbonTab === "ref" ? "home" : rawRibbonTab;
     const layout = getEffectiveHsdSlideLayout(cur);
     const isSplit =
       layout === "split-key" ||
@@ -30325,7 +30326,7 @@
 
     const frag = document.createDocumentFragment();
 
-    // 1. Clean Microsoft PowerPoint Menu Tab Strip (NO stuffed .pptx tabs — uses Google Drive File Picker!)
+    // 1. Clean Microsoft PowerPoint Menu Tab Strip
     const menuBar = make("div", null, "ppt-menubar hsd-no-print");
     const tabsLeft = make("div", null, "ppt-menu-tabs");
     tabsLeft.appendChild(buildUnavPairDOM({ compact: true }));
@@ -30333,7 +30334,6 @@
       { id: "file", label: "ไฟล์", isFile: true },
       { id: "home", label: "หน้าแรก" },
       { id: "slideshow", label: "การนำเสนอสไลด์" },
-      { id: "ref", label: "คำสอน & เส้นเชื่อม" },
       { id: "view", label: "มุมมอง" }
     ];
 
@@ -30458,16 +30458,6 @@
     mbRoomPickerBtn.addEventListener("click", () => openHsdKahootLobbyModal());
     menuRight.appendChild(mbRoomPickerBtn);
 
-    const gdriveFolderBtn = make(
-      "button",
-      "📚 ← เลือกบทอื่น",
-      "ppt-gdrive-folder-btn"
-    );
-    gdriveFolderBtn.type = "button";
-    gdriveFolderBtn.title = "ปิดสไลด์ปัจจุบันกลับไปหน้าเลือกบทเรียน";
-    gdriveFolderBtn.addEventListener("click", () => openHsGoogleDriveFolder());
-    menuRight.appendChild(gdriveFolderBtn);
-
     const collapseRibbonBtn = make(
       "button",
       state.hsdPptRibbonCollapsed ? "⌄ แสดงริบบอน" : "⌃",
@@ -30542,83 +30532,6 @@
       gClose.body.appendChild(scrollSwitchBtn);
 
       ribbon.append(gExport.grp, gClose.grp);
-    } else if (activeTab === "ref") {
-      const gDocs = makeGroup(`เส้นทาง 6 ขั้นตอนคาบ ${cur.mod.code}`);
-      if (cur.mod) {
-        const bFolder = make("button", `🧭 ภาพรวม 6 ขั้น (${cur.mod.code})`, "ppt-rb-cmd is-primary-teal");
-        bFolder.type = "button";
-        bFolder.addEventListener("click", () => openTextbookDriveFolder(cur.mod.code));
-        gDocs.body.appendChild(bFolder);
-      }
-      if (cur.mod && cur.mod.docId) {
-        const bFull = make("button", `📚 ① ฉบับเต็ม (${cur.mod.code})`, "ppt-rb-cmd");
-        bFull.type = "button";
-        bFull.addEventListener("click", () => openTextbookDoc(cur.mod.docId));
-        gDocs.body.appendChild(bFull);
-      }
-      if (cur.mod && cur.mod.conciseDocId) {
-        const bConcise = make("button", `⚡ ② ฉบับย่อ (${cur.mod.code})`, "ppt-rb-cmd");
-        bConcise.type = "button";
-        bConcise.addEventListener("click", () => openTextbookDoc(cur.mod.conciseDocId));
-        gDocs.body.appendChild(bConcise);
-      }
-      if (cur.mod) {
-        const bQuiz = make("button", `🧠 ③ Self-Quiz (${cur.mod.code})`, "ppt-rb-cmd");
-        bQuiz.type = "button";
-        bQuiz.addEventListener("click", () => openSelfQuizForModule(cur.mod.code, "qa"));
-        gDocs.body.appendChild(bQuiz);
-
-        const rbSlide = getHsSlideInfo(cur.mod.code);
-        const bLecSlides = make(
-          "button",
-          rbSlide.uploaded
-            ? `🖥️ ④ Slide อาจารย์ (${cur.mod.code} · ✓ ${rbSlide.extBadge})`
-            : `🖥️ ④ Slide อาจารย์ (${cur.mod.code} · รอ Upload)`,
-          `ppt-rb-cmd ${rbSlide.uploaded ? "is-slide-ready-cmd" : "is-slide-pending-cmd"}`
-        );
-        bLecSlides.type = "button";
-        bLecSlides.addEventListener("click", () => openHsLectureSlides(cur.mod.code));
-        gDocs.body.appendChild(bLecSlides);
-
-        const rbVdo = getHsVdoLectureInfo(cur.mod.code);
-        const bVdoLec = make(
-          "button",
-          rbVdo.uploaded
-            ? `🎬 ⑥ VDO Lecture (${cur.mod.code} · ✓ ${rbVdo.extBadge})`
-            : `🎬 ⑥ VDO Lecture (${cur.mod.code} · รอแขวน VDO)`,
-          `ppt-rb-cmd ${rbVdo.uploaded ? "is-slide-ready-cmd" : "is-slide-pending-cmd"}`
-        );
-        bVdoLec.type = "button";
-        bVdoLec.addEventListener("click", () => openHsVdoLecture(cur.mod.code));
-        gDocs.body.appendChild(bVdoLec);
-      }
-      ribbon.appendChild(gDocs.grp);
-
-      if (ROLE === "faculty" && state.hsdFacultyMode !== "student" && cur.qObj) {
-        const gConcept = makeGroup("การแสดงคำตอบสด & เฉลยอาจารย์");
-        const bGoLiveSlide = make(
-          "button",
-          "🟢 ไปสไลด์คำตอบสด นศ. (Real-time)",
-          `ppt-rb-cmd${layout === "live-sheet" ? " is-active" : ""}`
-        );
-        bGoLiveSlide.type = "button";
-        bGoLiveSlide.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, 2.5));
-
-        const bGoStage3 = make(
-          "button",
-          "👁 ไปขั้น ③ Answer Key เต็มจอ",
-          `ppt-rb-cmd${layout === "key-full" ? " is-active" : ""}`
-        );
-        bGoStage3.type = "button";
-        bGoStage3.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, 3));
-
-        const bOverviewAll = make("button", "📊 ภาพรวมคำตอบทั้งห้อง (ทุกข้อ)", "ppt-rb-cmd");
-        bOverviewAll.type = "button";
-        bOverviewAll.addEventListener("click", () => openFacultyRoomOverviewModal());
-
-        gConcept.body.append(bGoLiveSlide, bGoStage3, bOverviewAll);
-        ribbon.appendChild(gConcept.grp);
-      }
     } else if (activeTab === "slideshow") {
       const gStart = makeGroup("โหมดขยายเต็มหน้าจอ (Full Screen)");
       const bFromBegin = make("button", "⛶ Full Screen ตั้งแต่สไลด์แรก", "ppt-rb-cmd is-ppt-accent");
@@ -30933,14 +30846,6 @@
       exportStudioBtn.title = "ดาวน์โหลดใบงานเปล่า .PDF (16:9 Optimal Font) ประจำคาบ / กลางรวม HS1–HS6 หรือพิมพ์สไลด์ Handout";
       exportStudioBtn.addEventListener("click", () => openHsdPptExportStudioModal());
       gTools.body.appendChild(exportStudioBtn);
-
-      if (cur.mod && cur.mod.conciseDocId) {
-        const docBtn = make("button", `📚 ${cur.mod.code}`, "ppt-rb-cmd is-primary-teal");
-        docBtn.type = "button";
-        docBtn.title = `เปิดเอกสารคำสอน ${cur.mod.code}`;
-        docBtn.addEventListener("click", () => openTextbookDoc(cur.mod.conciseDocId));
-        gTools.body.appendChild(docBtn);
-      }
 
       ribbon.appendChild(gTools.grp);
     }
