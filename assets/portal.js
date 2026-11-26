@@ -38430,6 +38430,36 @@
     return chip;
   }
 
+  function isLiveAnonymousWallActive() {
+    return LIVE && typeof LIVE.getAnonymousWall === "function" ? Boolean(LIVE.getAnonymousWall()) : true;
+  }
+
+  function syncLiveAnonBtnState(btnEl) {
+    if (!btnEl) return;
+    const isAnon = isLiveAnonymousWallActive();
+    btnEl.textContent = isAnon ? "👁 แสดง #รหัส/ชื่อเล่น" : "🙈 ซ่อนชื่อ";
+    btnEl.setAttribute("aria-pressed", isAnon ? "false" : "true");
+    btnEl.title = isAnon
+      ? "ขณะนี้ซ่อนชื่อเป็นค่าเริ่มต้น (โหมดนิรนาม) · คลิกเพื่อแสดง #รหัส/ชื่อเล่น"
+      : "ขณะนี้แสดง #รหัส/ชื่อเล่น · คลิกเพื่อกลับไปซ่อนชื่อ (โหมดนิรนาม)";
+  }
+
+  function buildLiveAnonToggleBtnDOM(onAfterToggleOpt) {
+    const btn = make("button", "", "hsd-tbtn");
+    btn.type = "button";
+    btn.setAttribute("data-live-anon-btn", "1");
+    syncLiveAnonBtnState(btn);
+    btn.addEventListener("click", () => {
+      if (!LIVE) return;
+      LIVE.setAnonymousWall(!LIVE.getAnonymousWall());
+      syncLiveAnonBtnState(btn);
+      if (typeof onAfterToggleOpt === "function") {
+        onAfterToggleOpt();
+      }
+    });
+    return btn;
+  }
+
   function openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel) {
     const modal = $("hsdSpotlightModal");
     const card = $("hsdSpotlightCard");
@@ -38439,7 +38469,7 @@
     const items = LIVE.getCellResponses(qObj.id, cellId);
     const subCnt = items.filter((x) => x.status === "submitted").length;
     const typCnt = items.length - subCnt;
-    const isAnon = LIVE.getAnonymousWall();
+    const isAnon = isLiveAnonymousWallActive();
     const anonMap = buildAnonIndexMap(qObj.id);
     const blockTitle = [rowLabel, colHeader].filter(Boolean).join(" · ") || cellId;
 
@@ -38461,6 +38491,7 @@
             `ส่งแล้ว ${subCnt} คน · กำลังพิมพ์ ${typCnt} คน`,
             `hsd-resp-status ${subCnt > 0 ? "is-submitted" : "is-typing"}`
           ),
+          buildLiveAnonToggleBtnDOM(() => openCellResponsesSpotlight(qObj, cellId, colHeader, rowLabel)),
           buildUnavPairDOM({ compact: true }),
           topCloseBtn
         );
@@ -38520,7 +38551,7 @@
     if (!modal || !card) return;
     card.replaceChildren();
 
-    const isAnon = LIVE && LIVE.getAnonymousWall();
+    const isAnon = isLiveAnonymousWallActive();
     const author = formatTeamAuthorTitle(rec, isAnon, (idxNum || 0) + 1);
     const sm = resolveResponseStudentMeta(rec);
 
@@ -38551,6 +38582,7 @@
             rec.status === "submitted" ? "✓ ส่งคำตอบแล้ว" : "✍ กำลังพิมพ์สด…",
             `hsd-resp-status ${rec.status === "submitted" ? "is-submitted" : "is-typing"}`
           ),
+          buildLiveAnonToggleBtnDOM(() => openStudentResponseSpotlight(rec, qObj, idxNum)),
           buildUnavPairDOM({ compact: true }),
           topCloseBtn
         );
@@ -38695,7 +38727,7 @@
     const ws = (qObj && qObj.worksheet) || {};
     const meta = ws.diagramMeta || {};
     const nodesMeta = meta.nodes || {};
-    const isAnon = Boolean(LIVE && LIVE.getAnonymousWall());
+    const isAnon = isLiveAnonymousWallActive();
 
     const shell = make(
       "div",
@@ -38869,7 +38901,7 @@
 
   function populateLiveAnswerSheetCells(sheetHolder, qObj, anonMap) {
     if (!sheetHolder || !LIVE) return;
-    const isAnon = LIVE.getAnonymousWall();
+    const isAnon = isLiveAnonymousWallActive();
     const wsRows = (qObj && qObj.worksheet && qObj.worksheet.rows) || [];
     const visibleRowCount = wsRows.filter((r) => !r.isDiagramLinksRow).length || 1;
     const streamMaxHeight =
@@ -38943,7 +38975,7 @@
 
   function buildRoomRosterQuestionTableDOM(qObj, roomNum, list, anonMap) {
     const wrap = make("div", null, "hsd-ws-wrap hsd-room-roster-live-wrap");
-    const isAnon = Boolean(LIVE && LIVE.getAnonymousWall());
+    const isAnon = isLiveAnonymousWallActive();
     const pres = LIVE ? LIVE.getPresenceSummary(roomNum) : { joinedStudents: [] };
     const onlineBySid = new Set((pres.joinedStudents || []).map((p) => String(p.studentId || "")));
     const recBySid = new Map();
@@ -38990,6 +39022,7 @@
     roomStudents.forEach((stu, idx) => {
       const sid = String(stu.id);
       const rec = recBySid.get(sid) || null;
+      const anonNum = rec ? anonMap.get(rec.participantId) || idx + 1 : idx + 1;
       const isOnline = onlineBySid.has(sid) || Boolean(rec);
       const trEl = document.createElement("tr");
       if (rec) {
@@ -39000,7 +39033,7 @@
 
       const tdSid = document.createElement("td");
       if (isAnon) {
-        tdSid.textContent = rec ? `นิรนาม #${anonMap.get(rec.participantId) || idx + 1}` : "—";
+        tdSid.textContent = rec ? `นิรนาม #${anonNum}` : "—";
       } else {
         tdSid.innerHTML = `<span class="hsd-ans-sid-badge">รหัส ${escapeHtml(sid)}</span> <small style="color:var(--muted)">#${escapeHtml(sid.slice(-3))}</small>`;
       }
@@ -39050,7 +39083,7 @@
       if (rec) {
         const vBtn = make("button", "📄 เปิดดู", "hsd-cell-zoom-btn");
         vBtn.type = "button";
-        vBtn.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, idx));
+        vBtn.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, (anonNum || 1) - 1));
         tdAct.appendChild(vBtn);
       } else {
         tdAct.textContent = "—";
@@ -39061,10 +39094,11 @@
     });
 
     extraRecs.forEach((rec, eIdx) => {
+      const anonNum = anonMap.get(rec.participantId) || roomStudents.length + eIdx + 1;
       const trEl = document.createElement("tr");
       trEl.appendChild(make("td", String(roomStudents.length + eIdx + 1)));
-      trEl.appendChild(make("td", "ยังไม่ระบุรหัส"));
-      trEl.appendChild(make("td", rec.displayName || "ผู้เรียน"));
+      trEl.appendChild(make("td", isAnon ? `นิรนาม #${anonNum}` : "ยังไม่ระบุรหัส"));
+      trEl.appendChild(make("td", isAnon ? "ซ่อนชื่อ (โหมดนิรนาม)" : rec.displayName || "ผู้เรียน"));
       trEl.appendChild(make("td", "🟢 ออนไลน์"));
       trEl.appendChild(make("td", rec.status === "submitted" ? "✓ ส่งแล้ว" : "✍ พิมพ์สด"));
       const entries = Object.entries(rec.cells || {});
@@ -39072,7 +39106,7 @@
       const tdAct = document.createElement("td");
       const vBtn = make("button", "📄 เปิดดู", "hsd-cell-zoom-btn");
       vBtn.type = "button";
-      vBtn.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, roomStudents.length + eIdx));
+      vBtn.addEventListener("click", () => openStudentResponseSpotlight(rec, qObj, (anonNum || 1) - 1));
       tdAct.appendChild(vBtn);
       trEl.appendChild(tdAct);
       tbody.appendChild(trEl);
@@ -39090,6 +39124,7 @@
     card.replaceChildren();
     modal._backToCellFn = null;
 
+    const isAnon = isLiveAnonymousWallActive();
     const roomNum = LIVE.getRoomId();
     const rmDef = LIVE.getRoomDef(roomNum);
     const activeMod =
@@ -39103,7 +39138,8 @@
         modQuestions.push({
           caseObj: c,
           qObj: q,
-          shortLbl: `C${c.caseNumber}·ข้อ ${getShortQuestionNumLabel(q, idx)}`
+          shortLbl: `C${c.caseNumber}·ข้อ ${getShortQuestionNumLabel(q, idx)}`,
+          anonMap: buildAnonIndexMap(q.id)
         });
       });
     });
@@ -39144,6 +39180,7 @@
           });
           rc.appendChild(rb);
         });
+        rc.appendChild(buildLiveAnonToggleBtnDOM(() => openFacultyRoomOverviewModal(activeMod)));
         rc.appendChild(topCloseBtn);
         return rc;
       })()
@@ -39188,11 +39225,20 @@
       trEl.appendChild(make("td", String(idx + 1)));
 
       const tdSid = document.createElement("td");
-      tdSid.innerHTML = `<span class="hsd-ans-sid-badge">รหัส ${escapeHtml(sid)}</span> <small style="color:var(--muted)">#${escapeHtml(sid.slice(-3))}</small>`;
+      if (isAnon) {
+        tdSid.textContent = `นิรนาม #${idx + 1}`;
+      } else {
+        tdSid.innerHTML = `<span class="hsd-ans-sid-badge">รหัส ${escapeHtml(sid)}</span> <small style="color:var(--muted)">#${escapeHtml(sid.slice(-3))}</small>`;
+      }
       trEl.appendChild(tdSid);
 
       trEl.appendChild(
-        make("td", `${stu.fullName || stu.name || sid}${stu.nickname ? ` (${stu.nickname})` : ""}`)
+        make(
+          "td",
+          isAnon
+            ? "ซ่อนชื่อ (โหมดนิรนาม)"
+            : `${stu.fullName || stu.name || sid}${stu.nickname ? ` (${stu.nickname})` : ""}`
+        )
       );
 
       const tdOn = document.createElement("td");
@@ -39218,7 +39264,8 @@
           btn.style.cursor = "pointer";
           btn.addEventListener("click", () => {
             modal._backToCellFn = () => openFacultyRoomOverviewModal(activeMod);
-            openStudentResponseSpotlight(rec, mq.qObj, idx);
+            const anonIdx = ((mq.anonMap && mq.anonMap.get(rec.participantId)) || idx + 1) - 1;
+            openStudentResponseSpotlight(rec, mq.qObj, anonIdx);
           });
           tdQ.appendChild(btn);
         }
@@ -39279,12 +39326,10 @@
         ? `ห้อง ${roomNum} (${rmDef.roomCode}): ตอบแล้ว ${list.length}/${expectedTotal} คน (✓ ${subStudents} · ✍ ${typStudents} · 🟢 ออนไลน์ ${pres.students})`
         : `ห้อง ${roomNum} (${rmDef.roomCode}): ออนไลน์ ${pres.students}/${expectedTotal} คน · รอคำตอบสด…`;
     }
-    if (anonBtn) {
-      anonBtn.textContent = LIVE.getAnonymousWall() ? "👁 แสดง #รหัส/ชื่อเล่น" : "🙈 ซ่อนชื่อ";
-    }
+    syncLiveAnonBtnState(anonBtn);
 
     const anonMap = buildAnonIndexMap(qObj.id);
-    const isAnon = LIVE.getAnonymousWall();
+    const isAnon = isLiveAnonymousWallActive();
 
     // Compact 1-line horizontal strip showing everyone who has typed/submitted in this question (#146 อิ๊กเล้ง)
     if (sidStrip) {
@@ -39459,13 +39504,7 @@
     allRoomBtn.title = "ดูตารางภาพรวมการส่งกระดาษคำตอบของนักศึกษาทุกคนในห้องนี้ครบทุกข้อในคาบ";
     allRoomBtn.addEventListener("click", () => openFacultyRoomOverviewModal());
 
-    const anonBtn = make("button", "", "hsd-tbtn");
-    anonBtn.type = "button";
-    anonBtn.setAttribute("data-live-anon-btn", "1");
-    anonBtn.addEventListener("click", () => {
-      if (!LIVE) return;
-      LIVE.setAnonymousWall(!LIVE.getAnonymousWall());
-    });
+    const anonBtn = buildLiveAnonToggleBtnDOM();
 
     const clrBtn = make("button", "🗑 ล้าง", "hsd-tbtn");
     clrBtn.type = "button";

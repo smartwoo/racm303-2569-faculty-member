@@ -129,7 +129,7 @@
     activeQuestionId: "",
     joinedWallMs: 0,
     followTeacher: false,
-    anonymousWall: safeGetStorage("racm303_live_anon_v1", "0") === "1",
+    anonymousWall: true,
     soundMuted: safeGetStorage("racm303_live_mute_v1", "0") === "1",
     connectedTransports: new Set(),
     mqttClients: [],
@@ -1134,6 +1134,14 @@
       state.connectedTransports.add("local");
       state.bc.onmessage = (ev) => {
         if (!ev || !ev.data) return;
+        if (ev.data.type === "local_anon_wall") {
+          const nextAnon = Boolean(ev.data.anonymousWall);
+          if (state.anonymousWall !== nextAnon) {
+            state.anonymousWall = nextAnon;
+            emit("responses", { questionId: "*" });
+          }
+          return;
+        }
         handleIncomingPacket(ev.data.subpath || "", ev.data.msg, false);
       };
       updateConnectionBadge();
@@ -2706,7 +2714,11 @@
 
   function setAnonymousWall(flag) {
     state.anonymousWall = Boolean(flag);
-    safeSetStorage("racm303_live_anon_v1", state.anonymousWall ? "1" : "0");
+    try {
+      if (state.bc) {
+        state.bc.postMessage({ type: "local_anon_wall", anonymousWall: state.anonymousWall });
+      }
+    } catch (_) {}
     emit("responses", { questionId: "*" });
   }
 
@@ -2719,6 +2731,9 @@
   function startEngine() {
     if (initialized) return;
     initialized = true;
+    try {
+      localStorage.removeItem("racm303_live_anon_v1");
+    } catch (_) {}
     hydratePresenceRegistryFromStorage(false);
     hydrateRoomResponsesFromStorage(state.roomId, false);
     initBroadcastChannel();
