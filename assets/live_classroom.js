@@ -173,6 +173,10 @@
     // Teacher-released Conceptualized Key Takeaway slides (room-scoped, hidden initially for students)
     unlockedConceptSummaries: {},
 
+    // Per-room Faculty Check-in Cache Reset Registry: { [roomId]: { resetId, resetAtWallMs, modCode } | null }
+    checkinResetByRoom: { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null },
+    ackResetId: "",
+
     // Responses: Map<questionId, Map<participantId, ResponseRecord>>
     responsesByQuestion: new Map(),
     clearedAtByQuestion: new Map(),
@@ -189,6 +193,70 @@
     // Active room presence alias: Map<participantId, PresenceRecord>
     presence: null
   };
+
+  const CHECKIN_RESET_STORAGE_KEY = "racm303_live_checkin_reset_v1";
+  const CHECKIN_RESET_MAX_AGE_MS = 10 * 60 * 60 * 1000; // 10 hours
+
+  function getActiveRoomResetObj(roomIdOpt) {
+    const r = clampRoom(roomIdOpt || state.roomId);
+    const rec = state.checkinResetByRoom[r];
+    if (!rec || !rec.resetId) return null;
+    if (rec.resetAtWallMs && Date.now() - Number(rec.resetAtWallMs) > CHECKIN_RESET_MAX_AGE_MS) {
+      state.checkinResetByRoom[r] = null;
+      return null;
+    }
+    return rec;
+  }
+
+  function getRoomCheckinResetId(roomIdOpt) {
+    const rec = getActiveRoomResetObj(roomIdOpt);
+    return rec ? String(rec.resetId) : "";
+  }
+
+  function getRoomCheckinResetAt(roomIdOpt) {
+    const rec = getActiveRoomResetObj(roomIdOpt);
+    return rec ? Number(rec.resetAtWallMs || 0) : 0;
+  }
+
+  function persistCheckinResetToStorage() {
+    try {
+      const out = {};
+      [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const rec = getActiveRoomResetObj(rId);
+        if (rec) out[rId] = rec;
+      });
+      localStorage.setItem(CHECKIN_RESET_STORAGE_KEY, JSON.stringify({ updatedMs: Date.now(), rooms: out }));
+    } catch (_) {}
+  }
+
+  function hydrateCheckinResetFromStorage() {
+    let changedRooms = [];
+    try {
+      const raw = safeGetStorage(CHECKIN_RESET_STORAGE_KEY, "");
+      if (!raw) return changedRooms;
+      const parsed = JSON.parse(raw);
+      const roomsObj = (parsed && parsed.rooms) || {};
+      const now = Date.now();
+      [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const rec = roomsObj[rId];
+        if (!rec || !rec.resetId) return;
+        const ts = Number(rec.resetAtWallMs || 0);
+        if (ts && now - ts > CHECKIN_RESET_MAX_AGE_MS) return;
+        const cur = state.checkinResetByRoom[rId];
+        if (!cur || cur.resetId !== rec.resetId) {
+          state.checkinResetByRoom[rId] = {
+            resetId: String(rec.resetId).slice(0, 48),
+            resetAtWallMs: ts || now,
+            modCode: String(rec.modCode || "HS1").slice(0, 12)
+          };
+          changedRooms.push(rId);
+        }
+      });
+    } catch (_) {}
+    return changedRooms;
+  }
+
+  hydrateCheckinResetFromStorage();
 
   function getRoomPresenceMap(roomIdOpt) {
     const r = clampRoom(roomIdOpt || state.roomId);
@@ -207,9 +275,11 @@
       const now = Date.now();
       const snapshot = {};
       [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const reqResetId = getRoomCheckinResetId(rId);
         const arr = [];
         getRoomPresenceMap(rId).forEach((rec) => {
           if (!rec || rec.role !== "student" || !rec.studentId || rec.joined === false) return;
+          if (reqResetId && rec.ackResetId !== reqResetId) return;
           const refMs = Number(rec.lastSeenMs || rec.joinedWallMs || 0);
           if (now - refMs > CHECKED_IN_MAX_AGE_MS) return;
           arr.push({
@@ -231,6 +301,7 @@
             activeQuestionId: String(rec.activeQuestionId || "").slice(0, 32),
             name: String(rec.name || "").slice(0, 80),
             senderCli: String(rec.senderCli || "").slice(0, 40),
+            ackResetId: String(rec.ackResetId || "").slice(0, 48),
             joinedWallMs: Number(rec.joinedWallMs || now),
             lastSeenMs: Number(rec.lastSeenMs || now)
           });
@@ -255,10 +326,12 @@
       const storagePidsByRoom = { 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set(), 6: new Set() };
 
       [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const reqResetId = getRoomCheckinResetId(rId);
         const list = Array.isArray(roomsObj[rId]) ? roomsObj[rId] : [];
         const rMap = getRoomPresenceMap(rId);
         list.forEach((rec) => {
           if (!rec || !rec.studentId || rec.joined === false) return;
+          if (reqResetId && rec.ackResetId !== reqResetId) return;
           const refMs = Number(rec.lastSeenMs || rec.joinedWallMs || 0);
           if (now - refMs > CHECKED_IN_MAX_AGE_MS) return;
           const pid = String(rec.participantId || `sid_${rec.studentId}`).slice(0, 48);
@@ -278,9 +351,12 @@
           if (
             existing &&
             existing.role === "student" &&
-            existing.fromStorage &&
-            !storagePidsByRoom[rId].has(pid) &&
-            !(state.sessionJoined && rId === state.joinedRoomId && pid === state.participantId)
+            (
+              (reqResetId && existing.ackResetId !== reqResetId) ||
+              (existing.fromStorage &&
+                !storagePidsByRoom[rId].has(pid) &&
+                !(state.sessionJoined && rId === state.joinedRoomId && pid === state.participantId))
+            )
           ) {
             rMap.delete(pid);
             changed = true;
@@ -424,6 +500,7 @@
     presence: new Set(),
     pointer: new Set(),
     concept_unlock: new Set(),
+    checkin_reset: new Set(),
     connection: new Set()
   };
 
@@ -597,9 +674,14 @@
       } catch (_) {}
     }
 
-    // 2. MQTT over WSS (QoS 1 for timer & presence so countdown and check-in delivery is broker-acknowledged)
+    // 2. MQTT over WSS (QoS 1 for timer, checkin_reset & presence so countdown and check-in delivery is broker-acknowledged)
     const fullTopic = roomTopic(subpath, targetRoom);
-    const qosLevel = subpath === "timer" || String(subpath || "").startsWith("presence") ? 1 : 0;
+    const qosLevel =
+      subpath === "timer" ||
+      subpath === "checkin_reset" ||
+      String(subpath || "").startsWith("presence")
+        ? 1
+        : 0;
     state.mqttClients.forEach((client) => {
       try {
         if (client && client.connected) {
@@ -623,6 +705,108 @@
         } catch (_) {}
       }
     }
+  }
+
+  function clearStudentCheckinCachesForRoomReset(targetRoom, resetId) {
+    const r = clampRoom(targetRoom);
+    ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].forEach((m) => {
+      const key = `racm303_hsd_qr_checkin_v1_${m}_R${r}`;
+      [
+        [safeGetSession, safeSetSession],
+        [safeGetStorage, safeSetStorage]
+      ].forEach(([getter, setter]) => {
+        try {
+          const raw = getter(key, "");
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!parsed || parsed.ackResetId !== resetId) {
+            setter(key, null);
+          }
+        } catch (_) {
+          setter(key, null);
+        }
+      });
+    });
+  }
+
+  function doesStoredStudentBelongToRoom(targetRoom) {
+    const r = clampRoom(targetRoom);
+    const lockedPageRoom =
+      typeof window !== "undefined" &&
+      window.RACM_HSD_ROOM_PAGE &&
+      Number(window.RACM_HSD_ROOM_PAGE.roomId);
+    if (lockedPageRoom >= 1 && lockedPageRoom <= 6) {
+      return lockedPageRoom === r;
+    }
+    if (state.disc >= 1 && state.disc <= 6) {
+      return state.disc === r;
+    }
+    const candSid = String(
+      state.studentId ||
+        safeGetSession("racm303_hsd_prefill_sid", "") ||
+        safeGetStorage("racm303_my_sid", "") ||
+        safeGetStorage("racm303_hsd_prefill_sid", "") ||
+        ""
+    ).trim();
+    if (candSid && typeof window !== "undefined" && Array.isArray(window.RACM_STUDENT_ROSTER)) {
+      const stu = window.RACM_STUDENT_ROSTER.find((s) => s && String(s.id) === candSid);
+      if (stu && Number(stu.disc) >= 1 && Number(stu.disc) <= 6) {
+        return Number(stu.disc) === r;
+      }
+    }
+    return false;
+  }
+
+  function evictLocalStudentForCheckinReset(pktRoom, modCode, resetId, resetAtWallMs) {
+    if (state.role === "faculty") return;
+    const wasJoined = Boolean(state.sessionJoined);
+    const oldPid = state.participantId;
+    const oldSid = state.studentId;
+    while (burstTimers.length) {
+      clearTimeout(burstTimers.pop());
+    }
+    state.sessionJoined = false;
+    state.joinedRoomId = 0;
+    state.joinedWallMs = 0;
+    state.ackResetId = "";
+    state.teamId = 0;
+    state.studentId = "";
+    state.shortNo = "";
+    state.nickname = "";
+    state.fullName = "";
+    state.area = "";
+    state.disc = 0;
+    state.photoId = "";
+    state.displayName = "";
+    state.participantId = persistentPid;
+    state.responsesByQuestion.clear();
+    lastPublishedLocalCellsByQ.clear();
+    pendingCellsByQuestion.clear();
+    pendingDirtyCellsByQ.clear();
+    reloadSubmittedCellsForActiveStudent();
+
+    safeSetSession("racm303_hsd_session_joined_v1", null);
+    safeSetSession("racm303_hsd_room_confirmed", null);
+    safeSetSession("racm303_hsd_prefill_sid", null);
+    safeSetSession("racm303_hsd_step5_pin_sid", null);
+    safeSetSession("racm303_hsd_team_id_v1", null);
+    safeSetStorage("racm303_my_sid", null);
+    safeSetStorage("racm303_login_uid", null);
+    safeSetStorage("racm303_hsd_prefill_sid", null);
+    safeSetStorage("racm303_personal_student", null);
+    safeSetStorage("racm303_live_team_v1", null);
+
+    if (wasJoined && oldPid) {
+      broadcastStudentLeaveFromRoom(oldPid, oldSid, pktRoom, false);
+    }
+    emit("presence", getPresenceSummary());
+    emit("checkin_reset", {
+      roomId: pktRoom,
+      modCode: modCode || state.activeModule || "HS1",
+      resetId,
+      resetAtWallMs,
+      evicted: true
+    });
   }
 
   function handleIncomingPacket(subpath, msg, isRetained) {
@@ -652,7 +836,8 @@
     }
 
     const pktRoom = clampRoom(msg.roomId || state.roomId);
-    const isMultiRoomPresencePkt = msg.type === "presence" || msg.type === "who_is_here";
+    const isMultiRoomPresencePkt =
+      msg.type === "presence" || msg.type === "who_is_here" || msg.type === "checkin_reset";
     if (!isMultiRoomPresencePkt && pktRoom !== state.roomId) return;
 
     // If faculty receives from a PeerJS student on active room, relay to other PeerJS students
@@ -662,6 +847,52 @@
           if (conn && conn.open) conn.send({ subpath, msg });
         } catch (_) {}
       });
+    }
+
+    if (msg.type === "checkin_reset") {
+      const resetId = String(msg.resetId || "").trim().slice(0, 48);
+      if (!resetId) return;
+      const resetAtWallMs = Number(msg.resetAtWallMs || msg.sentWallMs || Date.now());
+      if (isRetained && Date.now() - resetAtWallMs > CHECKIN_RESET_MAX_AGE_MS) {
+        return;
+      }
+      const modCode = String(msg.modCode || state.activeModule || "HS1").toUpperCase().slice(0, 12);
+      const prevRec = state.checkinResetByRoom[pktRoom];
+      const isNewResetToken = !prevRec || prevRec.resetId !== resetId;
+      if (isNewResetToken) {
+        state.checkinResetByRoom[pktRoom] = { resetId, resetAtWallMs, modCode };
+        persistCheckinResetToStorage();
+      }
+      const rMap = getRoomPresenceMap(pktRoom);
+      let pruned = false;
+      rMap.forEach((rec, pid) => {
+        if (rec && rec.role !== "faculty" && rec.ackResetId !== resetId) {
+          rMap.delete(pid);
+          pruned = true;
+        }
+      });
+      if (pruned) {
+        persistPresenceRegistryToStorage();
+        emit("presence", getPresenceSummary());
+      }
+      if (state.role !== "faculty") {
+        clearStudentCheckinCachesForRoomReset(pktRoom, resetId);
+        const shouldEvictHere =
+          (state.sessionJoined &&
+            clampRoom(state.joinedRoomId || state.roomId) === pktRoom &&
+            state.ackResetId !== resetId) ||
+          (!state.sessionJoined &&
+            state.ackResetId !== resetId &&
+            doesStoredStudentBelongToRoom(pktRoom));
+        if (shouldEvictHere) {
+          evictLocalStudentForCheckinReset(pktRoom, modCode, resetId, resetAtWallMs);
+        } else if (isNewResetToken && clampRoom(state.roomId) === pktRoom) {
+          emit("checkin_reset", { roomId: pktRoom, modCode, resetId, resetAtWallMs, evicted: false });
+        }
+      } else if (isNewResetToken) {
+        emit("checkin_reset", { roomId: pktRoom, modCode, resetId, resetAtWallMs, evicted: false });
+      }
+      return;
     }
 
     if (msg.type === "timer") {
@@ -823,33 +1054,39 @@
         ? String(msg.senderPid).slice(0, 48)
         : rawPid;
 
-      // Refresh sender student's individual presence so Live Lobby stays accurate
+      // Refresh sender student's individual presence ONLY on live (non-retained) packets and ONLY when valid under active room reset
       const senderPid = sidClean ? `sid_${sidClean}` : (!pid.startsWith("team_") ? pid : "");
-      if (senderPid && sidClean) {
+      if (!isRetained && senderPid && sidClean) {
         const rMap = getRoomPresenceMap(pktRoom);
-        const prevPres = rMap.get(senderPid) || {};
-        rMap.set(
-          senderPid,
-          Object.assign({}, prevPres, {
-            participantId: senderPid,
-            role: "student",
-            joined: true,
-            checkedIn: true,
-            roomId: pktRoom,
-            teamId: clampTeamOrZero(incomingTeamId || prevPres.teamId),
-            studentId: sidClean,
-            shortNo: String(msg.shortNo || prevPres.shortNo || sidClean.slice(-3)).slice(0, 6),
-            fullName: String(msg.fullName || prevPres.fullName || "").slice(0, 80),
-            nickname: String(msg.nickname || prevPres.nickname || "").slice(0, 32),
-            area: String(msg.area || prevPres.area || "").slice(0, 40),
-            disc: Number(msg.disc || prevPres.disc || pktRoom) || pktRoom,
-            name: String(msg.senderName || msg.editorLabel || prevPres.name || `รหัส ${sidClean}`).slice(0, 80),
-            activeQuestionId: qid,
-            lastSeenMs: Date.now()
-          })
-        );
-        persistPresenceRegistryToStorage();
-        emit("presence", getPresenceSummary());
+        const prevPres = rMap.get(senderPid);
+        const reqRst = getRoomCheckinResetId(pktRoom);
+        const pktAck = String(msg.ackResetId || (prevPres && prevPres.ackResetId) || "").slice(0, 48);
+        if (!reqRst || pktAck === reqRst) {
+          const basePres = prevPres || {};
+          rMap.set(
+            senderPid,
+            Object.assign({}, basePres, {
+              participantId: senderPid,
+              role: "student",
+              joined: true,
+              checkedIn: true,
+              roomId: pktRoom,
+              teamId: clampTeamOrZero(incomingTeamId || basePres.teamId),
+              studentId: sidClean,
+              shortNo: String(msg.shortNo || basePres.shortNo || sidClean.slice(-3)).slice(0, 6),
+              fullName: String(msg.fullName || basePres.fullName || "").slice(0, 80),
+              nickname: String(msg.nickname || basePres.nickname || "").slice(0, 32),
+              area: String(msg.area || basePres.area || "").slice(0, 40),
+              disc: Number(msg.disc || basePres.disc || pktRoom) || pktRoom,
+              name: String(msg.senderName || msg.editorLabel || basePres.name || `รหัส ${sidClean}`).slice(0, 80),
+              activeQuestionId: qid,
+              ackResetId: pktAck,
+              lastSeenMs: Date.now()
+            })
+          );
+          persistPresenceRegistryToStorage();
+          emit("presence", getPresenceSummary());
+        }
       }
 
       // Strictly isolate student answer sheets: a student client NEVER absorbs another student's answers
@@ -1008,7 +1245,8 @@
               senderName: state.displayName || myRec.editorLabel,
               studentId: state.studentId,
               shortNo: state.shortNo || String(state.studentId).slice(-3),
-              fullName: state.fullName || ""
+              fullName: state.fullName || "",
+              ackResetId: state.ackResetId || ""
             }),
             true,
             pktRoom
@@ -1016,6 +1254,20 @@
         });
       }
       if (pktRoom === state.roomId && state.role === "faculty") {
+        const activeRst = getActiveRoomResetObj(pktRoom);
+        if (activeRst && activeRst.resetId) {
+          publishPacket(
+            "checkin_reset",
+            {
+              type: "checkin_reset",
+              resetId: activeRst.resetId,
+              resetAtWallMs: activeRst.resetAtWallMs || Date.now(),
+              modCode: activeRst.modCode || state.activeModule || "HS1"
+            },
+            true,
+            pktRoom
+          );
+        }
         if (
           state.timer.running ||
           state.timer.hasConfigured ||
@@ -1083,6 +1335,13 @@
         return;
       }
       const prevPres = rMap.get(pid) || {};
+      if (msg.role !== "faculty") {
+        const reqRst = getRoomCheckinResetId(pktRoom);
+        const incomingAck = String(msg.ackResetId || "").slice(0, 48);
+        if (reqRst && incomingAck !== reqRst) {
+          return;
+        }
+      }
       const sidStr = String(msg.studentId || prevPres.studentId || "").slice(0, 16);
       // Remove stale record from other rooms so each student only appears in their active room
       if (sidStr && msg.role !== "faculty") {
@@ -1111,6 +1370,10 @@
         activeQuestionId: String(msg.activeQuestionId || prevPres.activeQuestionId || "").slice(0, 32),
         name: String(msg.name || prevPres.name || "ผู้เข้าร่วม").slice(0, 80),
         senderCli: String(msg.senderCli || prevPres.senderCli || "").slice(0, 40),
+        ackResetId:
+          msg.role === "faculty"
+            ? ""
+            : String(msg.ackResetId || prevPres.ackResetId || "").slice(0, 48),
         joinedWallMs: Number(msg.joinedWallMs || prevPres.joinedWallMs || msg.sentWallMs || Date.now()),
         lastSeenMs: isRetained && refWallMs ? refWallMs : Date.now()
       });
@@ -1152,11 +1415,12 @@
   function subscribeCurrentRoomMqtt(client) {
     if (!client || !client.connected) return;
     try {
-      // Subscribe to active room full stream AND all 6 rooms' presence/snapshot/LWT topics
+      // Subscribe to active room full stream AND all 6 rooms' presence/reset/snapshot/LWT topics
       client.subscribe(
         [
           `${TOPIC_NS}/room-${state.roomId}/#`,
           `${TOPIC_NS}/+/presence/#`,
+          `${TOPIC_NS}/+/checkin_reset`,
           `${TOPIC_NS}/+/who_is_here`,
           `${TOPIC_NS}/lwt/+`
         ],
@@ -1166,6 +1430,7 @@
       try {
         client.subscribe(`${TOPIC_NS}/room-${state.roomId}/#`, { qos: 0 });
         client.subscribe(`${TOPIC_NS}/+/presence/#`, { qos: 0 });
+        client.subscribe(`${TOPIC_NS}/+/checkin_reset`, { qos: 0 });
         client.subscribe(`${TOPIC_NS}/lwt/+`, { qos: 0 });
       } catch (_2) {}
     }
@@ -1416,6 +1681,21 @@
                   }
                 });
               });
+              const activeRst = getActiveRoomResetObj(state.roomId);
+              if (activeRst && activeRst.resetId) {
+                conn.send({
+                  subpath: "checkin_reset",
+                  msg: {
+                    type: "checkin_reset",
+                    msgId: randomId("sync"),
+                    roomId: state.roomId,
+                    resetId: activeRst.resetId,
+                    resetAtWallMs: activeRst.resetAtWallMs || Date.now(),
+                    modCode: activeRst.modCode || state.activeModule || "HS1",
+                    sentWallMs: Date.now()
+                  }
+                });
+              }
               getRoomPresenceMap(state.roomId).forEach((pRec) => {
                 conn.send({
                   subpath: `presence/${pRec.participantId}`,
@@ -1533,6 +1813,7 @@
       activeQuestionId: state.activeQuestionId || "",
       name: myName,
       senderCli: clientInstanceId,
+      ackResetId: state.role === "faculty" ? "" : String(state.ackResetId || "").slice(0, 48),
       joinedWallMs: state.joinedWallMs,
       lastSeenMs: now
     };
@@ -1860,7 +2141,7 @@
     });
   }
 
-  function joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt) {
+  function joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt, opts) {
     startEngine();
     const targetRoom = roomNumOpt
       ? clampRoom(roomNumOpt)
@@ -1877,6 +2158,11 @@
       (existingPres && existingPres.record && existingPres.record.joinedWallMs) ||
       state.joinedWallMs ||
       Date.now();
+    if (opts && opts.ackResetId !== undefined) {
+      state.ackResetId = String(opts.ackResetId || "").slice(0, 48);
+    } else {
+      state.ackResetId = getRoomCheckinResetId(targetRoom) || "";
+    }
     safeSetSession("racm303_hsd_session_joined_v1", "1");
     if (activeModuleOpt) state.activeModule = String(activeModuleOpt);
     state.teamId = clampTeamOrZero(teamIdOpt);
@@ -1902,7 +2188,7 @@
     const isSharedScreen = Boolean((opts && opts.kioskMode) || state.role === "faculty");
     const targetRoom = clampRoom(roomNumOpt || studentObj.disc || state.roomId);
     if (!isSharedScreen) {
-      joinSessionWithStudent(studentObj, targetRoom, activeModuleOpt, clampTeamOrZero(teamIdOpt));
+      joinSessionWithStudent(studentObj, targetRoom, activeModuleOpt, clampTeamOrZero(teamIdOpt), opts);
       return true;
     }
     if (roomNumOpt && targetRoom !== state.roomId) {
@@ -1937,6 +2223,7 @@
       activeQuestionId: String(prevPres.activeQuestionId || "").slice(0, 32),
       name: dispLabel.slice(0, 80),
       senderCli: clientInstanceId,
+      ackResetId: getRoomCheckinResetId(targetRoom) || "",
       joinedWallMs: prevPres.joinedWallMs || now,
       lastSeenMs: now
     };
@@ -1966,6 +2253,7 @@
     state.sessionJoined = false;
     state.joinedRoomId = 0;
     state.joinedWallMs = 0;
+    state.ackResetId = "";
     safeSetSession("racm303_hsd_session_joined_v1", null);
     if (wasJoined && oldPid) {
       broadcastStudentLeaveFromRoom(oldPid, oldSid, oldRoom, Boolean(opts && opts.fromUnload));
@@ -1986,6 +2274,7 @@
     state.sessionJoined = false;
     state.joinedRoomId = 0;
     state.joinedWallMs = 0;
+    state.ackResetId = "";
     state.teamId = 0;
     state.studentId = "";
     state.shortNo = "";
@@ -2528,6 +2817,7 @@
         cellStatuses: cleanCellStatuses,
         cellUpdatedMs: cleanCellUpdatedMs,
         cellEditors: cleanCellEditors,
+        ackResetId: state.ackResetId || "",
         status: overallStatus,
         updatedWallMs: updatedMs
       },
@@ -2793,6 +3083,108 @@
     safeSetStorage("racm303_live_mute_v1", state.soundMuted ? "1" : "0");
   }
 
+  function resetRoomCheckin(roomIdOpt, modCodeOpt) {
+    if (state.role !== "faculty") return null;
+    startEngine();
+    const targetRoom = clampRoom(roomIdOpt || state.roomId);
+    const effMod = String(modCodeOpt || state.activeModule || "HS1").toUpperCase().slice(0, 12);
+    const resetId = randomId("rst");
+    const resetAtWallMs = Date.now();
+
+    state.checkinResetByRoom[targetRoom] = {
+      resetId,
+      resetAtWallMs,
+      modCode: effMod
+    };
+    persistCheckinResetToStorage();
+
+    // Purge all non-faculty presence records in targetRoom & collect all student PIDs for broker retained wipe
+    const rMap = getRoomPresenceMap(targetRoom);
+    const clearedPids = [];
+    const seenPids = new Set();
+    rMap.forEach((rec, pid) => {
+      if (!rec || rec.role === "faculty") return;
+      seenPids.add(pid);
+      clearedPids.push({ pid, studentId: String(rec.studentId || "") });
+      rMap.delete(pid);
+    });
+    if (typeof window !== "undefined" && Array.isArray(window.RACM_STUDENT_ROSTER)) {
+      window.RACM_STUDENT_ROSTER.forEach((stu) => {
+        if (!stu || !stu.id || Number(stu.disc) !== targetRoom) return;
+        const pid = `sid_${String(stu.id).trim()}`;
+        if (!seenPids.has(pid)) {
+          seenPids.add(pid);
+          clearedPids.push({ pid, studentId: String(stu.id).trim() });
+        }
+      });
+    }
+    persistPresenceRegistryToStorage();
+
+    // Wipe retained MQTT presence/<pid> topics for this room & notify same-device tabs
+    clearedPids.forEach(({ pid, studentId }) => {
+      const leaveMsg = {
+        type: "presence",
+        msgId: randomId("rstlv"),
+        roomId: targetRoom,
+        senderCli: clientInstanceId,
+        sentWallMs: resetAtWallMs,
+        participantId: pid,
+        studentId,
+        role: "student",
+        joined: false,
+        left: true,
+        clearedByFaculty: true
+      };
+      rememberMsgId(leaveMsg.msgId);
+      if (state.bc) {
+        try {
+          state.bc.postMessage({ subpath: `presence/${pid}`, msg: leaveMsg, retained: false });
+        } catch (_) {}
+      }
+      const presTopic = `${TOPIC_NS}/room-${targetRoom}/presence/${pid}`;
+      state.mqttClients.forEach((client) => {
+        try {
+          if (client && client.connected) {
+            client.publish(presTopic, "", { qos: 0, retain: true });
+          }
+        } catch (_) {}
+      });
+    });
+
+    const resetPayload = {
+      type: "checkin_reset",
+      resetId,
+      resetAtWallMs,
+      modCode: effMod,
+      roomId: targetRoom
+    };
+    publishPacket("checkin_reset", resetPayload, true, targetRoom);
+    [750, 2000].forEach((delayMs) => {
+      setTimeout(() => {
+        const cur = state.checkinResetByRoom[targetRoom];
+        if (cur && cur.resetId === resetId) {
+          publishPacket(
+            "checkin_reset",
+            Object.assign({}, resetPayload, { msgId: randomId("pkt") }),
+            true,
+            targetRoom
+          );
+        }
+      }, delayMs);
+    });
+
+    emit("presence", getPresenceSummary(targetRoom));
+    emit("checkin_reset", {
+      roomId: targetRoom,
+      modCode: effMod,
+      resetId,
+      resetAtWallMs,
+      clearedCount: rMap.size,
+      localOrigin: true
+    });
+    return { roomId: targetRoom, modCode: effMod, resetId, resetAtWallMs };
+  }
+
   let initialized = false;
   function startEngine() {
     if (initialized) return;
@@ -2800,6 +3192,7 @@
     try {
       localStorage.removeItem("racm303_live_anon_v1");
     } catch (_) {}
+    hydrateCheckinResetFromStorage();
     hydratePresenceRegistryFromStorage(false);
     hydrateRoomResponsesFromStorage(state.roomId, false);
     initBroadcastChannel();
@@ -2807,6 +3200,27 @@
     initPeerForRoom();
     if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
       window.addEventListener("storage", (ev) => {
+        if (!ev || !ev.key || ev.key === CHECKIN_RESET_STORAGE_KEY) {
+          const changedRstRooms = hydrateCheckinResetFromStorage();
+          hydratePresenceRegistryFromStorage(true);
+          if (state.role !== "faculty" && changedRstRooms.length) {
+            changedRstRooms.forEach((rId) => {
+              const rec = getActiveRoomResetObj(rId);
+              if (!rec) return;
+              clearStudentCheckinCachesForRoomReset(rId, rec.resetId);
+              const shouldEvictHere =
+                (state.sessionJoined &&
+                  clampRoom(state.joinedRoomId || state.roomId) === rId &&
+                  state.ackResetId !== rec.resetId) ||
+                (!state.sessionJoined &&
+                  state.ackResetId !== rec.resetId &&
+                  doesStoredStudentBelongToRoom(rId));
+              if (shouldEvictHere) {
+                evictLocalStudentForCheckinReset(rId, rec.modCode, rec.resetId, rec.resetAtWallMs);
+              }
+            });
+          }
+        }
         if (!ev || !ev.key || ev.key === PRESENCE_STORAGE_KEY) {
           hydratePresenceRegistryFromStorage(true);
         }
@@ -2815,6 +3229,7 @@
         }
       });
       window.addEventListener("online", () => {
+        hydrateCheckinResetFromStorage();
         hydratePresenceRegistryFromStorage(true);
         hydrateRoomResponsesFromStorage(state.roomId, true);
         publishPresence();
@@ -2830,6 +3245,7 @@
       if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
         document.addEventListener("visibilitychange", () => {
           if (!document.hidden) {
+            hydrateCheckinResetFromStorage();
             hydratePresenceRegistryFromStorage(true);
             hydrateRoomResponsesFromStorage(state.roomId, true);
             publishPresence();
@@ -2869,6 +3285,9 @@
     checkinStudentToRoom,
     leaveCurrentRoom,
     logoutStudentSession,
+    resetRoomCheckin,
+    getRoomCheckinResetId,
+    getRoomCheckinResetAt,
     isSessionJoined: () => Boolean(state.sessionJoined),
     setActiveStudentSlide,
     requestRoomSnapshot,
@@ -2882,6 +3301,7 @@
     getAllRoomsPresenceSummary,
     findStudentLivePresence,
     syncFromStorage: () => {
+      hydrateCheckinResetFromStorage();
       hydratePresenceRegistryFromStorage(true);
       hydrateRoomResponsesFromStorage(state.roomId, true);
     },

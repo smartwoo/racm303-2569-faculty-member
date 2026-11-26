@@ -711,11 +711,24 @@
 
   function getStudentCheckinRecord(modCode, roomId) {
     const key = checkinStorageKey(modCode, roomId);
+    const live = root && root.RACM_LIVE_CLASSROOM;
+    const reqResetId =
+      live && typeof live.getRoomCheckinResetId === "function"
+        ? String(live.getRoomCheckinResetId(roomId) || "")
+        : "";
     try {
       const sRaw = sessionStorage.getItem(key);
       if (sRaw) {
         const parsed = JSON.parse(sRaw);
-        if (parsed && parsed.studentId) return parsed;
+        if (parsed && parsed.studentId) {
+          if (reqResetId && String(parsed.ackResetId || "") !== reqResetId) {
+            try {
+              sessionStorage.removeItem(key);
+            } catch (_) {}
+          } else {
+            return parsed;
+          }
+        }
       }
     } catch (_) {}
     try {
@@ -723,7 +736,13 @@
       if (lRaw) {
         const parsed = JSON.parse(lRaw);
         if (parsed && parsed.studentId && Date.now() - (Number(parsed.checkedInMs) || 0) < CHECKIN_FRESH_MS) {
-          return parsed;
+          if (reqResetId && String(parsed.ackResetId || "") !== reqResetId) {
+            try {
+              localStorage.removeItem(key);
+            } catch (_) {}
+          } else {
+            return parsed;
+          }
         }
       }
     } catch (_) {}
@@ -740,6 +759,11 @@
     const effMod = String(modCode || "HS1").toUpperCase();
     const effRoom = clampRoomId(roomId);
     const effTeam = Number(teamId) >= 1 && Number(teamId) <= 3 ? Number(teamId) : 0;
+    const live = root && root.RACM_LIVE_CLASSROOM;
+    const ackResetId =
+      live && typeof live.getRoomCheckinResetId === "function"
+        ? String(live.getRoomCheckinResetId(effRoom) || "")
+        : "";
     const rec = {
       modCode: effMod,
       roomId: effRoom,
@@ -749,6 +773,7 @@
       nickname: String(studentObj.nickname || ""),
       assignedDisc: Number(studentObj.disc) || effRoom,
       teamId: effTeam,
+      ackResetId,
       checkedInMs: now,
       checkedInISO: new Date(now).toISOString()
     };
@@ -767,12 +792,11 @@
         localStorage.setItem("racm303_login_uid", String(studentObj.id));
       } catch (_) {}
     }
-    const live = root && root.RACM_LIVE_CLASSROOM;
     if (live && !(opts && opts.skipLiveBroadcast)) {
       if (typeof live.checkinStudentToRoom === "function") {
-        live.checkinStudentToRoom(studentObj, effRoom, effMod, effTeam, { kioskMode: isKiosk });
+        live.checkinStudentToRoom(studentObj, effRoom, effMod, effTeam, { kioskMode: isKiosk, ackResetId });
       } else if (!isKiosk && typeof live.joinSessionWithStudent === "function") {
-        live.joinSessionWithStudent(studentObj, effRoom, effMod, effTeam);
+        live.joinSessionWithStudent(studentObj, effRoom, effMod, effTeam, { ackResetId });
       }
     }
     return rec;
@@ -884,7 +908,121 @@
     };
   }
 
-  /* ---------- 6. Faculty CSV Attendance Export for Active Room ---------- */
+  /* ---------- 6. Faculty CSV Attendance Export & Room Check-in Cache Reset ---------- */
+  function showFacultyResetToast(msgText) {
+    if (typeof document === "undefined") return;
+    let toast = document.getElementById("hsdFacultyResetToast");
+    const host = document.fullscreenElement || document.body;
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "hsdFacultyResetToast";
+      toast.className = "hsd-reset-checkin-toast hsd-no-print";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+    }
+    if (toast.parentNode !== host) {
+      host.appendChild(toast);
+    }
+    toast.textContent = msgText;
+    toast.hidden = false;
+    toast.classList.add("is-visible");
+    if (toast._hideTimer) clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
+      toast.classList.remove("is-visible");
+      toast.hidden = true;
+    }, 4200);
+  }
+
+  function closeResetCheckinConfirmModal() {
+    if (typeof document === "undefined") return;
+    const bd = document.getElementById("hsdResetCheckinConfirmModal");
+    if (bd) bd.hidden = true;
+  }
+
+  function openResetCheckinConfirmModal(modCodeOpt, roomIdOpt, onResetDone) {
+    if (typeof document === "undefined" || !root || root.PORTAL_ROLE !== "faculty") return;
+    const live = root && root.RACM_LIVE_CLASSROOM;
+    const effRoom = clampRoomId(roomIdOpt || (live ? live.getRoomId() : 1));
+    const meta = getRoomMeta(modCodeOpt || "HS1", effRoom);
+    const stats = getLiveRoomJoinedStats(meta.roomId, meta.modCode);
+    const host = document.fullscreenElement || document.body;
+
+    let bd = document.getElementById("hsdResetCheckinConfirmModal");
+    if (!bd) {
+      bd = document.createElement("div");
+      bd.id = "hsdResetCheckinConfirmModal";
+      bd.className = "hsd-reset-checkin-backdrop hsd-no-print";
+      bd.setAttribute("role", "dialog");
+      bd.setAttribute("aria-modal", "true");
+      bd.addEventListener("click", (ev) => {
+        if (ev.target === bd) closeResetCheckinConfirmModal();
+      });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && bd && !bd.hidden) {
+          closeResetCheckinConfirmModal();
+        }
+      });
+    }
+    if (bd.parentNode !== host) {
+      host.appendChild(bd);
+    }
+
+    bd.innerHTML = `
+      <div class="hsd-reset-checkin-dialog">
+        <div class="hsd-reset-checkin-badge-row">
+          <span class="hsd-reset-checkin-room-pill">📍 ห้อง ${meta.roomId} (${escHtml(meta.roomCode)}) · คาบ ${escHtml(meta.modCode)}</span>
+          <button type="button" class="hsd-reset-checkin-x" id="hsdResetCheckinCloseX" aria-label="ปิดหน้าต่าง">✕</button>
+        </div>
+        <h3 class="hsd-reset-checkin-title">🔄 ล้าง Cache การ Check-in ห้อง ${escHtml(meta.roomCode)}?</h3>
+        <p class="hsd-reset-checkin-lead">
+          เมื่อกดยืนยัน ระบบจะรีเซ็ตสถานะเช็คชื่อของ <strong>ห้อง ${meta.roomId} (${escHtml(meta.roomCode)})</strong> ทันที เพื่อให้นักศึกษาในห้องนี้สแกน QR / กรอกรหัส 3 ตัวท้ายเข้ามาใหม่ทั้งหมด
+        </p>
+        <ul class="hsd-reset-checkin-points">
+          <li><strong>เฉพาะห้องของคุณเท่านั้น:</strong> ล้างเฉพาะ <strong>ห้อง ${meta.roomId} (${escHtml(meta.roomCode)})</strong> (ขณะนี้ Check-in อยู่ <strong>${stats.joinedCount}/${stats.expectedCount} คน</strong> → กลับเป็น <code>0/${stats.expectedCount}</code>) <em>ไม่กระทบห้องอภิปรายกลุ่มอื่น</em></li>
+          <li><strong>ล้าง Cache ฝั่ง นศพ. อัตโนมัติ:</strong> มือถือ/แท็บเล็ตของ นศพ. ในห้องนี้จะถูกล้าง Cache การ Check-in เดิม และเด้งหน้าต่างให้สแกน Check-in ใหม่ทันที</li>
+          <li><strong>ไม่ลบคำตอบใบงาน:</strong> ข้อความที่ นศพ. พิมพ์ไว้ใน Worksheet จะยังคงปลอดภัยเหมือนเดิม</li>
+        </ul>
+        <div class="hsd-reset-checkin-actions">
+          <button type="button" class="btn sm" id="hsdResetCheckinCancelBtn">ยกเลิก</button>
+          <button type="button" class="btn sm is-reset-checkin-confirm" id="hsdResetCheckinConfirmBtn">
+            🔄 ยืนยันล้าง Check-in ห้อง ${escHtml(meta.roomCode)} ให้สแกนใหม่ทั้งหมด
+          </button>
+        </div>
+      </div>
+    `;
+
+    bd.hidden = false;
+
+    const cancelBtn = bd.querySelector("#hsdResetCheckinCancelBtn");
+    const closeX = bd.querySelector("#hsdResetCheckinCloseX");
+    const confirmBtn = bd.querySelector("#hsdResetCheckinConfirmBtn");
+    if (cancelBtn) cancelBtn.addEventListener("click", () => closeResetCheckinConfirmModal());
+    if (closeX) closeX.addEventListener("click", () => closeResetCheckinConfirmModal());
+    if (confirmBtn) {
+      confirmBtn.addEventListener("click", () => {
+        let res = null;
+        if (live && typeof live.resetRoomCheckin === "function") {
+          res = live.resetRoomCheckin(meta.roomId, meta.modCode);
+        }
+        clearStudentCheckin(meta.modCode, meta.roomId);
+        closeResetCheckinConfirmModal();
+        showFacultyResetToast(
+          `✓ ล้าง Cache การ Check-in ห้อง ${meta.roomId} (${meta.roomCode}) เรียบร้อย — นศพ. ในห้องนี้ต้องสแกน Check-in ใหม่ทั้งหมด`
+        );
+        if (typeof onResetDone === "function") {
+          try {
+            onResetDone(res);
+          } catch (_) {}
+        }
+      });
+      setTimeout(() => {
+        try {
+          confirmBtn.focus();
+        } catch (_) {}
+      }, 30);
+    }
+  }
+
   function exportRoomCheckinCsv(modCodeOpt, roomIdOpt) {
     if (typeof document === "undefined") return;
     const meta = getRoomMeta(modCodeOpt, roomIdOpt);
@@ -1053,6 +1191,7 @@
               <button type="button" class="btn sm primary" id="hsdQrZoomCopyBtn">📋 คัดลอกลิงก์ห้อง ${escHtml(meta.roomCode)}</button>
               <a class="btn sm teal" href="${escHtml(meta.studentQrUrl)}" target="_blank" rel="noopener">↗ เปิดหน้า Check-in นศพ. (${escHtml(meta.htmlFile || meta.pinCode)})</a>
               ${isFaculty ? `<button type="button" class="btn sm" id="hsdQrZoomCsvBtn">📥 ส่งออกเช็คชื่อ (.csv)</button>` : ""}
+              ${isFaculty ? `<button type="button" class="btn sm is-reset-checkin-danger" id="hsdQrZoomResetCheckinBtn">🔄 ล้าง Check-in ห้อง ${escHtml(meta.roomCode)} (สแกนใหม่)</button>` : ""}
               <button type="button" class="btn sm" id="hsdQrZoomCloseBtn">✕ ปิดหน้าต่าง (Esc)</button>
             </div>
           </div>
@@ -1076,6 +1215,12 @@
       if (csvBtn) {
         csvBtn.addEventListener("click", () => exportRoomCheckinCsv(meta.modCode, meta.roomId));
       }
+      const resetChkBtn = bd.querySelector("#hsdQrZoomResetCheckinBtn");
+      if (resetChkBtn) {
+        resetChkBtn.addEventListener("click", () => {
+          openResetCheckinConfirmModal(meta.modCode, meta.roomId, () => renderDialog());
+        });
+      }
       bd.querySelectorAll("#hsdQrZoomCloseBtn, #hsdQrZoomTopCloseBtn").forEach((btn) => {
         btn.addEventListener("click", () => closeRoomQrZoomModal());
       });
@@ -1086,9 +1231,16 @@
 
     if (qrModalUnsub) qrModalUnsub();
     if (live && typeof live.on === "function") {
-      qrModalUnsub = live.on("presence", () => {
+      const u1 = live.on("presence", () => {
         if (!bd.hidden) renderDialog();
       });
+      const u2 = live.on("checkin_reset", () => {
+        if (!bd.hidden) renderDialog();
+      });
+      qrModalUnsub = () => {
+        u1();
+        u2();
+      };
     }
   }
 
@@ -1677,7 +1829,22 @@
           dlPdfA.setAttribute("aria-disabled", "true");
         }
 
-        acts.append(openRoomBtn, newTabRoomA, qrZoomBtn, dlPdfA);
+        acts.append(openRoomBtn, newTabRoomA, qrZoomBtn);
+        if (isFaculty) {
+          const rstRoomBtn = document.createElement("button");
+          rstRoomBtn.type = "button";
+          rstRoomBtn.className = "hsd-srp-act-btn is-reset-checkin-btn";
+          rstRoomBtn.disabled = isLockedOut;
+          rstRoomBtn.textContent = "🔄 ล้าง Check-in";
+          rstRoomBtn.title = `ล้าง Cache การ Check-in เฉพาะห้อง ${rId} (${meta.roomCode}) ให้นักศึกษาสแกนใหม่ทั้งหมด`;
+          rstRoomBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            if (isLockedOut) return;
+            openResetCheckinConfirmModal(modCode, rId, () => syncSectionUI());
+          });
+          acts.appendChild(rstRoomBtn);
+        }
+        acts.appendChild(dlPdfA);
         card.appendChild(acts);
         grid.appendChild(card);
       });
@@ -2506,12 +2673,6 @@
       }
 
       saveStepPinPrefillStudent(stuDone);
-      if (root && root.RACM_PORTAL_API && typeof root.RACM_PORTAL_API.applyMyStudent === "function") {
-        try {
-          root.RACM_PORTAL_API.applyMyStudent(stuDone, true);
-        } catch (_) {}
-      }
-
       const assignedRoom = clampRoomId(stuDone.disc || roomId);
       if (assignedRoom !== roomId) {
         const recOther = markStudentCheckedIn(modCode, assignedRoom, stuDone, 0, { skipLiveBroadcast: true });
@@ -2519,12 +2680,22 @@
           window.location.href = buildStudentCheckinHrefWithSid(modCode, assignedRoom, stuDone);
           return;
         }
+        if (root && root.RACM_PORTAL_API && typeof root.RACM_PORTAL_API.applyMyStudent === "function") {
+          try {
+            root.RACM_PORTAL_API.applyMyStudent(stuDone, true);
+          } catch (_) {}
+        }
         if (typeof cfg.onCompletedCheckin === "function") {
           cfg.onCompletedCheckin(stuDone, assignedRoom, 0, recOther);
         }
         return;
       }
       const rec = markStudentCheckedIn(modCode, roomId, stuDone, 0);
+      if (root && root.RACM_PORTAL_API && typeof root.RACM_PORTAL_API.applyMyStudent === "function") {
+        try {
+          root.RACM_PORTAL_API.applyMyStudent(stuDone, true);
+        } catch (_) {}
+      }
       if (typeof cfg.onCompletedCheckin === "function") {
         cfg.onCompletedCheckin(stuDone, roomId, 0, rec);
       }
@@ -2753,6 +2924,8 @@
     matchStudentsBy3DigitPin,
     getLiveRoomJoinedStats,
     exportRoomCheckinCsv,
+    openResetCheckinConfirmModal,
+    closeResetCheckinConfirmModal,
     openRoomQrZoomModal,
     closeRoomQrZoomModal,
     buildSixRoomPptsSectionDOM,

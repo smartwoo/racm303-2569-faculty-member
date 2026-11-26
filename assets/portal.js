@@ -20773,13 +20773,16 @@
       LIVE.requestRoomSnapshot();
     }
     let modal = $("hsdKahootLobbyModal");
+    const host = document.fullscreenElement || document.body;
     if (!modal) {
       modal = make("div", null, "hsd-kahoot-modal-backdrop hsd-no-print");
       modal.id = "hsdKahootLobbyModal";
       modal.addEventListener("click", (ev) => {
         if (ev.target === modal) closeHsdKahootLobbyModal();
       });
-      document.body.appendChild(modal);
+    }
+    if (modal.parentNode !== host) {
+      host.appendChild(modal);
     }
     modal.hidden = false;
     refreshHsdKahootLobbyModalDOM();
@@ -20855,6 +20858,27 @@
       csvBtn.type = "button";
       csvBtn.addEventListener("click", () => window.RACM_HSD_ROOM_QR.exportRoomCheckinCsv(activeMod, st.roomId));
       hRight.appendChild(csvBtn);
+    }
+
+    if (
+      ROLE === "faculty" &&
+      window.RACM_HSD_ROOM_QR &&
+      typeof window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal === "function"
+    ) {
+      const rstLobbyBtn = make(
+        "button",
+        `🔄 ล้าง Check-in ห้อง ${roomCode} (ให้สแกนใหม่)`,
+        "btn sm hsd-km-reset-checkin-btn"
+      );
+      rstLobbyBtn.type = "button";
+      rstLobbyBtn.title = `ล้าง Cache การ Check-in ห้อง ${roomCode} ให้นักศึกษาสแกน QR / กรอกรหัส 3 ตัวท้ายใหม่ทั้งหมด`;
+      rstLobbyBtn.addEventListener("click", () => {
+        window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal(activeMod, st.roomId, () => {
+          refreshHsdKahootLobbyModalDOM();
+          syncLiveConnectionAndPresenceDOM();
+        });
+      });
+      hRight.appendChild(rstLobbyBtn);
     }
 
     const closeBtn = make("button", "✕ ปิดหน้าต่าง", "btn sm is-modal-top-close");
@@ -21011,6 +21035,7 @@
     liveSubscriptionsBound = true;
     LIVE.on("timer", (snap) => syncTimerWidgetDOM(snap));
     LIVE.on("presence", () => syncLiveConnectionAndPresenceDOM());
+    LIVE.on("checkin_reset", () => syncLiveConnectionAndPresenceDOM());
     LIVE.on("connection", () => syncLiveConnectionAndPresenceDOM());
     LIVE.on("responses", (ev) => {
       if (ROLE === "faculty" && typeof refreshLiveWallByQuestionId === "function") {
@@ -21087,6 +21112,23 @@
 
     // Live Lobby Presence Button
     left.appendChild(buildKahootLobbyTriggerBtnDOM("hsd-kahoot-lobby-btn"));
+
+    if (
+      ROLE === "faculty" &&
+      window.RACM_HSD_ROOM_QR &&
+      typeof window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal === "function"
+    ) {
+      const rstTopBtn = make("button", `🔄 ล้าง Check-in ห้อง ${curRoom}`, "hsd-tbtn is-reset-checkin-tbtn");
+      rstTopBtn.type = "button";
+      rstTopBtn.title = "ล้าง Cache การ Check-in ห้องนี้ให้นักศึกษาสแกน QR / กรอกรหัส 3 ตัวท้ายเข้ามาใหม่ทั้งหมด";
+      rstTopBtn.addEventListener("click", () => {
+        const effMod = state.hsdModule && state.hsdModule !== "ALL" ? state.hsdModule : "HS1";
+        window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal(effMod, curRoom, () => {
+          syncLiveConnectionAndPresenceDOM();
+        });
+      });
+      left.appendChild(rstTopBtn);
+    }
 
     if (ROLE === "faculty") {
       const refreshRoomBtn = make("button", "🔄 รีเฟรชสถานะสด", "hsd-tbtn");
@@ -28444,6 +28486,22 @@
 
     if (isInteractive) {
       const rHeadActions = make("div", null, "ppt-ok-roster-head-actions hsd-no-print");
+      if (
+        ROLE === "faculty" &&
+        window.RACM_HSD_ROOM_QR &&
+        typeof window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal === "function"
+      ) {
+        const rstOkBtn = make("button", "🔄 ล้าง Check-in ใหม่", "ppt-ok-reset-checkin-btn");
+        rstOkBtn.type = "button";
+        rstOkBtn.title = `ล้าง Cache การ Check-in ห้อง ${st.roomDef.roomCode} ให้นักศึกษาสแกน QR / กรอกรหัส 3 ตัวท้ายใหม่ทั้งหมด`;
+        rstOkBtn.addEventListener("click", () => {
+          const effMod = cardEl.dataset.pptOkMod || (state.hsdModule !== "ALL" ? state.hsdModule : "HS1");
+          window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal(effMod, st.roomId, () => {
+            syncLiveConnectionAndPresenceDOM();
+          });
+        });
+        rHeadActions.appendChild(rstOkBtn);
+      }
       if (typeof openHsdKahootLobbyModal === "function") {
         const fullLobbyBtn = make("button", "ดูสถานะ Live Lobby ↗", "btn sm");
         fullLobbyBtn.type = "button";
@@ -28657,6 +28715,17 @@
         csvBtn.title = `ดาวน์โหลดรายชื่อนักศึกษาที่ออนไลน์ในห้อง ${roomCode} (.csv)`;
         csvBtn.addEventListener("click", () => qrApi.exportRoomCheckinCsv(mod.code, roomId));
         qrActions.appendChild(csvBtn);
+      }
+      if (ROLE === "faculty" && qrApi && typeof qrApi.openResetCheckinConfirmModal === "function") {
+        const rstQrBtn = make("button", "🔄 ล้าง Check-in", "btn sm is-reset-checkin-danger");
+        rstQrBtn.type = "button";
+        rstQrBtn.title = `ล้าง Cache การ Check-in ห้อง ${roomCode} ให้นักศึกษาสแกนใหม่ทั้งหมด`;
+        rstQrBtn.addEventListener("click", () => {
+          qrApi.openResetCheckinConfirmModal(mod.code, roomId, () => {
+            syncLiveConnectionAndPresenceDOM();
+          });
+        });
+        qrActions.appendChild(rstQrBtn);
       }
       const goQ1Btn = make("button", "▶ เริ่มโจทย์ →", "ppt-ok-join-cta");
       goQ1Btn.type = "button";
@@ -33264,6 +33333,17 @@
     if (LIVE) {
       tbRight.appendChild(buildKahootLobbyTriggerBtnDOM("ppt-title-btn is-kahoot-title-btn"));
       if (ROLE === "faculty") {
+        if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal === "function") {
+          const tbRstBtn = make("button", "🔄 ล้าง Check-in", "ppt-title-btn is-reset-title-btn");
+          tbRstBtn.type = "button";
+          tbRstBtn.title = `ล้าง Cache การ Check-in ห้อง ${effTitleRoomId} ให้นักศึกษาสแกน QR / กรอกรหัส 3 ตัวท้ายใหม่ทั้งหมด`;
+          tbRstBtn.addEventListener("click", () => {
+            window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal(cur.mod.code, effTitleRoomId, () => {
+              syncLiveConnectionAndPresenceDOM();
+            });
+          });
+          tbRight.appendChild(tbRstBtn);
+        }
         const tbRefreshBtn = make("button", "🔄 รีเฟรชสด", "ppt-title-btn");
         tbRefreshBtn.type = "button";
         tbRefreshBtn.title = "อัปเดตสถานะนักศึกษาออนไลน์ใน Live Lobby และคำตอบล่าสุดทันที (โดยไม่บังคับเลื่อนสไลด์นักศึกษา)";
@@ -34099,6 +34179,18 @@
           window.RACM_HSD_ROOM_QR.openRoomQrZoomModal(effModForGate, effRoomForGate);
         });
 
+        const rstRibbonBtn = make("button", `🔄 ล้าง Check-in ห้อง ${rMeta.roomId}`, "hsd-drr-link is-reset-drr-btn");
+        rstRibbonBtn.type = "button";
+        rstRibbonBtn.style.cursor = "pointer";
+        rstRibbonBtn.title = `ล้าง Cache การ Check-in ห้อง ${rMeta.roomCode} ให้นักศึกษาสแกนใหม่ทั้งหมด`;
+        rstRibbonBtn.addEventListener("click", () => {
+          if (typeof window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal === "function") {
+            window.RACM_HSD_ROOM_QR.openResetCheckinConfirmModal(effModForGate, effRoomForGate, () => {
+              syncLiveConnectionAndPresenceDOM();
+            });
+          }
+        });
+
         const dlPdfRoomBtn = make("a", `⬇ .PDF ห้อง ${rMeta.roomId} (16:9)`, "hsd-drr-btn");
         dlPdfRoomBtn.href = rMeta.staticRoomPdfHref;
         dlPdfRoomBtn.setAttribute("download", rMeta.roomPdfFileName);
@@ -34107,7 +34199,7 @@
         dlPdfCentralBtn.href = rMeta.centralModulePdfHref;
         dlPdfCentralBtn.setAttribute("download", rMeta.centralModulePdfFileName);
 
-        rightWrap.append(roomSel, qrZoomBtn, dlPdfRoomBtn, dlPdfCentralBtn);
+        rightWrap.append(roomSel, qrZoomBtn, rstRibbonBtn, dlPdfRoomBtn, dlPdfCentralBtn);
         if (window.RACM_HSD_ROOM_PAGE) {
           const backPortalLink = make("a", "← หน้าหลักพอร์ทัลรวม", "hsd-drr-link");
           backPortalLink.href = "./";
