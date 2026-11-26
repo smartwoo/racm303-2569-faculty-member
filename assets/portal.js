@@ -8441,12 +8441,12 @@
         actRow.append(filterBtn, icsLink);
         if (site.id === 1) {
           const facBtn = make("a", tr("🎛️ Facilitator จอใหญ่ (กุฉินารายณ์) ↗", "🎛️ Kuchinarai Facilitator ↗"), "btn sm primary");
-          facBtn.href = "kuchinarai/facilitator.html";
+          facBtn.href = "kuchinarai/facilitator.html?v=14";
           facBtn.target = "_blank";
           facBtn.rel = "noopener";
           actRow.appendChild(facBtn);
           const kuchiBtn = make("a", tr("🚂 ภาพรวม 21 คน ↗", "🚂 21-Member Overview ↗"), "btn sm");
-          kuchiBtn.href = "kuchinarai/";
+          kuchiBtn.href = "kuchinarai/?v=14";
           kuchiBtn.target = "_blank";
           kuchiBtn.rel = "noopener";
           actRow.appendChild(kuchiBtn);
@@ -8758,12 +8758,12 @@
       else actRow.append(lockBtn, pdfSiteLink, printSiteBtn, icsLink);
       if (curSite.id === 1) {
         const facMapBtn = make("a", tr("🎛️ Facilitator จอใหญ่ (กุฉินารายณ์) ↗", "🎛️ Kuchinarai Facilitator ↗"), "btn sm primary");
-        facMapBtn.href = "kuchinarai/facilitator.html";
+        facMapBtn.href = "kuchinarai/facilitator.html?v=14";
         facMapBtn.target = "_blank";
         facMapBtn.rel = "noopener";
         actRow.appendChild(facMapBtn);
         const kuchiMapBtn = make("a", tr("🚂 ภาพรวม 21 คน ↗", "🚂 21-Member Overview ↗"), "btn sm");
-        kuchiMapBtn.href = "kuchinarai/";
+        kuchiMapBtn.href = "kuchinarai/?v=14";
         kuchiMapBtn.target = "_blank";
         kuchiMapBtn.rel = "noopener";
         actRow.appendChild(kuchiMapBtn);
