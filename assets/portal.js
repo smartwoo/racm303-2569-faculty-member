@@ -19818,11 +19818,21 @@
     hasStarted: false,
     hasConfigured: false,
     timedOutInCurrentRun: false,
+    configuredDurationSec: 300,
     durationSec: 300,
     baseRemainingMs: 300000,
     anchorPerfNow: 0,
     chimePlayed: false,
     intervalId: 0
+  };
+
+  const floatingTimerPopState = {
+    el: null,
+    triggerEl: null,
+    preferDropUp: false,
+    outsideHandler: null,
+    relayoutHandler: null,
+    isTypingDraft: false
   };
 
   function playLocalTimerChime() {
@@ -19881,6 +19891,7 @@
         running: stuLocalTimer.running && remMs > 0,
         remainingMs: remMs,
         durationSec: stuLocalTimer.durationSec || 300,
+        configuredDurationSec: stuLocalTimer.configuredDurationSec || stuLocalTimer.durationSec || 300,
         formatted: `${mm}:${ss}`,
         pct: Math.max(0, Math.min(100, (remMs / durMs) * 100)),
         isWarning: Boolean(stuLocalTimer.running) && totalSec > 15 && totalSec <= 60,
@@ -19893,7 +19904,16 @@
     if (snapOpt) return snapOpt;
     return LIVE
       ? LIVE.getTimerSnapshot()
-      : { running: false, hasStarted: false, hasConfigured: false, durationSec: 300, formatted: "05:00", pct: 100 };
+      : {
+          running: false,
+          hasStarted: false,
+          hasConfigured: false,
+          configuredDurationSec: 300,
+          durationSec: 300,
+          remainingMs: 300000,
+          formatted: "05:00",
+          pct: 100
+        };
   }
 
   const slideTimerCtrl = {
@@ -19903,19 +19923,22 @@
         LIVE.clearTimeUpAlert();
       }
       if (stuLocalTimer.timedOutInCurrentRun) {
+        const sec = stuLocalTimer.configuredDurationSec || 300;
         stuLocalTimer.timedOutInCurrentRun = false;
         stuLocalTimer.hasStarted = false;
         stuLocalTimer.hasConfigured = false;
-        stuLocalTimer.baseRemainingMs = (stuLocalTimer.durationSec || 300) * 1000;
+        stuLocalTimer.durationSec = sec;
+        stuLocalTimer.baseRemainingMs = sec * 1000;
       }
       syncTimerWidgetDOM();
     },
     start(durationSec) {
-      const sec = Math.max(5, Math.min(5400, Math.round(Number(durationSec) || 300)));
+      const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || 300)));
       if (ROLE === "faculty" && LIVE) {
         LIVE.startTimer(sec, state.hsdLastSelectedQId || "", "จับเวลาอภิปรายกลุ่มย่อย");
       } else {
         stuLocalTimer.active = true;
+        stuLocalTimer.configuredDurationSec = sec;
         stuLocalTimer.durationSec = sec;
         stuLocalTimer.baseRemainingMs = sec * 1000;
         stuLocalTimer.anchorPerfNow = performance.now();
@@ -19929,7 +19952,7 @@
       syncTimerWidgetDOM();
     },
     setReady(durationSec) {
-      const sec = Math.max(5, Math.min(5400, Math.round(Number(durationSec) || 300)));
+      const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || 300)));
       if (ROLE === "faculty" && LIVE) {
         LIVE.resetTimer(sec, true);
       } else {
@@ -19938,6 +19961,7 @@
         stuLocalTimer.hasStarted = false;
         stuLocalTimer.hasConfigured = true;
         stuLocalTimer.timedOutInCurrentRun = false;
+        stuLocalTimer.configuredDurationSec = sec;
         stuLocalTimer.durationSec = sec;
         stuLocalTimer.baseRemainingMs = sec * 1000;
         stuLocalTimer.chimePlayed = false;
@@ -19951,6 +19975,7 @@
         const curSnap = getEffectiveSlideTimerSnapshot();
         if (!stuLocalTimer.active) {
           stuLocalTimer.active = true;
+          stuLocalTimer.configuredDurationSec = curSnap.configuredDurationSec || curSnap.durationSec || 300;
           stuLocalTimer.durationSec = curSnap.durationSec || 300;
           stuLocalTimer.baseRemainingMs =
             curSnap.remainingMs !== undefined ? curSnap.remainingMs : stuLocalTimer.durationSec * 1000;
@@ -19960,7 +19985,9 @@
           stuLocalTimer.baseRemainingMs = rem;
           stuLocalTimer.running = false;
         } else {
-          stuLocalTimer.baseRemainingMs = rem > 0 ? rem : (stuLocalTimer.durationSec || 300) * 1000;
+          const fallbackSec = stuLocalTimer.configuredDurationSec || stuLocalTimer.durationSec || 300;
+          stuLocalTimer.baseRemainingMs = rem > 0 ? rem : fallbackSec * 1000;
+          if (rem <= 0) stuLocalTimer.durationSec = fallbackSec;
           stuLocalTimer.anchorPerfNow = performance.now();
           stuLocalTimer.running = true;
           stuLocalTimer.hasStarted = true;
@@ -19973,21 +20000,23 @@
       syncTimerWidgetDOM();
     },
     addSeconds(deltaSec) {
+      const delta = Number.isFinite(Number(deltaSec)) ? Number(deltaSec) : 60;
       if (ROLE === "faculty" && LIVE) {
-        LIVE.addTimerSeconds(deltaSec);
+        LIVE.addTimerSeconds(delta);
       } else {
         const curSnap = getEffectiveSlideTimerSnapshot();
         if (!stuLocalTimer.active) {
           stuLocalTimer.active = true;
+          stuLocalTimer.configuredDurationSec = curSnap.configuredDurationSec || curSnap.durationSec || 300;
           stuLocalTimer.durationSec = curSnap.durationSec || 300;
           stuLocalTimer.baseRemainingMs =
             curSnap.remainingMs !== undefined ? curSnap.remainingMs : stuLocalTimer.durationSec * 1000;
         }
         const rem = getStuLocalTimerRemainingMs();
-        const nextMs = Math.max(0, Math.min(5400 * 1000, rem + (Number(deltaSec) || 60) * 1000));
+        const nextMs = Math.max(0, Math.min(10800 * 1000, rem + delta * 1000));
         stuLocalTimer.baseRemainingMs = nextMs;
         stuLocalTimer.anchorPerfNow = performance.now();
-        stuLocalTimer.durationSec = Math.max(stuLocalTimer.durationSec, Math.ceil(nextMs / 1000) || 60);
+        stuLocalTimer.durationSec = Math.max(stuLocalTimer.durationSec, Math.ceil(nextMs / 1000) || 1);
         if (nextMs > 0) {
           stuLocalTimer.chimePlayed = false;
           stuLocalTimer.hasConfigured = true;
@@ -19996,9 +20025,8 @@
       }
       syncTimerWidgetDOM();
     },
-    reset() {
-      const snap = getEffectiveSlideTimerSnapshot();
-      const dur = snap.durationSec || 300;
+    reset(defaultSecOpt) {
+      const dur = Math.max(1, Math.min(10800, Math.round(Number(defaultSecOpt) || 300)));
       if (ROLE === "faculty" && LIVE) {
         LIVE.resetTimer(dur, false);
       } else {
@@ -20007,6 +20035,7 @@
         stuLocalTimer.hasStarted = false;
         stuLocalTimer.hasConfigured = false;
         stuLocalTimer.timedOutInCurrentRun = false;
+        stuLocalTimer.configuredDurationSec = dur;
         stuLocalTimer.durationSec = dur;
         stuLocalTimer.baseRemainingMs = dur * 1000;
         stuLocalTimer.chimePlayed = false;
@@ -20025,15 +20054,12 @@
 
   function syncTimerWidgetDOM(snap) {
     const s = getEffectiveSlideTimerSnapshot(snap);
-    const isIdleUnset = !s.running && !s.isTimeUp && !s.hasConfigured && !s.hasStarted;
 
     document.querySelectorAll("[data-ppt-mirror-timer]").forEach((el) => {
       const hasCaret = el.dataset.pptHasCaret === "1";
       const suffix = hasCaret ? " ▾" : "";
       if (s.isTimeUp) {
         el.textContent = `⏱ หมดเวลา 00:00${suffix}`;
-      } else if (isIdleUnset) {
-        el.textContent = hasCaret ? "⏱ Set Timer ▾" : "⏱ Set Timer";
       } else {
         el.textContent = `⏱ ${s.formatted}${suffix}`;
       }
@@ -20051,10 +20077,8 @@
       el.textContent = s.isTimeUp
         ? "⏰ หมดเวลาอภิปราย!"
         : s.running
-        ? "⏱ กำลังนับถอยหลังสด"
-        : s.hasConfigured || s.hasStarted
-        ? `⏱ ตั้งเวลาไว้ ${s.formatted} (กด ▶ เพื่อเริ่ม)`
-        : "⏱ Set Timer · ตั้งเวลานับถอยหลัง";
+        ? `⏱ กำลังนับถอยหลังสด (${s.formatted})`
+        : `⏱ เวลาที่ตั้ง ${s.formatted} · กด ▶ เริ่มนับ`;
     });
 
     document.querySelectorAll("[data-ppt-timer-playbtn]").forEach((el) => {
@@ -20074,6 +20098,10 @@
       el.classList.toggle("is-timeup", Boolean(s.isTimeUp));
     });
 
+    if (floatingTimerPopState.el && typeof floatingTimerPopState.el._syncDynamicMeta === "function") {
+      floatingTimerPopState.el._syncDynamicMeta();
+    }
+
     const w = $("hsdTimerWidget");
     const clk = $("hsdTimerClock");
     const sub = $("hsdTimerSub");
@@ -20091,9 +20119,7 @@
         ? "หมดเวลาอภิปราย!"
         : s.running
         ? "กำลังจับเวลาสด"
-        : s.hasConfigured || s.hasStarted
-        ? "พร้อมเริ่มนับเวลา"
-        : "กดตั้งเวลา (Set Timer)";
+        : "คลิกตั้งเวลา · กด ▶ เริ่ม";
     }
     if (bar) {
       bar.style.width = `${s.pct}%`;
@@ -20807,6 +20833,12 @@
     const right = make("div", null, "hsd-live-right");
     const timerW = make("div", null, "hsd-timer-widget");
     timerW.id = "hsdTimerWidget";
+    timerW.style.cursor = "pointer";
+    timerW.title = "คลิกเพื่อพิมพ์/ตั้งเวลา นาที:วินาที (±1 นาที / ±15 วินาที)";
+    timerW.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openFloatingSlideTimerPopover(timerW, false);
+    });
     const tSub = make("span", tr("นาฬิกาห้องกลุ่ม", "Room Timer"), "hsd-timer-sub");
     tSub.id = "hsdTimerSub";
     const tClk = make("span", "05:00", "hsd-timer-clock");
@@ -21769,6 +21801,11 @@
       );
 
       if (e.key === "Escape") {
+        if (floatingTimerPopState.el && !floatingTimerPopState.el.hidden) {
+          e.preventDefault();
+          closeFloatingSlideTimerPopover();
+          return;
+        }
         if (driveModalOpen) {
           closeHsdGoogleDrivePickerModal();
           return;
@@ -23273,7 +23310,7 @@
       const tp = String(ae.type || "text").toLowerCase();
       if (["range", "checkbox", "radio", "button", "submit", "file", "color"].includes(tp)) return false;
     }
-    return Boolean(ae.closest("#pptPresentationOverlay, .hsd-slide-shell"));
+    return Boolean(ae.closest("#pptPresentationOverlay, .hsd-slide-shell, .ppt-slide-timer-popover"));
   }
 
   function getPptViewportEnv() {
@@ -23284,7 +23321,8 @@
     const rawVvH = vv && vvScale <= 1.06 ? Math.round(vv.height) : layoutH;
     const rawOffsetTop = vv && vvScale <= 1.06 ? Math.max(0, Math.round(vv.offsetTop || 0)) : 0;
     const isCoarse = isCoarseTouchDevice();
-    const editFocused = isEditableElementFocusedInOverlay();
+    const inTimerPop = Boolean(document.activeElement && document.activeElement.closest(".ppt-slide-timer-popover"));
+    const editFocused = isEditableElementFocusedInOverlay() && !inTimerPop;
     const screenH = (window.screen && window.screen.height) || layoutH;
     const heightDrop = layoutH - (vv ? vv.height : layoutH);
     // Detect iOS-style overlay keyboard (layout viewport stays tall while visualViewport shrinks > 68px)
@@ -23295,8 +23333,9 @@
     const h = isOverlayKbd ? rawVvH : layoutH;
     const offsetTop = isOverlayKbd ? rawOffsetTop : 0;
     const isKbdOpen = Boolean(
-      (editFocused && (isCoarse || h < 580 || heightDrop > 85 || screenH - layoutH > 220)) ||
-      (isCoarse && vvScale <= 1.06 && heightDrop > 135)
+      !inTimerPop &&
+        ((editFocused && (isCoarse || h < 580 || heightDrop > 85 || screenH - layoutH > 220)) ||
+          (isCoarse && vvScale <= 1.06 && heightDrop > 135))
     );
     const aspect = h > 0 ? w / h : 1.77;
     const useCompactDock = Boolean(isKbdOpen || isCoarse || w < 1180 || h < 680);
@@ -25699,6 +25738,7 @@
     return (ev) => {
       ev.stopPropagation();
       const willOpen = popoverEl.hidden;
+      closeFloatingSlideTimerPopover();
       document.querySelectorAll(".ppt-slide-timer-popover, .hsd-snap-popover").forEach((p) => {
         if (p !== popoverEl) p.hidden = true;
       });
@@ -25718,54 +25758,211 @@
     };
   }
 
-  function buildSlideTimerPopoverDOM(isDropUp) {
-    const pop = make("div", null, "ppt-slide-timer-popover hsd-no-print");
+  function closeFloatingSlideTimerPopover() {
+    const st = floatingTimerPopState;
+    if (st.triggerEl) {
+      st.triggerEl.classList.remove("is-timer-pop-open");
+      st.triggerEl.setAttribute("aria-expanded", "false");
+    }
+    st.triggerEl = null;
+    st.isTypingDraft = false;
+    if (st.el) {
+      st.el.hidden = true;
+    }
+    if (st.outsideHandler) {
+      document.removeEventListener("pointerdown", st.outsideHandler, true);
+      st.outsideHandler = null;
+    }
+    if (st.relayoutHandler) {
+      window.removeEventListener("resize", st.relayoutHandler);
+      window.removeEventListener("scroll", st.relayoutHandler, true);
+      document.removeEventListener("fullscreenchange", st.relayoutHandler);
+      document.removeEventListener("webkitfullscreenchange", st.relayoutHandler);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", st.relayoutHandler);
+        window.visualViewport.removeEventListener("scroll", st.relayoutHandler);
+      }
+      st.relayoutHandler = null;
+    }
+  }
+
+  function positionFloatingSlideTimerPopover() {
+    const st = floatingTimerPopState;
+    const pop = st.el;
+    if (!pop || pop.hidden) return;
+
+    const host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
+    if (pop.parentElement !== host) {
+      host.appendChild(pop);
+    }
+
+    let trig = st.triggerEl;
+    if (!trig || !trig.isConnected) {
+      const ov = $("pptPresentationOverlay");
+      const activeScope = ov && !ov.hidden ? ov : document;
+      trig =
+        activeScope.querySelector("[data-ppt-mirror-timer]") ||
+        $("hsdTimerWidget") ||
+        null;
+      if (trig) st.triggerEl = trig;
+    }
+
+    const isDarkCtx =
+      document.documentElement.getAttribute("data-theme") === "dark" ||
+      Boolean(trig && trig.closest(".ppt-fs-control-bar"));
+    pop.classList.toggle("is-dark-pop", isDarkCtx);
+
+    const vv = window.visualViewport;
+    const vw = vv ? vv.width : window.innerWidth || document.documentElement.clientWidth || 1280;
+    const vh = vv ? vv.height : window.innerHeight || document.documentElement.clientHeight || 800;
+    const vLeft = vv ? vv.offsetLeft || 0 : 0;
+    const vTop = vv ? vv.offsetTop || 0 : 0;
+    const margin = 8;
+
+    pop.style.maxHeight = `${Math.max(220, Math.round(vh - margin * 2))}px`;
+    const pRect = pop.getBoundingClientRect();
+    const popW = pRect.width || 356;
+    const popH = pRect.height || 310;
+
+    let leftPx = vLeft + Math.max(margin, (vw - popW) / 2);
+    let topPx = vTop + Math.max(margin, Math.min(72, (vh - popH) / 2));
+
+    if (trig && trig.isConnected) {
+      const bRect = trig.getBoundingClientRect();
+      if (bRect.width > 0 || bRect.height > 0) {
+        leftPx = bRect.right - popW;
+        leftPx = Math.max(vLeft + margin, Math.min(vLeft + vw - popW - margin, leftPx));
+
+        const spaceBelow = vTop + vh - bRect.bottom - margin;
+        const spaceAbove = bRect.top - vTop - margin;
+        const shouldDropUp =
+          (st.preferDropUp && spaceAbove >= Math.min(popH, 200)) ||
+          (spaceBelow < popH + 8 && spaceAbove > spaceBelow);
+
+        if (shouldDropUp) {
+          topPx = Math.max(vTop + margin, bRect.top - popH - 8);
+        } else {
+          topPx = Math.min(vTop + vh - popH - margin, Math.max(vTop + margin, bRect.bottom + 8));
+        }
+      }
+    }
+
+    pop.style.left = `${Math.round(leftPx)}px`;
+    pop.style.top = `${Math.round(topPx)}px`;
+  }
+
+  function ensureFloatingSlideTimerPopoverDOM() {
+    if (floatingTimerPopState.el) return floatingTimerPopState.el;
+
+    const pop = make("div", null, "ppt-slide-timer-popover is-floating-portal-pop hsd-no-print");
     pop.hidden = true;
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", "ตั้งเวลา Countdown นาทีและวินาที");
     pop.addEventListener("click", (ev) => ev.stopPropagation());
     pop.addEventListener("pointerdown", (ev) => ev.stopPropagation());
 
     const head = make("div", null, "ppt-stp-head");
-    const hTitle = make("span", "⏱ ตั้งเวลา Countdown ในสไลด์");
+    const hTitle = make("span", "⏱ เวลาที่ตั้ง 05:00 · กด ▶ เริ่มนับ");
     hTitle.setAttribute("data-ppt-timer-status", "1");
     const closeBtn = make("button", "✕", "ppt-stp-close");
     closeBtn.type = "button";
-    closeBtn.addEventListener("click", () => {
-      pop.hidden = true;
-    });
+    closeBtn.title = "ปิดหน้าต่างตั้งเวลา (Esc)";
+    closeBtn.addEventListener("click", () => closeFloatingSlideTimerPopover());
     head.append(hTitle, closeBtn);
     pop.appendChild(head);
 
-    // Custom MM : SS Setter Row
-    const customRow = make("div", null, "ppt-stp-custom-row");
-    const minus1m = make("button", "−1m", "ppt-stp-step-btn");
+    // Dual Minute & Second Setter (Typeable MM : SS + ±1m & ±15s Steppers)
+    const dualGrid = make("div", null, "ppt-stp-dual-setter");
+
+    // 1. Minutes Box (±1 min)
+    const minBox = make("div", null, "ppt-stp-unit-box");
+    const minLbl = make("span", "นาที (MIN)", "ppt-stp-unit-lbl");
+    const minCtrl = make("div", null, "ppt-stp-unit-ctrl");
+    const minus1m = make("button", "−1m", "ppt-stp-adj-btn");
     minus1m.type = "button";
+    minus1m.title = "ลดเวลาทีละ 1 นาที";
+    minus1m.setAttribute("aria-label", "ลดเวลา 1 นาที");
 
     const minIn = document.createElement("input");
-    minIn.type = "number";
+    minIn.type = "text";
+    minIn.inputMode = "numeric";
+    minIn.pattern = "[0-9]*";
+    minIn.maxLength = 3;
     minIn.className = "ppt-stp-num-input";
-    minIn.min = "0";
-    minIn.max = "90";
-    minIn.value = "5";
-    minIn.setAttribute("aria-label", "ตั้งนาที");
+    minIn.value = "05";
+    minIn.setAttribute("aria-label", "พิมพ์จำนวนนาที");
+
+    const plus1m = make("button", "+1m", "ppt-stp-adj-btn");
+    plus1m.type = "button";
+    plus1m.title = "เพิ่มเวลาทีละ 1 นาที";
+    plus1m.setAttribute("aria-label", "เพิ่มเวลา 1 นาที");
+
+    minCtrl.append(minus1m, minIn, plus1m);
+    const minSub = make("span", "พิมพ์ได้ · ±1 นาที", "ppt-stp-unit-sub");
+    minBox.append(minLbl, minCtrl, minSub);
 
     const colon = make("span", ":", "ppt-stp-colon");
 
+    // 2. Seconds Box (±15 sec)
+    const secBox = make("div", null, "ppt-stp-unit-box");
+    const secLbl = make("span", "วินาที (SEC)", "ppt-stp-unit-lbl");
+    const secCtrl = make("div", null, "ppt-stp-unit-ctrl");
+    const minus15s = make("button", "−15s", "ppt-stp-adj-btn");
+    minus15s.type = "button";
+    minus15s.title = "ลดเวลาทีละ 15 วินาที";
+    minus15s.setAttribute("aria-label", "ลดเวลา 15 วินาที");
+
     const secIn = document.createElement("input");
-    secIn.type = "number";
+    secIn.type = "text";
+    secIn.inputMode = "numeric";
+    secIn.pattern = "[0-9]*";
+    secIn.maxLength = 2;
     secIn.className = "ppt-stp-num-input";
-    secIn.min = "0";
-    secIn.max = "59";
-    secIn.step = "5";
     secIn.value = "00";
-    secIn.setAttribute("aria-label", "ตั้งวินาที");
+    secIn.setAttribute("aria-label", "พิมพ์จำนวนวินาที");
 
-    const plus1m = make("button", "+1m", "ppt-stp-step-btn");
-    plus1m.type = "button";
+    const plus15s = make("button", "+15s", "ppt-stp-adj-btn");
+    plus15s.type = "button";
+    plus15s.title = "เพิ่มเวลาทีละ 15 วินาที";
+    plus15s.setAttribute("aria-label", "เพิ่มเวลา 15 วินาที");
 
-    const readCustomSec = () => {
-      const m = Math.max(0, Math.min(90, parseInt(minIn.value, 10) || 0));
-      const s = Math.max(0, Math.min(59, parseInt(secIn.value, 10) || 0));
-      return Math.max(5, m * 60 + s);
+    secCtrl.append(minus15s, secIn, plus15s);
+    const secSub = make("span", "พิมพ์ได้ · ±15 วินาที", "ppt-stp-unit-sub");
+    secBox.append(secLbl, secCtrl, secSub);
+
+    dualGrid.append(minBox, colon, secBox);
+    pop.appendChild(dualGrid);
+
+    const applyRow = make("div", null, "ppt-stp-apply-row");
+    const startCustomBtn = make("button", "▶ เริ่มนับถอยหลัง", "btn sm teal");
+    startCustomBtn.type = "button";
+
+    const setReadyBtn = make("button", "✓ ตั้งเวลาไว้", "btn sm");
+    setReadyBtn.type = "button";
+
+    const resetDefBtn = make("button", "↺ 05:00", "ppt-stp-step-btn");
+    resetDefBtn.type = "button";
+    resetDefBtn.title = "รีเซ็ตกลับค่าเริ่มต้น 5 นาที (05:00)";
+
+    applyRow.append(startCustomBtn, setReadyBtn, resetDefBtn);
+    pop.appendChild(applyRow);
+
+    const parseInputsTotalSec = () => {
+      const m = Math.max(0, Math.min(180, parseInt(minIn.value, 10) || 0));
+      const s = Math.max(0, Math.min(99, parseInt(secIn.value, 10) || 0));
+      return Math.min(10800, m * 60 + s);
+    };
+
+    const syncButtonsDisabledState = (totalSec) => {
+      startCustomBtn.disabled = totalSec <= 0;
+      setReadyBtn.disabled = totalSec <= 0;
+    };
+
+    const writeSecToInputs = (totalSec) => {
+      const clamped = Math.max(0, Math.min(10800, Math.round(totalSec) || 0));
+      minIn.value = String(Math.floor(clamped / 60)).padStart(2, "0");
+      secIn.value = String(clamped % 60).padStart(2, "0");
+      syncButtonsDisabledState(clamped);
     };
 
     const syncFromSnapshot = () => {
@@ -25773,55 +25970,129 @@
       const baseSec =
         snap.remainingMs !== undefined && snap.remainingMs > 0
           ? Math.ceil(snap.remainingMs / 1000)
-          : snap.durationSec || 300;
-      minIn.value = String(Math.floor(baseSec / 60));
-      secIn.value = String(baseSec % 60).padStart(2, "0");
+          : snap.configuredDurationSec || snap.durationSec || 300;
+      writeSecToInputs(baseSec);
+      floatingTimerPopState.isTypingDraft = false;
     };
     pop._syncInputs = syncFromSnapshot;
 
-    minus1m.addEventListener("click", () => {
-      const next = Math.max(10, readCustomSec() - 60);
-      minIn.value = String(Math.floor(next / 60));
-      secIn.value = String(next % 60).padStart(2, "0");
-    });
-    plus1m.addEventListener("click", () => {
-      const next = Math.min(5400, readCustomSec() + 60);
-      minIn.value = String(Math.floor(next / 60));
-      secIn.value = String(next % 60).padStart(2, "0");
-    });
-
-    const onEnterStart = (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        ev.stopPropagation();
-        slideTimerCtrl.start(readCustomSec());
-        pop.hidden = true;
+    const stepCustomOrLive = (deltaSec, isMinMinus) => {
+      const snap = slideTimerCtrl.getSnapshot();
+      if (snap.running && !floatingTimerPopState.isTypingDraft) {
+        slideTimerCtrl.addSeconds(deltaSec);
+        const afterSnap = slideTimerCtrl.getSnapshot();
+        const remSec = Math.max(0, Math.ceil((afterSnap.remainingMs || 0) / 1000));
+        writeSecToInputs(remSec);
+        return;
+      }
+      let nextTotal = 0;
+      if (isMinMinus) {
+        const curM = Math.max(0, Math.min(180, parseInt(minIn.value, 10) || 0));
+        const curS = Math.max(0, Math.min(59, parseInt(secIn.value, 10) || 0));
+        nextTotal = Math.max(0, curM - 1) * 60 + curS;
+      } else {
+        nextTotal = Math.max(0, Math.min(10800, parseInputsTotalSec() + deltaSec));
+      }
+      writeSecToInputs(nextTotal);
+      if (!snap.running && nextTotal > 0) {
+        slideTimerCtrl.setReady(nextTotal);
       }
     };
-    minIn.addEventListener("keydown", onEnterStart);
-    secIn.addEventListener("keydown", onEnterStart);
 
-    customRow.append(minus1m, minIn, colon, secIn, plus1m);
-    pop.appendChild(customRow);
+    minus1m.addEventListener("click", () => stepCustomOrLive(-60, true));
+    plus1m.addEventListener("click", () => stepCustomOrLive(60, false));
+    minus15s.addEventListener("click", () => stepCustomOrLive(-15, false));
+    plus15s.addEventListener("click", () => stepCustomOrLive(15, false));
 
-    const applyRow = make("div", null, "ppt-stp-apply-row");
-    const startCustomBtn = make("button", "▶ เริ่มนับตามเวลาที่ตั้ง", "btn sm teal");
-    startCustomBtn.type = "button";
+    const wireNumericInput = (inp, isMin) => {
+      inp.addEventListener("focus", () => {
+        setTimeout(() => {
+          try {
+            inp.select();
+          } catch (_) {}
+        }, 0);
+      });
+      inp.addEventListener("click", () => {
+        try {
+          inp.select();
+        } catch (_) {}
+      });
+      inp.addEventListener("input", () => {
+        const clean = inp.value.replace(/\D+/g, "");
+        if (inp.value !== clean) inp.value = clean;
+        floatingTimerPopState.isTypingDraft = true;
+        const total = parseInputsTotalSec();
+        syncButtonsDisabledState(total);
+        if (!slideTimerCtrl.getSnapshot().running && total > 0) {
+          slideTimerCtrl.setReady(total);
+        }
+      });
+      inp.addEventListener("blur", () => {
+        writeSecToInputs(parseInputsTotalSec());
+      });
+      inp.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const sec = parseInputsTotalSec();
+          if (sec > 0) {
+            slideTimerCtrl.start(sec);
+            closeFloatingSlideTimerPopover();
+          }
+          return;
+        }
+        if (ev.key === "Escape") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          closeFloatingSlideTimerPopover();
+          return;
+        }
+        if (isMin && (ev.key === ":" || ev.key === ".")) {
+          ev.preventDefault();
+          secIn.focus();
+          try {
+            secIn.select();
+          } catch (_) {}
+          return;
+        }
+        if (ev.key === "ArrowUp") {
+          ev.preventDefault();
+          stepCustomOrLive(isMin ? 60 : ev.shiftKey ? 1 : 15, false);
+        } else if (ev.key === "ArrowDown") {
+          ev.preventDefault();
+          if (isMin) stepCustomOrLive(-60, true);
+          else stepCustomOrLive(ev.shiftKey ? -1 : -15, false);
+        }
+      });
+    };
+    wireNumericInput(minIn, true);
+    wireNumericInput(secIn, false);
+
     startCustomBtn.addEventListener("click", () => {
-      slideTimerCtrl.start(readCustomSec());
-      pop.hidden = true;
+      const sec = parseInputsTotalSec();
+      if (sec > 0) {
+        slideTimerCtrl.start(sec);
+        closeFloatingSlideTimerPopover();
+      }
     });
 
-    const setReadyBtn = make("button", "✓ ตั้งรอไว้ก่อน", "btn sm");
-    setReadyBtn.type = "button";
     setReadyBtn.addEventListener("click", () => {
-      slideTimerCtrl.setReady(readCustomSec());
-      pop.hidden = true;
+      const sec = parseInputsTotalSec();
+      if (sec > 0) {
+        slideTimerCtrl.setReady(sec);
+        closeFloatingSlideTimerPopover();
+      }
     });
-    applyRow.append(startCustomBtn, setReadyBtn);
-    pop.appendChild(applyRow);
 
-    // 9 Quick Presets Grid (1-Click Instant Countdown)
+    resetDefBtn.addEventListener("click", () => {
+      slideTimerCtrl.reset(300);
+      writeSecToInputs(300);
+      floatingTimerPopState.isTypingDraft = false;
+    });
+
+    // Quick Presets Grid (1-Click Instant Countdown)
+    const presetsWrap = make("div", null, "ppt-stp-presets-wrap");
+    presetsWrap.appendChild(make("div", "⚡ เริ่มนับด่วน (คลิกเริ่มทันที)", "ppt-stp-sec-title"));
     const presetsGrid = make("div", null, "ppt-stp-presets");
     [
       { label: "1 นาที", sec: 60 },
@@ -25838,11 +26109,12 @@
       b.type = "button";
       b.addEventListener("click", () => {
         slideTimerCtrl.start(pr.sec);
-        pop.hidden = true;
+        closeFloatingSlideTimerPopover();
       });
       presetsGrid.appendChild(b);
     });
-    pop.appendChild(presetsGrid);
+    presetsWrap.appendChild(presetsGrid);
+    pop.appendChild(presetsWrap);
 
     // Live Playback & Big Slide Clock Actions
     const acts = make("div", null, "ppt-stp-actions");
@@ -25852,18 +26124,6 @@
     ppBtn.dataset.pptWithLabel = "1";
     ppBtn.addEventListener("click", () => slideTimerCtrl.togglePause());
 
-    const sub30Btn = make("button", "−30 วิ", "ppt-stp-step-btn");
-    sub30Btn.type = "button";
-    sub30Btn.addEventListener("click", () => slideTimerCtrl.addSeconds(-30));
-
-    const add30Btn = make("button", "+30 วิ", "ppt-stp-step-btn");
-    add30Btn.type = "button";
-    add30Btn.addEventListener("click", () => slideTimerCtrl.addSeconds(30));
-
-    const rstBtn = make("button", "↺ รีเซ็ต", "ppt-stp-step-btn");
-    rstBtn.type = "button";
-    rstBtn.addEventListener("click", () => slideTimerCtrl.reset());
-
     const bigToggleBtn = make(
       "button",
       state.hsdBigSlideTimer ? "✕ ย่อนาฬิกาใหญ่" : "⤢ ขยายนาฬิกาใหญ่ในสไลด์",
@@ -25872,51 +26132,127 @@
     bigToggleBtn.type = "button";
     bigToggleBtn.addEventListener("click", () => {
       state.hsdBigSlideTimer = !state.hsdBigSlideTimer;
-      pop.hidden = true;
+      closeFloatingSlideTimerPopover();
       renderHsDiscussionView();
       broadcastPptPresentationState();
     });
 
-    acts.append(ppBtn, sub30Btn, add30Btn, rstBtn, bigToggleBtn);
-    if (ROLE === "student" && stuLocalTimer.active) {
-      const syncRoomBtn = make("button", "ซิงค์เวลาห้องอาจารย์", "ppt-stp-step-btn");
-      syncRoomBtn.type = "button";
-      syncRoomBtn.addEventListener("click", () => {
-        slideTimerCtrl.syncWithRoom();
-        pop.hidden = true;
-      });
-      acts.appendChild(syncRoomBtn);
-    }
+    const syncRoomBtn = make("button", "ซิงค์เวลาห้องอาจารย์", "ppt-stp-step-btn");
+    syncRoomBtn.type = "button";
+    syncRoomBtn.hidden = !(ROLE === "student" && stuLocalTimer.active);
+    syncRoomBtn.addEventListener("click", () => {
+      slideTimerCtrl.syncWithRoom();
+      closeFloatingSlideTimerPopover();
+    });
+
+    acts.append(ppBtn, bigToggleBtn, syncRoomBtn);
     pop.appendChild(acts);
 
-    if (isDropUp) pop.dataset.dropUp = "1";
+    pop._syncDynamicMeta = () => {
+      bigToggleBtn.textContent = state.hsdBigSlideTimer
+        ? "✕ ย่อนาฬิกาใหญ่"
+        : "⤢ ขยายนาฬิกาใหญ่ในสไลด์";
+      syncRoomBtn.hidden = !(ROLE === "student" && stuLocalTimer.active);
+    };
+    pop._focusMinInput = () => {
+      if (!isCoarseTouchDevice()) {
+        try {
+          minIn.focus({ preventScroll: true });
+          minIn.select();
+        } catch (_) {}
+      }
+    };
+
+    floatingTimerPopState.el = pop;
     return pop;
   }
 
-  function buildInteractiveSlideHeaderTimerDOM() {
-    if (state.isPptSlideSharePopup) {
-      const timerBadge = make("span", "⏱ Set Timer", "ppt-sm-timer");
-      timerBadge.setAttribute("data-ppt-mirror-timer", "1");
-      return timerBadge;
+  function openFloatingSlideTimerPopover(triggerEl, preferDropUp) {
+    const pop = ensureFloatingSlideTimerPopoverDOM();
+    if (!pop.hidden && floatingTimerPopState.triggerEl === triggerEl) {
+      closeFloatingSlideTimerPopover();
+      return;
     }
 
+    closeFloatingSlideTimerPopover();
+    document.querySelectorAll(".hsd-snap-popover").forEach((p) => {
+      p.hidden = true;
+    });
+
+    slideTimerCtrl.clearTimeUp();
+    floatingTimerPopState.triggerEl = triggerEl || null;
+    floatingTimerPopState.preferDropUp = Boolean(preferDropUp);
+    if (triggerEl) {
+      triggerEl.classList.add("is-timer-pop-open");
+      triggerEl.setAttribute("aria-expanded", "true");
+    }
+
+    const host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
+    if (pop.parentElement !== host) {
+      host.appendChild(pop);
+    }
+
+    pop._syncInputs();
+    pop._syncDynamicMeta();
+    pop.hidden = false;
+    syncTimerWidgetDOM();
+    positionFloatingSlideTimerPopover();
+    requestAnimationFrame(() => {
+      positionFloatingSlideTimerPopover();
+      if (typeof pop._focusMinInput === "function") pop._focusMinInput();
+    });
+
+    const onOutside = (dev) => {
+      const t = dev.target;
+      if (pop.contains(t)) return;
+      if (floatingTimerPopState.triggerEl && floatingTimerPopState.triggerEl.contains(t)) return;
+      closeFloatingSlideTimerPopover();
+    };
+    const onRelayout = () => {
+      if (!pop.hidden) positionFloatingSlideTimerPopover();
+    };
+
+    floatingTimerPopState.outsideHandler = onOutside;
+    floatingTimerPopState.relayoutHandler = onRelayout;
+    setTimeout(() => {
+      if (!pop.hidden && floatingTimerPopState.outsideHandler === onOutside) {
+        document.addEventListener("pointerdown", onOutside, true);
+      }
+    }, 0);
+    window.addEventListener("resize", onRelayout);
+    window.addEventListener("scroll", onRelayout, true);
+    document.addEventListener("fullscreenchange", onRelayout);
+    document.addEventListener("webkitfullscreenchange", onRelayout);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", onRelayout);
+      window.visualViewport.addEventListener("scroll", onRelayout);
+    }
+  }
+
+  function buildInteractiveSlideHeaderTimerDOM() {
     const anchor = make("div", null, "ppt-timer-pop-anchor hsd-no-print");
     const cluster = make("div", null, "ppt-sm-timer-cluster");
 
     const playBtn = make("button", "▶", "ppt-sm-tbtn");
     playBtn.type = "button";
     playBtn.setAttribute("data-ppt-timer-playbtn", "1");
-    playBtn.title = "เริ่ม / พักเวลานับถอยหลังในสไลด์ทันที";
+    playBtn.title = "เริ่ม / พักเวลานับถอยหลังในสไลด์ทันที (ค่าเริ่มต้น 05:00)";
     playBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       slideTimerCtrl.togglePause();
     });
 
-    const clockBtn = make("button", "⏱ Set Timer ▾", "ppt-sm-timer-btn");
+    const clockBtn = make("button", "⏱ 05:00 ▾", "ppt-sm-timer-btn");
     clockBtn.type = "button";
     clockBtn.setAttribute("data-ppt-mirror-timer", "1");
     clockBtn.dataset.pptHasCaret = "1";
-    clockBtn.title = "คลิกเพื่อตั้งเวลา Countdown (นาที:วินาที หรือปุ่มลัด) บนสไลด์โดยตรง";
+    clockBtn.setAttribute("aria-haspopup", "dialog");
+    clockBtn.setAttribute("aria-expanded", "false");
+    clockBtn.title = "คลิกเพื่อพิมพ์ตั้งเวลา นาที:วินาที (±1 นาที / ±15 วินาที)";
+    clockBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openFloatingSlideTimerPopover(clockBtn, false);
+    });
 
     const add1mBtn = make("button", "+1m", "ppt-sm-tbtn");
     add1mBtn.type = "button";
@@ -25938,17 +26274,8 @@
       broadcastPptPresentationState();
     });
 
-    const pop = buildSlideTimerPopoverDOM(false);
-    clockBtn.addEventListener(
-      "click",
-      attachOutsideCloseForPopover(anchor, pop, () => {
-        slideTimerCtrl.clearTimeUp();
-        pop._syncInputs();
-      })
-    );
-
     cluster.append(playBtn, clockBtn, add1mBtn, expandBtn);
-    anchor.append(cluster, pop);
+    anchor.appendChild(cluster);
     return anchor;
   }
 
@@ -25957,51 +26284,54 @@
     card.setAttribute("data-ppt-timer-card", "1");
 
     const top = make("div", null, "ppt-bst-top");
-    const statusLbl = make("span", "⏱ Set Timer · ตั้งเวลานับถอยหลัง");
+    const statusLbl = make("span", "⏱ เวลาที่ตั้ง 05:00 · กด ▶ เริ่มนับ");
     statusLbl.setAttribute("data-ppt-timer-status", "1");
     top.appendChild(statusLbl);
 
-    if (!state.isPptSlideSharePopup) {
-      const minBtn = make("button", "✕ ย่อ", "ppt-bst-btn");
-      minBtn.type = "button";
-      minBtn.addEventListener("click", () => {
-        state.hsdBigSlideTimer = false;
-        renderHsDiscussionView();
-        broadcastPptPresentationState();
-      });
-      top.appendChild(minBtn);
+    const minBtn = make("button", "✕ ย่อ", "ppt-bst-btn");
+    minBtn.type = "button";
+    minBtn.addEventListener("click", () => {
+      state.hsdBigSlideTimer = false;
+      renderHsDiscussionView();
+      broadcastPptPresentationState();
+    });
+    top.appendChild(minBtn);
 
-      // Allow dragging the big countdown clock anywhere inside the 16:9 slide!
-      top.addEventListener("pointerdown", (ev) => {
-        if (ev.target.closest("button")) return;
-        ev.preventDefault();
-        top.setPointerCapture(ev.pointerId);
-        const sRect = sheetEl.getBoundingClientRect();
-        const cRect = card.getBoundingClientRect();
-        const offX = ev.clientX - cRect.left;
-        const offY = ev.clientY - cRect.top;
-        const onMove = (mev) => {
-          const leftPx = Math.max(8, Math.min(sRect.width - cRect.width - 8, mev.clientX - sRect.left - offX));
-          const topPx = Math.max(8, Math.min(sRect.height - cRect.height - 8, mev.clientY - sRect.top - offY));
-          card.style.right = "auto";
-          card.style.left = `${Math.round(leftPx)}px`;
-          card.style.top = `${Math.round(topPx)}px`;
-        };
-        const onUp = () => {
-          top.removeEventListener("pointermove", onMove);
-          top.removeEventListener("pointerup", onUp);
-          top.removeEventListener("pointercancel", onUp);
-        };
-        top.addEventListener("pointermove", onMove);
-        top.addEventListener("pointerup", onUp);
-        top.addEventListener("pointercancel", onUp);
-      });
-    }
+    // Allow dragging the big countdown clock anywhere inside the 16:9 slide!
+    top.addEventListener("pointerdown", (ev) => {
+      if (ev.target.closest("button")) return;
+      ev.preventDefault();
+      top.setPointerCapture(ev.pointerId);
+      const sRect = sheetEl.getBoundingClientRect();
+      const cRect = card.getBoundingClientRect();
+      const offX = ev.clientX - cRect.left;
+      const offY = ev.clientY - cRect.top;
+      const onMove = (mev) => {
+        const leftPx = Math.max(8, Math.min(sRect.width - cRect.width - 8, mev.clientX - sRect.left - offX));
+        const topPx = Math.max(8, Math.min(sRect.height - cRect.height - 8, mev.clientY - sRect.top - offY));
+        card.style.right = "auto";
+        card.style.left = `${Math.round(leftPx)}px`;
+        card.style.top = `${Math.round(topPx)}px`;
+      };
+      const onUp = () => {
+        top.removeEventListener("pointermove", onMove);
+        top.removeEventListener("pointerup", onUp);
+        top.removeEventListener("pointercancel", onUp);
+      };
+      top.addEventListener("pointermove", onMove);
+      top.addEventListener("pointerup", onUp);
+      top.addEventListener("pointercancel", onUp);
+    });
     card.appendChild(top);
 
     const clkRow = make("div", null, "ppt-bst-clock-row");
-    const digits = make("span", "05:00", "ppt-bst-digits");
+    const digits = make("span", "05:00", "ppt-bst-digits is-clickable-digits");
     digits.setAttribute("data-ppt-big-clock", "1");
+    digits.title = "คลิกตัวเลขเพื่อพิมพ์ตั้งเวลา นาที:วินาที";
+    digits.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openFloatingSlideTimerPopover(digits, false);
+    });
     clkRow.appendChild(digits);
     card.appendChild(clkRow);
 
@@ -26012,39 +26342,48 @@
     track.appendChild(fill);
     card.appendChild(track);
 
-    if (!state.isPptSlideSharePopup) {
-      const ctrls = make("div", null, "ppt-bst-ctrls");
-      const pp = make("button", "▶ เริ่ม", "ppt-bst-btn is-primary");
-      pp.type = "button";
-      pp.setAttribute("data-ppt-timer-playbtn", "1");
-      pp.dataset.pptWithLabel = "1";
-      pp.addEventListener("click", () => slideTimerCtrl.togglePause());
+    const ctrls = make("div", null, "ppt-bst-ctrls");
+    const pp = make("button", "▶ เริ่ม", "ppt-bst-btn is-primary");
+    pp.type = "button";
+    pp.setAttribute("data-ppt-timer-playbtn", "1");
+    pp.dataset.pptWithLabel = "1";
+    pp.addEventListener("click", () => slideTimerCtrl.togglePause());
 
-      [
-        { lbl: "3m", sec: 180 },
-        { lbl: "5m", sec: 300 },
-        { lbl: "8m", sec: 480 },
-        { lbl: "10m", sec: 600 }
-      ].forEach((p) => {
-        const pb = make("button", p.lbl, "ppt-bst-btn");
-        pb.type = "button";
-        pb.addEventListener("click", () => slideTimerCtrl.start(p.sec));
-        ctrls.appendChild(pb);
-      });
+    const sub1m = make("button", "−1m", "ppt-bst-btn");
+    sub1m.type = "button";
+    sub1m.title = "ลดเวลา 1 นาที";
+    sub1m.addEventListener("click", () => slideTimerCtrl.addSeconds(-60));
 
-      const plus = make("button", "+1m", "ppt-bst-btn");
-      plus.type = "button";
-      plus.addEventListener("click", () => slideTimerCtrl.addSeconds(60));
+    const plus1m = make("button", "+1m", "ppt-bst-btn");
+    plus1m.type = "button";
+    plus1m.title = "เพิ่มเวลา 1 นาที";
+    plus1m.addEventListener("click", () => slideTimerCtrl.addSeconds(60));
 
-      const rst = make("button", "↺", "ppt-bst-btn");
-      rst.type = "button";
-      rst.title = "รีเซ็ตเวลา";
-      rst.addEventListener("click", () => slideTimerCtrl.reset());
+    const sub15s = make("button", "−15s", "ppt-bst-btn");
+    sub15s.type = "button";
+    sub15s.title = "ลดเวลา 15 วินาที";
+    sub15s.addEventListener("click", () => slideTimerCtrl.addSeconds(-15));
 
-      ctrls.prepend(pp);
-      ctrls.append(plus, rst);
-      card.appendChild(ctrls);
-    }
+    const plus15s = make("button", "+15s", "ppt-bst-btn");
+    plus15s.type = "button";
+    plus15s.title = "เพิ่มเวลา 15 วินาที";
+    plus15s.addEventListener("click", () => slideTimerCtrl.addSeconds(15));
+
+    const editBtn = make("button", "⌨ ตั้งเวลา", "ppt-bst-btn");
+    editBtn.type = "button";
+    editBtn.title = "พิมพ์กำหนดนาทีและวินาทีเอง";
+    editBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openFloatingSlideTimerPopover(editBtn, false);
+    });
+
+    const rst = make("button", "↺", "ppt-bst-btn");
+    rst.type = "button";
+    rst.title = "รีเซ็ตเป็น 05:00";
+    rst.addEventListener("click", () => slideTimerCtrl.reset(300));
+
+    ctrls.append(pp, sub1m, plus1m, sub15s, plus15s, editBtn, rst);
+    card.appendChild(ctrls);
 
     return card;
   }
@@ -26067,20 +26406,18 @@
     playBtn.addEventListener("click", () => slideTimerCtrl.togglePause());
 
     const anchor = make("div", null, `ppt-timer-pop-anchor${isDropUp ? " is-drop-up" : ""}`);
-    const clockBtn = make("button", "⏱ Set Timer ▾", "ppt-timer-dock-clock-btn");
+    const clockBtn = make("button", "⏱ 05:00 ▾", "ppt-timer-dock-clock-btn");
     clockBtn.type = "button";
     clockBtn.setAttribute("data-ppt-mirror-timer", "1");
     clockBtn.dataset.pptHasCaret = "1";
-    clockBtn.title = "คลิกเพื่อกำหนดเวลา Countdown เอง (นาที:วินาที) หรือเลือกเวลาด่วน";
-    const pop = buildSlideTimerPopoverDOM(isDropUp);
-    clockBtn.addEventListener(
-      "click",
-      attachOutsideCloseForPopover(anchor, pop, () => {
-        slideTimerCtrl.clearTimeUp();
-        pop._syncInputs();
-      })
-    );
-    anchor.append(clockBtn, pop);
+    clockBtn.setAttribute("aria-haspopup", "dialog");
+    clockBtn.setAttribute("aria-expanded", "false");
+    clockBtn.title = "คลิกเพื่อพิมพ์กำหนดเวลา Countdown เอง (นาที:วินาที · ±1m / ±15s)";
+    clockBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openFloatingSlideTimerPopover(clockBtn, Boolean(isDropUp));
+    });
+    anchor.appendChild(clockBtn);
 
     const plusBtn = make("button", "+1m", "ppt-big-btn");
     plusBtn.type = "button";

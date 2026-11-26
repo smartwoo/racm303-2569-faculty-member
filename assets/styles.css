@@ -44995,7 +44995,6 @@ html[data-theme="dark"] .hsd-live-sid-pill.is-submitted {
   border-color: rgba(74, 222, 128, 0.4);
 }
 
-
 /* ==========================================================================
    Mobile Full Screen Exit Pill, Zero-Gap 2-Button Keyboard Bar, Horizontal
    Swipe Ergonomics & Thai Vowel/Tone-Mark (สระ/วรรณยุกต์) Fit Optimization
@@ -45242,3 +45241,223 @@ body.is-ppt-fullscreen-open,
     table-layout: fixed;
   }
 }
+
+/* ==========================================================================
+   Portal-Mounted Floating Slide Timer Popover (Default 05:00 · Typeable MM:SS
+   with ±1m & ±15s Steppers · Never Clipped by Slide Header Overflow)
+   ========================================================================== */
+.ppt-slide-timer-popover.is-floating-portal-pop {
+  position: fixed !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 10050 !important;
+  width: min(396px, calc(100vw - 16px));
+  padding: 13px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow:
+    0 22px 54px rgba(15, 23, 42, 0.34),
+    0 4px 14px rgba(15, 23, 42, 0.14);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ppt-stp-dual-setter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  padding: 9px 8px;
+}
+
+.ppt-stp-unit-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ppt-stp-unit-lbl {
+  font-family: var(--font-display);
+  font-size: 10.8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0f766e;
+}
+
+.ppt-stp-unit-ctrl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.ppt-stp-adj-btn {
+  height: 36px;
+  min-width: 40px;
+  padding: 0 7px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.ppt-stp-adj-btn:hover {
+  background: #e6f7f5;
+  border-color: #0d9488;
+  color: #0f5c54;
+}
+
+.ppt-stp-adj-btn:active {
+  transform: scale(0.96);
+}
+
+.ppt-stp-dual-setter .ppt-stp-num-input {
+  width: 56px;
+  flex: 0 0 56px;
+  height: 38px;
+  padding: 0 4px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  border: 1.5px solid #0d9488;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.ppt-stp-dual-setter .ppt-stp-num-input:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.24);
+}
+
+.ppt-stp-unit-sub {
+  font-family: var(--font-display);
+  font-size: 10.2px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.ppt-stp-dual-setter .ppt-stp-colon {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 900;
+  color: #334155;
+  line-height: 1;
+}
+
+.ppt-slide-timer-popover.is-floating-portal-pop .ppt-stp-apply-row {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.ppt-stp-presets-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ppt-stp-sec-title {
+  font-family: var(--font-display);
+  font-size: 10.8px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.ppt-bst-digits.is-clickable-digits {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 8px;
+  transition: background 0.14s ease;
+}
+
+.ppt-bst-digits.is-clickable-digits:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ppt-sm-timer-btn.is-timer-pop-open {
+  background: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
+}
+
+html[data-theme="dark"] .ppt-slide-timer-popover.is-floating-portal-pop,
+.ppt-slide-timer-popover.is-floating-portal-pop.is-dark-pop {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.36) !important;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.65) !important;
+}
+
+html[data-theme="dark"] .ppt-stp-dual-setter,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-dual-setter {
+  background: #0b1220 !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
+}
+
+html[data-theme="dark"] .ppt-stp-unit-lbl,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-unit-lbl {
+  color: #5eead4 !important;
+}
+
+html[data-theme="dark"] .ppt-stp-unit-sub,
+html[data-theme="dark"] .ppt-stp-sec-title,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-unit-sub,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-sec-title {
+  color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .ppt-stp-adj-btn,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-adj-btn {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(148, 163, 184, 0.34) !important;
+}
+
+html[data-theme="dark"] .ppt-stp-adj-btn:hover,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-adj-btn:hover {
+  background: #0f766e !important;
+  border-color: #2dd4bf !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
+.ppt-slide-timer-popover.is-dark-pop .ppt-stp-dual-setter .ppt-stp-num-input {
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #2dd4bf !important;
+}
+
+@media (max-width: 390px) {
+  .ppt-stp-adj-btn {
+    min-width: 35px;
+    padding: 0 5px;
+    font-size: 11px;
+  }
+  .ppt-stp-dual-setter .ppt-stp-num-input {
+    width: 48px;
+    font-size: 16px;
+  }
+}
+

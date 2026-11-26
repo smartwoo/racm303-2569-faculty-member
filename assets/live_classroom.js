@@ -145,6 +145,7 @@
       hasStarted: false,
       hasConfigured: false,
       timedOutInCurrentRun: false,
+      configuredDurationSec: 300,
       durationSec: 300,
       baseRemainingMs: 300000,
       anchorPerfNow: performance.now(),
@@ -492,6 +493,7 @@
       running: state.timer.running && remMs > 0,
       remainingMs: remMs,
       durationSec: state.timer.durationSec || 300,
+      configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
       pct: Math.max(0, Math.min(100, (remMs / durMs) * 100)),
       formatted: formatMs(remMs),
       isWarning: Boolean(state.timer.running) && remMs > 0 && remMs <= 60000,
@@ -641,6 +643,10 @@
     }
 
     if (msg.type === "timer") {
+      const maxRetainedAgeMs = msg.running ? RETAINED_STALE_MS : 10 * 60 * 1000;
+      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > maxRetainedAgeMs) {
+        return;
+      }
       const seq = Number(msg.seq) || 0;
       if (seq < state.timer.seq && msg.sentWallMs < (state.timer.lastWallMs || 0)) return;
       let rem = Math.max(0, Number(msg.remainingMs) || 0);
@@ -648,11 +654,13 @@
         const wallElapsed = Math.max(0, Date.now() - Number(msg.sentWallMs));
         rem = Math.max(0, rem - wallElapsed);
       }
-      const durSec = Math.max(5, Number(msg.durationSec) || 300);
+      const durSec = Math.max(1, Number(msg.durationSec) || 300);
+      const cfgSec = Math.max(1, Number(msg.configuredDurationSec) || durSec);
       // Never turn any incoming 0-remaining packet (MQTT retained, PeerJS sync, or BroadcastChannel) into a red Time-Up state
       if (rem === 0) {
         const wasActivelyRunningHere = Boolean(state.timer.running);
         state.timer.seq = wasActivelyRunningHere ? Math.max(state.timer.seq + 1, seq) : 0;
+        state.timer.configuredDurationSec = cfgSec;
         state.timer.durationSec = durSec;
         state.timer.baseRemainingMs = wasActivelyRunningHere ? 0 : durSec * 1000;
         state.timer.anchorPerfNow = performance.now();
@@ -665,6 +673,7 @@
         return;
       }
       state.timer.seq = Math.max(state.timer.seq + 1, seq);
+      state.timer.configuredDurationSec = cfgSec;
       state.timer.durationSec = durSec;
       state.timer.baseRemainingMs = rem;
       state.timer.anchorPerfNow = performance.now();
@@ -2021,8 +2030,12 @@
 
   /* ---------- Teacher Timer & Slide Pointer Controls ---------- */
   function startTimer(durationSec, questionId, label) {
-    const sec = Math.max(5, Math.min(5400, Number(durationSec) || state.timer.durationSec || 300));
+    const sec = Math.max(
+      1,
+      Math.min(10800, Math.round(Number(durationSec) || state.timer.configuredDurationSec || state.timer.durationSec || 300))
+    );
     state.timer.seq += 1;
+    state.timer.configuredDurationSec = sec;
     state.timer.durationSec = sec;
     state.timer.baseRemainingMs = sec * 1000;
     state.timer.anchorPerfNow = performance.now();
@@ -2042,6 +2055,7 @@
         running: true,
         hasStarted: true,
         hasConfigured: true,
+        configuredDurationSec: sec,
         durationSec: sec,
         remainingMs: sec * 1000,
         questionId: state.timer.questionId,
@@ -2059,7 +2073,9 @@
       state.timer.running = false;
       state.timer.baseRemainingMs = rem;
     } else {
-      const nextMs = rem > 0 ? rem : (state.timer.durationSec || 300) * 1000;
+      const fallbackSec = state.timer.configuredDurationSec || state.timer.durationSec || 300;
+      const nextMs = rem > 0 ? rem : fallbackSec * 1000;
+      if (rem <= 0) state.timer.durationSec = fallbackSec;
       state.timer.baseRemainingMs = nextMs;
       state.timer.anchorPerfNow = performance.now();
       state.timer.running = true;
@@ -2076,6 +2092,7 @@
         running: state.timer.running,
         hasStarted: state.timer.hasStarted,
         hasConfigured: state.timer.hasConfigured,
+        configuredDurationSec: state.timer.configuredDurationSec || state.timer.durationSec || 300,
         durationSec: state.timer.durationSec,
         remainingMs: state.timer.baseRemainingMs,
         questionId: state.timer.questionId,
@@ -2088,7 +2105,8 @@
 
   function addTimerSeconds(deltaSec) {
     const cur = getTimerRemainingMs();
-    const nextMs = Math.max(0, Math.min(5400 * 1000, cur + (Number(deltaSec) || 60) * 1000));
+    const delta = Number.isFinite(Number(deltaSec)) ? Number(deltaSec) : 60;
+    const nextMs = Math.max(0, Math.min(10800 * 1000, cur + delta * 1000));
     state.timer.seq += 1;
     state.timer.baseRemainingMs = nextMs;
     state.timer.anchorPerfNow = performance.now();
@@ -2097,7 +2115,7 @@
       state.timer.hasConfigured = true;
       state.timer.timedOutInCurrentRun = false;
     }
-    state.timer.durationSec = Math.max(state.timer.durationSec, Math.ceil(nextMs / 1000));
+    state.timer.durationSec = Math.max(state.timer.durationSec, Math.ceil(nextMs / 1000) || 1);
     publishPacket(
       "timer",
       {
@@ -2106,6 +2124,7 @@
         running: state.timer.running,
         hasStarted: state.timer.hasStarted,
         hasConfigured: state.timer.hasConfigured,
+        configuredDurationSec: state.timer.configuredDurationSec || 300,
         durationSec: state.timer.durationSec,
         remainingMs: nextMs,
         questionId: state.timer.questionId,
@@ -2117,12 +2136,14 @@
   }
 
   function resetTimer(durationSec, isSetReady) {
-    const sec = Math.max(5, Math.min(5400, Number(durationSec) || state.timer.durationSec || 300));
+    const fallbackSec = isSetReady ? state.timer.configuredDurationSec || 300 : 300;
+    const sec = Math.max(1, Math.min(10800, Math.round(Number(durationSec) || fallbackSec)));
     state.timer.seq += 1;
     state.timer.running = false;
     state.timer.hasStarted = false;
     state.timer.hasConfigured = Boolean(isSetReady);
     state.timer.timedOutInCurrentRun = false;
+    state.timer.configuredDurationSec = sec;
     state.timer.durationSec = sec;
     state.timer.baseRemainingMs = sec * 1000;
     state.timer.anchorPerfNow = performance.now();
@@ -2135,6 +2156,7 @@
         running: false,
         hasStarted: false,
         hasConfigured: Boolean(isSetReady),
+        configuredDurationSec: sec,
         durationSec: sec,
         remainingMs: sec * 1000,
         questionId: state.timer.questionId,
@@ -2147,10 +2169,12 @@
 
   function clearTimeUpAlert() {
     if (!state.timer.timedOutInCurrentRun) return;
+    const sec = state.timer.configuredDurationSec || 300;
     state.timer.timedOutInCurrentRun = false;
     state.timer.hasStarted = false;
     state.timer.hasConfigured = false;
-    state.timer.baseRemainingMs = (state.timer.durationSec || 300) * 1000;
+    state.timer.durationSec = sec;
+    state.timer.baseRemainingMs = sec * 1000;
     emit("timer", getTimerSnapshot());
   }
 
