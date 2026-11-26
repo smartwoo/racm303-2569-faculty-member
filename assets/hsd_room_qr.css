@@ -2197,30 +2197,17 @@ html[data-theme="dark"] .gsorter-live-checkin-badge {
   flex-shrink: 0;
 }
 
-/* ---------- 9. Clean 2-Column Slide 1 Live Lobby (No 3rd-Round PIN Numpad) ---------- */
+/* ---------- 9. Clean 2-Column Slide 1 Live Lobby (Auto Optimized Size Fit) ---------- */
 .ppt-opening-kahoot-stage.is-2col-live-lobby {
-  grid-template-columns: clamp(248px, 29.5%, 342px) minmax(0, 1fr) !important;
+  grid-template-columns: clamp(252px, 30%, 430px) minmax(0, 1fr) !important;
   gap: clamp(12px, 1.5cqw, 20px) !important;
   padding: clamp(10px, 1.9cqh, 20px) clamp(14px, 2.0cqw, 26px) clamp(10px, 1.8cqh, 18px) !important;
 }
 
-@media (max-width: 820px) {
-  .ppt-opening-kahoot-stage.is-2col-live-lobby {
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-auto-rows: max-content !important;
-    align-content: start !important;
-    overflow-y: auto !important;
-  }
-  .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-col-qr {
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
-}
-
-.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-col-qr {
-  overflow-y: auto;
-  scrollbar-width: thin;
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-col-qr,
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-right {
+  min-height: 0;
+  overflow: hidden;
   gap: clamp(7px, 1.2cqh, 11px);
 }
 
@@ -2239,13 +2226,237 @@ html[data-theme="dark"] .gsorter-live-checkin-badge {
   line-height: 1.48 !important;
 }
 
-.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-card.is-compact-qr-only-card {
-  padding: clamp(8px, 1.35cqh, 13px) clamp(10px, 1.2cqw, 15px) !important;
-  gap: clamp(5px, 0.85cqh, 9px) !important;
+/* Bounded Auto-Fit Panes on Slide 1 (Left QR Card & Right Live Lobby Card) */
+.ppt-opening-kahoot-stage.is-2col-live-lobby .is-ok-autofit-pane,
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-card.is-compact-qr-only-card.is-ok-autofit-pane,
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-roster-card.is-ok-autofit-pane {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
-.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-card.is-compact-qr-only-card .ppt-ok-qr-frame-btn {
-  max-width: clamp(106px, min(13.2cqw, 24cqh), 164px);
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-card.is-compact-qr-only-card.is-ok-autofit-pane {
+  padding: clamp(9px, 1.4cqh, 14px) clamp(11px, 1.3cqw, 16px) !important;
+  gap: 8px !important;
+  text-align: center;
+}
+
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-roster-card.is-ok-autofit-pane {
+  padding: clamp(10px, 1.55cqh, 16px) clamp(13px, 1.55cqw, 20px) !important;
+  gap: 9px !important;
+}
+
+.ppt-slide-sheet .is-ok-autofit-pane.is-autofit-measuring {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+}
+
+/* Unzoomed Top Eyebrow Headers Inside Slide 1 Panes (Matches Slides 2–50 .hsd-pane-snap-bar) */
+.ppt-ok-qr-head,
+.ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-roster-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+}
+
+html[data-theme="dark"] .ppt-ok-qr-head,
+html[data-theme="dark"] .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-roster-head {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.ppt-ok-roster-head-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Auto-Fit Zoom Bodies Inside Slide 1 Panes (Deterministic px Sizing for Binary-Search Zoom) */
+.is-ok-autofit-pane > .hsd-box-zoom-body {
+  flex: 0 0 auto !important;
+  width: 100%;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-block: auto;
+  padding-bottom: 2px !important;
+}
+
+.is-ok-autofit-pane.is-autofit-measuring > .hsd-box-zoom-body.is-ok-qr-zoom-body {
+  margin-block: 0 !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-qr-frame-btn {
+  width: 162px !important;
+  max-width: 82% !important;
+  padding: 8px !important;
+  border-radius: 15px !important;
+  gap: 5px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body.has-stu-lobby-card .ppt-ok-qr-frame-btn {
+  width: 132px !important;
+  max-width: 74% !important;
+  padding: 6px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-qr-zoom-hint {
+  font-size: 10.8px !important;
+  line-height: 1.45 !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-qr-url-pill {
+  font-size: 9.1px !important;
+  letter-spacing: -0.02em;
+  padding: 3px 7px !important;
+  gap: 4px !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-join-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-join-cta {
+  height: 31px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-join-row .btn.sm {
+  height: 31px !important;
+  padding: 0 10px !important;
+  font-size: 11.5px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-case-jump-row {
+  justify-content: center;
+  margin-top: 1px !important;
+  gap: 5px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-case-jump-pill {
+  font-size: 11px !important;
+  padding: 3px 9px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-stu-lobby-card {
+  width: 100%;
+  padding: 8px 10px !important;
+  gap: 5px !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-stu-lobby-title {
+  font-size: 11.5px !important;
+  line-height: 1.48 !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-stu-lobby-sub {
+  font-size: 10.2px !important;
+  line-height: 1.5 !important;
+}
+
+.hsd-box-zoom-body.is-ok-qr-zoom-body .ppt-ok-stu-lobby-btn {
+  font-size: 10.6px !important;
+  padding: 5px 8px !important;
+  line-height: 1.5 !important;
+}
+
+/* Right Live Lobby Roster Grid Inside Auto-Fit Zoom Body */
+.hsd-box-zoom-body.is-ok-roster-zoom-body {
+  gap: 0 !important;
+  padding-bottom: 2px !important;
+}
+
+.hsd-box-zoom-body.is-ok-roster-zoom-body .ppt-ok-roster-grid {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6.5px !important;
+}
+
+.hsd-box-zoom-body.is-ok-roster-zoom-body .ppt-ok-stu-chip {
+  min-height: 29px !important;
+  padding: 4px 10px !important;
+  border-radius: 9px !important;
+  font-size: 12.8px !important;
+  line-height: 1.48 !important;
+}
+
+.hsd-box-zoom-body.is-ok-roster-zoom-body .ppt-ok-stu-chip .ppt-ok-stu-label {
+  line-height: 1.52 !important;
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+}
+
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage {
+  grid-auto-rows: max-content !important;
+  align-content: start !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-1col-stage {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage .ppt-ok-col-qr,
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage .ppt-ok-right,
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage .is-ok-autofit-pane,
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage .ppt-ok-card.is-compact-qr-only-card.is-ok-autofit-pane,
+.ppt-opening-kahoot-stage.is-2col-live-lobby.is-ok-compact-stage .ppt-ok-roster-card.is-ok-autofit-pane {
+  flex: 0 0 auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 820px) {
+  .ppt-opening-kahoot-stage.is-2col-live-lobby {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    overflow-y: auto !important;
+  }
+
+  .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-col-qr,
+  .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-right,
+  .ppt-opening-kahoot-stage.is-2col-live-lobby .is-ok-autofit-pane,
+  .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-card.is-compact-qr-only-card.is-ok-autofit-pane,
+  .ppt-opening-kahoot-stage.is-2col-live-lobby .ppt-ok-roster-card.is-ok-autofit-pane {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .hsd-box-zoom-body.is-ok-roster-zoom-body .ppt-ok-roster-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }
 
 /* Student Self-Status / 1-Click Confirm / Leave Card on Slide 1 */
