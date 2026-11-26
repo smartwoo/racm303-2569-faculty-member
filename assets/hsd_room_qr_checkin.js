@@ -36,6 +36,53 @@
     return num >= 1 && num <= 6 ? Math.floor(num) : 1;
   }
 
+  function alignGateInputAboveMobileKeyboard(fieldEl) {
+    if (!fieldEl || typeof window === "undefined" || typeof document === "undefined") return;
+    const isMobileOrCoarse =
+      (typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse), (max-width: 960px)").matches) ||
+      (window.innerWidth || 1280) <= 960;
+    if (!isMobileOrCoarse) return;
+
+    const runAlign = () => {
+      if (!fieldEl.isConnected || document.activeElement !== fieldEl) return;
+      if (root && root.RACM_MOBILE_KBD_FIT && typeof root.RACM_MOBILE_KBD_FIT.scrollIntoView === "function") {
+        root.RACM_MOBILE_KBD_FIT.scrollIntoView(fieldEl, true);
+        return;
+      }
+      document.body.classList.add("is-mobile-kbd-open");
+      const vv = window.visualViewport;
+      const vvScale = vv && vv.scale ? vv.scale : 1;
+      const vvTop = vv && vvScale <= 1.06 ? Math.max(0, vv.offsetTop || 0) : 0;
+      const vvH = vv && vvScale <= 1.06 ? vv.height : window.innerHeight || 600;
+      const anchor =
+        fieldEl.closest(".hsd-srp-pin-lock-bar, .hsd-compact-step-lock, .hsd-qr-checkin-card") || fieldEl;
+      const modalBody = anchor.closest(".hsd-km-body, .hsd-km-dialog");
+      if (modalBody) {
+        const mRect = modalBody.getBoundingClientRect();
+        const aRect = anchor.getBoundingClientRect();
+        const dy = aRect.top - (mRect.top + 8);
+        if (Math.abs(dy) > 6) modalBody.scrollTop += dy;
+        return;
+      }
+      const rect = anchor.getBoundingClientRect();
+      const desiredTop = vvTop + 8;
+      let deltaY = rect.top - desiredTop;
+      if (rect.bottom - deltaY > vvTop + vvH - 8) {
+        deltaY = Math.max(deltaY, rect.bottom - (vvTop + vvH - 8));
+      }
+      if (Math.abs(deltaY) > 6) {
+        window.scrollTo({
+          top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + deltaY),
+          behavior: "auto"
+        });
+      }
+    };
+
+    requestAnimationFrame(runAlign);
+    setTimeout(runAlign, 110);
+    setTimeout(runAlign, 260);
+  }
+
   /* ---------- 1. Pure-JS ISO/IEC 18004 QR Code Generator (ECC-M, Versions 1..10) ---------- */
   const QR_ECC_M = [
     null,
@@ -1194,10 +1241,15 @@
       }
     }
 
+    pinInput.addEventListener("focus", () => {
+      alignGateInputAboveMobileKeyboard(pinInput);
+    });
+
     pinInput.addEventListener("input", () => {
       pinQuery = pinInput.value;
       resolveFromPinQuery(pinQuery);
       syncSectionUI();
+      alignGateInputAboveMobileKeyboard(pinInput);
     });
 
     pinInput.addEventListener("keydown", (ev) => {
@@ -1235,12 +1287,11 @@
     sec._focusPinInputWithPrompt = (msgText) => {
       needIdPromptMsg = msgText || "🔑 กรุณากรอกรหัสนักศึกษา 3 ตัวท้ายด้านซ้าย แล้วกดยืนยันเพื่อเข้าสู่ Breakout Room ที่ถูกต้องของคุณ";
       syncSectionUI();
-      if (typeof pinInput.scrollIntoView === "function") {
+      if (typeof pinInput.focus === "function") pinInput.focus({ preventScroll: true });
+      alignGateInputAboveMobileKeyboard(pinInput);
+      if (typeof pinInput.scrollIntoView === "function" && !document.body.classList.contains("is-mobile-kbd-open")) {
         pinInput.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      setTimeout(() => {
-        if (typeof pinInput.focus === "function") pinInput.focus({ preventScroll: true });
-      }, 80);
     };
 
     clearPinBtn.addEventListener("click", () => {
@@ -1753,6 +1804,10 @@
       sync();
     };
 
+    inp.addEventListener("focus", () => {
+      alignGateInputAboveMobileKeyboard(inp);
+    });
+
     inp.addEventListener("input", () => {
       curVal = inp.value;
       const q = curVal.trim();
@@ -1763,6 +1818,7 @@
         curStu = res.all.length === 1 ? res.all[0] : null;
       }
       sync();
+      alignGateInputAboveMobileKeyboard(inp);
     });
 
     inp.addEventListener("keydown", (ev) => {
@@ -1959,10 +2015,12 @@
       } else {
         s.addEventListener("focus", () => {
           if (idx > pinDigits.length && slotEls[pinDigits.length] && typeof slotEls[pinDigits.length].focus === "function") {
-            slotEls[pinDigits.length].focus();
+            slotEls[pinDigits.length].focus({ preventScroll: true });
+            alignGateInputAboveMobileKeyboard(slotEls[pinDigits.length]);
             return;
           }
           if (typeof s.select === "function") s.select();
+          alignGateInputAboveMobileKeyboard(s);
         });
         s.addEventListener("keydown", (ev) => {
           if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
@@ -1975,14 +2033,16 @@
               pinDigits = ev.key;
               autoResolveCandidate();
               syncUI();
-              if (slotEls[1] && typeof slotEls[1].focus === "function") slotEls[1].focus();
+              if (slotEls[1] && typeof slotEls[1].focus === "function") slotEls[1].focus({ preventScroll: true });
+              alignGateInputAboveMobileKeyboard(slotEls[1] || s);
               return;
             }
             setDigitAtSlot(idx, ev.key);
             const nextIdx = Math.min(2, pinDigits.length);
             if (slotEls[nextIdx] && nextIdx !== idx && typeof slotEls[nextIdx].focus === "function") {
-              slotEls[nextIdx].focus();
+              slotEls[nextIdx].focus({ preventScroll: true });
             }
+            alignGateInputAboveMobileKeyboard(slotEls[nextIdx] || s);
           } else if (ev.key === "Backspace") {
             ev.preventDefault();
             flashNumpadKey("back");
@@ -1993,25 +2053,25 @@
               syncUI();
               const prevIdx = Math.max(0, idx - (idx >= pinDigits.length ? 1 : 0));
               if (slotEls[prevIdx] && typeof slotEls[prevIdx].focus === "function") {
-                slotEls[prevIdx].focus();
+                slotEls[prevIdx].focus({ preventScroll: true });
               }
             } else {
               popDigit();
               const prevIdx = Math.max(0, pinDigits.length);
               if (slotEls[prevIdx] && typeof slotEls[prevIdx].focus === "function") {
-                slotEls[prevIdx].focus();
+                slotEls[prevIdx].focus({ preventScroll: true });
               }
             }
           } else if (ev.key === "ArrowLeft" && idx > 0) {
             ev.preventDefault();
-            if (slotEls[idx - 1] && typeof slotEls[idx - 1].focus === "function") slotEls[idx - 1].focus();
+            if (slotEls[idx - 1] && typeof slotEls[idx - 1].focus === "function") slotEls[idx - 1].focus({ preventScroll: true });
           } else if (ev.key === "ArrowRight" && idx < 2) {
             ev.preventDefault();
-            if (slotEls[idx + 1] && typeof slotEls[idx + 1].focus === "function") slotEls[idx + 1].focus();
+            if (slotEls[idx + 1] && typeof slotEls[idx + 1].focus === "function") slotEls[idx + 1].focus({ preventScroll: true });
           } else if (ev.key === "Delete" || ev.key === "Escape") {
             ev.preventDefault();
             clearAllDigits();
-            if (slotEls[0] && typeof slotEls[0].focus === "function") slotEls[0].focus();
+            if (slotEls[0] && typeof slotEls[0].focus === "function") slotEls[0].focus({ preventScroll: true });
           } else if (ev.key === "Enter") {
             ev.preventDefault();
             ev.stopPropagation();
@@ -2027,6 +2087,7 @@
               autoResolveCandidate();
             }
             syncUI();
+            alignGateInputAboveMobileKeyboard(s);
             return;
           }
           if (digits.length >= 3) {
@@ -2036,18 +2097,22 @@
             pickedStudent = null;
             autoResolveCandidate();
             syncUI();
-            if (slotEls[2] && typeof slotEls[2].focus === "function") slotEls[2].focus();
+            if (slotEls[2] && typeof slotEls[2].focus === "function") slotEls[2].focus({ preventScroll: true });
+            alignGateInputAboveMobileKeyboard(slotEls[2] || s);
             return;
           }
           const ch = digits.slice(-1);
           if ((pinDigits[idx] || "") !== ch) {
             setDigitAtSlot(idx, ch);
             if (idx < 2 && slotEls[idx + 1] && typeof slotEls[idx + 1].focus === "function") {
-              slotEls[idx + 1].focus();
+              slotEls[idx + 1].focus({ preventScroll: true });
+              alignGateInputAboveMobileKeyboard(slotEls[idx + 1]);
+              return;
             }
           } else {
             syncUI();
           }
+          alignGateInputAboveMobileKeyboard(s);
         });
         s.addEventListener("paste", (ev) => {
           ev.preventDefault();

@@ -45775,5 +45775,336 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
   background: #fecaca;
 }
 
+/* ==========================================================================
+   Mobile Virtual Keyboard Push-Up & Optimized Fit Size (Slide Studio,
+   In-Page Shell, DoH Diagram Node Focus & Worksheet Tables)
+   ========================================================================== */
+.ppt-inpage-kbd-bar,
+.doh-mobile-focus-bar {
+  display: none !important;
+}
+
+/* 1. Auto-Fold Scenario Pane while Typing in Answer Sheet on Mobile / Foldable */
+#pptPresentationOverlay .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-slide-left,
+#hsdCasesContainer .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-slide-left,
+#pptPresentationOverlay .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-split-resizer,
+#hsdCasesContainer .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-split-resizer {
+  display: none !important;
+}
+
+#pptPresentationOverlay .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-slide-stage.is-16x9-canvas,
+#hsdCasesContainer .ppt-slide-sheet.is-kbd-auto-scen-folded .hsd-slide-stage.is-16x9-canvas {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+/* 2. Reading View Overlay Chrome Collapse when Virtual Keyboard Opens */
+.ppt-presentation-overlay.is-kbd-open .ppt-reading-topbar,
+.ppt-presentation-overlay.is-kbd-open .ppt-reading-statusbar,
+.ppt-presentation-overlay.is-kbd-open .ppt-slideshow-fab-hud,
+.ppt-presentation-overlay.is-kbd-open .ppt-slide-master-foot {
+  display: none !important;
+}
+
+/* 3. Normal In-Page Slide Shell (#hsdCasesContainer .hsd-slide-shell.is-kbd-open) Fit Above Keyboard */
+@media (max-width: 960px), (pointer: coarse) {
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-titlebar,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-menubar,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-ribbon,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-statusbar,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-notes-drawer:not(:focus-within),
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-thumb-rail,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .hsd-mobile-slide-jumpbar,
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-slide-master-foot {
+    display: none !important;
+  }
+
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open {
+    height: calc(var(--ppt-vvh, 340px) - 8px) !important;
+    max-height: calc(var(--ppt-vvh, 340px) - 8px) !important;
+    min-height: 215px !important;
+    margin-bottom: 4px !important;
+  }
+
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open .ppt-canvas-stage.is-stage-resp-split {
+    height: max(172px, calc(var(--ppt-vvh, 340px) - 50px)) !important;
+    min-height: 168px !important;
+    padding: 2px !important;
+  }
+
+  #hsdCasesContainer .hsd-slide-shell.is-ppt-app.is-kbd-open > .ppt-inpage-kbd-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 4px 10px !important;
+    min-height: 40px !important;
+    background: #0f172a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ultra-compact Slide Master Header & Pane Snap Bar while typing so maximum height goes to active text box */
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .ppt-slide-master-head,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .ppt-slide-master-head {
+    padding: 3px 10px !important;
+    min-height: 26px !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .ppt-sm-mod,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .ppt-sm-mod,
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .ppt-sm-right,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .ppt-sm-right,
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-pane-snap-bar,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-pane-snap-bar {
+    display: none !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .ppt-sm-title,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .ppt-sm-title {
+    font-size: 12.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Compact question banner & inline team banner while keyboard is open */
+  .ppt-presentation-overlay.is-kbd-open .hsd-slide-right .hsd-team-sheet-banner,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-slide-right .hsd-team-sheet-banner,
+  .ppt-presentation-overlay.is-kbd-open .hsd-slide-right .hsd-q-concept-hub,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-slide-right .hsd-q-concept-hub,
+  .ppt-presentation-overlay.is-kbd-open .hsd-slide-right .hsd-q-prompt,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-slide-right .hsd-q-prompt {
+    display: none !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .hsd-slide-right .hsd-q-head,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-slide-right .hsd-q-head {
+    padding: 3px 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .hsd-slide-right .hsd-q-title,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-slide-right .hsd-q-title {
+    font-size: 13px !important;
+    line-height: 1.32 !important;
+    margin: 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Crisp 16px optimized typing inside Worksheet Tables & Full-Scroll Cards */
+  body.is-mobile-kbd-open .hsd-ws-table textarea.hsd-input,
+  .ppt-presentation-overlay.is-kbd-open .hsd-ws-table textarea.hsd-input,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-ws-table textarea.hsd-input {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    padding: 8px 10px !important;
+  }
+
+  body.is-mobile-kbd-open .hsd-ws-table textarea.hsd-input:focus,
+  .ppt-presentation-overlay.is-kbd-open .hsd-ws-table textarea.hsd-input:focus,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .hsd-ws-table textarea.hsd-input:focus {
+    min-height: 78px !important;
+    border-width: 2px !important;
+  }
+}
+
+/* Stack multi-column worksheet tables into full-width readable cards on < 720px while typing */
+@media (max-width: 720px) {
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table thead,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table thead,
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table colgroup,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table colgroup {
+    display: none !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table tbody,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table tr,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table tr {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 6px 8px !important;
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
+    border-radius: 10px !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table td,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table td {
+    display: block !important;
+    width: 100% !important;
+    padding: 4px 2px !important;
+    border: 0 !important;
+  }
+
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table td[data-col-label]::before,
+  #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table td[data-col-label]::before {
+    content: attr(data-col-label);
+    display: block !important;
+    font-size: 11.8px !important;
+    font-weight: 700 !important;
+    color: #334155;
+    margin-bottom: 3px;
+  }
+
+  html[data-theme="dark"] .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet .hsd-ws-table td[data-col-label]::before,
+  html[data-theme="dark"] #hsdCasesContainer .hsd-slide-shell.is-kbd-open .ppt-slide-sheet .hsd-ws-table td[data-col-label]::before {
+    color: #93c5fd;
+  }
+}
+
+/* 4. DoH Concentric Diagram Mobile Full-Width Crisp Node-Editing Mode (.is-mobile-node-editing) */
+.doh-diagram-shell.is-mobile-node-editing {
+  width: 100% !important;
+  max-width: 100% !important;
+  zoom: 1 !important;
+  min-height: 0 !important;
+  padding: 6px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.doh-diagram-shell.is-mobile-node-editing .doh-oval-bg-svg,
+.doh-diagram-shell.is-mobile-node-editing .doh-arrows-svg,
+.doh-diagram-shell.is-mobile-node-editing .doh-node-card:not(.is-focused-doh-node) {
+  display: none !important;
+}
+
+.doh-diagram-shell.is-mobile-node-editing .doh-structural-zone,
+.doh-diagram-shell.is-mobile-node-editing .doh-inner-oval,
+.doh-diagram-shell.is-mobile-node-editing .doh-inner-arena,
+.doh-diagram-shell.is-mobile-node-editing .doh-pos-ind,
+.doh-diagram-shell.is-mobile-node-editing .doh-pos-soc,
+.doh-diagram-shell.is-mobile-node-editing .doh-pos-out,
+.doh-diagram-shell.is-mobile-node-editing .doh-pos-hsys {
+  display: contents !important;
+}
+
+.doh-diagram-shell.is-mobile-node-editing > .doh-mobile-focus-bar {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.doh-mfb-pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.doh-mfb-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.doh-mfb-pill {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-family: var(--font-display, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.doh-mfb-pill.is-active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .doh-mfb-pill {
+  background: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .doh-mfb-pill.is-active {
+  background: #3b82f6;
+  border-color: #60a5fa;
+  color: #ffffff;
+}
+
+.doh-mfb-done {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #059669;
+  background: #ecfdf5;
+  color: #065f46;
+  font-family: var(--font-display, sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .doh-mfb-done {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #a7f3d0;
+}
+
+.doh-diagram-shell.is-mobile-node-editing .doh-node-card.is-focused-doh-node {
+  position: static !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: 0 8px 20px -12px rgba(37, 99, 235, 0.35) !important;
+  box-sizing: border-box !important;
+}
+
+.doh-diagram-shell.is-mobile-node-editing .doh-node-card.is-focused-doh-node .doh-node-title {
+  font-size: 14.5px !important;
+  line-height: 1.4 !important;
+}
+
+.doh-diagram-shell.is-mobile-node-editing .doh-node-card.is-focused-doh-node textarea.hsd-input {
+  width: 100% !important;
+  font-size: 16px !important;
+  line-height: 1.52 !important;
+  padding: 9px 11px !important;
+  border-radius: 9px !important;
+  box-sizing: border-box !important;
+}
+
 
 

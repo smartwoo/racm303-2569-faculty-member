@@ -2644,4 +2644,22 @@ html[data-role="faculty"] .racm-unav-btn.is-home {
   }
 }
 
+/* Unstick top TV masthead capsule & add bottom scroll runway when mobile virtual keyboard is open so active inputs push cleanly to the top of visualViewport */
+@media (max-width: 960px), (pointer: coarse) {
+  body.is-mobile-kbd-open:not(.is-ppt-fullscreen-open) {
+    padding-bottom: max(48vh, 320px) !important;
+  }
+
+  body.is-mobile-kbd-open header.masthead.tv-masthead,
+  html[data-role="student"] body.is-mobile-kbd-open header.masthead.student-masthead.tv-masthead,
+  html[data-role="faculty"] body.is-mobile-kbd-open header.masthead.faculty-masthead.tv-masthead {
+    position: relative !important;
+    top: auto !important;
+    z-index: 20 !important;
+    padding-top: 6px !important;
+    padding-bottom: 2px !important;
+  }
+}
+
+
 

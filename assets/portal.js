@@ -22602,6 +22602,16 @@
 
   function syncDohShellScale(shellEl, forceRebase) {
     if (!shellEl || !shellEl.isConnected) return false;
+    if (shellEl.classList.contains("is-mobile-node-editing")) {
+      if (shellEl._dohAppliedW !== "100%" || shellEl._dohAppliedZoom !== "1") {
+        shellEl._dohAppliedW = "100%";
+        shellEl._dohAppliedZoom = "1";
+        shellEl.style.width = "100%";
+        shellEl.style.zoom = "1";
+        return true;
+      }
+      return false;
+    }
     const hostEl = shellEl.parentElement;
     if (!hostEl) return false;
     const csHost = window.getComputedStyle(hostEl);
@@ -23048,6 +23058,103 @@
     svgEl.setAttribute("class", "doh-arrows-svg");
     svgEl.setAttribute("aria-hidden", "true");
 
+    const dohNodeTabs = [
+      { key: "structural", shortLbl: "① โครงสร้าง" },
+      { key: "individual", shortLbl: "② บุคคล" },
+      { key: "soc_env", shortLbl: "③ สังคม" },
+      { key: "health_sys", shortLbl: "④ ระบบบริการ" },
+      { key: "outcome", shortLbl: "⑤ ผลลัพธ์" }
+    ];
+    const dohCardMap = new Map();
+    const dohTaMap = new Map();
+    const dohTabBtnMap = new Map();
+    let dohBlurTimer = 0;
+
+    const mobileFocusBar = make("div", null, "doh-mobile-focus-bar hsd-no-print");
+    const mobileTabsWrap = make("div", null, "doh-mfb-pills");
+    dohNodeTabs.forEach((nt) => {
+      const b = make("button", nt.shortLbl, "doh-mfb-pill");
+      b.type = "button";
+      b.addEventListener("pointerdown", (e) => e.preventDefault());
+      b.addEventListener("mousedown", (e) => e.preventDefault());
+      b.addEventListener("click", () => {
+        const targetTa = dohTaMap.get(nt.key);
+        if (targetTa && typeof targetTa.focus === "function") {
+          targetTa.focus({ preventScroll: true });
+        }
+      });
+      dohTabBtnMap.set(nt.key, b);
+      mobileTabsWrap.appendChild(b);
+    });
+    const fullMapBtn = make("button", "🗺 แผนภาพรวม ✓", "doh-mfb-done");
+    fullMapBtn.type = "button";
+    fullMapBtn.addEventListener("click", () => {
+      if (document.activeElement && shell.contains(document.activeElement) && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+    });
+    mobileFocusBar.append(mobileTabsWrap, fullMapBtn);
+
+    const activateMobileDohNodeFocus = (nodeKey) => {
+      if (dohBlurTimer) {
+        clearTimeout(dohBlurTimer);
+        dohBlurTimer = 0;
+      }
+      const isCompactOrTouch =
+        isCoarseTouchDevice() ||
+        (window.innerWidth || 1280) <= 960 ||
+        Boolean(shell._dohAppliedZoom && parseFloat(shell._dohAppliedZoom) < 0.82);
+      if (!isCompactOrTouch) return;
+      const wasEditing = shell.classList.contains("is-mobile-node-editing");
+      shell.classList.add("is-mobile-node-editing");
+      const parentZoomBody = shell.closest(".hsd-box-zoom-body");
+      if (parentZoomBody && parentZoomBody.style.zoom && parentZoomBody.style.zoom !== "1") {
+        parentZoomBody._lastFitSig = "";
+        parentZoomBody.style.zoom = "1";
+      }
+      syncDohShellScale(shell, true);
+      dohCardMap.forEach((cEl, k) => {
+        cEl.classList.toggle("is-focused-doh-node", k === nodeKey);
+      });
+      dohTabBtnMap.forEach((bEl, k) => {
+        bEl.classList.toggle("is-active", k === nodeKey);
+      });
+      const activeTa = dohTaMap.get(nodeKey);
+      if (activeTa && typeof activeTa._fitDohTaNow === "function") {
+        activeTa._fitDohTaNow();
+        requestAnimationFrame(() => activeTa._fitDohTaNow());
+      }
+      if (!wasEditing && typeof syncPptOverlayViewportMetrics === "function") {
+        requestAnimationFrame(() => syncPptOverlayViewportMetrics(true, true));
+      } else if (activeTa && typeof scrollFocusedFieldIntoSlideView === "function") {
+        requestAnimationFrame(() => scrollFocusedFieldIntoSlideView(activeTa, false));
+      }
+    };
+
+    const scheduleExitMobileDohNodeFocus = () => {
+      if (dohBlurTimer) clearTimeout(dohBlurTimer);
+      dohBlurTimer = setTimeout(() => {
+        dohBlurTimer = 0;
+        if (!shell.isConnected) return;
+        if (document.activeElement && shell.contains(document.activeElement)) return;
+        if (!shell.classList.contains("is-mobile-node-editing")) return;
+        shell.classList.remove("is-mobile-node-editing");
+        dohCardMap.forEach((cEl) => cEl.classList.remove("is-focused-doh-node"));
+        dohTabBtnMap.forEach((bEl) => bEl.classList.remove("is-active"));
+        shell._dohAppliedW = "";
+        shell._dohAppliedZoom = "";
+        syncDohShellScale(shell, true);
+        dohTaMap.forEach((tEl) => {
+          if (typeof tEl._fitDohTaNow === "function") tEl._fitDohTaNow();
+        });
+        redrawDiagramArrows(true);
+        const parentSheet = shell.closest(".ppt-slide-sheet");
+        if (parentSheet && typeof autoFitSingleSheetBoxes === "function") {
+          requestAnimationFrame(() => autoFitSingleSheetBoxes(parentSheet, true));
+        }
+      }, 70);
+    };
+
     const buildEditableNodeCard = (nodeKey, extraCardCls) => {
       const nMeta = nodesMeta[nodeKey] || {};
       const cid = nMeta.inputId || `c1b_q1_${nodeKey}`;
@@ -23055,6 +23162,7 @@
       const isOutcome = nodeKey === "outcome";
       const card = make("div", null, `doh-node-card${extraCardCls ? ` ${extraCardCls}` : ""}`);
       card.setAttribute("data-doh-slot", nodeKey);
+      dohCardMap.set(nodeKey, card);
 
       const head = make("div", null, "doh-node-head");
       head.appendChild(make("span", nMeta.title || nodeKey, "doh-node-title"));
@@ -23069,6 +23177,7 @@
       ta.rows = isOutcome ? 2 : nodeKey === "health_sys" ? 2 : 3;
       ta.placeholder = nMeta.placeholder || cellSpec.placeholder || "พิมพ์ประเด็นในโหนดนี้…";
       ta.value = savedVal;
+      dohTaMap.set(nodeKey, ta);
 
       const mirror = make(
         "div",
@@ -23078,8 +23187,10 @@
 
       let composing = false;
       const fitTa = (skipArrowRedraw) => {
-        const minH = isOutcome ? 42 : 44;
-        const maxH = isOutcome ? 72 : 112;
+        const inMobileEdit =
+          shell.classList.contains("is-mobile-node-editing") && card.classList.contains("is-focused-doh-node");
+        const minH = inMobileEdit ? 88 : isOutcome ? 42 : 44;
+        const maxH = inMobileEdit ? 176 : isOutcome ? 72 : 112;
         if (!ta.isConnected || ta.clientWidth === 0) {
           const fbH = `${minH}px`;
           if (ta.style.height !== fbH) ta.style.height = fbH;
@@ -23092,7 +23203,7 @@
         ta.style.height = nextH;
         if (ta._lastAppliedDohH !== nextH) {
           ta._lastAppliedDohH = nextH;
-          if (!skipArrowRedraw) redrawDiagramArrows(false);
+          if (!skipArrowRedraw && !inMobileEdit) redrawDiagramArrows(false);
         }
       };
       ta._fitDohTaNow = () => fitTa(true);
@@ -23115,6 +23226,8 @@
         }
       };
 
+      ta.addEventListener("focus", () => activateMobileDohNodeFocus(nodeKey));
+      ta.addEventListener("blur", scheduleExitMobileDohNodeFocus);
       ta.addEventListener("compositionstart", () => {
         composing = true;
       });
@@ -23148,7 +23261,7 @@
 
     arena.append(svgEl, posInd, posOut, posSoc, posHsys);
     innerOval.append(createDohOvalBgSvg(false), arena);
-    shell.append(createDohOvalBgSvg(true), structZone, innerOval);
+    shell.append(mobileFocusBar, createDohOvalBgSvg(true), structZone, innerOval);
     container.appendChild(shell);
 
     redrawDiagramArrows = mountDohArenaArrows(
@@ -23606,16 +23719,23 @@
     return false;
   }
 
+  function isEditableTextControl(el) {
+    if (!el || !(el instanceof HTMLElement)) return false;
+    const tag = String(el.tagName || "").toUpperCase();
+    if (tag === "TEXTAREA" || Boolean(el.isContentEditable)) return true;
+    if (tag === "INPUT") {
+      const tp = String(el.type || "text").toLowerCase();
+      if (["range", "checkbox", "radio", "button", "submit", "reset", "file", "color", "image", "hidden"].includes(tp)) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
   function isEditableElementFocusedInOverlay() {
     const ae = document.activeElement;
-    if (!ae) return false;
-    const tag = ae.tagName || "";
-    const isEdit = tag === "TEXTAREA" || tag === "INPUT" || Boolean(ae.isContentEditable);
-    if (!isEdit) return false;
-    if (tag === "INPUT") {
-      const tp = String(ae.type || "text").toLowerCase();
-      if (["range", "checkbox", "radio", "button", "submit", "file", "color"].includes(tp)) return false;
-    }
+    if (!isEditableTextControl(ae)) return false;
     return Boolean(ae.closest("#pptPresentationOverlay, .hsd-slide-shell, .ppt-slide-timer-popover"));
   }
 
@@ -23626,8 +23746,9 @@
     const vvScale = vv && vv.scale ? vv.scale : 1;
     const isCoarse = isCoarseTouchDevice();
     const inTimerPop = Boolean(document.activeElement && document.activeElement.closest(".ppt-slide-timer-popover"));
+    const anyEditFocused = isEditableTextControl(document.activeElement) && !inTimerPop;
     const editFocused = isEditableElementFocusedInOverlay() && !inTimerPop;
-    const useVvMetrics = Boolean(vv && (vvScale <= 1.12 || editFocused));
+    const useVvMetrics = Boolean(vv && (vvScale <= 1.12 || editFocused || anyEditFocused));
     let rawVvW = useVvMetrics ? Math.round(vv.width) : layoutW;
     let rawVvH = useVvMetrics ? Math.round(vv.height) : layoutH;
     const rawOffsetTop = useVvMetrics ? Math.max(0, Math.round(vv.offsetTop || 0)) : 0;
@@ -23646,7 +23767,7 @@
     }
 
     const isPortraitNow = layoutH >= layoutW;
-    if (!editFocused && layoutH - rawVvH < 48) {
+    if (!anyEditFocused && layoutH - rawVvH < 48) {
       if (isPortraitNow) {
         pptKbdState.cleanPortraitH = Math.max(pptKbdState.cleanPortraitH || 0, rawVvH, layoutH);
       } else {
@@ -23659,7 +23780,7 @@
     const cleanDrop = Math.max(0, refCleanH - rawVvH);
     const effKbdDrop = Math.max(rawDrop, cleanDrop);
 
-    if (editFocused) {
+    if (anyEditFocused) {
       if (effKbdDrop > 85 || screenH - layoutH > 220) {
         pptKbdState.sawShrink = true;
         pptKbdState.dismissedByBack = false;
@@ -23675,11 +23796,17 @@
       pptKbdState.dismissedByBack = false;
     }
 
+    const isMobileViewport = Boolean(isCoarse || layoutW <= 960);
+    const isMobileKbdOpen = Boolean(
+      !inTimerPop &&
+        isMobileViewport &&
+        ((anyEditFocused && !pptKbdState.dismissedByBack) || (vvScale <= 1.12 && rawDrop > 135))
+    );
     const isKbdOpen = Boolean(
       !inTimerPop &&
         ((editFocused &&
           !pptKbdState.dismissedByBack &&
-          (isCoarse || rawVvH < 580 || effKbdDrop > 75 || screenH - layoutH > 220)) ||
+          (isCoarse || layoutW <= 960 || rawVvH < 580 || effKbdDrop > 75 || screenH - layoutH > 220)) ||
           (isCoarse && vvScale <= 1.12 && rawDrop > 135))
     );
     const isOverlayKbd = Boolean(
@@ -23716,11 +23843,16 @@
     return {
       w,
       h,
+      vvH: rawVvH,
+      rawOffsetTop,
       offsetTop,
       offsetLeft,
       isOverlayKbd,
       aspect,
       isCoarse,
+      isMobileViewport,
+      isMobileKbdOpen,
+      anyEditFocused,
       isKbdOpen,
       useCompactDock,
       isShortLandscape,
@@ -23755,54 +23887,254 @@
     return r;
   }
 
-  function scrollFocusedFieldIntoSlideView(fieldEl) {
+  function syncMobileKbdScenarioFold(sheetEl, env) {
+    if (!sheetEl) return false;
+    const curEnv = env || getPptViewportEnv();
+    const leftPaneEl = sheetEl.querySelector(".hsd-slide-left");
+    const rightPaneEl = sheetEl.querySelector(".hsd-slide-right");
+    const hasSplit = Boolean(leftPaneEl && rightPaneEl);
+    if (!hasSplit) {
+      sheetEl.classList.remove("is-kbd-auto-scen-folded");
+      return false;
+    }
+    if (!curEnv.isKbdOpen) {
+      state.hsdKbdUserPeekingScenario = false;
+      const hadAuto = sheetEl.classList.contains("is-kbd-auto-scen-folded");
+      if (hadAuto) sheetEl.classList.remove("is-kbd-auto-scen-folded");
+      const effFolded = Boolean(state.hsdFsScenFolded || leftPaneEl.hidden);
+      document.querySelectorAll("[data-kbd-scen-toggle]").forEach((btn) => {
+        btn.textContent = effFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
+      });
+      return hadAuto;
+    }
+    const ae = document.activeElement;
+    const inRightPane = Boolean(ae && ae.closest && ae.closest(".hsd-slide-right") && sheetEl.contains(ae));
+    const shouldAutoFold = Boolean(
+      inRightPane &&
+        (curEnv.isCoarse || curEnv.w <= 960 || curEnv.h < 520) &&
+        !state.hsdFsScenFolded &&
+        !leftPaneEl.hidden &&
+        !state.hsdKbdUserPeekingScenario
+    );
+    const prevAuto = sheetEl.classList.contains("is-kbd-auto-scen-folded");
+    sheetEl.classList.toggle("is-kbd-auto-scen-folded", shouldAutoFold);
+    const effFolded = Boolean(state.hsdFsScenFolded || leftPaneEl.hidden || shouldAutoFold);
+    document.querySelectorAll("[data-kbd-scen-toggle]").forEach((btn) => {
+      btn.textContent = effFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
+    });
+    return prevAuto !== shouldAutoFold;
+  }
+
+  function toggleKbdScenarioVisibility(sheetEl) {
+    if (!sheetEl) return;
+    const env = getPptViewportEnv();
+    const leftPaneEl = sheetEl.querySelector(".hsd-slide-left");
+    const currentlyFolded =
+      Boolean(state.hsdFsScenFolded) ||
+      Boolean(leftPaneEl && leftPaneEl.hidden) ||
+      sheetEl.classList.contains("is-kbd-auto-scen-folded");
+    if (env.isKbdOpen && sheetEl.classList.contains("is-kbd-auto-scen-folded")) {
+      state.hsdKbdUserPeekingScenario = true;
+      sheetEl.classList.remove("is-kbd-auto-scen-folded");
+    } else if (
+      env.isKbdOpen &&
+      state.hsdKbdUserPeekingScenario &&
+      !state.hsdFsScenFolded &&
+      !(leftPaneEl && leftPaneEl.hidden)
+    ) {
+      state.hsdKbdUserPeekingScenario = false;
+      sheetEl.classList.add("is-kbd-auto-scen-folded");
+    } else if (currentlyFolded) {
+      state.hsdFsScenFolded = false;
+      sheetEl.classList.remove("is-mobile-scen-folded", "is-kbd-auto-scen-folded");
+      if (leftPaneEl && leftPaneEl.hidden) {
+        state.hsdSinglePaneOverride = "";
+        leftPaneEl.hidden = false;
+        const resizerEl = sheetEl.querySelector(".hsd-split-resizer");
+        if (resizerEl) resizerEl.hidden = false;
+        sheetEl.classList.remove("is-layout-sheet", "is-layout-live-sheet", "is-layout-key-full");
+      }
+      if (env.isKbdOpen) state.hsdKbdUserPeekingScenario = true;
+    } else {
+      state.hsdFsScenFolded = true;
+      sheetEl.classList.add("is-mobile-scen-folded");
+    }
+    const effNow =
+      Boolean(state.hsdFsScenFolded) ||
+      Boolean(leftPaneEl && leftPaneEl.hidden) ||
+      sheetEl.classList.contains("is-kbd-auto-scen-folded");
+    document.querySelectorAll("[data-kbd-scen-toggle]").forEach((btn) => {
+      btn.textContent = effNow ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
+    });
+    const fb = sheetEl.querySelector(".hsd-msj-btn.is-fold-toggle");
+    if (fb) fb.textContent = effNow ? "▸ แสดงโจทย์" : "▾ ซ่อนโจทย์";
+    markSlideBoxesAutoOptimize("both");
+    autoFitSingleSheetBoxes(sheetEl, true);
+    if (document.activeElement && isEditableTextControl(document.activeElement)) {
+      requestAnimationFrame(() => scrollFocusedFieldIntoSlideView(document.activeElement, false));
+    }
+  }
+
+  function scrollFocusedFieldIntoSlideView(fieldEl, isTypingInput) {
     if (!fieldEl || !fieldEl.isConnected) return;
+    const env = getPptViewportEnv();
+    const vv = window.visualViewport;
+    const vvScale = vv && vv.scale ? vv.scale : 1;
+    const vvTop = vv && vvScale <= 1.06 ? Math.max(0, vv.offsetTop || 0) : 0;
+    const vvH =
+      vv && vvScale <= 1.06
+        ? vv.height
+        : window.innerHeight || document.documentElement.clientHeight || 600;
+    const vvBottom = vvTop + vvH;
+
+    // 1. Breakout Room PIN Gate / Compact Lock / 3-Slot Check-in Card
+    const gateCard = fieldEl.closest(
+      ".hsd-srp-pin-lock-bar, .hsd-compact-step-lock, .hsd-qr-checkin-card, .hsd-inline-team-gate"
+    );
+    const inSlideShell = fieldEl.closest(".hsd-slide-shell");
+    const inFsOverlay = fieldEl.closest("#pptPresentationOverlay");
+    if (gateCard && !inSlideShell && !inFsOverlay) {
+      if (!env.isMobileViewport && !env.isKbdOpen) return;
+      const modalScroller = gateCard.closest(".hsd-km-body, .hsd-km-dialog");
+      if (modalScroller) {
+        const mRect = modalScroller.getBoundingClientRect();
+        const cRect = gateCard.getBoundingClientRect();
+        const dy = cRect.top - (mRect.top + 8);
+        if (Math.abs(dy) > 6) modalScroller.scrollTop += dy;
+        return;
+      }
+      const cRect = gateCard.getBoundingClientRect();
+      const desiredTop = vvTop + 8;
+      let deltaY = cRect.top - desiredTop;
+      if (cRect.bottom - deltaY > vvBottom - 8 && cRect.height <= vvH - 12) {
+        deltaY = cRect.bottom - (vvBottom - 8);
+      }
+      if (Math.abs(deltaY) > 6) {
+        window.scrollTo({
+          top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + deltaY),
+          behavior: "auto"
+        });
+      }
+      return;
+    }
+
+    // 2. Normal In-Page Slide Shell (#hsdCasesContainer .hsd-slide-shell): push slide shell flush to top of visualViewport
+    if (inSlideShell && !inFsOverlay && (env.isMobileKbdOpen || env.isKbdOpen)) {
+      const shRect = inSlideShell.getBoundingClientRect();
+      const shDelta = shRect.top - (vvTop + 4);
+      if (Math.abs(shDelta) > 6) {
+        window.scrollTo({
+          top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + shDelta),
+          behavior: "auto"
+        });
+      }
+    }
+
+    // 3. Internal Slide Pane Scroller
     const paneScroller = fieldEl.closest(
       ".hsd-slide-right, .hsd-slide-left, .hsd-key-slide-stage, .ppt-opening-kahoot-stage, .ppt-concept-summary-stage"
     );
     if (paneScroller) {
       paneScroller.style.overflowY = "auto";
       const sRect = paneScroller.getBoundingClientRect();
-      const fRect = getTrueViewportRect(fieldEl, paneScroller);
+      const focusBox =
+        fieldEl.closest(".doh-node-card.is-focused-doh-node, .hsd-qr-checkin-card, .hsd-inline-team-gate") || fieldEl;
+      const fRect = getTrueViewportRect(focusBox, paneScroller);
       if (sRect.height > 0) {
         const snapBar = paneScroller.querySelector(":scope > .hsd-pane-snap-bar");
         const snapSticky =
-          snapBar && window.getComputedStyle(snapBar).position === "sticky"
+          snapBar &&
+          window.getComputedStyle(snapBar).display !== "none" &&
+          window.getComputedStyle(snapBar).position === "sticky"
             ? snapBar.offsetHeight
             : 0;
-        const padTop = Math.max(12, snapSticky + 8);
-        const padBot = 12;
+        const padTop = env.isKbdOpen ? Math.max(8, snapSticky + 6) : Math.max(18, snapSticky + 10);
+        const padBot = env.isKbdOpen ? 10 : 18;
         const availH = Math.max(40, sRect.height - padTop - padBot);
         if (fRect.height > availH) {
           const topDelta = fRect.top - (sRect.top + padTop);
           if (Math.abs(topDelta) > 2) {
             paneScroller.scrollTop += topDelta;
           }
-        } else if (fRect.bottom > sRect.bottom - padBot) {
-          paneScroller.scrollTop += fRect.bottom - (sRect.bottom - padBot);
         } else if (fRect.top < sRect.top + padTop) {
           paneScroller.scrollTop += fRect.top - (sRect.top + padTop);
+        } else if (fRect.bottom > sRect.bottom - padBot) {
+          const maxShift = fRect.top - (sRect.top + padTop);
+          const wantedShift = fRect.bottom - (sRect.bottom - padBot);
+          if (maxShift > 0) {
+            paneScroller.scrollTop += Math.min(wantedShift, maxShift);
+          }
         }
       }
     }
+
+    // 4. Pinch-Zoomed Full-Screen Stage Scroller
     const ov = $("pptPresentationOverlay");
     const stageScroller = ov && !ov.hidden ? ov.querySelector(".ppt-fs-stage-wrap.is-pinch-zoomed") : null;
     if (stageScroller) {
       const stRect = stageScroller.getBoundingClientRect();
       const fRect = getTrueViewportRect(fieldEl, stageScroller);
       if (stRect.height > 0) {
-        if (fRect.bottom > stRect.bottom - 14) {
-          stageScroller.scrollTop += fRect.bottom - (stRect.bottom - 14);
+        if (fRect.bottom > stRect.bottom - 16) {
+          stageScroller.scrollTop += fRect.bottom - (stRect.bottom - 16);
         } else if (fRect.top < stRect.top + 18) {
           stageScroller.scrollTop += fRect.top - (stRect.top + 18);
         }
       }
     }
+
+    // 5. Full-Scroll Worksheet (.hsd-case-card) & General Mobile Text Inputs
+    if (!inSlideShell && !inFsOverlay && env.isMobileKbdOpen) {
+      const modalWrap = fieldEl.closest(".modal-card, .tv-modal-card, .iq-modal-dialog, .cal-modal-card");
+      if (modalWrap) {
+        const mRect = modalWrap.getBoundingClientRect();
+        const fRect = fieldEl.getBoundingClientRect();
+        if (fRect.bottom > mRect.bottom - 20 || fRect.top < mRect.top + 20) {
+          modalWrap.scrollTop += fRect.top - (mRect.top + 28);
+        }
+        return;
+      }
+      const fRect = fieldEl.getBoundingClientRect();
+      const topSafe = vvTop + 18;
+      const botSafe = vvBottom - 22;
+      if (!isTypingInput) {
+        const targetTop = vvTop + Math.min(42, Math.max(14, Math.round(vvH * 0.12)));
+        const dy = fRect.top - targetTop;
+        if (Math.abs(dy) > 8) {
+          window.scrollTo({
+            top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + dy),
+            behavior: "auto"
+          });
+        }
+      } else if (fRect.bottom > botSafe) {
+        const dy = Math.min(fRect.bottom - botSafe, Math.max(0, fRect.top - topSafe));
+        if (dy > 4) {
+          window.scrollTo({
+            top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + dy),
+            behavior: "auto"
+          });
+        }
+      } else if (fRect.top < topSafe) {
+        window.scrollTo({
+          top: Math.max(0, (window.scrollY || window.pageYOffset || 0) + (fRect.top - topSafe)),
+          behavior: "auto"
+        });
+      }
+    }
   }
 
-  function syncPptOverlayViewportMetrics(forceRefit) {
+  function syncPptOverlayViewportMetrics(forceRefit, allowScrollAlign) {
     const ov = $("pptPresentationOverlay");
     const env = getPptViewportEnv();
+    const docEl = document.documentElement;
+    if (docEl) {
+      docEl.style.setProperty("--mobile-vvh", `${env.vvH}px`);
+      docEl.style.setProperty("--mobile-vv-top", `${env.rawOffsetTop}px`);
+    }
+    if (document.body) {
+      document.body.classList.toggle("is-mobile-kbd-open", Boolean(env.isMobileKbdOpen));
+    }
+
     if (ov && !ov.hidden) {
       ov.style.setProperty("--ppt-vvw", `${env.w}px`);
       ov.style.setProperty("--ppt-vvh", `${env.h}px`);
@@ -23815,8 +24147,11 @@
       ov.classList.toggle("is-fs-tools-open", Boolean(state.hsdFsToolsExpanded));
       const stageWrap = ov.querySelector(".ppt-fs-stage-wrap");
       const sheetEl = ov.querySelector(".ppt-slide-sheet");
-      if (stageWrap && sheetEl) {
-        fitSlideSheetToStage(stageWrap, sheetEl, false, Boolean(forceRefit));
+      if (sheetEl) {
+        const foldChanged = syncMobileKbdScenarioFold(sheetEl, env);
+        if (stageWrap) {
+          fitSlideSheetToStage(stageWrap, sheetEl, false, Boolean(forceRefit || foldChanged));
+        }
       }
       ov.querySelectorAll("[data-fs-canvas-mode-btn]").forEach((btn) => {
         const modeVal = btn.getAttribute("data-fs-canvas-mode-btn");
@@ -23826,8 +24161,29 @@
         btn.setAttribute("aria-pressed", activeNow ? "true" : "false");
       });
     }
-    if (isEditableElementFocusedInOverlay() && (env.isKbdOpen || env.isCoarse)) {
-      scrollFocusedFieldIntoSlideView(document.activeElement);
+
+    const inPageShell = document.querySelector("#hsdCasesContainer .hsd-slide-shell");
+    if (inPageShell && (!ov || ov.hidden)) {
+      const prevKbd = inPageShell.classList.contains("is-kbd-open");
+      const nextKbd = Boolean(env.isKbdOpen && env.isMobileViewport);
+      inPageShell.classList.toggle("is-kbd-open", nextKbd);
+      inPageShell.style.setProperty("--ppt-vvh", `${env.vvH}px`);
+      const inPageStage = inPageShell.querySelector(".ppt-canvas-stage");
+      const inPageSheet = inPageShell.querySelector(".ppt-slide-sheet");
+      if (inPageSheet) {
+        const foldChanged = syncMobileKbdScenarioFold(inPageSheet, env);
+        if (inPageStage && (forceRefit || prevKbd !== nextKbd || foldChanged)) {
+          fitSlideSheetToStage(inPageStage, inPageSheet, true, true);
+        }
+      }
+    }
+
+    if (
+      allowScrollAlign !== false &&
+      (env.isKbdOpen || env.isMobileKbdOpen) &&
+      isEditableTextControl(document.activeElement)
+    ) {
+      scrollFocusedFieldIntoSlideView(document.activeElement, false);
     }
   }
 
@@ -23835,80 +24191,123 @@
     if (pptVvListenersInited) return;
     pptVvListenersInited = true;
 
+    window.RACM_MOBILE_KBD_FIT = {
+      sync: syncPptOverlayViewportMetrics,
+      scrollIntoView: scrollFocusedFieldIntoSlideView
+    };
+
     let vvRaf = 0;
-    const onViewportShift = () => {
+    let pendingAllowAlign = false;
+    let lastVvHeight = window.visualViewport
+      ? Math.round(window.visualViewport.height)
+      : window.innerHeight || 0;
+
+    const queueViewportSync = (allowAlign) => {
+      if (allowAlign) pendingAllowAlign = true;
       if (vvRaf) return;
       vvRaf = requestAnimationFrame(() => {
         vvRaf = 0;
-        syncPptOverlayViewportMetrics(true);
+        const doAlign = pendingAllowAlign;
+        pendingAllowAlign = false;
+        syncPptOverlayViewportMetrics(true, doAlign);
       });
     };
 
+    const onViewportResize = () => {
+      const curH = window.visualViewport
+        ? Math.round(window.visualViewport.height)
+        : window.innerHeight || 0;
+      const hChanged = Math.abs(curH - lastVvHeight) >= 16;
+      lastVvHeight = curH;
+      queueViewportSync(hChanged);
+    };
+
+    const onViewportScroll = () => {
+      queueViewportSync(false);
+    };
+
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", onViewportShift, { passive: true });
-      window.visualViewport.addEventListener("scroll", onViewportShift, { passive: true });
+      window.visualViewport.addEventListener("resize", onViewportResize, { passive: true });
+      window.visualViewport.addEventListener("scroll", onViewportScroll, { passive: true });
     }
     if (navigator && navigator.virtualKeyboard && typeof navigator.virtualKeyboard.addEventListener === "function") {
-      navigator.virtualKeyboard.addEventListener("geometrychange", onViewportShift);
+      navigator.virtualKeyboard.addEventListener("geometrychange", onViewportResize);
     }
-    window.addEventListener("resize", onViewportShift, { passive: true });
-    window.addEventListener("orientationchange", () => {
-      pptKbdState.cleanPortraitH = 0;
-      pptKbdState.cleanLandscapeH = 0;
-      setTimeout(() => syncPptOverlayViewportMetrics(true), 120);
-      setTimeout(() => syncPptOverlayViewportMetrics(true), 340);
-    }, { passive: true });
+    window.addEventListener("resize", onViewportResize, { passive: true });
+    window.addEventListener(
+      "orientationchange",
+      () => {
+        pptKbdState.cleanPortraitH = 0;
+        pptKbdState.cleanLandscapeH = 0;
+        setTimeout(() => syncPptOverlayViewportMetrics(true, true), 120);
+        setTimeout(() => syncPptOverlayViewportMetrics(true, true), 340);
+      },
+      { passive: true }
+    );
 
-    const scheduleAnimatedKbdSyncs = () => {
-      syncPptOverlayViewportMetrics(true);
-      [50, 120, 220, 360, 540, 760].forEach((ms) => {
-        setTimeout(() => syncPptOverlayViewportMetrics(true), ms);
+    let kbdAnimTimers = [];
+    const clearKbdAnimTimers = () => {
+      kbdAnimTimers.forEach((id) => clearTimeout(id));
+      kbdAnimTimers = [];
+    };
+
+    const scheduleAnimatedKbdSyncs = (allowAlign) => {
+      clearKbdAnimTimers();
+      syncPptOverlayViewportMetrics(true, allowAlign);
+      [80, 190, 340, 520, 740].forEach((ms) => {
+        kbdAnimTimers.push(setTimeout(() => syncPptOverlayViewportMetrics(true, allowAlign), ms));
       });
     };
 
     document.addEventListener("focusin", (ev) => {
       const t = ev.target;
-      if (!t || !(t instanceof HTMLElement)) return;
-      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
+      if (!isEditableTextControl(t)) return;
       pptKbdState.focusTs = Date.now();
       pptKbdState.sawShrink = false;
       pptKbdState.dismissedByBack = false;
-      scheduleAnimatedKbdSyncs();
+      scheduleAnimatedKbdSyncs(true);
     });
 
-    document.addEventListener("pointerup", (ev) => {
-      const t = ev.target;
-      if (!t || !(t instanceof HTMLElement)) return;
-      if (!t.matches("textarea, input, [contenteditable='true']")) return;
-      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
-      if (pptKbdState.dismissedByBack) {
-        pptKbdState.dismissedByBack = false;
-        pptKbdState.sawShrink = false;
-        pptKbdState.focusTs = Date.now();
-        scheduleAnimatedKbdSyncs();
-      } else {
-        setTimeout(() => {
-          if (document.activeElement === t) scrollFocusedFieldIntoSlideView(t);
-        }, 90);
-      }
-    }, { passive: true });
-
-    document.addEventListener("input", (ev) => {
-      const t = ev.target;
-      if (!t || !(t instanceof HTMLElement)) return;
-      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
-      pptKbdState.dismissedByBack = false;
-      requestAnimationFrame(() => {
-        if (document.activeElement === t) scrollFocusedFieldIntoSlideView(t);
-      });
-    }, { passive: true });
+    document.addEventListener(
+      "pointerup",
+      (ev) => {
+        const t = ev.target;
+        if (!isEditableTextControl(t)) return;
+        if (pptKbdState.dismissedByBack) {
+          pptKbdState.dismissedByBack = false;
+          pptKbdState.sawShrink = false;
+          pptKbdState.focusTs = Date.now();
+          scheduleAnimatedKbdSyncs(true);
+        } else {
+          setTimeout(() => {
+            if (document.activeElement === t) scrollFocusedFieldIntoSlideView(t, false);
+          }, 90);
+        }
+      },
+      { passive: true }
+    );
 
     document.addEventListener("focusout", (ev) => {
       const t = ev.target;
-      if (!t || !(t instanceof HTMLElement)) return;
-      if (!t.closest("#pptPresentationOverlay, .hsd-slide-shell")) return;
-      scheduleAnimatedKbdSyncs();
+      if (!isEditableTextControl(t)) return;
+      scheduleAnimatedKbdSyncs(false);
     });
+
+    let inputAlignRaf = 0;
+    document.addEventListener(
+      "input",
+      (ev) => {
+        const t = ev.target;
+        if (!isEditableTextControl(t) || t !== document.activeElement) return;
+        pptKbdState.dismissedByBack = false;
+        if (inputAlignRaf) cancelAnimationFrame(inputAlignRaf);
+        inputAlignRaf = requestAnimationFrame(() => {
+          inputAlignRaf = 0;
+          scrollFocusedFieldIntoSlideView(t, true);
+        });
+      },
+      { passive: true }
+    );
   }
 
   function syncFsZoomUiReadouts(rootEl, scaleVal) {
@@ -27553,6 +27952,20 @@
       }
 
       if (!isHandout && document.activeElement && boxEl.contains(document.activeElement) && isEditableElementFocusedInOverlay()) {
+        const envTyping = getPptViewportEnv();
+        if (envTyping.isKbdOpen && (envTyping.isCoarse || envTyping.w <= 960 || envTyping.h < 520)) {
+          if (boxEl.style.zoom !== "1") {
+            boxEl._lastFitSig = "";
+            boxEl.style.zoom = "1";
+            if (hasDohShell) {
+              dohShells.forEach((sh) => syncDohShellScale(sh, true));
+            }
+            if (autoTextareas.length) {
+              syncAllBoxTextareas();
+            }
+          }
+          paneEl.style.overflowX = "hidden";
+        }
         paneEl.style.overflowY = "auto";
         if (hasDohShell) {
           dohShells.forEach((sh) => {
@@ -30177,43 +30590,19 @@
       const rightPaneEl = sheet.querySelector(".hsd-slide-right");
       const hasScenSplitPane = Boolean(leftPaneEl && rightPaneEl);
       if (hasScenSplitPane) {
-        const isScenHiddenInit = Boolean(state.hsdFsScenFolded || leftPaneEl.hidden);
+        const isScenHiddenInit = Boolean(
+          state.hsdFsScenFolded || leftPaneEl.hidden || sheet.classList.contains("is-kbd-auto-scen-folded")
+        );
         const kJumpScen = make(
           "button",
           isScenHiddenInit ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์",
           "ppt-fs-tool-btn is-kbd-mini"
         );
         kJumpScen.type = "button";
+        kJumpScen.setAttribute("data-kbd-scen-toggle", "1");
         kJumpScen.addEventListener("pointerdown", (e) => e.preventDefault());
         kJumpScen.addEventListener("mousedown", (e) => e.preventDefault());
-        kJumpScen.addEventListener("click", () => {
-          const currentlyHidden = Boolean(state.hsdFsScenFolded || leftPaneEl.hidden);
-          if (currentlyHidden) {
-            state.hsdFsScenFolded = false;
-            sheet.classList.remove("is-mobile-scen-folded");
-            if (leftPaneEl.hidden) {
-              state.hsdSinglePaneOverride = "";
-              leftPaneEl.hidden = false;
-              const resizerEl = sheet.querySelector(".hsd-split-resizer");
-              if (resizerEl) resizerEl.hidden = false;
-              sheet.classList.remove("is-layout-sheet", "is-layout-live-sheet", "is-layout-key-full");
-            }
-          } else {
-            state.hsdFsScenFolded = true;
-            sheet.classList.add("is-mobile-scen-folded");
-          }
-          const nextHidden = Boolean(state.hsdFsScenFolded || leftPaneEl.hidden);
-          kJumpScen.textContent = nextHidden ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์";
-          const fb = sheet.querySelector(".hsd-msj-btn.is-fold-toggle");
-          if (fb) fb.textContent = nextHidden ? "▸ แสดงโจทย์" : "▾ ซ่อนโจทย์";
-          markSlideBoxesAutoOptimize("both");
-          autoFitSingleSheetBoxes(sheet, true);
-          requestAnimationFrame(() => {
-            if (isEditableElementFocusedInOverlay()) {
-              scrollFocusedFieldIntoSlideView(document.activeElement);
-            }
-          });
-        });
+        kJumpScen.addEventListener("click", () => toggleKbdScenarioVisibility(sheet));
         kbdBar.appendChild(kJumpScen);
       }
 
@@ -30227,7 +30616,7 @@
         if (document.activeElement && typeof document.activeElement.blur === "function") {
           document.activeElement.blur();
         }
-        syncPptOverlayViewportMetrics(true);
+        syncPptOverlayViewportMetrics(true, false);
       });
       kbdBar.appendChild(kDismissBtn);
       return kbdBar;
@@ -33320,6 +33709,35 @@
     stRight.append(handoutBarBtn, notesToggle, thumbToggle, viewStrip, zoomGroup);
     statusBar.append(stLeft, stRight);
     shell.appendChild(statusBar);
+
+    const inPageKbdBar = make("div", null, "ppt-inpage-kbd-bar ppt-fs-kbd-bar hsd-no-print");
+    if (mountedSheet && mountedSheet.querySelector(".hsd-slide-left") && mountedSheet.querySelector(".hsd-slide-right")) {
+      const ipJumpScen = make(
+        "button",
+        state.hsdFsScenFolded ? "📖 แสดงโจทย์" : "📖 ซ่อนโจทย์",
+        "ppt-fs-tool-btn is-kbd-mini"
+      );
+      ipJumpScen.type = "button";
+      ipJumpScen.setAttribute("data-kbd-scen-toggle", "1");
+      ipJumpScen.addEventListener("pointerdown", (e) => e.preventDefault());
+      ipJumpScen.addEventListener("mousedown", (e) => e.preventDefault());
+      ipJumpScen.addEventListener("click", () => toggleKbdScenarioVisibility(mountedSheet));
+      inPageKbdBar.appendChild(ipJumpScen);
+    }
+    const ipSlideBadge = make(
+      "span",
+      `สไลด์ ${state.hsdSlideIdx + 1}/${slides.length}`,
+      "ppt-fs-kbd-badge"
+    );
+    const ipDismissBtn = make("button", "⌨ พับแป้นพิมพ์ ✓", "ppt-fs-tool-btn is-kbd-done");
+    ipDismissBtn.type = "button";
+    ipDismissBtn.addEventListener("click", () => {
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+    });
+    inPageKbdBar.append(ipSlideBadge, ipDismissBtn);
+    shell.appendChild(inPageKbdBar);
 
     container.appendChild(shell);
 
