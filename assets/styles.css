@@ -41070,6 +41070,9 @@ html[data-theme="dark"] .ppt-slide-sheet .hsd-slide-right > .hsd-pane-snap-bar {
 
 .ppt-presentation-overlay.is-vv-overlay-kbd {
   top: var(--ppt-vv-top, 0px) !important;
+  left: var(--ppt-vv-left, 0px) !important;
+  width: var(--ppt-vvw, 100%) !important;
+  right: auto !important;
   bottom: auto !important;
   height: var(--ppt-vvh, 100vh) !important;
   height: var(--ppt-vvh, 100dvh) !important;
@@ -45090,8 +45093,40 @@ body.is-ppt-fullscreen-open {
   margin-bottom: 0 !important;
 }
 
-.ppt-presentation-overlay.is-kbd-open .hsd-mobile-slide-jumpbar {
+.ppt-presentation-overlay.is-kbd-open .ppt-fs-stage-wrap {
+  flex: 1 1 0% !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .hsd-mobile-slide-jumpbar,
+.ppt-presentation-overlay.is-kbd-open .ppt-slide-master-foot,
+.ppt-presentation-overlay.is-kbd-open .ppt-reading-topbar,
+.ppt-presentation-overlay.is-kbd-open .ppt-reading-statusbar {
   display: none !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .ppt-slide-master-head {
+  padding: 4px 10px !important;
+  min-height: 34px !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .hsd-slide-stage.is-16x9-canvas {
+  padding-bottom: 4px !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .hsd-pane-snap-bar {
+  position: static !important;
+  top: auto !important;
+  margin-top: 0 !important;
+  padding-top: 2px !important;
+  z-index: auto !important;
+}
+
+.ppt-presentation-overlay.is-kbd-open .hsd-slide-right > .hsd-box-zoom-body,
+.ppt-presentation-overlay.is-kbd-open .hsd-slide-left > .hsd-box-zoom-body,
+.ppt-presentation-overlay.is-kbd-open .hsd-key-slide-stage > .hsd-box-zoom-body {
+  padding-bottom: 24px !important;
 }
 
 .ppt-presentation-overlay.is-kbd-open > .ppt-fs-kbd-bar {
@@ -45101,7 +45136,7 @@ body.is-ppt-fullscreen-open {
   gap: 10px !important;
   width: 100% !important;
   margin: 0 !important;
-  padding: 6px 12px max(6px, env(safe-area-inset-bottom, 0px)) !important;
+  padding: 5px 12px !important;
   background: #0f172a !important;
   border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-sizing: border-box !important;
