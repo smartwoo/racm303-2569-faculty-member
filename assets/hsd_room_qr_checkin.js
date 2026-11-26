@@ -1092,6 +1092,34 @@
     }
   }
 
+  let idlePinFieldSeq = 0;
+  let lastGlobalTabKeyMs = 0;
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener(
+      "keydown",
+      (ev) => {
+        if (ev && ev.key === "Tab") lastGlobalTabKeyMs = Date.now();
+      },
+      true
+    );
+  }
+
+  function applyIdlePinInputGuards(el, namePrefix) {
+    if (!el) return;
+    idlePinFieldSeq += 1;
+    el.name = `${namePrefix || "racm_pin"}_${Date.now().toString(36)}_${idlePinFieldSeq}`;
+    el.autocomplete = "off";
+    el.spellcheck = false;
+    el.autocapitalize = "off";
+    el.defaultValue = "";
+    el.setAttribute("autocomplete", "off");
+    el.setAttribute("autocorrect", "off");
+    el.setAttribute("aria-autocomplete", "none");
+    el.setAttribute("data-form-type", "other");
+    el.setAttribute("data-lpignore", "true");
+    el.setAttribute("data-1p-ignore", "true");
+  }
+
   /* ---------- 8. Dedicated 6-Room PPT, 16:9 Blank Worksheet PDF & 3-Digit Room-Lock Section (HS1–HS6) ---------- */
   function buildSixRoomPptsSectionDOM(modCodeOpt, opts) {
     const cfg = opts || {};
@@ -1099,12 +1127,12 @@
     const isFaculty = root.PORTAL_ROLE === "faculty";
     const activeRoom = Number(cfg.activeRoomId) || 0;
 
-    // Always start fresh & empty on Case Discussion entry so old profiles (e.g. 053) never stick
-    const initStu = cfg.forcePrefillStudent && cfg.forcePrefillStudent.id ? cfg.forcePrefillStudent : null;
-    let pinQuery = initStu ? String(initStu.id).slice(-3) : "";
-    let lockedStudent = initStu || null;
+    // Always start fresh, empty, and unfocused on Case Discussion entry until user explicitly taps to type
+    let pinQuery = "";
+    let lockedStudent = null;
     let manualUnlockedAll = false;
     let needIdPromptMsg = "";
+    let userEngagedPin = false;
 
     const sec = document.createElement("section");
     sec.className = "hsd-six-room-ppts-section hsd-no-print";
@@ -1155,17 +1183,25 @@
     const pinInput = document.createElement("input");
     pinInput.type = "text";
     pinInput.inputMode = "numeric";
-    pinInput.autocomplete = "off";
+    applyIdlePinInputGuards(pinInput, "racm_srp_pin");
     pinInput.maxLength = 24;
     pinInput.className = "hsd-srp-pin-input";
     pinInput.placeholder = "กรอกรหัส 3 ตัวท้ายใหม่ (เช่น 018)…";
-    pinInput.value = pinQuery;
+    pinInput.value = "";
+
+    const markUserEngaged = () => {
+      userEngagedPin = true;
+    };
+    pinInput.addEventListener("pointerdown", markUserEngaged, { passive: true });
+    pinInput.addEventListener("mousedown", markUserEngaged, { passive: true });
+    pinInput.addEventListener("touchstart", markUserEngaged, { passive: true });
+    pinInput.addEventListener("click", markUserEngaged, { passive: true });
 
     const clearPinBtn = document.createElement("button");
     clearPinBtn.type = "button";
     clearPinBtn.className = "hsd-srp-pin-clear-btn";
     clearPinBtn.textContent = "✕ ล้างรหัส / โปรไฟล์";
-    clearPinBtn.hidden = !pinQuery;
+    clearPinBtn.hidden = true;
 
     inputRow.append(pinInput, clearPinBtn);
     lockFormCol.append(lockLabel, inputRow);
@@ -1242,10 +1278,22 @@
     }
 
     pinInput.addEventListener("focus", () => {
+      if (!userEngagedPin && Date.now() - lastGlobalTabKeyMs > 400) {
+        if (typeof pinInput.blur === "function") pinInput.blur();
+        return;
+      }
+      userEngagedPin = true;
       alignGateInputAboveMobileKeyboard(pinInput);
     });
 
     pinInput.addEventListener("input", () => {
+      if (!userEngagedPin && document.activeElement !== pinInput) {
+        pinInput.value = "";
+        pinQuery = "";
+        lockedStudent = null;
+        return;
+      }
+      userEngagedPin = true;
       pinQuery = pinInput.value;
       resolveFromPinQuery(pinQuery);
       syncSectionUI();
@@ -1253,6 +1301,7 @@
     });
 
     pinInput.addEventListener("keydown", (ev) => {
+      userEngagedPin = true;
       if (ev.key === "Enter") {
         ev.preventDefault();
         const trimmed = pinInput.value.trim();
@@ -1276,15 +1325,20 @@
     });
 
     sec._resetPinState = () => {
+      userEngagedPin = false;
       pinQuery = "";
       pinInput.value = "";
       lockedStudent = null;
       manualUnlockedAll = false;
       needIdPromptMsg = "";
+      if (document.activeElement === pinInput && typeof pinInput.blur === "function") {
+        pinInput.blur();
+      }
       syncSectionUI();
     };
 
     sec._focusPinInputWithPrompt = (msgText) => {
+      userEngagedPin = true;
       needIdPromptMsg = msgText || "🔑 กรุณากรอกรหัสนักศึกษา 3 ตัวท้ายด้านซ้าย แล้วกดยืนยันเพื่อเข้าสู่ Breakout Room ที่ถูกต้องของคุณ";
       syncSectionUI();
       if (typeof pinInput.focus === "function") pinInput.focus({ preventScroll: true });
@@ -1295,6 +1349,7 @@
     };
 
     clearPinBtn.addEventListener("click", () => {
+      userEngagedPin = false;
       pinQuery = "";
       pinInput.value = "";
       lockedStudent = null;
@@ -1305,7 +1360,23 @@
         root.RACM_PORTAL_API.clearAllPersonalization({ keepCurrentTab: true, skipRenderHsd: true });
       }
       syncSectionUI();
-      pinInput.focus();
+      if (document.activeElement === pinInput && typeof pinInput.blur === "function") {
+        pinInput.blur();
+      }
+    });
+
+    requestAnimationFrame(() => {
+      if (!userEngagedPin) {
+        if (pinInput.value) {
+          pinInput.value = "";
+          pinQuery = "";
+          lockedStudent = null;
+          syncSectionUI();
+        }
+        if (document.activeElement === pinInput && typeof pinInput.blur === "function") {
+          pinInput.blur();
+        }
+      }
     });
 
     function syncSectionUI() {
@@ -1660,11 +1731,19 @@
     const inp = document.createElement("input");
     inp.type = "text";
     inp.inputMode = "numeric";
-    inp.autocomplete = "off";
+    applyIdlePinInputGuards(inp, "racm_csl_pin");
     inp.maxLength = 16;
     inp.className = "hsd-csl-input";
     inp.placeholder = "กรอกรหัส 3 ตัวใหม่ (เช่น 018)";
-    inp.value = curVal;
+    inp.value = "";
+    let userEngagedCsl = false;
+    const markEngagedCsl = () => {
+      userEngagedCsl = true;
+    };
+    inp.addEventListener("pointerdown", markEngagedCsl, { passive: true });
+    inp.addEventListener("mousedown", markEngagedCsl, { passive: true });
+    inp.addEventListener("touchstart", markEngagedCsl, { passive: true });
+    inp.addEventListener("click", markEngagedCsl, { passive: true });
 
     const statusWrap = document.createElement("div");
     statusWrap.className = "hsd-csl-status";
@@ -1737,6 +1816,7 @@
         clr.textContent = "✕";
         clr.title = "ล้างรหัสและโปรไฟล์";
         clr.addEventListener("click", () => {
+          userEngagedCsl = false;
           curStu = null;
           curVal = "";
           inp.value = "";
@@ -1745,7 +1825,9 @@
             root.RACM_PORTAL_API.clearAllPersonalization({ keepCurrentTab: true, skipRenderHsd: true });
           }
           sync();
-          inp.focus();
+          if (document.activeElement === inp && typeof inp.blur === "function") {
+            inp.blur();
+          }
         });
         statusWrap.append(badge, btn, newTabA, clr);
         return;
@@ -1798,17 +1880,33 @@
     }
 
     box._resetPinState = () => {
+      userEngagedCsl = false;
       curStu = null;
       curVal = "";
       inp.value = "";
+      if (document.activeElement === inp && typeof inp.blur === "function") {
+        inp.blur();
+      }
       sync();
     };
 
     inp.addEventListener("focus", () => {
+      if (!userEngagedCsl && Date.now() - lastGlobalTabKeyMs > 400) {
+        if (typeof inp.blur === "function") inp.blur();
+        return;
+      }
+      userEngagedCsl = true;
       alignGateInputAboveMobileKeyboard(inp);
     });
 
     inp.addEventListener("input", () => {
+      if (!userEngagedCsl && document.activeElement !== inp) {
+        inp.value = "";
+        curVal = "";
+        curStu = null;
+        return;
+      }
+      userEngagedCsl = true;
       curVal = inp.value;
       const q = curVal.trim();
       if (!q || /^\d{1,2}$/.test(q)) {
@@ -2003,7 +2101,7 @@
       s.type = "text";
       s.inputMode = "numeric";
       s.pattern = "[0-9]*";
-      s.autocomplete = "off";
+      applyIdlePinInputGuards(s, `racm_qcg_s${idx}`);
       s.className = "hsd-qcg-slot";
       s.placeholder = "•";
       s.setAttribute("aria-label", `รหัสนักศึกษาหลักที่ ${idx + 1}`);
@@ -2664,6 +2762,30 @@
     renderStudentQrCheckinGateDOM,
     teardownCheckinGateListeners
   };
+
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("pageshow", (ev) => {
+      if (typeof document === "undefined") return;
+      document
+        .querySelectorAll(".hsd-six-room-ppts-section[data-hsd-pin-resettable='1'], .hsd-compact-step-lock[data-hsd-pin-resettable='1']")
+        .forEach((el) => {
+          if (ev && ev.persisted && typeof el._resetPinState === "function") {
+            try {
+              el._resetPinState();
+            } catch (_) {}
+          }
+        });
+      const act = document.activeElement;
+      if (
+        act &&
+        act.classList &&
+        (act.classList.contains("hsd-srp-pin-input") || act.classList.contains("hsd-csl-input")) &&
+        typeof act.blur === "function"
+      ) {
+        act.blur();
+      }
+    });
+  }
 
   if (root) {
     root.RACM_HSD_ROOM_QR = api;

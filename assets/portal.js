@@ -2015,6 +2015,16 @@
     if (tabId === "hs-discussion") {
       markSlideBoxesAutoOptimize("both");
       renderHsDiscussionView();
+      if (
+        state.hsdDriveFolderOpen &&
+        document.activeElement &&
+        document.activeElement !== document.body &&
+        typeof document.activeElement.blur === "function" &&
+        document.activeElement.matches &&
+        document.activeElement.matches("input, textarea, select")
+      ) {
+        document.activeElement.blur();
+      }
       if (!state.isPptSlideSharePopup) {
         requestAnimationFrame(() => {
           window.scrollTo({ top: 0, behavior: "instant" });

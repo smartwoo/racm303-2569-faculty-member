@@ -2424,13 +2424,6 @@
 
     searchInput.addEventListener("input", renderStudentChoices);
     renderStudentChoices();
-
-    const isMobileOrCoarse =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(pointer: coarse), (max-width: 960px)").matches;
-    if (!isMobileOrCoarse) {
-      requestAnimationFrame(() => searchInput.focus({ preventScroll: true }));
-    }
   }
 
   function closeAllTvModals() {
