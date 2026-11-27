@@ -1799,8 +1799,23 @@
     return true;
   }
 
-  function downloadHs1AnswerKey16x9Pdf() {
-    const fileName = "RACM303_2569_HS1_Answer_Key_16x9.pdf";
+  function isHsModuleAnswerKeyPdfUnlocked(modIdOpt) {
+    const cleanMod = /^HS[1-6]$/i.test(String(modIdOpt || "")) ? String(modIdOpt).toUpperCase() : "HS1";
+    if (ROLE === "faculty") return true;
+    const rel = HSD_KEY && Array.isArray(HSD_KEY.releasedModules) ? HSD_KEY.releasedModules : [];
+    return rel.includes(cleanMod);
+  }
+
+  function downloadHsModuleAnswerKey16x9Pdf(modIdOpt) {
+    const raw = String(modIdOpt || "").toUpperCase();
+    const cleanMod = /^HS[1-6]$/.test(raw) ? raw : (/^HS[1-6]$/.test(String(getActiveSlideSessionMod() || "")) ? getActiveSlideSessionMod() : "HS1");
+    if (!isHsModuleAnswerKeyPdfUnlocked(cleanMod)) {
+      const mObj = (HSD_DATA.modules || []).find((m) => m.id === cleanMod);
+      const whenTxt = (mObj && (mObj.unlockAfterLabel || mObj.unlockShortLabel || mObj.scheduleDate)) || "หลังจบคาบเรียน";
+      window.alert(`🔒 เฉลย Answer Key คาบ ${cleanMod} (RACM303_2569_${cleanMod}_Answer_Key_16x9.pdf) จะเปิดให้ดาวน์โหลดหลังจบคาบอภิปราย (${whenTxt})`);
+      return false;
+    }
+    const fileName = `RACM303_2569_${cleanMod}_Answer_Key_16x9.pdf`;
     const href = `exports/pdf/${fileName}`;
     const a = document.createElement("a");
     a.href = href;
@@ -1809,6 +1824,360 @@
     a.click();
     setTimeout(() => a.remove(), 400);
     return true;
+  }
+
+  function downloadHs1AnswerKey16x9Pdf() {
+    return downloadHsModuleAnswerKey16x9Pdf("HS1");
+  }
+
+  function mountHsModuleAnswerKey16x9FullBleedDOM(modIdOpt, opts) {
+    const cleanMod = /^HS[1-6]$/i.test(String(modIdOpt || "")) ? String(modIdOpt).toUpperCase() : "HS1";
+    const openRubricsInline = Boolean(opts && opts.openRubricsInline);
+    const prevFacultyMode = state.hsdFacultyMode;
+    const prevPinAll = state.hsdKeyPinAllOpen;
+    state.hsdFacultyMode = "teacher";
+    state.hsdKeyPinAllOpen = true;
+
+    const mod = (HSD_DATA.modules || []).find((m) => m.id === cleanMod) || {
+      id: cleanMod,
+      code: cleanMod,
+      title: `Case Discussion ${cleanMod}`,
+      enTitle: `Health Systems Case Discussion ${cleanMod}`
+    };
+    const cases = (HSD_DATA.cases || []).filter((c) => c.module === cleanMod);
+    const slideSpecs = [];
+    const ktTocEntries = [];
+    let fwTotalCount = 0;
+    let fuTotalCount = 0;
+    let qTotalCount = 0;
+
+    cases.forEach((c) => {
+      (c.questions || []).forEach((qObj, qIdx) => {
+        qTotalCount += 1;
+        const shortNum = getShortQuestionNumLabel(qObj, qIdx);
+        const tk = (HSD_KEY && HSD_KEY.keys && HSD_KEY.keys[qObj.id]) || null;
+        const hasDiagramKey = Boolean(tk && tk.diagramKey && Array.isArray(tk.diagramKey.steps));
+        const rowCount = tk && tk.keyTable && Array.isArray(tk.keyTable.rows) ? tk.keyTable.rows.length : 0;
+
+        slideSpecs.push({
+          kind: "question",
+          pedStage: 4,
+          forceLayout: "split-key-all",
+          diagramViewMode: hasDiagramKey ? "diagram" : "table",
+          expandRubric: !hasDiagramKey && openRubricsInline,
+          pedBadge: hasDiagramKey
+            ? "🔓 โจทย์ไฮไลต์หลักฐาน + แผนภาพเฉลย (DoH Diagram Key)"
+            : "🔓 โจทย์ไฮไลต์หลักฐาน + เฉลยแนวคำตอบมาตรฐาน",
+          pedShort: "④ Highlight+Key",
+          mod,
+          caseObj: c,
+          qObj,
+          shortNum
+        });
+
+        if (hasDiagramKey || rowCount >= 5) {
+          slideSpecs.push({
+            kind: "question",
+            pedStage: 3,
+            forceLayout: "key-full",
+            diagramViewMode: "table",
+            expandRubric: false,
+            pedBadge: hasDiagramKey
+              ? "🔓 ตารางสรุปหลักฐานรายหมวดฉบับเต็ม (Determinants of Health)"
+              : "🔓 เฉลยแนวคำตอบมาตรฐานฉบับเต็ม (Full Answer Key Table)",
+            pedShort: "③ ตารางเฉลยฉบับเต็ม",
+            mod,
+            caseObj: c,
+            qObj,
+            shortNum
+          });
+          if (tk && ((tk.rubric && tk.rubric.length) || tk.hsBridge)) {
+            slideSpecs.push({
+              kind: "question",
+              pedStage: 3,
+              forceLayout: "key-full",
+              diagramViewMode: "table",
+              rubricOnly: true,
+              expandRubric: true,
+              pedBadge: "🎯 เกณฑ์การให้คะแนน (Scoring Rubric) & ประเด็นสังเคราะห์เชิงระบบ",
+              pedShort: "🎯 เกณฑ์คะแนน & เชื่อมโยงทฤษฎี",
+              mod,
+              caseObj: c,
+              qObj,
+              shortNum
+            });
+          }
+        } else if (!openRubricsInline && tk && ((tk.rubric && tk.rubric.length) || tk.hsBridge)) {
+          slideSpecs.push({
+            kind: "question",
+            pedStage: 3,
+            forceLayout: "key-full",
+            diagramViewMode: "table",
+            expandRubric: true,
+            pedBadge: "🔓 เฉลยแนวคำตอบมาตรฐานฉบับเต็ม + เกณฑ์การให้คะแนน & ประเด็นสังเคราะห์เชิงระบบ",
+            pedShort: "③ Key + เกณฑ์คะแนน",
+            mod,
+            caseObj: c,
+            qObj,
+            shortNum
+          });
+        }
+
+        const cs = qObj && qObj.conceptSummarySlide ? qObj.conceptSummarySlide : null;
+        if (cs) {
+          const fwList = Array.isArray(cs.frameworkSynthesisSlides) && cs.frameworkSynthesisSlides.length
+            ? cs.frameworkSynthesisSlides
+            : cs.frameworkSynthesisSlide
+            ? [cs.frameworkSynthesisSlide]
+            : [];
+          const fuList = Array.isArray(cs.followUpSummarySlides) ? cs.followUpSummarySlides : [];
+          fwTotalCount += fwList.length;
+          fuTotalCount += fuList.length;
+          ktTocEntries.push({
+            num: cs.takeawayNumber || ktTocEntries.length + 1,
+            shortNum,
+            title: cs.title || qObj.title || "",
+            fwLen: fwList.length,
+            fuLen: fuList.length
+          });
+
+          fwList.forEach((fw, fwIdx) => {
+            slideSpecs.push({
+              kind: "concept-summary",
+              subKind: "framework-visual",
+              pedStage: 5 + fwIdx,
+              pedKey: fwIdx === 0 ? "concept-framework" : `concept-framework-${fwIdx + 1}`,
+              forceLayout: "concept-summary",
+              pedBadge: `Essential Framework · ${fw.badge || fw.studentBadge || fw.kicker || "Key Takeaway"}`,
+              pedShort: fw.shortLabel || "Framework",
+              mod,
+              caseObj: c,
+              qObj,
+              conceptSummary: cs,
+              frameworkVisual: fw,
+              isHiddenSlide: false,
+              shortNum
+            });
+          });
+          slideSpecs.push({
+            kind: "concept-summary",
+            subKind: "narrative",
+            pedStage: 5 + fwList.length,
+            pedKey: "concept-summary",
+            forceLayout: "concept-summary",
+            pedBadge: `Key Takeaway #${cs.takeawayNumber || ""} · สรุปสาระสำคัญ`,
+            pedShort: cs.shortLabel || "Key Takeaway",
+            mod,
+            caseObj: c,
+            qObj,
+            conceptSummary: cs,
+            isHiddenSlide: false,
+            shortNum
+          });
+          fuList.forEach((fu, fuIdx) => {
+            slideSpecs.push({
+              kind: "concept-summary",
+              subKind: fu.subKind || "matrix",
+              pedStage: 5 + fwList.length + 1 + fuIdx,
+              pedKey: `concept-followup-${fuIdx + 1}`,
+              forceLayout: "concept-summary",
+              pedBadge: `Analytical Matrix · ${fu.badge || fu.studentBadge || fu.kicker || "ตารางสังเคราะห์"}`,
+              pedShort: fu.shortLabel || "Matrix",
+              mod,
+              caseObj: c,
+              qObj,
+              conceptSummary: cs,
+              followUpSlide: fu,
+              isHiddenSlide: false,
+              shortNum
+            });
+          });
+        }
+      });
+    });
+
+    const totalPages = slideSpecs.length + 1;
+    let pageStyleEl = document.getElementById("pptHandoutDynamicPageStyle");
+    if (!pageStyleEl) {
+      pageStyleEl = document.createElement("style");
+      pageStyleEl.id = "pptHandoutDynamicPageStyle";
+      document.head.appendChild(pageStyleEl);
+    }
+    pageStyleEl.textContent = `
+      @media print {
+        @page { size: 1280px 720px; margin: 0; }
+        html, body { margin: 0 !important; padding: 0 !important; width: 1280px !important; background: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body.print-ppt-handout-mode > *:not(#pptHandoutPrintMount) { display: none !important; }
+        body.print-ppt-handout-mode #pptHandoutPrintMount { display: block !important; position: static !important; width: 1280px !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
+      }
+      .hsd-ak-pdf-page {
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        page-break-after: always;
+        break-after: page;
+        background: #ffffff;
+        box-sizing: border-box;
+        position: relative;
+      }
+      .hsd-ak-pdf-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+      .hsd-ak-pdf-page > .ppt-slide-sheet {
+        width: 1280px !important;
+        height: 720px !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    `;
+
+    let mount = document.getElementById("pptHandoutPrintMount");
+    if (!mount) {
+      mount = make("div", null, "ppt-handout-print-mount");
+      mount.id = "pptHandoutPrintMount";
+      document.body.appendChild(mount);
+    }
+    mount.replaceChildren();
+    document.documentElement.setAttribute("data-theme", "light");
+
+    const accentPalette = ["#2563eb", "#0d9488", "#d97706", "#7c3aed", "#e11d48", "#059669", "#0284c7"];
+    const isCompactToc = ktTocEntries.length >= 6;
+    const tocCardsHtml = ktTocEntries
+      .map((kt, idx) => {
+        const col = accentPalette[idx % accentPalette.length];
+        const extraTags = [];
+        if (kt.fwLen > 0) extraTags.push(`Essential Framework ${kt.fwLen} แผ่น`);
+        if (kt.fuLen > 0) extraTags.push(`ตารางสังเคราะห์ ${kt.fuLen} แผ่น`);
+        const extraSuffix = extraTags.length ? ` <span style="color:#0f4c97;font-weight:700;">(${extraTags.join(" + ")})</span>` : "";
+        return `<div style="background:#ffffff;border:1px solid #dbeafe;border-left:4px solid ${col};border-radius:10px;padding:${isCompactToc ? "6px 10px" : "9px 12px"};">
+          <strong>Key Takeaway #${escapeHtml(String(kt.num))} (${escapeHtml(kt.shortNum)}):</strong> ${escapeHtml(kt.title)}${extraSuffix}
+        </div>`;
+      })
+      .join("");
+
+    const caseBulletsHtml = cases
+      .map((c) => {
+        const qLen = (c.questions || []).length;
+        return `<div style="font-size:13.2px;line-height:1.45;color:#1e293b;">• <strong>${escapeHtml(c.title)}:</strong> ไฮไลต์หลักฐานจากสถานการณ์ + เฉลยแนวคำตอบมาตรฐาน + เกณฑ์การให้คะแนน (${qLen} ข้อย่อย)</div>`;
+      })
+      .join("");
+
+    const topSummaryChip = `${cases.length} กรณี · ${qTotalCount} ข้อ${fwTotalCount > 0 ? ` · ${fwTotalCount} Frameworks` : ""} · ${ktTocEntries.length} Key Takeaways`;
+    const coverPage = make("section", null, "hsd-ak-pdf-page");
+    coverPage.innerHTML = `
+      <div style="width:1280px;height:720px;box-sizing:border-box;padding:24px 34px 18px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Anuphan','Sarabun','Plus Jakarta Sans',sans-serif;color:#0f172a;background:#ffffff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1.5px solid #e2e8f0;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="background:#0f4c97;color:#ffffff;font-weight:700;font-size:14px;padding:6px 14px;border-radius:999px;">คาบ ${escapeHtml(cleanMod)} · เฉลย &amp; สรุปสาระสำคัญ (16:9)</span>
+            <span style="font-size:18.5px;font-weight:800;color:#0f172a;">Case Discussion: ${escapeHtml(cleanMod)} — Answer Key${fwTotalCount > 0 ? ", Essential Frameworks" : ""} &amp; Key Takeaways</span>
+          </div>
+          <span style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-weight:700;font-size:13.2px;padding:5px 14px;border-radius:999px;">${escapeHtml(topSummaryChip)}</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.12fr 0.88fr;gap:22px;flex:1;min-height:0;padding:16px 0 12px;">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:13.5px;font-weight:700;color:#1d4ed8;margin-bottom:4px;">📅 ${escapeHtml(mod.scheduleDate || "")}${mod.discTime ? ` · เวลาอภิปราย ${escapeHtml(mod.discTime)}` : ""}${mod.examWeight ? ` · สัดส่วนข้อสอบ ${escapeHtml(mod.examWeight)} (Open-Note A4)` : ""}</div>
+              <h1 style="margin:0 0 6px;font-size:33px;font-weight:800;color:#0f4c97;letter-spacing:-0.02em;">Case Discussion: ${escapeHtml(cleanMod)} (Answer Key)</h1>
+              <div style="font-size:16px;font-weight:700;color:#0f172a;line-height:1.38;">${escapeHtml(mod.title || "")}</div>
+            </div>
+
+            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;padding:12px 16px;font-size:13.3px;line-height:1.52;color:#334155;">
+              เอกสารชุดนี้รวบรวม <strong>เฉลยแนวคำตอบมาตรฐานประจำคาบ ${escapeHtml(cleanMod)}</strong> พร้อม <strong>ไฮไลต์หลักฐานจากสถานการณ์ (Supporting Evidence)</strong>, <strong>เกณฑ์การให้คะแนน (Scoring Rubric)</strong>, <strong>จุดเชื่อมโยงทฤษฎีระบบสุขภาพ</strong>${fwTotalCount > 0 ? `, <strong>Essential Frameworks (${fwTotalCount} แผ่น)</strong>` : ""}${fuTotalCount > 0 ? `, <strong>ตารางสังเคราะห์</strong>` : ""} และ <strong>Key Takeaways ครบทั้ง ${ktTocEntries.length} หัวข้อ</strong>${mod.summaryFocus ? `<br><span style="color:#0f4c97;font-weight:600;">จุดเน้นประจำคาบ:</span> ${escapeHtml(mod.summaryFocus)}` : ""}
+            </div>
+
+            <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:14px;padding:13px 16px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;">
+              <div style="font-size:14.5px;font-weight:800;color:#0f4c97;">📋 โครงสร้างเนื้อหาและเฉลยรายกรณีศึกษา (${cases.length} กรณีศึกษา · ${qTotalCount} ข้อย่อย)</div>
+              ${caseBulletsHtml}
+            </div>
+          </div>
+
+          <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:15px 18px;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;">
+            <div style="font-size:15px;font-weight:800;color:#0f4c97;margin-bottom:2px;">🧭 สารบัญ${fwTotalCount > 0 ? " Essential Frameworks &amp;" : ""} Key Takeaways (#1–#${ktTocEntries.length})</div>
+            <div style="display:flex;flex-direction:column;gap:${isCompactToc ? "6.5px" : "10px"};font-size:${isCompactToc ? "12.4px" : "13.2px"};line-height:1.45;flex:1;justify-content:${isCompactToc ? "space-between" : "flex-start"};">
+              ${tocCardsHtml}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569;">
+          <span>คาบ ${escapeHtml(cleanMod)}: ${escapeHtml(mod.enTitle || "")}</span>
+          <span>RACM 303 (ปีการศึกษา 2569) · Answer Key &amp; Key Takeaways 16:9 · หน้า 1 / ${totalPages}</span>
+        </div>
+      </div>
+    `;
+    mount.appendChild(coverPage);
+
+    const dummyDeckForCount = new Array(totalPages).fill({});
+    slideSpecs.forEach((it, idx) => {
+      const pageNum = idx + 2;
+      const pageWrap = make("section", null, "hsd-ak-pdf-page");
+      state.hsdKeyDiagramViewMode = it.diagramViewMode || "diagram";
+      const slideSheet = buildPptSlideSheetDOM(it, dummyDeckForCount, false, {
+        forceLayout: it.forceLayout,
+        forceOrient: "vertical",
+        blankWorksheet: false,
+        slideNumber: pageNum
+      });
+      if (it.expandRubric) {
+        slideSheet.querySelectorAll(".ppt-key-rubric-mask").forEach((m) => m.remove());
+        slideSheet.querySelectorAll(".hsd-tk-grid").forEach((g) => {
+          g.hidden = false;
+          g.removeAttribute("hidden");
+          if (it.rubricOnly) {
+            g.style.gap = "18px";
+            g.style.marginTop = "14px";
+            g.querySelectorAll(".hsd-rubric-card, .hsd-bridge-card").forEach((card) => {
+              card.style.padding = "16px 20px";
+              card.style.borderRadius = "12px";
+            });
+            g.querySelectorAll("h5").forEach((h) => {
+              h.style.fontSize = "15.5px";
+              h.style.marginBottom = "10px";
+            });
+            g.querySelectorAll("ul").forEach((ul) => {
+              ul.style.fontSize = "14.2px";
+              ul.style.lineHeight = "1.62";
+            });
+          }
+        });
+        if (it.rubricOnly) {
+          slideSheet.querySelectorAll(".clean-table-wrap, .doh-diagram-shell, .hsd-doh-key-mode-bar").forEach((el) => el.remove());
+        }
+        slideSheet.querySelectorAll("details").forEach((d) => {
+          d.open = true;
+          d.setAttribute("open", "");
+        });
+      }
+      pageWrap.appendChild(slideSheet);
+      mount.appendChild(pageWrap);
+    });
+    state.hsdKeyDiagramViewMode = "diagram";
+
+    document.body.classList.add("print-ppt-handout-mode");
+    mount.querySelectorAll(".ppt-slide-sheet").forEach((sh) => {
+      if (
+        sh.classList.contains("is-layout-concept-summary") &&
+        !sh.classList.contains("is-hidden-slide-sheet")
+      ) {
+        const csStage = sh.querySelector(".ppt-concept-summary-stage");
+        if (csStage) fitConceptSummarySlideStage(sh, csStage, true);
+      } else {
+        autoFitSingleSheetBoxes(sh, true);
+      }
+      if (typeof sh._redrawConceptLines === "function") sh._redrawConceptLines();
+    });
+
+    state.hsdFacultyMode = prevFacultyMode;
+    state.hsdKeyPinAllOpen = prevPinAll;
+    return { modId: cleanMod, totalPages, slideCount: slideSpecs.length };
+  }
+
+  function mountHs1AnswerKey16x9FullBleedDOM(opts) {
+    return mountHsModuleAnswerKey16x9FullBleedDOM("HS1", opts);
   }
 
   function openHsDiscussionRoom(mod, roomIdOpt, stuObj) {
@@ -13528,19 +13897,21 @@
             switchTab("hs-discussion");
           }
         },
-        {
-          uid: "course:hs1-ak-pdf",
-          icoCls: "is-pdf",
-          icoTxt: "PDF",
-          fileName: "RACM303_2569_HS1_Answer_Key_16x9.pdf",
-          kicker: "🔓 ไฟล์ PDF เฉลย Answer Key คาบ HS1 (16:9)",
-          headCls: "is-full",
-          title: "เฉลยแนวคำตอบมาตรฐาน + Essential Frameworks & Key Takeaways คาบ HS1 (.pdf)",
-          subDesc: "รวมโจทย์ไฮไลต์หลักฐาน แผนภาพ DoH Diagram Key เกณฑ์คะแนน 10 Essential Frameworks และ Key Takeaways #1–#6 (31 หน้า 16:9)",
-          chipLabel: "⬇ ดาวน์โหลด Answer Key HS1",
-          meta: "31 หน้า · 16:9",
-          onOpen: () => downloadHs1AnswerKey16x9Pdf()
-        },
+        ...(HSD_DATA.modules || [])
+          .filter((m) => isHsModuleAnswerKeyPdfUnlocked(m.code))
+          .map((m) => ({
+            uid: `course:${m.code.toLowerCase()}-ak-pdf`,
+            icoCls: "is-pdf",
+            icoTxt: "KEY",
+            fileName: `RACM303_2569_${m.code}_Answer_Key_16x9.pdf`,
+            kicker: `🔓 ไฟล์ PDF เฉลย Answer Key คาบ ${m.code} (16:9)`,
+            headCls: "is-full",
+            title: `เฉลยแนวคำตอบมาตรฐาน & Key Takeaways คาบ ${m.code}: ${m.title} (.pdf)`,
+            subDesc: `รวมโจทย์ไฮไลต์หลักฐาน เฉลยแนวคำตอบมาตรฐาน เกณฑ์การให้คะแนน และ Key Takeaways ประจำคาบ ${m.code} (16:9)`,
+            chipLabel: `⬇ ดาวน์โหลด Answer Key ${m.code}`,
+            meta: `${m.code} · 16:9`,
+            onOpen: () => downloadHsModuleAnswerKey16x9Pdf(m.code)
+          })),
         {
           uid: "course:disc-pdf",
           icoCls: "is-pdf",
@@ -17491,11 +17862,18 @@
           ev.stopPropagation();
           downloadHsBlankWorksheet16x9Pdf(curMod.id, 0);
         });
-        const allPdfBtn = make("button", "⬇ PDF พร้อม Answer Key HS1", "hs-atv-mini-dl");
+        const miniAkUnlocked = isHsModuleAnswerKeyPdfUnlocked(curMod.code);
+        const allPdfBtn = make(
+          "button",
+          miniAkUnlocked
+            ? `⬇ PDF พร้อม Answer Key ${curMod.code}`
+            : `🔒 Answer Key ${curMod.code} (${curMod.unlockShortLabel || "หลังจบคาบ"})`,
+          "hs-atv-mini-dl"
+        );
         allPdfBtn.type = "button";
         allPdfBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          downloadHs1AnswerKey16x9Pdf();
+          downloadHsModuleAnswerKey16x9Pdf(curMod.code);
         });
         foot.append(scrollBtn, pdfBtn, allPdfBtn);
       } else if (step.key === "vdo-lecture") {
@@ -18611,9 +18989,16 @@
     dlPdfModBtn.type = "button";
     dlPdfModBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf(curMod.id, 0));
 
-    const dlPdfAllBtn = make("button", "⬇ PDF พร้อม Answer Key คาบ HS1 (16:9)", "tv-hero-btn is-glass");
+    const heroAkUnlocked = isHsModuleAnswerKeyPdfUnlocked(curMod.code);
+    const dlPdfAllBtn = make(
+      "button",
+      heroAkUnlocked
+        ? `⬇ PDF พร้อม Answer Key คาบ ${curMod.code} (16:9)`
+        : `🔒 PDF พร้อม Answer Key คาบ ${curMod.code} (เปิด ${curMod.unlockShortLabel || "หลังจบคาบ"})`,
+      "tv-hero-btn is-glass"
+    );
     dlPdfAllBtn.type = "button";
-    dlPdfAllBtn.addEventListener("click", () => downloadHs1AnswerKey16x9Pdf());
+    dlPdfAllBtn.addEventListener("click", () => downloadHsModuleAnswerKey16x9Pdf(curMod.code));
 
     const backSlideBtn = make(
       "button",
@@ -31626,9 +32011,21 @@
       }
 
       const secHead = make("div", null, "gdrive-section-head");
-      const dlCentralAllBtn = make("button", "⬇ PDF พร้อม Answer Key & Key Takeaway คาบ HS1 (16:9)", "btn sm teal");
+      const effHdrMod = /^HS[1-6]$/.test(String(activeDeckMod || ""))
+        ? activeDeckMod
+        : matchedMods[0]
+        ? matchedMods[0].code
+        : "HS1";
+      const hdrAkUnlocked = isHsModuleAnswerKeyPdfUnlocked(effHdrMod);
+      const dlCentralAllBtn = make(
+        "button",
+        hdrAkUnlocked
+          ? `⬇ PDF พร้อม Answer Key & Key Takeaway คาบ ${effHdrMod} (16:9)`
+          : `🔒 PDF พร้อม Answer Key คาบ ${effHdrMod} (เปิดหลังจบคาบ)`,
+        "btn sm teal"
+      );
       dlCentralAllBtn.type = "button";
-      dlCentralAllBtn.addEventListener("click", () => downloadHs1AnswerKey16x9Pdf());
+      dlCentralAllBtn.addEventListener("click", () => downloadHsModuleAnswerKey16x9Pdf(effHdrMod));
       secHead.append(
         make(
           "span",
@@ -31702,6 +32099,17 @@
             downloadHsBlankWorksheet16x9Pdf(m.id, 0);
           });
           qActs.appendChild(dlBtn);
+          const cardAkUnlocked = isHsModuleAnswerKeyPdfUnlocked(m.code);
+          const dlKeyBtn = make("button", cardAkUnlocked ? "⬇ Key" : "🔒 Key", "gdrive-icon-act-btn is-mini-badge");
+          dlKeyBtn.type = "button";
+          dlKeyBtn.title = cardAkUnlocked
+            ? `ดาวน์โหลด PDF พร้อม Answer Key & Key Takeaways คาบ ${m.code} (16:9)`
+            : `เฉลย Answer Key คาบ ${m.code} จะเปิดหลังจบคาบ (${m.unlockAfterLabel || m.scheduleDate || ""})`;
+          dlKeyBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            downloadHsModuleAnswerKey16x9Pdf(m.code);
+          });
+          qActs.appendChild(dlKeyBtn);
           cHead.appendChild(qActs);
           card.appendChild(cHead);
 
@@ -33264,12 +33672,21 @@
       statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ .PDF (16:9 Optimal Font Blank Worksheet) เรียบร้อยแล้ว!`;
     });
 
-    const btnPdfCentralAll = make("button", "⬇ PDF พร้อม Answer Key & Key Takeaway คาบ HS1 (16:9)", "btn teal");
+    const actExportMod = /^HS[1-6]$/.test(String(getActiveSlideSessionMod() || "")) ? getActiveSlideSessionMod() : "HS1";
+    const btnPdfCentralAll = make(
+      "button",
+      isHsModuleAnswerKeyPdfUnlocked(actExportMod)
+        ? `⬇ PDF พร้อม Answer Key & Key Takeaway คาบ ${actExportMod} (16:9)`
+        : `🔒 PDF พร้อม Answer Key คาบ ${actExportMod} (เปิดหลังจบคาบ)`,
+      "btn teal"
+    );
     btnPdfCentralAll.type = "button";
     btnPdfCentralAll.dataset.expActionPdfAll = "1";
     btnPdfCentralAll.addEventListener("click", () => {
-      downloadHs1AnswerKey16x9Pdf();
-      statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ PDF พร้อม Answer Key, Essential Frameworks & Key Takeaways คาบ HS1 (16:9) เรียบร้อยแล้ว!`;
+      const targetMod = /^HS[1-6]$/.test(String(getActiveSlideSessionMod() || "")) ? getActiveSlideSessionMod() : "HS1";
+      if (downloadHsModuleAnswerKey16x9Pdf(targetMod)) {
+        statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ PDF พร้อม Answer Key & Key Takeaways คาบ ${targetMod} (16:9) เรียบร้อยแล้ว!`;
+      }
     });
 
     actBtns.append(btnPdfMod, btnPdfCentralAll, btnPrintHandout);
@@ -34320,11 +34737,20 @@
         dlPdfCentralBtn.setAttribute("download", rMeta.centralModulePdfFileName);
 
         rightWrap.append(roomSel, qrZoomBtn, rstRibbonBtn, dlPdfRoomBtn, dlPdfCentralBtn);
-        if (effModForGate === "HS1" && rMeta.hs1AnswerKeyPdfHref) {
-          const dlPdfHs1AkBtn = make("a", "⬇ PDF พร้อม Answer Key HS1 (16:9)", "hsd-drr-btn");
-          dlPdfHs1AkBtn.href = rMeta.hs1AnswerKeyPdfHref;
-          dlPdfHs1AkBtn.setAttribute("download", rMeta.hs1AnswerKeyPdfFileName);
-          rightWrap.appendChild(dlPdfHs1AkBtn);
+        if (/^HS[1-6]$/.test(effModForGate) && rMeta.answerKeyPdfHref) {
+          if (rMeta.answerKeyUnlocked) {
+            const dlPdfModAkBtn = make("a", `⬇ PDF พร้อม Answer Key ${effModForGate} (16:9)`, "hsd-drr-btn");
+            dlPdfModAkBtn.href = rMeta.answerKeyPdfHref;
+            dlPdfModAkBtn.setAttribute("download", rMeta.answerKeyPdfFileName);
+            rightWrap.appendChild(dlPdfModAkBtn);
+          } else {
+            const lockedModAkBtn = make("button", `🔒 Answer Key ${effModForGate} (${rMeta.unlockShortLabel})`, "hsd-drr-btn");
+            lockedModAkBtn.type = "button";
+            lockedModAkBtn.style.opacity = "0.75";
+            lockedModAkBtn.style.cursor = "not-allowed";
+            lockedModAkBtn.addEventListener("click", () => downloadHsModuleAnswerKey16x9Pdf(effModForGate));
+            rightWrap.appendChild(lockedModAkBtn);
+          }
         }
         if (window.RACM_HSD_ROOM_PAGE) {
           const backPortalLink = make("a", "← หน้าหลักพอร์ทัลรวม", "hsd-drr-link");
@@ -46069,7 +46495,11 @@
     openHsDiscussion,
     openHsDiscussionRoom,
     downloadHsBlankWorksheet16x9Pdf,
+    isHsModuleAnswerKeyPdfUnlocked,
+    downloadHsModuleAnswerKey16x9Pdf,
     downloadHs1AnswerKey16x9Pdf,
+    mountHsModuleAnswerKey16x9FullBleedDOM,
+    mountHs1AnswerKey16x9FullBleedDOM,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),
     selectHsSessionDeck,

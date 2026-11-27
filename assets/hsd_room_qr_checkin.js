@@ -573,8 +573,23 @@
     const centralModulePdfHref = `exports/pdf/${centralModulePdfFileName}`;
     const hs1AnswerKeyPdfFileName = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
     const hs1AnswerKeyPdfHref = `exports/pdf/${hs1AnswerKeyPdfFileName}`;
-    const centralCombinedPdfFileName = hs1AnswerKeyPdfFileName;
-    const centralCombinedPdfHref = hs1AnswerKeyPdfHref;
+    const moduleAnswerKeyPdfFileName = `RACM303_2569_${modCode}_Answer_Key_16x9.pdf`;
+    const moduleAnswerKeyPdfHref = `exports/pdf/${moduleAnswerKeyPdfFileName}`;
+    const isFacultyPortal = Boolean(root && root.PORTAL_ROLE === "faculty");
+    const hsdMods =
+      root && root.RACM_HS_DISCUSSION_DATA && Array.isArray(root.RACM_HS_DISCUSSION_DATA.modules)
+        ? root.RACM_HS_DISCUSSION_DATA.modules
+        : [];
+    const modMetaObj = hsdMods.find((x) => x && x.id === modCode) || null;
+    const relMods =
+      root && root.RACM_HS_DISCUSSION_KEY && Array.isArray(root.RACM_HS_DISCUSSION_KEY.releasedModules)
+        ? root.RACM_HS_DISCUSSION_KEY.releasedModules
+        : [];
+    const answerKeyUnlocked = isFacultyPortal || relMods.includes(modCode);
+    const unlockAfterLabel = (modMetaObj && modMetaObj.unlockAfterLabel) || "หลังจบคาบเรียน";
+    const unlockShortLabel = (modMetaObj && modMetaObj.unlockShortLabel) || "หลังจบคาบ";
+    const centralCombinedPdfFileName = answerKeyUnlocked ? moduleAnswerKeyPdfFileName : hs1AnswerKeyPdfFileName;
+    const centralCombinedPdfHref = answerKeyUnlocked ? moduleAnswerKeyPdfHref : hs1AnswerKeyPdfHref;
 
     return {
       modCode,
@@ -599,6 +614,11 @@
       centralModulePdfHref,
       hs1AnswerKeyPdfFileName,
       hs1AnswerKeyPdfHref,
+      moduleAnswerKeyPdfFileName,
+      moduleAnswerKeyPdfHref,
+      answerKeyUnlocked,
+      unlockAfterLabel,
+      unlockShortLabel,
       centralCombinedPdfFileName,
       centralCombinedPdfHref
     };
@@ -612,6 +632,11 @@
       modulePdfHref: m.centralModulePdfHref,
       hs1AnswerKeyPdfFileName: m.hs1AnswerKeyPdfFileName,
       hs1AnswerKeyPdfHref: m.hs1AnswerKeyPdfHref,
+      answerKeyPdfFileName: m.moduleAnswerKeyPdfFileName,
+      answerKeyPdfHref: m.moduleAnswerKeyPdfHref,
+      answerKeyUnlocked: m.answerKeyUnlocked,
+      unlockAfterLabel: m.unlockAfterLabel,
+      unlockShortLabel: m.unlockShortLabel,
       combinedPdfFileName: m.centralCombinedPdfFileName,
       combinedPdfHref: m.centralCombinedPdfHref
     };
@@ -1556,10 +1581,20 @@
         }</p>
       `;
 
-      headRight.innerHTML = `
-        <a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF กลางรวม ${escHtml(modCode)} (16:9 ใบงานเปล่า)</a>
-        <a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.hs1AnswerKeyPdfHref)}" download="${escHtml(cPdf.hs1AnswerKeyPdfFileName)}" title="ดาวน์โหลดไฟล์ PDF เฉลยแนวคำตอบมาตรฐาน + Essential Frameworks &amp; Key Takeaways คาบ HS1 (16:9)">⬇ PDF พร้อม Answer Key คาบ HS1 (16:9)</a>
-      `;
+      const akBtnUnlocked = Boolean(isFaculty || cPdf.answerKeyUnlocked);
+      headRight.innerHTML =
+        `<a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF กลางรวม ${escHtml(modCode)} (16:9 ใบงานเปล่า)</a>` +
+        (akBtnUnlocked
+          ? `<a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.answerKeyPdfHref)}" download="${escHtml(cPdf.answerKeyPdfFileName)}" title="ดาวน์โหลด ${escHtml(cPdf.answerKeyPdfFileName)} — เฉลยแนวคำตอบมาตรฐาน &amp; Key Takeaways ประจำคาบ ${escHtml(modCode)} (16:9)">⬇ PDF พร้อม Answer Key คาบ ${escHtml(modCode)} (16:9)</a>`
+          : `<button type="button" class="hsd-srp-central-pdf-btn is-all is-locked-ak" data-locked-ak-btn="1" title="ไฟล์ ${escHtml(cPdf.answerKeyPdfFileName)} จะเปิดให้ดาวน์โหลดหลังจบคาบเรียน (${escHtml(cPdf.unlockAfterLabel)})" style="opacity:0.78;cursor:not-allowed;background:#f8fafc;border:1.5px dashed #94a3b8;color:#475569;font-family:inherit;">🔒 PDF พร้อม Answer Key คาบ ${escHtml(modCode)} (เปิด ${escHtml(cPdf.unlockShortLabel)})</button>`);
+      const lockedAkBtn = headRight.querySelector("[data-locked-ak-btn]");
+      if (lockedAkBtn) {
+        lockedAkBtn.addEventListener("click", () => {
+          if (root && typeof root.alert === "function") {
+            root.alert(`🔒 เฉลย Answer Key คาบ ${modCode} (${cPdf.answerKeyPdfFileName}) จะเปิดให้ดาวน์โหลดหลังจบคาบอภิปราย (${cPdf.unlockAfterLabel})`);
+          }
+        });
+      }
 
       lockLabel.innerHTML = isFaculty
         ? `🔑 <span>ค้นหานักศึกษาด้วยรหัส <strong>3 ตัวท้าย</strong> เพื่อตรวจห้องย่อยตามตาราง <strong>${escHtml(modCode)}</strong></span>`
@@ -1888,6 +1923,7 @@
 
     const topRow = document.createElement("div");
     topRow.className = "hsd-csl-top";
+    const akChipUnlocked = Boolean(isFaculty || cPdf.answerKeyUnlocked);
     topRow.innerHTML =
       `<span class="hsd-csl-title">${
         isFaculty
@@ -1896,8 +1932,18 @@
       }</span>` +
       `<div class="hsd-csl-pdfs">` +
       `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF กลางรวม ${escHtml(modCode)} (16:9)</a>` +
-      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.hs1AnswerKeyPdfHref)}" download="${escHtml(cPdf.hs1AnswerKeyPdfFileName)}">⬇ .PDF พร้อม Answer Key HS1</a>` +
+      (akChipUnlocked
+        ? `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.answerKeyPdfHref)}" download="${escHtml(cPdf.answerKeyPdfFileName)}" title="ดาวน์โหลด ${escHtml(cPdf.answerKeyPdfFileName)}">⬇ .PDF พร้อม Answer Key ${escHtml(modCode)}</a>`
+        : `<button type="button" class="hsd-csl-pdf-chip" data-locked-csl-ak="1" title="เปิดให้ดาวน์โหลดหลังจบคาบเรียน (${escHtml(cPdf.unlockAfterLabel)})" style="opacity:0.75;cursor:not-allowed;background:#f8fafc;border-style:dashed;color:#64748b;font-family:inherit;">🔒 Answer Key ${escHtml(modCode)} (${escHtml(cPdf.unlockShortLabel)})</button>`) +
       `</div>`;
+    const lockedCslAk = topRow.querySelector("[data-locked-csl-ak]");
+    if (lockedCslAk) {
+      lockedCslAk.addEventListener("click", () => {
+        if (root && typeof root.alert === "function") {
+          root.alert(`🔒 เฉลย Answer Key คาบ ${modCode} (${cPdf.answerKeyPdfFileName}) จะเปิดให้ดาวน์โหลดหลังจบคาบอภิปราย (${cPdf.unlockAfterLabel})`);
+        }
+      });
+    }
 
     const midRow = document.createElement("div");
     midRow.className = "hsd-csl-mid";

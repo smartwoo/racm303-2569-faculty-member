@@ -3163,34 +3163,57 @@
             a.remove();
           })
         });
-        if (m.code === "HS1") {
-          const hs1KeyPdfItem = {
-            name: `05_HS1_Answer_Key_Frameworks_KeyTakeaways_16x9.pdf`,
-            title: `PDF พร้อม Answer Key, Essential Frameworks & Key Takeaways — คาบ HS1 (16:9)`,
-            sub: `ไฟล์ .PDF สไลด์ 16:9 รวมเฉลยแนวคำตอบมาตรฐาน ไฮไลต์หลักฐาน แผนภาพ DoH กรอบแนวคิดสำคัญ (Essential Frameworks) และ Key Takeaways #1–#6 ของคาบ HS1 ครบในไฟล์เดียว`,
-            meta: `16:9 Answer Key & Frameworks · HS1`,
-            badge: `⬇ PDF พร้อม Answer Key HS1`,
-            icoCls: "is-pdf",
-            icoTxt: "KEY",
-            downloadHref: `exports/pdf/RACM303_2569_HS1_Answer_Key_16x9.pdf`,
-            downloadName: `RACM303_2569_HS1_Answer_Key_16x9.pdf`,
-            onOpen: openFileAction(() => {
-              const a = document.createElement("a");
-              a.href = `exports/pdf/RACM303_2569_HS1_Answer_Key_16x9.pdf`;
-              a.download = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-            })
-          };
+        const isFacRole = Boolean(window.PORTAL_ROLE === "faculty");
+        const relModsList =
+          window.RACM_HS_DISCUSSION_KEY && Array.isArray(window.RACM_HS_DISCUSSION_KEY.releasedModules)
+            ? window.RACM_HS_DISCUSSION_KEY.releasedModules
+            : [];
+        const modAkUnlocked = isFacRole || relModsList.includes(m.code);
+        const modKeyPdfName = `RACM303_2569_${m.code}_Answer_Key_16x9.pdf`;
+        const modKeyPdfHref = `exports/pdf/${modKeyPdfName}`;
+        const modKeyPdfItem = modAkUnlocked
+          ? {
+              name: `05_${m.code}_Answer_Key_KeyTakeaways_16x9.pdf`,
+              title: `PDF พร้อม Answer Key & Key Takeaways — คาบ ${m.code} (16:9)`,
+              sub: `ไฟล์ .PDF สไลด์ 16:9 รวมเฉลยแนวคำตอบมาตรฐาน ไฮไลต์หลักฐาน เกณฑ์คะแนน และ Key Takeaways ประจำคาบ ${m.code} ครบในไฟล์เดียว`,
+              meta: `16:9 Answer Key & Key Takeaways · ${m.code}`,
+              badge: `⬇ PDF พร้อม Answer Key ${m.code}`,
+              icoCls: "is-pdf",
+              icoTxt: "KEY",
+              downloadHref: modKeyPdfHref,
+              downloadName: modKeyPdfName,
+              onOpen: openFileAction(() => {
+                const a = document.createElement("a");
+                a.href = modKeyPdfHref;
+                a.download = modKeyPdfName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              })
+            }
+          : {
+              name: `05_${m.code}_Answer_Key_KeyTakeaways_16x9.pdf`,
+              title: `🔒 PDF พร้อม Answer Key & Key Takeaways — คาบ ${m.code} (เปิดหลังจบคาบ)`,
+              sub: `เฉลยแนวคำตอบมาตรฐานและ Key Takeaways ประจำคาบ ${m.code} จะเปิดให้ดาวน์โหลดหลังจบคาบอภิปราย (${m.unlockAfterLabel || m.scheduleDate || "หลังจบคาบ"})`,
+              meta: `🔒 เปิด ${m.unlockShortLabel || "หลังจบคาบ"} · ${m.code}`,
+              badge: `🔒 Answer Key ${m.code}`,
+              icoCls: "is-pdf",
+              icoTxt: "🔒",
+              onOpen: openFileAction(() => {
+                window.alert(
+                  `🔒 เฉลย Answer Key คาบ ${m.code} (${modKeyPdfName}) จะเปิดให้ดาวน์โหลดหลังจบคาบอภิปราย (${m.unlockAfterLabel || m.scheduleDate || "หลังจบคาบเรียน"})`
+                );
+              })
+            };
+        files.push({
+          ...modKeyPdfItem,
+          id: `hspdf16x9:${m.code}-KEY`,
+          folderPath: ["health-systems", m.id]
+        });
+        if (modAkUnlocked) {
           files.push({
-            ...hs1KeyPdfItem,
-            id: `hspdf16x9:HS1-KEY`,
-            folderPath: ["health-systems", m.id]
-          });
-          files.push({
-            ...hs1KeyPdfItem,
-            id: `hspdf16x9:ALL`,
+            ...modKeyPdfItem,
+            id: m.code === "HS1" ? `hspdf16x9:ALL` : `hspdf16x9:ROOT-${m.code}-KEY`,
             folderPath: ["health-systems"]
           });
         }
