@@ -3278,62 +3278,62 @@ window.RACM_HS_DISCUSSION_DATA = {
       "id": "case-8",
       "caseNumber": 1,
       "module": "HS6",
-      "title": "กรณีศึกษาที่ 1: เป้าหมายการพัฒนาที่ยั่งยืน (SDG 3.8) และสถานการณ์หลักประกันสุขภาพถ้วนหน้าโลก (UHC) ใน 138 ประเทศ",
-      "subtitle": "การวิเคราะห์เปรียบเทียบแนวโน้มความครอบคลุมบริการที่จำเป็น (SDG 3.8.1) กับอุบัติการณ์รายจ่ายสุขภาพระดับวิบัติ (SDG 3.8.2)",
+      "title": "กรณีศึกษาที่ 1: ความก้าวหน้าสู่หลักประกันสุขภาพถ้วนหน้า (Progress toward Universal Health Coverage: SDG 3.8)",
+      "subtitle": "การติดตามการเปลี่ยนแปลงความครอบคลุมบริการที่จำเป็น (SDG 3.8.1) และภาระค่าใช้จ่ายด้านสุขภาพที่ก่อให้เกิดหายนะทางการเงิน (SDG 3.8.2) ใน 138 ประเทศ",
       "frameworks": [
         "เป้าหมายหลักประกันสุขภาพถ้วนหน้า (Universal Health Coverage: SDG 3.8.1 & 3.8.2)",
-        "ลูกบาศก์หลักประกันสุขภาพถ้วนหน้า 3 มิติ (UHC Cube: Population, Services, Financial Protection)",
-        "การคุ้มครองความเสี่ยงทางการเงินและรายจ่ายสุขภาพระดับวิบัติ (Catastrophic Health Spending)"
+        "ลูกบาศก์หลักประกันสุขภาพถ้วนหน้า 3 มิติ (UHC Cube: X Population · Z Services · Y Direct Costs)",
+        "บันไดความครอบคลุมที่มีประสิทธิผล (Effective Coverage: Campbell et al., 2013) และการคุ้มครองความเสี่ยงทางการเงิน"
       ],
       "scenarioBlocks": [
         {
           "type": "p",
-          "text": "องค์การสหประชาชาติ (UN) ได้พัฒนากรอบเป้าหมายการพัฒนาที่ยั่งยืน (Sustainable Development Goals: SDGs) โดยมีแก่นสำคัญคือ “การไม่ทิ้งใครไว้ข้างหลัง (Leave no one behind)” มุ่งสู่โลกที่มีความปลอดภัย เป็นธรรม และมีสุขภาวะดีขึ้นภายในปี ค.ศ. 2030 โดยกำหนดเป้าหมายการพัฒนา 17 ด้าน ซึ่งสุขภาพเป็นเป้าหมายลำดับที่ 3 (SDG 3: Good Health and Well-being)"
+          "text": "องค์การสหประชาชาติ (UN) ได้พัฒนากรอบเป้าหมายการพัฒนาที่ยั่งยืน (Sustainable Development Goals: SDGs) โดยมีแก่นสำคัญคือ “การไม่ทิ้งใครไว้ข้างหลัง (Leave no one behind)” กำหนดเป้าหมายการพัฒนามุ่งสู่โลกที่มีความปลอดภัย เป็นธรรม และมีสุขภาวะดีขึ้นภายในปี ค.ศ. 2030 (Safer, fairer, and healthier world by 2030) โดยกำหนดเป้าหมายการพัฒนา 17 ด้าน ซึ่งสุขภาพเป็นเป้าหมายลำดับที่ 3 (SDG 3: Good Health and Well-being)"
         },
         {
           "type": "p",
-          "text": "ตัวชี้วัดสำคัญส่วนหนึ่งของ SDG 3 คือการขับเคลื่อนให้ประเทศต่าง ๆ จัดระบบหลักประกันสุขภาพถ้วนหน้าแก่ประชาชนของตน (Universal Health Coverage: UHC) ทั้งนี้ องค์การอนามัยโลก (WHO) และธนาคารโลก (World Bank) ได้ร่วมกันจัดทำรายงานติดตามความก้าวหน้าทุก 2 ปี โดยมีตัวชี้วัดหลัก 2 ตัว ได้แก่:"
+          "text": "ตัวชี้วัดสำคัญส่วนหนึ่งของ SDG 3 คือ การขับเคลื่อนให้ประเทศต่าง ๆ จัดระบบหลักประกันสุขภาพถ้วนหน้าแก่ประชาชนของตน (Universal Health Coverage: UHC) ทั้งนี้ องค์การอนามัยโลก (WHO) และธนาคารโลก (World Bank) ได้ร่วมกันจัดทำข้อมูลติดตามความก้าวหน้าการพัฒนาระบบสุขภาพถ้วนหน้าของประเทศต่าง ๆ โดยออกรายงานทุก ๆ 2 ปี ซึ่งมีตัวชี้วัดสำคัญสองตัว ได้แก่:"
         },
         {
           "type": "bullets",
           "items": [
-            "SDG 3.8.1 Coverage of essential health services (Service Coverage Index): ดัชนีความครอบคลุมของบริการสุขภาพที่จำเป็น",
-            "SDG 3.8.2 Catastrophic health spending: อุบัติการณ์ภาระค่าใช้จ่ายด้านสุขภาพจากเงินจ่ายเองหน้างานที่ก่อให้เกิดหายนะทางการเงินของครัวเรือน"
+            "SDG 3.8.1 Coverage of essential services (Service Coverage Index: ดัชนีความครอบคลุมของบริการสุขภาพที่จำเป็น)",
+            "SDG 3.8.2 Catastrophic health spending (Incidence of catastrophic Out-of-pocket health spending: อุบัติการณ์ภาระค่าใช้จ่ายด้านสุขภาพจากเงินจ่ายเองหน้างานที่ก่อให้เกิดหายนะทางการเงินของครัวเรือน)"
           ]
         },
         {
           "type": "p",
-          "text": "ในรายงานการติดตามความก้าวหน้าปี ค.ศ. 2023 ได้นำเสนอการเปลี่ยนแปลงของตัวชี้วัดทั้งสองเมื่อเทียบกับปี ค.ศ. 2000 ของ 138 ประเทศทั่วโลก ดังแสดงในแผนภาพด้านล่าง:"
+          "text": "ในรายงานการติดตามความก้าวหน้าปี ค.ศ. 2023 ได้นำเสนอการเปลี่ยนแปลงของตัวชี้วัดทั้งสองเมื่อเทียบกับปี ค.ศ. 2000 ของ 138 ประเทศทั่วโลก ซึ่งผลลัพธ์มีทั้งประเทศที่ดีขึ้น เปลี่ยนแปลงน้อย และแย่ลง ดังแสดงในภาพ (คะแนนรวม 6 คะแนน):"
         },
         {
           "type": "image",
           "src": "assets/images/sdg_uhc_2023_fig2.png",
           "alt": "Fig. 2 Categories of change in SDG indicators 3.8.1 and 3.8.2 for 138 countries since 2000 (WHO & World Bank, 2023)",
-          "caption": "ภาพประกอบกรณีศึกษาที่ 1: การจำแนกการเปลี่ยนแปลงของดัชนีความครอบคลุมบริการสุขภาพที่จำเป็น (SDG 3.8.1 แกนนอน) และอุบัติการณ์รายจ่ายสุขภาพระดับวิบัติจากการจ่ายเงินเอง (SDG 3.8.2 แกนตั้ง) ใน 138 ประเทศ ตั้งแต่ปี ค.ศ. 2000 (ที่มา: WHO & World Bank Global Monitoring Report 2023)"
+          "caption": "ภาพแสดงการเปลี่ยนแปลงสถานะความครอบคลุมบริการสุขภาพ (SDG 3.8.1 แกนนอน) และภาระค่าใช้จ่ายด้านสุขภาพที่ก่อให้เกิดหายนะทางการเงินจากการจ่ายเงินเอง (SDG 3.8.2 แกนตั้ง) ใน 138 ประเทศ ตั้งแต่ปี ค.ศ. 2000 (ที่มา: WHO & World Bank Global Monitoring Report 2023)"
         }
       ],
       "questions": [
         {
           "id": "q-8-1",
           "label": "ประเด็นอภิปรายที่ 1.1",
-          "title": "การวิเคราะห์แนวโน้มและปัจจัยสนับสนุนด้านความครอบคลุมบริการสุขภาพที่จำเป็น (SDG 3.8.1)",
-          "prompt": "จากข้อมูลและแผนภาพข้างต้น จงอภิปรายว่าสถานการณ์โดยรวมของโลกด้านความครอบคลุมบริการสุขภาพที่จำเป็น (Service Coverage Index: SDG 3.8.1) เป็นอย่างไร และท่านคิดว่าการเปลี่ยนแปลงดังกล่าวมาจากปัจจัยสนับสนุนใดบ้าง (ระบุอย่างน้อย 2 ปัจจัย)",
+          "title": "การวิเคราะห์แนวโน้มและปัจจัยสนับสนุนด้านความครอบคลุมบริการสุขภาพที่จำเป็น (SDG 3.8.1 · 3 คะแนน)",
+          "prompt": "จากข้อมูลและภาพดังกล่าวจงตอบคำถามต่อไปนี้: สถานการณ์โดยรวมด้านความครอบคลุมบริการสุขภาพที่จำเป็น (Service Coverage Index: SDG 3.8.1) เป็นอย่างไร (1 คะแนน) และนักศึกษาคิดว่ามาจากปัจจัยสนับสนุนใดบ้าง ตอบมาสองปัจจัย? (2 คะแนน)",
           "worksheet": {
             "type": "table",
             "headers": [
               "ประเด็นการวิเคราะห์ (SDG 3.8.1 Service Coverage Index)",
-              "คำอภิปรายและเหตุผลประกอบ"
+              "คำอภิปรายและเหตุผลประกอบ (รวม 3 คะแนน)"
             ],
             "rows": [
               {
                 "rowId": "trend",
                 "cells": [
                   {
-                    "static": "แนวโน้มสถานการณ์โดยรวมใน 138 ประเทศ"
+                    "static": "สถานการณ์โดยรวมใน 138 ประเทศ (1 คะแนน)"
                   },
                   {
                     "inputId": "c8_q1_trend",
-                    "placeholder": "ระบุทิศทางภาพรวมพร้อมอ้างอิงตัวเลขจำนวนประเทศจากแผนภาพ…",
+                    "placeholder": "ระบุทิศทางภาพรวมของ Service Coverage Index พร้อมอ้างอิงตัวเลขจำนวนประเทศจากภาพ…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3346,237 +3346,11 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "factors",
                 "cells": [
                   {
-                    "static": "ปัจจัยสนับสนุนสำคัญ (อย่างน้อย 2 ปัจจัย)"
+                    "static": "ปัจจัยสนับสนุนสำคัญ (ตอบมาสองปัจจัย · 2 คะแนน)"
                   },
                   {
                     "inputId": "c8_q1_factors",
                     "placeholder": "1) …\n2) …",
-                    "compact": false,
-                    "maxWords": 60,
-                    "maxChars": 330,
-                    "maxLines": 5,
-                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
-                  }
-                ]
-              }
-            ],
-            "colWidths": [
-              "20%",
-              "80%"
-            ]
-          },
-          "conceptSummarySlide": {
-            "id": "cs-8-1",
-            "takeawayNumber": 1,
-            "badge": "ขั้น ⑤ Key Takeaway #1",
-            "studentBadge": "Key Takeaway #1",
-            "shortLabel": "⑤ Key Takeaway #1",
-            "studentShortLabel": "Key Takeaway #1",
-            "kicker": "Key Takeaway #1",
-            "title": "ความครอบคลุมบริการสุขภาพที่จำเป็นตามเป้าหมาย SDG 3.8.1",
-            "enTitle": "Essential Health Service Coverage (SDG 3.8.1)",
-            "sourceNote": "WHO & World Bank UHC Global Monitoring Report",
-            "coreTerm": "“ความครอบคลุมบริการสุขภาพที่จำเป็น” (SDG 3.8.1)",
-            "coreDefinitionLead": "ติดตามความก้าวหน้าของการเข้าถึงบริการสร้างเสริม ป้องกัน รักษา และฟื้นฟูที่จำเป็นตลอดช่วงชีวิตผ่านดัชนี UHC Service Coverage Index",
-            "coreDefinitionQualifier": "สะท้อนศักยภาพการจัดบริการจริงของระบบสุขภาพในระดับประชากรควบคู่ไปกับการคุ้มครองทางการเงิน",
-            "coreDefinition": "ติดตามความก้าวหน้าของการเข้าถึงบริการสร้างเสริม ป้องกัน รักษา และฟื้นฟูที่จำเป็นตลอดช่วงชีวิตผ่านดัชนี UHC Service Coverage Index สะท้อนศักยภาพการจัดบริการจริงของระบบสุขภาพในระดับประชากรควบคู่ไปกับการคุ้มครองทางการเงิน",
-            "dimensions": [
-              {
-                "num": "01",
-                "thTitle": "ดัชนีความครอบคลุมบริการ (SCI)",
-                "enTitle": "UHC Service Coverage Index",
-                "definition": "วัดความครอบคลุมบริการตัวแทน 4 หมวด ได้แก่ สุขภาพแม่และเด็ก โรคติดเชื้อ โรคไม่ติดต่อเรื้อรัง และศักยภาพระบบบริการ",
-                "anchor": "ช่วยให้เปรียบเทียบแนวโน้มการขยายบริการที่จำเป็นระหว่างประเทศและติดตามความเหลื่อมล้ำได้ชัดเจน"
-              },
-              {
-                "num": "02",
-                "thTitle": "รากฐานบริการปฐมภูมิใกล้บ้าน",
-                "enTitle": "Primary Health Care Backbone",
-                "definition": "การกระจายหน่วยบริการปฐมภูมิและบุคลากรสุขภาพสู่พื้นที่ชนบทเป็นกลไกหลักที่ทำให้ประชากรเข้าถึงบริการพื้นฐานได้กว้างขวาง",
-                "anchor": "การลงทุนในระบบปฐมภูมิขยายความครอบคลุมได้คุ้มค่าและเป็นธรรมกว่าการกระจุกตัวในเมืองใหญ่"
-              },
-              {
-                "num": "03",
-                "thTitle": "ชุดสิทธิประโยชน์ที่จำเป็น",
-                "enTitle": "Essential Benefit Package",
-                "definition": "การกำหนดชุดบริการที่มีหลักฐานประสิทธิผลและความคุ้มค่า เช่น วัคซีน ยาจำเป็น และการรักษาโรคสำคัญ ให้ประชาชนได้รับโดยทั่วถึง",
-                "anchor": "เชื่อมโยงการประเมินเทคโนโลยีด้านสุขภาพเข้ากับการขยายบริการที่มีผลกระทบสูงต่อภาระโรค"
-              },
-              {
-                "num": "04",
-                "thTitle": "ปัจจัยขับเคลื่อนด้านการคลังและกำลังคน",
-                "enTitle": "Public Financing & Workforce Enablers",
-                "definition": "งบประมาณภาครัฐด้านสุขภาพ ระบบเวชภัณฑ์ และเทคโนโลยีดิจิทัลช่วยหนุนให้หน่วยบริการส่งมอบบริการได้จริงอย่างต่อเนื่อง",
-                "anchor": "การขยายความครอบคลุมจะชะลอตัวทันทีหากขาดการลงทุนด้านกำลังคนและโครงสร้างพื้นฐานรองรับ"
-              }
-            ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 8.1 · แนวโน้มโลก SDG 3.8.1",
-            "caseBridge": "อ่านทิศทางดัชนีความครอบคลุมบริการจากข้อมูลเชิงประจักษ์ และวิเคราะห์ปัจจัยเชิงระบบที่หนุนให้หลายประเทศขยายการเข้าถึงบริการได้ดีขึ้น",
-            "docId": "HS6-CONCISE",
-            "docSec": "1.3",
-            "docLabel": "อ่านเพิ่มเติม HS6 (1.3)"
-          }
-        },
-        {
-          "id": "q-8-2",
-          "label": "ประเด็นอภิปรายที่ 1.2",
-          "title": "การวิเคราะห์แนวโน้มและปัจจัยสาเหตุด้านภาระค่าใช้จ่ายด้านสุขภาพระดับวิบัติ (SDG 3.8.2)",
-          "prompt": "จากข้อมูลและแผนภาพข้างต้น จงอภิปรายว่าสถานการณ์โดยรวมด้านอุบัติการณ์การล้มละลายหรือรายจ่ายสุขภาพระดับวิบัติจากการจ่ายค่ารักษาพยาบาลเอง (Incidence of Catastrophic Out-of-Pocket Health Spending: SDG 3.8.2) เป็นอย่างไร และมาจากปัจจัยสาเหตุใดบ้าง (ระบุอย่างน้อย 2 ปัจจัย)",
-          "worksheet": {
-            "type": "table",
-            "headers": [
-              "ประเด็นการวิเคราะห์ (SDG 3.8.2 Catastrophic OOP Spending)",
-              "คำอภิปรายและเหตุผลประกอบ"
-            ],
-            "rows": [
-              {
-                "rowId": "trend",
-                "cells": [
-                  {
-                    "static": "แนวโน้มสถานการณ์โดยรวมใน 138 ประเทศ"
-                  },
-                  {
-                    "inputId": "c8_q2_trend",
-                    "placeholder": "ระบุทิศทางภาพรวมและข้อสังเกตเชิงเปรียบเทียบจากแผนภาพ…",
-                    "compact": false,
-                    "maxWords": 45,
-                    "maxChars": 240,
-                    "maxLines": 4,
-                    "a4BoxLabel": "กรอบ A4 กระชับ (≤45 คำ)"
-                  }
-                ]
-              },
-              {
-                "rowId": "factors",
-                "cells": [
-                  {
-                    "static": "ปัจจัยสาเหตุสำคัญ (อย่างน้อย 2 ปัจจัย)"
-                  },
-                  {
-                    "inputId": "c8_q2_factors",
-                    "placeholder": "1) …\n2) …",
-                    "compact": false,
-                    "maxWords": 60,
-                    "maxChars": 330,
-                    "maxLines": 5,
-                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
-                  }
-                ]
-              }
-            ],
-            "colWidths": [
-              "20%",
-              "80%"
-            ]
-          },
-          "conceptSummarySlide": {
-            "id": "cs-8-2",
-            "takeawayNumber": 2,
-            "badge": "ขั้น ⑤ Key Takeaway #2",
-            "studentBadge": "Key Takeaway #2",
-            "shortLabel": "⑤ Key Takeaway #2",
-            "studentShortLabel": "Key Takeaway #2",
-            "kicker": "Key Takeaway #2",
-            "title": "การคุ้มครองความเสี่ยงทางการเงินและลูกบาศก์หลักประกันสุขภาพ",
-            "enTitle": "Financial Risk Protection (SDG 3.8.2) & WHO UHC Cube",
-            "sourceNote": "WHO World Health Report (2010) · SDG 3.8.2",
-            "coreTerm": "“ลูกบาศก์หลักประกันสุขภาพถ้วนหน้า” (WHO UHC Cube)",
-            "coreDefinitionLead": "จำลองการออกแบบระบบหลักประกันสุขภาพใน 3 มิติ ได้แก่ ความกว้างของประชากร ความลึกของชุดบริการ และความสูงของการคุ้มครองค่าใช้จ่าย",
-            "coreDefinitionQualifier": "หากขยายการเข้าถึงบริการโดยไม่เพิ่มงบรวมกองทุนล่วงหน้า ประชาชนอาจเผชิญรายจ่ายสุขภาพระดับวิบัติสูงขึ้น",
-            "coreDefinition": "จำลองการออกแบบระบบหลักประกันสุขภาพใน 3 มิติ ได้แก่ ความกว้างของประชากร ความลึกของชุดบริการ และความสูงของการคุ้มครองค่าใช้จ่าย หากขยายการเข้าถึงบริการโดยไม่เพิ่มงบรวมกองทุนล่วงหน้า ประชาชนอาจเผชิญรายจ่ายสุขภาพระดับวิบัติสูงขึ้น",
-            "dimensions": [
-              {
-                "num": "01",
-                "thTitle": "ความกว้าง: ความครอบคลุมประชากร",
-                "enTitle": "Breadth · Population Coverage",
-                "definition": "สัดส่วนของประชากรที่ได้รับความคุ้มครองภายใต้ระบบหลักประกันสุขภาพ โดยมุ่งให้ครอบคลุมทุกคนโดยไม่ทิ้งกลุ่มเปราะบางไว้ข้างหลัง",
-                "anchor": "ระบบภาคบังคับหรือสิทธิถ้วนหน้าตามกฎหมายช่วยปิดช่องว่างประชากรตกหล่นได้ดีกว่าภาคสมัครใจ"
-              },
-              {
-                "num": "02",
-                "thTitle": "ความลึก: ความครอบคลุมชุดบริการ",
-                "enTitle": "Depth · Service Package Coverage",
-                "definition": "ขอบเขตของบริการสุขภาพ ยา และการรักษาเทคโนโลยีที่อยู่ในชุดสิทธิประโยชน์ หากชุดสิทธิแคบผู้ป่วยต้องจ่ายส่วนที่อยู่นอกสิทธิเอง",
-                "anchor": "ภาระโรค NCDs และสังคมสูงวัยทำให้ต้องปรับชุดสิทธิประโยชน์ให้ทันต่อความจำเป็นด้านยาและการดูแลระยะยาว"
-              },
-              {
-                "num": "03",
-                "thTitle": "ความสูง: การลดรายจ่ายควักกระเป๋า",
-                "enTitle": "Height · Financial Protection (SDG 3.8.2)",
-                "definition": "สัดส่วนค่าใช้จ่ายที่กองทุนจ่ายแทนเพื่อลดการจ่ายเงินสดหน้างาน (OOP) และป้องกันรายจ่ายสุขภาพระดับวิบัติของครัวเรือน",
-                "anchor": "ต้องอาศัยการจ่ายเงินล่วงหน้าและการรวมกองทุนภาครัฐ (prepayment & pooling) ที่เพียงพอ"
-              }
-            ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 8.2 · ความย้อนแย้ง SDG 3.8.1 vs 3.8.2",
-            "caseBridge": "อธิบายให้เห็นว่าเหตุใดเมื่อประชาชนเข้าถึงบริการมากขึ้น (SDG 3.8.1 ดีขึ้น) แต่หากพึ่งพาเงินควักกระเป๋าสูง ภาระรายจ่ายวิบัติ (SDG 3.8.2) จึงกลับแย่ลงได้",
-            "docId": "HS6-CONCISE",
-            "docSec": "1.3",
-            "docLabel": "อ่านเพิ่มเติม HS6 (1.3–1.4)"
-          }
-        }
-      ],
-      "coverTitle": "สถานการณ์หลักประกันสุขภาพถ้วนหน้าโลก (SDG 3.8)"
-    },
-    {
-      "id": "case-9",
-      "caseNumber": 2,
-      "module": "HS6",
-      "title": "กรณีศึกษาที่ 2: ช่องว่างสิทธิประกันสุขภาพของผู้ขายบริการทางเพศ (Sex Workers) และแรงงานนอกระบบ",
-      "subtitle": "การวิพากษ์ข้อยกเว้นของประกันสุขภาพเอกชนด้วยทฤษฎีการประกันสุขภาพ และทางเลือกหลักประกันความมั่นคงทางสังคมในไทย",
-      "frameworks": [
-        "ทฤษฎีการประกันสุขภาพและเกณฑ์ความเสี่ยงที่รับประกันได้ (Insurability, Adverse Selection, p → 1)",
-        "ผลกระทบภายนอกทางบวกด้านสาธารณสุข (Positive Externalities) และบทบาทของรัฐ",
-        "ระบบคุ้มครองทางสังคมสำหรับแรงงานนอกระบบ (ประกันสังคม มาตรา 40 และระบบบัตรทอง)"
-      ],
-      "scenarioBlocks": [
-        {
-          "type": "p",
-          "text": "ผู้ขายบริการทางเพศ (sex workers) ในประเทศไทยยังถูกจัดอยู่ในฐานะ “แรงงานนอกระบบ (informal labor)” กล่าวคือ ไม่มีการขึ้นทะเบียนแรงงานกับนายจ้างและไม่อยู่ในระบบคุ้มครองทางสังคมภาคบังคับของลูกจ้างในระบบ เช่น ประกันสังคมตามมาตรา 33 แม้ว่าจะสามารถเข้าถึงสิทธิการรักษาพยาบาลขั้นพื้นฐานภายใต้ “ระบบหลักประกันสุขภาพแห่งชาติ” (บัตรทอง) ได้ แต่สิทธิความมั่นคงทางสังคมในบางมิติยังมีข้อจำกัดเมื่อเปรียบเทียบกับแรงงานในระบบที่มีสิทธิจากทั้งประกันสังคมและสวัสดิการนายจ้าง"
-        },
-        {
-          "type": "p",
-          "text": "ในด้าน “ประกันสุขภาพเอกชน” ไม่ว่าจะเป็นประกันส่วนบุคคลหรือประกันกลุ่มที่บริษัทเอกชนมักซื้อเพิ่มเติมให้กับพนักงานเพื่อความสะดวกที่มากกว่า หากพิจารณาในกลุ่มผู้ขายบริการทางเพศที่ต้องการซื้อประกันสุขภาพเอกชน บริษัทประกันส่วนใหญ่กลับกำหนด “ข้อยกเว้นของการคุ้มครอง” ที่ชัดเจน เช่น การไม่ครอบคลุมโรคติดต่อทางเพศสัมพันธ์รวมถึงเอชไอวี (HIV) และไม่ครอบคลุมบริการป้องกันเชิงรุก เช่น การรับยาป้องกันก่อนการสัมผัสเชื้อ (Pre-Exposure Prophylaxis: PrEP) หรือหลังการสัมผัสเชื้อ (Post-Exposure Prophylaxis: PEP)"
-        }
-      ],
-      "questions": [
-        {
-          "id": "q-9-1",
-          "label": "ประเด็นอภิปรายที่ 2.1",
-          "title": "การวิเคราะห์ข้อยกเว้นของประกันสุขภาพเอกชนด้วยทฤษฎีการประกันสุขภาพ (Health Insurance Theory)",
-          "prompt": "จงใช้หลักทฤษฎีการประกันสุขภาพ (Health Insurance Theory) และเศรษฐศาสตร์สาธารณสุข มาเป็นกรอบในการวิพากษ์และอภิปรายทั้ง 2 กรณีต่อไปนี้:",
-          "worksheet": {
-            "type": "table",
-            "headers": [
-              "ประเด็นคำถาม",
-              "การวิเคราะห์ตามทฤษฎีการประกันสุขภาพ (Health Insurance Theory)"
-            ],
-            "rows": [
-              {
-                "rowId": "q911",
-                "cells": [
-                  {
-                    "static": "9.1.1 เหตุใดประกันสุขภาพเอกชนจึงไม่ครอบคลุมโรคติดต่อทางเพศสัมพันธ์และเอชไอวี (HIV)?"
-                  },
-                  {
-                    "inputId": "c9_q1_sti",
-                    "placeholder": "วิเคราะห์ในแง่พฤติกรรมความเสี่ยง การคัดเลือกในทางตรงข้าม (Adverse Selection) และค่าความน่าจะเป็นของการเกิดโรค (p)…",
-                    "compact": false,
-                    "maxWords": 60,
-                    "maxChars": 330,
-                    "maxLines": 5,
-                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
-                  }
-                ]
-              },
-              {
-                "rowId": "q912",
-                "cells": [
-                  {
-                    "static": "9.1.2 เหตุใดประกันสุขภาพเอกชนจึงไม่ครอบคลุมบริการป้องกันเชิงรุก เช่น บริการ PrEP และ PEP?"
-                  },
-                  {
-                    "inputId": "c9_q1_prep",
-                    "placeholder": "วิเคราะห์ในแง่ผลกระทบภายนอกต่อสังคม (Externalities) บทบาทภาครัฐ และกลไกการถัวเฉลี่ยความเสี่ยง…",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -3592,78 +3366,131 @@ window.RACM_HS_DISCUSSION_DATA = {
             ]
           },
           "conceptSummarySlide": {
-            "id": "cs-9-1",
-            "takeawayNumber": 3,
-            "badge": "ขั้น ⑤ Key Takeaway #3",
-            "studentBadge": "Key Takeaway #3",
-            "shortLabel": "⑤ Key Takeaway #3",
-            "studentShortLabel": "Key Takeaway #3",
-            "kicker": "Key Takeaway #3",
-            "title": "เกณฑ์ความเสี่ยงที่รับประกันได้และความล้มเหลวของตลาดสมัครใจ",
-            "enTitle": "Insurability Criteria & Voluntary Insurance Market Failure",
-            "sourceNote": "เศรษฐศาสตร์สาธารณสุข · ทฤษฎีการประกันสุขภาพ (HS6)",
-            "coreTerm": "“ประกันสุขภาพภาคสมัครใจในกลไกตลาด” (voluntary private insurance)",
-            "coreDefinitionLead": "รับประกันได้ดีเฉพาะเหตุการณ์เจ็บป่วยที่ไม่แน่นอน คำนวณความเสี่ยงได้ และไม่มีความไม่สมมาตรของข้อมูลรุนแรง",
-            "coreDefinitionQualifier": "จึงเกิดความล้มเหลวของตลาดกับกลุ่มเสี่ยงสูงและบริการป้องกันโรค ทำให้รัฐต้องจัดบริการสาธารณะเข้ามาคุ้มครองแทน",
-            "coreDefinition": "รับประกันได้ดีเฉพาะเหตุการณ์เจ็บป่วยที่ไม่แน่นอน คำนวณความเสี่ยงได้ และไม่มีความไม่สมมาตรของข้อมูลรุนแรง จึงเกิดความล้มเหลวของตลาดกับกลุ่มเสี่ยงสูงและบริการป้องกันโรค ทำให้รัฐต้องจัดบริการสาธารณะเข้ามาคุ้มครองแทน",
+            "id": "cs-8-1",
+            "takeawayNumber": 1,
+            "badge": "ขั้น ⑥ Key Takeaway #1 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #1 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑥ คำอธิบาย #1",
+            "studentShortLabel": "Key Takeaway #1",
+            "kicker": "Key Takeaway #1 · คำอธิบายสังเคราะห์ 4 มิติ",
+            "title": "ความครอบคลุมบริการสุขภาพที่จำเป็นตามเป้าหมาย SDG 3.8.1",
+            "enTitle": "Essential Health Service Coverage (SDG 3.8.1)",
+            "sourceNote": "WHO & World Bank UHC Global Monitoring Report · Campbell et al. (2013)",
+            "frameworkSynthesisSlide": {
+              "id": "cs-8-1-framework",
+              "kicker": "Key Takeaway #1 · Essential Framework (SDG 3.8.1)",
+              "badge": "ขั้น ⑤ Key Takeaway #1 (Effective Coverage Framework)",
+              "studentBadge": "Key Takeaway #1 · Effective Coverage Framework",
+              "shortLabel": "⑤ ภาพ Framework #1",
+              "studentShortLabel": "Framework #1",
+              "stageBtnLabel": "⑤ ภาพ Framework",
+              "studentStageBtnLabel": "🖼 ภาพ Framework",
+              "title": "Moving towards UHC: Ensuring Needed Services Are Equally Distributed & Easily Accessed",
+              "enTitle": "UHC Cube & Effective Coverage Staircase (Campbell et al., 2013)",
+              "sourceNote": "Source: Campbell et al. (2013) · Adapted from WHO (2010) & Tanahashi (1978)",
+              "imageSrc": "assets/images/hs6_fw_uhc_effective_coverage.jpg?v=1",
+              "imageAlt": "Moving towards UHC: UHC cube (X population, Y direct costs, Z essential services) and HRH effective coverage staircase (Availability, Accessibility, Acceptability, Service utilization, Quality)",
+              "caption": "การขับเคลื่อนสู่ UHC ให้ทุกคนเข้าถึงบริการที่จำเป็นอย่างเท่าเทียม ต้องขยายทั้งความครอบคลุมหลักประกันสุขภาพประชากร (แกน X) และลดช่องว่าง 5 ขั้นสู่ความครอบคลุมที่มีประสิทธิผล (Effective Coverage): Availability (หน่วยบริการปฐมภูมิ/กำลังคนกระจายทั่วถึง) → Accessibility (เข้าถึงสะดวก) → Acceptability → Service utilization → Quality",
+              "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-8-1-framework",
+                "kicker": "Key Takeaway #1 · Essential Framework (SDG 3.8.1)",
+                "badge": "ขั้น ⑤ Key Takeaway #1 (Effective Coverage Framework)",
+                "studentBadge": "Key Takeaway #1 · Effective Coverage Framework",
+                "shortLabel": "⑤ ภาพ Framework #1",
+                "studentShortLabel": "Framework #1",
+                "stageBtnLabel": "⑤ ภาพ Framework",
+                "studentStageBtnLabel": "🖼 ภาพ Framework",
+                "title": "Moving towards UHC: Ensuring Needed Services Are Equally Distributed & Easily Accessed",
+                "enTitle": "UHC Cube & Effective Coverage Staircase (Campbell et al., 2013)",
+                "sourceNote": "Source: Campbell et al. (2013) · Adapted from WHO (2010) & Tanahashi (1978)",
+                "imageSrc": "assets/images/hs6_fw_uhc_effective_coverage.jpg?v=1",
+                "imageAlt": "Moving towards UHC: UHC cube (X population, Y direct costs, Z essential services) and HRH effective coverage staircase (Availability, Accessibility, Acceptability, Service utilization, Quality)",
+                "caption": "การขับเคลื่อนสู่ UHC ให้ทุกคนเข้าถึงบริการที่จำเป็นอย่างเท่าเทียม ต้องขยายทั้งความครอบคลุมหลักประกันสุขภาพประชากร (แกน X) และลดช่องว่าง 5 ขั้นสู่ความครอบคลุมที่มีประสิทธิผล (Effective Coverage): Availability (หน่วยบริการปฐมภูมิ/กำลังคนกระจายทั่วถึง) → Accessibility (เข้าถึงสะดวก) → Acceptability → Service utilization → Quality",
+                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+              }
+            ],
+            "coreTerm": "“ความครอบคลุมบริการสุขภาพที่จำเป็น” (SDG 3.8.1)",
+            "coreDefinitionLead": "ติดตามความก้าวหน้าของการเข้าถึงบริการสร้างเสริม ป้องกัน รักษา และฟื้นฟูที่จำเป็นตลอดช่วงชีวิตผ่านดัชนี UHC Service Coverage Index",
+            "coreDefinitionQualifier": "สะท้อนศักยภาพการจัดบริการจริงของระบบสุขภาพในระดับประชากรควบคู่ไปกับการคุ้มครองทางการเงิน",
+            "coreDefinition": "ติดตามความก้าวหน้าของการเข้าถึงบริการสร้างเสริม ป้องกัน รักษา และฟื้นฟูที่จำเป็นตลอดช่วงชีวิตผ่านดัชนี UHC Service Coverage Index สะท้อนศักยภาพการจัดบริการจริงของระบบสุขภาพในระดับประชากรควบคู่ไปกับการคุ้มครองทางการเงิน",
             "dimensions": [
               {
                 "num": "01",
-                "thTitle": "เกณฑ์ความไม่แน่นอนของความสูญเสีย",
-                "enTitle": "Randomness vs. Certain Utilization",
-                "definition": "ประกันตลาดเสรีออกแบบไว้รองรับเหตุการณ์สุ่มที่มีโอกาสเกิดต่ำแต่ค่าเสียหายสูง ไม่ใช่บริการป้องกันที่ใช้เป็นประจำและคาดการณ์ได้แน่นอน",
-                "anchor": "บริการที่มีโอกาสใช้เข้าใกล้ 100% จะทำให้เบี้ยประกันสูงเท่ากับราคาบริการจริงจนไม่เกิดการเฉลี่ยความเสี่ยง"
+                "thTitle": "ดัชนีความครอบคลุมบริการ (SCI)",
+                "enTitle": "UHC Service Coverage Index",
+                "definition": "วัดความครอบคลุมบริการตัวแทน 4 หมวด ได้แก่ สุขภาพแม่และเด็ก โรคติดเชื้อ โรคไม่ติดต่อเรื้อรัง และศักยภาพระบบบริการ (ดีขึ้นใน 137/138 ประเทศ)",
+                "anchor": "ช่วยให้เปรียบเทียบแนวโน้มการขยายบริการที่จำเป็นระหว่างประเทศและติดตามความเหลื่อมล้ำได้ชัดเจน"
               },
               {
                 "num": "02",
-                "thTitle": "การคัดเลือกที่ขัดผลประโยชน์กัน",
-                "enTitle": "Adverse Selection",
-                "definition": "เกิดจากความไม่สมมาตรของข้อมูลที่ผู้ซื้อรู้ความเสี่ยงตนเองมากกว่าผู้รับประกัน ทำให้ผู้มีความเสี่ยงสูงเข้ามาซื้อประกันในสัดส่วนสูง",
-                "anchor": "ส่งผลให้ค่าสินไหมเฉลี่ยพุ่งสูงจนบริษัทต้องขึ้นเบี้ยหรือกำหนดข้อยกเว้นความคุ้มครอง"
+                "thTitle": "การขยายความครอบคลุมหลักประกันสุขภาพ",
+                "enTitle": "Expansion of Insurance Coverage",
+                "definition": "การเพิ่มความครอบคลุมประชากรที่มีสิทธิในระบบหลักประกันสุขภาพช่วยลดอุปสรรคในการรับบริการสุขภาพพื้นฐาน",
+                "anchor": "เป็นกลไกฝั่งอุปสงค์ที่ทำให้ประชากรเข้าสู่ระบบบริการที่จำเป็นได้เพิ่มขึ้นในเกือบทุกภูมิภาค"
               },
               {
                 "num": "03",
-                "thTitle": "การคัดกรองความเสี่ยงโดยผู้รับประกัน",
-                "enTitle": "Risk Selection / Cream-Skimming",
-                "definition": "บริษัทประกันแสวงหากำไรจึงคัดเลือกเฉพาะผู้มีสุขภาพดีและตัดสิทธิหรือยกเว้นโรค/กลุ่มอาชีพที่มีความเสี่ยงสูงออกจากกรมธรรม์",
-                "anchor": "ทำให้กลุ่มที่มีความจำเป็นทางสุขภาพสูงที่สุดกลับเป็นกลุ่มที่ถูกตลาดประกันเอกชนปฏิเสธ"
+                "thTitle": "เครือข่ายหน่วยบริการปฐมภูมิที่กระจายทั่วถึง",
+                "enTitle": "Primary Care Network Distribution",
+                "definition": "การมีหน่วยบริการสุขภาพปฐมภูมิกระจายตัวใกล้บ้านอย่างทั่วถึงทำให้ประชาชนเข้าถึงบริการได้สะดวก (Availability & Accessibility)",
+                "anchor": "เป็นรากฐานฝั่งอุปทานที่ยกระดับความครอบคลุมบริการสุขภาพได้คุ้มค่าและเป็นธรรมที่สุด"
               },
               {
                 "num": "04",
-                "thTitle": "บทบาทรัฐต่อผลกระทบภายนอกทางบวก",
-                "enTitle": "Public Financing & Positive Externalities",
-                "definition": "การป้องกันและควบคุมโรคติดต่อสร้างประโยชน์ลดการแพร่เชื้อให้สังคมส่วนรวม รัฐจึงต้องจัดสรรงบประมาณคุ้มครองถ้วนหน้าทุกคน",
-                "anchor": "ในไทย งบสร้างเสริมสุขภาพและป้องกันโรคจึงคุ้มครองบริการตรวจและป้องกัน HIV แก่คนไทยทุกสิทธิ"
+                "thTitle": "บริการเชิงรุกและมาตรการส่งเสริมการเข้าถึง",
+                "enTitle": "Proactive Outreach & Access Enablers",
+                "definition": "การจัดบริการเชิงรุกเข้าถึงชุมชน ควบคู่กับนโยบายเวชภัณฑ์ วัคซีน และบุคลากร ช่วยปิดช่องว่างกลุ่มที่เข้าถึงบริการยาก",
+                "anchor": "เปลี่ยนความครอบคลุมตามสิทธิ์บนกระดาษให้เป็นการได้รับบริการที่มีคุณภาพจริง (Effective Coverage)"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 9.1 · ข้อยกเว้นประกันเอกชน",
-            "caseBridge": "ใช้เกณฑ์ Insurability, Adverse Selection, Cream-Skimming และ Positive Externalities วิเคราะห์ทั้งกรณีการรักษาโรคติดต่อและบริการป้องกันเชิงรุก",
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 1.1 · แนวโน้มโลก SDG 3.8.1 (137/138 ประเทศดีขึ้น)",
+            "caseBridge": "อ่านทิศทางดัชนีความครอบคลุมบริการจากตาราง 3×3 Matrix (137/138 ประเทศดีขึ้น) และเชื่อมโยงปัจจัยด้านความครอบคลุมหลักประกันสุขภาพ การกระจายหน่วยบริการปฐมภูมิ และบริการเชิงรุก",
             "docId": "HS6-CONCISE",
-            "docSec": "1.2",
-            "docLabel": "อ่านเพิ่มเติม HS6 (1.2 & 3.1)"
+            "docSec": "1.3",
+            "docLabel": "อ่านเพิ่มเติม HS6 (1.3)"
           }
         },
         {
-          "id": "q-9-2",
-          "label": "ประเด็นอภิปรายที่ 2.2",
-          "title": "แนวทางการสร้างหลักประกันความมั่นคงทางสังคมสำหรับแรงงานนอกระบบในประเทศไทยปัจจุบัน",
-          "prompt": "หากแรงงานนอกระบบกลุ่มนี้ต้องการเพิ่ม “หลักประกันความมั่นคงทางสังคม” ที่ครอบคลุมครบทั้งเรื่องการเจ็บป่วย ทุพพลภาพ เสียชีวิต ชราภาพ และสงเคราะห์บุตร จะมีแนวทางดำเนินการผ่านช่องทางใดได้ในปัจจุบัน และต้องเลือกเงื่อนไขอย่างไรจึงจะได้รับสิทธิประโยชน์ครบถ้วนตามที่กล่าวข้างต้น?",
+          "id": "q-8-2",
+          "label": "ประเด็นอภิปรายที่ 1.2",
+          "title": "การวิเคราะห์แนวโน้มและปัจจัยสาเหตุด้านการล้มละลายจากการจ่ายค่ารักษาพยาบาล (SDG 3.8.2 · 3 คะแนน)",
+          "prompt": "จากข้อมูลและภาพดังกล่าวจงตอบคำถามต่อไปนี้: สถานการณ์โดยรวมด้านการล้มละลายจากการจ่ายค่ารักษาพยาบาล (Incidence of Catastrophic Out-of-Pocket Health Spending: SDG 3.8.2) เป็นอย่างไร (1 คะแนน) และนักศึกษาคิดว่ามาจากปัจจัยสาเหตุใดบ้าง ตอบมาสองปัจจัย? (2 คะแนน)",
           "worksheet": {
             "type": "table",
             "headers": [
-              "องค์ประกอบของแนวทางดำเนินการ",
-              "รายละเอียดช่องทางและเงื่อนไขในระบบประเทศไทยปัจจุบัน"
+              "ประเด็นการวิเคราะห์ (SDG 3.8.2 Catastrophic OOP Spending)",
+              "คำอภิปรายและเหตุผลประกอบ (รวม 3 คะแนน)"
             ],
             "rows": [
               {
-                "rowId": "ch",
+                "rowId": "trend",
                 "cells": [
                   {
-                    "static": "ช่องทาง / ระบบที่สามารถสมัครได้ และเงื่อนไขการจ่ายเงินสมทบ"
+                    "static": "สถานการณ์โดยรวมใน 138 ประเทศ (1 คะแนน)"
                   },
                   {
-                    "inputId": "c9_q2_ans",
-                    "placeholder": "ระบุชื่อกองทุน/มาตรา รูปแบบการสมัคร และทางเลือกอัตราเงินสมทบที่ครอบคลุมครบทั้ง 5 กรณีรวมสงเคราะห์บุตรและชราภาพ…",
+                    "inputId": "c8_q2_trend",
+                    "placeholder": "ระบุทิศทางภาพรวมพร้อมเปรียบเทียบจำนวนประเทศที่ดีขึ้น (42) ไม่เปลี่ยนแปลง (32) และแย่ลง (64)…",
+                    "compact": false,
+                    "maxWords": 45,
+                    "maxChars": 240,
+                    "maxLines": 4,
+                    "a4BoxLabel": "กรอบ A4 กระชับ (≤45 คำ)"
+                  }
+                ]
+              },
+              {
+                "rowId": "factors",
+                "cells": [
+                  {
+                    "static": "ปัจจัยสาเหตุสำคัญ (ตอบมาสองปัจจัย · 2 คะแนน)"
+                  },
+                  {
+                    "inputId": "c8_q2_factors",
+                    "placeholder": "1) …\n2) …",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -3674,25 +3501,359 @@ window.RACM_HS_DISCUSSION_DATA = {
               }
             ],
             "colWidths": [
-              "20%",
-              "80%"
+              "22%",
+              "78%"
+            ]
+          },
+          "conceptSummarySlide": {
+            "id": "cs-8-2",
+            "takeawayNumber": 2,
+            "badge": "ขั้น ⑥ Key Takeaway #2 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #2 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑥ คำอธิบาย #2",
+            "studentShortLabel": "Key Takeaway #2",
+            "kicker": "Key Takeaway #2 · คำอธิบายสังเคราะห์ 3 แกน UHC Cube",
+            "title": "การคุ้มครองความเสี่ยงทางการเงินและลูกบาศก์หลักประกันสุขภาพ",
+            "enTitle": "Financial Risk Protection (SDG 3.8.2) & WHO UHC Cube",
+            "sourceNote": "WHO World Health Report (2010) · SDG 3.8.2",
+            "frameworkSynthesisSlide": {
+              "id": "cs-8-2-framework",
+              "kicker": "Key Takeaway #2 · Essential Framework (SDG 3.8.2)",
+              "badge": "ขั้น ⑤ Key Takeaway #2 (WHO UHC Cube)",
+              "studentBadge": "Key Takeaway #2 · WHO UHC Cube",
+              "shortLabel": "⑤ UHC Cube",
+              "studentShortLabel": "UHC Cube",
+              "stageBtnLabel": "⑤ UHC Cube",
+              "studentStageBtnLabel": "🖼 UHC Cube",
+              "title": "UHC Cube: Expanding Financial Risk Protection (X · Y · Z Axes)",
+              "enTitle": "Three Dimensions of Universal Health Coverage (WHO World Health Report 2010)",
+              "sourceNote": "WHO World Health Report (2010) · กรอบวิเคราะห์สาเหตุ Catastrophic OOP Health Spending",
+              "imageSrc": "assets/images/hs6_fw_uhc_cube_financial_protection.jpg?v=1",
+              "imageAlt": "WHO UHC Cube showing X axis (Population: who is covered?), Z axis (Services: which services are covered?), and Y axis (Direct costs: proportion of costs covered / reduce cost sharing and fees)",
+              "caption": "สาเหตุที่หลายประเทศยังมีอุบัติการณ์ Catastrophic OOP Spending สูง วิเคราะห์ได้ตรงตาม 3 แกนของ UHC Cube: แกน X (ความครอบคลุมประชากรยังขยายได้จำกัด) · แกน Z (ชุดสิทธิประโยชน์ยังมีจำกัดไม่รอบด้าน ต้องจ่ายเงินเอง) · แกน Y (ประชาชนยังต้องร่วมจ่าย Co-payment ค่อนข้างสูงเมื่อไปรับบริการ)",
+              "nextBtnLabel": "คำอธิบายบรรยาย 3 แกน (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-8-2-framework",
+                "kicker": "Key Takeaway #2 · Essential Framework (SDG 3.8.2)",
+                "badge": "ขั้น ⑤ Key Takeaway #2 (WHO UHC Cube)",
+                "studentBadge": "Key Takeaway #2 · WHO UHC Cube",
+                "shortLabel": "⑤ UHC Cube",
+                "studentShortLabel": "UHC Cube",
+                "stageBtnLabel": "⑤ UHC Cube",
+                "studentStageBtnLabel": "🖼 UHC Cube",
+                "title": "UHC Cube: Expanding Financial Risk Protection (X · Y · Z Axes)",
+                "enTitle": "Three Dimensions of Universal Health Coverage (WHO World Health Report 2010)",
+                "sourceNote": "WHO World Health Report (2010) · กรอบวิเคราะห์สาเหตุ Catastrophic OOP Health Spending",
+                "imageSrc": "assets/images/hs6_fw_uhc_cube_financial_protection.jpg?v=1",
+                "imageAlt": "WHO UHC Cube showing X axis (Population: who is covered?), Z axis (Services: which services are covered?), and Y axis (Direct costs: proportion of costs covered / reduce cost sharing and fees)",
+                "caption": "สาเหตุที่หลายประเทศยังมีอุบัติการณ์ Catastrophic OOP Spending สูง วิเคราะห์ได้ตรงตาม 3 แกนของ UHC Cube: แกน X (ความครอบคลุมประชากรยังขยายได้จำกัด) · แกน Z (ชุดสิทธิประโยชน์ยังมีจำกัดไม่รอบด้าน ต้องจ่ายเงินเอง) · แกน Y (ประชาชนยังต้องร่วมจ่าย Co-payment ค่อนข้างสูงเมื่อไปรับบริการ)",
+                "nextBtnLabel": "คำอธิบายบรรยาย 3 แกน (Slide ถัดไป)"
+              }
+            ],
+            "coreTerm": "“ลูกบาศก์หลักประกันสุขภาพถ้วนหน้า” (WHO UHC Cube)",
+            "coreDefinitionLead": "จำลองการออกแบบระบบหลักประกันสุขภาพใน 3 แกน ได้แก่ แกน X ประชากรที่คุ้มครอง แกน Z ชุดบริการที่ครอบคลุม และแกน Y สัดส่วนค่าใช้จ่ายที่ไม่ต้องจ่ายเงินเอง",
+            "coreDefinitionQualifier": "หากขยายการเข้าถึงบริการโดยไม่ขยายทั้ง 3 แกนอย่างสมดุล ประชาชนจะเผชิญภาวะล้มละลายจากค่ารักษาพยาบาลสูงขึ้น",
+            "coreDefinition": "จำลองการออกแบบระบบหลักประกันสุขภาพใน 3 แกน ได้แก่ แกน X ประชากรที่คุ้มครอง แกน Z ชุดบริการที่ครอบคลุม และแกน Y สัดส่วนค่าใช้จ่ายที่ไม่ต้องจ่ายเงินเอง หากขยายการเข้าถึงบริการโดยไม่ขยายทั้ง 3 แกนอย่างสมดุล ประชาชนจะเผชิญภาวะล้มละลายจากค่ารักษาพยาบาลสูงขึ้น",
+            "dimensions": [
+              {
+                "num": "01",
+                "thTitle": "แกน X: ความครอบคลุมประชากร",
+                "enTitle": "X Axis · Population Coverage",
+                "definition": "สัดส่วนประชากรที่มีหลักประกันสุขภาพ (Extend to non-covered) หากความครอบคลุมประชากรยังขยายได้จำกัด ผู้ตกหล่นต้องรับภาระค่ารักษาเองทั้งหมด",
+                "anchor": "ระบบภาคบังคับหรือสิทธิถ้วนหน้าตามกฎหมายช่วยปิดช่องว่างประชากรตกหล่นได้ดีกว่าภาคสมัครใจ"
+              },
+              {
+                "num": "02",
+                "thTitle": "แกน Z: ความครอบคลุมชุดสิทธิประโยชน์",
+                "enTitle": "Z Axis · Service Package Coverage",
+                "definition": "ขอบเขตของบริการและยาที่อยู่ในชุดสิทธิประโยชน์ (Include other services) หากชุดสิทธิยังมีจำกัดไม่รอบด้าน คนส่วนใหญ่ยังต้องควักเงินจ่ายเอง",
+                "anchor": "ต้องปรับชุดสิทธิประโยชน์ให้ครอบคลุมทั้งโรคเฉียบพลัน โรคเรื้อรัง และบริการค่าใช้จ่ายสูงที่จำเป็น"
+              },
+              {
+                "num": "03",
+                "thTitle": "แกน Y: การลดการร่วมจ่ายหน้างาน",
+                "enTitle": "Y Axis · Direct Cost Protection",
+                "definition": "สัดส่วนค่าใช้จ่ายที่กองทุนจ่ายแทน (Reduce cost sharing and fees) หากประชาชนยังต้องร่วมจ่ายเมื่อไปใช้บริการค่อนข้างสูง จะเกิด Catastrophic OOP รุนแรง",
+                "anchor": "ใน 138 ประเทศ มีเพียง 42 ประเทศที่ดีขึ้น แต่แย่ลงถึง 64 ประเทศ สะท้อนช่องว่างของการคุ้มครองทางการเงิน"
+              }
+            ],
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 1.2 · ดีขึ้นเพียง 42/138 แต่แย่ลงถึง 64/138 ประเทศ",
+            "caseBridge": "อธิบายด้วย 3 แกนของ UHC Cube ว่าเหตุใดเมื่อประชาชนเข้าถึงบริการมากขึ้น (SDG 3.8.1 ดีขึ้น) แต่หากความครอบคลุมประชากร ชุดสิทธิประโยชน์ และการลดร่วมจ่ายยังจำกัด รายจ่ายวิบัติ (SDG 3.8.2) จึงแย่ลง",
+            "docId": "HS6-CONCISE",
+            "docSec": "1.3",
+            "docLabel": "อ่านเพิ่มเติม HS6 (1.3–1.4)"
+          }
+        }
+      ],
+      "coverTitle": "Progress toward Universal Health Coverage (SDG 3.8)"
+    },
+    {
+      "id": "case-9",
+      "caseNumber": 2,
+      "module": "HS6",
+      "title": "กรณีศึกษาที่ 2: ประกันสุขภาพเอกชนกับผู้ขายบริการทางเพศ (Sex Workers) และแรงงานนอกระบบ",
+      "subtitle": "การวิเคราะห์ข้อยกเว้นของประกันสุขภาพเอกชนตามทฤษฎีการประกันสุขภาพ และแนวทางเพิ่มหลักประกันความมั่นคงด้านสังคมในไทย",
+      "frameworks": [
+        "สมมติฐานพื้นฐานทฤษฎีการประกันสุขภาพ 5 ประการ (Basic Assumptions: p < 1, Asymmetric Info / Adverse Selection)",
+        "ข้อยกเว้นมาตรฐาน 21 ข้อของ คปภ. และผลกระทบภายนอกทางบวก (Positive Externalities) ของบริการป้องกันเชิงรุก",
+        "การเปรียบเทียบสิทธิประกันสังคม มาตรา 33 · มาตรา 39 · มาตรา 40 (ทางเลือก 70 / 100 / 300 บาท/เดือน)"
+      ],
+      "scenarioBlocks": [
+        {
+          "type": "p",
+          "text": "ผู้ขายบริการทางเพศ (Sex workers) ในประเทศไทยยังถูกจัดอยู่ในฐานะ “แรงงานนอกระบบ (informal labor)” กล่าวคือ ไม่มีการขึ้นทะเบียนแรงงานและไม่อยู่ในระบบคุ้มครองทางสังคมอย่างเป็นทางการภาคบังคับของลูกจ้างในระบบ เช่น ประกันสังคมตามมาตรา 33 แม้ว่าจะสามารถเข้าถึงสิทธิการรักษาพยาบาลขั้นพื้นฐานภายใต้ “ระบบหลักประกันสุขภาพแห่งชาติ” (บัตรทอง) ได้ แต่สิทธิความมั่นคงทางสังคมในบางมิติยังมีข้อจำกัด โดยเฉพาะเมื่อเปรียบเทียบกับแรงงานในระบบที่มีสิทธิจากทั้งประกันสังคมและสวัสดิการนายจ้าง"
+        },
+        {
+          "type": "p",
+          "text": "ในด้าน “ประกันสุขภาพเอกชน” ไม่ว่าจะเป็นประกันส่วนบุคคลและประกันกลุ่มที่บริษัทเอกชนมักดำเนินการซื้อประกันเพิ่มให้กับพนักงานในบริษัท เพื่อประโยชน์คุ้มครองที่สะดวกมากกว่าประกันสังคม อย่างไรก็ดี หากพิจารณาในกลุ่มผู้ขายบริการทางเพศที่ซื้อประกันเอกชนนี้ บริษัทประกันส่วนใหญ่กลับกำหนด “ข้อยกเว้นของการคุ้มครอง” ที่ชัดเจน เช่น การไม่ครอบคลุมโรคติดต่อทางเพศสัมพันธ์รวมถึงเอชไอวี (HIV) และไม่ครอบคลุมบริการป้องกันเชิงรุก เช่น การรับยาป้องกันก่อนการสัมผัสเชื้อ (Pre-Exposure Prophylaxis: PrEP) หรือหลังการสัมผัสเชื้อ (Post-Exposure Prophylaxis: PEP) (คะแนนรวม 6 คะแนน)"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q-9-1",
+          "label": "ประเด็นอภิปรายที่ 2.1",
+          "title": "การวิเคราะห์ข้อยกเว้นของประกันสุขภาพเอกชนด้วยทฤษฎีการประกันสุขภาพ (Health Insurance Theory · 4 คะแนน)",
+          "prompt": "ตามหลักทฤษฎีการประกันสุขภาพ (Health Insurance Theory) และเศรษฐศาสตร์สาธารณสุข เหตุใดประกันสุขภาพเอกชนถึงไม่ครอบคลุมโรคติดต่อทางเพศสัมพันธ์ และ เอชไอวี (HIV)? (2 คะแนน) และเหตุใดประกันสุขภาพเอกชนถึงไม่ครอบคลุมบริการป้องกันเชิงรุก เช่น บริการ PrEP และ PEP? (2 คะแนน)",
+          "worksheet": {
+            "type": "table",
+            "headers": [
+              "ประเด็นคำถาม (รวม 4 คะแนน)",
+              "การวิเคราะห์ตามทฤษฎีการประกันสุขภาพ (Health Insurance Theory)"
+            ],
+            "rows": [
+              {
+                "rowId": "q911",
+                "cells": [
+                  {
+                    "static": "2.1.1 เหตุใดประกันสุขภาพเอกชนถึงไม่ครอบคลุมโรคติดต่อทางเพศสัมพันธ์และเอชไอวี (HIV)? (2 คะแนน)"
+                  },
+                  {
+                    "inputId": "c9_q1_sti",
+                    "placeholder": "วิเคราะห์ในแง่พฤติกรรมเสี่ยง การคัดเลือกในทางตรงข้าม (Adverse Selection) และค่าความน่าจะเป็นของการเกิดโรค (p เข้าใกล้ 1)…",
+                    "compact": false,
+                    "maxWords": 60,
+                    "maxChars": 330,
+                    "maxLines": 5,
+                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
+                  }
+                ]
+              },
+              {
+                "rowId": "q912",
+                "cells": [
+                  {
+                    "static": "2.1.2 เหตุใดประกันสุขภาพเอกชนถึงไม่ครอบคลุมบริการป้องกันเชิงรุก เช่น บริการ PrEP และ PEP? (2 คะแนน)"
+                  },
+                  {
+                    "inputId": "c9_q1_prep",
+                    "placeholder": "วิเคราะห์ในแง่บริการที่มี Externalities และกรณีที่มีเฉพาะกลุ่มเสี่ยงเข้ามาซื้อทำให้ค่า p เข้าใกล้ 1…",
+                    "compact": false,
+                    "maxWords": 60,
+                    "maxChars": 330,
+                    "maxLines": 5,
+                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
+                  }
+                ]
+              }
+            ],
+            "colWidths": [
+              "24%",
+              "76%"
+            ]
+          },
+          "conceptSummarySlide": {
+            "id": "cs-9-1",
+            "takeawayNumber": 3,
+            "badge": "ขั้น ⑦ Key Takeaway #3 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #3 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑦ คำอธิบาย #3",
+            "studentShortLabel": "Key Takeaway #3",
+            "kicker": "Key Takeaway #3 · คำอธิบายสังเคราะห์ 4 มิติ",
+            "title": "เกณฑ์ความเสี่ยงที่รับประกันได้และความล้มเหลวของตลาดสมัครใจ",
+            "enTitle": "Insurability Criteria & Voluntary Insurance Market Failure",
+            "sourceNote": "เศรษฐศาสตร์สาธารณสุข · ทฤษฎีการประกันสุขภาพ & คำสั่งนายทะเบียน คปภ. ที่ 56/2562",
+            "frameworkSynthesisSlide": {
+              "id": "cs-9-1-framework-1",
+              "kicker": "Key Takeaway #3 · Essential Framework (1/2)",
+              "badge": "ขั้น ⑤ Key Takeaway #3 (Basic Assumptions)",
+              "studentBadge": "Key Takeaway #3 · Basic Assumptions",
+              "shortLabel": "⑤ ทฤษฎีประกัน",
+              "studentShortLabel": "Basic Assumptions",
+              "stageBtnLabel": "⑤ ทฤษฎีประกัน",
+              "studentStageBtnLabel": "🖼 ทฤษฎีประกัน",
+              "title": "Basic Assumptions: Health Insurance Theory (5 สมมติฐานพื้นฐาน)",
+              "enTitle": "Actuarial Assumptions for Voluntary Health Insurance Markets",
+              "sourceNote": "ทฤษฎีการประกันสุขภาพ (HS6) · เงื่อนไขพื้นฐานที่ทำให้ตลาดเอกชนถัวเฉลี่ยความเสี่ยงได้",
+              "imageSrc": "assets/images/hs6_fw_insurance_basic_assumptions.jpg?v=1",
+              "imageAlt": "Basic assumptions of health insurance theory: (1) p and E known to insurer, (2) p < 1, (3) p not known to insured, (4) p independent / non-covariate, (5) illness does not benefit insured",
+              "caption": "เมื่อผู้ซื้อมีพฤติกรรมเสี่ยงและรู้ความเสี่ยงตนมากกว่าผู้รับประกัน (ขัดข้อ 3 → Adverse Selection) และมีความเสี่ยงสูงจน p เข้าใกล้ 1 (ขัดข้อ 2 → ถัวเฉลี่ยความเสี่ยงไม่ได้) รวมถึง PrEP/PEP ที่มี Externalities และมีเฉพาะกลุ่มเสี่ยงเข้ามาซื้อ (p → 1) บริษัทประกันเอกชนจึงตั้งข้อยกเว้นไม่คุ้มครอง",
+              "nextBtnLabel": "ข้อยกเว้นมาตรฐาน คปภ. 21 ข้อ (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-9-1-framework-1",
+                "kicker": "Key Takeaway #3 · Essential Framework (1/2)",
+                "badge": "ขั้น ⑤ Key Takeaway #3 (Basic Assumptions)",
+                "studentBadge": "Key Takeaway #3 · Basic Assumptions",
+                "shortLabel": "⑤ ทฤษฎีประกัน",
+                "studentShortLabel": "Basic Assumptions",
+                "stageBtnLabel": "⑤ ทฤษฎีประกัน",
+                "studentStageBtnLabel": "🖼 ทฤษฎีประกัน",
+                "title": "Basic Assumptions: Health Insurance Theory (5 สมมติฐานพื้นฐาน)",
+                "enTitle": "Actuarial Assumptions for Voluntary Health Insurance Markets",
+                "sourceNote": "ทฤษฎีการประกันสุขภาพ (HS6) · เงื่อนไขพื้นฐานที่ทำให้ตลาดเอกชนถัวเฉลี่ยความเสี่ยงได้",
+                "imageSrc": "assets/images/hs6_fw_insurance_basic_assumptions.jpg?v=1",
+                "imageAlt": "Basic assumptions of health insurance theory: (1) p and E known to insurer, (2) p < 1, (3) p not known to insured, (4) p independent / non-covariate, (5) illness does not benefit insured",
+                "caption": "เมื่อผู้ซื้อมีพฤติกรรมเสี่ยงและรู้ความเสี่ยงตนมากกว่าผู้รับประกัน (ขัดข้อ 3 → Adverse Selection) และมีความเสี่ยงสูงจน p เข้าใกล้ 1 (ขัดข้อ 2 → ถัวเฉลี่ยความเสี่ยงไม่ได้) รวมถึง PrEP/PEP ที่มี Externalities และมีเฉพาะกลุ่มเสี่ยงเข้ามาซื้อ (p → 1) บริษัทประกันเอกชนจึงตั้งข้อยกเว้นไม่คุ้มครอง",
+                "nextBtnLabel": "ข้อยกเว้นมาตรฐาน คปภ. 21 ข้อ (Slide ถัดไป)"
+              },
+              {
+                "id": "cs-9-1-framework-2",
+                "kicker": "Key Takeaway #3 · Essential Framework (2/2)",
+                "badge": "ขั้น ⑥ Key Takeaway #3 (OIC 21 Exclusions)",
+                "studentBadge": "Key Takeaway #3 · ข้อยกเว้น คปภ. 21 ข้อ",
+                "shortLabel": "⑥ ข้อยกเว้น คปภ.",
+                "studentShortLabel": "ข้อยกเว้น คปภ.",
+                "stageBtnLabel": "⑥ ข้อยกเว้น คปภ.",
+                "studentStageBtnLabel": "🖼 ข้อยกเว้น คปภ.",
+                "title": "ข้อยกเว้นสำคัญ (21 ข้อ) ตามแบบมาตรฐานของ คปภ. (คำสั่งนายทะเบียนที่ 56/2562)",
+                "enTitle": "OIC Standard Health Insurance Policy Exclusions in Thailand",
+                "sourceNote": "สำนักงานคณะกรรมการกำกับและส่งเสริมการประกอบธุรกิจประกันภัย (คปภ.)",
+                "imageSrc": "assets/images/hs6_fw_oic_21_exclusions.jpg?v=1",
+                "imageAlt": "ข้อยกเว้นสำคัญ 21 ข้อ ตามแบบมาตรฐานของ คปภ. โดยไฮไลต์ข้อ 4 โรคเอดส์หรือกามโรคหรือโรคติดต่อทางเพศสัมพันธ์ ข้อ 6 การตรวจสุขภาพ และข้อ 12 การฉีดวัคซีน",
+                "caption": "หลักฐานเชิงสถาบันในตลาดประกันสุขภาพไทย: แบบมาตรฐาน คปภ. ยกเว้นข้อ 4 (โรคเอดส์/กามโรค/โรคติดต่อทางเพศสัมพันธ์) ข้อ 6 (การตรวจสุขภาพ) และข้อ 12 (การฉีดวัคซีนป้องกันเชิงรุกทั่วไป) สะท้อนข้อจำกัดของประกันสมัครใจที่ต้องให้รัฐเข้ามาคุ้มครองผ่านงบ P&P ถ้วนหน้าแทน",
+                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+              }
+            ],
+            "coreTerm": "“ประกันสุขภาพภาคสมัครใจในกลไกตลาด” (voluntary private insurance)",
+            "coreDefinitionLead": "รับประกันได้ดีเฉพาะเหตุการณ์เจ็บป่วยที่ไม่แน่นอน (p < 1) คำนวณความเสี่ยงได้ และไม่มีความไม่สมมาตรของข้อมูลรุนแรง",
+            "coreDefinitionQualifier": "จึงเกิดความล้มเหลวของตลาดกับกลุ่มเสี่ยงสูงและบริการป้องกันโรคที่มี Externalities ทำให้รัฐต้องจัดบริการสาธารณะคุ้มครองแทน",
+            "coreDefinition": "รับประกันได้ดีเฉพาะเหตุการณ์เจ็บป่วยที่ไม่แน่นอน (p < 1) คำนวณความเสี่ยงได้ และไม่มีความไม่สมมาตรของข้อมูลรุนแรง จึงเกิดความล้มเหลวของตลาดกับกลุ่มเสี่ยงสูงและบริการป้องกันโรคที่มี Externalities ทำให้รัฐต้องจัดบริการสาธารณะคุ้มครองแทน",
+            "dimensions": [
+              {
+                "num": "01",
+                "thTitle": "สมมติฐานความน่าจะเป็น p < 1",
+                "enTitle": "Probability p < 1 vs. Certain Claim",
+                "definition": "ความเสี่ยงที่รับประกันได้ต้องไม่เข้าใกล้ 1 หากผู้ซื้อมีพฤติกรรมเสี่ยงสูงหรือเข้ามาซื้อเพื่อใช้บริการแน่นอน (p → 1) จะถัวเฉลี่ยความเสี่ยงไม่ได้",
+                "anchor": "เป็นเหตุผลร่วมทั้งกรณีโรคติดต่อทางเพศสัมพันธ์/HIV และกรณีบริการ PrEP/PEP ที่มีเฉพาะกลุ่มเสี่ยงเข้ามาซื้อ"
+              },
+              {
+                "num": "02",
+                "thTitle": "การคัดเลือกในทางตรงข้าม",
+                "enTitle": "Adverse Selection",
+                "definition": "เมื่อผู้ซื้อรู้พฤติกรรมเสี่ยงของตนมากกว่าผู้รับประกัน (ขัดสมมติฐาน p is not known to the insured) กลุ่มเสี่ยงสูงจึงเข้ามาซื้อในสัดส่วนสูง",
+                "anchor": "ทำให้บริษัทประกันเอกชนป้องกันการขาดทุนด้วยการกำหนดข้อยกเว้นมาตรฐาน (เช่น ข้อ 4 ของ คปภ.)"
+              },
+              {
+                "num": "03",
+                "thTitle": "ผลกระทบภายนอกทางบวกต่อสังคม",
+                "enTitle": "Positive Externalities (PrEP / PEP)",
+                "definition": "บริการป้องกันเชิงรุกอย่าง PrEP และ PEP ช่วยตัดวงจรการแพร่เชื้อให้แก่สังคมส่วนรวม ตลาดเอกชนจึงจัดสรรต่ำกว่าระดับที่สังคมต้องการ",
+                "anchor": "ในประเทศไทย งบสร้างเสริมสุขภาพและป้องกันโรค (P&P) ของ สปสช. จึงจัดบริการ PrEP/PEP ฟรีแก่คนไทยทุกสิทธิ"
+              },
+              {
+                "num": "04",
+                "thTitle": "ข้อยกเว้นมาตรฐาน คปภ. 21 ข้อ",
+                "enTitle": "Institutional Policy Exclusions",
+                "definition": "สะท้อนปัญหา Moral hazard, Adverse selection และ p → 1 ในโลกจริง เช่น ยกเว้น STI/HIV การตรวจสุขภาพ วัคซีน เสริมสวย และการทำร้ายตนเอง",
+                "anchor": "ชี้ให้เห็นว่าประกันเอกชนเป็นเพียงส่วนเสริมความสะดวก ไม่สามารถทดแทนระบบหลักประกันสุขภาพภาครัฐได้"
+              }
+            ],
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 2.1 · ข้อยกเว้น STI/HIV และ PrEP/PEP",
+            "caseBridge": "เชื่อมสมมติฐานพื้นฐานทฤษฎีประกันสุขภาพ (พฤติกรรมเสี่ยง, Adverse Selection, p → 1) เข้ากับหลักเศรษฐศาสตร์สาธารณสุขเรื่อง Externalities อย่างครบถ้วน",
+            "docId": "HS6-CONCISE",
+            "docSec": "1.2",
+            "docLabel": "อ่านเพิ่มเติม HS6 (1.2 & 3.1)"
+          }
+        },
+        {
+          "id": "q-9-2",
+          "label": "ประเด็นอภิปรายที่ 2.2",
+          "title": "แนวทางการเพิ่มหลักประกันความมั่นคงด้านสังคมสำหรับแรงงานนอกระบบในปัจจุบัน (2 คะแนน)",
+          "prompt": "หากแรงงานนอกระบบกลุ่มนี้ต้องการเพิ่ม “หลักประกันความมั่นคงทางสังคม” ที่ครอบคลุมทั้งเรื่องการเจ็บป่วย, ทุพพลภาพ, เสียชีวิต, เงินบำเหน็จชราภาพ และสงเคราะห์บุตร จะมีแนวทางดำเนินการผ่านช่องทางใดได้ในปัจจุบัน และต้องเลือกเงื่อนไขอย่างไร? (2 คะแนน)",
+          "worksheet": {
+            "type": "table",
+            "headers": [
+              "องค์ประกอบของแนวทางดำเนินการ",
+              "รายละเอียดช่องทาง มาตรา และอัตราเงินสมทบในปัจจุบัน (รวม 2 คะแนน)"
+            ],
+            "rows": [
+              {
+                "rowId": "ch",
+                "cells": [
+                  {
+                    "static": "ช่องทาง / ระบบที่สมัครได้ รูปแบบมาตรา และอัตราเงินสมทบ (2 คะแนน)"
+                  },
+                  {
+                    "inputId": "c9_q2_ans",
+                    "placeholder": "ระบุชื่อระบบ (0.5 คะแนน) รูปแบบ/มาตรา (0.5 คะแนน) และอัตราเงินสมทบรายเดือนที่ครอบคลุมครบทั้งเจ็บป่วย ทุพพลภาพ เสียชีวิต เงินบำเหน็จชราภาพ และสงเคราะห์บุตร (1 คะแนน)…",
+                    "compact": false,
+                    "maxWords": 60,
+                    "maxChars": 330,
+                    "maxLines": 5,
+                    "a4BoxLabel": "กรอบ A4 กระชับ (≤60 คำ)"
+                  }
+                ]
+              }
+            ],
+            "colWidths": [
+              "24%",
+              "76%"
             ]
           },
           "conceptSummarySlide": {
             "id": "cs-9-2",
             "takeawayNumber": 4,
-            "badge": "ขั้น ⑤ Key Takeaway #4",
-            "studentBadge": "Key Takeaway #4",
-            "shortLabel": "⑤ Key Takeaway #4",
+            "badge": "ขั้น ⑥ Key Takeaway #4 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #4 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑥ คำอธิบาย #4",
             "studentShortLabel": "Key Takeaway #4",
-            "kicker": "Key Takeaway #4",
+            "kicker": "Key Takeaway #4 · คำอธิบายสังเคราะห์ระบบประกันสังคมไทย",
             "title": "หลักประกันสุขภาพและประกันสังคมสำหรับแรงงานนอกระบบ",
             "enTitle": "Universal Health Coverage & Social Security Section 40 in Thailand",
-            "sourceNote": "พ.ร.บ.หลักประกันสุขภาพแห่งชาติ พ.ศ. 2545 · พ.ร.บ.ประกันสังคม (มาตรา 40)",
+            "sourceNote": "พ.ร.บ.หลักประกันสุขภาพแห่งชาติ พ.ศ. 2545 · พ.ร.บ.ประกันสังคม (มาตรา 33, 39, 40)",
+            "frameworkSynthesisSlide": {
+              "id": "cs-9-2-framework",
+              "kicker": "Key Takeaway #4 · Essential Framework (Social Security Scheme)",
+              "badge": "ขั้น ⑤ Key Takeaway #4 (SSS Section 33 · 39 · 40)",
+              "studentBadge": "Key Takeaway #4 · ประกันสังคม ม.33 · 39 · 40",
+              "shortLabel": "⑤ ม.33/39/40",
+              "studentShortLabel": "ม.33/39/40",
+              "stageBtnLabel": "⑤ ม.33/39/40",
+              "studentStageBtnLabel": "🖼 ม.33/39/40",
+              "title": "Social Security Scheme — เปรียบเทียบสิทธิประกันสังคม มาตรา 33 · 39 · 40",
+              "enTitle": "Comparison of Benefits & Contributions Across Section 33, Section 39, and Section 40",
+              "sourceNote": "สำนักงานประกันสังคม · มาตรา 40 ทางเลือก 70 / 100 / 300 บาท/เดือน",
+              "imageSrc": "assets/images/hs6_fw_sss_sections_comparison.jpg?v=1",
+              "imageAlt": "ตารางเปรียบเทียบสิทธิประกันสังคม Section 33, Section 39 และ Section 40 (70, 100, 300 บาท/เดือน) ครอบคลุมเจ็บป่วย คลอดบุตร ทุพพลภาพ เสียชีวิต ชราภาพ สงเคราะห์บุตร และว่างงาน",
+              "caption": "แรงงานนอกระบบสมัครประกันสังคมภาคสมัครใจ มาตรา 40 ได้ 3 อัตรา: 70 บาท/เดือน (✓ 3 กรณี: ทดแทนขาดรายได้เจ็บป่วย ทุพพลภาพ ตาย) · 100 บาท/เดือน (✓✓ เพิ่มบำเหน็จชราภาพ) · 300 บาท/เดือน (✓✓✓ ครบ 5 กรณีรวมบำเหน็จชราภาพและสงเคราะห์บุตร) โดยยังคงใช้สิทธิรักษาพยาบาลบัตรทองควบคู่กัน",
+              "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-9-2-framework",
+                "kicker": "Key Takeaway #4 · Essential Framework (Social Security Scheme)",
+                "badge": "ขั้น ⑤ Key Takeaway #4 (SSS Section 33 · 39 · 40)",
+                "studentBadge": "Key Takeaway #4 · ประกันสังคม ม.33 · 39 · 40",
+                "shortLabel": "⑤ ม.33/39/40",
+                "studentShortLabel": "ม.33/39/40",
+                "stageBtnLabel": "⑤ ม.33/39/40",
+                "studentStageBtnLabel": "🖼 ม.33/39/40",
+                "title": "Social Security Scheme — เปรียบเทียบสิทธิประกันสังคม มาตรา 33 · 39 · 40",
+                "enTitle": "Comparison of Benefits & Contributions Across Section 33, Section 39, and Section 40",
+                "sourceNote": "สำนักงานประกันสังคม · มาตรา 40 ทางเลือก 70 / 100 / 300 บาท/เดือน",
+                "imageSrc": "assets/images/hs6_fw_sss_sections_comparison.jpg?v=1",
+                "imageAlt": "ตารางเปรียบเทียบสิทธิประกันสังคม Section 33, Section 39 และ Section 40 (70, 100, 300 บาท/เดือน) ครอบคลุมเจ็บป่วย คลอดบุตร ทุพพลภาพ เสียชีวิต ชราภาพ สงเคราะห์บุตร และว่างงาน",
+                "caption": "แรงงานนอกระบบสมัครประกันสังคมภาคสมัครใจ มาตรา 40 ได้ 3 อัตรา: 70 บาท/เดือน (✓ 3 กรณี: ทดแทนขาดรายได้เจ็บป่วย ทุพพลภาพ ตาย) · 100 บาท/เดือน (✓✓ เพิ่มบำเหน็จชราภาพ) · 300 บาท/เดือน (✓✓✓ ครบ 5 กรณีรวมบำเหน็จชราภาพและสงเคราะห์บุตร) โดยยังคงใช้สิทธิรักษาพยาบาลบัตรทองควบคู่กัน",
+                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+              }
+            ],
             "coreTerm": "“การคุ้มครองสุขภาพควบคู่ความมั่นคงทางรายได้” (health & social protection)",
             "coreDefinitionLead": "ในประเทศไทย แรงงานนอกระบบมีสิทธิหลักประกันสุขภาพแห่งชาติคุ้มครองค่ารักษาพยาบาลเป็นฐานถ้วนหน้าอยู่แล้ว",
-            "coreDefinitionQualifier": "และสามารถสมัครเป็นผู้ประกันตนตามมาตรา 40 เพิ่มเติมเพื่อสร้างหลักประกันทดแทนรายได้และสวัสดิการสังคมโดยไม่เสียสิทธิบัตรทอง",
-            "coreDefinition": "ในประเทศไทย แรงงานนอกระบบมีสิทธิหลักประกันสุขภาพแห่งชาติคุ้มครองค่ารักษาพยาบาลเป็นฐานถ้วนหน้าอยู่แล้ว และสามารถสมัครเป็นผู้ประกันตนตามมาตรา 40 เพิ่มเติมเพื่อสร้างหลักประกันทดแทนรายได้และสวัสดิการสังคมโดยไม่เสียสิทธิบัตรทอง",
+            "coreDefinitionQualifier": "และสามารถสมัครเป็นผู้ประกันตนภาคสมัครใจตามมาตรา 40 (จ่ายไม่น้อยกว่า 300 บาท/เดือน) เพื่อคุ้มครองครบทั้ง 5 กรณีโดยไม่เสียสิทธิบัตรทอง",
+            "coreDefinition": "ในประเทศไทย แรงงานนอกระบบมีสิทธิหลักประกันสุขภาพแห่งชาติคุ้มครองค่ารักษาพยาบาลเป็นฐานถ้วนหน้าอยู่แล้ว และสามารถสมัครเป็นผู้ประกันตนภาคสมัครใจตามมาตรา 40 (จ่ายไม่น้อยกว่า 300 บาท/เดือน) เพื่อคุ้มครองครบทั้ง 5 กรณีโดยไม่เสียสิทธิบัตรทอง",
             "dimensions": [
               {
                 "num": "01",
@@ -3705,44 +3866,44 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "num": "02",
                 "thTitle": "ประกันสังคมภาคสมัครใจ มาตรา 40",
                 "enTitle": "Social Security Section 40",
-                "definition": "ออกแบบสำหรับผู้ประกอบอาชีพอิสระและแรงงานนอกระบบ เพื่อคุ้มครองเงินทดแทนการขาดรายได้ ทุพพลภาพ เสียชีวิต ชราภาพ และสงเคราะห์บุตร",
-                "anchor": "รัฐร่วมสมทบเงินเข้ากองทุนเพิ่มเติมตามทางเลือกที่ผู้ประกันตนสมัคร"
+                "definition": "เปิดให้แรงงานนอกระบบสมัครโดยสมัครใจเพื่อรับเงินทดแทนการขาดรายได้เมื่อเจ็บป่วย (300 บ./วัน สูงสุด 30 วัน) ทุพพลภาพ เสียชีวิต ชราภาพ และสงเคราะห์บุตร",
+                "anchor": "ต่างจาก ม.33 (ภาคบังคับลูกจ้าง 5% เงินเดือน) และ ม.39 (สมัครใจสำหรับผู้เคยอยู่ ม.33 จ่าย 432 บ./เดือน)"
               },
               {
                 "num": "03",
-                "thTitle": "การคงสิทธิบัตรทองควบคู่มาตรา 40",
-                "enTitle": "Complementary Dual Protection",
-                "definition": "ต่างจากผู้ประกันตนมาตรา 33 และ 39 ผู้สมัครมาตรา 40 ยังคงใช้สิทธิรักษาพยาบาลจากบัตรทอง (UCS) ตามเดิมควบคู่กับสวัสดิการรายได้",
-                "anchor": "ปิดช่องว่างทั้งค่ารักษาพยาบาลหน้างานและเงินชดเชยเมื่อเจ็บป่วยจนต้องหยุดงานขาดรายได้"
+                "thTitle": "เงื่อนไขสมทบ 300 บาท/เดือน (ทางเลือกที่ 3)",
+                "enTitle": "300 THB/Month Option for Full 5 Benefits",
+                "definition": "ทางเลือก 70 บ./เดือน ได้ 3 กรณีพื้นฐาน · 100 บ./เดือน เพิ่มบำเหน็จชราภาพ · ต้องจ่าย 300 บ./เดือน จึงจะได้ครบทั้งบำเหน็จชราภาพและสงเคราะห์บุตร",
+                "anchor": "ตอบโจทย์ความต้องการหลักประกันความมั่นคงทางสังคมทั้ง 5 ด้านตามที่โจทย์กำหนดครบถ้วน"
               },
               {
                 "num": "04",
-                "thTitle": "ทางเลือกชุดสิทธิประโยชน์ตามเงินสมทบ",
-                "enTitle": "Tiered Contribution Options",
-                "definition": "แบ่งทางเลือกสมทบรายเดือนตามความต้องการความคุ้มครอง โดยทางเลือกสูงสุดครอบคลุมครบทั้ง 5 กรณีรวมบำเหน็จชราภาพและสงเคราะห์บุตร",
-                "anchor": "ยืดหยุ่นให้แรงงานนอกระบบเลือกเงื่อนไขให้ตรงกับความต้องการหลักประกันระยะยาวของครอบครัว"
+                "thTitle": "การคงสิทธิบัตรทองควบคู่มาตรา 40",
+                "enTitle": "Complementary Dual Protection",
+                "definition": "ผู้ประกันตนมาตรา 40 ยังคงใช้สิทธิรักษาพยาบาลจากบัตรทอง (UCS) ตามเดิมควบคู่กับสวัสดิการเงินทดแทนจากประกันสังคม",
+                "anchor": "ปิดช่องว่างทั้งค่ารักษาพยาบาลหน้างานและเงินชดเชยเมื่อเจ็บป่วยจนต้องหยุดงานขาดรายได้"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 9.2 · แรงงานนอกระบบไทย",
-            "caseBridge": "ระบุช่องทางกฎหมายในระบบไทยและเงื่อนไขทางเลือกเงินสมทบที่ทำให้ได้รับความคุ้มครองครบทั้ง 5 กรณีควบคู่กับสิทธิรักษาพยาบาล",
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 2.2 · ประกันสังคม มาตรา 40 (300 บาท/เดือน)",
+            "caseBridge": "ระบุให้ครบ 3 องค์ประกอบคะแนน: (1) สมัครระบบประกันสังคม [0.5] (2) แบบภาคสมัครใจ หรือ มาตรา 40 [0.5] และ (3) จ่ายเงินสมทบไม่น้อยกว่า 300 บาท/เดือน [1.0]",
             "docId": "HS6-CONCISE",
             "docSec": "3.2",
             "docLabel": "อ่านเพิ่มเติม HS6 (3.2)"
           }
         }
       ],
-      "coverTitle": "ช่องว่างสิทธิประกันสุขภาพของแรงงานนอกระบบ"
+      "coverTitle": "ประกันสุขภาพเอกชนกับผู้ขายบริการทางเพศ"
     },
     {
       "id": "case-10",
       "caseNumber": 3,
       "module": "HS6",
-      "title": "กรณีศึกษาที่ 3: กลไกการจ่ายเงินผู้ให้บริการ (FFS vs Capitation) และบทบาทของการจ่ายตามผลงาน (Pay for Performance: P4P)",
+      "title": "กรณีศึกษาที่ 3: การจ่ายตามผลงาน (Pay for Performance: P4P) เปรียบเทียบกับกลไกการจ่ายเงินหลัก (FFS vs Capitation)",
       "subtitle": "กรณีประกาศ สปสช. เรื่องการจ่ายเพิ่มเติมแบบ P4P ในโรคหืด (Asthma) และโรคปอดอุดกั้นเรื้อรัง (COPD)",
       "frameworks": [
-        "กลไกการจ่ายเงินผู้ให้บริการ (Fee-for-Service vs Inclusive Capitation)",
-        "แรงจูงใจทางการเงินและพฤติกรรมผู้ให้บริการ (Over-service / SID vs Under-service / Risk Selection)",
-        "การผสมผสานกลไกการจ่ายตามผลงาน (Pay for Performance: P4P) เพื่อปิดช่องว่างคุณภาพ"
+        "กลไกการจ่ายเงินตามรายบริการ (Fee-for-Services: FFS) และสมการรายจ่ายสุขภาพ",
+        "กลไกการจ่ายแบบเหมาจ่ายรายหัว (Capitation: Inclusive vs Exclusive) และตาราง World Health Report 2000",
+        "บทบาทและเงื่อนไขของการจ่ายตามผลงาน (Pay for Performance: P4P) ในการปิดช่องว่างของระบบการจ่ายเดิม"
       ],
       "scenarioBlocks": [
         {
@@ -3751,17 +3912,13 @@ window.RACM_HS_DISCUSSION_DATA = {
         },
         {
           "type": "p",
-          "text": "กรณีบริการควบคุมความรุนแรงของโรคหืด (Asthma) และโรคปอดอุดกั้นเรื้อรัง (COPD) ได้กำหนดหลักเกณฑ์ วิธีการ และเงื่อนไขการจ่ายเพิ่มเติมแบบ “จ่ายตามผลงาน (Pay for Performance: P4P)” นอกเหนือจากการจ่ายปกติที่มีอยู่แล้ว สำหรับสองกลุ่มโรคข้างต้น เพื่อส่งเสริมและสนับสนุนการจัดบริการให้ได้คุณภาพมาตรฐานและมีประสิทธิภาพ โดยมีวงเงิน 40.84 ล้านบาทสำหรับ Asthma และ 10.21 ล้านบาทสำหรับ COPD"
-        },
-        {
-          "type": "p",
-          "text": "การชดเชยโรงพยาบาลจะคำนวณจากอัตราการเกิดภาวะกำเริบเฉียบพลัน (Acute Exacerbation) จนต้องเข้ารับบริการผู้ป่วยใน (Admission) และห้องฉุกเฉิน (ER visit) ดังนี้:"
+          "text": "กรณีบริการควบคุมความรุนแรง โรคหืด (Asthma) และ โรคปอดอุดกั้นเรื้อรัง (COPD) ได้กำหนดหลักเกณฑ์ วิธีการ และเงื่อนไขการจ่ายเพิ่มเติมแบบ “จ่ายตามผลงาน (Pay for Performance: P4P)” นอกเหนือจากการจ่ายปกติที่มีอยู่แล้ว สำหรับสองกลุ่มโรคข้างต้น เพื่อส่งเสริมและสนับสนุนการจัดบริการให้ได้คุณภาพมาตรฐานและมีประสิทธิภาพ โดยมีวงเงิน 40.84 ล้านบาทสำหรับ Asthma และ 10.21 ล้านบาทสำหรับ COPD ทั้งนี้ การชดเชยโรงพยาบาลจะคำนวณจากอัตราการมีภาวะกำเริบเฉียบพลัน (Acute Exacerbation) จนต้องเข้ารับบริการแบบผู้ป่วยใน (IPD / Admission) และห้องฉุกเฉิน (ER visit) ดังนี้:"
         },
         {
           "type": "table",
           "headers": [
-            "กลุ่มโรค",
-            "เกณฑ์การคำนวณคะแนน P4P"
+            "โรค",
+            "การคำนวณคะแนน"
           ],
           "rows": [
             [
@@ -3776,24 +3933,28 @@ window.RACM_HS_DISCUSSION_DATA = {
         },
         {
           "type": "p",
-          "text": "ตัวอย่างการคำนวณคะแนน: โรงพยาบาล A มีผู้ป่วยโรคหืดทั้งหมด 2,000 คน ปีที่ผ่านมามีผู้ป่วยที่เกิดภาวะกำเริบจนเข้ารับบริการแบบผู้ป่วยในจำนวน 100 คน คิดเป็นร้อยละ 5 จึงได้รับอัตราชดเชยที่ 1 คะแนน นำไปคูณกับจำนวนผู้ป่วยโรคหืดทั้งหมดได้ 2,000 คะแนน แล้วนำไปคิดสัดส่วนเทียบกับคะแนนรวมทั้งประเทศ (สมมติเท่ากับ 1,000,000 คะแนน) จะได้รับเงินชดเชยเพิ่มเติมนอกเหนือจากงบเหมาจ่ายรายหัวของผู้ป่วยนอกและค่าบริการผู้ป่วยในตาม DRG ที่ได้รับอยู่ก่อนแล้ว"
+          "text": "ตัวอย่างการคำนวณคะแนน: โรงพยาบาล A มีผู้ป่วยโรคหืดจำนวนทั้งสิ้น 2,000 คน ปีที่ผ่านมามีผู้ป่วยที่เข้ารับบริการแบบผู้ป่วยในจำนวน 100 คน คิดเป็น 5% จะได้รับอัตราชดเชยอยู่ที่ 1 คะแนน นำไปคูณกับจำนวนผู้ป่วยโรคหืดทั้งหมด จะได้ 2,000 คะแนน และนำคะแนนไปคิดสัดส่วนกับจำนวนคะแนนรวมทั้งประเทศ (สมมติให้เป็น 1,000,000 คะแนน) ก็จะได้รับเงินชดเชยทั้งหมด (2,000 / 1,000,000) × 40,843,100 = 82,686.2 บาท นั่นคือ รพ. A จะได้รับเงินเพิ่มเติม 82,686.2 บาท นอกเหนือจากงบเหมาจ่ายรายหัวของผู้ป่วยนอก และค่าบริการผู้ป่วยในตาม DRG ที่ได้รับอยู่ก่อนแล้ว"
         },
         {
           "type": "subheading",
-          "text": "ส่วนที่ 2: ตารางเปรียบเทียบรูปแบบการจ่ายเงินหลักของ 2 ประเทศสมมติ"
+          "text": "ส่วนที่ 2: คำสั่งโจทย์และตารางเปรียบเทียบรูปแบบการจ่ายสมมติ (คะแนนรวม 8 คะแนน)"
+        },
+        {
+          "type": "p",
+          "text": "คำสั่งโจทย์: ให้นักศึกษาพิจารณาเปรียบเทียบรูปแบบการจ่ายในกรณีศึกษาข้างต้น กับรูปแบบการจ่ายสมมติในตารางด้านล่างนี้ เพื่อวิเคราะห์และตอบคำถาม (คะแนนรวม 8 คะแนน)"
         },
         {
           "type": "table",
           "headers": [
-            "หัวข้อเปรียบเทียบ",
+            "รูปแบบการจ่าย",
             "ประเทศ A",
             "ประเทศ B"
           ],
           "rows": [
             [
-              "ลักษณะการจ่ายเงินหลักแก่ผู้ให้บริการ",
-              "จ่ายตามอัตราค่าบริการที่กำหนดไว้ตามจริงต่อรายการ (Fee-for-Service)\nเช่น:\n• ค่าบริการทางการแพทย์ ครั้งละ 300 บาท\n• ค่า X-ray ครั้งละ 200 บาท\n• ค่ายาจ่ายตามราคาจริงในตารางราคายา",
-              "จ่ายแบบเหมาจ่ายรายหัวครอบคลุม (Inclusive Capitation)\nเช่น:\n• เหมาจ่าย 4,000 บาท/คน/ปี\n• สำหรับการเข้ารับบริการทั้งหมด ทั้งบริการผู้ป่วยนอกและบริการผู้ป่วยใน"
+              "ลักษณะการจ่าย",
+              "จ่ายตามอัตราค่าบริการที่กำหนดไว้ตามจริงต่อรายการ (Fee-for-Service) เช่น:\n• ค่าบริการทางการแพทย์ ครั้งละ 300 บาท\n• ค่า X-ray ครั้งละ 200 บาท\n• ค่ายาจ่ายตามราคาจริงในตารางราคายา",
+              "จ่ายแบบเหมาจ่ายรายหัวครอบคลุม (Inclusive Capitation) เช่น:\n• เหมาจ่าย 4,000 บาท/คน/ปี\n• สำหรับการเข้ารับบริการทั้งหมด ทั้งบริการผู้ป่วยนอกและบริการผู้ป่วยใน (Inclusive Capitation)"
             ]
           ]
         }
@@ -3802,25 +3963,25 @@ window.RACM_HS_DISCUSSION_DATA = {
         {
           "id": "q-10-1",
           "label": "ประเด็นอภิปรายที่ 3.1",
-          "title": "การเปรียบเทียบพฤติกรรมการให้บริการของแพทย์ (Provider Behaviors) และปัจจัยจูงใจ",
-          "prompt": "ภายใต้รูปแบบการจ่ายเงินหลักของประเทศ A และประเทศ B จงอภิปรายว่าลักษณะพฤติกรรมการให้บริการของแพทย์ (provider behaviors) มีแนวโน้มแตกต่างกันอย่างไร และพฤติกรรมดังกล่าวเกิดจากปัจจัยแรงจูงใจใด?",
+          "title": "การเปรียบเทียบลักษณะพฤติกรรมการให้บริการของแพทย์และปัจจัยสาเหตุ (2 คะแนน)",
+          "prompt": "หากพิจารณาด้วยรูปแบบการจ่ายของประเทศ A และประเทศ B ลักษณะพฤติกรรมการให้บริการของแพทย์ (provider behaviors) สำหรับรูปแบบการจ่ายทั้งสองแบบจะมีความแตกต่างกันอย่างไร (1 คะแนน) และมาจากปัจจัยแรงจูงใจใด? (1 คะแนน)",
           "worksheet": {
             "type": "table",
             "headers": [
               "ประเทศ / รูปแบบการจ่าย",
-              "แนวโน้มพฤติกรรมการให้บริการของแพทย์",
-              "ปัจจัยสาเหตุ / กลไกแรงจูงใจทางการเงิน"
+              "ลักษณะพฤติกรรมการให้บริการของแพทย์ (ประเทศละ 0.5 คะแนน)",
+              "ปัจจัยสาเหตุ / กลไกแรงจูงใจ (ประเทศละ 0.5 คะแนน)"
             ],
             "rows": [
               {
                 "rowId": "ca",
                 "cells": [
                   {
-                    "static": "ประเทศ A (จ่ายตามรายการบริการ — Fee-for-Service)"
+                    "static": "ประเทศ A (จ่ายตามรายบริการ — Fee-for-Service)"
                   },
                   {
                     "inputId": "c10_q1_a_beh",
-                    "placeholder": "ระบุแนวโน้มปริมาณ/ความเข้มข้นของการให้บริการ…",
+                    "placeholder": "ระบุอิสระ/แนวโน้มปริมาณหรือความเข้มข้นในการสั่งบริการ เช่น ยาราคาแพง…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3829,7 +3990,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q1_a_why",
-                    "placeholder": "อธิบายความสัมพันธ์ระหว่างปริมาณบริการกับรายรับ/ความเสี่ยงทางการเงิน…",
+                    "placeholder": "อธิบายเหตุผลด้านการเรียกเก็บค่าบริการตามรายการจริง…",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -3842,11 +4003,11 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "cb",
                 "cells": [
                   {
-                    "static": "ประเทศ B (เหมาจ่ายรายหัวครอบคลุม — Inclusive Capitation)"
+                    "static": "ประเทศ B (เหมาจ่ายรายหัว — Inclusive Capitation)"
                   },
                   {
                     "inputId": "c10_q1_b_beh",
-                    "placeholder": "ระบุแนวโน้มการให้บริการ การควบคุมต้นทุน หรือการส่งต่อ…",
+                    "placeholder": "ระบุความระมัดระวังในการสั่งจ่าย เช่น การหลีกเลี่ยงการรักษาราคาแพง…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3855,7 +4016,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q1_b_why",
-                    "placeholder": "อธิบายผลของการรับความเสี่ยงภายใต้วงเงินคงที่ต่อการตัดสินใจ…",
+                    "placeholder": "อธิบายผลของภาระค่าใช้จ่ายที่อยู่ในงบเหมาจ่ายคงที่ซึ่ง รพ. ได้รับมาแล้ว…",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -3874,14 +4035,67 @@ window.RACM_HS_DISCUSSION_DATA = {
           "conceptSummarySlide": {
             "id": "cs-10-1",
             "takeawayNumber": 5,
-            "badge": "ขั้น ⑤ Key Takeaway #5",
-            "studentBadge": "Key Takeaway #5",
-            "shortLabel": "⑤ Key Takeaway #5",
+            "badge": "ขั้น ⑦ Key Takeaway #5 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #5 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑦ คำอธิบาย #5",
             "studentShortLabel": "Key Takeaway #5",
-            "kicker": "Key Takeaway #5",
+            "kicker": "Key Takeaway #5 · คำอธิบายสังเคราะห์ FFS vs Capitation",
             "title": "กลไกการจ่ายเงินผู้ให้บริการและการโอนความเสี่ยงทางการเงิน",
             "enTitle": "Provider Payment Methods & Financial Risk Transfer",
             "sourceNote": "เศรษฐศาสตร์การคลังสุขภาพ · HS6 หัวข้อ 4.1–4.2",
+            "frameworkSynthesisSlide": {
+              "id": "cs-10-1-framework-1",
+              "kicker": "Key Takeaway #5 · Essential Framework (1/2)",
+              "badge": "ขั้น ⑤ Key Takeaway #5 (Fee-for-Services)",
+              "studentBadge": "Key Takeaway #5 · Fee-for-Services (FFS)",
+              "shortLabel": "⑤ กลไก FFS",
+              "studentShortLabel": "Fee-for-Services",
+              "stageBtnLabel": "⑤ กลไก FFS",
+              "studentStageBtnLabel": "🖼 กลไก FFS",
+              "title": "Fee-for-Services (FFS) — รูปแบบการจ่ายตามรายบริการและสมการรายจ่าย",
+              "enTitle": "Fee-for-Services Types & Expenditure Determinants",
+              "sourceNote": "เศรษฐศาสตร์การคลังสุขภาพ · บริบทประเทศ A (Regulated Fee Schedule)",
+              "imageSrc": "assets/images/hs6_fw_fee_for_service.jpg?v=1",
+              "imageAlt": "Fee-for-services (FFS): Open-ended fees, Negotiated fee schedule, Regulated fee schedule, and Expenditure = Quantity of inputs x Price of inputs x Volume of services x Intensity of services",
+              "caption": "ภายใต้ FFS (ประเทศ A) รายจ่ายรวมแปรผันตามทั้งปริมาณการนัด (Volume) และความเข้มข้นของการตรวจ/ยาราคาแพง (Intensity) เนื่องจากสามารถเรียกเก็บได้ทุกรายการ แพทย์จึงมีอิสระเต็มที่ในการสั่งบริการ",
+              "nextBtnLabel": "กลไกเหมาจ่ายรายหัว Capitation (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-10-1-framework-1",
+                "kicker": "Key Takeaway #5 · Essential Framework (1/2)",
+                "badge": "ขั้น ⑤ Key Takeaway #5 (Fee-for-Services)",
+                "studentBadge": "Key Takeaway #5 · Fee-for-Services (FFS)",
+                "shortLabel": "⑤ กลไก FFS",
+                "studentShortLabel": "Fee-for-Services",
+                "stageBtnLabel": "⑤ กลไก FFS",
+                "studentStageBtnLabel": "🖼 กลไก FFS",
+                "title": "Fee-for-Services (FFS) — รูปแบบการจ่ายตามรายบริการและสมการรายจ่าย",
+                "enTitle": "Fee-for-Services Types & Expenditure Determinants",
+                "sourceNote": "เศรษฐศาสตร์การคลังสุขภาพ · บริบทประเทศ A (Regulated Fee Schedule)",
+                "imageSrc": "assets/images/hs6_fw_fee_for_service.jpg?v=1",
+                "imageAlt": "Fee-for-services (FFS): Open-ended fees, Negotiated fee schedule, Regulated fee schedule, and Expenditure = Quantity of inputs x Price of inputs x Volume of services x Intensity of services",
+                "caption": "ภายใต้ FFS (ประเทศ A) รายจ่ายรวมแปรผันตามทั้งปริมาณการนัด (Volume) และความเข้มข้นของการตรวจ/ยาราคาแพง (Intensity) เนื่องจากสามารถเรียกเก็บได้ทุกรายการ แพทย์จึงมีอิสระเต็มที่ในการสั่งบริการ",
+                "nextBtnLabel": "กลไกเหมาจ่ายรายหัว Capitation (Slide ถัดไป)"
+              },
+              {
+                "id": "cs-10-1-framework-2",
+                "kicker": "Key Takeaway #5 · Essential Framework (2/2)",
+                "badge": "ขั้น ⑥ Key Takeaway #5 (Capitation)",
+                "studentBadge": "Key Takeaway #5 · Capitation",
+                "shortLabel": "⑥ Capitation",
+                "studentShortLabel": "Capitation",
+                "stageBtnLabel": "⑥ Capitation",
+                "studentStageBtnLabel": "🖼 Capitation",
+                "title": "Capitation — กลไกการเหมาจ่ายรายหัวและสมการรายจ่าย",
+                "enTitle": "Flat vs Risk-Adjusted & Inclusive vs Exclusive Capitation",
+                "sourceNote": "เศรษฐศาสตร์การคลังสุขภาพ · บริบทประเทศ B (Inclusive Capitation) เทียบกับระบบไทย (SSS & UCS)",
+                "imageSrc": "assets/images/hs6_fw_capitation_mechanism.jpg?v=1",
+                "imageAlt": "Capitation payment per head of beneficiary registered with gatekeeper: Flat vs Risk-adjusted, Inclusive (SSS) vs Exclusive (UCS), and Expenditure = Number of beneficiaries x Capitation rate",
+                "caption": "ภายใต้ Capitation (ประเทศ B) งบรวมถูกกำหนดตายตัวจากจำนวนผู้มีสิทธิ × อัตราเหมาจ่ายรายหัว โอนความเสี่ยงส่วนเกินต้นทุนมายังโรงพยาบาล แพทย์จึงระมัดระวังในการสั่งจ่ายและหลีกเลี่ยงการรักษาที่มีราคาแพง",
+                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+              }
+            ],
             "coreTerm": "“รูปแบบการจ่ายค่าบริการแก่หน่วยบริการ” (provider payment methods)",
             "coreDefinitionLead": "เป็นสัญญาณแรงจูงใจทางเศรษฐกิจที่กำหนดพฤติกรรมการจัดบริการของแพทย์และโรงพยาบาลอย่างทรงพลัง",
             "coreDefinitionQualifier": "ผ่านสองกลไกหลักคือ หน่วยของการมัดรวมการจ่าย (payment bundling) และทิศทางการรับความเสี่ยงทางการเงิน (financial risk)",
@@ -3896,28 +4110,28 @@ window.RACM_HS_DISCUSSION_DATA = {
               },
               {
                 "num": "02",
-                "thTitle": "การจ่ายตามรายบริการ (Fee-for-Service)",
+                "thTitle": "ประเทศ A: จ่ายตามรายบริการ (FFS)",
                 "enTitle": "Retrospective Unbundled Payment",
-                "definition": "รายรับของหน่วยบริการแปรผันตรงกับปริมาณและราคาของหัตถการ ยา และการตรวจที่สั่งจ่าย โดยความเสี่ยงทางการเงินอยู่ที่กองทุนผู้ซื้อ",
-                "anchor": "สร้างแรงจูงใจให้ขยายปริมาณบริการและความเข้มข้นของการตรวจรักษาต่อผู้ป่วยหนึ่งราย"
+                "definition": "แพทย์มีอิสระเต็มที่ในการตัดสินใจให้บริการมากน้อยหรือถี่บ่อยเท่าใด เช่น สั่งยาราคาแพง เนื่องจากสามารถเรียกเก็บได้ทุกรายการ",
+                "anchor": "ความเสี่ยงทางการเงินอยู่ที่กองทุนผู้จ่ายเงิน รายรับหน่วยบริการแปรผันตรงตาม Volume × Intensity"
               },
               {
                 "num": "03",
-                "thTitle": "การเหมาจ่ายรายหัว (Capitation)",
+                "thTitle": "ประเทศ B: เหมาจ่ายรายหัว (Capitation)",
                 "enTitle": "Prospective Per-Capita Payment",
-                "definition": "จ่ายงบคงที่ล่วงหน้าตามจำนวนประชากรที่ขึ้นทะเบียนต่อช่วงเวลา โอนความเสี่ยงส่วนเกินต้นทุนมายังหน่วยบริการด่านหน้า",
-                "anchor": "สร้างแรงจูงใจให้บริหารจัดการภายใต้เพดานงบประมาณและลดต้นทุนที่ไม่จำเป็น"
+                "definition": "แพทย์มีความระมัดระวังในการสั่งจ่ายมากกว่า เช่น หลีกเลี่ยงการสั่งการรักษาราคาแพง เพราะภาระค่าใช้จ่ายอยู่ในงบเหมาจ่ายที่ รพ. ได้รับมาแล้ว",
+                "anchor": "ในไทย ประกันสังคม (SSS) ใช้ Inclusive Capitation ส่วนบัตรทอง (UCS) ใช้ Exclusive Capitation เฉพาะผู้ป่วยนอกคู่กับ DRGs ผู้ป่วยใน"
               },
               {
                 "num": "04",
-                "thTitle": "แรงจูงใจต่องานป้องกันโรคระยะยาว",
-                "enTitle": "Prevention vs. Treatment Incentives",
-                "definition": "ภายใต้เหมาจ่ายรายหัวครอบคลุม หากป้องกันไม่ให้ผู้ป่วยเกิดภาวะกำเริบนอนโรงพยาบาลได้ หน่วยบริการจะประหยัดต้นทุนระยะยาวได้เอง",
-                "anchor": "แต่ต้องระวังแรงกดดันระยะสั้นที่อาจทำให้จำกัดบริการหากงบเหมาจ่ายต่ำกว่าต้นทุนจริง"
+                "thTitle": "การปรับอัตราจ่ายตามความเสี่ยง",
+                "enTitle": "Risk-Adjusted Capitation",
+                "definition": "การคำนวณอัตราเหมาจ่ายรายหัวที่ดีควรปรับตามอายุ เพศ โรคเรื้อรัง หรือพื้นที่ห่างไกล เพื่อลดแรงจูงใจในการปฏิเสธผู้ป่วยหนัก",
+                "anchor": "ช่วยให้หน่วยบริการที่ดูแลผู้สูงอายุหรือผู้ป่วยซับซ้อนได้รับงบประมาณที่เป็นธรรมมากขึ้น"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 10.1 · ประเทศ A เทียบกับประเทศ B",
-            "caseBridge": "เปรียบเทียบทิศทางแรงจูงใจและแนวโน้มพฤติกรรมการให้บริการของแพทย์เมื่ออยู่ภายใต้ระบบจ่ายตามรายบริการเทียบกับระบบเหมาจ่ายรายหัว",
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 3.1 · พฤติกรรมแพทย์ในประเทศ A เทียบกับประเทศ B",
+            "caseBridge": "เปรียบเทียบชัดเจนทั้ง ‘ลักษณะพฤติกรรมการสั่งบริการ’ (1 คะแนน) และ ‘เหตุผลด้านการเรียกเก็บรายรายการเทียบกับงบเหมาจ่ายคงที่’ (1 คะแนน)",
             "docId": "HS6-CONCISE",
             "docSec": "4.1",
             "docLabel": "อ่านเพิ่มเติม HS6 (4.1–4.2)"
@@ -3926,25 +4140,25 @@ window.RACM_HS_DISCUSSION_DATA = {
         {
           "id": "q-10-2",
           "label": "ประเด็นอภิปรายที่ 3.2",
-          "title": "จุดแข็ง (Strengths) และจุดอ่อน (Weaknesses) ตามทฤษฎีของรูปแบบการจ่ายในประเทศ A และประเทศ B",
-          "prompt": "ตามทฤษฎีการคลังสุขภาพ รูปแบบการจ่ายเงินของประเทศ A และประเทศ B มีจุดแข็งและจุดอ่อนต่อระบบสุขภาพอย่างไรบ้าง?",
+          "title": "จุดแข็ง (Strengths) และจุดอ่อน (Weaknesses) ตามทฤษฎีของรูปแบบการจ่ายในประเทศ A และประเทศ B (3 คะแนน)",
+          "prompt": "ตามทฤษฎีการคลังสุขภาพ รูปแบบการจ่ายเงินของประเทศ A และประเทศ B มีจุดแข็ง (Strengths) และจุดอ่อน (Weaknesses) อย่างไรบ้าง? (3 คะแนน)",
           "worksheet": {
             "type": "table",
             "headers": [
-              "รูปแบบการจ่ายเงิน",
+              "รูปแบบการจ่ายเงิน (รวม 3 คะแนน)",
               "จุดแข็งตามทฤษฎี (Strengths)",
-              "จุดอ่อน / ความเสี่ยงตามทฤษฎี (Weaknesses)"
+              "จุดอ่อนตามทฤษฎี (Weaknesses)"
             ],
             "rows": [
               {
                 "rowId": "ffs",
                 "cells": [
                   {
-                    "static": "ประเทศ A: จ่ายตามรายการบริการ (Fee-for-Service)"
+                    "static": "ประเทศ A: ตามรายบริการ (Fee-for-Service · 1.5 คะแนน)"
                   },
                   {
                     "inputId": "c10_q2_a_str",
-                    "placeholder": "ระบุจุดแข็งด้านการเข้าถึง/การตอบสนอง…",
+                    "placeholder": "ระบุจุดแข็งด้านแรงจูงใจในการให้บริการ (0.5 คะแนน)…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3953,7 +4167,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q2_a_wk",
-                    "placeholder": "ระบุจุดอ่อนด้านอุปสงค์ที่ผู้ให้บริการกระตุ้น (SID) และภาระค่าใช้จ่ายรวม…",
+                    "placeholder": "ระบุจุดอ่อน 2 ประเด็น: (1) Supply-induced demand และ (2) ภาระค่าใช้จ่ายที่สูง (1 คะแนน)…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3966,11 +4180,11 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "cap",
                 "cells": [
                   {
-                    "static": "ประเทศ B: เหมาจ่ายรายหัว (Capitation)"
+                    "static": "ประเทศ B: เหมาจ่ายรายหัว (Capitation · 1.5 คะแนน)"
                   },
                   {
                     "inputId": "c10_q2_b_str",
-                    "placeholder": "ระบุจุดแข็งด้านการควบคุมงบประมาณและการส่งเสริมป้องกันโรค…",
+                    "placeholder": "ระบุจุดแข็ง 2 ประเด็น: (1) การควบคุมค่าใช้จ่าย และ (2) แรงจูงใจบริการส่งเสริมป้องกันโรค (1 คะแนน)…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3979,7 +4193,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q2_b_wk",
-                    "placeholder": "ระบุจุดอ่อนด้านคุณภาพ/การให้บริการต่ำกว่าเกณฑ์ และการคัดเลือกความเสี่ยง…",
+                    "placeholder": "ระบุจุดอ่อนด้านการควบคุมค่าใช้จ่ายสูงจนอาจเกิด Under-provision of service (0.5 คะแนน)…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -3990,58 +4204,94 @@ window.RACM_HS_DISCUSSION_DATA = {
               }
             ],
             "colWidths": [
-              "18%",
-              "41%",
-              "41%"
+              "20%",
+              "40%",
+              "40%"
             ]
           },
           "conceptSummarySlide": {
             "id": "cs-10-2",
             "takeawayNumber": 6,
-            "badge": "ขั้น ⑤ Key Takeaway #6",
-            "studentBadge": "Key Takeaway #6",
-            "shortLabel": "⑤ Key Takeaway #6",
+            "badge": "ขั้น ⑥ Key Takeaway #6 (คำอธิบายสังเคราะห์)",
+            "studentBadge": "Key Takeaway #6 · คำอธิบายสังเคราะห์",
+            "shortLabel": "⑥ คำอธิบาย #6",
             "studentShortLabel": "Key Takeaway #6",
-            "kicker": "Key Takeaway #6",
-            "title": "จุดแข็ง–จุดอ่อนของวิธีจ่ายเงินและอุปสงค์ที่ผู้ให้บริการกระตุ้น",
-            "enTitle": "Payment Trade-offs & Supplier-Induced Demand",
-            "sourceNote": "HS6 หัวข้อ 4.1–4.2 & 5.1 · Moral Hazard in Healthcare",
+            "kicker": "Key Takeaway #6 · คำอธิบายสังเคราะห์จุดแข็ง–จุดอ่อน",
+            "title": "จุดแข็ง–จุดอ่อนของวิธีจ่ายเงินและตารางเปรียบเทียบพฤติกรรมผู้ให้บริการ",
+            "enTitle": "Payment Trade-offs, Supplier-Induced Demand & Under-Provision",
+            "sourceNote": "World Health Report 2000 (WHO) · HS6 หัวข้อ 4.1–4.2 & 5.1",
+            "frameworkSynthesisSlide": {
+              "id": "cs-10-2-framework",
+              "kicker": "Key Takeaway #6 · Essential Framework (World Health Report 2000)",
+              "badge": "ขั้น ⑤ Key Takeaway #6 (Payment & Provider Behavior)",
+              "studentBadge": "Key Takeaway #6 · Payment & Provider Behavior",
+              "shortLabel": "⑤ ตาราง WHR 2000",
+              "studentShortLabel": "WHR 2000 Matrix",
+              "stageBtnLabel": "⑤ ตาราง WHR 2000",
+              "studentStageBtnLabel": "🖼 ตาราง WHR 2000",
+              "title": "Payment & Provider Behavior — เปรียบเทียบแรงจูงใจของกลไกการจ่ายเงิน",
+              "enTitle": "WHO World Health Report 2000 Matrix: FFS, Capitation, DRGs, and Global Budget",
+              "sourceNote": "Source: World Health Report 2000 (WHO)",
+              "imageSrc": "assets/images/hs6_fw_whr2000_payment_behavior.jpg?v=1",
+              "imageAlt": "World Health Report 2000 table comparing Fee-For-Services, Capitation, Case-based payment (DRGs), and Global budget across Prevent health problem, Deliver services, Responsiveness, and Contain costs",
+              "caption": "ตารางแม่บทจาก World Health Report 2000 สรุปข้อแลกเปลี่ยนเชิงทฤษฎีชัดเจน: FFS เด่นด้าน Deliver services (+++) และ Responsiveness (+++) แต่ด้อยด้าน Contain costs (---) และเกิด SID · ส่วน Capitation เด่นด้าน Prevent health problem (+++) และ Contain costs (+++) แต่เสี่ยง Deliver services ต่ำกว่าเกณฑ์ (-- Under-provision)",
+              "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+            },
+            "frameworkSynthesisSlides": [
+              {
+                "id": "cs-10-2-framework",
+                "kicker": "Key Takeaway #6 · Essential Framework (World Health Report 2000)",
+                "badge": "ขั้น ⑤ Key Takeaway #6 (Payment & Provider Behavior)",
+                "studentBadge": "Key Takeaway #6 · Payment & Provider Behavior",
+                "shortLabel": "⑤ ตาราง WHR 2000",
+                "studentShortLabel": "WHR 2000 Matrix",
+                "stageBtnLabel": "⑤ ตาราง WHR 2000",
+                "studentStageBtnLabel": "🖼 ตาราง WHR 2000",
+                "title": "Payment & Provider Behavior — เปรียบเทียบแรงจูงใจของกลไกการจ่ายเงิน",
+                "enTitle": "WHO World Health Report 2000 Matrix: FFS, Capitation, DRGs, and Global Budget",
+                "sourceNote": "Source: World Health Report 2000 (WHO)",
+                "imageSrc": "assets/images/hs6_fw_whr2000_payment_behavior.jpg?v=1",
+                "imageAlt": "World Health Report 2000 table comparing Fee-For-Services, Capitation, Case-based payment (DRGs), and Global budget across Prevent health problem, Deliver services, Responsiveness, and Contain costs",
+                "caption": "ตารางแม่บทจาก World Health Report 2000 สรุปข้อแลกเปลี่ยนเชิงทฤษฎีชัดเจน: FFS เด่นด้าน Deliver services (+++) และ Responsiveness (+++) แต่ด้อยด้าน Contain costs (---) และเกิด SID · ส่วน Capitation เด่นด้าน Prevent health problem (+++) และ Contain costs (+++) แต่เสี่ยง Deliver services ต่ำกว่าเกณฑ์ (-- Under-provision)",
+                "nextBtnLabel": "คำอธิบายบรรยาย 4 หมวด (Slide ถัดไป)"
+              }
+            ],
             "coreTerm": "“ไม่มีวิธีจ่ายเงินเดี่ยววิธีใดที่สมบูรณ์แบบ” (inherent payment trade-offs)",
-            "coreDefinitionLead": "เพราะทุกวิธีจ่ายเงินสร้างแรงจูงใจสองด้านเสมอ ระหว่างการกระตุ้นบริการเกินจำเป็นกับการประหยัดต้นทุนจนเสี่ยงลดทอนคุณภาพ",
+            "coreDefinitionLead": "เพราะทุกวิธีจ่ายเงินสร้างแรงจูงใจสองด้านเสมอ ระหว่างการกระตุ้นบริการเกินจำเป็น (SID) กับการประหยัดต้นทุนจนเสี่ยงให้บริการต่ำกว่าเกณฑ์ (Under-provision)",
             "coreDefinitionQualifier": "โดยมีความไม่สมมาตรของข้อมูลระหว่างแพทย์กับผู้ป่วยเป็นตัวขยายผลต่อค่าใช้จ่ายและคุณภาพบริการ",
-            "coreDefinition": "เพราะทุกวิธีจ่ายเงินสร้างแรงจูงใจสองด้านเสมอ ระหว่างการกระตุ้นบริการเกินจำเป็นกับการประหยัดต้นทุนจนเสี่ยงลดทอนคุณภาพ โดยมีความไม่สมมาตรของข้อมูลระหว่างแพทย์กับผู้ป่วยเป็นตัวขยายผลต่อค่าใช้จ่ายและคุณภาพบริการ",
+            "coreDefinition": "เพราะทุกวิธีจ่ายเงินสร้างแรงจูงใจสองด้านเสมอ ระหว่างการกระตุ้นบริการเกินจำเป็น (SID) กับการประหยัดต้นทุนจนเสี่ยงให้บริการต่ำกว่าเกณฑ์ (Under-provision) โดยมีความไม่สมมาตรของข้อมูลระหว่างแพทย์กับผู้ป่วยเป็นตัวขยายผลต่อค่าใช้จ่ายและคุณภาพบริการ",
             "dimensions": [
               {
                 "num": "01",
-                "thTitle": "อุปสงค์ที่ผู้ให้บริการกระตุ้น (SID)",
-                "enTitle": "Supplier-Induced Demand",
-                "definition": "ภายใต้ FFS แพทย์มีข้อมูลทางคลินิกเหนือกว่าผู้ป่วย จึงมีแรงจูงใจสั่งตรวจ ยา หรือหัตถการเกินความจำเป็นเพื่อเพิ่มรายรับหน่วยบริการ",
-                "anchor": "ทำให้ผู้ป่วยเข้าถึงเทคโนโลยีง่ายและรวดเร็ว แต่เสี่ยงต่อค่าใช้จ่ายบานปลายและบริการเกินจำเป็น"
+                "thTitle": "FFS: แรงจูงใจบริการสูง แต่เกิด SID & งบพุ่ง",
+                "enTitle": "High Service Incentive vs. SID & High Cost",
+                "definition": "สร้างแรงจูงใจในการให้บริการและตอบสนองสูง (+++) แต่เกิด Supply-induced demand และภาระค่าใช้จ่ายรวมที่สูงควบคุมยาก (---)",
+                "anchor": "เป็น 3 ประเด็นคะแนนหลักของประเทศ A (จุดแข็ง 0.5 + จุดอ่อน 0.5 + 0.5 = 1.5 คะแนน)"
               },
               {
                 "num": "02",
-                "thTitle": "ความเสี่ยงการให้บริการต่ำกว่าเกณฑ์",
-                "enTitle": "Under-Provision & Cream-Skimming",
-                "definition": "ภายใต้ Capitation หน่วยบริการช่วยคุมงบประมาณรวมได้ดีเยี่ยม แต่มีแรงจูงใจลดต้นทุนจนอาจตรวจรักษาน้อยเกินไปหรือเลี่ยงรับผู้ป่วยโรคซับซ้อน",
-                "anchor": "จำเป็นต้องมีระบบตรวจสอบคุณภาพมาตรฐานคลินิกและกลไกปรับความเสี่ยงตามโครงสร้างอายุ/โรค"
+                "thTitle": "Capitation: คุมงบดี & เน้นป้องกัน แต่เสี่ยง Under-provision",
+                "enTitle": "Cost Containment & Prevention vs. Under-Provision",
+                "definition": "ควบคุมค่าใช้จ่ายได้ดี (+++) และจูงใจจัดบริการส่งเสริมป้องกันโรค (+++) แต่อาจคุมต้นทุนสูงเกินไปจนเกิด Under-provision of service (--)",
+                "anchor": "เป็น 3 ประเด็นคะแนนหลักของประเทศ B (จุดแข็ง 0.5 + 0.5 + จุดอ่อน 0.5 = 1.5 คะแนน)"
               },
               {
                 "num": "03",
                 "thTitle": "ความไม่สมมาตรของข้อมูลทางการแพทย์",
                 "enTitle": "Information Asymmetry",
                 "definition": "ผู้ป่วยไม่อาจประเมินความจำเป็นทางเทคนิคของการรักษาได้เอง จึงต้องพึ่งพาแพทย์ทำหน้าที่ตัวแทนตัดสินใจ (agency relationship)",
-                "anchor": "เป็นเหตุผลหลักว่าเหตุใดมาตรการฝั่งผู้ให้บริการจึงมีอิทธิพลต่อรายจ่ายระบบมากกว่าฝั่งผู้ป่วย"
+                "anchor": "เป็นเหตุผลหลักว่าเหตุใดโครงสร้างการจ่ายเงินฝั่งผู้ให้บริการจึงกำหนดรายจ่ายและคุณภาพของระบบสุขภาพ"
               },
               {
                 "num": "04",
-                "thTitle": "แยก Consumer vs. Provider Moral Hazard",
-                "enTitle": "Demand-Side vs. Supply-Side Hazard",
-                "definition": "ฝั่งผู้ป่วยเกิดจากการไม่ต้องจ่ายราคาเต็มหน้างานจึงขอใช้บริการเพิ่มขึ้น ส่วนฝั่งผู้ให้บริการเกิดจากโครงสร้างการจ่ายเงินของกองทุน",
-                "anchor": "ต้องแยกแยะสองแนวคิดนี้ให้แม่นยำเมื่อวิเคราะห์จุดอ่อนของการคลังสุขภาพแต่ละประเทศ"
+                "thTitle": "บทบาทของ DRGs และ Global Budget",
+                "enTitle": "Complementary Case-Based & Budget Caps",
+                "definition": "DRGs ช่วยสร้างสมดุลระดับกลาง (++) ในบริการผู้ป่วยใน ส่วน Global budget ช่วยคุมเพดานงบประมาณรวมของระบบ (+++)",
+                "anchor": "จึงนิยมนำมาผสมผสานร่วมกับ Capitation เพื่อลดจุดอ่อนของวิธีจ่ายเดี่ยว"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 10.2 · จุดแข็งและจุดอ่อนเชิงทฤษฎี",
-            "caseBridge": "ชั่งน้ำหนักทั้งข้อดีด้านการเข้าถึง/การคุมงบประมาณ และความเสี่ยงด้าน SID, Under-provision และความยั่งยืนของทั้งสองระบบ",
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 3.2 · ครบทั้ง 6 ประเด็นย่อย (6 × 0.5 = 3 คะแนน)",
+            "caseBridge": "สรุปจากตาราง World Health Report 2000 ได้ครบทั้งจุดแข็ง–จุดอ่อนของประเทศ A (FFS) และประเทศ B (Capitation) ประเด็นละ 0.5 คะแนน",
             "docId": "HS6-CONCISE",
             "docSec": "5.1",
             "docLabel": "อ่านเพิ่มเติม HS6 (4.1–4.2 & 5.1)"
@@ -4050,26 +4300,26 @@ window.RACM_HS_DISCUSSION_DATA = {
         {
           "id": "q-10-3",
           "label": "ประเด็นอภิปรายที่ 3.3",
-          "title": "การวิเคราะห์บทบาทของ Pay for Performance (P4P) เมื่อนำไปใช้ในประเทศ A เทียบกับประเทศ B",
-          "prompt": "หากนำระบบการจ่ายตามผลงาน (P4P) เพื่อลดอัตราการเกิด Acute Exacerbation ในผู้ป่วย Asthma/COPD (ตามประกาศ สปสช. ข้างต้น) ไปดำเนินการจริงในประเทศ A และประเทศ B จงวิเคราะห์แยกรายประเทศให้ครอบคลุม 3 ประเด็นสำคัญ: (1) กลไก P4P มุ่งหวังไปปิดช่องว่าง (close the gap) ในประเด็นใดของรูปแบบการจ่ายเดิม (2) คาดว่าจะปิดช่องว่างดังกล่าวได้สำเร็จหรือไม่ ขึ้นกับเงื่อนไขใด และ (3) เหตุผลเชิงกลไกแรงจูงใจทางการเงินเมื่อเปรียบเทียบ P4P กับกลไกการจ่ายเดิม",
+          "title": "การวิเคราะห์บทบาทของการจ่ายตามผลงาน (Pay for Performance: P4P) ในการปิดช่องว่างของประเทศ A และประเทศ B (3 คะแนน)",
+          "prompt": "การจ่ายตามผลงาน (Pay for performance) ในระบบการจ่ายตามผลงาน (P4P) ข้างต้น นั้นสามารถปิดช่องว่างของรูปแบบการจ่ายของประเทศ A และประเทศ B ได้อย่างไรบ้าง (3 คะแนน: ประเทศละ 1.5 คะแนน) โดยวิเคราะห์ครอบคลุม (1) กลไก P4P มุ่งหวังไปปิดช่องว่าง (close the gap) ของรูปแบบการจ่ายเดิมได้หรือไม่ (2) คาดว่าจะปิดช่องว่างดังกล่าวได้สำเร็จหรือไม่ ขึ้นกับเงื่อนไขใด และ (3) เหตุผลเชิงกลไกแรงจูงใจทางการเงินในการจัดบริการส่งเสริม ป้องกัน และฟื้นฟูเพื่อลด Acute Exacerbation",
           "worksheet": {
             "type": "table",
             "headers": [
-              "ประเทศที่นำ P4P ไปเสริม",
-              "1) ช่องว่างของระบบเดิมที่มุ่งปิด",
-              "2) โอกาสสำเร็จและเงื่อนไขสำคัญ",
-              "3) เหตุผลเชิงกลไกแรงจูงใจเปรียบเทียบ P4P กับระบบเดิม"
+              "บริบทประเทศ (รวม 3 คะแนน)",
+              "1) ผลในการปิดช่องว่างของรูปแบบการจ่ายเดิม (0.5 คะแนน)",
+              "2) เงื่อนไขสำคัญ / ทิศทางการสร้างแรงจูงใจ (0.5 คะแนน)",
+              "3) ผลต่อการจัดบริการส่งเสริม ป้องกัน ฟื้นฟู / ลด Acute Exacerbation (0.5 คะแนน)"
             ],
             "rows": [
               {
                 "rowId": "p4p_a",
                 "cells": [
                   {
-                    "static": "ผลต่อประเทศ A (ฐานเดิม Fee-for-Service + เสริม P4P)"
+                    "static": "บริบทประเทศ A (ฐานเดิม Fee-for-Service + เสริม P4P · 1.5 คะแนน)"
                   },
                   {
                     "inputId": "c10_q3_a_gap",
-                    "placeholder": "ระบุช่องว่างของ FFS ที่ P4P มุ่งแก้…",
+                    "placeholder": "ระบุว่า P4P อาจมีผลหรือไม่มีผลในการปิดช่องว่างของการจ่ายตามรายบริการ…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -4078,7 +4328,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q3_a_cond",
-                    "placeholder": "ประเมินโอกาสสำเร็จและเงื่อนไขอัตราจ่าย…",
+                    "placeholder": "ระบุเงื่อนไขด้านอัตราการจ่าย P4P ว่ามากเพียงพอหรือไม่เมื่อเทียบกับรายรับ FFS…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -4087,7 +4337,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q3_a_why",
-                    "placeholder": "เปรียบเทียบแรงจูงใจจาก P4P กับรายรับจากการรักษาเมื่อกำเริบในระบบ FFS…",
+                    "placeholder": "อธิบายว่าจูงใจให้ รพ. จัดบริการส่งเสริม ป้องกัน และฟื้นฟูมากขึ้นได้หรือไม่…",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -4100,11 +4350,11 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "rowId": "p4p_b",
                 "cells": [
                   {
-                    "static": "ผลต่อประเทศ B (ฐานเดิม Inclusive Capitation + เสริม P4P)"
+                    "static": "บริบทประเทศ B (ฐานเดิม Inclusive Capitation + เสริม P4P · 1.5 คะแนน)"
                   },
                   {
                     "inputId": "c10_q3_b_gap",
-                    "placeholder": "ระบุช่องว่างของ Capitation ที่ P4P มุ่งแก้…",
+                    "placeholder": "ระบุว่า P4P ไปช่วยปิดช่องว่างของการจ่ายแบบเหมาจ่ายรายหัวอย่างไร…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -4113,7 +4363,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q3_b_cond",
-                    "placeholder": "ประเมินโอกาสสำเร็จและความไปในทิศทางเดียวกันของแรงจูงใจ…",
+                    "placeholder": "อธิบายการสร้างแรงจูงใจในการให้บริการส่งเสริม ป้องกัน และฟื้นฟูมากขึ้น…",
                     "compact": false,
                     "maxWords": 45,
                     "maxChars": 240,
@@ -4122,7 +4372,7 @@ window.RACM_HS_DISCUSSION_DATA = {
                   },
                   {
                     "inputId": "c10_q3_b_why",
-                    "placeholder": "อธิบายว่าโบนัส P4P เสริมกับเป้าหมายประหยัดต้นทุน IPD ระยะยาวของ Capitation อย่างไร…",
+                    "placeholder": "เชื่อมโยงสู่การลดการเกิด Acute Exacerbation ของผู้ป่วย Asthma และ COPD…",
                     "compact": false,
                     "maxWords": 60,
                     "maxChars": 330,
@@ -4133,10 +4383,10 @@ window.RACM_HS_DISCUSSION_DATA = {
               }
             ],
             "colWidths": [
-              "15%",
-              "25%",
+              "16%",
+              "26%",
               "28%",
-              "32%"
+              "30%"
             ]
           },
           "conceptSummarySlide": {
@@ -4157,35 +4407,35 @@ window.RACM_HS_DISCUSSION_DATA = {
             "dimensions": [
               {
                 "num": "01",
-                "thTitle": "ความสอดคล้องกับฐานการจ่ายเงินเดิม",
-                "enTitle": "Incentive Alignment vs. Conflict",
-                "definition": "บนฐาน FFS หากการป้องกันโรคทำให้โรงพยาบาลสูญเสียรายรับผู้ป่วยในก้อนใหญ่กว่าโบนัส P4P แรงจูงใจอาจขัดแย้งกัน ในขณะที่บนฐาน Capitation ทั้งสองเสริมทิศทางเดียวกัน",
-                "anchor": "ต้องเปรียบเทียบขนาดผลตอบแทน P4P กับรายรับหรือต้นทุนที่เปลี่ยนแปลงในระบบฐานเดิมเสมอ"
+                "thTitle": "บนฐาน FFS (ประเทศ A): ขึ้นกับขนาดอัตราจ่าย P4P",
+                "enTitle": "Conditional Effect on FFS Base",
+                "definition": "P4P อาจมีผลหรือไม่มีผลในการปิดช่องว่างของ FFS ขึ้นอยู่กับว่าอัตราจ่าย P4P มากเพียงพอที่จะจูงใจให้ รพ. หันมาจัดบริการส่งเสริม ป้องกัน ฟื้นฟูมากขึ้นหรือไม่",
+                "anchor": "หากโบนัส P4P น้อยกว่ารายรับ FFS ที่เสียไปเมื่อผู้ป่วยไม่มานอน รพ. แรงจูงใจอาจไม่เพียงพอ"
               },
               {
                 "num": "02",
-                "thTitle": "เงื่อนไขความสำเร็จของกลไก P4P",
-                "enTitle": "Design Conditions & Unintended Effects",
-                "definition": "ขนาดโบนัสต้องจูงใจเพียงพอ ตัวชี้วัดสะท้อนผลลัพธ์ทางคลินิกที่แท้จริง มีระบบข้อมูลตรวจสอบได้ และระวังการทุ่มเฉพาะตัวชี้วัดที่ได้เงินจนละเลยงานอื่น",
-                "anchor": "จริยธรรมวิชาชีพและระบบสารสนเทศที่โปร่งใสเป็นเงื่อนไขจำเป็นคู่กับแรงจูงใจทางการเงิน"
+                "thTitle": "บนฐาน Capitation (ประเทศ B): เสริมแรงปิดช่องว่างได้ดี",
+                "enTitle": "Synergistic Alignment with Capitation",
+                "definition": "P4P ช่วยปิดช่องว่าง Under-provision ของเหมาจ่ายรายหัว โดยสร้างแรงจูงใจให้จัดบริการส่งเสริม ป้องกัน ฟื้นฟูมากขึ้น เพื่อลด Acute Exacerbation ของ Asthma และ COPD",
+                "anchor": "โรงพยาบาลได้ประโยชน์สองต่อ คือทั้งได้รับเงินโบนัส P4P และประหยัดต้นทุนผู้ป่วยในภายใต้งบเหมาจ่าย"
               },
               {
                 "num": "03",
-                "thTitle": "สถาปัตยกรรมการจ่ายแบบผสมผสาน",
-                "enTitle": "Blended Payment Architecture",
-                "definition": "ระบบหลักประกันสุขภาพสมัยใหม่ผสาน Capitation สำหรับบริการปฐมภูมิ ควบคู่กับ DRGs ภายใต้งบประมาณยอดรวมสำหรับผู้ป่วยใน และเสริม P4P เฉพาะโรคเป้าหมาย",
+                "thTitle": "สถาปัตยกรรมการจ่ายแบบผสมผสานในไทย",
+                "enTitle": "Thai UCS Blended Payment Architecture",
+                "definition": "บัตรทอง (UCS) ผสาน Exclusive Capitation สำหรับผู้ป่วยนอก คู่กับ DRGs ภายใต้งบยอดรวมสำหรับผู้ป่วยใน และเสริม P4P เฉพาะโรคเรื้อรังสำคัญ",
                 "anchor": "ช่วยคุมงบประมาณรวม ป้องกันการปฏิเสธรับผู้ป่วยหนัก และยกระดับคุณภาพการดูแลโรคเรื้อรังพร้อมกัน"
               }
             ],
-            "caseBridgeLabel": "เชื่อมโยงโจทย์ HS 10.3 · บทบาท P4P ในประเทศ A และ B",
-            "caseBridge": "วิเคราะห์ทั้งช่องว่างที่ P4P มุ่งปิด โอกาสสำเร็จ และกลไกแรงจูงใจเปรียบเทียบเมื่อวาง P4P บนฐาน FFS เทียบกับฐาน Inclusive Capitation",
+            "caseBridgeLabel": "เชื่อมโยงโจทย์ข้อ 3.3 · P4P ในบริบทประเทศ A (1.5) และประเทศ B (1.5)",
+            "caseBridge": "ชี้ให้เห็นความแตกต่างเชิงกลไก: ในประเทศ A ผลลัพธ์ขึ้นกับว่าอัตราจ่าย P4P มากพอหรือไม่ ส่วนในประเทศ B P4P เสริมแรงให้เร่งส่งเสริมป้องกันฟื้นฟูเพื่อลด Acute Exacerbation ของ Asthma/COPD",
             "docId": "HS6-CONCISE",
             "docSec": "5.3",
             "docLabel": "อ่านเพิ่มเติม HS6 (4.3–4.4 & 5.3)"
           }
         }
       ],
-      "coverTitle": "กลไกการจ่ายเงินผู้ให้บริการ (FFS, Capitation & P4P)"
+      "coverTitle": "การจ่ายตามผลงาน (Pay for performance)"
     }
   ]
 };
