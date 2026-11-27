@@ -1341,11 +1341,15 @@
         mb.dataset.srpMod = mc;
         mb.textContent = `คาบ ${mc}`;
         mb.addEventListener("click", () => {
+          if (modCode === mc) return;
           modCode = mc;
           modStrip.querySelectorAll(".hsd-srp-mod-pill").forEach((el) => {
             el.classList.toggle("is-active", el.dataset.srpMod === modCode);
           });
           syncSectionUI();
+          if (typeof cfg.onModuleChange === "function") {
+            cfg.onModuleChange(modCode);
+          }
         });
         modStrip.appendChild(mb);
       });

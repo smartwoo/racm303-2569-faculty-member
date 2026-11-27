@@ -1718,10 +1718,11 @@
     const m = String(rawTab).match(/^hs-discussion-(HS[1-6])$/i);
     if (m) {
       const modUpper = m[1].toUpperCase();
+      state.activeHsModule = modUpper;
       state.hsdModule = modUpper;
       state.hsdSlideDeckMod = modUpper;
       if (!window.RACM_HSD_ROOM_PAGE) state.hsdLockedRoomId = 0;
-      state.hsdDriveFolderOpen = false;
+      state.hsdDriveFolderOpen = !state.isPptSlideSharePopup;
       if ($("hsdModuleSelect")) $("hsdModuleSelect").value = state.hsdModule;
       return "hs-discussion";
     }
@@ -1746,6 +1747,7 @@
     const isSpecificMod = Boolean(mod && /^HS[1-6]$/i.test(mod));
     const cleanMod = isSpecificMod ? String(mod).toUpperCase() : "ALL";
     if (isSpecificMod) {
+      state.activeHsModule = cleanMod;
       state.hsdModule = cleanMod;
       state.hsdSlideDeckMod = cleanMod;
       state.hsdDriveFolderOpen = false;
@@ -19035,9 +19037,20 @@
     ) {
       stage.appendChild(
         window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM(curMod.code, {
+          role: ROLE,
+          allowModuleSwitch: true,
           myStudent: state.myStudent || null,
           myStudentDisc: state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0,
           activeRoomId: LIVE ? LIVE.getRoomId() : 1,
+          onModuleChange: (mc) => {
+            state.activeHsModule = mc;
+            state.hsdModule = mc;
+            state.hsdSlideDeckMod = mc;
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#hs-discussion-${mc}`);
+            }
+            renderHsDiscussionView();
+          },
           onOpenRoomPpt: (rId, mCode, stuObj) => openHsDiscussionRoom(mCode || curMod.code, rId, stuObj),
           onGoCheckinRoom: (mCode, rId, stuObj) => openHsDiscussionRoom(mCode || curMod.code, rId, stuObj)
         })
@@ -31985,6 +31998,26 @@
       canvas.appendChild(chipsRow);
 
       const matchedMods = getMatchingModules();
+      let curHdrMod = /^HS[1-6]$/.test(String(activeDeckMod || ""))
+        ? activeDeckMod
+        : matchedMods[0]
+        ? matchedMods[0].code
+        : "HS1";
+      const dlCentralAllBtn = make("button", "", "btn sm teal");
+      dlCentralAllBtn.type = "button";
+      const syncCentralBtnForMod = (nextMod) => {
+        if (/^HS[1-6]$/i.test(String(nextMod || ""))) {
+          curHdrMod = String(nextMod).toUpperCase();
+        }
+        const unlocked = isHsModuleAnswerKeyPdfUnlocked(curHdrMod);
+        const mInfo = (HSD_DATA.modules || []).find((x) => x.id === curHdrMod) || {};
+        dlCentralAllBtn.textContent = unlocked
+          ? `⬇ PDF พร้อม Answer Key & Key Takeaway คาบ ${curHdrMod} (16:9)`
+          : `🔒 PDF พร้อม Answer Key คาบ ${curHdrMod} (เปิด ${mInfo.unlockShortLabel || "หลังจบคาบ"})`;
+      };
+      syncCentralBtnForMod(curHdrMod);
+      dlCentralAllBtn.addEventListener("click", () => downloadHsModuleAnswerKey16x9Pdf(curHdrMod));
+
       if (
         sec === "decks" &&
         matchedMods.length > 0 &&
@@ -31992,40 +32025,35 @@
         typeof window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM === "function"
       ) {
         const initModForSix = matchedMods.some((m) => m.id === activeDeckMod) ? activeDeckMod : matchedMods[0].code;
+        syncCentralBtnForMod(initModForSix);
         const hsSixBox = window.RACM_HSD_ROOM_QR.buildSixRoomPptsSectionDOM(initModForSix, {
           role: ROLE,
           allowModuleSwitch: matchedMods.length > 1,
           myStudent: state.myStudent || null,
           myStudentDisc: state.myStudent && state.myStudent.disc ? Number(state.myStudent.disc) : 0,
           activeRoomId: LIVE ? LIVE.getRoomId() : 1,
+          onModuleChange: (mc) => {
+            state.activeHsModule = mc;
+            state.hsdModule = mc;
+            state.hsdSlideDeckMod = mc;
+            syncCentralBtnForMod(mc);
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#hs-discussion-${mc}`);
+            }
+          },
           onOpenRoomPpt: (rId, mCode, stuObj) => {
             closeHsdGoogleDrivePickerModal();
-            openHsDiscussionRoom(mCode || initModForSix, rId, stuObj);
+            openHsDiscussionRoom(mCode || curHdrMod, rId, stuObj);
           },
           onGoCheckinRoom: (mCode, rId, stuObj) => {
             closeHsdGoogleDrivePickerModal();
-            openHsDiscussionRoom(mCode || initModForSix, rId, stuObj);
+            openHsDiscussionRoom(mCode || curHdrMod, rId, stuObj);
           }
         });
         canvas.appendChild(hsSixBox);
       }
 
       const secHead = make("div", null, "gdrive-section-head");
-      const effHdrMod = /^HS[1-6]$/.test(String(activeDeckMod || ""))
-        ? activeDeckMod
-        : matchedMods[0]
-        ? matchedMods[0].code
-        : "HS1";
-      const hdrAkUnlocked = isHsModuleAnswerKeyPdfUnlocked(effHdrMod);
-      const dlCentralAllBtn = make(
-        "button",
-        hdrAkUnlocked
-          ? `⬇ PDF พร้อม Answer Key & Key Takeaway คาบ ${effHdrMod} (16:9)`
-          : `🔒 PDF พร้อม Answer Key คาบ ${effHdrMod} (เปิดหลังจบคาบ)`,
-        "btn sm teal"
-      );
-      dlCentralAllBtn.type = "button";
-      dlCentralAllBtn.addEventListener("click", () => downloadHsModuleAnswerKey16x9Pdf(effHdrMod));
       secHead.append(
         make(
           "span",
