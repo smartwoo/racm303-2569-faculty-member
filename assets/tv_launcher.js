@@ -3164,26 +3164,34 @@
           })
         });
         if (m.code === "HS1") {
-          files.push({
-            id: `hspdf16x9:ALL`,
-            folderPath: ["health-systems"],
-            name: `00_HS1-HS6_Blank_Worksheet_16x9_กลางรวมครบทุกคาบ.pdf`,
-            title: `PDF กลางรวมครบทุกคาบ (HS1–HS6) — 16:9 Blank Worksheet (12 กรณี · 23 ข้อ)`,
-            sub: `ดาวน์โหลดไฟล์ .PDF ใบงานเปล่า 16:9 Optimal Font กลางรวมครบทั้ง 6 คาบ (HS1–HS6) ในไฟล์เดียว`,
-            meta: `48 หน้าสไลด์ 16:9 · ครบ 6 คาบ`,
-            badge: `⬇ PDF กลางรวม HS1–HS6`,
+          const hs1KeyPdfItem = {
+            name: `05_HS1_Answer_Key_Frameworks_KeyTakeaways_16x9.pdf`,
+            title: `PDF พร้อม Answer Key, Essential Frameworks & Key Takeaways — คาบ HS1 (16:9)`,
+            sub: `ไฟล์ .PDF สไลด์ 16:9 รวมเฉลยแนวคำตอบมาตรฐาน ไฮไลต์หลักฐาน แผนภาพ DoH กรอบแนวคิดสำคัญ (Essential Frameworks) และ Key Takeaways #1–#6 ของคาบ HS1 ครบในไฟล์เดียว`,
+            meta: `16:9 Answer Key & Frameworks · HS1`,
+            badge: `⬇ PDF พร้อม Answer Key HS1`,
             icoCls: "is-pdf",
-            icoTxt: "ALL",
-            downloadHref: `exports/pdf/RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`,
-            downloadName: `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`,
+            icoTxt: "KEY",
+            downloadHref: `exports/pdf/RACM303_2569_HS1_Answer_Key_16x9.pdf`,
+            downloadName: `RACM303_2569_HS1_Answer_Key_16x9.pdf`,
             onOpen: openFileAction(() => {
               const a = document.createElement("a");
-              a.href = `exports/pdf/RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
-              a.download = `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
+              a.href = `exports/pdf/RACM303_2569_HS1_Answer_Key_16x9.pdf`;
+              a.download = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
               document.body.appendChild(a);
               a.click();
               a.remove();
             })
+          };
+          files.push({
+            ...hs1KeyPdfItem,
+            id: `hspdf16x9:HS1-KEY`,
+            folderPath: ["health-systems", m.id]
+          });
+          files.push({
+            ...hs1KeyPdfItem,
+            id: `hspdf16x9:ALL`,
+            folderPath: ["health-systems"]
           });
         }
         if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getAllModuleRoomMetas === "function") {

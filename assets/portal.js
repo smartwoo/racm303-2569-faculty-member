@@ -1799,6 +1799,18 @@
     return true;
   }
 
+  function downloadHs1AnswerKey16x9Pdf() {
+    const fileName = "RACM303_2569_HS1_Answer_Key_16x9.pdf";
+    const href = `exports/pdf/${fileName}`;
+    const a = document.createElement("a");
+    a.href = href;
+    a.setAttribute("download", fileName);
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 400);
+    return true;
+  }
+
   function openHsDiscussionRoom(mod, roomIdOpt, stuObj) {
     const cleanMod = /^HS[1-6]$/i.test(String(mod || "")) ? String(mod).toUpperCase() : "HS1";
     const rNum = Math.min(6, Math.max(1, Math.floor(Number(roomIdOpt) || (stuObj && stuObj.disc) || 1)));
@@ -17466,11 +17478,11 @@
           ev.stopPropagation();
           downloadHsBlankWorksheet16x9Pdf(curMod.id, 0);
         });
-        const allPdfBtn = make("button", "⬇ PDF กลางรวม HS1–6", "hs-atv-mini-dl");
+        const allPdfBtn = make("button", "⬇ PDF พร้อม Answer Key HS1", "hs-atv-mini-dl");
         allPdfBtn.type = "button";
         allPdfBtn.addEventListener("click", (ev) => {
           ev.stopPropagation();
-          downloadHsBlankWorksheet16x9Pdf("ALL", 0);
+          downloadHs1AnswerKey16x9Pdf();
         });
         foot.append(scrollBtn, pdfBtn, allPdfBtn);
       } else if (step.key === "vdo-lecture") {
@@ -18586,9 +18598,9 @@
     dlPdfModBtn.type = "button";
     dlPdfModBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf(curMod.id, 0));
 
-    const dlPdfAllBtn = make("button", "⬇ PDF กลางรวม HS1–HS6 (16:9)", "tv-hero-btn is-glass");
+    const dlPdfAllBtn = make("button", "⬇ PDF พร้อม Answer Key คาบ HS1 (16:9)", "tv-hero-btn is-glass");
     dlPdfAllBtn.type = "button";
-    dlPdfAllBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf("ALL", 0));
+    dlPdfAllBtn.addEventListener("click", () => downloadHs1AnswerKey16x9Pdf());
 
     const backSlideBtn = make(
       "button",
@@ -31601,9 +31613,9 @@
       }
 
       const secHead = make("div", null, "gdrive-section-head");
-      const dlCentralAllBtn = make("button", "⬇ PDF กลางรวมครบทุกคาบ (HS1–HS6 · 16:9 ใบงานเปล่า)", "btn sm teal");
+      const dlCentralAllBtn = make("button", "⬇ PDF พร้อม Answer Key & Key Takeaway คาบ HS1 (16:9)", "btn sm teal");
       dlCentralAllBtn.type = "button";
-      dlCentralAllBtn.addEventListener("click", () => downloadHsBlankWorksheet16x9Pdf("ALL", 0));
+      dlCentralAllBtn.addEventListener("click", () => downloadHs1AnswerKey16x9Pdf());
       secHead.append(
         make(
           "span",
@@ -33239,12 +33251,12 @@
       statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ .PDF (16:9 Optimal Font Blank Worksheet) เรียบร้อยแล้ว!`;
     });
 
-    const btnPdfCentralAll = make("button", "⬇ PDF กลางรวมครบทุกคาบ (HS1–HS6 · 16:9)", "btn teal");
+    const btnPdfCentralAll = make("button", "⬇ PDF พร้อม Answer Key & Key Takeaway คาบ HS1 (16:9)", "btn teal");
     btnPdfCentralAll.type = "button";
     btnPdfCentralAll.dataset.expActionPdfAll = "1";
     btnPdfCentralAll.addEventListener("click", () => {
-      downloadHsBlankWorksheet16x9Pdf("ALL", 0);
-      statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ PDF กลางรวม HS1–HS6 (16:9 Blank Worksheet) เรียบร้อยแล้ว!`;
+      downloadHs1AnswerKey16x9Pdf();
+      statusMsg.textContent = `✓ ดาวน์โหลดไฟล์ PDF พร้อม Answer Key, Essential Frameworks & Key Takeaways คาบ HS1 (16:9) เรียบร้อยแล้ว!`;
     });
 
     actBtns.append(btnPdfMod, btnPdfCentralAll, btnPrintHandout);
@@ -46038,6 +46050,7 @@
     openHsDiscussion,
     openHsDiscussionRoom,
     downloadHsBlankWorksheet16x9Pdf,
+    downloadHs1AnswerKey16x9Pdf,
     openHsDriveFolder: () => openHsGoogleDriveFolder(),
     openHsDrivePickerModal: () => openHsdGoogleDrivePickerModal(),
     selectHsSessionDeck,

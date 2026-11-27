@@ -571,6 +571,8 @@
     const staticRoomPdfHref = `exports/pdf/${roomPdfFileName}`;
     const centralModulePdfFileName = `RACM303_2569_${modCode}_Blank_Worksheet_16x9.pdf`;
     const centralModulePdfHref = `exports/pdf/${centralModulePdfFileName}`;
+    const hs1AnswerKeyPdfFileName = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
+    const hs1AnswerKeyPdfHref = `exports/pdf/${hs1AnswerKeyPdfFileName}`;
     const centralCombinedPdfFileName = `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
     const centralCombinedPdfHref = `exports/pdf/${centralCombinedPdfFileName}`;
 
@@ -595,6 +597,8 @@
       staticRoomPdfHref,
       centralModulePdfFileName,
       centralModulePdfHref,
+      hs1AnswerKeyPdfFileName,
+      hs1AnswerKeyPdfHref,
       centralCombinedPdfFileName,
       centralCombinedPdfHref
     };
@@ -606,6 +610,8 @@
       modCode: m.modCode,
       modulePdfFileName: m.centralModulePdfFileName,
       modulePdfHref: m.centralModulePdfHref,
+      hs1AnswerKeyPdfFileName: m.hs1AnswerKeyPdfFileName,
+      hs1AnswerKeyPdfHref: m.hs1AnswerKeyPdfHref,
       combinedPdfFileName: m.centralCombinedPdfFileName,
       combinedPdfHref: m.centralCombinedPdfHref
     };
@@ -1552,7 +1558,7 @@
 
       headRight.innerHTML = `
         <a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF กลางรวม ${escHtml(modCode)} (16:9 ใบงานเปล่า)</a>
-        <a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.combinedPdfHref)}" download="${escHtml(cPdf.combinedPdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมครบทุกคาบ HS1–HS6 (16:9 Optimal Font)">⬇ PDF กลางรวม HS1–HS6 (ครบ 6 คาบ)</a>
+        <a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.hs1AnswerKeyPdfHref)}" download="${escHtml(cPdf.hs1AnswerKeyPdfFileName)}" title="ดาวน์โหลดไฟล์ PDF เฉลยแนวคำตอบมาตรฐาน + Essential Frameworks &amp; Key Takeaways คาบ HS1 (16:9)">⬇ PDF พร้อม Answer Key คาบ HS1 (16:9)</a>
       `;
 
       lockLabel.innerHTML = isFaculty
@@ -1890,7 +1896,7 @@
       }</span>` +
       `<div class="hsd-csl-pdfs">` +
       `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF กลางรวม ${escHtml(modCode)} (16:9)</a>` +
-      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.combinedPdfHref)}" download="${escHtml(cPdf.combinedPdfFileName)}">⬇ .PDF รวม HS1–HS6</a>` +
+      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.hs1AnswerKeyPdfHref)}" download="${escHtml(cPdf.hs1AnswerKeyPdfFileName)}">⬇ .PDF พร้อม Answer Key HS1</a>` +
       `</div>`;
 
     const midRow = document.createElement("div");
