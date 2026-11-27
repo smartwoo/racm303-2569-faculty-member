@@ -573,8 +573,8 @@
     const centralModulePdfHref = `exports/pdf/${centralModulePdfFileName}`;
     const hs1AnswerKeyPdfFileName = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
     const hs1AnswerKeyPdfHref = `exports/pdf/${hs1AnswerKeyPdfFileName}`;
-    const centralCombinedPdfFileName = `RACM303_2569_HS1-HS6_Blank_Worksheet_16x9.pdf`;
-    const centralCombinedPdfHref = `exports/pdf/${centralCombinedPdfFileName}`;
+    const centralCombinedPdfFileName = hs1AnswerKeyPdfFileName;
+    const centralCombinedPdfHref = hs1AnswerKeyPdfHref;
 
     return {
       modCode,
