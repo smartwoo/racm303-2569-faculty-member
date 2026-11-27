@@ -167,6 +167,7 @@
     hsdPptShowNotes: localStorage.getItem("racm303_hsd_ppt_notes") === "1",
     hsdPptZoomMode: "fit", // fit | manual
     hsdPptZoomPct: 100,
+    hsdKeyDiagramViewMode: "diagram",
     hsdKeyStepByQ: {},
     hsdKeyVisibleSteps: {},
     hsdKeyJustRevealedQ: "",
@@ -21403,6 +21404,97 @@
     return Boolean(qObj && qObj.conceptSummarySlide);
   }
 
+  function isAnswerKeyUnlockedForStudent(qObj, modIdOpt) {
+    if (!qObj || !qObj.id || typeof HSD_KEY === "undefined" || !HSD_KEY || !HSD_KEY.keys || !HSD_KEY.keys[qObj.id]) {
+      return false;
+    }
+    return Boolean(getHsSessionUnlockInfo(qObj, modIdOpt).timePassed);
+  }
+
+  function canShowAnswerKeyInCurrentMode(qObj, modIdOpt) {
+    if (!qObj || !qObj.id || typeof HSD_KEY === "undefined" || !HSD_KEY || !HSD_KEY.keys || !HSD_KEY.keys[qObj.id]) {
+      return false;
+    }
+    if (ROLE === "faculty" && state.hsdFacultyMode !== "student") return true;
+    return isAnswerKeyUnlockedForStudent(qObj, modIdOpt);
+  }
+
+  function buildUnifiedQuestionStageDefs(qObj, modIdOpt, isTeacherDeck) {
+    const stageDefs = [
+      { st: 0, lbl: "เนื้อหาโจทย์", tip: "เนื้อหาโจทย์ Scenario เต็มจอ" },
+      {
+        st: 1,
+        lbl: "① Sheet เต็ม",
+        tip: isTeacherDeck ? "ประเด็นคำถาม & Answer Sheet เปล่านิ่งๆ เต็มจอ" : "ประเด็นคำถาม & Answer Sheet เต็มจอ"
+      },
+      {
+        st: 2,
+        lbl: "② โจทย์+Sheet",
+        tip: isTeacherDeck ? "โจทย์ประกบกับ Answer Sheet เปล่านิ่งๆ" : "โจทย์ประกบกับ Answer Sheet"
+      }
+    ];
+    if (isTeacherDeck) {
+      stageDefs.push(
+        { st: 2.5, lbl: "🟢 คำตอบสด นศ.", tip: "คำตอบสดนักศึกษาแบบ Real-time รายกล่อง (ระบุรหัสนักศึกษา)" },
+        { st: 3, lbl: "③ Key เต็ม", tip: "Answer Key เต็มจอ" },
+        { st: 4, lbl: "④ Highlight+Key", tip: "Highlight เนื้อหาโจทย์ ประกบกับ Answer Key" }
+      );
+    } else if (isAnswerKeyUnlockedForStudent(qObj, modIdOpt)) {
+      stageDefs.push(
+        { st: 3, lbl: "③ Key เต็ม", tip: "เฉลยแนวคำตอบมาตรฐานเต็มจอ (เปิดหลังจบคาบเรียน)" },
+        { st: 4, lbl: "④ Highlight+Key", tip: "ไฮไลต์หลักฐานจากโจทย์ ประกบกับแนวคำตอบมาตรฐาน" }
+      );
+    }
+    if (qObj && qObj.conceptSummarySlide) {
+      const uInfo = getHsSessionUnlockInfo(qObj, modIdOpt);
+      const csUnlocked = isTeacherDeck || Boolean(uInfo && uInfo.unlockedForStudent);
+      if (csUnlocked) {
+        const qCs = qObj.conceptSummarySlide || {};
+        const qFwList = Array.isArray(qCs.frameworkSynthesisSlides) && qCs.frameworkSynthesisSlides.length
+          ? qCs.frameworkSynthesisSlides
+          : qCs.frameworkSynthesisSlide
+          ? [qCs.frameworkSynthesisSlide]
+          : [];
+        const qFuList = Array.isArray(qCs.followUpSummarySlides) ? qCs.followUpSummarySlides : [];
+        if (qFwList.length > 0 || qFuList.length > 0) {
+          const circNums = ["⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
+          qFwList.forEach((fwItem, fwIdx) => {
+            stageDefs.push({
+              st: 5 + fwIdx,
+              lbl: fwItem.stageBtnLabel || fwItem.studentStageBtnLabel || `${circNums[fwIdx] || "⑤"} ภาพ Framework`,
+              tip: fwItem.title || "Key Takeaway: ภาพแผนภาพ Framework สังเคราะห์"
+            });
+          });
+          stageDefs.push({
+            st: 5 + qFwList.length,
+            lbl: `${circNums[qFwList.length] || "⑥"} คำอธิบาย`,
+            tip: qCs.title ? `Key Takeaway: ${qCs.title}` : "Key Takeaway: คำอธิบายสังเคราะห์รายหมวด"
+          });
+          qFuList.forEach((fuItem, fuIdx) => {
+            stageDefs.push({
+              st: 5 + qFwList.length + 1 + fuIdx,
+              lbl: fuItem.stageBtnLabel || fuItem.studentStageBtnLabel || `${circNums[qFwList.length + 1 + fuIdx] || "⑦"} ตารางสังเคราะห์`,
+              tip: fuItem.title || "Key Takeaway: ตารางสังเคราะห์"
+            });
+          });
+        } else {
+          stageDefs.push({
+            st: 5,
+            lbl: "⑤ Takeaway",
+            tip: qCs.title ? `Key Takeaway: ${qCs.title}` : "สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway)"
+          });
+        }
+      } else {
+        stageDefs.push({
+          st: 5,
+          lbl: "🔒 Hide Slide",
+          tip: `สไลด์สรุปหลังอภิปราย · ปลดล็อกเป็น Unhide Slide หลัง ${uInfo ? uInfo.shortLabel : "จบคาบ"}`
+        });
+      }
+    }
+    return stageDefs;
+  }
+
   let hsHiddenSlideWatcherTimer = null;
   let lastHsUnlockedScheduleMask = "";
   function computeHsUnlockedScheduleMask() {
@@ -21421,7 +21513,7 @@
         if (state.activeTab === "hs-discussion" || state.isPptSlideSharePopup) {
           renderHsDiscussionView();
           broadcastPptPresentationState();
-          showStudentSlideSyncToast("🔓 หมดเวลาคาบ Discussion แล้ว — เปลี่ยนสไลด์จาก Hide Slide เป็น Unhide Slide อัตโนมัติเรียบร้อย");
+          showStudentSlideSyncToast("🔓 หมดเวลาคาบ Discussion แล้ว — เปิดเผย Answer Key และปลดล็อก Unhide Slide อัตโนมัติเรียบร้อย");
         }
       }
     }, 20000);
@@ -21837,7 +21929,23 @@
       } else if (wantKind === "case-scenario" && ptr.caseId) {
         idx = slides.findIndex((s) => s.kind === "case-scenario" && s.caseObj && s.caseObj.id === ptr.caseId);
       } else if (wantKind === "concept-summary") {
-        idx = slides.findIndex((s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ptr.questionId);
+        if (ptr.pedKey) {
+          idx = slides.findIndex(
+            (s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ptr.questionId && s.pedKey === ptr.pedKey
+          );
+        }
+        if (idx < 0 && Number.isFinite(Number(ptr.pedStage))) {
+          idx = slides.findIndex(
+            (s) =>
+              s.kind === "concept-summary" &&
+              s.qObj &&
+              s.qObj.id === ptr.questionId &&
+              s.pedStage === Number(ptr.pedStage)
+          );
+        }
+        if (idx < 0) {
+          idx = slides.findIndex((s) => s.kind === "concept-summary" && s.qObj && s.qObj.id === ptr.questionId);
+        }
       } else {
         const wantStuStage = ptr.studentStage === 1 ? 1 : 2;
         idx = slides.findIndex(
@@ -24895,14 +25003,25 @@
 
     const pedStage = (activeCur && activeCur.pedStage) || 2;
     if (ROLE !== "faculty" || state.hsdFacultyMode === "student") {
+      const keyAllowedStu = Boolean(
+        activeCur &&
+          activeCur.qObj &&
+          isAnswerKeyUnlockedForStudent(activeCur.qObj, activeCur.mod && activeCur.mod.id)
+      );
       if (
         state.hsdSinglePaneOverride === "scenario" ||
         state.hsdSinglePaneOverride === "sheet" ||
-        state.hsdSinglePaneOverride === "split-sheet"
+        state.hsdSinglePaneOverride === "split-sheet" ||
+        (keyAllowedStu &&
+          (state.hsdSinglePaneOverride === "key-full" ||
+            state.hsdSinglePaneOverride === "key-only" ||
+            state.hsdSinglePaneOverride === "split-key-all"))
       ) {
-        return state.hsdSinglePaneOverride;
+        return state.hsdSinglePaneOverride === "key-only" ? "key-full" : state.hsdSinglePaneOverride;
       }
       if (pedStage === 1) return "sheet";
+      if (pedStage === 3 && keyAllowedStu) return "key-full";
+      if (pedStage === 4 && keyAllowedStu) return "split-key-all";
       return "split-sheet";
     }
 
@@ -25026,8 +25145,9 @@
         state.hsdSinglePaneOverride = "";
       }
     } else {
+      const curQObj = curQId ? findHsQuestionById(curQId) : null;
       if (nextLayout === "concept-summary" && curQId) {
-        if (!canNavigateConceptSummarySlide(findHsQuestionById(curQId))) return;
+        if (!canNavigateConceptSummarySlide(curQObj)) return;
         state.hsdSinglePaneOverride = "";
         jumpToQuestionPedStage(curQId, 5);
         return;
@@ -25040,6 +25160,18 @@
       if (nextLayout === "split-sheet" && curQId) {
         state.hsdSinglePaneOverride = "";
         jumpToQuestionPedStage(curQId, 2);
+        return;
+      }
+      if ((nextLayout === "key-full" || nextLayout === "key-only" || nextLayout === "split-key") && curQId) {
+        if (!canShowAnswerKeyInCurrentMode(curQObj)) return;
+        state.hsdSinglePaneOverride = "";
+        jumpToQuestionPedStage(curQId, 3);
+        return;
+      }
+      if ((nextLayout === "split-key-all" || nextLayout === "split-concept") && curQId) {
+        if (!canShowAnswerKeyInCurrentMode(curQObj)) return;
+        state.hsdSinglePaneOverride = "";
+        jumpToQuestionPedStage(curQId, 4);
         return;
       }
       if (nextLayout === "scenario" && curQId) {
@@ -25114,7 +25246,7 @@
         jumpToQuestionPedStage(cur.qObj.id, 2);
         return;
       }
-      if (cur && cur.qObj && cur.pedStage === 3 && ROLE === "faculty") {
+      if (cur && cur.qObj && cur.pedStage === 3 && canShowAnswerKeyInCurrentMode(cur.qObj, cur.mod && cur.mod.id)) {
         jumpToQuestionPedStage(cur.qObj.id, 4);
         return;
       }
@@ -25130,7 +25262,7 @@
         if (cur && cur.qObj) {
           if (
             (curLayout === "split-key" || curLayout === "split-key-all" || curLayout === "split-concept") &&
-            ROLE === "faculty"
+            canShowAnswerKeyInCurrentMode(cur.qObj, cur.mod && cur.mod.id)
           ) {
             jumpToQuestionPedStage(cur.qObj.id, 3);
             return;
@@ -25321,12 +25453,13 @@
             });
           }
         } else {
+          const keyUnlocked = isAnswerKeyUnlockedForStudent(qObj, mod.id);
           items.push({
             kind: "question",
             pedStage: 1,
             pedKey: "sheet-full",
             pedBadge: "ประเด็นคำถาม & Answer Sheet (เต็มจอ)",
-            pedShort: "Sheet เต็มจอ",
+            pedShort: "① Sheet เต็มจอ",
             mod,
             caseObj: c,
             qObj,
@@ -25337,12 +25470,36 @@
             pedStage: 2,
             pedKey: "sheet",
             pedBadge: "โจทย์ประกบกับ Answer Sheet",
-            pedShort: "โจทย์+Sheet",
+            pedShort: "② โจทย์+Sheet",
             mod,
             caseObj: c,
             qObj,
             shortNum
           });
+          if (keyUnlocked) {
+            items.push({
+              kind: "question",
+              pedStage: 3,
+              pedKey: "key-full",
+              pedBadge: "🔓 Answer Key เต็มจอ (เฉลยหลังจบคาบเรียน)",
+              pedShort: "③ Key เต็มจอ",
+              mod,
+              caseObj: c,
+              qObj,
+              shortNum
+            });
+            items.push({
+              kind: "question",
+              pedStage: 4,
+              pedKey: "key-unhide-all",
+              pedBadge: "🔓 Highlight เนื้อหาโจทย์ ประกบกับ Answer Key",
+              pedShort: "④ Highlight+Key",
+              mod,
+              caseObj: c,
+              qObj,
+              shortNum
+            });
+          }
           if (hasCs) {
             const cs = qObj.conceptSummarySlide;
             const fwList = Array.isArray(cs.frameworkSynthesisSlides) && cs.frameworkSynthesisSlides.length
@@ -25358,10 +25515,10 @@
                 pedStage: 5 + fwIdx,
                 pedKey: fwIdx === 0 ? "concept-framework" : `concept-framework-${fwIdx + 1}`,
                 pedBadge: unlockedNow
-                  ? `🔓 Unhide Slide · ${fw.studentBadge || "Key Takeaway Framework"}`
+                  ? `🔓 Unhide Slide · ${fw.badge || fw.studentBadge || "Key Takeaway Framework"}`
                   : `🔒 Hide Slide · ปลดล็อกหลัง ${uInfo.shortLabel}`,
                 pedShort: unlockedNow
-                  ? `🔓 ${fw.studentShortLabel || "Framework"}`
+                  ? (fw.shortLabel || `🔓 ${fw.studentShortLabel || "Framework"}`)
                   : "🔒 Hide Slide",
                 mod,
                 caseObj: c,
@@ -25379,10 +25536,10 @@
               pedStage: 5 + fwList.length,
               pedKey: "concept-summary",
               pedBadge: unlockedNow
-                ? `🔓 Unhide Slide · ${cs.studentBadge || "Key Takeaway"}`
+                ? `🔓 Unhide Slide · ${cs.badge || cs.studentBadge || "Key Takeaway"}`
                 : `🔒 Hide Slide · ปลดล็อกหลัง ${uInfo.shortLabel}`,
               pedShort: unlockedNow
-                ? `🔓 ${cs.studentShortLabel || "Key Takeaway"}`
+                ? (cs.shortLabel || `🔓 ${cs.studentShortLabel || "Key Takeaway"}`)
                 : "🔒 Hide Slide",
               mod,
               caseObj: c,
@@ -25400,10 +25557,10 @@
                 pedStage: 5 + fwList.length + 1 + fuIdx,
                 pedKey: `concept-followup-${fuIdx + 1}`,
                 pedBadge: unlockedNow
-                  ? `🔓 Unhide Slide · ${fu.studentBadge || "Key Takeaway Matrix"}`
+                  ? `🔓 Unhide Slide · ${fu.badge || fu.studentBadge || "Key Takeaway Matrix"}`
                   : `🔒 Hide Slide · ปลดล็อกหลัง ${uInfo.shortLabel}`,
                 pedShort: unlockedNow
-                  ? `🔓 ${fu.studentShortLabel || "ตารางสังเคราะห์"}`
+                  ? (fu.shortLabel || `🔓 ${fu.studentShortLabel || "ตารางสังเคราะห์"}`)
                   : "🔒 Hide Slide",
                 mod,
                 caseObj: c,
@@ -25433,8 +25590,9 @@
 
   function getVisibleHsKeyStepsSet(qId) {
     const out = new Set();
+    const qObj = findHsQuestionById(qId);
     const total = getHsQuestionKeyTotalSteps(qId);
-    if (!total || state.hsdFacultyMode === "student") return out;
+    if (!total || (state.hsdFacultyMode === "student" && !isAnswerKeyUnlockedForStudent(qObj))) return out;
     if (state.hsdKeyPinAllOpen) {
       for (let i = 1; i <= total; i += 1) out.add(i);
       return out;
@@ -25488,9 +25646,10 @@
 
     const vis = getVisibleHsKeyStepsSet(qId);
     const shouldShow = typeof forceShow === "boolean" ? forceShow : !vis.has(sNum);
+    const qObj = findHsQuestionById(qId);
 
     if (shouldShow) {
-      if (state.hsdFacultyMode === "student") {
+      if (state.hsdFacultyMode === "student" && !isAnswerKeyUnlockedForStudent(qObj)) {
         state.hsdFacultyMode = "teacher";
         document.querySelectorAll("[data-hsd-fmode]").forEach((b) =>
           b.setAttribute("aria-pressed", b.dataset.hsdFmode === "teacher" ? "true" : "false")
@@ -29656,45 +29815,13 @@
         const caseSw = buildSlideCaseScenarioSwitcherDOM(cur, slides);
         if (caseSw) mRight.appendChild(caseSw);
       }
-      if (ROLE === "faculty" && state.hsdFacultyMode !== "student" && !state.isPptSlideSharePopup && !exp && cur.qObj) {
+      if (!exp && !state.isPptSlideSharePopup && cur.qObj) {
         const stageBar = make("div", null, "ppt-sm-stage-pills hsd-no-print");
-        const circNums = ["⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
-        const csStages = hasFwPair
-          ? [
-              { st: 0, lbl: "เนื้อหาโจทย์", tip: "เนื้อหาโจทย์ Scenario เต็มจอ" },
-              { st: 1, lbl: "① Sheet เต็ม", tip: "ประเด็นคำถาม & Answer Sheet เปล่านิ่งๆ เต็มจอ" },
-              { st: 2, lbl: "② โจทย์+Sheet", tip: "โจทย์ประกบกับ Answer Sheet เปล่านิ่งๆ" },
-              { st: 2.5, lbl: "🟢 คำตอบสด นศ.", tip: "คำตอบสดนักศึกษาแบบ Real-time รายกล่อง (ระบุรหัสนักศึกษา)" },
-              { st: 3, lbl: "③ Key เต็ม", tip: "Answer Key เต็มจอ" },
-              { st: 4, lbl: "④ Highlight+Key", tip: "Highlight เนื้อหาโจทย์ ประกบกับ Answer Key" },
-              ...fwList.map((fwItem, fwIdx) => ({
-                st: 5 + fwIdx,
-                lbl: fwItem.stageBtnLabel || `${circNums[fwIdx] || "⑤"} ภาพ Framework`,
-                tip: fwItem.title || "Key Takeaway: ภาพแผนภาพ Framework สังเคราะห์"
-              })),
-              {
-                st: 5 + fwList.length,
-                lbl: `${circNums[fwList.length] || "⑥"} คำอธิบาย`,
-                tip: `Key Takeaway: คำอธิบายบรรยาย (${cs.title || ""})`
-              },
-              ...fuList.map((fuItem, fuIdx) => ({
-                st: 5 + fwList.length + 1 + fuIdx,
-                lbl: fuItem.stageBtnLabel || `${circNums[fwList.length + 1 + fuIdx] || "⑦"} ตารางสังเคราะห์`,
-                tip: fuItem.title || "Key Takeaway: ตารางสังเคราะห์"
-              }))
-            ]
-          : [
-              { st: 0, lbl: "เนื้อหาโจทย์", tip: "เนื้อหาโจทย์ Scenario เต็มจอ" },
-              { st: 1, lbl: "① Sheet เต็ม", tip: "ประเด็นคำถาม & Answer Sheet เปล่านิ่งๆ เต็มจอ" },
-              { st: 2, lbl: "② โจทย์+Sheet", tip: "โจทย์ประกบกับ Answer Sheet เปล่านิ่งๆ" },
-              { st: 2.5, lbl: "🟢 คำตอบสด นศ.", tip: "คำตอบสดนักศึกษาแบบ Real-time รายกล่อง (ระบุรหัสนักศึกษา)" },
-              { st: 3, lbl: "③ Key เต็ม", tip: "Answer Key เต็มจอ" },
-              { st: 4, lbl: "④ Highlight+Key", tip: "Highlight เนื้อหาโจทย์ ประกบกับ Answer Key" },
-              { st: 5, lbl: "⑤ Takeaway", tip: `สรุปสาระสำคัญ (${ktLabel})` }
-            ];
+        const isTeacherDeck = ROLE === "faculty" && state.hsdFacultyMode !== "student";
+        const csStages = buildUnifiedQuestionStageDefs(cur.qObj, cur.mod && cur.mod.id, isTeacherDeck);
         csStages.forEach((sp) => {
           const curSt = cur.pedStage || 5;
-          const isActSt = sp.st === curSt;
+          const isActSt = isHiddenNow && sp.st === 5 && curSt >= 5 ? true : sp.st === curSt;
           const sb = make("button", sp.lbl, `ppt-sm-stage-btn${isActSt ? " is-active" : ""}`);
           sb.type = "button";
           sb.dataset.pedStageBtn = String(sp.st);
@@ -29703,34 +29830,6 @@
           stageBar.appendChild(sb);
         });
         mRight.appendChild(stageBar);
-      } else if (!exp && !state.isPptSlideSharePopup && cur.qObj) {
-        if (hasFwPair) {
-          const fwPairBar = make("div", null, "ppt-sm-stage-pills hsd-no-print");
-          [
-            { st: 2, lbl: `← โจทย์ ${cur.shortNum}` },
-            ...fwList.map((fwItem, fwIdx) => ({
-              st: 5 + fwIdx,
-              lbl: fwItem.studentStageBtnLabel || "🖼 ภาพ Framework"
-            })),
-            { st: 5 + fwList.length, lbl: "📝 คำอธิบาย" },
-            ...fuList.map((fuItem, fuIdx) => ({
-              st: 5 + fwList.length + 1 + fuIdx,
-              lbl: fuItem.studentStageBtnLabel || "📊 ตารางสังเคราะห์"
-            }))
-          ].forEach((sp) => {
-            const isActSt = sp.st === (cur.pedStage || 5);
-            const sb = make("button", sp.lbl, `ppt-sm-stage-btn${isActSt ? " is-active" : ""}`);
-            sb.type = "button";
-            sb.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, sp.st));
-            fwPairBar.appendChild(sb);
-          });
-          mRight.appendChild(fwPairBar);
-        } else {
-          const backQBtn = make("button", `← กลับโจทย์ ${cur.shortNum}`, "ppt-sm-qpill");
-          backQBtn.type = "button";
-          backQBtn.addEventListener("click", () => jumpToQuestionPedStage(cur.qObj.id, 2));
-          mRight.appendChild(backQBtn);
-        }
       } else if (exp && cur.pedBadge) {
         mRight.appendChild(make("span", cur.pedBadge, "ppt-sm-qpill is-current"));
       }
@@ -29845,59 +29944,8 @@
     }
     if (!state.isPptSlideSharePopup && !exp && cur.qObj) {
       const stageBar = make("div", null, "ppt-sm-stage-pills hsd-no-print");
-      const hasCs = Boolean(cur.qObj && cur.qObj.conceptSummarySlide);
       const isTeacherDeck = ROLE === "faculty" && state.hsdFacultyMode !== "student";
-      const stageDefs = isTeacherDeck
-        ? [
-            { st: 0, lbl: "เนื้อหาโจทย์", tip: "เนื้อหาโจทย์ Scenario เต็มจอ" },
-            { st: 1, lbl: "① Sheet เต็ม", tip: "ประเด็นคำถาม & Answer Sheet เปล่านิ่งๆ เต็มจอ" },
-            { st: 2, lbl: "② โจทย์+Sheet", tip: "โจทย์ประกบกับ Answer Sheet เปล่านิ่งๆ" },
-            { st: 2.5, lbl: "🟢 คำตอบสด นศ.", tip: "คำตอบสดนักศึกษาแบบ Real-time รายกล่อง (ระบุรหัสนักศึกษา)" },
-            { st: 3, lbl: "③ Key เต็ม", tip: "Answer Key เต็มจอ" },
-            { st: 4, lbl: "④ Highlight+Key", tip: "Highlight เนื้อหาโจทย์ ประกบกับ Answer Key" }
-          ]
-        : [
-            { st: 0, lbl: "เนื้อหาโจทย์", tip: "เนื้อหาโจทย์ Scenario เต็มจอ" },
-            { st: 1, lbl: "① Sheet เต็ม", tip: "ประเด็นคำถาม & Answer Sheet เต็มจอ" },
-            { st: 2, lbl: "② โจทย์+Sheet", tip: "โจทย์ประกบกับ Answer Sheet" }
-          ];
-      if (isTeacherDeck && hasCs) {
-        const qCs = cur.qObj.conceptSummarySlide || {};
-        const qFwList = Array.isArray(qCs.frameworkSynthesisSlides) && qCs.frameworkSynthesisSlides.length
-          ? qCs.frameworkSynthesisSlides
-          : qCs.frameworkSynthesisSlide
-          ? [qCs.frameworkSynthesisSlide]
-          : [];
-        const qFuList = Array.isArray(qCs.followUpSummarySlides) ? qCs.followUpSummarySlides : [];
-        if (qFwList.length > 0 || qFuList.length > 0) {
-          const circNums = ["⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
-          qFwList.forEach((fwItem, fwIdx) => {
-            stageDefs.push({
-              st: 5 + fwIdx,
-              lbl: fwItem.stageBtnLabel || `${circNums[fwIdx] || "⑤"} ภาพ Framework`,
-              tip: fwItem.title || "Key Takeaway: ภาพแผนภาพ Framework สังเคราะห์"
-            });
-          });
-          stageDefs.push({
-            st: 5 + qFwList.length,
-            lbl: `${circNums[qFwList.length] || "⑥"} คำอธิบาย`,
-            tip: "Key Takeaway: คำอธิบายสังเคราะห์รายหมวด (Slide ถัดไป)"
-          });
-          qFuList.forEach((fuItem, fuIdx) => {
-            stageDefs.push({
-              st: 5 + qFwList.length + 1 + fuIdx,
-              lbl: fuItem.stageBtnLabel || `${circNums[qFwList.length + 1 + fuIdx] || "⑦"} ตารางสังเคราะห์`,
-              tip: fuItem.title || "Key Takeaway: ตารางสังเคราะห์"
-            });
-          });
-        } else {
-          stageDefs.push({
-            st: 5,
-            lbl: "⑤ Takeaway",
-            tip: "สรุปสาระสำคัญหลังเฉลยโจทย์ (Key Takeaway)"
-          });
-        }
-      }
+      const stageDefs = buildUnifiedQuestionStageDefs(cur.qObj, cur.mod && cur.mod.id, isTeacherDeck);
       stageDefs.forEach((sp) => {
         const curSt = isCaseScen ? 0 : cur.pedStage !== undefined ? cur.pedStage : 2;
         const isActSt = !state.hsdSinglePaneOverride && curSt === sp.st;
@@ -34000,9 +34048,15 @@
             qBlock.appendChild(buildWideWorksheetTableDOM(qObj, ROLE === "faculty"));
           }
 
-          if (ROLE === "faculty" && state.hsdFacultyMode !== "student" && typeof appendFacultyTeacherKey === "function") {
+          if (canShowAnswerKeyInCurrentMode(qObj, mod.id) && typeof appendFacultyTeacherKey === "function") {
             appendFacultyTeacherKey(qBlock, qObj, c, mod);
-          } else if (qObj && qObj.conceptSummarySlide) {
+          }
+
+          if (
+            (ROLE !== "faculty" || state.hsdFacultyMode === "student") &&
+            qObj &&
+            qObj.conceptSummarySlide
+          ) {
             const uInfo = getHsSessionUnlockInfo(qObj, mod.id);
             const shortNum = getShortQuestionNumLabel(qObj, 0);
             const hsBar = make(
@@ -34014,7 +34068,7 @@
               hsBar.appendChild(
                 make(
                   "span",
-                  `🔓 Unhide Slide แล้ว (หลังจบคาบ ${mod.code}) — พร้อมเปิดอ่านสไลด์สรุปสาระสำคัญของข้อ ${shortNum}`
+                  `🔓 Unhide Slide แล้ว (${uInfo.timePassed ? `หลังจบคาบ ${mod.code}` : "อาจารย์เปิดปล่อยแล้ว"}) — พร้อมเปิดอ่านสไลด์สรุปสาระสำคัญ (Framework & Key Takeaway) ของข้อ ${shortNum}`
                 )
               );
               const openCsBtn = make("button", "เปิดดูสไลด์ Key Takeaway →", "btn sm teal");
@@ -34040,7 +34094,14 @@
         });
 
         split.append(scenSticky, qCol);
-        if (ROLE === "faculty" && state.hsdFacultyMode === "teacher" && typeof HSD_KEY !== "undefined") {
+        const hasUnlockedCaseKey = (c.questions || []).some((qItem) =>
+          canShowAnswerKeyInCurrentMode(qItem, mod.id)
+        );
+        if (
+          ROLE === "faculty" &&
+          (state.hsdFacultyMode === "teacher" || (state.hsdFacultyMode === "student" && hasUnlockedCaseKey)) &&
+          typeof HSD_KEY !== "undefined"
+        ) {
           const allCaseClues = [];
           (c.questions || []).forEach((qItem) => {
             const tkItem = (HSD_KEY.keys || {})[qItem.id];
@@ -41743,14 +41804,21 @@
       `hsd-teacher-key-panel${isConceptStage ? " is-concept-stage-panel" : ""}${isUnhideAllStage ? " is-unhide-all-stage-panel" : ""}`
     );
     const tkHead = make("div", null, "hsd-tk-header");
+    const isStuKeyView = ROLE === "student" || state.hsdFacultyMode === "student";
     const titleStr = isConceptStage
       ? "สังเคราะห์หลักฐานจากโจทย์สู่แนวคิดคำตอบ & เอกสารคำสอน"
       : isUnhideAllStage
-      ? "แนวคำตอบมาตรฐานครบทุกข้อ · ไฮไลต์หลักฐานจากสถานการณ์"
+      ? (isStuKeyView
+          ? "🔓 เฉลยแนวคำตอบมาตรฐานหลังจบคาบเรียน · ไฮไลต์หลักฐานจากสถานการณ์"
+          : "แนวคำตอบมาตรฐานครบทุกข้อ · ไฮไลต์หลักฐานจากสถานการณ์")
       : hasStepMode
-      ? `แนวคำตอบอาจารย์ · ${step === 0 ? "คลิกแต่ละแถวเพื่อเปิดคำตอบทีละข้อ" : `เปิดแสดง ${step}/${totalSteps} ขั้น`}`
+      ? `${isStuKeyView ? "🔓 เฉลยแนวคำตอบมาตรฐาน" : "แนวคำตอบอาจารย์"} · ${
+          step === 0 ? "คลิกแต่ละแถวเพื่อเปิดคำตอบทีละข้อ" : `เปิดแสดง ${step}/${totalSteps} ขั้น`
+        }`
       : standaloneNotes
       ? `แนวคำตอบมาตรฐานสำหรับอาจารย์ (${clearQLabel})`
+      : isStuKeyView
+      ? "🔓 เฉลยแนวคำตอบมาตรฐานหลังจบคาบเรียน (Answer Key)"
       : "แนวคำตอบมาตรฐานสำหรับอาจารย์ (Teacher Answer Key)";
 
     const hasDiagramKey = Boolean(tk.diagramKey && Array.isArray(tk.diagramKey.steps));

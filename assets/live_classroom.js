@@ -509,6 +509,57 @@
     return changed;
   }
 
+  const ROOM_CONCEPT_UNLOCK_PREFIX = "racm303_live_concept_unlock_r";
+  const CONCEPT_UNLOCK_STORAGE_TTL_MS = 18 * 60 * 60 * 1000;
+
+  function persistRoomConceptUnlocksToStorage(roomIdOpt) {
+    try {
+      const rId = clampRoom(roomIdOpt || state.roomId);
+      if (rId !== state.roomId) return;
+      safeSetStorage(
+        `${ROOM_CONCEPT_UNLOCK_PREFIX}${rId}_v1`,
+        JSON.stringify({
+          roomId: rId,
+          updatedMs: Date.now(),
+          items: state.unlockedConceptSummaries || {}
+        })
+      );
+    } catch (_) {}
+  }
+
+  function hydrateRoomConceptUnlocksFromStorage(roomIdOpt) {
+    try {
+      const rId = clampRoom(roomIdOpt || state.roomId);
+      if (rId !== state.roomId) return false;
+      const raw = safeGetStorage(`${ROOM_CONCEPT_UNLOCK_PREFIX}${rId}_v1`, "");
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || !parsed.items) return false;
+      const now = Date.now();
+      let changed = false;
+      Object.keys(parsed.items).forEach((qid) => {
+        const rec = parsed.items[qid];
+        if (!rec || typeof rec !== "object") return;
+        const uMs = Number(rec.updatedWallMs || 0);
+        if (!uMs || now - uMs > CONCEPT_UNLOCK_STORAGE_TTL_MS) return;
+        const prev = state.unlockedConceptSummaries[qid];
+        if (!prev || (Number(prev.updatedWallMs) || 0) < uMs) {
+          state.unlockedConceptSummaries[qid] = {
+            unlocked: Boolean(rec.unlocked),
+            seq: Number(rec.seq) || 0,
+            updatedWallMs: uMs
+          };
+          changed = true;
+        }
+      });
+      return changed;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  hydrateRoomConceptUnlocksFromStorage(state.roomId);
+
   const listeners = {
     timer: new Set(),
     responses: new Set(),
@@ -769,6 +820,7 @@
     const qosLevel =
       subStr.startsWith("timer") ||
       subStr === "checkin_reset" ||
+      subStr.startsWith("concept_unlock") ||
       subStr.startsWith("presence")
         ? 1
         : 0;
@@ -1085,6 +1137,7 @@
             seq: Number(msg.seq) || 0,
             updatedWallMs: sentMs
           };
+          persistRoomConceptUnlocksToStorage(state.roomId);
           if (!wasUnlocked) {
             emit("concept_unlock", { questionId: qid, unlocked: true, isRetained: Boolean(isRetained) });
           }
@@ -1110,6 +1163,7 @@
         seq: Number(msg.seq) || 0,
         updatedWallMs: updatedMs
       };
+      persistRoomConceptUnlocksToStorage(state.roomId);
       if (!prevRec || wasUnlocked !== isUnlocked) {
         emit("concept_unlock", { questionId: qid, unlocked: isUnlocked, isRetained: Boolean(isRetained) });
       }
@@ -2497,6 +2551,7 @@
     }
 
     hydrateRoomResponsesFromStorage(next, false);
+    hydrateRoomConceptUnlocksFromStorage(next);
     state.mqttClients.forEach((c) => subscribeCurrentRoomMqtt(c));
     if (initialized) {
       initPeerForRoom();
@@ -2753,6 +2808,7 @@
       seq: conceptUnlockSeq,
       updatedWallMs: now
     };
+    persistRoomConceptUnlocksToStorage(state.roomId);
     publishPacket(
       `concept_unlock/${qid}`,
       {
