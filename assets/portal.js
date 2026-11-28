@@ -16129,9 +16129,13 @@
       heroActions.appendChild(vdoHeroBtn);
     }
 
-    const schedBtn = make("button", "📅 ดูในตารางเรียน & บันทึก .ics", "tv-hero-btn is-glass");
+    const schedBtn = make(
+      "button",
+      ROLE === "faculty" ? tr("📅 เปิดดูตารางสอน", "📅 Open Schedule") : tr("📅 เปิดดูตารางเรียน", "📅 Open Schedule"),
+      "tv-hero-btn is-glass"
+    );
     schedBtn.type = "button";
-    schedBtn.addEventListener("click", () => openSystemsForumScheduleModal(sess.id));
+    schedBtn.addEventListener("click", () => jumpToScheduleSession(sess.id));
     heroActions.appendChild(schedBtn);
 
     if (ROLE === "faculty" && slideRec) {

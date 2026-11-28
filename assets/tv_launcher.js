@@ -1187,8 +1187,7 @@
         }
         ${
           snap.hasProfile
-            ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroSyncIcsBtn" data-tv-focus data-tv-row="1">${ICONS.calendar} <span>${esc(t("บันทึกเข้าปฏิทินมือถือ (.ics)", "Add to Calendar (.ics)"))}</span></button>
-               <button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.edit} <span>${esc(t("เปลี่ยนโปรไฟล์", "Switch Profile"))}</span></button>`
+            ? `<button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.edit} <span>${esc(t("เปลี่ยนโปรไฟล์", "Switch Profile"))}</span></button>`
             : `<button type="button" class="tv-hero-btn is-glass" id="tvHeroProfileBtn" data-tv-focus data-tv-row="1">${ICONS.user} <span>${esc(
                 ROLE === "faculty"
                   ? t("เลือกชื่ออาจารย์ผู้สอน", "Select Faculty Profile")
@@ -1217,13 +1216,6 @@
         } else {
           navigateTvTab("schedule");
         }
-      });
-    }
-
-    const heroSyncBtn = $("tvHeroSyncIcsBtn");
-    if (heroSyncBtn) {
-      heroSyncBtn.addEventListener("click", () => {
-        if (api && api.downloadScheduleIcs) api.downloadScheduleIcs();
       });
     }
 
