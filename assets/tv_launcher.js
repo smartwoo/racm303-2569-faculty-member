@@ -184,9 +184,11 @@
     const backTitle = esc(t("ย้อนกลับ 1 หน้าก่อนหน้านี้", "Go back 1 previous screen"));
     const homeTitle = esc(t("กลับหน้าหลักใหญ่พอร์ทัล RACM 303", "Return to Main RACM 303 Home Page"));
     return (
-      `<div class="${cls}" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">` +
+      `<div class="${cls}" role="navigation" aria-label="${o.onlyBack ? "ปุ่มย้อนกลับ" : "ปุ่มย้อนกลับและหน้าหลักใหญ่"}">` +
       `<button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="${backTitle}"${focusAttr}>${ICONS.back}<span class="racm-unav-lbl">${backLbl}</span></button>` +
-      `<button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="${homeTitle}"${focusAttr}>${ICONS.home}<span class="racm-unav-lbl">${homeLbl}</span></button>` +
+      (o.onlyBack
+        ? ""
+        : `<button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="${homeTitle}"${focusAttr}>${ICONS.home}<span class="racm-unav-lbl">${homeLbl}</span></button>`) +
       `</div>`
     );
   }
@@ -260,7 +262,7 @@
     dock.innerHTML = `
       <div class="tv-nav-capsule" role="navigation" aria-label="เมนูนำทางหลัก">
         <div class="tv-capsule-left-cluster">
-          ${renderUniversalNavPairHtml({ compact: true, tvRow: "0" })}
+          ${renderUniversalNavPairHtml({ compact: true, tvRow: "0", onlyBack: true })}
           <button type="button" class="tv-brand-pill" id="tvBrandHomeBtn" data-tv-focus data-tv-row="0" title="กลับหน้าหลักใหญ่ RACM 303">
             <span class="tv-brand-badge">${ROLE === "faculty" ? "FAC" : "STU"}</span>
             <span class="tv-brand-text">
