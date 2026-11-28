@@ -1308,7 +1308,7 @@ html[data-theme="dark"] .tv-sibling-pill.is-active {
   color: #0c1424;
 }
 
-/* Health Systems 2-Track Switcher (Exam HS1-HS6 vs Non-Exam ST1 & 6 Panels) */
+/* Health Systems 2-Track Switcher (Core Domains HS1-HS6 vs Cross-Cutting & Linking Domains) */
 .tv-sibling-pills.is-hs-track-pills {
   flex-wrap: wrap;
   justify-content: center;
@@ -1320,8 +1320,9 @@ html[data-theme="dark"] .tv-sibling-pill.is-active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 7px 16px;
+  gap: 7px;
+  padding: 7px 14px;
+  font-size: 12.8px;
   white-space: normal;
   text-align: center;
 }
@@ -1334,9 +1335,9 @@ html[data-theme="dark"] .tv-sibling-pill.is-active {
 .tv-sibling-pill.is-hs-track-pill .tv-sib-tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11.4px;
+  font-size: 11.2px;
   font-weight: 700;
   line-height: 1.35;
   transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
@@ -1392,6 +1393,12 @@ html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill.is-active .tv-sib-tag 
   background: rgba(15, 23, 42, 0.12);
   color: #0c1424;
   border-color: rgba(15, 23, 42, 0.18);
+}
+
+@media (max-width: 1180px) {
+  .tv-sibling-pills.is-hs-track-pills {
+    border-radius: 20px;
+  }
 }
 
 @media (max-width: 780px) {

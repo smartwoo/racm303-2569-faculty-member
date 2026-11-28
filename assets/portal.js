@@ -13204,12 +13204,12 @@
         "span",
         isStOrBeyondView
           ? tr(
-              "🌟 ไม่ออกสอบข้อเขียน · สำคัญสำหรับการเรียนรู้และนำเสนอ Final Presentation",
-              "🌟 Not on Written Exam · Essential for Learning & Final Presentation"
+              "🌟 Cross-Cutting & Linking Domains (Workshop & Panel Discussion · 6 คาบ) · ไม่ออกสอบข้อเขียน แต่สำคัญต่อการเรียนรู้ & Final Presentation",
+              "🌟 Cross-Cutting & Linking Domains (Workshops & Panel Discussions · 6 Sessions) · Not on Written Exam, Key for Learning & Final Presentation"
             )
           : tr(
-              "🎯 หมวดเนื้อหาที่ออกสอบข้อเขียน 100% (HS1–HS6 · Open Note A4)",
-              "🎯 100% Written Exam Scope (HS1–HS6 · Open Note A4)"
+              "🎯 Core Domains (บทเรียนหลัก HS1–HS6) · หมวดเนื้อหาที่ออกสอบข้อเขียน 100% (Open Note A4)",
+              "🎯 Core Domains (HS1–HS6) · 100% Written Exam Scope (Open Note A4)"
             ),
         `hs-track-scope-badge ${isStOrBeyondView ? "is-beyond" : "is-exam"}`
       );
@@ -13219,7 +13219,13 @@
       capsule.setAttribute("role", "tablist");
 
       if (isStOrBeyondView) {
-        capsule.setAttribute("aria-label", tr("เลือกคาบคิดเชิงระบบ ST1 และเสวนา 6 คาบ", "Select ST1 & 6 Panel Sessions"));
+        capsule.setAttribute(
+          "aria-label",
+          tr(
+            "เลือกคาบ Workshop & Panel Discussion (Cross-Cutting & Linking Domains)",
+            "Select Workshop & Panel Discussion Session (Cross-Cutting & Linking Domains)"
+          )
+        );
         const allBeyondBtn = make(
           "button",
           tr("รวมทั้ง 6 คาบ", "All 6 Sessions"),
@@ -13231,13 +13237,22 @@
         allBeyondBtn.addEventListener("click", () => openSystemsForum(""));
         capsule.appendChild(allBeyondBtn);
 
+        const sfPillLabels = {
+          "w1-d1-st": tr("1. ST1 · Linking (Systems)", "1. ST1 · Linking"),
+          "w1-d1-global": tr("2. Panel · SBP & Global", "2. Panel · SBP & Global"),
+          "w3-d3-dhs-panel": tr("3. Workshop · เรียนรู้ชุมชน", "3. Workshop · Community"),
+          "w5-d2-cld-ws": tr("4. ST2 Workshop · CLD", "4. ST2 Workshop · CLD"),
+          "w5-d3-panel-homeless": tr("5. Panel · เชื่อม 6BB", "5. Panel · 6BB Equity"),
+          "w5-d4-policy": tr("6. Panel · นโยบาย & สสส.", "6. Panel · Policy")
+        };
+
         (HS_BEYOND_SESSIONS || []).forEach((s) => {
           const isCurSess = isBeyondActive
             ? state.sfSelectedId === s.id
             : s.code === "ST1" && mod.code === "ST1";
           const sBtn = make(
             "button",
-            `${s.order}. ${s.code}`,
+            sfPillLabels[s.id] || `${s.order}. ${s.code}`,
             `hs-seg-pill${isCurSess ? " is-active" : ""}`
           );
           sBtn.type = "button";
@@ -16676,27 +16691,27 @@
       state.sfSelectedId = "";
     }
 
-    // 1. Pedagogical "Why Beyond the Exam Matters" Framing Banner
+    // 1. Pedagogical "Why Cross-Cutting & Linking Domains Matter" Framing Banner
     const whyBanner = make("div", null, "sf-why-banner");
     whyBanner.innerHTML =
       `<div class="sf-why-head">` +
-      `<div class="sf-why-kicker">🧭 BEYOND THE WRITTEN EXAM · 6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6</div>` +
+      `<div class="sf-why-kicker">🧭 CROSS-CUTTING &amp; LINKING DOMAINS · WORKSHOP &amp; PANEL DISCUSSION (6 คาบสำคัญนอกกรอบสอบข้อเขียน)</div>` +
       `<h3 class="sf-why-title">${escapeHtml(
         tr(
-          "ทำไม 6 คาบนี้จึงสำคัญมาก แม้ไม่ได้ออกสอบข้อเขียน HS1–HS6?",
-          "Why These 6 Sessions Matter Deeply Beyond the HS1–HS6 Written Exam"
+          "ทำไม Cross-Cutting & Linking Domains ทั้ง 6 คาบนี้จึงสำคัญต่อการเรียนรู้ & Final Presentation?",
+          "Why These 6 Cross-Cutting & Linking Domain Sessions Are Essential for Learning & Final Presentation"
         )
       )}</h3>` +
       `<p class="sf-why-sub">${escapeHtml(
         ROLE === "faculty"
-          ? "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ประเมินเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 17.5 ชม. นี้คือโครงสร้างที่เชื่อมทฤษฎีสู่ภาคสนาม การให้คำปรึกษากลุ่มย่อย ฟอร์ม 3A และ SRN 1–2"
-          : "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ออกเฉพาะ HS1–HS6 (100%) แต่ 6 คาบสอนสดตลอด 17.5 ชม. นี้ (เช็คชื่อ Onsite ห้อง 2C2-03) คือเลนส์คิดเชิงระบบและประสบการณ์ตรงจากโลกจริงที่ส่งผลต่อภาคสนาม ฟอร์ม 3A และ SRN 1–2"
+          ? "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ประเมินเฉพาะ Core Domains: HS1–HS6 (100%) แต่ทั้ง 6 คาบสอนสด (17.5 ชม.) ในหมวด Cross-Cutting & Linking Domains นี้คือกลไกเชื่อมทฤษฎีสู่ภาคสนาม การให้คำปรึกษากลุ่มย่อย และการนำเสนอ Final Presentation (ฟอร์ม 3A · SRN 1–2)"
+          : "ข้อสอบภาคทฤษฎีแบบ Open Note (22 ธ.ค.) ออกเฉพาะ Core Domains: HS1–HS6 (100%) แต่ทั้ง 6 คาบสอนสด (17.5 ชม. · เช็คชื่อ Onsite) ในหมวด Cross-Cutting & Linking Domains นี้คือเลนส์เชื่อมโยงระบบและประสบการณ์ตรงจากโลกจริงสำหรับภาคสนามและ Final Presentation (ฟอร์ม 3A · SRN 1–2)"
       )}</p>` +
       `</div>` +
       `<div class="sf-why-pillars">` +
-      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🧠</span><div><strong>Systems Thinking &amp; CLD (2 คาบ · 6 ชม.)</strong><span>ปูรากฐาน CAS &amp; Iceberg Model ก่อนเรียน HS1–HS6 และสังเคราะห์ภาคสนามด้วย CLD, System Archetypes &amp; Leverage Points</span></div></div>` +
-      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🎙️</span><div><strong>Panel Discussion &amp; Policy (4 คาบ · 12.5 ชม.)</strong><span>เสวนาสดกับวิทยากรตัวจริงด้าน Global/Planetary Health, HPSR, DHS 6BB+1, สุขภาวะข้างถนน และเศรษฐศาสตร์การเมืองของนโยบาย</span></div></div>` +
-      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🎯</span><div><strong>หัวใจภาคสนาม · ฟอร์ม 3A · SRN 1–2</strong><span>ต่อยอดตรงสู่การลงพื้นที่ 9 โรงพยาบาลชุมชน เกณฑ์นำเสนอฟอร์ม 3A (วิเคราะห์สังเคราะห์ + ปรับกระบวนทัศน์) และการสะท้อนคิด</span></div></div>` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🔗</span><div><strong>Linking Domain · Systems Thinking &amp; CLD Workshop (2 คาบ · 5.5 ชม.)</strong><span>เชื่อมโยงทุกองค์ประกอบของระบบสุขภาพ ปูรากฐาน CAS &amp; Iceberg Model (ST1) ก่อนเรียน HS1–HS6 และสังเคราะห์ข้อมูลภาคสนามด้วย CLD &amp; Leverage Points (ST2)</span></div></div>` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🌐</span><div><strong>Cross-Cutting Domains · Workshop &amp; Panel Discussions (4 คาบ · 13 ชม.)</strong><span>บ่มเพาะทักษะ Learning How to Learn ร่วมกับชุมชน บทบาทแพทย์ SBP &amp; Global/Planetary Health ความเป็นธรรมทางสุขภาพ และการขับเคลื่อนนโยบาย</span></div></div>` +
+      `<div class="sf-why-pillar"><span class="sf-pillar-ico">🎯</span><div><strong>หัวใจของการเรียนรู้ภาคสนาม &amp; Final Presentation (ฟอร์ม 3A · SRN 1–2)</strong><span>ต่อยอดตรงสู่การลงพื้นที่ 9 โรงพยาบาลชุมชน เกณฑ์นำเสนอ Final Presentation ฟอร์ม 3A (วิเคราะห์สังเคราะห์ + ปรับกระบวนทัศน์) และการสะท้อนคิด</span></div></div>` +
       `</div>`;
     stage.appendChild(whyBanner);
 
@@ -16704,8 +16719,8 @@
     const filterBar = make("div", null, "sf-filter-bar");
     const filterDefs = [
       { id: "all", label: tr("ทั้งหมด (6 คาบ · 17.5 ชม.)", "All (6 Sessions · 17.5 hrs)") },
-      { id: "systems", label: tr("🧠 Systems Thinking & Workshop (2 คาบ)", "🧠 Systems Thinking & Workshop (2)") },
-      { id: "panel", label: tr("🎙️ Panel Discussion & Policy (4 คาบ)", "🎙️ Panel Discussion & Policy (4)") }
+      { id: "systems", label: tr("🔗 Linking Domain · Systems & CLD Workshop (2 คาบ)", "🔗 Linking Domain · Systems & CLD Workshop (2)") },
+      { id: "panel", label: tr("🌐 Cross-Cutting · Workshop & Panel Discussion (4 คาบ)", "🌐 Cross-Cutting · Workshop & Panels (4)") }
     ];
     const curFilter = state.sfFilter || "all";
     filterDefs.forEach((fd) => {
@@ -17371,14 +17386,14 @@
             allHeading: sel
               ? `${sel.code}: ${sel.title}`
               : tr(
-                  "คิดเชิงระบบ (ST1) & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6)",
-                  "Systems Thinking (ST1) & Expert Panels (6 Key Sessions Beyond HS1–HS6)"
+                  "Workshop & Panel Discussion · Cross-Cutting & Linking Domains (6 คาบสำคัญ)",
+                  "Workshops & Panel Discussions · Cross-Cutting & Linking Domains (6 Key Sessions)"
                 ),
             allDesc: sel
               ? `${sel.dateTH} (${sel.timeLabel}) · ${sel.speakers} — ${sel.examBadge}`
               : tr(
-                  "รวมคาบปูรากฐาน ST1 (Systems Thinking ครบทั้ง 6 ขั้นตอน: Full · Abridged · Self-Quiz · Slide · กรอบคาบเรียน · VDO Lecture) และเวทีเสวนาสดรวม 17.5 ชม. เชื่อมสู่ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
-                  "Includes foundational ST1 (Systems Thinking 6-step hub) & live panels (17.5 hrs) anchoring Fieldwork, Form 3A & SRN 1–2."
+                  "บูรณาการ Linking Domain (Systems Thinking: ST1 ครบ 6 ขั้นตอน & ST2 CLD Workshop) และ Cross-Cutting Domains ผ่าน Workshop & Panel Discussion รวม 17.5 ชม. เชื่อมสู่ภาคสนาม 9 พื้นที่ การนำเสนอ Final Presentation (ฟอร์ม 3A) และ SRN 1–2",
+                  "Integrates Linking Domain (ST1 & ST2 CLD Workshop) and Cross-Cutting Domains via Workshops & Panel Discussions (17.5 hrs) anchoring Fieldwork, Final Presentation (Form 3A) & SRN 1–2."
                 ),
             onSelectModule: (m) => openTextbookDriveFolder(m || "FOLDERS")
           }
@@ -17419,10 +17434,10 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", "เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
+        make("h3", "Core Domains: เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
         make(
           "span",
-          "เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 Systems Thinking อยู่ในแท็บ คิดเชิงระบบ & เสวนา)",
+          "เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 และเวทีบูรณาการอยู่ในแท็บ Workshop & Panel Discussion · Cross-Cutting & Linking Domains)",
           "tv-shelf-sub"
         )
       );
@@ -17552,13 +17567,13 @@
       shelf.appendChild(grid);
       stage.appendChild(shelf);
 
-      // Companion Banner highlighting ST1 foundational textbook & the 6 taught sessions beyond the HS1–HS6 written exam
+      // Companion Banner highlighting Cross-Cutting & Linking Domains (Workshops & Panel Discussions)
       const beyondBanner = make("div", null, "sf-companion-banner");
       const bCopy = make("div", null, "sf-companion-copy");
       bCopy.append(
-        make("div", "🧭 FOUNDATIONAL & BEYOND THE WRITTEN EXAM · ปูรากฐานคิดเชิงระบบ (ST1) & 6 คาบสอนสำคัญ", "sf-why-kicker"),
-        make("h4", "ST1: แนวคิดเบื้องต้นเกี่ยวกับระบบและการคิดเชิงระบบ & เวทีเสวนาผู้เชี่ยวชาญ (6 คาบ · 17.5 ชม.)"),
-        make("p", "อ่านเอกสารคำสอนคาบปูรากฐาน ST1 (ฉบับเต็ม & ฉบับย่อ · ผศ. นพ.บวรศม ลีระพันธ์ & อ. นพ.ณัฐวุฒิ เอี่ยงธนรัตน์) และดูกรอบคาบ Global/Planetary Health, DHS 6BB+1, Workshop CLD, สุขภาวะข้างถนน และ Policy Exercise")
+        make("div", "🧭 CROSS-CUTTING & LINKING DOMAINS · ไม่ออกสอบข้อเขียน แต่สำคัญต่อการเรียนรู้ & Final Presentation", "sf-why-kicker"),
+        make("h4", "Workshop & Panel Discussion: Linking Domain (ST1 & ST2 CLD) และ Cross-Cutting Domains (6 คาบ · 17.5 ชม.)"),
+        make("p", "อ่านเอกสารคำสอนคาบปูรากฐาน ST1 (ฉบับเต็ม & ฉบับย่อ) พร้อมกรอบคาบ Workshop: Learning How to Learn, ST2 CLD Synthesis และ Panel Discussions (SBP & Global Health, เชื่อม 6BB สุขภาวะข้างถนน, นโยบาย & สสส.)")
       );
       const bActs = make("div", null, "header-actions");
       const bStFull = make("button", "① อ่าน ST1 (ฉบับเต็ม)", "btn sm primary");

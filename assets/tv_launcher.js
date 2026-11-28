@@ -1650,15 +1650,15 @@
           </div>
         </div>
 
-        <!-- SHELF 2B: BEYOND THE EXAM — SYSTEMS THINKING & EXPERT PANELS (6 KEY SESSIONS) -->
+        <!-- SHELF 2B: BEYOND THE EXAM — WORKSHOP & PANEL DISCUSSION (CROSS-CUTTING & LINKING DOMAINS) -->
         ${
           beyondSessions.length
             ? `
-        <div class="tv-shelf" aria-label="เวทีคิดเชิงระบบและเสวนา ST1 และ 6 คาบสำคัญ">
+        <div class="tv-shelf" aria-label="Workshop & Panel Discussion: Cross-Cutting & Linking Domains (6 คาบสำคัญ)">
           <div class="tv-shelf-head">
             <div>
-              <h2 class="tv-shelf-title">${esc(t("🧭 คิดเชิงระบบ (ST1) & เวทีเสวนา (6 คาบสำคัญนอกกรอบสอบ HS1–HS6)", "🧭 Systems Thinking (ST1) & Panels (6 Key Sessions Beyond HS1–HS6)"))}</h2>
-              <span class="tv-shelf-sub">${esc(t("เริ่มจากคาบปูรากฐาน ST1 (Systems Thinking · Full/Abridged/Self-Quiz/Slide/VDO) และเวทีเสวนาสดรวม 17.5 ชม. เชื่อมสู่ภาคสนาม ฟอร์ม 3A และ SRN 1–2", "Starts with foundational ST1 (Systems Thinking 6-step hub) & live panels (17.5 hrs) powering Fieldwork, Form 3A & SRN 1–2"))}</span>
+              <h2 class="tv-shelf-title">${esc(t("🧭 Workshop & Panel Discussion · Cross-Cutting & Linking Domains (6 คาบ)", "🧭 Workshops & Panel Discussions · Cross-Cutting & Linking Domains (6 Sessions)"))}</h2>
+              <span class="tv-shelf-sub">${esc(t("ไม่ออกสอบข้อเขียน · บูรณาการ Linking Domain (Systems Thinking: ST1 & ST2 CLD Workshop) และ Cross-Cutting Domains รวม 17.5 ชม. เชื่อมสู่ภาคสนามและ Final Presentation (ฟอร์ม 3A · SRN 1–2)", "Non-Exam · Integrates Linking Domain (Systems Thinking: ST1 & ST2 CLD) & Cross-Cutting Domains (17.5 hrs) powering Fieldwork & Final Presentation"))}</span>
             </div>
             <div class="tv-shelf-controls">
               <button type="button" class="tv-pill-action-btn" id="tvOpenGlobalPanelScreensaverBtn">${esc(t("🎬 เปิด Slide เสวนา GLOBAL", "🎬 Launch GLOBAL Panel Slides"))}</button>
@@ -2607,14 +2607,19 @@
       bar.classList.add("has-centered-pills");
       bar.innerHTML = `
         <div class="tv-sibling-pills is-hs-track-pills" role="tablist" aria-label="${esc(
-          t("สลับหมวดออกสอบ HS1–HS6 และคาบคิดเชิงระบบ/เสวนา", "Switch Exam-Tested HS1–HS6 and Non-Exam ST1 & Panels")
+          t("สลับหมวด Core Domains (HS1–HS6) และ Cross-Cutting & Linking Domains (Workshop & Panel Discussion)", "Switch Core Domains (HS1–HS6) and Cross-Cutting & Linking Domains (Workshops & Panels)")
         )}">
           <button type="button" class="tv-sibling-pill is-hs-track-pill ${!isStOrBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${!isStOrBeyondActive ? "true" : "false"}" data-tv-hs-track="exam" data-tv-focus>
-            <span class="tv-sib-main">${esc(t("บทเรียน HS1–HS6", "HS1–HS6 Modules"))}</span>
+            <span class="tv-sib-main">${esc(t("บทเรียนหลัก HS1–HS6 · Core Domains", "Core Domains · HS1–HS6"))}</span>
             <span class="tv-sib-tag is-exam">${esc(t("ออกสอบ", "Exam-Tested"))}</span>
           </button>
           <button type="button" class="tv-sibling-pill is-hs-track-pill ${isStOrBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${isStOrBeyondActive ? "true" : "false"}" data-tv-hs-track="beyond" data-tv-focus>
-            <span class="tv-sib-main">${esc(t("คิดเชิงระบบ (ST1) & เสวนา (6 คาบ)", "Systems (ST1) & Panels (6)"))}</span>
+            <span class="tv-sib-main">${esc(
+              t(
+                "Workshop & Panel Discussion · Cross-Cutting & Linking Domains",
+                "Workshops & Panel Discussions · Cross-Cutting & Linking Domains"
+              )
+            )}</span>
             <span class="tv-sib-tag is-beyond">${esc(
               t("ไม่ออกสอบ · สำคัญต่อการเรียนรู้ & Final Presentation", "Non-Exam · Key for Learning & Final Presentation")
             )}</span>
@@ -3409,10 +3414,10 @@
       },
       "health-systems": {
         id: "health-systems",
-        code: "02_ระบบสุขภาพ (HS1–HS6 & เวทีคิดเชิงระบบ)",
-        title: "โฟลเดอร์บทเรียนระบบสุขภาพ HS1–HS6 ตาม Logical Flow 6 ขั้นตอน พร้อมโฟลเดอร์คิดเชิงระบบ (ST1) & เสวนา 6 คาบสำคัญ",
-        meta: "6 โฟลเดอร์บทเรียน (HS1–HS6) + 1 โฟลเดอร์เวทีคิดเชิงระบบ (ST1) & เสวนา (6 คาบ)",
-        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case Discussion", "⑥ VDO Lecture", "🧭 ST1 & เสวนา"],
+        code: "02_ระบบสุขภาพ (Core Domains HS1–HS6 & Cross-Cutting / Linking Domains)",
+        title: "โฟลเดอร์บทเรียนหลัก Core Domains (HS1–HS6) ตาม Logical Flow 6 ขั้นตอน พร้อมโฟลเดอร์ Workshop & Panel Discussion (Cross-Cutting & Linking Domains 6 คาบ)",
+        meta: "6 โฟลเดอร์ Core Domains (HS1–HS6 · ออกสอบ) + 1 โฟลเดอร์ Cross-Cutting & Linking Domains (6 คาบ · ไม่ออกสอบ)",
+        tags: ["① Full", "② Abridged", "③ Self-Quiz", "④ Slide อาจารย์", "⑤ Case Discussion", "⑥ VDO Lecture", "🧭 Cross-Cutting & Linking"],
         subfolders: [
           ...modules.map((m) => ({
             id: m.id,
@@ -3424,11 +3429,11 @@
           })),
           {
             id: "systems-forum",
-            code: "07_เวทีคิดเชิงระบบและเสวนา (รวม ST1)",
-            title: "Systems Thinking (ST1 · Full/Abridged/Self-Quiz/Slide/VDO), CLD Workshop & Expert Panels",
+            code: "07_Cross-Cutting & Linking Domains (Workshop & Panel Discussion · 6 คาบ)",
+            title: "Linking Domain (Systems Thinking: ST1 & ST2 CLD Workshop) & Cross-Cutting Domains (Learning How to Learn & Panel Discussions)",
             examWeight: "",
-            customPill: "ST1 + 5 เวที",
-            customTags: ["📘 ST1 รากฐาน 6 ขั้น", "🧠 Systems & CLD", "🎙️ Expert Panels", "📋 ฟอร์ม 3A · SRN"],
+            customPill: "Workshop & Panel (6 คาบ)",
+            customTags: ["🔗 Linking: ST1 & ST2 CLD", "🌐 Cross-Cutting Domains", "🛠️ Workshops", "🎙️ Panel Discussions"],
             meta: "สัปดาห์ที่ 1, 3, 5 · 17.5 ชม. (รวมคาบ ST1 Systems Thinking · เช็คชื่อ Onsite)",
             files: [
               ...(api && api.getHsModuleMeta ? buildHsModuleFiles(api.getHsModuleMeta("ST1")) : []),
