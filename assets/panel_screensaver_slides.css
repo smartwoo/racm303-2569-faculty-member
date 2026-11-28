@@ -1438,7 +1438,7 @@ body.psv-deck-open {
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  max-width: 440px;
+  max-width: 480px;
   text-align: center;
 }
 
@@ -1459,17 +1459,19 @@ body.psv-deck-open {
 .psv-qr-url-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 700;
-  color: #7dd3fc;
+  color: #7dd3fc !important;
   text-decoration: none;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.34);
   transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
-  word-break: break-all;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .psv-qr-url-link:hover {
@@ -3248,9 +3250,9 @@ body.psv-deck-open {
   appearance: none;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(15, 23, 42, 0.8);
-  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(15, 23, 42, 0.88) !important;
+  color: #f1f5f9 !important;
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -3259,9 +3261,9 @@ body.psv-deck-open {
 }
 
 .psv-qac-target-chip.is-selected {
-  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
-  border-color: #7dd3fc;
-  color: #04111f;
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%) !important;
+  border-color: #7dd3fc !important;
+  color: #04111f !important;
   font-weight: 800;
 }
 
