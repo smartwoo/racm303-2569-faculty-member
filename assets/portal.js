@@ -19863,14 +19863,1027 @@
       ? items
           .map(
             (r) => `
-        <article class="data-card editorial-prose">
-          <h3><span class="badge cat-HS" style="margin-right:8px">${escapeHtml(r.module)}</span>${escapeHtml(r.moduleTitle)}</h3>
+        <article class="data-card editorial-prose rr-module-card" data-rr-module="${escapeHtml(r.module)}">
+          <div class="rr-card-head">
+            <h3><span class="badge cat-HS" style="margin-right:8px">${escapeHtml(r.module)}</span>${escapeHtml(r.moduleTitle)}</h3>
+            <span class="rr-card-hint hsd-no-print">💡 คลิกปุ่มหัวข้อหรือตัวอย่างในบทเพื่อเปิดอ่านและไฮไลต์เนื้อหาส่วนที่เกี่ยวข้องทันที</span>
+          </div>
           ${r.html}
         </article>`
           )
           .join("")
       : `<div class="empty-state">ไม่พบตารางทบทวนเร็วที่ตรงกับคำค้นหา</div>`;
+
+    enhanceRapidReviewTablesInRoot(container, { sourceType: "practice" });
   }
+
+  /* ---------- Rapid Review Deep-Link Segmentation & Context Passage Highlighting ---------- */
+  const RR_LINK_ICON_SVG =
+    '<svg class="rr-btn-ico hsd-no-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
+  const RR_STOP_WORDS = new Set([
+    "การ", "ความ", "ใน", "ของ", "และ", "หรือ", "ที่", "เป็น", "มี", "ได้", "ให้", "จาก", "กับ",
+    "โดย", "ต่อ", "ตาม", "เพื่อ", "ซึ่ง", "จะ", "ไม่", "แต่", "ว่า", "ก็", "ทั้ง", "เช่น", "คือ",
+    "อย่าง", "ไป", "มา", "อยู่", "ขึ้น", "ลง", "เข้า", "ออก", "ถึง", "กว่า", "สุด", "มาก", "น้อย",
+    "ผู้", "คน", "สิ่ง", "ด้าน", "ระดับ", "กลุ่ม", "ระบบ", "บริการ", "สุขภาพ", "ผู้ป่วย", "แพทย์",
+    "บท", "หัวข้อ", "ภาพที่", "ตารางที่", "กรณี", "ศึกษา", "ส่วน", "แบบ", "ใช้", "ทำ", "เกิด",
+    "ผล", "ตัว", "ในบท", "เกี่ยวกับ", "นำไปใช้", "สามารถ", "ต้อง", "ควร", "อาจ", "เมื่อ", "หลัง"
+  ]);
+
+  const RR_GENERIC_MARK_PHRASES = new Set([
+    "การป้องกัน", "การดูแล", "การรักษา", "บริการสุขภาพ", "ระบบสุขภาพ", "ระบบบริการ",
+    "ผู้ป่วยที่", "ผู้ที่มี", "ในประชากร", "ของประชากร", "ในชุมชน", "โรงพยาบาล",
+    "ความเสี่ยง", "ผลตรวจ", "ระดับที่", "องค์ประกอบ", "ปัจจัยกำหนด"
+  ]);
+
+  let activeRrReturnState = null;
+
+  function buildCleanRapidReviewExportHtml(wrapEl) {
+    if (!wrapEl) return "";
+    const clone = wrapEl.cloneNode(true);
+    clone.querySelectorAll(".hsd-no-print, .rr-btn-ico, .rr-btn-arrow, .rr-topic-arrow").forEach((n) => n.remove());
+    clone.querySelectorAll(".rr-chip-list").forEach((listEl) => {
+      const labels = [...listEl.querySelectorAll(".rr-jump-btn")]
+        .map((b) => (b.textContent || "").replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      listEl.replaceWith(document.createTextNode(labels.join("; ")));
+    });
+    clone.querySelectorAll(".rr-topic-jump-link, .rr-inline-jump-link").forEach((a) => {
+      a.replaceWith(document.createTextNode((a.textContent || "").trim()));
+    });
+    return clone.innerHTML;
+  }
+
+  function splitRapidReviewExampleItems(cellEl) {
+    if (!cellEl) return [];
+    const anchorMap = new Map();
+    cellEl.querySelectorAll('a[href^="#"]').forEach((a) => {
+      const lbl = (a.textContent || "").replace(/\s+/g, " ").trim();
+      const href = (a.getAttribute("href") || "").replace(/^#+/, "").trim();
+      if (lbl && href) anchorMap.set(lbl, href);
+    });
+
+    const clean = (cellEl.textContent || "").replace(/\s+/g, " ").trim();
+    if (!clean) return [];
+
+    const semiParts = clean
+      .split(/\s*;\s*/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const out = [];
+    semiParts.forEach((sp) => {
+      let s = sp;
+      s = s.replace(
+        /(ภาพที่\s*\d+[ก-ฮ]?(?:[–-]\d+[ก-ฮ]?)?)\s*(?:,\s*|\s+และ\s*|\s+)(?=(?:ภาพที่|ตารางที่|หัวข้อ)\s*\d+)/g,
+        "$1 ||| "
+      );
+      s = s.replace(
+        /(ภาพที่\s*\d+[ก-ฮ]?(?:\s*\([^)]+\))?)\s+และ\s*(?=(?:การ|ผู้|ตาราง|หลักฐาน|บรรยากาศ|วงเสริมแรง|เส้นทาง|ทีมหมอ|คลินิก))/g,
+        "$1 ||| "
+      );
+      s = s.replace(
+        /(ภาพที่\s*\d+[ก-ฮ]?)\s+(?=(?:บรรยากาศ|ภาษีน้ำตาล|การงดตรวจ))/g,
+        "$1 ||| "
+      );
+      s = s.replace(
+        /\s+และ(?=(?:ตารางที่\s*\d+|ภาพที่\s*\d+|หัวข้อ\s*\d+|อาการ|ผู้ที่|ผู้ป่วย|ผู้สูงอายุ|การ(?:งด|ตรวจ|ฟื้นฟู|ดูแล|ตัดสินใจ|ออกแบบ|ห้าม|ควบคุม|จัดสรร|ปฏิรูป|เสริมพลัง|พัฒนา|โยกงบ|ให้ผู้ป่วย|ประเมิน)|คลินิก|บทเรียน|เครือข่าย|ระบบชีววิทยา|ประกันแรงงาน|คำถามวิจัย|อาคารรองรับ))/g,
+        " ||| "
+      );
+      s = s.replace(/\s+ควบคู่กับการ(?=ปฏิรูประบบ)/g, " ||| การ");
+      s = s.replace(/\s+ส่วน(?=เบี้ยประกันเอกชน)/g, " ||| ");
+      s = s.replace(
+        /(\S)\s+(?=(?:การ(?:งดตรวจ|งดใช้|ปรับพฤติกรรมและวิถีชีวิต|ตรวจสุขภาพตามความเสี่ยง|ฟื้นฟูสมรรถภาพ|ดูแลแบบประคับประคอง|ดูแลประคับประคอง|ประเมินก่อนกลับเข้าทำงาน|ห้ามใช้ไขมันทรานส์|คัดกรองตามหลักฐาน|ผ่าตัดไส้เลื่อน|ฉีดวัคซีน)|งดตรวจซีรัมเฟอร์ริทิน|วัคซีนและควบคุมสิ่งคุกคามในงาน|หลักโยนิโสมนสิการ|กระบวนการทางวิทยาศาสตร์|เครือข่ายแพทย์พื้นบ้าน|ผู้ป่วยตอบสนองต่อคิวห้องฉุกเฉิน|อาสาสมัครภัยสึนามิ))/g,
+        "$1 ||| "
+      );
+      s = s.replace(
+        /,\s*(?=(?:SSS\s+\d|CSMBS\s+\d|พนักงานท้องถิ่น\s+\d|พ\.ร\.บ\.\s*รถ))/g,
+        " ||| "
+      );
+
+      s.split(/\s*\|\|\|\s*/).forEach((piece) => {
+        const pt = piece.replace(/^[,;\s]+|[,;\s]+$/g, "").trim();
+        if (!pt) return;
+        let explicitAnchor = anchorMap.get(pt) || "";
+        if (!explicitAnchor) {
+          for (const [k, v] of anchorMap.entries()) {
+            if (pt.includes(k) || k.includes(pt)) {
+              explicitAnchor = v;
+              break;
+            }
+          }
+        }
+        out.push({ label: pt, explicitAnchor });
+      });
+    });
+
+    return out;
+  }
+
+  function enhanceInlineRefsInSummaryCell(cellEl, baseMeta) {
+    if (!cellEl || cellEl.dataset.rrSummaryWired === "1") return;
+    cellEl.dataset.rrSummaryWired = "1";
+    const refRe = /(ภาพที่\s*\d+[ก-ฮ]?(?:[–-]\d+[ก-ฮ]?)?|ตารางที่\s*\d+|หัวข้อ(?:ที่|ย่อย)?\s*\d+(?:\.\d+)*)/g;
+    const walker = document.createTreeWalker(cellEl, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue || !refRe.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+        refRe.lastIndex = 0;
+        const p = node.parentElement;
+        if (p && p.closest && p.closest("a, button")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const textNodes = [];
+    let cur;
+    while ((cur = walker.nextNode())) textNodes.push(cur);
+
+    textNodes.forEach((tNode) => {
+      const raw = tNode.nodeValue || "";
+      refRe.lastIndex = 0;
+      let lastIdx = 0;
+      let m;
+      const frag = document.createDocumentFragment();
+      let changed = false;
+      while ((m = refRe.exec(raw)) !== null) {
+        if (m.index > lastIdx) {
+          frag.appendChild(document.createTextNode(raw.slice(lastIdx, m.index)));
+        }
+        const refLabel = m[1].trim();
+        const a = document.createElement("a");
+        a.href = `#rr-jump-${encodeURIComponent(baseMeta.modCode)}`;
+        a.className = "rr-inline-jump-link";
+        a.title = `เปิดและไฮไลต์ "${refLabel}" ในบทเรียน`;
+        a.setAttribute(
+          "data-rr-jump",
+          JSON.stringify({
+            ...baseMeta,
+            kind: "inline-ref",
+            itemText: refLabel,
+            explicitAnchor: ""
+          })
+        );
+        a.textContent = refLabel;
+        const arr = document.createElement("span");
+        arr.className = "rr-btn-arrow hsd-no-print";
+        arr.setAttribute("aria-hidden", "true");
+        arr.textContent = "↗";
+        a.appendChild(arr);
+        frag.appendChild(a);
+        lastIdx = m.index + m[0].length;
+        changed = true;
+      }
+      if (changed) {
+        if (lastIdx < raw.length) frag.appendChild(document.createTextNode(raw.slice(lastIdx)));
+        tNode.replaceWith(frag);
+      }
+    });
+  }
+
+  function inferModuleCodeForRapidTable(tableEl, opts) {
+    if (opts && opts.modCode) return String(opts.modCode).toUpperCase();
+    const card = tableEl.closest ? tableEl.closest("[data-rr-module]") : null;
+    if (card && card.dataset.rrModule) return String(card.dataset.rrModule).toUpperCase();
+    const docId = (opts && opts.sourceDocId) || state.activeDocId || "";
+    if (docId) {
+      const parsed = parseHsDocInfo(docId);
+      if (parsed && parsed.modCode) return String(parsed.modCode).toUpperCase();
+    }
+    return "";
+  }
+
+  function isRapidReviewTableElement(tableEl, sourceType) {
+    if (!tableEl) return false;
+    if (sourceType === "practice") return true;
+    const ths = [...tableEl.querySelectorAll("thead th, tr:first-child th")].map((th) =>
+      (th.textContent || "").replace(/\s+/g, " ").trim()
+    );
+    if (ths.length < 3) return false;
+    const h0 = ths[0] || "";
+    const h1 = ths[1] || "";
+    const h2 = ths[2] || "";
+    return (
+      h0 === "ประเด็น" &&
+      h1.includes("สาระสำคัญ") &&
+      (h2.includes("ตัวอย่าง") || h2.includes("การนำไปใช้"))
+    );
+  }
+
+  function enhanceRapidReviewTablesInRoot(rootEl, opts) {
+    if (!rootEl || !rootEl.querySelectorAll) return;
+    const o = opts || {};
+    const sourceType = o.sourceType || "practice";
+
+    rootEl.querySelectorAll("table").forEach((tableEl, tblIdx) => {
+      if (tableEl.dataset.rrEnhanced === "1") return;
+      if (!isRapidReviewTableElement(tableEl, sourceType)) return;
+      const modCode = inferModuleCodeForRapidTable(tableEl, o);
+      if (!modCode) return;
+
+      tableEl.dataset.rrEnhanced = "1";
+      tableEl.classList.add("rr-interactive-table");
+
+      const bodyRows = [...tableEl.querySelectorAll("tbody tr")];
+      const rows = bodyRows.length ? bodyRows : [...tableEl.querySelectorAll("tr")].slice(1);
+      const totalRows = rows.length || 1;
+      const sourceDocId = o.sourceDocId || "";
+
+      rows.forEach((tr, idx) => {
+        const tds = [...tr.querySelectorAll("td")];
+        if (tds.length < 3) return;
+
+        const rowNum = idx + 1;
+        const rowId =
+          tr.id ||
+          `rr-${sourceType}-${(sourceDocId || modCode).toLowerCase().replace(/[^a-z0-9_-]/g, "")}-t${tblIdx}-r${rowNum}`;
+        tr.id = rowId;
+
+        const topicPlain = (tds[0].textContent || "").replace(/\s+/g, " ").trim();
+        const summaryPlain = (tds[1].textContent || "").replace(/\s+/g, " ").trim();
+        const refPlain = tds[3] ? (tds[3].textContent || "").replace(/\s+/g, " ").trim() : "";
+
+        const baseMeta = {
+          modCode,
+          topicText: topicPlain,
+          summaryText: summaryPlain.slice(0, 320),
+          refText: refPlain.slice(0, 220),
+          rowIndex: rowNum,
+          totalRows,
+          sourceType,
+          sourceDocId,
+          sourceRowId: rowId
+        };
+
+        // 1. Make Col 0 (ประเด็น) clickable to jump & highlight the section
+        if (topicPlain && !tds[0].querySelector("[data-rr-jump]")) {
+          const topicLink = document.createElement("a");
+          topicLink.href = `#rr-topic-${encodeURIComponent(modCode)}-${rowNum}`;
+          topicLink.className = "rr-topic-jump-link";
+          topicLink.title = `คลิกเพื่อเปิดอ่านและไฮไลต์หัวข้อ "${topicPlain}" ในบทเรียน`;
+          topicLink.setAttribute(
+            "data-rr-jump",
+            JSON.stringify({
+              ...baseMeta,
+              kind: "topic",
+              itemText: topicPlain,
+              explicitAnchor: ""
+            })
+          );
+          while (tds[0].firstChild) {
+            topicLink.appendChild(tds[0].firstChild);
+          }
+          const tArr = document.createElement("span");
+          tArr.className = "rr-topic-arrow hsd-no-print";
+          tArr.setAttribute("aria-hidden", "true");
+          tArr.textContent = "↗";
+          topicLink.appendChild(tArr);
+          tds[0].appendChild(topicLink);
+        }
+
+        // 2. Make explicit inline refs in Col 1 (สาระสำคัญ) clickable
+        enhanceInlineRefsInSummaryCell(tds[1], baseMeta);
+
+        // 3. Segment Col 2 (ตัวอย่างในบท / ตัวอย่างหรือการนำไปใช้) into hyperlink pill buttons
+        const segments = splitRapidReviewExampleItems(tds[2]);
+        if (segments.length) {
+          const listWrap = document.createElement("div");
+          listWrap.className = "rr-chip-list";
+          segments.forEach((seg) => {
+            const btn = document.createElement("a");
+            btn.href = seg.explicitAnchor
+              ? `#${seg.explicitAnchor}`
+              : `#rr-ex-${encodeURIComponent(modCode)}-${rowNum}`;
+            btn.className = "rr-jump-btn";
+            btn.title = `คลิกเพื่อเปิดอ่านและไฮไลต์ "${seg.label}" ในเนื้อหาบทเรียน`;
+            btn.setAttribute(
+              "data-rr-jump",
+              JSON.stringify({
+                ...baseMeta,
+                kind: "example",
+                itemText: seg.label,
+                explicitAnchor: seg.explicitAnchor || ""
+              })
+            );
+            btn.innerHTML =
+              RR_LINK_ICON_SVG +
+              `<span class="rr-btn-lbl">${escapeHtml(seg.label)}</span>` +
+              `<span class="rr-btn-arrow hsd-no-print" aria-hidden="true">↗</span>`;
+            listWrap.appendChild(btn);
+          });
+          tds[2].replaceChildren(listWrap);
+        }
+      });
+    });
+  }
+
+  function extractRrQueryFeatures(text, includeFiveGrams) {
+    const clean = String(text || "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/[()[\]"'“”‘’,.;:/\\•\-–—]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const feats = [];
+    const seen = new Set();
+    const pushFeat = (tok, weight) => {
+      const k = tok.toLowerCase();
+      if (!k || k.length < 2 || RR_STOP_WORDS.has(k) || seen.has(k)) return;
+      seen.add(k);
+      feats.push({ tok: k, weight });
+    };
+
+    (clean.match(/[A-Za-z][A-Za-z0-9-]{1,}|\d+(?:\.\d+)?/g) || []).forEach((w) => {
+      pushFeat(w, /^[A-Z0-9-]{2,}$/.test(w) ? 1.35 : 1.15);
+    });
+
+    (clean.match(/[\u0E00-\u0E7F]{3,}/g) || []).forEach((thChunk) => {
+      if (thChunk.length <= 18) pushFeat(thChunk, 1.25);
+      const stripped = thChunk.replace(/^(?:การ|ความ|ผู้ที่|ผู้ป่วยที่|ผู้สูงอายุที่มี|อาการในช่วง|อาการ)/, "");
+      if (stripped.length >= 4 && stripped !== thChunk) {
+        pushFeat(stripped, 1.3);
+      }
+      if (includeFiveGrams && thChunk.length >= 5) {
+        const step = thChunk.length > 14 ? 2 : 1;
+        for (let i = 0; i <= thChunk.length - 5; i += step) {
+          const gram = thChunk.slice(i, i + 5);
+          if (!RR_GENERIC_MARK_PHRASES.has(gram)) {
+            pushFeat(gram, 0.85);
+          }
+        }
+      }
+    });
+
+    return feats;
+  }
+
+  function clearRapidReviewHighlights(rootScope) {
+    const scope = rootScope || document;
+    scope.querySelectorAll(".rr-jump-banner").forEach((b) => b.remove());
+    scope.querySelectorAll("mark.rr-inline-highlight").forEach((m) => {
+      const parent = m.parentNode;
+      m.replaceWith(document.createTextNode(m.textContent || ""));
+      if (parent && parent.normalize) parent.normalize();
+    });
+    scope
+      .querySelectorAll(".rr-jump-target-active, .rr-jump-target-secondary, .rr-jump-pulse")
+      .forEach((el) => {
+        el.classList.remove("rr-jump-target-active", "rr-jump-target-secondary", "rr-jump-pulse");
+      });
+  }
+
+  function snapThaiSubstringBounds(str, startIdx, endIdx) {
+    const isCombining = (ch) => /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(ch || "");
+    const isLeadingVowel = (ch) => /[\u0E40-\u0E44]/.test(ch || "");
+    let s = startIdx;
+    let e = endIdx;
+    while (s < e && isCombining(str[s])) s++;
+    while (e > s && isLeadingVowel(str[e - 1])) e--;
+    while (e < str.length && isCombining(str[e])) e++;
+    return [s, e];
+  }
+
+  function computeHighlightPhrasesForTarget(targetEl, itemText, topicText) {
+    const targetTxt = (targetEl && targetEl.textContent) || "";
+    if (!targetTxt) return [];
+    const targetLower = targetTxt.toLowerCase();
+    const source = /^หัวข้อ/.test(itemText || "") ? `${topicText || ""} ${itemText || ""}` : `${itemText || ""}`;
+    const cleanQ = source.replace(/\s+/g, " ").trim();
+    const candidates = new Set();
+
+    // 1. English technical terms / numbers present in target
+    (cleanQ.match(/[A-Za-z][A-Za-z0-9-]{2,}|\d+(?:\.\d+)?/g) || []).forEach((w) => {
+      if (targetLower.includes(w.toLowerCase()) && !RR_STOP_WORDS.has(w.toLowerCase())) {
+        candidates.add(w);
+      }
+    });
+
+    // 2. Maximal common Thai/mixed substrings (>= 5 chars) between query and target
+    let i = 0;
+    while (i < cleanQ.length) {
+      if (/[\s()[\],.;:/\\\-–—]/.test(cleanQ[i])) {
+        i++;
+        continue;
+      }
+      let bestLen = 0;
+      const maxLen = Math.min(48, cleanQ.length - i);
+      for (let len = 5; len <= maxLen; len++) {
+        const sub = cleanQ.slice(i, i + len).toLowerCase();
+        if (targetLower.includes(sub)) {
+          bestLen = len;
+        } else {
+          break;
+        }
+      }
+      if (bestLen >= 5) {
+        const [s, e] = snapThaiSubstringBounds(cleanQ, i, i + bestLen);
+        const snapped = cleanQ.slice(s, e).replace(/^[\s,.;:()]+|[\s,.;:()]+$/g, "").trim();
+        if (
+          snapped.length >= 5 &&
+          !RR_STOP_WORDS.has(snapped.toLowerCase()) &&
+          !RR_GENERIC_MARK_PHRASES.has(snapped)
+        ) {
+          candidates.add(snapped);
+        }
+        i += Math.max(1, bestLen);
+      } else {
+        i++;
+      }
+    }
+
+    // Fallback to topicText substrings if example was heavily paraphrased
+    if (!candidates.size && topicText) {
+      const cleanT = String(topicText).replace(/\s+/g, " ").trim();
+      (cleanT.match(/[A-Za-z][A-Za-z0-9-]{2,}|[\u0E00-\u0E7F]{5,}/g) || []).forEach((w) => {
+        if (targetLower.includes(w.toLowerCase()) && !RR_GENERIC_MARK_PHRASES.has(w)) {
+          candidates.add(w);
+        }
+      });
+    }
+
+    return [...candidates]
+      .sort((a, b) => b.length - a.length)
+      .slice(0, 7);
+  }
+
+  function highlightMatchingPhrasesInElement(targetEl, itemText, topicText) {
+    if (!targetEl) return;
+    const phrases = computeHighlightPhrasesForTarget(targetEl, itemText, topicText);
+    if (!phrases.length) return;
+
+    const escapedAlts = phrases
+      .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .filter(Boolean);
+    if (!escapedAlts.length) return;
+    const matchRe = new RegExp(`(${escapedAlts.join("|")})`, "gi");
+
+    const walker = document.createTreeWalker(targetEl, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p = node.parentElement;
+        if (
+          p &&
+          p.closest &&
+          p.closest(".rr-jump-banner, .sec-kt-bar, .doc-kt-overview-bar, script, style, mark.rr-inline-highlight")
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        matchRe.lastIndex = 0;
+        return matchRe.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    const nodes = [];
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+
+    nodes.forEach((tNode) => {
+      const txt = tNode.nodeValue || "";
+      matchRe.lastIndex = 0;
+      let lastIdx = 0;
+      let m;
+      const frag = document.createDocumentFragment();
+      let didMark = false;
+
+      while ((m = matchRe.exec(txt)) !== null) {
+        let mStart = m.index;
+        let mEnd = m.index + m[0].length;
+        if (mStart < lastIdx) continue;
+        while (mEnd < txt.length && /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(txt[mEnd])) {
+          mEnd++;
+        }
+        if (mEnd > matchRe.lastIndex) matchRe.lastIndex = mEnd;
+        if (mStart > lastIdx) {
+          frag.appendChild(document.createTextNode(txt.slice(lastIdx, mStart)));
+        }
+        const mark = document.createElement("mark");
+        mark.className = "rr-inline-highlight";
+        mark.textContent = txt.slice(mStart, mEnd);
+        frag.appendChild(mark);
+        lastIdx = mEnd;
+        didMark = true;
+      }
+
+      if (didMark) {
+        if (lastIdx < txt.length) frag.appendChild(document.createTextNode(txt.slice(lastIdx)));
+        tNode.replaceWith(frag);
+      }
+    });
+  }
+
+  function findBestPassageInProse(proseContainer, payload) {
+    if (!proseContainer || !payload) return null;
+    const itemText = String(payload.itemText || "").trim();
+    const topicText = String(payload.topicText || "").trim();
+    const summaryText = String(payload.summaryText || "").trim();
+    const refText = String(payload.refText || "").trim();
+    const rowRatio = Math.min(1, Math.max(0, (Number(payload.rowIndex) || 1) / Math.max(1, Number(payload.totalRows) || 1)));
+
+    // 1. Determine tail cutoffs so Rapid Review never matches itself or glossary/references
+    const allHeadings = [...proseContainer.querySelectorAll("h2, h3, h4")];
+    let tailCutoffEl = null;
+    let summaryCutoffEl = null;
+    allHeadings.forEach((h) => {
+      const ht = (h.textContent || "").replace(/\s+/g, " ").trim();
+      if (!tailCutoffEl && /^(?:ตารางทบทวนสาระสำคัญ|Rapid Review|คำศัพท์สำคัญ|แบบทบทวนความรู้ด้วยตนเอง|แนวคำตอบ|เอกสารอ้างอิง)/i.test(ht)) {
+        tailCutoffEl = h;
+      }
+      if (!summaryCutoffEl && /^บทสรุป\b/.test(ht)) {
+        summaryCutoffEl = h;
+      }
+    });
+
+    const isBefore = (el, boundary) => {
+      if (!boundary) return true;
+      if (el === boundary || boundary.contains(el)) return false;
+      return Boolean(el.compareDocumentPosition(boundary) & Node.DOCUMENT_POSITION_FOLLOWING);
+    };
+
+    const isIgnoredUiNode = (el) =>
+      Boolean(
+        el.closest &&
+          el.closest(
+            ".doc-kt-overview-bar, .sec-kt-bar, .hs-flow-next-banner, .rr-jump-banner, .rr-interactive-table"
+          )
+      );
+
+    const nextContentAfterHeading = (hEl) => {
+      let sib = hEl ? hEl.nextElementSibling : null;
+      const picked = [];
+      while (sib && picked.length < 2) {
+        if (/^H[1-4]$/i.test(sib.tagName)) break;
+        if (!sib.classList.contains("sec-kt-bar") && !sib.classList.contains("doc-kt-overview-bar")) {
+          picked.push(sib);
+        }
+        sib = sib.nextElementSibling;
+      }
+      return picked;
+    };
+
+    // Priority A: Explicit anchor ID
+    if (payload.explicitAnchor) {
+      const escId = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(payload.explicitAnchor) : payload.explicitAnchor;
+      const anchorEl = proseContainer.querySelector(`#${escId}`);
+      if (anchorEl && isBefore(anchorEl, tailCutoffEl)) {
+        return {
+          primaryEl: anchorEl,
+          secondaryEls: /^H[1-4]$/i.test(anchorEl.tagName) ? nextContentAfterHeading(anchorEl) : []
+        };
+      }
+    }
+
+    const activeBoundary = summaryCutoffEl || tailCutoffEl;
+    const bodyHeadings = allHeadings.filter((h) => isBefore(h, activeBoundary) && !isIgnoredUiNode(h));
+
+    // Priority B: Explicit Heading Number (e.g. "หัวข้อ 1.2.2", "หัวข้อที่ 2", "ในหัวข้อ 3.2")
+    const secMatch = itemText.match(/หัวข้อ(?:ย่อย|ที่)?\s*(\d+(?:\.\d+)*)/);
+    if (secMatch) {
+      const secNum = secMatch[1];
+      const secEsc = secNum.replace(/\./g, "\\.");
+      const numRe = new RegExp(`^\\(?${secEsc}\\)?(?:\\.|\\s|$)`);
+      const matchedH = bodyHeadings.find((h) => {
+        const numSpan = h.querySelector ? h.querySelector(".h-num, .h2-num") : null;
+        const numTxt = ((numSpan ? numSpan.textContent : h.textContent) || "").trim();
+        return numRe.test(numTxt);
+      });
+      if (matchedH) {
+        if (/^ตาราง/.test(itemText)) {
+          let cur = matchedH.nextElementSibling;
+          while (cur && !/^H[1-3]$/i.test(cur.tagName)) {
+            if (cur.classList.contains("table-scroll") || cur.tagName === "TABLE") {
+              return { primaryEl: cur, secondaryEls: [] };
+            }
+            const innerTbl = cur.querySelector && cur.querySelector(".table-scroll, table");
+            if (innerTbl) return { primaryEl: innerTbl, secondaryEls: [] };
+            cur = cur.nextElementSibling;
+          }
+        }
+        return { primaryEl: matchedH, secondaryEls: nextContentAfterHeading(matchedH) };
+      }
+    }
+
+    // Priority C: Explicit Figure Reference (e.g. "ภาพที่ 1", "ภาพที่ 10ก", "ภาพที่ 13ก–13ค", "ตาบอดคลำช้าง (ภาพที่ 5)")
+    const figMatch = itemText.match(/ภาพที่\s*(\d+)([ก-ฮ])?(?:\s*[–-]\s*(?:ภาพที่\s*)?(\d+)?([ก-ฮ]))?/);
+    if (figMatch) {
+      const fNum = figMatch[1];
+      const fSub = figMatch[2] || "";
+      const fEndSub = figMatch[4] || "";
+      const figures = [...proseContainer.querySelectorAll("figure")].filter((f) => isBefore(f, tailCutoffEl));
+      const exactRe = new RegExp(`ภาพที่\\s*${fNum}${fSub ? fSub : "(?:[ก-ฮ]|\\b|[^0-9])"}`);
+      const matchedFigs = figures.filter((fig) => {
+        const cap = (fig.textContent || "") + " " + ((fig.querySelector("img") && fig.querySelector("img").alt) || "");
+        return exactRe.test(cap);
+      });
+      if (matchedFigs.length) {
+        const primaryFig = matchedFigs[0];
+        const secondaryEls = matchedFigs.slice(1);
+        if (fEndSub && fSub) {
+          const rangeFigs = figures.filter((fig) => {
+            const m = (fig.textContent || "").match(new RegExp(`ภาพที่\\s*${fNum}([ก-ฮ])`));
+            return m && m[1] >= fSub && m[1] <= fEndSub && fig !== primaryFig;
+          });
+          rangeFigs.forEach((rf) => {
+            if (!secondaryEls.includes(rf)) secondaryEls.push(rf);
+          });
+        }
+        // If item also describes prose before "(ภาพที่ N)", highlight adjacent matching paragraph/bullet too
+        const prefixConcept = itemText.replace(/\(?\s*ภาพที่\s*\d+[^)]*\)?/g, "").trim();
+        if (prefixConcept.length >= 6 && !/^กรอบ|^ความต่อเนื่อง|^เป้าหมาย|^เส้นทาง/.test(prefixConcept)) {
+          const prevEl = primaryFig.previousElementSibling;
+          if (prevEl && /^(P|UL|OL|BLOCKQUOTE)$/i.test(prevEl.tagName)) {
+            secondaryEls.unshift(prevEl);
+          }
+        }
+        return { primaryEl: primaryFig, secondaryEls };
+      }
+    }
+
+    // Priority D: Explicit Table Reference (e.g. "ตารางที่ 1", "ตารางที่ 2", "ตารางเทียบระบบ Service Plan...")
+    const tblNumMatch = itemText.match(/ตารางที่\s*(\d+)/);
+    if (tblNumMatch || /^ตาราง(?:เทียบ|ลำดับ|เปรียบเทียบ)/.test(itemText)) {
+      const targetNum = tblNumMatch ? Number(tblNumMatch[1]) : 0;
+      const rawTables = [...proseContainer.querySelectorAll("table")].filter((t) => {
+        if (!isBefore(t, activeBoundary) || isIgnoredUiNode(t)) return false;
+        const firstTh = (t.querySelector("th") && t.querySelector("th").textContent) || "";
+        return !firstTh.includes("วัตถุประสงค์การเรียนรู้");
+      });
+      if (rawTables.length) {
+        if (targetNum > 0) {
+          const captionMatched = rawTables.find((t) => {
+            const wrap = t.closest(".table-scroll") || t;
+            const prev = wrap.previousElementSibling;
+            const capTxt =
+              ((t.querySelector("caption") && t.querySelector("caption").textContent) || "") +
+              " " +
+              ((prev && prev.textContent) || "");
+            return new RegExp(`ตารางที่\\s*${targetNum}\\b`).test(capTxt);
+          });
+          if (captionMatched) {
+            return { primaryEl: captionMatched.closest(".table-scroll") || captionMatched, secondaryEls: [] };
+          }
+        }
+        const qFeats = extractRrQueryFeatures(`${itemText} ${topicText} ${summaryText}`, true);
+        let bestTbl = rawTables[Math.min(rawTables.length - 1, Math.max(0, (targetNum || 1) - 1))];
+        let bestTblScore = -1;
+        rawTables.forEach((t, idx) => {
+          const txt = (t.textContent || "").toLowerCase();
+          let sc = targetNum > 0 && idx === targetNum - 1 ? 6 : 0;
+          qFeats.forEach((f) => {
+            if (txt.includes(f.tok)) sc += f.weight * 2;
+          });
+          if (sc > bestTblScore) {
+            bestTblScore = sc;
+            bestTbl = t;
+          }
+        });
+        if (bestTbl) {
+          return { primaryEl: bestTbl.closest(".table-scroll") || bestTbl, secondaryEls: [] };
+        }
+      }
+    }
+
+    // Priority E: Topic Jump (Col 0 click) -> Match best Section Heading + Lead Prose
+    if (payload.kind === "topic" && bodyHeadings.length) {
+      const topicFeats = extractRrQueryFeatures(topicText, true);
+      const sumFeats = extractRrQueryFeatures(`${summaryText} ${itemText} ${refText}`, false);
+      let bestH = null;
+      let bestHScore = -1;
+      bodyHeadings.forEach((h, hIdx) => {
+        const hTxt = (h.textContent || "").toLowerCase();
+        if (hTxt.includes("วัตถุประสงค์การเรียนรู้") || h.classList.contains("doc-h1")) return;
+        const secNodes = nextContentAfterHeading(h);
+        const secBodyTxt = secNodes.map((n) => n.textContent || "").join(" ").toLowerCase();
+        let sc = 0;
+        topicFeats.forEach((f) => {
+          if (hTxt.includes(f.tok)) sc += f.weight * 4.5;
+          if (secBodyTxt.includes(f.tok)) sc += f.weight * 1.8;
+        });
+        sumFeats.forEach((f) => {
+          if (hTxt.includes(f.tok)) sc += f.weight * 1.6;
+          if (secBodyTxt.includes(f.tok)) sc += f.weight * 1.1;
+        });
+        const posRatio = hIdx / Math.max(1, bodyHeadings.length);
+        sc += 3.0 * (1 - Math.abs(posRatio - rowRatio));
+        if (sc > bestHScore) {
+          bestHScore = sc;
+          bestH = h;
+        }
+      });
+      if (bestH && bestHScore > 2) {
+        return { primaryEl: bestH, secondaryEls: nextContentAfterHeading(bestH) };
+      }
+    }
+
+    // Priority F: Granular TF-IDF + 5-gram Passage Scoring across li, p, blockquote, and body table rows
+    const candidates = [];
+    let curH2 = "";
+    let curH3 = "";
+    let curH4 = "";
+    let inObjectives = false;
+
+    const collectFromBoundary = (boundaryNode) => {
+      candidates.length = 0;
+      curH2 = "";
+      curH3 = "";
+      curH4 = "";
+      inObjectives = false;
+
+      proseContainer.querySelectorAll("h2, h3, h4, li, p, blockquote, table tr").forEach((el) => {
+        if (!isBefore(el, boundaryNode) || isIgnoredUiNode(el)) return;
+        const tag = el.tagName.toUpperCase();
+        if (tag === "H2") {
+          curH2 = (el.textContent || "").trim();
+          curH3 = "";
+          curH4 = "";
+          inObjectives = curH2.includes("วัตถุประสงค์การเรียนรู้");
+          return;
+        }
+        if (tag === "H3") {
+          curH3 = (el.textContent || "").trim();
+          curH4 = "";
+          return;
+        }
+        if (tag === "H4") {
+          curH4 = (el.textContent || "").trim();
+          return;
+        }
+        if (inObjectives) return;
+        if (tag === "P" && el.closest && el.closest("li, blockquote, td, th, figcaption")) return;
+        if (tag === "TR" && el.querySelector("th")) return;
+
+        const plain = (el.textContent || "").replace(/\s+/g, " ").trim();
+        if (plain.length < 12) return;
+        if (tag === "BLOCKQUOTE" && /^(?:คำถามนำ|คำถามย่อย|ก่อนอ่านต่อ)/.test(plain)) return;
+
+        candidates.push({
+          el,
+          tag,
+          plain,
+          plainLower: plain.toLowerCase(),
+          headingLower: `${curH2} ${curH3} ${curH4}`.toLowerCase()
+        });
+      });
+    };
+
+    collectFromBoundary(activeBoundary);
+    if (!candidates.length && activeBoundary !== tailCutoffEl) {
+      collectFromBoundary(tailCutoffEl);
+    }
+    if (!candidates.length) return null;
+
+    const itemFeats = extractRrQueryFeatures(itemText, true);
+    const topicFeats = extractRrQueryFeatures(topicText, false);
+    const sumFeats = extractRrQueryFeatures(summaryText, false);
+    const refFeats = (refText.match(/[A-Z][a-z]{3,}|25\d\d|19\d\d|20\d\d/g) || []).map((r) =>
+      r.toLowerCase()
+    );
+
+    const allToks = new Set([
+      ...itemFeats.map((f) => f.tok),
+      ...topicFeats.map((f) => f.tok),
+      ...sumFeats.map((f) => f.tok),
+      ...refFeats
+    ]);
+    const idfMap = new Map();
+    const totalDocs = candidates.length;
+    allToks.forEach((tok) => {
+      let df = 0;
+      for (let i = 0; i < totalDocs; i++) {
+        if (candidates[i].plainLower.includes(tok)) df++;
+      }
+      idfMap.set(tok, Math.log(1 + totalDocs / (1 + df)));
+    });
+
+    const cleanItemLower = itemText.toLowerCase();
+    let bestCand = null;
+    let bestScore = -1;
+
+    candidates.forEach((c, idx) => {
+      let sc = 0;
+      if (cleanItemLower.length >= 6 && c.plainLower.includes(cleanItemLower)) {
+        sc += 26;
+      }
+      itemFeats.forEach((f) => {
+        const idf = idfMap.get(f.tok) || 1;
+        if (c.plainLower.includes(f.tok)) sc += 4.2 * f.weight * idf;
+        else if (c.headingLower.includes(f.tok)) sc += 1.6 * f.weight * idf;
+      });
+      topicFeats.forEach((f) => {
+        const idf = idfMap.get(f.tok) || 1;
+        if (c.headingLower.includes(f.tok)) sc += 2.5 * f.weight * idf;
+        if (c.plainLower.includes(f.tok)) sc += 1.25 * f.weight * idf;
+      });
+      sumFeats.forEach((f) => {
+        const idf = idfMap.get(f.tok) || 1;
+        if (c.plainLower.includes(f.tok)) sc += 0.55 * f.weight * idf;
+      });
+      refFeats.forEach((rk) => {
+        const idf = idfMap.get(rk) || 1;
+        if (c.plainLower.includes(rk)) sc += 2.1 * idf;
+      });
+
+      if (c.tag === "LI" || c.tag === "P") {
+        sc += 8.5;
+      }
+      sc = sc / Math.pow(Math.max(85, c.plain.length), 0.12);
+      const posRatio = idx / Math.max(1, totalDocs);
+      sc += 2.6 * (1 - Math.abs(posRatio - rowRatio));
+
+      if (sc > bestScore) {
+        bestScore = sc;
+        bestCand = c;
+      }
+    });
+
+    return bestCand ? { primaryEl: bestCand.el, secondaryEls: [], score: bestScore } : null;
+  }
+
+  function applyRapidReviewTargetHighlight(proseContainer, matchResult, payload) {
+    if (!proseContainer || !matchResult || !matchResult.primaryEl) return false;
+    clearRapidReviewHighlights(proseContainer);
+
+    const primaryEl = matchResult.primaryEl;
+    const secondaryEls = matchResult.secondaryEls || [];
+
+    const parentDetails = primaryEl.closest ? primaryEl.closest("details") : null;
+    if (parentDetails && !parentDetails.open) parentDetails.open = true;
+
+    primaryEl.classList.add("rr-jump-target-active", "rr-jump-pulse");
+    secondaryEls.forEach((sEl) => {
+      if (sEl && sEl.classList) sEl.classList.add("rr-jump-target-secondary");
+    });
+
+    highlightMatchingPhrasesInElement(primaryEl, payload.itemText, payload.topicText);
+    secondaryEls.forEach((sEl) => {
+      highlightMatchingPhrasesInElement(sEl, payload.itemText, payload.topicText);
+    });
+
+    // Inject floating context & return banner right above or inside target
+    const banner = document.createElement("div");
+    banner.className = "rr-jump-banner hsd-no-print";
+    const shortLabel =
+      payload.itemText && payload.itemText.length > 78
+        ? `${payload.itemText.slice(0, 76)}…`
+        : payload.itemText || payload.topicText || "";
+    banner.innerHTML = `
+      <div class="rr-jump-banner-copy">
+        <span class="rr-jump-badge">✨ ไฮไลต์จาก Rapid Review</span>
+        <strong class="rr-jump-title">${escapeHtml(shortLabel)}</strong>
+      </div>
+      <div class="rr-jump-banner-acts">
+        <button type="button" class="rr-banner-btn is-return" data-rr-return="1">↩ กลับไปตาราง Rapid Review</button>
+        <button type="button" class="rr-banner-btn is-clear" data-rr-clear-hl="1" title="ล้างแถบไฮไลต์">✕ ล้างไฮไลต์</button>
+      </div>
+    `;
+
+    if (primaryEl.tagName === "LI") {
+      primaryEl.insertBefore(banner, primaryEl.firstChild);
+    } else if (primaryEl.tagName === "TR") {
+      const tblWrap = primaryEl.closest(".table-scroll") || primaryEl.closest("table");
+      if (tblWrap && tblWrap.parentNode) {
+        tblWrap.parentNode.insertBefore(banner, tblWrap);
+      }
+    } else if (primaryEl.parentNode) {
+      primaryEl.parentNode.insertBefore(banner, primaryEl);
+    }
+
+    const scrollAnchor = primaryEl.tagName === "LI" ? primaryEl : banner.parentNode ? banner : primaryEl;
+    const scrollToHighlighted = () => {
+      const rect = primaryEl.getBoundingClientRect();
+      const useCenter = rect.height > 0 && rect.height < window.innerHeight * 0.52;
+      scrollAnchor.scrollIntoView({ behavior: "smooth", block: useCenter ? "center" : "start" });
+    };
+    scrollToHighlighted();
+    setTimeout(scrollToHighlighted, 240);
+    return true;
+  }
+
+  function jumpFromRapidReviewToPassage(payload) {
+    if (!payload || !payload.modCode) return;
+    const modCode = String(payload.modCode).toUpperCase();
+    const modMeta = getHsModuleMeta(modCode) || {};
+    const fullDocId = modMeta.docId || modCode;
+
+    if (window.RACM_UNIVERSAL_NAV && typeof window.RACM_UNIVERSAL_NAV.recordTransition === "function") {
+      window.RACM_UNIVERSAL_NAV.recordTransition();
+    }
+
+    activeRrReturnState = {
+      sourceType: payload.sourceType || "practice",
+      sourceDocId: payload.sourceDocId || "",
+      sourceRowId: payload.sourceRowId || "",
+      modCode
+    };
+
+    // If clicked inside an already-open textbook doc, try resolving in the current doc first
+    if (
+      payload.sourceType === "in-doc" &&
+      state.activeTab === "textbooks" &&
+      state.textbookSubMode === "doc-reader" &&
+      state.activeDocId &&
+      $("textbookProseContainer")
+    ) {
+      if (state.readerViewMode !== "scroll") {
+        state.readerViewMode = "scroll";
+        renderTextbookReader();
+      }
+      const proseNow = $("textbookProseContainer");
+      const inCurrentMatch = findBestPassageInProse(proseNow, payload);
+      if (
+        inCurrentMatch &&
+        inCurrentMatch.primaryEl &&
+        (state.activeDocId === fullDocId || (inCurrentMatch.score == null || inCurrentMatch.score >= 12))
+      ) {
+        applyRapidReviewTargetHighlight(proseNow, inCurrentMatch, payload);
+        return;
+      }
+    }
+
+    // Open the module's Full Textbook in Scroll mode and highlight the target passage
+    state.activeDocId = fullDocId;
+    state.activeHsModule = modCode;
+    state.preferredHsFormat = "full";
+    state.textbookSubMode = "doc-reader";
+    state.readerViewMode = "scroll";
+
+    if (state.activeTab === "textbooks") {
+      renderTextbookReader();
+    } else {
+      switchTab("textbooks");
+    }
+
+    const runHighlight = () => {
+      const prose = $("textbookProseContainer");
+      if (!prose) return false;
+      const match = findBestPassageInProse(prose, payload);
+      if (!match || !match.primaryEl) return false;
+      return applyRapidReviewTargetHighlight(prose, match, payload);
+    };
+
+    if (!runHighlight()) {
+      requestAnimationFrame(() => {
+        if (!runHighlight()) setTimeout(runHighlight, 100);
+      });
+    }
+  }
+
+  function returnToRapidReviewOrigin() {
+    clearRapidReviewHighlights($("textbookProseContainer") || document);
+    const ret = activeRrReturnState;
+    if (!ret) return;
+
+    const flashOriginRow = () => {
+      if (!ret.sourceRowId) return;
+      const rowEl = document.getElementById(ret.sourceRowId);
+      if (!rowEl) return;
+      rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      rowEl.classList.remove("rr-row-return-flash");
+      void rowEl.offsetWidth;
+      rowEl.classList.add("rr-row-return-flash");
+    };
+
+    if (ret.sourceType === "in-doc" && ret.sourceDocId) {
+      if (state.activeTab !== "textbooks" || state.activeDocId !== ret.sourceDocId || state.textbookSubMode !== "doc-reader") {
+        openTextbookDoc(ret.sourceDocId);
+      }
+      requestAnimationFrame(() => setTimeout(flashOriginRow, 80));
+      return;
+    }
+
+    state.practiceSub = "rapid";
+    if ($("practiceModuleFilter") && ret.modCode) {
+      $("practiceModuleFilter").value = ret.modCode;
+    }
+    if (state.activeTab === "practice") {
+      renderPracticeCurrent();
+    } else {
+      switchTab("practice");
+    }
+    requestAnimationFrame(() => setTimeout(flashOriginRow, 80));
+  }
+
+  document.addEventListener("click", (ev) => {
+    const t = ev.target && ev.target.closest ? ev.target : null;
+    if (!t) return;
+
+    const jumpTrigger = t.closest("[data-rr-jump]");
+    if (jumpTrigger) {
+      ev.preventDefault();
+      try {
+        const payload = JSON.parse(jumpTrigger.getAttribute("data-rr-jump") || "{}");
+        jumpFromRapidReviewToPassage(payload);
+      } catch (_) {}
+      return;
+    }
+
+    if (t.closest("[data-rr-return]")) {
+      ev.preventDefault();
+      returnToRapidReviewOrigin();
+      return;
+    }
+
+    if (t.closest("[data-rr-clear-hl]")) {
+      ev.preventDefault();
+      clearRapidReviewHighlights($("textbookProseContainer") || document);
+    }
+  });
 
   function renderFlashcards() {
     const mod = ($("practiceModuleFilter") && $("practiceModuleFilter").value) || "";
