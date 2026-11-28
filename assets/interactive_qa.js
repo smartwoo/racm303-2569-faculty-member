@@ -137,7 +137,8 @@
   function clipText(s, maxLen) {
     const clean = String(s || "").replace(/\s+/g, " ").trim();
     if (clean.length <= maxLen) return clean;
-    return clean.slice(0, maxLen).replace(/\s+\S*$/, "") + "…";
+    // Only trim trailing short words (<=14 chars) so continuous unspaced Thai phrases are never wiped out
+    return clean.slice(0, maxLen).replace(/\s+\S{1,14}$/, "") + "…";
   }
 
   /* ==========================================================================
@@ -2171,6 +2172,11 @@
     return String(txt || "")
       .replace(/^คำถามนำของ(?:หัวข้อ|ส่วน|บท)นี้คือ[^?؟]+[?؟]?\s*/i, "")
       .replace(/^(?:หัวข้อ|ส่วน|บท)นี้(?:เริ่มจากการ)?(?:ชี้ให้เห็นว่า|สำรวจว่า|ชวนพิจารณาว่า|อธิบายว่า)\s*/i, "")
+      .replace(/^(?:หัวข้อ|ส่วน|บท)นี้ใช้[^.]+เป็น(?:จุด|นิยาม)อ้างอิง[^.]*(?:โดยเริ่มจาก[^.]*)?/i, "")
+      .replace(/\(\s+/g, "(")
+      .replace(/\s+\)/g, ")")
+      .replace(/\(\s*\)/g, "")
+      .replace(/\s{2,}/g, " ")
       .trim();
   }
 
@@ -2306,13 +2312,16 @@
       ""
     );
 
-    const conciseNote = rubric.kind === "table" || rubric.kind === "cloze" ? "" : buildConciseSectionAnchorNote(rubric, ctx);
-    const fullExpansion = buildFullSectionConciseExpansion(rubric, ctx);
+    // Curated Table-Spec Self-Quiz items already provide a complete synthesized explanation; avoid appending noisy auto-clipped snippets
+    const isCuratedSpecItem = Boolean(rubric.specKey);
+    const conciseNote = isCuratedSpecItem || rubric.kind === "table" || rubric.kind === "cloze" ? "" : buildConciseSectionAnchorNote(rubric, ctx);
+    const fullExpansion = isCuratedSpecItem ? "" : buildFullSectionConciseExpansion(rubric, ctx);
 
     const linkChips = [];
     if (rubric.specKey) {
+      const shortSpecLabel = rubric.specTitle ? rubric.specTitle.split("·")[0].trim() : rubric.specKey.replace(":", " หมวดที่ ");
       linkChips.push(
-        `<button type="button" class="iq-doc-deep-link is-spec" data-kt-open="${escapeHtml(rubric.specKey)}">🎯 เปิดกรอบ Table Spec (${escapeHtml(rubric.specTitle || rubric.specKey)}) →</button>`
+        `<button type="button" class="iq-doc-deep-link is-spec" data-kt-open="${escapeHtml(rubric.specKey)}">🎯 เปิดกรอบ Table Spec (${escapeHtml(mod)} · ${escapeHtml(shortSpecLabel)}) →</button>`
       );
     }
     if (cSec) {

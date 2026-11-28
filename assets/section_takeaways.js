@@ -33,8 +33,8 @@
       specBadgeEN: "Case Discussion Readiness (3 Cases) & Table Spec 20% · Open Note A4",
       shortTH: "สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกัน 4 ระดับ",
       shortEN: "Health, Determinants & 4 Levels of Prevention",
-      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (3 เคส) & Table Spec (20%): แยกมิติ Disease–Illness–Sickness ประเมินสุขภาวะ 4 มิติ (แยกภาวะสุขภาพกับปัจจัยกระทบ) เชื่อมแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดและ WHO CSDH (Structural vs Intermediary) พร้อมจำแนกการป้องกันโรค 4 ระดับตามกลุ่มเป้าหมายและระยะของโรค",
-      arcEN: "Case Discussion & Table Spec Readiness (3 Cases · 20%): Distinguish Disease–Illness–Sickness, assess 4-dimensional health (status vs. +/- factors), map the 4-ring DoH diagram & WHO CSDH (Structural vs. Intermediary), and classify 4 prevention levels by target group and disease stage",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (3 เคส) & Table Spec (20%): แยกมิติ Disease–Illness–Sickness ประเมินสุขภาวะ 4 มิติ (แยกภาวะสุขภาพที่เป็นอยู่ออกจากปัจจัยที่ส่งผลกระทบทั้งทางบวกและทางลบ) เชื่อมแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดและกรอบ WHO CSDH (Structural vs Intermediary) พร้อมจำแนกการป้องกันโรค 4 ระดับตามกลุ่มเป้าหมายและระยะของโรค",
+      arcEN: "Case Discussion & Table Spec Readiness (3 Cases · 20%): Distinguish Disease–Illness–Sickness, assess 4-dimensional health (separating health status from positive and negative affecting factors), map the 4-ring DoH diagram & WHO CSDH (Structural vs. Intermediary), and classify 4 prevention levels by target group and disease stage",
       sections: ["1", "2", "3", "sum"],
     },
     HS2: {
