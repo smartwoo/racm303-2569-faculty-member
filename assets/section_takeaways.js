@@ -3,12 +3,14 @@
 
   const LANG_PREF_STORAGE = "racm303_kt_lang_v1";
 
-  /* ---------- Official RACM 303 (2569) Table Specification & Curriculum Spine ---------- */
+  /* ---------- Official RACM 303 (2569) Case Discussion Readiness & Table Specification Spine ---------- */
   const MODULE_META = {
     ST1: {
       code: "ST1",
       order: 0,
       specWeight: "รากฐาน",
+      caseCountTH: "",
+      caseCountEN: "",
       specPillTH: "รากฐานคิดเชิงระบบ · TH/EN",
       specPillEN: "Systems Foundation · TH/EN",
       specBadgeTH: "กรอบรายวิชา: รากฐานคิดเชิงระบบเชื่อม HS1–HS6 · ฟอร์ม 3A · SRN 1–2",
@@ -23,91 +25,103 @@
       code: "HS1",
       order: 1,
       specWeight: "20%",
-      specPillTH: "Table Spec 20% · TH/EN",
-      specPillEN: "Table Spec 20% · TH/EN",
-      specBadgeTH: "Table Spec 20% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 20% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "3 กรณีศึกษา",
+      caseCountEN: "3 Cases",
+      specPillTH: "Case + Spec 20% · TH/EN",
+      specPillEN: "Case + Spec 20% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (3 เคส) & Table Spec 20% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (3 Cases) & Table Spec 20% · Open Note A4",
       shortTH: "สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกัน 4 ระดับ",
       shortEN: "Health, Determinants & 4 Levels of Prevention",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (20%): แยกมิติ Disease–Illness–Sickness เปรียบเทียบนิยามสุขภาพ วิเคราะห์กลไก SDH และจำแนกการป้องกันโรคครบทุกระดับ",
-      arcEN: "Table Spec Scope (20%): Distinguishing Disease–Illness–Sickness, comparing health definitions, tracing SDH inequity pathways, and applying 4 prevention levels",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (3 เคส) & Table Spec (20%): แยกมิติ Disease–Illness–Sickness ประเมินสุขภาวะ 4 มิติ (แยกภาวะสุขภาพกับปัจจัยกระทบ) เชื่อมแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดและ WHO CSDH (Structural vs Intermediary) พร้อมจำแนกการป้องกันโรค 4 ระดับตามกลุ่มเป้าหมายและระยะของโรค",
+      arcEN: "Case Discussion & Table Spec Readiness (3 Cases · 20%): Distinguish Disease–Illness–Sickness, assess 4-dimensional health (status vs. +/- factors), map the 4-ring DoH diagram & WHO CSDH (Structural vs. Intermediary), and classify 4 prevention levels by target group and disease stage",
       sections: ["1", "2", "3", "sum"],
     },
     HS2: {
       code: "HS2",
       order: 2,
       specWeight: "15%",
-      specPillTH: "Table Spec 15% · TH/EN",
-      specPillEN: "Table Spec 15% · TH/EN",
-      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "2 กรณีศึกษา",
+      caseCountEN: "2 Cases",
+      specPillTH: "Case + Spec 15% · TH/EN",
+      specPillEN: "Case + Spec 15% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (2 เคส) & Table Spec 15% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (2 Cases) & Table Spec 15% · Open Note A4",
       shortTH: "โครงสร้างของระบบสุขภาพและรูปแบบการดูแล",
       shortEN: "Structure of Health Systems & Models of Care",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): ขีดเส้นขอบเขตระบบสุขภาพ เชื่อมโยง 6 Building Blocks สู่เป้าหมาย Quintuple Aim และเลือกรูปแบบการดูแลตามกรอบ 6W",
-      arcEN: "Table Spec Scope (15%): Defining health system boundaries, linking 6 Building Blocks to Quintuple Aim goals, and designing 6W Models of Care",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (2 เคส) & Table Spec (15%): ขีดขอบเขตระบบสุขภาพ เชื่อม 4 หน้าที่สู่ 3 เป้าหมาย วินิจฉัยคอขวดและทางออกโรงพยาบาลครบ 6 Building Blocks แบบ CAS และเปรียบเทียบรูปแบบการดูแล (Acute vs Chronic/Ambulatory & Rehab) ตามกรอบ WHAT–WHY–HOW (6W)",
+      arcEN: "Case Discussion & Table Spec Readiness (2 Cases · 15%): Define health system boundaries, link 4 Functions to 3 Goals, diagnose hospital bottlenecks across all 6 Building Blocks as a CAS, and align Acute vs. Chronic/Rehab Models of Care via WHAT–WHY–HOW (6W)",
       sections: ["1", "2", "3", "4", "5", "sum"],
     },
     HS3: {
       code: "HS3",
       order: 3,
       specWeight: "15%",
-      specPillTH: "Table Spec 15% · TH/EN",
-      specPillEN: "Table Spec 15% · TH/EN",
-      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "2 กรณีศึกษา",
+      caseCountEN: "2 Cases",
+      specPillTH: "Case + Spec 15% · TH/EN",
+      specPillEN: "Case + Spec 15% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (2 เคส) & Table Spec 15% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (2 Cases) & Table Spec 15% · Open Note A4",
       shortTH: "หน้าที่ของระบบสุขภาพและคุณลักษณะที่พึงประสงค์ (EQESaRR)",
       shortEN: "Functions of Health Systems & Desirable Characteristics (EQESaRR)",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): ประเมินและชั่งน้ำหนักความเป็นธรรม คุณภาพ (STEP) ประสิทธิภาพ ภาระรับผิดชอบต่อสังคม ความสอดคล้องบริบท และความยืดหยุ่น",
-      arcEN: "Table Spec Scope (15%): Evaluating and balancing Equity, Quality (STEP), Efficiency, Social Accountability, Relevance, and Resilience",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (2 เคส) & Table Spec (15%): ประเมินนโยบายและบริการด้วย EQESaRR แยกองค์ประกอบหลัก–ย่อยพร้อมนิยามทฤษฎี (Equity การเข้าถึง 4 มิติ, Quality กรอบ STEP/ACP & Effective Coverage, Efficiency เชิงเทคนิค vs การจัดสรร, ธรรมาภิบาล PPP และความยืดหยุ่น/ยั่งยืน)",
+      arcEN: "Case Discussion & Table Spec Readiness (2 Cases · 15%): Evaluate policies using Main + Sub-dimensions of EQESaRR—4-dimension Equity of Access, STEP Quality/ACP & Effective Coverage, Technical vs. Allocative Efficiency, PPP Governance, and Resilience/Sustainability trade-offs",
       sections: ["1", "2", "3", "4", "5", "6", "7", "sum"],
     },
     HS4: {
       code: "HS4",
       order: 4,
       specWeight: "15%",
-      specPillTH: "Table Spec 15% · TH/EN",
-      specPillEN: "Table Spec 15% · TH/EN",
-      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "1 กรณีศึกษา · 3 ประเด็น",
+      caseCountEN: "1 Case · 3 Sub-Qs",
+      specPillTH: "Case + Spec 15% · TH/EN",
+      specPillEN: "Case + Spec 15% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (3 ประเด็น) & Table Spec 15% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (3 Sub-Qs) & Table Spec 15% · Open Note A4",
       shortTH: "พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ",
       shortEN: "Health Behaviour, Behaviour Change & Health Promotion",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): จำแนกพฤติกรรมสุขภาพ 3 ประเภท ประยุกต์ทฤษฎีพฤติกรรม Nudge และวงล้อ COM-B ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา–เจนีวา",
-      arcEN: "Table Spec Scope (15%): Classifying 3 health behavior types, applying Nudge & BCW/COM-B, dual-level Health Literacy, and Ottawa–Geneva Health Promotion",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (3 ประเด็น) & Table Spec (15%): แยกพฤติกรรมปัญหา–พฤติกรรมเป้าหมายออกจากผลลัพธ์สุขภาพ วิเคราะห์แรงบีบคั้นเชิงพาณิชย์ (CDoH) วินิจฉัยกลไก COM-B ครบ 6 องค์ประกอบย่อย คู่ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวาครบ 5 ด้านปฏิบัติการ",
+      arcEN: "Case Discussion & Table Spec Readiness (3 Sub-Qs · 15%): Distinguish Problem vs. Target Behavior from clinical outcomes, diagnose Commercial Determinants (CDoH) & all 6 COM-B sub-components, pair dual-level Health Literacy, and apply all 5 Ottawa Charter Action Areas",
       sections: ["1", "2", "3", "4", "sum"],
     },
     HS5: {
       code: "HS5",
       order: 5,
       specWeight: "15%",
-      specPillTH: "Table Spec 15% · TH/EN",
-      specPillEN: "Table Spec 15% · TH/EN",
-      specBadgeTH: "Table Spec 15% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 15% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "1 กรณีศึกษา · 2 ประเด็น",
+      caseCountEN: "1 Case · 2 Sub-Qs",
+      specPillTH: "Case + Spec 15% · TH/EN",
+      specPillEN: "Case + Spec 15% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (2 ประเด็น) & Table Spec 15% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (2 Sub-Qs) & Table Spec 15% · Open Note A4",
       shortTH: "ระบบสุขภาพปฐมภูมิและบริการปฐมภูมิ",
       shortEN: "Primary Health Care (PHC) & Primary Care (PC)",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (15%): แยก Primary Health Care (3 เสาหลัก Astana) ออกจาก Primary Care (4Cs + ยึดคนเป็นศูนย์กลาง) และเชื่อม EPHFs สู่ UHC",
-      arcEN: "Table Spec Scope (15%): Distinguishing 3-pillar Astana PHC from person-centered 4Cs Primary Care and population EPHFs anchoring UHC",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (2 ประเด็น) & Table Spec (15%): แยกบริการปฐมภูมิระดับบุคคลครบ 5 คุณลักษณะ (4Cs + ยึดคนเป็นศูนย์กลาง และความต่อเนื่องข้ามรอยต่อ) ออกจากระบบสุขภาพปฐมภูมิ 3 เสาหลักตามปฏิญญา Astana (บริการบูรณาการคู่ EPHFs · นโยบายข้ามภาคส่วน · การเสริมพลังชุมชน)",
+      arcEN: "Case Discussion & Table Spec Readiness (2 Sub-Qs · 15%): Distinguish 5 Personal/Primary Care attributes (4Cs + Person-Centeredness & care transitions) from Astana's 3 whole-of-society PHC pillars (Integrated PC + EPHFs · Multisectoral Policy · Empowered Communities)",
       sections: ["1", "2", "3", "4", "5", "6", "7", "sum"],
     },
     HS6: {
       code: "HS6",
       order: 6,
       specWeight: "20%",
-      specPillTH: "Table Spec 20% · TH/EN",
-      specPillEN: "Table Spec 20% · TH/EN",
-      specBadgeTH: "Table Spec 20% · สอบทฤษฎีระบบสุขภาพ (Open Note A4 ลายมือ 1 แผ่น)",
-      specBadgeEN: "Table Spec 20% · Health Systems Exam (Open Note · 1 Handwritten A4)",
+      caseCountTH: "3 กรณีศึกษา",
+      caseCountEN: "3 Cases",
+      specPillTH: "Case + Spec 20% · TH/EN",
+      specPillEN: "Case + Spec 20% · TH/EN",
+      specBadgeTH: "เตรียมตอบ Case Discussion (3 เคส) & Table Spec 20% · Open Note A4",
+      specBadgeEN: "Case Discussion Readiness (3 Cases) & Table Spec 20% · Open Note A4",
       shortTH: "การประกันสุขภาพ หลักประกันสุขภาพถ้วนหน้า และกลไกการจ่ายเงิน",
       shortEN: "Health Insurance, UHC & Provider Payment Methods",
-      arcTH: "สิ่งที่ควรรู้ตาม Table Spec (20%): เข้าใจการรวมความเสี่ยง Adverse Selection เปรียบเทียบ 3 กองทุนไทย กลไกจ่ายเงิน (FFS, Capitation, DRG) และการจัดการ Moral Hazard",
-      arcEN: "Table Spec Scope (20%): Risk pooling, Adverse Selection, Thailand's 3 schemes, provider payment incentives (FFS, Capitation, DRG), and Moral Hazard",
+      arcTH: "สิ่งที่ควรรู้เพื่อตอบ Case Discussion (3 เคส) & Table Spec (20%): วิเคราะห์ความก้าวหน้า UHC โลก (SDG 3.8.1–3.8.2 & UHC Cube 3 แกน) สมมติฐานประกันสมัครใจ 5 ข้อ ข้อยกเว้นเอกชนและ Externalities สิทธิ 3 กองทุนและประกันสังคม ม.33/39/40 ตลอดจนแรงจูงใจ FFS · Capitation · DRG · P4P",
+      arcEN: "Case Discussion & Table Spec Readiness (3 Cases · 20%): Analyze global UHC trends (SDG 3.8.1–3.8.2 & 3-axis UHC Cube), 5 voluntary insurance assumptions, private exclusions & Externalities, Thai schemes + SSS Sec 33/39/40, and FFS · Capitation · DRG · P4P incentives",
       sections: ["1", "2", "3", "4", "5", "sum"],
     },
   };
 
   /* ==========================================================================
-   * RACM 303 TABLE SPECIFICATION — WHAT YOU SHOULD KNOW BANK (ALL 44 SECTIONS)
-   * Grounded 100% in RACM 303 Teaching Handouts (ST1 & HS1–HS6) · Zero AI
+   * RACM 303 CASE DISCUSSION READINESS & TABLE SPEC — WHAT YOU SHOULD KNOW BANK
+   * Backward-designed from all 12 HS Case Discussions & RACM 303 Handouts
    * ========================================================================== */
   const TAKEAWAYS_DB = {
     /* -------------------- ST1: Systems & Systems Thinking -------------------- */
@@ -332,28 +346,30 @@
 
     /* -------------------- HS1: Health, Determinants & Prevention -------------------- */
     "HS1:1": {
-      secLabelTH: "หมวดที่ 1 · มิติของการป่วยและนิยามของสุขภาพ",
-      secLabelEN: "Section 1 · Disease–Illness–Sickness & Definitions of Health",
-      titleTH: "แยกแยะมิติของการป่วย (Disease, Illness, Sickness) และวิวัฒนาการนิยามสุขภาพ",
-      titleEN: "Unpacking the Sickness Triad and Holistic Definitions of Health",
-      summaryTH: "แพทย์ตรวจพบโรค ผู้ป่วยรับรู้ความทุกข์ และสังคมนิยามบทบาทคนป่วย สุขภาพที่แท้จริงจึงเป็นดุลยภาพองค์รวมทั้งกาย จิต ปัญญา และสังคม",
-      summaryEN: "Clinicians diagnose disease, patients experience illness, and society assigns sickness; true health harmonizes physical, mental, spiritual, and social well-being.",
+      secLabelTH: "หมวดที่ 1 · มิติของการป่วยและนิยามสุขภาวะ 4 มิติ",
+      secLabelEN: "Section 1 · Disease–Illness–Sickness & 4-Dimensional Health",
+      titleTH: "แยกแยะมิติของการป่วย (Disease, Illness, Sickness) และการประเมินสุขภาวะองค์รวม 4 มิติ",
+      titleEN: "Unpacking the Sickness Triad and Assessing 4-Dimensional Holistic Health",
+      summaryTH: "แพทย์ตรวจพบโรค ผู้ป่วยรับรู้ความทุกข์ และสังคมกำหนดบทบาทคนป่วย ขณะที่การประเมินสุขภาพต้องมองครบทั้งกาย จิต ปัญญา และสังคม โดยแยกภาวะสุขภาพที่เป็นอยู่ออกจากปัจจัยแวดล้อมที่มากระทบ",
+      summaryEN: "Clinicians diagnose disease, patients experience illness, and society assigns sickness; holistic health assessment spans physical, mental, spiritual/intellectual, and social dimensions while separating health status from affecting events.",
       bullets: [
         {
-          th: "<strong>แยก 3 มิติของการป่วยให้ชัด:</strong> `Disease` คือพยาธิสภาพทางการแพทย์ `Illness` คือประสบการณ์ความทุกข์ของผู้ป่วย และ `Sickness` คือบทบาททางสังคม ซึ่งทั้งสามไม่จำเป็นต้องเกิดพร้อมกัน",
-          en: "<strong>Master the Triad:</strong> Disease (biomedical pathology), Illness (lived suffering), and Sickness (social role) can occur together or independently.",
+          th: "<strong>แยก 3 มิติของการป่วย (`Disease · Illness · Sickness`) ที่เกิดแยกจากกันได้:</strong> `Disease` คือความผิดปกติทางชีวเวชศาสตร์ที่แพทย์ตรวจพบ (เช่น ดัชนีมวลกายเข้าเกณฑ์อ้วน หรือความดัน/ไขมันในเลือดสูงระยะไร้สัญญาน) `Illness` คือความทุกข์ไม่สบายที่เจ้าตัวรับรู้ และ `Sickness` คือสถานะคนป่วยในสังคม ผู้ที่มี `Disease` โดยไม่มี `Illness` จึงมักไม่เดินมารับบริการเองหากระบบตั้งรับรอในคลินิก",
+          en: "<strong>Three Independent Dimensions of Malady:</strong> Biomedical Disease (e.g., elevated BMI or asymptomatic hypertension), lived Illness, and social Sickness need not coincide—explaining why people with Disease but no Illness rarely seek passive clinic care.",
         },
         {
-          th: "<strong>นิยามสุขภาพก้าวพ้นการไร้โรค:</strong> WHO (1948) ขยายสู่สุขภาวะกาย จิต สังคม และ พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 เติมมิติ 'ทางปัญญา' เชื่อมโยงเป็นองค์รวมอย่างสมดุล",
-          en: "<strong>Beyond Absence of Disease:</strong> WHO (1948) established physical, mental, and social well-being, while Thailand's 2007 National Health Act added spiritual wisdom (`ปัญญา`) in dynamic balance.",
+          th: "<strong>ประเมินสุขภาวะ 4 มิติ ตาม พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 และธรรมนูญสุขภาพแห่งชาติ:</strong> ก้าวข้ามการปราศจากโรคและนิยาม 3 มิติของ WHO (1948) สู่ดุลยภาพทั้ง <strong>กาย</strong> (สมรรถนะร่างกายและโรค/ความเสี่ยงชีวภาพ) <strong>จิตใจ</strong> (สมดุลอารมณ์ ความเครียดสะสม การผ่อนคลาย) <strong>สังคม</strong> (สัมพันธภาพในครอบครัว ที่ทำงาน ชุมชน) และ <strong>ปัญญา/จิตวิญญาณ</strong> (สติ รู้เท่าทัน ไตร่ตรองเหตุปัจจัยและลุกขึ้นปรับพฤติกรรมดูแลตนเอง ไม่ได้จำกัดเฉพาะพิธีกรรมทางศาสนา)",
+          en: "<strong>Four Holistic Dimensions (Thai Health Act & Charter):</strong> Assess Physical, Mental, Social, and Spiritual/Intellectual well-being (`ปัญญา`—mindful self-awareness, learning from health feedback, and wise life choices beyond religious rituals).",
         },
         {
-          th: "<strong>สุขภาพคือความสามารถในการปรับตัว:</strong> มุมมองร่วมสมัยเน้นความสามารถของมนุษย์ในการปรับตัวและจัดการตนเองแม้มีโรคเรื้อรังอยู่ร่วมด้วย",
-          en: "<strong>Health as Adaptive Capacity:</strong> Contemporary views highlight people's capacity to adapt and self-manage meaningfully even while living with chronic conditions.",
+          th: "<strong>แยก 'ภาวะสุขภาพที่เป็นอยู่' ออกจาก 'พฤติกรรม/เหตุการณ์ที่ส่งผลกระทบ' และมองสุขภาพเป็นพลวัต:</strong> เวลาประเมินรายกรณีต้องแยกแยะสถานะสุขภาพของเจ้าตัวในแต่ละมิติ ออกจากพฤติกรรมหรือบริบทแวดล้อมที่ส่งผลทั้งทางบวกและทางลบ พร้อมเชื่อมมุมมองสุขภาพในฐานะความสามารถในการปรับตัวและจัดการตนเองแม้มีโรคเรื้อรัง",
+          en: "<strong>Separate Health Status from Positive/Negative Influences:</strong> Clearly distinguish a person's current state in each dimension from the behaviors and workplace/family events positively or negatively affecting it, viewing health as dynamic capacity to adapt.",
         },
       ],
-      flowRoleTH: "วางฐานความเข้าใจว่า 'สุขภาพและการป่วยคืออะไร' ก่อนถามต่อในหมวด 2 ว่า 'อะไรเป็นตัวกำหนดให้คนมีสุขภาพต่างกัน'",
-      flowRoleEN: "Clarifies what health and sickness mean before Section 2 asks what shapes unequal health across populations.",
+      caseLensTH: "ในการตอบ Case Discussion เรื่องสุขภาวะ 4 มิติ ให้แยกคอลัมน์ 'ภาวะสุขภาพของบุคคลนั้น (Health Status)' ออกจาก 'พฤติกรรมหรือเหตุการณ์ที่ส่งผลกระทบ (ทั้งผลบวกและผลลบ)' ให้ชัดเจนในครบทั้งกาย จิต สังคม และปัญญา และสังเกตรอยต่อผู้ที่มี Disease แต่ไม่รู้สึก Illness",
+      caseLensEN: "When analyzing 4-dimensional health cases, strictly separate current 'Health Status' from positive and negative 'Affecting Behaviors/Events' across all four dimensions, and spot gaps where Disease exists without perceived Illness.",
+      flowRoleTH: "วางฐานความเข้าใจว่า 'สุขภาพและการป่วยคืออะไรและประเมินครบ 4 มิติอย่างไร' ก่อนถามต่อในหมวด 2 ว่า 'ปัจจัยหลายระดับใดหล่อหลอมให้คนมีสุขภาพต่างกัน'",
+      flowRoleEN: "Clarifies what health and malady mean across 4 dimensions before Section 2 maps the multi-level determinants shaping unequal health.",
       crossLinks: [
         {
           target: "ST1:3",
@@ -366,59 +382,61 @@
           target: "HS3:7",
           labelTH: "HS3 · หมวด 7 (ฐานคิดธรรมนูญสุขภาพไทย)",
           labelEN: "HS3 · Sec 7 (Thai National Health Charter)",
-          whyTH: "นิยามสุขภาพ 4 มิติตาม พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 เป็นรากฐานคุณค่าของธรรมนูญสุขภาพไทย",
+          whyTH: "นิยามสุขภาพ 4 มิติตาม พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 เป็นรากฐานคุณค่าของธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ",
           whyEN: "Thailand's 4-dimensional holistic health definition anchors the National Health Charter.",
         },
       ],
       keywords: [
         { th: "โรค · ความเจ็บป่วย · บทบาทผู้ป่วย", en: "Disease · Illness · Sickness" },
-        { th: "สุขภาวะองค์รวม 4 มิติ", en: "Holistic Well-Being (4 Dimensions)" },
-        { th: "พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550", en: "National Health Act B.E. 2550" },
+        { th: "สุขภาวะ 4 มิติ (กาย · จิต · สังคม · ปัญญา)", en: "4-Dimensional Holistic Health" },
+        { th: "ภาวะสุขภาพเทียบกับปัจจัยกระทบ (+/-)", en: "Health Status vs. Affecting Factors" },
         { th: "ความสามารถในการปรับตัว", en: "Capacity to Adapt" },
       ],
     },
     "HS1:2": {
-      secLabelTH: "หมวดที่ 2 · ปัจจัยกำหนดสุขภาพและปัจจัยสังคมกำหนดสุขภาพ",
-      secLabelEN: "Section 2 · Determinants of Health & Social Determinants (SDH)",
-      titleTH: "สามกรอบแนวคิดปัจจัยกำหนดสุขภาพและต้นตอความไม่เป็นธรรมทางสุขภาพ",
-      titleEN: "Three Frameworks of Health Determinants and Structural Health Inequity",
-      summaryTH: "สุขภาพไม่ได้สร้างขึ้นในโรงพยาบาลเพียงอย่างเดียว แต่ก่อตัวขึ้นจากสภาพชีวิต การงาน และโครงสร้างสังคมที่ผู้คนเติบโตและอาศัยอยู่",
-      summaryEN: "Health is shaped far upstream of hospital walls—by the daily living conditions and social structures in which people live and work.",
+      secLabelTH: "หมวดที่ 2 · กรอบปัจจัยกำหนดสุขภาพ แผนภาพเชิงระบบ และ WHO CSDH",
+      secLabelEN: "Section 2 · Determinants of Health Diagram & WHO CSDH Framework",
+      titleTH: "แผนภาพพลวัตปัจจัยกำหนดสุขภาพ 4 หมวด กรอบ WHO CSDH และต้นตอความเหลื่อมล้ำทางสุขภาพ",
+      titleEN: "Multi-Level Determinants Diagram, WHO CSDH (Structural vs. Intermediary), and Action Leverage",
+      summaryTH: "พฤติกรรมและโรคไม่ได้เกิดจากความตั้งใจส่วนบุคคลโดด ๆ แต่เกิดจากปฏิสัมพันธ์สองทางระหว่างปัจเจก สิ่งแวดล้อม และระบบบริการ ภายใต้วงล้อมของปัจจัยเชิงโครงสร้างต้นน้ำ",
+      summaryEN: "Health behaviors and outcomes never arise in isolation; they emerge from bidirectional links among individual traits, environments, and health services within an outer ring of structural determinants.",
       bullets: [
         {
-          th: "<strong>กรอบ Dahlgren & Whitehead จำแนกชั้นปัจจัยเป็นวงแหวน:</strong> ตั้งแต่ปัจจัยชีวภาพ พฤติกรรม เครือข่ายชุมชน สภาพชีวิตและการทำงาน ไปจนถึงโครงสร้างเศรษฐกิจสังคมมหภาค",
-          en: "<strong>Rainbow Layers (Dahlgren & Whitehead):</strong> Maps determinants from constitutional traits and lifestyle outward to social networks, living/working conditions, and macro-policies.",
+          th: "<strong>สร้างแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดที่เชื่อมลูกศรสองทิศทาง (`↔`):</strong> วางปัญหาสุขภาพหลักตรงกลาง เชื่อมปฏิสัมพันธ์ระหว่าง <strong>(1) ปัจจัยส่วนบุคคล</strong> (พันธุกรรม/อายุ/เพศที่ปรับไม่ได้ vs ความรู้ ทัศนคติ พฤติกรรมกิน–อยู่นิ่ง) <strong>↔ (2) สังคมและสิ่งแวดล้อม</strong> (เวลาครอบครัว ที่พัก โรงเรียน ที่ทำงาน สิ่งแวดล้อมทางอาหาร พื้นที่ออกกำลังกาย บรรทัดฐานคนรอบข้าง) <strong>↔ (3) ระบบบริการสุขภาพ</strong> (บริการเชิงรุก อนามัยโรงเรียน อาชีวเวชศาสตร์ การคัดกรองและนัดติดตาม ควบคู่บทบาทแพทย์ `Clinician · Manager · Health Promoter`) ภายใต้วงล้อมชั้นนอกคือ <strong>(4) ปัจจัยเชิงโครงสร้าง/การเมือง-เศรษฐกิจ-สังคม</strong> (การกระจายอำนาจ ผังเมือง นโยบายองค์กร/โรงเรียน โครงสร้างชั่วโมงทำงาน และการตลาดอาหาร `CDoH`)",
+          en: "<strong>4-Group Systemic DoH Diagram:</strong> Place the central health problem in the middle with bidirectional links (`↔`) among (1) Individual, (2) Social/Physical Environment, and (3) Health Services (spanning Clinician, Manager, and Health Promoter roles), all enclosed within (4) Macro-Structural Determinants.",
         },
         {
-          th: "<strong>กรอบ CSDH (Solar & Irwin) อธิบายกลไกความเหลื่อมล้ำ:</strong> แยก 'ปัจจัยเชิงโครงสร้าง' (ฐานะ อำนาจ นโยบาย) ที่กำหนดการได้รับ 'ปัจจัยขั้นกลาง' (ที่อยู่อาศัย งาน พฤติกรรม และระบบบริการสุขภาพ)",
-          en: "<strong>Mechanism of Inequity (CSDH):</strong> Shows how socioeconomic governance and social position unevenly distribute intermediary exposures and health system access.",
+          th: "<strong>แยกปัจจัยต้นน้ำกับปัจจัยตัวกลางตามกรอบ WHO CSDH (`Solar & Irwin`):</strong> <strong>ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (`Structural determinants`)</strong> คือบริบทเศรษฐกิจ–การเมือง การบังคับใช้กฎหมายควบคุมแหล่งเสี่ยง ระบบการศึกษา โครงสร้างอาชีพแรงงานนอกระบบไร้หลักประกัน และค่านิยมทางสังคม ซึ่งกำหนดการได้รับ <strong>ปัจจัยทางสังคมที่มีผลต่อสุขภาพ (`Intermediary determinants`)</strong> ได้แก่ สภาพการทำงานและที่อยู่อาศัยจริง ช่วงวัยเปราะบาง (เช่น วัยรุ่นตั้งครรภ์ที่ขาดความพร้อม `self-care`) อิทธิพลคู่สมรส/ครอบครัว/เพื่อนร่วมอาชีพ และระบบบริการสุขภาพ",
+          en: "<strong>WHO CSDH Structural vs. Intermediary Split:</strong> Structural determinants (education system, informal labor structure, law enforcement on community supply, societal norms) stratify exposure to Intermediary determinants (material work/living conditions, vulnerable life-stage self-care capacity, family/peer substance use, and health services).",
         },
         {
-          th: "<strong>กรอบ Frieden (Health Impact Pyramid) ชี้จุดลงทุนที่ได้ผลกว้างที่สุด:</strong> การปรับปัจจัยเศรษฐกิจสังคมและสิ่งแวดล้อมฐานพีระมิดสร้างผลกระทบระดับประชากรได้ยั่งยืนและพึ่งความพยายามรายบุคคลน้อยที่สุด",
-          en: "<strong>Action Leverage (Frieden's Pyramid):</strong> Socioeconomic and default-environment interventions at the pyramid's base yield the broadest population impact with the least individual effort.",
+          th: "<strong>พีระมิดผลกระทบทางสุขภาพ (`Frieden's Health Impact Pyramid`):</strong> การให้คำปรึกษาและสอนสุขศึกษาปลายพีระมิดต้องอาศัยความพยายามรายบุคคลสูง แต่การปรับปัจจัยเศรษฐกิจสังคมและเปลี่ยนบริบทแวดล้อมให้ทางเลือกที่ดีต่อสุขภาพทำได้ง่ายที่ฐานพีระมิด สร้างผลกระทบระดับประชากรได้กว้างและยั่งยืนที่สุด",
+          en: "<strong>Frieden's Health Impact Pyramid:</strong> Socioeconomic improvements and changing environmental defaults at the pyramid's base achieve broader, more equitable population impact than individual counseling alone.",
         },
       ],
-      flowRoleTH: "ขยายมุมมองจากนิยามสุขภาพในหมวด 1 สู่รากเหง้าต้นน้ำของปัญหาสุขภาพ เพื่อชี้ตำแหน่งการป้องกันโรคทั้ง 4 ระดับในหมวด 3",
-      flowRoleEN: "Moves from defining health (Section 1) to mapping its upstream causes, setting up where and when to intervene in Section 3.",
+      caseLensTH: "เมื่อวิเคราะห์แผนภาพ DoH หรือตาราง WHO CSDH ต้องเชื่อมหลักฐานจากโจทย์ให้ตรงหมวดโดยไม่กล่าวโทษผู้ป่วย (`non-blaming`): แยก 'โครงสร้างต้นน้ำ' (ระบบการศึกษา โครงสร้างจ้างงาน กฎหมาย/แหล่งขาย ผังเมือง โฆษณา นโยบายองค์กร) ออกจาก 'ปัจจัยตัวกลาง/สิ่งแวดล้อมใกล้ตัว' (ครอบครัว เพื่อนร่วมงาน ช่วงวัย ที่พัก โรงอาหาร บริการสุขภาพ)",
+      caseLensEN: "In DoH diagram and WHO CSDH cases, cite concrete scenario clues without victim-blaming—cleanly separating macro-structural upstream rules (education, informal labor, law enforcement, urban/school policy, marketing) from intermediary/proximal conditions.",
+      flowRoleTH: "ขยายมุมมองจากนิยามสุขภาวะ 4 มิติในหมวด 1 สู่แผนภาพต้นน้ำ–ปลายน้ำของปัญหาสุขภาพ เพื่อชี้จังหวะการป้องกันโรคทั้ง 4 ระดับในหมวด 3",
+      flowRoleEN: "Moves from 4-dimensional health (Section 1) to upstream–intermediary determinant pathways, setting up targeted 4-level prevention in Section 3.",
       crossLinks: [
         {
           target: "HS4:4",
-          labelTH: "HS4 · หมวด 4 (กฎบัตรออตตาวาควบคุมปัจจัยสุขภาพ)",
+          labelTH: "HS4 · หมวด 4 (กฎบัตรออตตาวาจัดการปัจจัยกำหนดสุขภาพ)",
           labelEN: "HS4 · Sec 4 (Ottawa Charter & Determinants)",
-          whyTH: "การสร้างเสริมสุขภาพมุ่งเสริมพลังและสร้างนโยบายสาธารณะเพื่อจัดการปัจจัยกำหนดสุขภาพนอกภาคการแพทย์",
-          whyEN: "Health promotion operationalizes upstream action on determinants through Healthy Public Policy.",
+          whyTH: "การสร้างเสริมสุขภาพใช้การสร้างนโยบายสาธารณะและสิ่งแวดล้อมที่เอื้อต่อสุขภาพเพื่อปรับปัจจัยต้นน้ำและปัจจัยเชิงพาณิชย์ (`CDoH`)",
+          whyEN: "Health promotion operationalizes upstream action on social and commercial determinants via Healthy Public Policy.",
         },
         {
           target: "HS6:1",
           labelTH: "HS6 · หมวด 1 (คุ้มครองครัวเรือนไม่ให้ยากจนจากค่ารักษา)",
           labelEN: "HS6 · Sec 1 (Financial Risk Protection)",
-          whyTH: "หลักประกันสุขภาพตัดวงจรที่ความเจ็บป่วยผลักครัวเรือนตกลงสู่ความยากจน (`medical impoverishment`)",
-          whyEN: "Health insurance prevents illness from worsening socioeconomic determinants through medical impoverishment.",
+          whyTH: "หลักประกันสุขภาพตัดวงจรย้อนกลับที่ความเจ็บป่วยผลักครัวเรือนตกลงสู่ความยากจน (`medical impoverishment`)",
+          whyEN: "Health insurance prevents illness from worsening socioeconomic status through catastrophic bills.",
         },
       ],
       keywords: [
-        { th: "ปัจจัยสังคมกำหนดสุขภาพ", en: "Social Determinants of Health (SDH)" },
-        { th: "ปัจจัยเชิงโครงสร้างและปัจจัยขั้นกลาง", en: "Structural & Intermediary Determinants" },
+        { th: "แผนภาพปัจจัยกำหนดสุขภาพ 4 หมวด", en: "4-Group Determinants Diagram" },
+        { th: "ปัจจัยเชิงโครงสร้างเทียบกับปัจจัยตัวกลาง", en: "Structural vs. Intermediary Determinants (CSDH)" },
         { th: "พีระมิดผลกระทบทางสุขภาพ", en: "Health Impact Pyramid" },
         { th: "ความไม่เป็นธรรมทางสุขภาพ", en: "Health Inequity" },
       ],
@@ -426,32 +444,34 @@
     "HS1:3": {
       secLabelTH: "หมวดที่ 3 · ระดับของการป้องกันโรคทั้งสี่ระดับ",
       secLabelEN: "Section 3 · Four Levels of Disease Prevention",
-      titleTH: "การป้องกันปฐมภูมิ ทุติยภูมิ ตติยภูมิ และการป้องกันระดับที่สี่ (Quaternary Prevention)",
-      titleEN: "Primary, Secondary, Tertiary, and Quaternary Prevention",
-      summaryTH: "ป้องกันให้ถูกระยะช่วยลดโรคและความพิการ แต่การรู้เท่าทันไม่ตรวจรักษาเกินจำเป็นคือหัวใจของการไม่ทำอันตรายผู้รับบริการ",
-      summaryEN: "Timely prevention halts disease progression, while wise restraint through quaternary prevention protects people from overmedicalization.",
+      titleTH: "การจำแนก Primary · Secondary · Tertiary · Quaternary Prevention ตามระยะของโรคและมุมมองความสัมพันธ์",
+      titleEN: "Classifying Primary, Secondary, Tertiary, and Quaternary Prevention by Disease Stage and Relational Matrix",
+      summaryTH: "ระดับของการป้องกันโรคไม่ได้ตัดสินจากชื่อโครงการตายตัว แต่ตัดสินจากระยะของโรคในกลุ่มเป้าหมายและวัตถุประสงค์ของมาตรการ ควบคู่กับการไม่ตรวจรักษาเกินจำเป็น",
+      summaryEN: "Prevention levels are defined never by activity labels alone, but by the target group's disease stage and intervention purpose—paired with quaternary protection against overmedicalization.",
       bullets: [
         {
-          th: "<strong>สามระดับแรกเรียงตามธรรมชาติการดำเนินโรค:</strong> ปฐมภูมิลดอุบัติการณ์ก่อนเกิดโรค ทุติยภูมิตรวจพบระยะไร้สัญญานเพื่อรักษาแต่เนิ่น ๆ และตติยภูมิลดภาวะแทรกซ้อนพร้อมฟื้นฟูสมรรถภาพ",
-          en: "<strong>Three Chronological Stages:</strong> Primary prevents onset, Secondary detects asymptomatic disease early, and Tertiary limits disability and restores function.",
+          th: "<strong>กฎเหล็ก 3 องค์ประกอบ (`① กลุ่มเป้าหมาย · ② ระยะโรค/วัตถุประสงค์ · ③ มาตรการ`):</strong> กิจกรรมชื่อเดียวกันอยู่คนละระดับได้ตามกลุ่มเป้าหมาย เช่น โครงการปรับอาหาร/นับแคลอรีและออกกำลังกาย เมื่อทำในคนสุขภาพดีเพื่อป้องกันไม่ให้เกิดโรคจัดเป็น `Primary` แต่เมื่อผู้ป่วยความดันโลหิตสูงหรือไขมันในเลือดสูงเข้าร่วมเพื่อคุมโรคและลดภาวะแทรกซ้อนหลอดเลือดหัวใจจัดเป็น `Tertiary`",
+          en: "<strong>3-Element Classification Rule (Target Group · Disease Stage/Purpose · Intervention):</strong> Identical activities shift levels by target population—lifestyle/calorie programs are Primary in healthy workers to prevent disease onset, but Tertiary in diagnosed HT/dyslipidemia patients to prevent cardiovascular complications.",
         },
         {
-          th: "<strong>การป้องกันระดับที่สี่ (Quaternary Prevention) เกิดจากรอยต่อ Disease vs. Illness:</strong> ปกป้องผู้ที่กังวลหรือผู้ป่วยจากการวินิจฉัยเกินจริง (`overdiagnosis`) และการรักษาเกินจำเป็น (`overtreatment`)",
-          en: "<strong>Quaternary Prevention Guards Against Harm:</strong> Born from the relational matrix of physician-disease vs. patient-illness, it prevents overdiagnosis and overmedicalization.",
+          th: "<strong>สามระดับตามลำดับเวลา (`Chronological View` — Leavell & Clark):</strong> `Primary` มุ่งผู้ยังไม่เกิดโรค (สร้างเสริมสุขภาพ จัดสิ่งแวดล้อม/การยศาสตร์ เลิกบุหรี่) เพื่อลดอุบัติการณ์ · `Secondary` มุ่งผู้ที่เริ่มมีความผิดปกติหรือเกิดการใช้สาร/ความเสี่ยงขึ้นแล้วแต่ยังไม่มีอาการแทรกซ้อน ด้วยการ <strong>ค้นหาระยะแรกเริ่ม (`Early detection / Screening`) และบำบัดรักษาทันที (`Prompt intervention`)</strong> (เช่น ตรวจสุขภาพประจำปีค้นหา HT/ไขมันสูง หรือคัดกรองสารเสพติดในคลินิกฝากครรภ์ทุกรายเพื่อบำบัดทันทีก่อนเกิดอันตรายต่อมารดาและทารกโดยไม่ตีตรา) · `Tertiary` มุ่งผู้ป่วยที่วินิจฉัยแล้ว (นัดติดตามรักษาต่อเนื่อง ฟื้นฟูสมรรถภาพ) เพื่อลดภาวะแทรกซ้อนและทุพพลภาพ",
+          en: "<strong>Chronological Stages (Primary · Secondary · Tertiary):</strong> Primary prevents onset in healthy groups; Secondary applies screening/early detection and non-stigmatizing prompt intervention (e.g., workplace screening or universal ANC substance screening before maternal–fetal complications); Tertiary provides ongoing disease control and rehabilitation to prevent complications.",
         },
         {
-          th: "<strong>จำแนกระดับด้วยการถาม 3 คำถาม:</strong> ใครคือกลุ่มเป้าหมาย มุ่งผลลัพธ์ระยะใดของโรค และต้องระวังผลลบลวง (ระดับ 2) หรือผลบวกลวง (ระดับ 4) มากกว่ากัน",
-          en: "<strong>Three Diagnostic Questions:</strong> Identify target population, disease stage, and whether false negatives (Secondary) or false positives (Quaternary) pose the primary risk.",
+          th: "<strong>การป้องกันระดับที่สี่ตามมุมมองความสัมพันธ์ (`Relational View` — Jamoulle):</strong> `Quaternary prevention` เกิดที่รอยต่อระหว่างมุมมองแพทย์กับผู้รับบริการ เพื่อปกป้องผู้รับบริการจากการตรวจคัดกรองแบบหว่าน การวินิจฉัยเกินจริง (`Overdiagnosis`) ผลบวกลวง และการรักษาเกินจำเป็น (`Overmedicalization`) เช่น การให้แพทย์อาชีวเวชศาสตร์ออกแบบโปรแกรมตรวจสุขภาพตามความเสี่ยงจริงของคนทำงานแทนการตรวจหว่านทุกรายการ",
+          en: "<strong>Quaternary Prevention (Jamoulle's Relational Matrix):</strong> Protects individuals from over-testing, false positives, overdiagnosis, and overtreatment—exemplified by occupational physicians tailoring checkup panels strictly to evidence-based risks.",
         },
       ],
-      flowRoleTH: "ผสานความเข้าใจ Disease–Illness (หมวด 1) และปัจจัยต้นน้ำ (หมวด 2) ออกมาเป็นกรอบปฏิบัติการป้องกันครบทั้ง 4 ระดับ",
+      caseLensTH: "ในการตอบ Case Discussion เรื่องระดับการป้องกันโรค ห้ามเขียนแค่ชื่อระดับลอย ๆ ต้องระบุควบคู่กันเสมอว่า (1) กลุ่มเป้าหมายอยู่ในระยะใดของโรค/ความเสี่ยง (2) วัตถุประสงค์มุ่งป้องกันอะไร (เช่น ค้นหาเร็วเพื่อบำบัดก่อนเกิดภาวะแทรกซ้อนต่อแม่และทารก = Secondary; ออกแบบชุดตรวจตามความเสี่ยงเพื่อกัน Over-testing = Quaternary)",
+      caseLensEN: "Never state a prevention level without justifying both (1) the target group's exact stage (healthy vs. asymptomatic/early exposure vs. established disease vs. at risk of over-testing) and (2) the intended clinical/preventive outcome.",
+      flowRoleTH: "ผสานความเข้าใจ Disease–Illness (หมวด 1) และปัจจัยกำหนดสุขภาพต้นน้ำ–ตัวกลาง (หมวด 2) ออกมาเป็นกรอบปฏิบัติการป้องกันครบทั้ง 4 ระดับ",
       flowRoleEN: "Integrates the Disease–Illness matrix (Section 1) and upstream determinants (Section 2) into four actionable levels of prevention.",
       crossLinks: [
         {
           target: "HS3:3",
           labelTH: "HS3 · หมวด 3 (ความปลอดภัยในกรอบคุณภาพ STEP)",
           labelEN: "HS3 · Sec 3 (Safety in STEP Quality)",
-          whyTH: "การป้องกันระดับที่สี่คุ้มครองความปลอดภัยของผู้ป่วยจากอันตรายของการบริการทางการแพทย์ที่เกินจำเป็น",
+          whyTH: "การป้องกันระดับที่สี่คุ้มครองความปลอดภัยของผู้ป่วยจากอันตรายของการส่งตรวจและรักษาที่เกินจำเป็น",
           whyEN: "Quaternary prevention directly advances Patient Safety (`S` in STEP) by curbing iatrogenic harm.",
         },
         {
@@ -463,40 +483,42 @@
         },
       ],
       keywords: [
-        { th: "การป้องกันปฐมภูมิ · ทุติยภูมิ · ตติยภูมิ", en: "Primary · Secondary · Tertiary Prevention" },
-        { th: "การป้องกันระดับที่สี่", en: "Quaternary Prevention" },
-        { th: "การดูแลทางการแพทย์เกินจำเป็น", en: "Overmedicalization & Overdiagnosis" },
-        { th: "ผลลบลวงเทียบกับผลบวกลวง", en: "False Negative vs. False Positive" },
+        { th: "ปฐมภูมิ · ทุติยภูมิ · ตติยภูมิ · จตุรภูมิ", en: "Primary · Secondary · Tertiary · Quaternary Prevention" },
+        { th: "ค้นหาระยะแรกและบำบัดทันท่วงที", en: "Early Detection & Prompt Intervention" },
+        { th: "กลุ่มเป้าหมายและระยะดำเนินโรค", en: "Target Population & Disease Stage" },
+        { th: "ป้องกันการตรวจรักษาเกินจำเป็น", en: "Preventing Over-Testing & Overmedicalization" },
       ],
     },
     "HS1:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์สุขภาพ ปัจจัยกำหนดสุขภาพ และการป้องกันโรค",
-      secLabelEN: "Synthesis · Health, Determinants, and Prevention",
-      titleTH: "บทสรุปความเชื่อมโยงจากความหมายของสุขภาพสู่การป้องกันโรคทั้งสี่ระดับ",
-      titleEN: "Connecting Holistic Health, Upstream Determinants, and Four-Level Prevention",
-      summaryTH: "เข้าใจคนป่วยอย่างเป็นองค์รวม แก้ปัญหาที่รากเหง้าทางสังคม และเลือกการป้องกันที่พอดี คือเข็มทิศแรกของแพทย์ระบบสุขภาพ",
-      summaryEN: "Understanding whole persons, addressing social roots, and calibrating prevention wisely form the physician's first health-systems compass.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS1 & Open Note",
+      secLabelEN: "Synthesis · HS1 Case Discussion & Open-Note Readiness",
+      titleTH: "ร้อยเรียงสุขภาวะ 4 มิติ แผนภาพปัจจัยกำหนดสุขภาพ (DoH / CSDH) และการป้องกัน 4 ระดับ",
+      titleEN: "Synthesizing 4D Holistic Health, DoH/CSDH Pathways, and 4-Level Prevention",
+      summaryTH: "ประเมินคนครบสี่มิติ วาดความเชื่อมโยงปัจจัยกำหนดสุขภาพตั้งแต่ระดับปัจเจกถึงโครงสร้างต้นน้ำ และเลือกการป้องกันทั้งสี่ระดับให้ตรงกลุ่มเป้าหมาย คือหัวใจของการวิเคราะห์กรณีศึกษา HS1",
+      summaryEN: "Assessing 4D well-being, mapping individual-to-structural determinants, and matching all 4 prevention levels to target disease stages anchor every HS1 case analysis.",
       bullets: [
         {
-          th: "<strong>สามเสาหลักของ HS1 ร้อยเรียงเป็นเรื่องเดียวกัน:</strong> นิยามสุขภาพกำหนดเป้าหมาย ปัจจัยกำหนดสุขภาพชี้ต้นเหตุความเหลื่อมล้ำ และการป้องกัน 4 ระดับกำหนดจังหวะการแทรกแซง",
-          en: "<strong>One Cohesive Arc:</strong> Health definitions set the goal, determinants reveal upstream inequities, and 4-level prevention guides proportionate action.",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 3 กรณีศึกษาของ HS1:</strong> (1) แยก `Disease–Illness–Sickness` และประเมินสุขภาวะ 4 มิติโดยแยกภาวะสุขภาพออกจากปัจจัยบวก/ลบ (2) เชื่อมแผนภาพวงล้อม DoH 4 หมวด (`↔`) และแยก `Structural` ออกจาก `Intermediary determinants` ตามกรอบ WHO CSDH และ (3) จำแนก `Primary–Quaternary prevention` จากระยะของโรคในกลุ่มเป้าหมายและเป้าหมายของมาตรการ",
+          en: "<strong>Complete HS1 Case Toolkit:</strong> (1) Separate 4D health status from +/- affecting events; (2) map bidirectional DoH rings and CSDH Structural vs. Intermediary determinants; and (3) justify all 4 prevention levels by target group and disease stage.",
         },
       ],
-      flowRoleTH: "สรุปเป้าหมายด้านสุขภาพของประชากรใน HS1 ก่อนก้าวสู่ HS2 เพื่อศึกษาว่า 'ระบบสุขภาพจัดโครงสร้างและหน้าที่อย่างไรเพื่อบรรลุเป้าหมายนี้'",
-      flowRoleEN: "Concludes HS1's health goals and transitions to HS2: how health systems are structured and organized to achieve them.",
+      caseLensTH: "ก่อนเข้าห้องอภิปราย HS1 ตรวจทาน 3 จุดที่มักพลาดบ่อย: (1) สุขภาพทางปัญญาคือสติรู้เท่าทันและการไตร่ตรองปรับพฤติกรรม (2) กฎหมาย การศึกษา โครงสร้างงานนอกระบบ และผังเมืองเป็น Structural ส่วนครอบครัว เพื่อน และสภาพงานรายวันเป็น Intermediary และ (3) กิจกรรมเดียวกันเปลี่ยนจาก Primary เป็น Tertiary เมื่อทำในผู้ป่วยที่วินิจฉัยโรคแล้ว",
+      caseLensEN: "Pre-discussion check: (1) Spiritual/intellectual health means mindful reflection and informed action; (2) education, labor laws, enforcement, and urban policy are Structural while family/peer norms and daily work conditions are Intermediary; (3) same activity shifts from Primary to Tertiary once disease is diagnosed.",
+      flowRoleTH: "สรุปเป้าหมายและรากเหง้าด้านสุขภาพใน HS1 ก่อนก้าวสู่ HS2 เพื่อวิเคราะห์ว่า 'ระบบสุขภาพจัดโครงสร้าง 6 Building Blocks และรูปแบบการดูแล 6W อย่างไร'",
+      flowRoleEN: "Concludes HS1's health and determinant foundations and transitions to HS2: organizing 6 Building Blocks and 6W Models of Care.",
       crossLinks: [
         {
           target: "HS2:1",
           labelTH: "ต่อยอดสู่ HS2 · หมวด 1 (นิยามและขอบเขตระบบสุขภาพ)",
           labelEN: "Next: HS2 · Sec 1 (Health System Definition)",
-          whyTH: "เมื่อรู้ว่าสุขภาพถูกกำหนดจากหลายภาคส่วน จึงต้องนิยามระบบสุขภาพให้ครอบคลุมทุกกิจกรรมที่มุ่งสร้างสุขภาพ",
+          whyTH: "เมื่อรู้ว่าสุขภาพถูกกำหนดจากหลายภาคส่วน จึงต้องนิยามระบบสุขภาพให้ครอบคลุมทุกกิจกรรมที่มีเจตนาหลักเพื่อสุขภาพ",
           whyEN: "Because health has multi-sectoral determinants, HS2 defines the health system around all health-enhancing actions.",
         },
       ],
       keywords: [
-        { th: "สุขภาวะองค์รวม", en: "Holistic Well-Being" },
-        { th: "การแก้ปัญหาที่ต้นน้ำ", en: "Upstream Action" },
-        { th: "การป้องกันโรคที่สมดุล", en: "Proportionate Prevention" },
+        { th: "สุขภาวะองค์รวม 4 มิติ", en: "4D Holistic Well-Being" },
+        { th: "แผนภาพ DoH และกรอบ WHO CSDH", en: "DoH Diagram & WHO CSDH" },
+        { th: "การป้องกันโรค 4 ระดับตามกลุ่มเป้าหมาย", en: "Stage-Specific 4-Level Prevention" },
       ],
     },
 
@@ -506,19 +528,21 @@
       secLabelEN: "Section 1 · Definition and Boundaries of Health Systems",
       titleTH: "เกณฑ์เจตนาหลักเพื่อสุขภาพ (Primary Intent) และการทำงานข้ามภาคส่วน",
       titleEN: "Primary Intent Criterion and Intersectoral Responsibility",
-      summaryTH: "ระบบสุขภาพกว้างกว่ารั้วโรงพยาบาล เพราะนับรวมทุกองค์กรและกิจกรรมที่มีเจตนาหลักเพื่อคุ้มครองและฟื้นฟูสุขภาพของผู้คน",
+      summaryTH: "ระบบสุขภาพกว้างกว่ารั้วโรงพยาบาล เพราะนับรวมทุกองค์กร ทรัพยากร และกิจกรรมที่มีเจตนาหลักเพื่อส่งเสริม ฟื้นฟู หรือธำรงรักษาสุขภาพ",
       summaryEN: "A health system extends far beyond hospital walls to encompass every actor and action whose primary intent is to promote, restore, or maintain health.",
       bullets: [
         {
-          th: "<strong>ใช้เกณฑ์เจตนาหลัก (Primary Intent) ขีดเส้นขอบเขต:</strong> ตามนิยาม WHO (2000) กิจกรรมอย่างกฎหมายคาดเข็มขัดนิรภัยหรือการดูแลผู้ป่วยโดยครอบครัวถือเป็นส่วนหนึ่งของระบบสุขภาพ",
-          en: "<strong>Primary-Intent Criterion (WHO 2000):</strong> Road-safety laws and family caregiving belong inside the health system because their primary purpose is health.",
+          th: "<strong>ใช้เกณฑ์เจตนาหลักเพื่อสุขภาพ (`Primary Intent`) ขีดเส้นแบ่งขอบเขต:</strong> ตามนิยาม WHO (2000) กิจกรรมอย่างการดูแลผู้ป่วยโดยครอบครัวในบ้าน อาสาสมัครชุมชน หรือกฎหมายความปลอดภัยทางถนนเพื่อลดการบาดเจ็บ ล้วนอยู่ในขอบเขตของระบบสุขภาพ",
+          en: "<strong>Primary-Intent Criterion (WHO 2000):</strong> Family caregiving, community volunteers, and road-safety mandates belong inside the health system because their primary purpose is health.",
         },
         {
-          th: "<strong>แยกกิจกรรมในระบบออกจากการผลักดันข้ามภาคส่วน:</strong> นโยบายด้านอื่น (เช่น การศึกษาหรือการค้า) ที่ส่งผลต่อสุขภาพแต่ไม่มีเจตนาหลักเพื่อสุขภาพ เป็นพื้นที่ที่ระบบสุขภาพต้องเข้าไปร่วมผลักดัน (`intersectoral action`)",
-          en: "<strong>Inside vs. Intersectoral Advocacy:</strong> Policies like general education affect health without having health as their primary intent, calling for intersectoral stewardship.",
+          th: "<strong>แยกกิจกรรมในระบบออกจากการผลักดันข้ามภาคส่วน (`Intersectoral Action`):</strong> นโยบายด้านอื่น (เช่น การศึกษา การเกษตร อุตสาหกรรม หรือการปกครองท้องถิ่น) ที่มีเจตนาหลักด้านอื่นแต่ส่งผลกระทบต่อสุขภาพ เป็นพื้นที่ที่ภาคสุขภาพต้องเข้าไปร่วมชี้นำและประสานความร่วมมือ",
+          en: "<strong>Inside Boundary vs. Intersectoral Stewardship:</strong> Policies like general education or local administration affect health without having health as their primary intent, calling for intersectoral collaboration.",
         },
       ],
-      flowRoleTH: "กำหนดเส้นแบ่งขอบเขตของระบบสุขภาพให้ชัดเจน ก่อนแยกโครงสร้างภายในระบบออกเป็นสองวงจรที่สัมพันธ์กันในหมวด 2",
+      caseLensTH: "ใช้เกณฑ์ Primary Intent ช่วยขีดเส้นว่าเมื่อแก้ปัญหาระบบบริการและการดูแลระยะยาวในชุมชน ผู้ดูแลในครอบครัว อสม. และองค์กรปกครองส่วนท้องถิ่นที่จัดบริการสุขภาพถือเป็นกำลังสำคัญภายในระบบสุขภาพ ไม่ใช่คนนอก",
+      caseLensEN: "Apply the Primary Intent rule to recognize family caregivers, community health volunteers, and local government health initiatives as integral actors inside the health system.",
+      flowRoleTH: "กำหนดเส้นแบ่งขอบเขตของระบบสุขภาพให้ชัดเจน ก่อนแยกโครงสร้างภายในระบบออกเป็นสองวงจรที่ส่งผลถึงกันในหมวด 2",
       flowRoleEN: "Draws the boundary of the health system before unpacking its two internal structural subsystems in Section 2.",
       crossLinks: [
         {
@@ -547,26 +571,28 @@
       secLabelEN: "Section 2 · Components and Bidirectional Structure of Health Systems",
       titleTH: "ความเชื่อมโยงสองทิศทางระหว่างระบบบริการสุขภาพและปัจจัยกำหนดสุขภาพ",
       titleEN: "Bidirectional Links Between Health Services and Health Determinants",
-      summaryTH: "ระบบบริการสุขภาพกับปัจจัยทางสังคมไม่ได้แยกกันเดิน แต่ส่งแรงสะท้อนถึงกันสองทิศทางตลอดเวลา",
-      summaryEN: "Health care delivery and social determinants do not run on separate tracks; they continuously reinforce or buffer each other in both directions.",
+      summaryTH: "ระบบบริการสุขภาพกับปัจจัยกำหนดสุขภาพไม่ได้แยกกันเดิน แต่ส่งแรงสะท้อนถึงกันสองทิศทางทั้งการสร้างภาระโรคและการประคองวิถีชีวิตครัวเรือน",
+      summaryEN: "Health care delivery and social determinants continuously reinforce or buffer each other in both directions.",
       bullets: [
         {
-          th: "<strong>ทิศทางที่ 1 ปัจจัยกำหนดสุขภาพสร้างภาระโรคเข้าสู่โรงพยาบาล:</strong> สภาพแวดล้อม เศรษฐกิจ และพฤติกรรมกำหนดว่าใครเจ็บป่วยด้วยโรคใดและเข้าถึงบริการได้ยากง่ายเพียงใด",
-          en: "<strong>Determinants Drive Service Demand:</strong> Living conditions and social position shape both disease burden and barriers to seeking care.",
+          th: "<strong>ทิศทางที่ 1 ปัจจัยกำหนดสุขภาพกำหนดภาระโรคและรูปแบบการมาใช้บริการ:</strong> โครงสร้างประชากรสูงวัย สภาพเศรษฐกิจ สิ่งแวดล้อม และความพร้อมของครอบครัวกำหนดว่าผู้ป่วยจะเข้าสู่โรงพยาบาลด้วยโรคเรื้อรังหรือภาวะวิกฤตเพียงใด",
+          en: "<strong>Determinants Shape Service Load:</strong> Aging demographics, living conditions, and family caregiving capacity drive both chronic disease volume and acute hospital demand.",
         },
         {
-          th: "<strong>ทิศทางที่ 2 ระบบบริการสุขภาพย้อนกลับไปเปลี่ยนปัจจัยกำหนดสุขภาพได้:</strong> ระบบบริการที่เข้าถึงได้โดยไม่ล้มละลายช่วยรักษาความสามารถในการทำงานและฐานะทางเศรษฐกิจของครัวเรือน",
-          en: "<strong>Services Reshape Determinants:</strong> Accessible, financially protective care preserves household livelihoods and prevents downward social drift.",
+          th: "<strong>ทิศทางที่ 2 ระบบบริการสุขภาพย้อนกลับไปเปลี่ยนปัจจัยกำหนดสุขภาพได้:</strong> บริการที่เข้าถึงได้ ฟื้นฟูสมรรถภาพต่อเนื่อง และไม่ทำให้ครัวเรือนล้มละลาย ช่วยให้ผู้ป่วยกลับไปพึ่งพาตนเอง ประกอบอาชีพ และดำรงชีวิตในสังคมได้",
+          en: "<strong>Services Reshape Social Determinants:</strong> Accessible, rehabilitative, and financially protective care restores functional independence, employability, and household stability.",
         },
       ],
-      flowRoleTH: "เชื่อมโครงสร้างสองซีกของระบบสุขภาพจากหมวด 1 เพื่อปูทางสู่การแยกแยะ 'หน้าที่' กับ 'เป้าหมาย' ของระบบในหมวด 3",
-      flowRoleEN: "Connects the health system's service and determinant subsystems, setting up Functions vs. Goals in Section 3.",
+      caseLensTH: "ช่วยอธิบายในกรณีศึกษาว่าเมื่อครอบครัวและชุมชนเกินขีดความสามารถในการรับมือระยะวิกฤต โรงพยาบาลต้องเข้ามารองรับ และเมื่ออาการสงบ ระบบบริการต้องฟื้นฟูทักษะสังคมและอาชีพเพื่อส่งผู้ป่วยกลับสู่ชุมชนอย่างมั่นคง",
+      caseLensEN: "Explains why inpatient services must step in when acute illness exceeds family capacity, and why outpatient/rehabilitative services must rebuild social and vocational functioning afterward.",
+      flowRoleTH: "เชื่อมโครงสร้างสองซีกของระบบสุขภาพจากหมวด 1 เพื่อปูทางสู่การแยกแยะ '4 หน้าที่' กับ '3 เป้าหมายหลัก' ของระบบในหมวด 3",
+      flowRoleEN: "Connects the health system's service and determinant subsystems, setting up Functions vs. Intrinsic Objectives in Section 3.",
       crossLinks: [
         {
           target: "HS1:2",
           labelTH: "HS1 · หมวด 2 (กรอบ CSDH Solar & Irwin)",
           labelEN: "HS1 · Sec 2 (CSDH Framework)",
-          whyTH: "ในกรอบ CSDH ระบบบริการสุขภาพทำหน้าที่เป็นปัจจัยขั้นกลางที่ลดผลกระทบจากการป่วยต่อสถานะทางสังคมได้",
+          whyTH: "ในกรอบ CSDH ระบบบริการสุขภาพทำหน้าที่เป็นปัจจัยตัวกลางที่ลดผลกระทบจากการป่วยต่อสถานะทางเศรษฐกิจและสังคมได้",
           whyEN: "Matches CSDH's insight that health systems mediate whether illness causes socioeconomic loss.",
         },
         {
@@ -580,39 +606,41 @@
       keywords: [
         { th: "ระบบบริการสุขภาพ", en: "Health Services System" },
         { th: "ความสัมพันธ์สองทิศทาง", en: "Bidirectional Relationship" },
-        { th: "การคุ้มครองฐานะเศรษฐกิจครัวเรือน", en: "Livelihood Protection" },
+        { th: "การฟื้นฟูการพึ่งตนเองและอาชีพ", en: "Livelihood & Functional Recovery" },
       ],
     },
     "HS2:3": {
-      secLabelTH: "หมวดที่ 3 · หน้าที่ เป้าหมาย และคุณลักษณะที่พึงประสงค์ของระบบสุขภาพ",
-      secLabelEN: "Section 3 · Functions, Intrinsic Goals, and Desirable Attributes",
-      titleTH: "แยกสิ่งที่ระบบทำ (4 หน้าที่) ออกจากผลลัพธ์ที่ระบบมุ่งหวัง (3 เป้าหมายหลัก)",
-      titleEN: "Distinguishing What Systems Do (4 Functions) from Why They Exist (3 Goals)",
-      summaryTH: "อย่าสับสนระหว่างเครื่องมือกับจุดหมาย หน้าที่ทั้งสี่คือสิ่งที่ระบบลงมือทำ ส่วนสุขภาพดี การตอบสนอง และความเป็นธรรมทางการเงินคือจุดหมายปลายทาง",
-      summaryEN: "Never confuse means with ends: four core functions are what a health system does, while health, responsiveness, and fair financing are why it exists.",
+      secLabelTH: "หมวดที่ 3 · หน้าที่ 4 ด้าน เป้าหมายหลัก 3 ประการ และคุณลักษณะขั้นกลาง",
+      secLabelEN: "Section 3 · Four Functions, Three Intrinsic Objectives, and Intermediate Attributes",
+      titleTH: "แยกสิ่งที่ระบบทำ (4 Functions) ออกจากผลลัพธ์ปลายทาง (3 Objectives) ตามกรอบ WHO (2000)",
+      titleEN: "Distinguishing What Systems Do (4 Functions) from Why They Exist (3 Objectives — WHO 2000)",
+      summaryTH: "อย่าสับสนระหว่างเครื่องมือกับจุดหมาย หน้าที่ทั้งสี่คือกลไกต้นน้ำที่ระบบลงมือทำ ส่วนสุขภาพดี การตอบสนอง และความเป็นธรรมทางการเงินคือเป้าหมายสุดท้าย",
+      summaryEN: "Never confuse means with ends: four core functions are how a system operates, while health, responsiveness, and fair financial contribution are why it exists.",
       bullets: [
         {
-          th: "<strong>4 หน้าที่หลัก (WHO 2000):</strong> (1) การจัดบริการสุขภาพ (2) การสร้างทรัพยากร (3) การคลังสุขภาพ (ระดมทุน รวมความเสี่ยง ซื้อบริการ) และ (4) การอภิบาลระบบ (`stewardship`)",
-          en: "<strong>Four Core Functions (WHO 2000):</strong> Service provision, resource generation, financing (collecting, pooling, purchasing), and stewardship.",
+          th: "<strong>4 หน้าที่หลักและความเชื่อมโยงเชิงโครงสร้าง (`WHO 2000 Framework`):</strong> `Stewardship` (การอภิบาลระบบ) ส่งลูกศรกำกับทุกหน้าที่ ขณะที่ `Financing` (ระดมทุน รวมความเสี่ยง ซื้อบริการ) หนุนทั้ง `Creating resources` (สร้างกำลังคน ยา/เทคโนโลยี และข้อมูล) เพื่อนำไปสู่ `Delivering services` (การจัดบริการสุขภาพ)",
+          en: "<strong>Four Interlinked Functions (WHO 2000):</strong> Stewardship guides the entire system, while Financing enables Resource Generation and Service Provision.",
         },
         {
-          th: "<strong>3 เป้าหมายสุดท้ายวัดทั้งระดับเฉลี่ยและการกระจายที่เป็นธรรม:</strong> สุขภาพดีขึ้น (`health`) ตอบสนองความคาดหวังที่ไม่ใช่ด้านคลินิก (`responsiveness`) และความเป็นธรรมในการจ่ายเงินสมทบ (`fairness in financial contribution`)",
-          en: "<strong>Three Intrinsic Goals (Level & Equity):</strong> Improving health, enhancing non-clinical responsiveness, and ensuring fair financial contribution.",
+          th: "<strong>3 เป้าหมายหลักปลายทาง (`Intrinsic Objectives` — วัดทั้งค่าเฉลี่ยและความเป็นธรรมของการกระจาย):</strong> (1) `Health` (สุขภาพดีขึ้นและเหลื่อมล้ำลดลง) (2) `Responsiveness` (ตอบสนองความคาดหวังอันชอบธรรมที่ไม่ใช่ด้านเทคนิคคลินิก เช่น เคารพศักดิ์ศรี รวดเร็ว เลือกหน่วยบริการได้) และ (3) `Fairness in financial contribution` (ร่วมจ่ายตามกำลัง ไม่ล้มละลายยามป่วย)",
+          en: "<strong>Three Intrinsic Objectives (Level & Distribution):</strong> Improving Health, enhancing non-clinical Responsiveness, and ensuring Fair Financial Contribution.",
         },
         {
-          th: "<strong>คุณลักษณะที่พึงประสงค์เป็นตัวชี้วัดขั้นกลาง:</strong> การเข้าถึง ความครอบคลุม คุณภาพ ประสิทธิภาพ และความยืดหยุ่น เชื่อมการทำงานของหน้าที่ไปสู่เป้าหมายสุดท้าย",
-          en: "<strong>Intermediate Performance Bridges:</strong> Access, quality, efficiency, and resilience translate functional inputs into intrinsic system goals.",
+          th: "<strong>คุณลักษณะที่พึงประสงค์เป็นสะพานขั้นกลาง:</strong> การเข้าถึง คุณภาพ ประสิทธิภาพ และความยืดหยุ่น เป็นเกณฑ์ตรวจสอบว่าการทำหน้าที่ทั้ง 4 ด้านกำลังมุ่งไปสู่เป้าหมายทั้ง 3 ประการจริงหรือไม่",
+          en: "<strong>Intermediate Performance Bridges:</strong> Access, quality, efficiency, and resilience verify whether functional operations actually advance intrinsic goals.",
         },
       ],
-      flowRoleTH: "วางกรอบวิธีคิด Means vs. Ends ของ WHO (2000) ก่อนแปลงออกเป็นองค์ประกอบปฏิบัติการ 6 Building Blocks ในหมวด 4",
-      flowRoleEN: "Establishes WHO 2000's functions-to-goals logic before translating functions into the 6 operational Building Blocks in Section 4.",
+      caseLensTH: "ใช้แผนผัง WHO (2000) มองทะลุปัญหาหน้างานว่า คอขวดของการจัดบริการ (`Delivering services`) มักมีรากมาจากกฎระเบียบการอภิบาล (`Stewardship`) การคลัง (`Financing`) หรือการสร้างและจัดสรรทรัพยากร (`Creating resources` ซึ่งขยายเป็น 3 กล่องใน WHO 2007)",
+      caseLensEN: "Use the WHO (2000) arrow diagram to trace frontline service bottlenecks back to upstream Stewardship rules, Financing constraints, and Resource Generation.",
+      flowRoleTH: "วางกรอบวิธีคิด Means vs. Ends ของ WHO (2000) ก่อนแตกออกเป็นกรอบวิเคราะห์ปฏิบัติการ 6 Building Blocks ในหมวด 4",
+      flowRoleEN: "Establishes WHO 2000's functions-to-objectives architecture before unpacking the 6 operational Building Blocks in Section 4.",
       crossLinks: [
         {
           target: "HS3:1",
           labelTH: "HS3 · หมวด 1 (คุณลักษณะพึงประสงค์ในฐานะสัญญาณเตือนล่วงหน้า)",
           labelEN: "HS3 · Sec 1 (Process Attributes as Early Signals)",
-          whyTH: "บท HS3 ทั้งบทขยายรายละเอียดของคุณลักษณะขั้นกลาง (EQESaRR) ที่เชื่อมหน้าที่ไปสู่เป้าหมายสุดท้าย",
-          whyEN: "All of HS3 elaborates the intermediate process qualities (EQESaRR) introduced here.",
+          whyTH: "บท HS3 ทั้งบทขยายรายละเอียดของคุณลักษณะขั้นกลาง (`EQESaRR`) ที่เชื่อมหน้าที่ไปสู่เป้าหมายสุดท้าย",
+          whyEN: "All of HS3 elaborates the intermediate process qualities (`EQESaRR`) introduced here.",
         },
         {
           target: "HS6:1",
@@ -623,83 +651,92 @@
         },
       ],
       keywords: [
-        { th: "สี่หน้าที่หลักของระบบสุขภาพ", en: "Four Health System Functions" },
+        { th: "สี่หน้าที่หลักของระบบสุขภาพ", en: "Four Health System Functions (WHO 2000)" },
         { th: "การอภิบาลระบบ", en: "Stewardship" },
         { th: "การตอบสนองความคาดหวัง", en: "Responsiveness" },
         { th: "ความเป็นธรรมด้านการคลัง", en: "Fairness in Financial Contribution" },
       ],
     },
     "HS2:4": {
-      secLabelTH: "หมวดที่ 4 · หกองค์ประกอบหลัก (6 Building Blocks) และห่วงโซ่ผลลัพธ์",
-      secLabelEN: "Section 4 · Six Building Blocks, CAS Dynamics, and Results Chain",
-      titleTH: "การทำงานสอดประสานของ 6 Building Blocks และการติดตามประเมินผลตลอดห่วงโซ่",
-      titleEN: "Dynamic Interplay of the Six Building Blocks and M&E Results Chain",
-      summaryTH: "หกเสาหลักของระบบสุขภาพแข็งแรงเมื่อยึดโยงกันเป็นเครือข่าย การแก้เพียงเสาเดียวโดยลืมการอภิบาลและข้อมูลไม่อาจสร้างผลลัพธ์ที่ยั่งยืนได้",
-      summaryEN: "Six building blocks stand strong only as a connected web; strengthening one block in isolation cannot sustain system-wide health gains.",
+      secLabelTH: "หมวดที่ 4 · หกองค์ประกอบหลัก (WHO 6 Building Blocks) และพลวัต CAS",
+      secLabelEN: "Section 4 · WHO Six Building Blocks, CAS Dynamics & Results Chain",
+      titleTH: "การวินิจฉัยคอขวดและทางออกของโรงพยาบาลอย่างเป็นระบบครบทั้ง 6 Building Blocks",
+      titleEN: "Diagnosing Hospital Bottlenecks and Aligned Solutions Across All Six Building Blocks",
+      summaryTH: "วิกฤตในโรงพยาบาลไม่เคยเกิดจากองค์ประกอบเดียวโดด ๆ ผู้บริหารเชิงระบบต้องจำแนกปัญหาและจับคู่ทางออกให้ตรงครบทั้งหกองค์ประกอบพร้อมเห็นจุดคานงัดด้านการอภิบาลและการคลัง",
+      summaryEN: "Hospital crises never stem from one isolated silo; systems leaders map evidence and aligned solutions across all six building blocks while spotting governance and financing leverage.",
       bullets: [
         {
-          th: "<strong>6 Building Blocks (WHO 2007) แปลงหน้าที่ให้จับต้องได้:</strong> บริการสุขภาพ กำลังคน ข้อมูลสารสนเทศ ยาและเทคโนโลยี การคลังสุขภาพ และภาวะผู้นำ/การอภิบาล",
-          en: "<strong>Six Operational Building Blocks (WHO 2007):</strong> Service delivery, workforce, information systems, medical products/technologies, financing, and leadership/governance.",
+          th: "<strong>จำแนกขอบเขตของทั้ง 6 Building Blocks (`WHO 2007`) ให้แม่นยำไม่ปนกัน:</strong> <strong>(1) `Service Delivery`</strong> (รูปแบบบริการ ระบบด่านหน้า `Gatekeeper` ลดแออัดเคสคงที่ ความรวดเร็วปลอดภัยของ `EMS` และ `Teleconsultation`) · <strong>(2) `Health Workforce`</strong> (ชั่วโมงงาน ภาวะหมดไฟ `Burnout` การลาออก การใช้ทักษะไม่ตรงศักยภาพ และการแก้ด้วย `Nurse-led clinic` / `Task-shifting`) · <strong>(3) `Health Information Systems`</strong> (การเชื่อมต่อข้อมูล `Interoperability` กับแอปภายนอก ลดการกรอกข้อมูลซ้ำซ้อน)",
+          en: "<strong>Master Blocks 1–3 Distinctly:</strong> (1) Service Delivery (gatekeeping for stable NCDs, EMS timeliness, teleconsultation); (2) Health Workforce (burnout, retention, skill mix, nurse-led clinics & task-shifting); (3) Health Information Systems (interoperability and eliminating duplicate data entry).",
         },
         {
-          th: "<strong>ภาวะผู้นำและข้อมูลเป็นแกนเชื่อมทุกเสา:</strong> ในระบบซับซ้อน (`CAS`) การเพิ่มยาหรือคนโดยขาดระบบข้อมูลและการกำกับดูแลมักไม่เกิดผลลัพธ์ทางสุขภาพจริง",
-          en: "<strong>Governance & Information Bind the Web:</strong> Within a CAS, adding drugs or staff without information feedback and governance fails to improve care.",
+          th: "<strong>เชื่อมอีก 3 องค์ประกอบสนับสนุนและกำกับทิศทาง:</strong> <strong>(4) `Medical Products, Vaccines & Technologies`</strong> (มาตรฐานคลังยา ระบบลูกโซ่ความเย็น `Cold chain` และห่วงโซ่อุปทานเวชภัณฑ์ใน รพ.สต.) · <strong>(5) `Health Financing`</strong> (ความคล่องตัวของงบลงทุน `Capital investment` และงบสนับสนุนจากการกระจายอำนาจทางการคลังสู่ท้องถิ่น/อบจ.) · <strong>(6) `Leadership & Governance`</strong> (อำนาจตัดสินใจอิสระของโรงพยาบาล `Autonomy` การปลดล็อกระเบียบส่วนกลางที่ล่าช้า และการกระจายอำนาจอภิบาล)",
+          en: "<strong>Master Blocks 4–6 Distinctly:</strong> (4) Medical Products & Technologies (supply chain and cold-chain standards); (5) Health Financing (capital investment flexibility and fiscal decentralization); (6) Leadership & Governance (hospital autonomy, timely regulatory guidelines, and decentralized stewardship).",
         },
         {
-          th: "<strong>ติดตามประเมินผลตามห่วงโซ่ Input → Output → Outcome → Impact:</strong> ช่วยแยกแยะว่าปัญหาติดขัดที่ทรัพยากร การส่งมอบบริการ ความครอบคลุม หรือผลลัพธ์สุขภาพ",
-          en: "<strong>Results-Chain M&E:</strong> Tracing inputs, outputs, outcomes, and impacts pinpoints exactly where implementation bottlenecks arise.",
+          th: "<strong>อ่านความเชื่อมโยงข้ามกล่องแบบ `CAS` (`de Savigny & Adam, 2009`) และห่วงโซ่ผลลัพธ์:</strong> ทั้ง 6 องค์ประกอบมี `People` อยู่ตรงกลาง โดยคอขวดของ `Governance` (รอกฎระเบียบส่วนกลาง) และ `Financing` มักไปล็อกการปรับ `Workforce`, `HIS` และ `Cold chain` จนเกิดวิกฤตที่ `Service Delivery` จึงต้องประเมินครบห่วงโซ่ `Input → Output → Outcome → Impact`",
+          en: "<strong>CAS Interdependence & Results Chain:</strong> With People at the center, Governance and Financing bottlenecks constrain Workforce, HIS, and Cold-Chain readiness—requiring synchronized solutions tracked across Input → Output → Outcome → Impact.",
         },
       ],
-      flowRoleTH: "จากภาพรวม 6 เสาหลักของระบบในหมวด 4 จึงซูมเข้าสู่เสาที่ใกล้ชิดแพทย์ที่สุดคือ 'การออกแบบการจัดบริการสุขภาพ' ในหมวด 5",
-      flowRoleEN: "Zooms from the 6 system-wide Building Blocks into the block closest to clinical practice—Service Delivery design—in Section 5.",
+      caseLensTH: "ในการตอบตารางวิเคราะห์ปัญหาโรงพยาบาลตาม WHO 6 Building Blocks ต้องตรวจสอบความสอดคล้องรวดเดียวทั้ง 3 คอลัมน์ในแต่ละแถว: [ชื่อ Building Block] ↔ [หลักฐานปัญหาจากโจทย์ที่ตรงองค์ประกอบนั้น] ↔ [แนวทางแก้ปัญหาที่ตรงจุดเดียวกัน] เช่น ปัญหาคลังยา/Cold chain คู่กับ Medical Products ส่วนปัญหารอระเบียบส่วนกลาง/ขาดอิสระตัดสินใจ คู่กับ Leadership & Governance",
+      caseLensEN: "When completing a 6 Building Blocks matrix, ensure strict 3-column alignment per row—matching each Building Block to its exact scenario evidence and corresponding solution (e.g., cold-chain standards → Medical Products; centralized regulatory bottlenecks/autonomy → Leadership & Governance).",
+      flowRoleTH: "จากภาพรวมระดับบริหารทั้ง 6 เสาหลักในหมวด 4 จึงซูมเข้าสู่เสาที่ใกล้ชิดเวชปฏิบัติที่สุดคือ 'การเลือกรูปแบบการดูแลผู้ป่วย (Models of Care)' ในหมวด 5",
+      flowRoleEN: "Zooms from macro hospital stewardship across the 6 Building Blocks into clinical Service Delivery design and Models of Care in Section 5.",
       crossLinks: [
         {
           target: "ST1:2",
           labelTH: "ST1 · หมวด 2 (ปฏิสัมพันธ์ในระบบซับซ้อน CAS)",
           labelEN: "ST1 · Sec 2 (CAS Interdependence)",
-          whyTH: "De Savigny & Adam (2009) ชี้ว่า 6 Building Blocks ต้องอ่านผ่านแว่น CAS เพราะทุกกล่องมีวงจรป้อนกลับถึงกัน",
-          whyEN: "Applies CAS thinking so the 6 Building Blocks are managed as dynamic interactions, not static checklists.",
+          whyTH: "De Savigny & Adam (2009) ชี้ว่า 6 Building Blocks ต้องอ่านผ่านแว่น CAS เพราะทุกกล่องส่งผลสะท้อนถึงกัน",
+          whyEN: "Applies CAS thinking so the 6 Building Blocks are managed as dynamic interactions rather than isolated checklists.",
         },
         {
-          target: "HS6:2",
-          labelTH: "HS6 · หมวด 2 (บทบาทผู้รับประกัน ระบบการคลัง และข้อมูล)",
-          labelEN: "HS6 · Sec 2 (Insurer, Financing & Information)",
-          whyTH: "ผู้รับประกันเชื่อมเสาการคลัง เสาข้อมูลสารสนเทศ และเสาการจัดบริการเข้าด้วยกันผ่านการซื้อบริการ",
-          whyEN: "Third-party insurers link the financing, health information, and service delivery blocks.",
+          target: "HS5:7",
+          labelTH: "HS5 · หมวด 7 (เครือข่าย รพช.–รพ.สต. และการถ่ายโอนสู่ อบจ.)",
+          labelEN: "HS5 · Sec 7 (District Network & PHC Decentralization)",
+          whyTH: "การยกระดับ รพ.สต. เป็นด่านหน้าและการบริหารจัดการหลังถ่ายโอนสู่ อบจ. เชื่อมโยงโดยตรงกับพัฒนาการปฐมภูมิไทยใน HS5",
+          whyEN: "Strengthening subdistrict gatekeepers and local-government decentralization connects directly to Thailand's PHC evolution in HS5.",
         },
       ],
       keywords: [
         { th: "หกองค์ประกอบหลักของระบบสุขภาพ", en: "WHO Six Building Blocks" },
-        { th: "ห่วงโซ่ผลลัพธ์การติดตามประเมินผล", en: "M&E Results Chain" },
-        { th: "ภาวะผู้นำและการอภิบาล", en: "Leadership & Governance" },
+        { th: "การขยายบทบาทและมอบหมายงาน", en: "Nurse-Led Clinic & Task-Shifting" },
+        { th: "การเชื่อมต่อข้อมูลและลูกโซ่ความเย็น", en: "Interoperability & Cold Chain" },
+        { th: "ความเป็นอิสระและการกระจายอำนาจ", en: "Autonomy & Decentralization" },
       ],
     },
     "HS2:5": {
-      secLabelTH: "หมวดที่ 5 · การออกแบบการจัดบริการ ระดับบริการ และรูปแบบการดูแล",
-      secLabelEN: "Section 5 · Service Delivery Levels & Models of Care",
-      titleTH: "การเชื่อมโยงบริการระดับปฐมภูมิ ทุติยภูมิ ตติยภูมิ และรูปแบบการดูแลที่ยึดคนเป็นศูนย์กลาง",
-      titleEN: "Integrating Care Levels and Person-Centered Models of Care",
-      summaryTH: "โรงพยาบาลตติยภูมิรักษาโรคซับซ้อนได้ดีที่สุดก็ต่อเมื่อมีบริการปฐมภูมิที่เข้มแข็งคอยคัดกรอง ประสาน และดูแลผู้ป่วยต่อเนื่องใกล้บ้าน",
-      summaryEN: "Tertiary hospitals excel at complex care only when anchored by strong primary care that coordinates continuous care close to home.",
+      secLabelTH: "หมวดที่ 5 · ระดับบริการ รูปแบบการดูแล (Models of Care) และกรอบ 6W",
+      secLabelEN: "Section 5 · Levels of Care, Models of Care & The 6W Design Framework",
+      titleTH: "การเลือกรูปแบบการดูแล (Acute vs. Chronic/Ambulatory & Rehab) ให้สอดคล้องกันทั้ง WHAT · WHY · HOW (6W)",
+      titleEN: "Aligning Acute vs. Chronic/Ambulatory & Rehabilitative Models of Care via WHAT · WHY · HOW (6W)",
+      summaryTH: "ผู้ป่วยคนละระยะโรคต้องการรูปแบบการดูแลคนละแบบ แพทย์จึงต้องออกแบบเป้าหมาย วิธีการ สถานที่ และบทบาททีมสหวิชาชีพให้สอดรับกับสภาวะผู้ป่วยอย่างเป็นเหตุเป็นผล",
+      summaryEN: "Different illness trajectories demand distinct Models of Care—aligning clinical conditions (WHY) with the right care model (WHAT) and 6W management design (HOW).",
       bullets: [
         {
-          th: "<strong>จำแนกหน่วยบริการและ 4 ระดับการดูแล:</strong> การดูแลตนเองและครอบครัว → ปฐมภูมิ (ด่านแรกต่อเนื่อง) → ทุติยภูมิ → ตติยภูมิ/จตุตถภูมิ ซึ่งต้องมีระบบส่งต่อไป–กลับสองทาง (`two-way referral`)",
-          en: "<strong>Four Connected Levels of Care:</strong> Self/family care, primary, secondary, and tertiary care work эффективно only with seamless two-way referral and counter-referral.",
+          th: "<strong>จำแนกรูปแบบการดูแล (`WHAT: Model of Care`) จากสภาวะทางคลินิกและการพึ่งตนเอง (`WHY: Patient Conditions`):</strong> <strong>`Acute Care`</strong> เหมาะกับระยะกำเริบเฉียบพลัน (`Acute exacerbation`) หรือภาวะละเลยการดูแลตนเองรุนแรง (`Severe self-neglect` เช่น ไม่กินน้ำ/อาหารหลายวันจนทรุดโทรม แม้สัญญาณชีพยังปกติ) ซึ่งเกินขีดความสามารถของบ้านและต้องดูแลใกล้ชิด 24 ชม. · ส่วน <strong>`Chronic / Ambulatory Care` ควบคู่ `Rehabilitative Care`</strong> เหมาะกับโรคเรื้อรังระยะอาการสงบคงที่ (`Stable`) ที่อยู่ร่วมกับครอบครัวในชุมชนได้ แต่ต้องป้องกันการกลับเป็นซ้ำและฟื้นฟูทักษะสังคม/อาชีพ",
+          en: "<strong>Match WHAT (Model) to WHY (Clinical & Functional Condition):</strong> Choose Acute Care when acute exacerbation or severe self-neglect (even with stable vital signs) exceeds home safety and requires 24-hour stabilization; choose Chronic/Ambulatory + Rehabilitative Care for stable long-term conditions needing relapse prevention and social/vocational recovery.",
         },
         {
-          th: "<strong>รูปแบบการดูแล (Model of Care) ตอบโจทย์ภาระโรคยุคใหม่:</strong> สังคมสูงวัยและโรคเรื้อรังต้องการการดูแลแบบบูรณาการต่อเนื่อง (`integrated people-centred care`) แทนการตั้งรับเป็นครั้งคราว",
-          en: "<strong>Models of Care Must Fit Disease Burden:</strong> Aging populations and multimorbidity require integrated, team-based, person-centered models rather than episodic acute visits.",
+          th: "<strong>ออกแบบแนวทางการจัดการดูแล (`HOW: Care Management — กรอบ 6W`) ให้ตรงกับรูปแบบที่เลือก:</strong> เปรียบเทียบครบ 4 แกน ได้แก่ <strong>(1) `Guiding Principle` (`Why`)</strong>: ทำให้พ้นขีดอันตรายและอาการสงบ (`Stabilization`) vs เสริมพลังจัดการตนเอง (`Empowerment & Self-management`) · <strong>(2) `Interventions` (`What`)</strong>: เฝ้าระวัง 24 ชม./ปรับยาจำเพาะ/โภชนาการ vs ติดตามยาต่อเนื่องและฟื้นฟูสมรรถภาพทางจิตสังคม/อาชีพ · <strong>(3) `Settings` (`Where`)</strong>: หอผู้ป่วยใน (`IPD`) vs คลินิกผู้ป่วยนอก (`OPD`)/รพ.สต./บ้านและชุมชน · <strong>(4) `Providers & Interaction` (`Who & How`)</strong>: แพทย์เจ้าของไข้และทีมผู้ป่วยในดูแลกำกับใกล้ชิด (`Directive / Close monitoring`) vs ทีมสหวิชาชีพทำงานแบบหุ้นส่วน (`Partnership` ตาม `Wagner's Chronic Care Model`) ร่วมกับผู้ป่วยที่ตื่นรู้ (`Activated patient`) และครอบครัว",
+          en: "<strong>Align HOW (6W Care Management) Across 4 Axes:</strong> Contrast Guiding Principles (24-h stabilization vs. empowerment/self-management), Interventions (definitive inpatient Rx vs. longitudinal follow-up & psychosocial/vocational rehab), Settings (inpatient ward vs. OPD/primary care/home/community), and Providers/Interaction (directive inpatient team vs. Wagner CCM partnership between multidisciplinary team and activated patient).",
+        },
+        {
+          th: "<strong>เชื่อม 4 ระดับความซับซ้อนของการดูแลอย่างไร้รอยต่อ:</strong> ดูแลตนเองและครอบครัว → ปฐมภูมิ (ศูนย์กลางประสานงานใกล้บ้าน) → ทุติยภูมิ → ตติยภูมิ ด้วยระบบส่งต่อไป–กลับสองทาง (`Two-way referral`)",
+          en: "<strong>Four Connected Levels of Care:</strong> Self/family care, primary, secondary, and tertiary care work effectively only through two-way referral and counter-referral anchored in primary care.",
         },
       ],
-      flowRoleTH: "ปิดท้ายบท HS2 ด้วยสถาปัตยกรรมการจัดบริการหน้างาน ซึ่งจะถูกนำไปประเมินคุณค่าด้วยเกณฑ์ EQESaRR ใน HS3 และขยายผลสู่ปฐมภูมิใน HS5",
-      flowRoleEN: "Completes HS2's architectural blueprint with frontline Models of Care, setting up quality/equity evaluation in HS3 and PHC deep-dive in HS5.",
+      caseLensTH: "กฎการให้คะแนนสำคัญของโจทย์ Contrasting Cases (`Alignment Rule`): เหตุผลสภาวะผู้ป่วย (`WHY`) และรายละเอียดการจัดการดูแลทั้ง 4 แกน (`HOW`) ต้องสอดคล้องเป็นเนื้อเดียวกันกับ `Model of Care (WHAT)` ที่เลือก และระวังกับดัก 'สัญญาณชีพปกติ'—หากผู้ป่วยไม่กินน้ำ/อาหารหลายวันจนดูแลตนเองไม่ได้เฉียบพลัน ต้องเลือก `Acute Care` ในหอผู้ป่วยใน ไม่ใช่ `Ambulatory Care`",
+      caseLensEN: "Critical Alignment Rule for Contrasting Cases: WHY (patient condition) and all 4 elements of HOW (principle, interventions, setting, provider–patient interaction) must strictly match your chosen WHAT (Model of Care)—and remember that acute severe self-neglect requires inpatient Acute Care even if vital signs remain stable.",
+      flowRoleTH: "ปิดท้ายบท HS2 ด้วยสถาปัตยกรรมการจัดบริการตามระยะโรค ซึ่งจะถูกนำไปประเมินคุณค่าด้วยเกณฑ์ EQESaRR ใน HS3 และขยายผลสู่บริการปฐมภูมิใน HS5",
+      flowRoleEN: "Completes HS2's architectural blueprint with 6W Models of Care, setting up EQESaRR evaluation in HS3 and Primary Health Care in HS5.",
       crossLinks: [
         {
           target: "HS5:5",
-          labelTH: "HS5 · หมวด 5 (หน้าที่หลัก 4Cs ของบริการปฐมภูมิ)",
-          labelEN: "HS5 · Sec 5 (Starfield's 4Cs of Primary Care)",
-          whyTH: "บท HS5 ขยายรายละเอียดการออกแบบด่านหน้าระบบบริการและทีมหมอครอบครัวอย่างเจาะลึก",
-          whyEN: "HS5 expands primary-level service design into Starfield's 4Cs and Thailand's PCC model.",
+          labelTH: "HS5 · หมวด 5 (คุณลักษณะ 5 ประการของบริการปฐมภูมิ)",
+          labelEN: "HS5 · Sec 5 (5 Core Attributes of Primary Care)",
+          whyTH: "บท HS5 ขยายรายละเอียดการดูแลต่อเนื่องและประสานการส่งต่อในชุมชนของทีมปฐมภูมิอย่างเจาะลึก",
+          whyEN: "HS5 expands community-based continuity, coordination, and person-centered primary care.",
         },
         {
           target: "HS6:5",
@@ -710,40 +747,42 @@
         },
       ],
       keywords: [
-        { th: "ระดับบริการปฐมภูมิ · ทุติยภูมิ · ตติยภูมิ", en: "Primary · Secondary · Tertiary Care" },
-        { th: "รูปแบบการดูแลสุขภาพ", en: "Models of Care" },
+        { th: "การดูแลเฉียบพลันเทียบกับเรื้อรังและฟื้นฟู", en: "Acute vs. Chronic / Ambulatory & Rehabilitative Care" },
+        { th: "กรอบการออกแบบบริการ 6W (WHAT · WHY · HOW)", en: "6W Service Design & Alignment" },
+        { th: "รูปแบบการดูแลโรคเรื้อรัง (Wagner CCM)", en: "Wagner's Chronic Care Model" },
         { th: "ระบบส่งต่อสองทาง", en: "Two-Way Referral System" },
-        { th: "บริการบูรณาการที่ยึดคนเป็นศูนย์กลาง", en: "Integrated People-Centred Care" },
       ],
     },
     "HS2:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์โครงสร้าง หน้าที่ และการจัดบริการของระบบสุขภาพ",
-      secLabelEN: "Synthesis · Structure, Functions, and Models of Care",
-      titleTH: "บทสรุปจากขอบเขตระบบสุขภาพสู่การทำงานร่วมกันของ 6 Building Blocks และรูปแบบการดูแล",
-      titleEN: "From System Boundaries to Building Blocks and Integrated Care",
-      summaryTH: "ระบบสุขภาพที่ดีรู้ขอบเขตความรับผิดชอบ เชื่อมโยงทั้งหกองค์ประกอบอย่างสมดุล และจัดรูปแบบบริการให้ตอบเป้าหมายสุดท้ายของประชาชน",
-      summaryEN: "An effective health system honors its broad boundary, orchestrates all six building blocks, and designs care models around intrinsic human goals.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS2 & Open Note",
+      secLabelEN: "Synthesis · HS2 Case Discussion & Open-Note Readiness",
+      titleTH: "บทสรุปการวิเคราะห์โรงพยาบาลด้วย 6 Building Blocks และการออกแบบรูปแบบการดูแลด้วย WHAT · WHY · HOW (6W)",
+      titleEN: "Synthesizing 6 Building Blocks Hospital Diagnostics and 6W Models of Care",
+      summaryTH: "มองภาพใหญ่ให้เห็นความเชื่อมโยงครบหกองค์ประกอบของโรงพยาบาล และมองภาพคลินิกให้เลือกรูปแบบการดูแลสอดคล้องกับระยะโรคของผู้ป่วย คือสองทักษะคู่ขนานของ HS2",
+      summaryEN: "Diagnosing whole-hospital bottlenecks across all six building blocks and tailoring 6W care models to patient trajectories form the twin pillars of HS2.",
       bullets: [
         {
-          th: "<strong>โครงสร้าง → หน้าที่ → การจัดบริการ → เป้าหมาย:</strong> ทุกการปฏิรูปในระบบสุขภาพต้องตรวจสอบว่าช่วยยกระดับสุขภาพ การตอบสนอง และความเป็นธรรมทางการเงินจริงหรือไม่",
-          en: "<strong>Structure → Function → Delivery → Goals:</strong> Every health reform should be judged by whether it advances health, responsiveness, and fair financing.",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 2 กรณีศึกษาของ HS2:</strong> (1) เชื่อมผัง `WHO 2000` (4 หน้าที่ → 3 เป้าหมาย) สู่การแยกปัญหาและทางออกครบทั้ง `6 Building Blocks` โดยชี้คอขวดด้าน `Governance` และ `Financing` และ (2) เปรียบเทียบ `Acute Care` กับ `Chronic/Ambulatory & Rehabilitative Care` ให้สอดคล้องกันทั้ง `WHAT · WHY · HOW (Principle, Interventions, Settings, Providers/Partnership)`",
+          en: "<strong>Complete HS2 Case Toolkit:</strong> (1) Map evidence and solutions across all 6 Building Blocks with CAS feedback awareness; and (2) align WHAT, WHY, and all 4 dimensions of HOW across contrasting acute and chronic/rehabilitative cases.",
         },
       ],
-      flowRoleTH: "สรุปสถาปัตยกรรมระบบสุขภาพใน HS2 เพื่อส่งต่อเข้าสู่ HS3: 'เราจะใช้เกณฑ์อะไรวัดว่าระบบบริการสุขภาพทำงานได้ดีและพึงประสงค์เพียงใด'",
-      flowRoleEN: "Wraps up HS2's system architecture and hands off to HS3: the evaluative criteria (EQESaRR) for judging health service performance.",
+      caseLensTH: "ทบทวนก่อนเข้าคาบ HS2: ในระดับโรงพยาบาล อย่าลืมจับคู่ปัญหาให้ตรงทั้ง 6 กล่อง (เช่น แอป 1669 ไม่เชื่อม = HIS, คลังยา/Cold chain = Medical Products, รอระเบียบส่วนกลาง = Governance) และในระดับผู้ป่วย ตรวจสอบความสอดคล้อง WHAT–WHY–HOW ทุกบรรทัด",
+      caseLensEN: "Final HS2 check: match hospital clues cleanly to all 6 blocks (EMS data link → HIS; cold chain → Medical Products; centralized rules → Governance) and verify strict WHAT–WHY–HOW alignment for every patient stage.",
+      flowRoleTH: "สรุปสถาปัตยกรรมระบบสุขภาพใน HS2 เพื่อส่งต่อเข้าสู่ HS3: 'เราจะใช้เกณฑ์หลักและเกณฑ์ย่อยของ EQESaRR ประเมินนโยบายและบริการสุขภาพอย่างไร'",
+      flowRoleEN: "Wraps up HS2's system architecture and hands off to HS3: evaluating health policies with Main and Sub-criteria of EQESaRR.",
       crossLinks: [
         {
           target: "HS3:1",
           labelTH: "ต่อยอดสู่ HS3 · หมวด 1 (เกณฑ์คุณลักษณะที่พึงประสงค์ EQESaRR)",
           labelEN: "Next: HS3 · Sec 1 (Desirable Characteristics EQESaRR)",
-          whyTH: "นำโครงสร้างและกระบวนการของ HS2 มาตั้งเกณฑ์ประเมินคุณภาพและความเป็นธรรม 6 มิติใน HS3",
+          whyTH: "นำโครงสร้างและกระบวนการจัดบริการของ HS2 มาประเมินจุดแข็งและช่องว่างด้วยเข็มทิศ 6 มิติใน HS3",
           whyEN: "Evaluates HS2's service processes using HS3's six-dimensional EQESaRR compass.",
         },
       ],
       keywords: [
-        { th: "สถาปัตยกรรมระบบสุขภาพ", en: "Health System Architecture" },
-        { th: "หกองค์ประกอบหลัก", en: "Six Building Blocks" },
-        { th: "เป้าหมายสุดท้ายของระบบสุขภาพ", en: "Intrinsic Health System Goals" },
+        { th: "สี่หน้าที่สู่สามเป้าหมาย (WHO 2000)", en: "4 Functions to 3 Objectives" },
+        { th: "หกองค์ประกอบหลักของระบบสุขภาพ", en: "WHO Six Building Blocks" },
+        { th: "ความสอดคล้อง WHAT · WHY · HOW (6W)", en: "WHAT–WHY–HOW Model Alignment" },
       ],
     },
 
@@ -751,22 +790,24 @@
     "HS3:1": {
       secLabelTH: "หมวดที่ 1 · คุณลักษณะที่พึงประสงค์ในฐานะสัญญาณเตือนล่วงหน้า",
       secLabelEN: "Section 1 · Process Characteristics as Early Warning Signals",
-      titleTH: "เหตุผลที่ต้องวัดคุณลักษณะของกระบวนการบริการควบคู่กับผลลัพธ์สุดท้าย",
-      titleEN: "Why Process Qualities Serve as Early Warning Signals of System Goals",
-      summaryTH: "อย่ารอให้อัตราตายพุ่งแล้วจึงรู้ว่าระบบมีปัญหา คุณลักษณะของกระบวนการบริการคือสัญญาณเตือนล่วงหน้าที่ช่วยให้เราแก้ไขได้ทันท่วงที",
-      summaryEN: "Do not wait for mortality statistics to reveal system failure; desirable service characteristics act as early warning signals we can fix today.",
+      titleTH: "เหตุผลที่ต้องวัดคุณลักษณะของกระบวนการบริการควบคู่ผลลัพธ์ และโครงสร้างการวิเคราะห์หลัก–ย่อย",
+      titleEN: "Why Process Qualities Serve as Early Warning Signals & Main–Sub Analytical Structure",
+      summaryTH: "อย่ารอให้อัตราตายพุ่งแล้วจึงรู้ว่าระบบมีปัญหา คุณลักษณะที่พึงประสงค์ของกระบวนการบริการคือสัญญาณเตือนล่วงหน้าที่ใช้ประเมินจุดแข็งและช่องว่างของนโยบายได้ทันที",
+      summaryEN: "Do not wait for mortality statistics to reveal policy failure; desirable service characteristics act as early warning signals for diagnosing strengths and gaps.",
       bullets: [
         {
-          th: "<strong>ผลลัพธ์สุดท้ายเปลี่ยนช้าและมีหลายปัจจัยกวน:</strong> สุขภาพของประชากรได้รับอิทธิพลจากเศรษฐกิจและสังคมนอกระบบบริการ จึงต้องวัดคุณลักษณะของกระบวนการบริการ (`EQESaRR`) ควบคู่กัน",
+          th: "<strong>ผลลัพธ์สุดท้ายเปลี่ยนช้าและมีปัจจัยกวนนอกภาคสุขภาพ:</strong> ภาวะสุขภาพประชากรได้รับอิทธิพลจากเศรษฐกิจและสังคมด้วย จึงต้องวัดคุณลักษณะของกระบวนการจัดบริการ (`EQESaRR`) ควบคู่กัน",
           en: "<strong>Final Outcomes Lag and Confound:</strong> Population health shifts slowly and reflects non-medical factors, making intermediate service qualities essential operational gauges.",
         },
         {
-          th: "<strong>เชื่อม框架 Donabedian (Structure–Process–Outcome):</strong> เกณฑ์คุณลักษณะที่พึงประสงค์ตรวจสอบว่าทรัพยากรทั้ง 6 Building Blocks ถูกแปรเป็นบริการที่ดีจริงหรือไม่",
-          en: "<strong>Operationalizing Donabedian's Chain:</strong> Process attributes verify whether structural inputs genuinely translate into trustworthy care.",
+          th: "<strong>เชื่อมกรอบแนวคิด Donabedian (`Structure → Process → Outcome`) สู่การวิเคราะห์ 4 ขั้น:</strong> ตรวจสอบว่าทรัพยากร 6 Building Blocks ถูกแปรเป็นบริการที่ดีจริงหรือไม่ โดยแยก <strong>(1) คุณลักษณะหลัก → (2) คุณลักษณะย่อย → (3) นิยามเชิงทฤษฎี → (4) ข้อมูลหลักฐานจากสถานการณ์</strong>",
+          en: "<strong>Donabedian's Chain & 4-Step Policy Critique:</strong> Verify whether structural inputs become trustworthy processes by specifying (1) Main Characteristic → (2) Sub-Characteristic → (3) Theoretical Definition → (4) Scenario Evidence.",
         },
       ],
-      flowRoleTH: "ปูเหตุผลว่าเหตุใดต้องมีเข็มทิศ `EQESaRR` ก่อนเจาะลึกทีละมิติเริ่มจากความเป็นธรรม (`Equity`) ในหมวด 2",
-      flowRoleEN: "Explains why intermediate process criteria matter before examining each pillar of EQESaRR, starting with Equity in Section 2.",
+      caseLensTH: "โครงสร้างการตอบโจทย์ Case Discussion ของ HS3 ทุกข้อกำหนดให้แยกคอลัมน์ 'องค์ประกอบหลัก (Main)' ออกจาก 'องค์ประกอบย่อย (Sub)' อย่างชัดเจน พร้อมเขียนคำจำกัดความตามทฤษฎีขององค์ประกอบย่อยนั้นก่อนยกเหตุการณ์จากบทความมาสนับสนุน",
+      caseLensEN: "Every HS3 Case Discussion table scores 'Main Characteristic', 'Sub-Characteristic', 'Theoretical Definition', and 'Scenario Evidence' separately—always state both the exact sub-dimension and its conceptual definition.",
+      flowRoleTH: "ปูเหตุผลและโครงสร้างการประเมินด้วยเข็มทิศ `EQESaRR` ก่อนเจาะลึกองค์ประกอบย่อยทีละมิติเริ่มจากความเป็นธรรม (`Equity`) ในหมวด 2",
+      flowRoleEN: "Establishes the 4-part evaluative logic of EQESaRR before examining each pillar and its sub-dimensions, starting with Equity in Section 2.",
       crossLinks: [
         {
           target: "HS2:3",
@@ -777,40 +818,42 @@
         },
       ],
       keywords: [
-        { th: "คุณลักษณะที่พึงประสงค์", en: "Desirable Characteristics (EQESaRR)" },
-        { th: "สัญญาณเตือนล่วงหน้า", en: "Early Warning Signals" },
+        { th: "คุณลักษณะที่พึงประสงค์ (EQESaRR)", en: "Desirable Characteristics (EQESaRR)" },
+        { th: "องค์ประกอบหลักและองค์ประกอบย่อย", en: "Main & Sub-Characteristics" },
         { th: "โครงสร้าง–กระบวนการ–ผลลัพธ์", en: "Structure–Process–Outcome" },
       ],
     },
     "HS3:2": {
-      secLabelTH: "หมวดที่ 2 · ความเป็นธรรมในระบบบริการและการคลังสุขภาพ (Equity)",
-      secLabelEN: "Section 2 · Equity in Health Services & Health Financing",
-      titleTH: "รับบริการตามความจำเป็น และร่วมจ่ายเงินตามความสามารถในการจ่าย",
-      titleEN: "Care According to Need, Contribution According to Ability to Pay",
-      summaryTH: "ความเป็นธรรมไม่ใช่การหารเท่ากันทุกคน แต่คือการดูแลตามความจำเป็นทางสุขภาพและเก็บเงินตามกำลังความสามารถในการจ่าย",
-      summaryEN: "Equity is not identical shares for all—it means receiving care according to health need and contributing according to ability to pay.",
+      secLabelTH: "หมวดที่ 2 · ความเป็นธรรม (Equity) และองค์ประกอบย่อยของการเข้าถึงบริการ",
+      secLabelEN: "Section 2 · Equity & Sub-Dimensions of Accessibility",
+      titleTH: "ความเป็นธรรมตามความจำเป็นทางสุขภาพ และการแยกแยะอุปสรรคการเข้าถึงบริการทั้ง 4 มิติ",
+      titleEN: "Equity According to Health Need and Four Sub-Dimensions of Service Accessibility",
+      summaryTH: "ความเป็นธรรมคือผู้มีความจำเป็นเท่ากันมีโอกาสเข้าถึงบริการได้ทัดเทียมกันโดยปราศจากกำแพงด้านการเงิน ภูมิศาสตร์ ขั้นตอนบริหาร และวัฒนธรรมข้อมูล",
+      summaryEN: "Equity ensures equal access for equal health need—removing financial, geographical, administrative, and cultural/informational barriers while financing according to ability to pay.",
       bullets: [
         {
-          th: "<strong>แยก Equity ออกจาก Equality:</strong> ความไม่เท่าเทียมที่เป็นธรรมต้องจัดสรรทรัพยากรมากขึ้นให้กลุ่มที่มีความจำเป็นสูงกว่า (`vertical equity`) และดูแลผู้มีความจำเป็นเท่ากันให้เข้าถึงได้เท่าเทียม (`horizontal equity`)",
-          en: "<strong>Equity vs. Equality:</strong> Horizontal equity treats equal needs equally; vertical equity devotes greater support to those with greater health needs or lower means.",
+          th: "<strong>แยก `Equity` ออกจาก `Equality`:</strong> `Horizontal equity` คือผู้มีความจำเป็นทางสุขภาพเท่ากันมีโอกาสเข้าถึงบริการที่มีมาตรฐานเท่าเทียมกัน ส่วน `Vertical equity` คือการจัดสรรการสนับสนุนเพิ่มขึ้นแก่ผู้ที่มีความจำเป็นสูงกว่าหรือเปราะบางกว่า",
+          en: "<strong>Equity vs. Equality:</strong> Horizontal equity ensures equal access for equal need; vertical equity devotes greater support to those with greater health needs.",
         },
         {
-          th: "<strong>การเข้าถึงบริการมีหลายมิติ:</strong> ทั้งทางภูมิศาสตร์ การเงิน วัฒนธรรมภาษา และเวลารอคอย ไม่ใช่เพียงการมีชื่ออยู่ในทะเบียนสิทธิ",
-          en: "<strong>Multidimensional Access:</strong> True access spans geographic reach, affordability, cultural acceptability, and timely availability.",
+          th: "<strong>จำแนกองค์ประกอบย่อยของการเข้าถึงบริการ (`Accessibility`) ให้แม่นยำ:</strong> <strong>`Financial accessibility`</strong> (รับบริการที่จำเป็นโดยไม่เสียค่าใช้จ่ายเพิ่มหน้างาน) · <strong>`Geographical accessibility`</strong> (ลดภาระเดินทางข้ามพื้นที่) · <strong>`Administrative accessibility`</strong> (ปลดล็อกขั้นตอนเอกสารราชการ เช่น การไม่ต้องกลับไปขอใบส่งตัว) · และ <strong>`Cultural/Informational accessibility`</strong> ควบคู่กับความเสมอภาคเชิงคุณภาพระหว่างพื้นที่ (`Equity in quality`)",
+          en: "<strong>Four Sub-Dimensions of Accessibility:</strong> Distinguish Financial (no added point-of-care fees), Geographical (reduced travel burden), Administrative (removing referral-letter red tape), and Cultural/Informational accessibility, alongside cross-regional Equity in Quality.",
         },
         {
-          th: "<strong>ความเป็นธรรมด้านการคลังวัดความก้าวหน้าของการเก็บเงิน:</strong> ระบบการคลังที่เป็นธรรมเน้นการจัดเก็บอัตราก้าวหน้า (`progressive`) และคุ้มครองไม่ให้เกิดรายจ่ายหายนะ",
-          en: "<strong>Fair Health Financing:</strong> Links progressive revenue collection with pooling that shields households from catastrophic out-of-pocket bills.",
+          th: "<strong>ความเป็นธรรมด้านการคลังและการตอบสนอง (`Responsiveness`):</strong> จัดเก็บเงินตามความสามารถในการจ่ายแบบก้าวหน้า (`Progressive`) เพื่อกันรายจ่ายหายนะ พร้อมเคารพศักดิ์ศรีและสิทธิการเลือกหน่วยบริการของผู้ป่วย",
+          en: "<strong>Fair Financing & Responsiveness:</strong> Progressive revenue pooling prevents catastrophic spending, complemented by non-clinical responsiveness (choice of provider and prompt attention).",
         },
       ],
-      flowRoleTH: "เปิดมิติแรกของ `EQESaRR` คือ 'เข้าถึงอย่างเป็นธรรม' ก่อนชี้ต่อในหมวด 3 ว่า 'เข้าถึงเพียงอย่างเดียวไม่พอ หากบริการนั้นไร้คุณภาพ'",
-      flowRoleEN: "Establishes the first pillar—equitable access and financing—before Section 3 shows why access without quality falls short.",
+      caseLensTH: "เมื่อวิเคราะห์นโยบายที่เปิดให้ผู้ป่วยรับบริการได้ทุกหน่วยบริการโดยไม่ต้องใช้ใบส่งตัวและไม่เสียค่าใช้จ่ายเพิ่ม คุณลักษณะหลักที่เด่นชัดคือ `Equity` (องค์ประกอบย่อย: `Financial accessibility` รวมถึงการลดอุปสรรคเชิงบริหารและภูมิศาสตร์ — ผู้มีความจำเป็นเท่ากันเข้าถึงบริการได้โดยไม่มีกำแพงค่าใช้จ่ายหรือขั้นตอนใบส่งตัวกั้น)",
+      caseLensEN: "When evaluating policies that remove referral-slip requirements and extra charges, highlight Main: Equity → Sub: Financial (and Administrative/Geographical) Accessibility—equal access for equal need without financial or bureaucratic barriers.",
+      flowRoleTH: "เปิดมิติแรกของ `EQESaRR` คือ 'เข้าถึงอย่างเป็นธรรม' ก่อนชี้ต่อในหมวด 3 ว่า 'มีสิทธิหรือมีบริการเปิดอยู่ยังไม่พอ หากบริการขาดคุณภาพและความครอบคลุมที่มีประสิทธิผล'",
+      flowRoleEN: "Establishes equitable access before Section 3 shows why nominal access fails without clinical quality and effective coverage.",
       crossLinks: [
         {
           target: "HS1:2",
           labelTH: "HS1 · หมวด 2 (ความไม่เป็นธรรมจากปัจจัยสังคม)",
           labelEN: "HS1 · Sec 2 (Social Health Inequity)",
-          whyTH: "ระบบบริการที่เป็นธรรมต้องช่วยลดช่องว่างสุขภาพที่เกิดจากปัจจัยสังคมต้นน้ำ ไม่ใช่ซ้ำเติมคนจน",
+          whyTH: "ระบบบริการที่เป็นธรรมต้องช่วยลดช่องว่างสุขภาพที่เกิดจากปัจจัยสังคมต้นน้ำ ไม่ใช่ซ้ำเติมครัวเรือนรายได้น้อย",
           whyEN: "Equitable health services buffer rather than amplify upstream social gradients.",
         },
         {
@@ -823,75 +866,79 @@
       ],
       keywords: [
         { th: "ความเป็นธรรมแนวนอนและแนวตั้ง", en: "Horizontal & Vertical Equity" },
+        { th: "การเข้าถึงทางการเงิน · ภูมิศาสตร์ · บริหาร", en: "Financial · Geographical · Administrative Accessibility" },
         { th: "ความสามารถในการจ่าย", en: "Ability to Pay" },
-        { th: "ความจำเป็นทางสุขภาพ", en: "Health Need" },
-        { th: "อุปสรรคการเข้าถึงบริการ", en: "Barriers to Access" },
+        { th: "ความเสมอภาคเชิงคุณภาพ", en: "Equity in Quality" },
       ],
     },
     "HS3:3": {
-      secLabelTH: "หมวดที่ 3 · คุณภาพบริการและความครอบคลุมอย่างมีประสิทธิผล (Quality)",
-      secLabelEN: "Section 3 · Quality (STEP) & Effective Coverage",
-      titleTH: "กรอบคุณภาพ STEP และช่องว่างระหว่างการเข้าถึงกับการได้รับบริการที่มีคุณภาพจริง",
-      titleEN: "The STEP Quality Framework and Effective Coverage Cascade",
-      summaryTH: "การเข้าถึงบริการที่ไร้คุณภาพไม่ได้สร้างสุขภาพ ความครอบคลุมที่มีความหมายต้องปลอดภัย ได้ผล ทันเวลา และเคารพความเป็นมนุษย์ของผู้ป่วย",
-      summaryEN: "Access without quality delivers false reassurance; meaningful coverage must be Safe, Timely, Effective, and Person-centered.",
+      secLabelTH: "หมวดที่ 3 · คุณภาพบริการ (Quality: STEP) และความครอบคลุมอย่างมีประสิทธิผล",
+      secLabelEN: "Section 3 · Quality Sub-Dimensions (STEP / IOM) & Effective Coverage",
+      titleTH: "นิยามองค์ประกอบย่อยของ Quality (Safety · Timeliness · Effectiveness · Patient-Centeredness) และ Effective Coverage",
+      titleEN: "Defining Quality Sub-Dimensions (STEP, ACP) and Contact vs. Effective Coverage",
+      summaryTH: "การมีบริการเปิดอยู่ยังไม่เท่ากับการได้รับบริการที่มีคุณภาพจริง บริการที่ดีต้องปลอดภัย ทันเวลา ได้มาตรฐานตามหลักฐานวิชาการ และเคารพเจตจำนงของผู้ป่วยและครอบครัว",
+      summaryEN: "Having a service on paper does not guarantee real benefit; care must be Safe, Timely, Effective by clinical standards, and genuinely Patient-centered.",
       bullets: [
         {
-          th: "<strong>จำกรอบคุณภาพด้วย STEP (IOM):</strong> `Safe` (ปลอดภัยไม่เกิดอันตราย) `Timely` (ทันเวลาไม่ล่าช้า) `Effective` (อิงหลักฐานวิชาการ ไม่ขาดหรือเกิน) และ `Patient-centered` (เคารพคุณค่าผู้ป่วย)",
-          en: "<strong>STEP Quality Compass:</strong> Care must be Safe, Timely, Effective (evidence-based without underuse or overuse), and Patient-centered.",
+          th: "<strong>แยกนิยามองค์ประกอบย่อยของ `Quality` (`IOM / STEP`) ให้ชัดทุกตัว:</strong> <strong>`Safety`</strong> (ปลอดภัย ไม่ก่ออันตรายจากการรักษา) · <strong>`Timeliness`</strong> (ความทันเวลา — ลดเวลารอคอยและความล่าช้าที่เป็นอันตรายต่อการลุกลามของโรค เช่น เข้าถึงผ่าตัด/เคมีบำบัด/ฉายรังสีได้เร็วขึ้น) · <strong>`Effectiveness`</strong> (ประสิทธิผล — จัดบริการอิงหลักฐานวิชาการและครบตามมาตรฐานวิชาชีพ เช่น มียาแก้ปวดกลุ่ม `opioids` เพียงพอและจัดทำแผนดูแลล่วงหน้าตามมาตรฐาน) · และ <strong>`Patient-Centeredness`</strong> (ยึดผู้ป่วยเป็นศูนย์กลาง — เคารพคุณค่า ศักดิ์ศรี และให้ผู้ป่วยกับญาติร่วมตัดสินใจวางแผนการดูแลล่วงหน้า `Advance Care Plan: ACP` เพื่อไม่ส่งห้องฉุกเฉินสวนทางกับความต้องการของผู้ป่วย)",
+          en: "<strong>Exact Sub-Definitions of Quality (IOM / STEP):</strong> Safety (avoiding harm), Timeliness (reducing harmful waiting times for time-sensitive care like oncology), Effectiveness (delivering evidence-based standard care, essential opioids, and systematic ACP), and Patient-Centeredness (shared decision-making and honoring patient/family values via Advance Care Planning).",
         },
         {
-          th: "<strong>ความครอบคลุมอย่างมีประสิทธิผล (Effective Coverage):</strong> ผสานความจำเป็น (`Need`) × การมาใช้บริการ (`Use`) × คุณภาพการดูแลจนควบคุมโรคได้จริง (`Quality`)",
-          en: "<strong>Effective Coverage Cascade:</strong> Multiplies population need, service utilization, and clinical quality so coverage translates into real health gain.",
+          th: "<strong>แยก `Contact Coverage` ออกจาก `Effective Coverage` (`Tanahashi / WHO`):</strong> การมีนโยบายหรือมีหน่วยบริการตั้งอยู่ (`Contact coverage`) ยังไม่เกิดผลลัพธ์สุขภาพ หากติดคอขวดด้านความพร้อมของยา บุคลากร มาตรฐานคลินิก และการมีส่วนร่วมตัดสินใจ (`Effective coverage = Need × Utilization × Quality`)",
+          en: "<strong>Contact Coverage vs. Effective Coverage:</strong> Nominal policy or clinic availability falls short unless patients receive complete, standard-compliant, person-centered care (`Need × Use × Quality`).",
         },
       ],
-      flowRoleTH: "ต่อยอดจาก Equity (หมวด 2) ว่าเมื่อคนเข้าถึงบริการแล้ว บริการต้องมีคุณภาพจริง ก่อนถามในหมวด 4 ว่าเราจะจัดสรรทรัพยากรจำกัดให้คุ้มค่าได้อย่างไร",
-      flowRoleEN: "Builds on Equity (Section 2) to ensure access yields real health benefit, leading into how scarce resources sustain quality in Section 4.",
+      caseLensTH: "จุดเน้นในการตอบโจทย์ HS3: (1) เมื่อนโยบายลดคิวรอคอยจนผู้ป่วยได้รับเคมีบำบัด/ฉายรังสี/ผ่าตัดเร็วขึ้น ให้ระบุ `Main: Quality` → `Sub: Timeliness` และ (2) เมื่อบริการระยะท้ายยังขาดมาตรฐาน/ขาดยาจำเป็น หรือไม่ได้ทำ `ACP` ร่วมกับผู้ป่วยและญาติจนถูกส่ง ER ขัดเจตจำนง ให้แยกตอบ `Main: Quality` → `Sub: Effectiveness` และ `Sub: Patient-Centeredness` พร้อมเชื่อมแนวคิด `Effective Coverage`",
+      caseLensEN: "HS3 case precision: (1) Faster oncology treatment maps to Main: Quality → Sub: Timeliness; (2) missing clinical standards/opioids vs. lack of shared Advance Care Planning (leading to unwanted ER transfers) map distinctly to Quality → Effectiveness and Quality → Patient-Centeredness.",
+      flowRoleTH: "ต่อยอดจาก Equity (หมวด 2) ว่าเมื่อเข้าถึงได้แล้วบริการต้องมีคุณภาพจริง ก่อนถามในหมวด 4 ว่าการจัดสรรทรัพยากรแบบแยกโรคหรือขาดการเชื่อมข้อมูลกระทบประสิทธิภาพอย่างไร",
+      flowRoleEN: "Builds on Equity (Section 2) to ensure quality and effective coverage, leading into Technical vs. Allocative Efficiency in Section 4.",
       crossLinks: [
         {
           target: "HS1:3",
           labelTH: "HS1 · หมวด 3 (ป้องกันระดับ 4 ลด Overuse)",
           labelEN: "HS1 · Sec 3 (Quaternary Prevention)",
-          whyTH: "ความมีประสิทธิผลและความปลอดภัย (`Effective & Safe`) ต้องหลีกเลี่ยงทั้งการให้การรักษาน้อยเกินไปและมากเกินจำเป็น",
-          whyEN: "Clinical quality guards against both underuse of needed care and harmful overuse.",
+          whyTH: "ความมีประสิทธิผลและความปลอดภัย (`Effective & Safe`) ต้องหลีกเลี่ยงทั้งการให้การรักษาน้อยเกินไปและหัตถการยื้อชีวิตที่เกินความมุ่งหมาย",
+          whyEN: "Clinical quality guards against both underuse of needed care and non-beneficial overuse.",
         },
         {
           target: "HS5:5",
           labelTH: "HS5 · หมวด 5 (บริการปฐมภูมิยึดคนเป็นศูนย์กลาง)",
           labelEN: "HS5 · Sec 5 (Person-Centered Primary Care)",
-          whyTH: "บริการปฐมภูมิ 4Cs เป็นรากฐานของการสร้างความครอบคลุมอย่างมีประสิทธิผลในโรคเรื้อรัง",
-          whyEN: "Continuous, coordinated primary care closes the quality gap in chronic disease control.",
+          whyTH: "บริการปฐมภูมิ 5 คุณลักษณะเป็นรากฐานของการสร้างความครอบคลุมอย่างมีประสิทธิผลและการดูแลต่อเนื่องที่บ้าน",
+          whyEN: "Continuous, coordinated primary care closes the effective-coverage gap across home and community.",
         },
       ],
       keywords: [
-        { th: "ปลอดภัย · ทันเวลา · ได้ผล · ยึดผู้ป่วยเป็นศูนย์กลาง", en: "Safe · Timely · Effective · Patient-Centered (STEP)" },
-        { th: "ความครอบคลุมอย่างมีประสิทธิผล", en: "Effective Coverage" },
-        { th: "ช่องว่างด้านคุณภาพ", en: "Quality Gap" },
+        { th: "ปลอดภัย · ทันเวลา · ประสิทธิผล · ยึดผู้ป่วยเป็นศูนย์กลาง", en: "Safety · Timeliness · Effectiveness · Patient-Centeredness" },
+        { th: "การวางแผนการดูแลล่วงหน้า", en: "Advance Care Plan (ACP)" },
+        { th: "ความครอบคลุมอย่างมีประสิทธิผล", en: "Contact vs. Effective Coverage" },
       ],
     },
     "HS3:4": {
-      secLabelTH: "หมวดที่ 4 · ประสิทธิภาพและการประเมินเทคโนโลยีด้านสุขภาพ (Efficiency & HTA)",
-      secLabelEN: "Section 4 · Efficiency, Opportunity Cost, and Health Technology Assessment",
-      titleTH: "การใช้ทรัพยากรจำกัดให้เกิดคุณค่าสุขภาพสูงสุดโดยไม่ลดทอนความปลอดภัยและความเป็นธรรม",
-      titleEN: "Maximizing Health Value Under Scarcity Without Compromising Safety or Equity",
-      summaryTH: "ประสิทธิภาพไม่ใช่การตัดงบให้ถูกที่สุด แต่คือการลดความสูญเปล่าเพื่อนำทรัพยากรที่มีจำกัดไปสร้างคุณค่าทางสุขภาพให้ได้มากที่สุด",
-      summaryEN: "Efficiency is never blind cost-cutting; it eliminates waste so scarce resources generate the greatest possible health value.",
+      secLabelTH: "หมวดที่ 4 · ประสิทธิภาพของระบบบริการ (Technical · Productive · Allocative Efficiency)",
+      secLabelEN: "Section 4 · Technical, Productive & Allocative Efficiency and HTA",
+      titleTH: "แยกประสิทธิภาพเชิงเทคนิค การผลิต และการจัดสรรทรัพยากร (Allocative Efficiency) ภายใต้ต้นทุนค่าเสียโอกาส",
+      titleEN: "Distinguishing Technical, Productive, and Allocative Efficiency Under Opportunity Cost",
+      summaryTH: "ประสิทธิภาพไม่ใช่การตัดงบให้ถูกที่สุด แต่คือการจัดสรรชุดบริการและระดับหน่วยบริการให้สร้างคุณค่าสุขภาพและสวัสดิการสังคมรวมสูงสุดโดยไม่เกิดความสูญเปล่าแยกส่วน",
+      summaryEN: "Efficiency is never blind cost-cutting; it eliminates fragmentation and waste so scarce resources generate maximum total health and social value.",
       bullets: [
         {
-          th: "<strong>ทุกการใช้จ่ายมีต้นทุนค่าเสียโอกาส (Opportunity Cost):</strong> เงินที่จ่ายกับบริการราคาแพงแต่ไม่คุ้มค่า คือสุขภาพที่สูญเสียไปของผู้ป่วยกลุ่มอื่นที่ไม่ได้รับบริการที่จำเป็น",
-          en: "<strong>Opportunity Cost Matters:</strong> Spending on low-value interventions foregoes greater health gains elsewhere in the system.",
+          th: "<strong>แยก `Allocative Efficiency` ออกจาก `Technical` และ `Productive Efficiency` ให้ขาด:</strong> <strong>`Allocative efficiency` (ประสิทธิภาพการจัดสรรทรัพยากร)</strong> คือการจัดสรรงบประมาณ ชุดสิทธิประโยชน์ และระดับหน่วยบริการให้เกิดผลลัพธ์สุขภาพและสวัสดิการรวมสูงสุด (รวมต้นทุนเวลาและค่าเดินทางของครัวเรือน) · ส่วน <strong>`Technical efficiency`</strong> คือการลดความสูญเปล่าในกระบวนการ (เช่น เชื่อมเวชระเบียนอิเล็กทรอนิกส์ลดตรวจซ้ำ) และ <strong>`Productive efficiency`</strong> คือการผสมผสานทักษะบุคลากรอย่างเหมาะสม",
+          en: "<strong>Separate Allocative from Technical & Productive Efficiency:</strong> Allocative efficiency designs the right mix of benefits and care levels to maximize overall health and household welfare; Technical efficiency eliminates operational waste (e.g., interoperable EHRs); Productive efficiency optimizes skill mix.",
         },
         {
-          th: "<strong>แยก 3 ระดับของประสิทธิภาพ:</strong> `Technical` (ไม่สูญเปล่าในขั้นตอน) `Productive` (ผสมผสานทรัพยากร/ทักษะด้วยต้นทุนเหมาะสม) และ `Allocative` (จัดสรรงบไปสู่แผนงานที่สร้างสุขภาพคุ้มค่าที่สุด)",
-          en: "<strong>Three Efficiency Tiers:</strong> Technical (waste-free execution), Productive (optimal input/skill mix), and Allocative (funding the right mix of programs).",
+          th: "<strong>สัญญาณความบกพร่องของ `Allocative Efficiency` และต้นทุนค่าเสียโอกาส (`Opportunity Cost`):</strong> เกิดขึ้นเมื่อนโยบายออกแบบสิทธิประโยชน์แบบแยกส่วนเฉพาะโรคเดี่ยว (`Disease-specific silo`) โดยไม่ครอบคลุมโรคร่วมเรื้อรัง (`Comorbidities`) ทำให้ผู้ป่วยต้องตระเวนรับบริการหลายโรงพยาบาล เสียค่าเดินทาง เวลา และรายได้ หรือเมื่อเคสไม่ซับซ้อนไหลไปแออัดในโรงพยาบาลตติยภูมิ",
+          en: "<strong>Classic Allocative Efficiency Deficits:</strong> Single-disease benefit silos that exclude chronic comorbidities force patients to visit multiple hospitals—imposing heavy travel, time, and income costs—while crowding tertiary centers creates high opportunity costs.",
         },
         {
-          th: "<strong>HTA เป็นเครื่องมือจัดชุดสิทธิประโยชน์ที่มีรั้วกั้นทางจริยธรรม:</strong> ใช้ประเมินความคุ้มค่า (`ICER / QALY`) ควบคู่กับความเป็นธรรมและผลกระทบงบประมาณ ไม่ทิ้งโรคหายากหรือกลุ่มเปราะบาง",
-          en: "<strong>HTA with Ethical Guardrails:</strong> Health Technology Assessment weighs cost-effectiveness alongside budget impact, safety, and protection for vulnerable groups.",
+          th: "<strong>`HTA` เป็นเครื่องมือจัดชุดสิทธิประโยชน์ที่มีรั้วกั้นทางจริยธรรม:</strong> ประเมินความคุ้มค่า (`ICER / QALY`) ควบคู่ผลกระทบงบประมาณ ความปลอดภัย และความเป็นธรรมต่อกลุ่มเปราะบาง",
+          en: "<strong>HTA with Ethical Guardrails:</strong> Health Technology Assessment weighs cost-effectiveness alongside budget sustainability, safety, and equity.",
         },
       ],
-      flowRoleTH: "เชื่อมคุณภาพ (หมวด 3) เข้ากับข้อจำกัดด้านทรัพยากร ก่อนก้าวสู่หมวด 5 ว่า 'ใครเป็นคนตัดสินใจจัดสรรทรัพยากร และตรวจสอบความโปร่งใสอย่างไร'",
-      flowRoleEN: "Connects Quality (Section 3) to resource scarcity, raising Section 5's question: how should public priority-setting be governed accountably?",
+      caseLensTH: "จุดชี้ขาดในโจทย์ประเมินช่องว่างนโยบาย: หากสิทธิประโยชน์เปิดเสรีเฉพาะโรคหนึ่งแต่ไม่ครอบคลุมโรคร่วม (เช่น เบาหวาน ความดัน ไตเรื้อรัง) จนผู้ป่วยต้องเดินทางแยกไปรักษาหลายแห่งและเกิดความแออัดใน รพ.ใหญ่ คุณลักษณะหลักที่บกพร่องชัดเจนคือ `Efficiency` → องค์ประกอบย่อย `Allocative Efficiency` (ควบคู่กับ `Technical Efficiency` เมื่อเวชระเบียนยังไม่เชื่อมโยง)",
+      caseLensEN: "Key diagnostic clue: when a disease-specific policy excludes chronic comorbidities—forcing multi-hospital travel and tertiary congestion—identify Main: Efficiency → Sub: Allocative Efficiency (alongside Technical Efficiency for unlinked electronic records).",
+      flowRoleTH: "เชื่อมคุณภาพ (หมวด 3) เข้ากับประสิทธิภาพการจัดสรรทรัพยากร (หมวด 4) ก่อนก้าวสู่หมวด 5 ว่า 'ต้องกำกับดูแลความโปร่งใสและบูรณาการความร่วมมืออย่างไร'",
+      flowRoleEN: "Connects Quality (Section 3) to Allocative and Technical Efficiency, raising Section 5's question of transparent stewardship and cross-sector governance.",
       crossLinks: [
         {
           target: "HS6:4",
@@ -909,30 +956,33 @@
         },
       ],
       keywords: [
-        { th: "ต้นทุนค่าเสียโอกาส", en: "Opportunity Cost" },
-        { th: "ประสิทธิภาพเชิงเทคนิค · การผลิต · การจัดสรร", en: "Technical · Productive · Allocative Efficiency" },
+        { th: "ประสิทธิภาพการจัดสรรทรัพยากร", en: "Allocative Efficiency" },
+        { th: "ประสิทธิภาพเชิงเทคนิคและการผลิต", en: "Technical & Productive Efficiency" },
+        { th: "ต้นทุนค่าเสียโอกาสและปัญหาแยกส่วนโรค", en: "Opportunity Cost & Disease Silos" },
         { th: "การประเมินเทคโนโลยีด้านสุขภาพ", en: "Health Technology Assessment (HTA)" },
       ],
     },
     "HS3:5": {
       secLabelTH: "หมวดที่ 5 · ธรรมาภิบาล ภาระรับผิดชอบต่อสังคม และความสอดคล้องกับบริบท",
       secLabelEN: "Section 5 · Good Governance, Social Accountability, and Relevance",
-      titleTH: "การกำกับดูแลอำนาจสาธารณะให้โปร่งใส รับฟังประชาชน และตรงปัญหาพื้นที่",
-      titleEN: "Transparent Stewardship, Citizen Voice, and Local Relevance",
-      summaryTH: "ระบบสุขภาพที่น่าเชื่อถือต้องโปร่งใส ตรวจสอบได้ และจัดบริการให้ตรงกับปัญหาจริงของชุมชน ไม่ใช่จัดตามความคุ้นชินของส่วนกลาง",
-      summaryEN: "Trustworthy health systems govern transparently, answer to the communities they serve, and tailor services to real local priorities.",
+      titleTH: "การกำกับติดตามอย่างโปร่งใส ความร่วมมือรัฐ–เอกชน–ประชาสังคม (PPP) และความสอดคล้องปัญหาพื้นที่",
+      titleEN: "Transparent Monitoring, Public–Private–Civil Partnerships (PPP), and Contextual Relevance",
+      summaryTH: "ระบบบริการไร้รอยต่อเกิดขึ้นไม่ได้หากรัฐ เอกชน และประชาสังคมต่างคนต่างทำ จึงต้องมีธรรมาภิบาลที่โปร่งใส รับฟังประชาชน และสอดรับบริบทพื้นที่จริง",
+      summaryEN: "Seamless care requires transparent stewardship, citizen accountability, local relevance, and clear governance frameworks across public, private, and civil-society providers.",
       bullets: [
         {
-          th: "<strong>แก้ปัญหาตัวการ–ตัวแทน (Principal–Agent) ด้วยธรรมาภิบาล:</strong> ลดช่องว่างข้อมูลและผลประโยชน์ทับซ้อนด้วยความโปร่งใส การมีส่วนร่วม และหลักนิติธรรม",
-          en: "<strong>Aligning Principal–Agent Relationships:</strong> Transparency, participation, and rule of law align health institutions with public interest.",
+          th: "<strong>ธรรมาภิบาล (`Good Governance`) และกรอบความร่วมมือเชิงระบบ (`PPP`):</strong> แก้ปัญหาตัวการ–ตัวแทนและการทำงานแยกส่วนด้วยการวางมาตรฐานกลาง ระบบกำกับติดตามที่โปร่งใสทั้งปริมาณและคุณภาพ และกลไกความร่วมมือระหว่างภาครัฐ เอกชน และองค์กรไม่แสวงกำไร",
+          en: "<strong>Stewardship & Integrated PPP Governance:</strong> Overcomes fragmented silos via shared service standards, transparent volume-and-quality monitoring, and structured Public–Private–NGO partnerships.",
         },
         {
-          th: "<strong>ภาระรับผิดชอบต่อสังคม (Social Accountability) และความสอดคล้อง (`Relevance`):</strong> เปิดช่องทางให้ประชาชนร่วมออกแบบและสะท้อนผล เพื่อให้ทรัพยากรมุ่งแก้ปัญหาสำคัญของพื้นที่จริง",
-          en: "<strong>Social Accountability & Relevance:</strong> Citizen voice and community oversight keep service priorities anchored in local health needs.",
+          th: "<strong>ภาระรับผิดชอบต่อสังคม (`Social Accountability`) และความสอดคล้อง (`Relevance`):</strong> เปิดช่องทางให้ผู้ป่วย ครอบครัว และชุมชนร่วมออกแบบและสะท้อนผล เพื่อให้การจัดลำดับความสำคัญตอบโจทย์สังคมสูงวัยและปัญหาจริงของพื้นที่",
+          en: "<strong>Social Accountability & Contextual Relevance:</strong> Citizen voice and community oversight align benefit packages and care models with aging demographics and local realities.",
         },
       ],
-      flowRoleTH: "วางรากฐานธรรมาภิบาลและความไว้เนื้อเชื่อใจในภาวะปกติ ซึ่งเป็นต้นทุนสำคัญที่ทำให้ระบบยืนหยัดและปรับตัวได้เมื่อเกิดวิกฤตในหมวด 6",
-      flowRoleEN: "Builds everyday public trust and responsive governance, which become the decisive foundation for crisis Resilience in Section 6.",
+      caseLensTH: "เมื่อสถานการณ์ชี้ว่าบริการยังอยู่ในขั้นเริ่มบูรณาการ หน่วยบริการรัฐ–เอกชน–องค์กรไม่แสวงกำไรยังทำงานแยกส่วน ขาดกรอบกำกับติดตามหรือกรอบ PPP ที่ชัดเจน สามารถเชื่อมโยงช่องว่างด้าน `Governance / Coordination` และ `Relevance` เสริมการวิเคราะห์คลินิกได้",
+      caseLensEN: "When scenarios highlight fragmented public, private, and NGO delivery or missing transparent M&E frameworks, connect those gaps to Governance, Care Integration, and Contextual Relevance.",
+      flowRoleTH: "วางรากฐานธรรมาภิบาลและความไว้เนื้อเชื่อใจในภาวะปกติ ซึ่งเป็นต้นทุนสำคัญของความยั่งยืนและความยืดหยุ่นเมื่อเผชิญแรงกดดันในหมวด 6",
+      flowRoleEN: "Builds transparent governance and cross-sector coordination that underpin system Sustainability and crisis Resilience in Section 6.",
       crossLinks: [
         {
           target: "ST1:1",
@@ -945,36 +995,38 @@
           target: "HS5:4",
           labelTH: "HS5 · หมวด 4 (ปฏิญญาแอสทานาและการมีส่วนร่วมของชุมชน)",
           labelEN: "HS5 · Sec 4 (Astana Community Empowerment)",
-          whyTH: "การมีส่วนร่วมของชุมชนและท้องถิ่นในระบบปฐมภูมิคือกลไกสร้าง Social Accountability ในระดับพื้นที่",
+          whyTH: "การมีส่วนร่วมของชุมชนและภาคประชาสังคมในระบบปฐมภูมิคือกลไกสร้าง Social Accountability ในระดับพื้นที่",
           whyEN: "Community engagement in PHC brings social accountability and local relevance to life.",
         },
       ],
       keywords: [
-        { th: "ธรรมาภิบาลระบบสุขภาพ", en: "Health System Governance" },
+        { th: "ธรรมาภิบาลและการกำกับติดตาม", en: "Governance & Transparent Monitoring" },
+        { th: "ความร่วมมือภาครัฐ–เอกชน–ประชาสังคม", en: "Public–Private Partnership (PPP)" },
         { th: "ภาระรับผิดชอบต่อสังคม", en: "Social Accountability" },
-        { th: "ความสอดคล้องกับปัญหาและบริบท", en: "Contextual Relevance" },
-        { th: "ความสัมพันธ์ตัวการ–ตัวแทน", en: "Principal–Agent Theory" },
+        { th: "ความสอดคล้องกับบริบท", en: "Contextual Relevance" },
       ],
     },
     "HS3:6": {
-      secLabelTH: "หมวดที่ 6 · ความสามารถในการปรับตัวและความยืดหยุ่นของระบบสุขภาพ (Resilience)",
-      secLabelEN: "Section 6 · Health System Resilience",
-      titleTH: "การดูดซับแรงกระแทก การปรับตัว และการปฏิรูปโครงสร้างโดยไม่ผลักภาระให้คนหน้างาน",
-      titleEN: "Absorptive, Adaptive, and Transformative Capacities Without Frontline Burnout",
-      summaryTH: "ระบบที่ยืดหยุ่นไม่ใช่ระบบที่ปล่อยให้คนหน้างานอดทนแบกรับวิกฤตลำพัง แต่คือระบบที่คงบริการจำเป็นไว้ได้พร้อมปรับโครงสร้างให้แข็งแกร่งกว่าเดิม",
-      summaryEN: "True resilience never relies on exhausting frontline staff; it protects essential care during shocks while transforming structures for the future.",
+      secLabelTH: "หมวดที่ 6 · ความยืดหยุ่นของระบบสุขภาพ (Resilience) และความยั่งยืน",
+      secLabelEN: "Section 6 · Health System Resilience & Sustainability",
+      titleTH: "การดูดซับแรงกระแทก การปรับตัว การปฏิรูปโครงสร้าง และการไม่ผลักภาระให้คนหน้างาน",
+      titleEN: "Absorptive, Adaptive, and Transformative Capacities Alongside Workforce & Fiscal Sustainability",
+      summaryTH: "ระบบที่ยืดหยุ่นและยั่งยืนต้องคงบริการจำเป็นไว้ได้พร้อมปรับโครงสร้างรองรับภาระงานที่เปลี่ยนไป โดยไม่ปล่อยให้บุคลากรโรงพยาบาลรับส่งต่อเกิดภาวะเหนื่อยล้าเรื้อรัง",
+      summaryEN: "Resilient, sustainable systems protect essential care and adapt structures without shifting chronic overload onto frontline hospital staff.",
       bullets: [
         {
-          th: "<strong>3 ระดับขีดความสามารถเมื่อเผชิญวิกฤต:</strong> `Absorptive` (รับแรงกระแทกเบื้องต้น) `Adaptive` (ปรับวิธีจัดบริการให้ยืดหยุ่น) และ `Transformative` (ปฏิรูปโครงสร้างระยะยาว)",
+          th: "<strong>3 ระดับขีดความสามารถเมื่อเผชิญวิกฤตหรือการเปลี่ยนผ่าน:</strong> `Absorptive` (ดูดซับแรงกระแทกเบื้องต้น) `Adaptive` (ปรับวิธีจัดบริการและกระจายภาระงานให้ยืดหยุ่น) และ `Transformative` (ปฏิรูปโครงสร้างระยะยาว)",
           en: "<strong>Three Resilience Capacities:</strong> Absorptive buffering, Adaptive operational flexibility, and Transformative structural reform.",
         },
         {
-          th: "<strong>ระวังกับดักคำว่า Resilience เชิงอำนาจ:</strong> ห้ามใช้ความยืดหยุ่นเป็นข้ออ้างผลักภาระความเหนื่อยล้าให้บุคลากรหรือชุมชนโดยรัฐไม่ลงทุนแก้โครงสร้างที่เปราะบาง",
-          en: "<strong>Guard Against Burnout Shifting:</strong> Resilience must mean systemic support and structural investment, never normalizing chronic frontline overload.",
+          th: "<strong>เชื่อมความยืดหยุ่นเข้ากับความยั่งยืนทางการคลังและกำลังคน (`Sustainability`):</strong> ห้ามใช้วาทกรรมความทุ่มเทผลักภาระงานล้นมือให้บุคลากรหน้างาน ต้องลงทุนกระจายศักยภาพหน่วยบริการและวางสมดุลงบประมาณระยะยาวควบคู่กัน",
+          en: "<strong>Protect Frontline & Fiscal Sustainability:</strong> Never normalize staff exhaustion; pair access expansion with regional capacity investment and long-term fiscal stewardship.",
         },
       ],
-      flowRoleTH: "เติมมิติพลวัตตามเวลา (`Resilience`) ให้ครบทั้ง 6 เกณฑ์ ก่อนนำ `EQESaRR` ทั้งหมดมาสังเคราะห์การชั่งน้ำหนัก `Trade-off` ในบริบทไทยในหมวด 7",
-      flowRoleEN: "Completes all six EQESaRR pillars with dynamic crisis readiness before Section 7 synthesizes multi-criteria trade-offs in Thailand.",
+      caseLensTH: "เมื่อการเปิดเสรีเข้าถึงบริการทำให้ผู้ป่วยไหลเข้ากระจุกตัวในโรงพยาบาลศูนย์จนพยาบาลและแพทย์หน้างานเหนื่อยล้า และผู้บริหารกังวลเรื่องงบประมาณระยะยาว ให้ชี้ประเด็นความท้าทายด้าน `Sustainability` (ทั้งด้านการคลังและภาระงานกำลังคน) และการกระจายศักยภาพเครือข่าย",
+      caseLensEN: "When rapid access expansion concentrates patients at tertiary centers—straining frontline nurses and long-term budgets—flag Workforce & Financial Sustainability challenges.",
+      flowRoleTH: "เติมมิติพลวัตตามเวลา (`Resilience & Sustainability`) ให้ครบทุกเกณฑ์ ก่อนนำ `EQESaRR` ทั้งหมดมาสังเคราะห์การชั่งน้ำหนัก `Trade-offs` ในหมวด 7",
+      flowRoleEN: "Completes the EQESaRR criteria with dynamic Resilience and Sustainability before Section 7 synthesizes multi-criteria policy trade-offs.",
       crossLinks: [
         {
           target: "HS5:6",
@@ -986,29 +1038,31 @@
       ],
       keywords: [
         { th: "ความยืดหยุ่นของระบบสุขภาพ", en: "Health System Resilience" },
-        { th: "ความสามารถดูดซับ · ปรับตัว · เปลี่ยนผ่านโครงสร้าง", en: "Absorptive · Adaptive · Transformative Capacity" },
-        { th: "การคงบริการสุขภาพที่จำเป็น", en: "Maintaining Essential Health Services" },
+        { th: "ดูดซับ · ปรับตัว · เปลี่ยนผ่านโครงสร้าง", en: "Absorptive · Adaptive · Transformative" },
+        { th: "ความยั่งยืนทางการคลังและกำลังคน", en: "Financial & Workforce Sustainability" },
       ],
     },
     "HS3:7": {
       secLabelTH: "หมวดที่ 7 · บริบทระบบสุขภาพไทยและการชั่งน้ำหนักเกณฑ์ EQESaRR",
       secLabelEN: "Section 7 · Thai National Health Charter & Multi-Criteria Trade-Offs",
-      titleTH: "ธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติและการประเมินการแลกได้แลกเสีย (Trade-offs) ด้วย EQESaRR",
-      titleEN: "Thailand's National Health Charter and Balancing EQESaRR Trade-Offs",
-      summaryTH: "ในโลกความจริงไม่มีนโยบายใดสมบูรณ์แบบทุกด้าน การประเมินระบบสุขภาพที่รอบด้านจึงต้องใช้ทั้งหกเกณฑ์ชั่งน้ำหนักการแลกได้แลกเสียอย่างโปร่งใส",
-      summaryEN: "No real-world policy scores 100% on every dimension; wise stewardship weighs trade-offs transparently across all six EQESaRR criteria.",
+      titleTH: "ธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติและการประเมินการแลกได้แลกเสีย (Trade-offs) ของนโยบายจริง",
+      titleEN: "Thailand's National Health Charter and Navigating Real-World EQESaRR Trade-Offs",
+      summaryTH: "ไม่มีนโยบายใดได้คะแนนเต็มทุกด้านพร้อมกันโดยอัตโนมัติ การปลดล็อกการเข้าถึงด้านหนึ่งจึงต้องออกแบบกลไกรองรับด้านประสิทธิภาพ คุณภาพ และความยั่งยืนควบคู่กันเสมอ",
+      summaryEN: "No policy automatically maximizes every metric at once; expanding access on one front requires deliberate safeguards for efficiency, quality parity, and sustainability.",
       bullets: [
         {
-          th: "<strong>ธรรมนูญสุขภาพไทยวางฐานคุณค่าและธรรมาภิบาล:</strong> ยึดสุขภาพองค์รวมและปรัชญาเศรษฐกิจพอเพียง แต่ในการประเมินระดับระบบบริการยังต้องใช้เกณฑ์ `EQESaRR` กำกับอย่างเป็นรูปธรรม",
-          en: "<strong>Charter Values Meet Service Metrics:</strong> Thailand's National Health Charter sets holistic governance values, complemented operationally by EQESaRR.",
+          th: "<strong>ธรรมนูญสุขภาพไทยวางฐานคุณค่า คู่กับ `EQESaRR` ที่ใช้วัดผลระดับบริการ:</strong> ธรรมนูญฯ ยึดสุขภาพองค์รวม 4 มิติและธรรมาภิบาลแบบมีส่วนร่วม ขณะที่ `EQESaRR` เป็นเครื่องมือเจาะลึกจุดแข็งและข้อบกพร่องของระบบบริการสุขภาพอย่างเป็นรูปธรรม",
+          en: "<strong>Charter Values Paired with Service Metrics:</strong> Thailand's National Health Charter sets holistic governance values, operationalized at the service level through EQESaRR.",
         },
         {
-          th: "<strong>มองเห็น Trade-off เสมอ:</strong> เช่น การรวมศูนย์บริการซับซ้อนในเมืองเพิ่มคุณภาพ (`Q`) และประสิทธิภาพเทคนิค (`E`) แต่อาจลดความเป็นธรรมในการเข้าถึง (`E`) ของผู้ป่วยห่างไกล จึงต้องออกแบบระบบส่งต่อและปฐมภูมิชดเชย",
-          en: "<strong>Navigate Inevitable Trade-Offs:</strong> Centralizing specialized surgery boosts clinical Quality and technical Efficiency but can widen geographic Equity gaps unless mitigated.",
+          th: "<strong>ฝึกอ่าน `Trade-offs` ข้ามเกณฑ์อย่างรอบด้าน:</strong> นโยบายปลดล็อกสิทธิรักษาเฉพาะโรคช่วยเพิ่ม `Equity (Accessibility)` และ `Quality (Timeliness)` ได้เด่นชัด แต่หากแยกส่วนจากโรคร่วมและยังไม่เชื่อมเวชระเบียน จะเกิดช่องว่างด้าน `Allocative Efficiency`, `Technical Efficiency`, `Equity in Quality` และ `Sustainability`",
+          en: "<strong>Diagnose Policy Trade-Offs Clearly:</strong> Policies that boost Equity of Access and Timeliness for one disease can simultaneously expose gaps in Allocative Efficiency (comorbidity silos), EHR Technical Efficiency, and Tertiary Sustainability.",
         },
       ],
-      flowRoleTH: "รวบยอดทั้งบท HS3 เป็นกรอบคิดชั่งน้ำหนัก 6 เกณฑ์ (`EQESaRR`) ที่จะใช้ประเมินมาตรการปรับพฤติกรรม (HS4) ปฐมภูมิ (HS5) และการคลังสุขภาพ (HS6)",
-      flowRoleEN: "Integrates all six EQESaRR criteria into a practical trade-off lens used across HS4, HS5, and HS6.",
+      caseLensTH: "สูตรทองของการอภิปรายนโยบายใน HS3: ชื่นชมจุดแข็งที่ปลดล็อกได้จริง (เช่น `Equity → Financial/Administrative Accessibility` และ `Quality → Timeliness`) พร้อมชี้จุดบกพร่องเชิงระบบอย่างแม่นยำ (เช่น `Efficiency → Allocative Efficiency` หรือ `Quality → Effectiveness & Patient-Centeredness`) โดยอ้างอิงหลักฐานจากบทความทุกข้อ",
+      caseLensEN: "Golden formula for HS3 policy cases: pair exact credit for unlocked strengths (Equity of Access, Timeliness) with precise diagnosis of systemic deficits (Allocative Efficiency, Effectiveness, Patient-Centeredness) backed by scenario evidence.",
+      flowRoleTH: "รวบยอดทั้งบท HS3 เป็นกรอบคิดชั่งน้ำหนักเกณฑ์หลัก–ย่อยของ `EQESaRR` ที่จะใช้ประเมินงานสร้างเสริมสุขภาพ (HS4) ปฐมภูมิ (HS5) และการคลังสุขภาพ (HS6)",
+      flowRoleEN: "Integrates all EQESaRR main and sub-criteria into a balanced policy-evaluation lens carried into HS4, HS5, and HS6.",
       crossLinks: [
         {
           target: "HS6:5",
@@ -1020,64 +1074,69 @@
       ],
       keywords: [
         { th: "ธรรมนูญว่าด้วยระบบสุขภาพแห่งชาติ", en: "National Health Charter" },
-        { th: "กรอบเกณฑ์ประเมินหกมิติ", en: "EQESaRR Multi-Criteria Framework" },
+        { th: "กรอบเกณฑ์ประเมินหกมิติ EQESaRR", en: "EQESaRR Multi-Criteria Framework" },
         { th: "การแลกได้แลกเสียเชิงนโยบาย", en: "Policy Trade-Offs" },
       ],
     },
     "HS3:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์คุณลักษณะที่พึงประสงค์ของระบบบริการสุขภาพ",
-      secLabelEN: "Synthesis · Desirable Characteristics (EQESaRR)",
-      titleTH: "บทสรุปเข็มทิศ EQESaRR เพื่อการวินิจฉัยและพัฒนาระบบบริการสุขภาพ",
-      titleEN: "Using the EQESaRR Compass to Diagnose and Improve Health Services",
-      summaryTH: "เป็นธรรม มีคุณภาพ คุ้มค่า โปร่งใส ตรงปัญหา และปรับตัวได้ คือหกคำถามตรวจสอบระบบบริการที่แพทย์ชุมชนควรพกติดตัวเสมอ",
-      summaryEN: "Equitable, high-quality, efficient, accountable, relevant, and resilient—six diagnostic questions every health-systems physician carries into practice.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS3 & Open Note",
+      secLabelEN: "Synthesis · HS3 Case Discussion & Open-Note Readiness",
+      titleTH: "บทสรุปการจับคู่องค์ประกอบหลัก–องค์ประกอบย่อย–นิยามทฤษฎีตามกรอบ EQESaRR",
+      titleEN: "Mastering Main Characteristic → Sub-Characteristic → Theoretical Definition in EQESaRR",
+      summaryTH: "จำแนกองค์ประกอบหลักและองค์ประกอบย่อยให้แม่น นิยามตามทฤษฎีให้ชัด และดึงหลักฐานจากสถานการณ์มาจับคู่ให้ตรงจุด คือหัวใจของการทำคะแนนเต็มในกรณีศึกษา HS3",
+      summaryEN: "Naming the exact Main and Sub-characteristic, stating its theoretical definition, and grounding it in case evidence form the blueprint for every HS3 policy analysis.",
       bullets: [
         {
-          th: "<strong>ใช้ครบทั้ง 6 เลนส์ร่วมกัน:</strong> การมุ่งเน้นเพียงมิติเดียวโดยละเลยมิติอื่นมักสร้างผลกระทบข้างเคียงต่อกลุ่มเปราะบางหรือบุคลากรหน้างาน",
-          en: "<strong>Always Apply All Six Lenses:</strong> Optimizing a single metric in isolation risks unintended harm to vulnerable patients or frontline teams.",
+          th: "<strong>เช็กลิสต์คู่หลัก–ย่อยที่ใช้บ่อยที่สุดใน Case Discussion HS3:</strong> `Equity` → `Financial / Geographical / Administrative Accessibility` · `Quality` → `Timeliness`, `Effectiveness` (มาตรฐานวิชาชีพ/ยาจำเป็น), `Patient-Centeredness` (ร่วมตัดสินใจ/ทำ `ACP`) คู่แนวคิด `Contact vs. Effective Coverage` · และ `Efficiency` → `Allocative Efficiency` (ปัญหาแยกส่วนโรคเดี่ยวไม่รวมโรคร่วม/ความแออัดตติยภูมิ) เทียบกับ `Technical Efficiency` (เวชระเบียนไม่เชื่อมโยง)",
+          en: "<strong>High-Yield Main → Sub Pairs for HS3 Cases:</strong> Equity → Financial/Administrative/Geographical Accessibility; Quality → Timeliness, Effectiveness, and Patient-Centeredness (ACP) alongside Contact vs. Effective Coverage; Efficiency → Allocative Efficiency (comorbidity silos & congestion) vs. Technical Efficiency (unlinked EHRs).",
         },
       ],
-      flowRoleTH: "จบกรอบเกณฑ์ประเมินระบบบริการใน HS3 แล้วก้าวสู่ HS4 เพื่อดูว่าเราจะเสริมพลังประชาชนและสิ่งแวดล้อมให้สร้างสุขภาพก่อนป่วยได้อย่างไร",
-      flowRoleEN: "Concludes HS3's evaluative compass and moves to HS4: empowering people and environments for health promotion and behavior change.",
+      caseLensTH: "ตรวจทานก่อนส่งใบงาน HS3 ทุกข้อว่าได้เขียนครบทั้ง 4 ส่วนหรือยัง: ① คุณลักษณะหลัก ② คุณลักษณะย่อย ③ คำอธิบายความหมายตามทฤษฎีของข้อย่อยนั้น และ ④ ตัวอย่างเหตุการณ์จากบทความที่สอดคล้องกันโดยตรง",
+      caseLensEN: "Before submitting any HS3 worksheet row, verify all 4 components: (1) Main attribute, (2) Sub-attribute, (3) Theoretical definition of that sub-attribute, and (4) Direct supporting evidence from the text.",
+      flowRoleTH: "จบกรอบเกณฑ์ประเมินระบบบริการใน HS3 แล้วก้าวสู่ HS4 เพื่อวิเคราะห์กลไกพฤติกรรมสุขภาพ ปัจจัยเชิงพาณิชย์ (`CDoH`) ตัวแบบ `COM-B` และกฎบัตรออตตาวา",
+      flowRoleEN: "Concludes HS3's evaluative compass and moves to HS4: diagnosing behavior change via COM-B, CDoH, and the Ottawa Charter.",
       crossLinks: [
         {
           target: "HS4:1",
-          labelTH: "ต่อยอดสู่ HS4 · หมวด 1 (การเปลี่ยนผ่านทางระบาดวิทยาและพฤติกรรมสุขภาพ)",
-          labelEN: "Next: HS4 · Sec 1 (Epidemiological Transition & Health Behaviour)",
-          whyTH: "ยกระดับประสิทธิภาพการจัดสรร (`Allocative Efficiency`) และความเป็นธรรมด้วยการลดปัจจัยเสี่ยง NCDs ตั้งแต่ต้นน้ำ",
-          whyEN: "Upstream NCD risk reduction advances both allocative efficiency and health equity.",
+          labelTH: "ต่อยอดสู่ HS4 · หมวด 1 (พฤติกรรมสุขภาพและการระบุพฤติกรรมเป้าหมาย)",
+          labelEN: "Next: HS4 · Sec 1 (Health Behaviour & Specifying Target Behaviour)",
+          whyTH: "ยกระดับประสิทธิภาพการจัดสรร (`Allocative Efficiency`) และความเป็นธรรมด้วยการปรับพฤติกรรมและสิ่งแวดล้อมตั้งแต่ต้นน้ำ",
+          whyEN: "Upstream behavior and environment redesign advances both allocative efficiency and health equity.",
         },
       ],
       keywords: [
-        { th: "เข็มทิศหกมิติ EQESaRR", en: "EQESaRR Six-Pillar Compass" },
-        { th: "ดุลยภาพเชิงระบบ", en: "Systemic Balance" },
+        { th: "เข็มทิศหกมิติ EQESaRR (หลัก–ย่อย)", en: "EQESaRR Main & Sub-Dimensions" },
+        { th: "ความครอบคลุมอย่างมีประสิทธิผล", en: "Effective Coverage" },
+        { th: "ดุลยภาพและการแลกได้แลกเสีย", en: "Systemic Balance & Trade-Offs" },
       ],
     },
 
     /* -------------------- HS4: Health Behaviour, Behaviour Change & Health Promotion -------------------- */
     "HS4:1": {
-      secLabelTH: "หมวดที่ 1 · การเปลี่ยนผ่านทางระบาดวิทยาและพฤติกรรมสุขภาพ 3 ระยะ",
-      secLabelEN: "Section 1 · Epidemiological Transition & 3 Stages of Health Behaviour",
-      titleTH: "สังคมสูงวัย ภาระโรค NCDs กลไกพฤติกรรมมนุษย์ และการแยกคัดกรองตามเกณฑ์เสี่ยงออกจากตรวจสุขภาพทั่วไป",
-      titleEN: "Aged Society, NCD Burden, Stimulus–Response Behaviour & Targeted Screening",
-      summaryTH: "เมื่อ NCDs คิดเป็น 76% ของการเสียชีวิตในไทย การดูแลผู้ป่วยต้องผสานการปรับพฤติกรรมภายใต้บริบทสังคมเข้ากับการรักษาด้วยยา และแยกแยะพฤติกรรมสุขภาพทั้ง 3 ระยะอย่างแม่นยำ",
-      summaryEN: "With NCDs driving 76% of Thai deaths, clinical care must pair context-aware behaviour change with pharmacotherapy across all three stages of health behaviour.",
+      secLabelTH: "หมวดที่ 1 · พฤติกรรมสุขภาพ 3 ระยะ และการระบุพฤติกรรมปัญหา–พฤติกรรมเป้าหมาย",
+      secLabelEN: "Section 1 · 3 Stages of Health Behaviour & Specifying Problem vs. Target Behaviour",
+      titleTH: "ภาระโรค NCDs พฤติกรรมสุขภาพ 3 ระยะ และการแยก 'พฤติกรรมที่สังเกตได้' ออกจาก 'ผลลัพธ์สุขภาพ'",
+      titleEN: "NCD Burden, 3 Behavioural Stages, and Separating Observable Behaviour from Clinical Outcomes",
+      summaryTH: "จุดตั้งต้นของการปรับพฤติกรรมคือการนิยามการกระทำที่ต้องการเปลี่ยนให้จำเพาะและสังเกตได้ โดยไม่สับสนกับค่าผลตรวจทางคลินิก และเข้าใจพฤติกรรมมนุษย์ครบทั้งสามระยะ",
+      summaryEN: "Effective behaviour change starts by specifying concrete, observable target actions—never confusing behaviour with clinical lab outcomes—across all three stages of health behaviour.",
       bullets: [
         {
-          th: "<strong>สังคมสูงวัยสมบูรณ์ + NCDs 76% ต้องผสานปรับพฤติกรรมคู่กับยา:</strong> การปรับวิถีชีวิตเข้มข้นลดอุบัติการณ์เบาหวานได้ 58% (`DPP`) แต่ในโรคที่เป็นแล้ว (`Look AHEAD`) ยังต้องใช้ยาร่วมด้วยเพื่อลดโรคหัวใจและหลอดเลือด",
-          en: "<strong>Lifestyle + Pharmacotherapy Synergy:</strong> Intensive lifestyle cuts T2DM onset by 58% (DPP), yet established disease still requires combining lifestyle modification with medication.",
+          th: "<strong>สังคมสูงวัยสมบูรณ์ + NCDs 76% ต้องผสานปรับพฤติกรรมคู่กับการรักษาด้วยยา:</strong> การปรับวิถีชีวิตเข้มข้นลดอุบัติการณ์เบาหวานได้ 58% (`DPP`) แต่เมื่อเป็นโรคแล้ว (`Look AHEAD`) ยังต้องใช้ยาร่วมด้วย และควรเน้นคัดกรองตามเกณฑ์อายุ/ความเสี่ยงแทนการตรวจสุขภาพทั่วไปแบบไม่จำเพาะ (`Cochrane RR = 1.00`)",
+          en: "<strong>Lifestyle + Pharmacotherapy & Risk-Targeted Screening:</strong> Intensive lifestyle cuts T2DM onset by 58% (DPP), established disease still requires medication alongside lifestyle, and screening should follow age/risk criteria rather than untargeted general checkups.",
         },
         {
-          th: "<strong>กลไกสิ่งเร้า–การตอบสนอง และพฤติกรรมสุขภาพ 3 ระยะ (Kasl & Cobb):</strong> แยกพฤติกรรมภายนอก (`overt`; อัตราหัวใจเต้นเป็นสรีรวิทยา ไม่ใช่ `overt`) พฤติกรรมภายใน (`covert`) และ 3 ระยะตั้งแต่แข็งแรง เริ่มมีอาการ จนถึงบทบาทผู้ป่วย (`sick-role`)",
-          en: "<strong>Overt/Covert & Kasl–Cobb's 3 Stages:</strong> Distinguish observable vs. inner behaviour (heart rate is physiological, not overt) across preventive, illness, and sick-role stages.",
+          th: "<strong>กลไกสิ่งเร้า–การตอบสนอง และพฤติกรรมสุขภาพ 3 ระยะ (`Kasl & Cobb`):</strong> แยกพฤติกรรมภายนอกที่สังเกตได้ (`overt`; อัตราหัวใจเต้นเป็นสรีรวิทยา ไม่ใช่ `overt`) พฤติกรรมภายใน (`covert`) และจำแนก 3 ระยะตามการรับรู้สถานะสุขภาพ ได้แก่ ระยะป้องกันก่อนป่วย (`preventive`), ระยะเริ่มมีอาการ (`illness`), และระยะบทบาทผู้ป่วย (`sick-role`)",
+          en: "<strong>Overt/Covert & Kasl–Cobb's 3 Stages:</strong> Distinguish observable actions vs. inner thoughts/feelings (heart rate is physiological, not overt) across preventive, illness, and sick-role behaviour.",
         },
         {
-          th: "<strong>คัดกรองตามเกณฑ์อายุ/ความเสี่ยง ≠ ตรวจสุขภาพประจำปีแบบไม่จำเพาะ:</strong> หลักฐาน Cochrane (`Krogsbøll et al., 2019`) ชี้ว่าการตรวจสุขภาพทั่วไปแบบไม่เลือกกลุ่มเสี่ยงไม่ลดอัตราตายรวม (`RR = 1.00`) จึงต้องมุ่งคัดกรองเฉพาะโรคตามเกณฑ์ความเสี่ยง",
-          en: "<strong>Targeted Screening vs. Untargeted Checkups:</strong> Untargeted general health checks do not reduce total mortality (Cochrane RR = 1.00); prioritize age- and risk-appropriate screening.",
+          th: "<strong>กฎขั้นที่ 1 ของการออกแบบการปรับเปลี่ยนพฤติกรรม (`Problem vs. Target Behavior`):</strong> ต้องระบุทั้ง 'พฤติกรรมเสี่ยงเดิมที่เป็นปัญหา' และ 'พฤติกรรมเป้าหมายใหม่ที่ต้องการส่งเสริม' เป็น <strong>กริยาการกระทำของกลุ่มเป้าหมายที่สังเกตได้ชัดเจน</strong> (ใคร ทำอะไร แทนที่วิถีปฏิบัติเดิมใด) โดยห้ามเขียนเป็นผลลัพธ์สุขภาพหรือค่าผลเลือด (`Health outcome`)",
+          en: "<strong>Specifying Problem vs. Target Behavior (Michie et al.):</strong> Define both the existing Problem Behavior and desired Target Behavior as concrete, observable human actions (who does what instead of what)—never as a downstream lab or clinical outcome.",
         },
       ],
-      flowRoleTH: "ปูฐานว่า 'ทำไมแพทย์ต้องเข้าใจพฤติกรรมควบคู่การรักษา' และจำแนกพฤติกรรมทั้ง 3 ระยะ ก่อนเข้าสู่ทฤษฎีอธิบายและเครื่องมือปรับพฤติกรรมในหมวด 2",
-      flowRoleEN: "Establishes the epidemiological urgency and 3-stage behavioural taxonomy before Section 2 unpacks behaviour-change theories and tools.",
+      caseLensTH: "กับดักสำคัญในโจทย์ HS4 ข้อแรก: ห้ามตอบพฤติกรรมเป้าหมายเป็นผลลัพธ์ทางคลินิก เช่น 'ค่าสารเคมีตกค้างในเลือดลดลง' หรือ 'มีสุขภาพดีขึ้น' (นั่นคือ `Health outcome`!) ต้องระบุเป็นการกระทำจำเพาะของกลุ่มเป้าหมาย เช่น การเปลี่ยนจากใช้สารเคมีปริมาณมากมาทำเกษตรปลอดภัยหรือเกษตรอินทรีย์",
+      caseLensEN: "Avoid the #1 HS4 Case Discussion trap: never write a clinical or lab result (e.g., 'lower blood toxin levels') as a Target Behavior—specify the concrete action performed by the target group.",
+      flowRoleTH: "ปูฐานการนิยามพฤติกรรมที่สังเกตได้และ 3 ระยะพฤติกรรม ก่อนเข้าสู่การวินิจฉัยว่า 'อะไรล็อกพฤติกรรมเดิมไว้ และจะปลดล็อกด้วย COM-B อย่างไร' ในหมวด 2",
+      flowRoleEN: "Establishes observable target-behavior specification and 3-stage taxonomy before Section 2 diagnoses behavioural locks and solutions via CDoH and COM-B.",
       crossLinks: [
         {
           target: "HS1:1",
@@ -1090,60 +1149,62 @@
           target: "HS2:5",
           labelTH: "HS2 · หมวด 5 (รูปแบบการดูแลโรคเรื้อรังต่อเนื่อง)",
           labelEN: "HS2 · Sec 5 (Chronic Care Models)",
-          whyTH: "ภาระโรค NCDs ต้องอาศัยทั้งการปรับพฤติกรรมต้นน้ำและการจัดระบบดูแลผู้ป่วยโรคเรื้อรังแบบบูรณาการ",
-          whyEN: "Rising NCDs require pairing lifestyle support with continuous chronic care delivery.",
+          whyTH: "ภาระโรค NCDs ต้องอาศัยทั้งการปรับพฤติกรรมต้นน้ำและการจัดระบบดูแลผู้ป่วยโรคเรื้อรังแบบหุ้นส่วน",
+          whyEN: "Rising NCDs require pairing lifestyle support with collaborative chronic care delivery.",
         },
       ],
       keywords: [
-        { th: "การเปลี่ยนผ่านทางระบาดวิทยา", en: "Epidemiological Transition" },
+        { th: "พฤติกรรมปัญหาเทียบกับพฤติกรรมเป้าหมาย", en: "Problem vs. Target Behavior" },
+        { th: "พฤติกรรมเทียบกับผลลัพธ์สุขภาพ", en: "Behavior vs. Health Outcome" },
         { th: "พฤติกรรมสุขภาพ 3 ระยะ (Kasl & Cobb)", en: "Kasl & Cobb's 3 Stages" },
-        { th: "คัดกรองตามเกณฑ์ความเสี่ยง", en: "Risk-Appropriate Screening" },
       ],
     },
     "HS4:2": {
-      secLabelTH: "หมวดที่ 2 · ทฤษฎีพฤติกรรมสุขภาพ เศรษฐศาสตร์พฤติกรรม (Nudge) และวงล้อ BCW (COM-B)",
-      secLabelEN: "Section 2 · Behaviour Theories, Choice Architecture (Nudge) & BCW (COM-B)",
-      titleTH: "ก้าวข้ามข้อจำกัดของ KAP สู่ HBM, Stages of Change, ระบบคิดที่ 1–2 และวงล้อการปรับเปลี่ยนพฤติกรรม",
-      titleEN: "From KAP & HBM to Stages of Change, Dual-Process Nudges, and the Behaviour Change Wheel",
-      summaryTH: "ความรู้จำเป็นต่อการตัดสินใจอย่างรู้เท่าทันแต่ไม่เพียงพอที่จะเปลี่ยนพฤติกรรม การออกแบบมาตรการต้องเชื่อมทั้งความเชื่อ ระบบคิดอัตโนมัติ และปัจจัยนิเวศวิทยาผ่านกรอบ COM-B และ BCW",
-      summaryEN: "Knowledge enables informed choice but rarely suffices alone; effective interventions address beliefs, System 1 habits, and environmental context via Nudge and COM-B/BCW.",
+      secLabelTH: "หมวดที่ 2 · ทฤษฎีพฤติกรรม ปัจจัยเชิงพาณิชย์ (CDoH) Nudge และตัวแบบ COM-B ครบ 6 มิติย่อย",
+      secLabelEN: "Section 2 · Behaviour Theories, CDoH, Nudge & All 6 Sub-Components of COM-B",
+      titleTH: "ก้าวข้ามกับดักการสอนสุขศึกษา (KAP) สู่การวิเคราะห์ CDoH, HBM, Nudge และตัวแบบ COM-B ทั้ง 6 องค์ประกอบย่อย",
+      titleEN: "Beyond KAP: Diagnosing CDoH, HBM, Nudge, and the 6 Sub-Components of COM-B (BCW)",
+      summaryTH: "เมื่อคนรู้ว่าเสี่ยงแต่ถูกเงื่อนไขตลาดและปากท้องบังคับ การอบรมให้ความรู้ซ้ำ ๆ ย่อมไร้ผล ต้องปลดล็อกครบทั้งความสามารถ โอกาส และแรงจูงใจทั้งหกองค์ประกอบย่อยของ COM-B",
+      summaryEN: "When people already know a hazard yet commercial market rules trap their livelihood, education alone fails; lasting change unlocks all six Capability, Opportunity, and Motivation sub-components.",
       bullets: [
         {
-          th: "<strong>นิเวศวิทยา 5 ระดับ, ช่องว่าง KAP และลำดับพลังของ HBM:</strong> การให้ความรู้ลำพังติด `Intention–Behaviour Gap` และเสี่ยงโทษผู้ป่วย ส่วนใน `HBM` การรับรู้ประโยชน์และอุปสรรคมีพลังทำนายสูงกว่าการขู่ให้กลัวความรุนแรงของโรค",
-          en: "<strong>5 Ecological Levels, KAP Gap & HBM Hierarchy:</strong> Knowledge alone faces the intention–behaviour gap; in HBM, perceived benefits and barriers far outweigh threat perception.",
+          th: "<strong>ข้อจำกัดของ `KAP`, ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ (`CDoH`), `HBM` และ `Stages of Change`:</strong> ความรู้เพียงอย่างเดียวติด `Intention–Behaviour Gap` โดยเฉพาะเมื่อโครงสร้างตลาดและเกณฑ์รับซื้อของพ่อค้ารายใหญ่ (`CDoH`) บีบให้ต้องคงพฤติกรรมเสี่ยงเพื่อความอยู่รอด ส่วนใน `HBM` การลดอุปสรรคและเห็นประโยชน์มีพลังเหนือการขู่ให้กลัว และใน `Stages of Change` (`41 RCTs`) ไม่ควรงดช่วยเหลือผู้ที่ยังไม่พร้อม",
+          en: "<strong>KAP Limits, CDoH Locks, HBM & TTM:</strong> Knowledge alone cannot overcome Commercial Determinants of Health (`CDoH`, such as market standards penalizing safe practices); in HBM, lowering barriers outweighs fear appeals, and help should never be withheld by stage of change.",
         },
         {
-          th: "<strong>Stages of Change และข้อเท็จจริงจาก 41 RCTs:</strong> ช่วยเข้าใจความพร้อมและการกลับเป็นซ้ำ (`relapse`) แต่หลักฐาน Cochrane (`Cahill et al., 2010`) พบว่าโปรแกรมจับคู่ตามขั้นไม่ได้เหนือกว่าโปรแกรมมาตรฐาน จึงไม่ควรงดให้ความช่วยเหลือผู้ที่ยังไม่พร้อม",
-          en: "<strong>Stages of Change Reality Check:</strong> Useful for empathetic counseling, but Cochrane's 41-RCT review shows stage-matched care adds no extra quit benefit—never withhold help by stage.",
+          th: "<strong>จำแนกองค์ประกอบหลักและ 6 องค์ประกอบย่อยของ `COM-B` (`Michie et al., 2011`) ให้แม่นยำทุกตัว:</strong> <strong>`Capability` (ความสามารถ)</strong> แยกเป็น `C-Ph (Physical Capability)` สมรรถนะร่างกาย/ทักษะปฏิบัติทางกาย และ `C-Ps (Psychological Capability)` ความรู้โทษภัยที่ชัดเจนและทักษะคิดประเมินความเสี่ยง · <strong>`Opportunity` (โอกาสภายนอก)</strong> แยกเป็น `O-Ph (Physical Opportunity)` บริบทแวดล้อม ทรัพยากร ช่องทางตลาดรับซื้อทางเลือกและราคาที่เป็นธรรม และ `O-So (Social Opportunity)` การรวมกลุ่มเครือข่ายช่วยเหลือเกื้อกูล อำนาจต่อรอง และค่านิยมผู้บริโภค · <strong>`Motivation` (แรงจูงใจภายใน)</strong> แยกเป็น `M-Re (Reflective Motivation)` การหยุดคิดทบทวนผลดี–ผลเสีย การตัดสินใจอย่างมีเหตุผล และความเชื่อมั่นว่าฉันทำได้ (`Self-efficacy`) และ `M-Au (Automatic Motivation)` อารมณ์ความรู้สึก ความมั่นคงทางใจ และการคลายความกลัวขาดทุน",
+          en: "<strong>Master All 6 COM-B Sub-Components:</strong> Capability = `C-Ph` (physical skill/stamina) & `C-Ps` (knowledge & risk appraisal); Opportunity = `O-Ph` (environmental resources, alternative fair-price markets) & `O-So` (farmer/peer groups, social support, consumer norms); Motivation = `M-Re` (reflective evaluation, planning, `self-efficacy`) & `M-Au` (emotional security, easing fear of income loss, habits).",
         },
         {
-          th: "<strong>Nudge (`System 1`) และวงล้อ `BCW / COM-B`:</strong> ค่าตั้งต้น (`default`, `d = 0.62`) ทรงพลังแต่ผลระดับประชากรเฉลี่ยเพียง `+1.4%` (`Buy 1 Get 1 Free` ไม่ใช่ Nudge) จึงต้องใช้เสริมกฎหมายและภาษีผ่านการวินิจฉัย `Capability · Opportunity · Motivation` สู่ 9 มาตรการ และ 7 นโยบาย",
-          en: "<strong>Nudge + BCW/COM-B System Design:</strong> Defaults lead nudges (d = 0.62) yet real-world nudges average +1.4 pp; pair choice architecture with laws/taxes using COM-B, 9 functions, and 7 policies.",
+          th: "<strong>เชื่อม `Nudge` (`System 1`) เข้ากับวงล้อ `BCW` (9 มาตรการ · 7 นโยบาย):</strong> ค่าตั้งต้น (`default`, `d = 0.62`) ช่วยสะกิดทางเลือกอัตโนมัติ (โปรโมชันซื้อ 1 แถม 1 เป็นแรงจูงใจราคา ไม่ใช่ `Nudge`) แต่ผลเฉลี่ยระดับประชากรราว `+1.4%` จึงต้องผสานเข้ากับมาตรการปรับสิ่งแวดล้อม กฎหมาย และการคลังในวงล้อ `BCW`",
+          en: "<strong>Nudge Paired with BCW Policy Rings:</strong> Choice-architecture defaults aid System 1 decisions (price promotions are not nudges), yet achieve lasting scale only when combined with environmental, fiscal, and regulatory policies in BCW.",
         },
       ],
-      flowRoleTH: "สังเคราะห์วิวัฒนาการของทฤษฎีพฤติกรรมศาสตร์สู่เครื่องมือออกแบบมาตรการเชิงระบบ (`BCW`) ก่อนเจาะลึกสมรรถนะการใช้ข้อมูลและบทบาทองค์กร (`Health Literacy`) ในหมวด 3",
-      flowRoleEN: "Synthesizes behavioural theories into the BCW system-design wheel before Section 3 examines personal and organizational Health Literacy.",
+      caseLensTH: "ในการตอบตาราง COM-B ของ Case Discussion ต้องระบุแยกทั้ง 'องค์ประกอบหลัก (`C / O / M`)' และ 'องค์ประกอบย่อย (`C-Ph, C-Ps, O-Ph, O-So, M-Re, M-Au`)' ให้ตรงกับหลักฐานในโจทย์ (เช่น ตลาดรับซื้อทางเลือก = `O-Ph`; รวมกลุ่มแลกเปลี่ยน/ไม่โดดเดี่ยว = `O-So`; ความรู้โทษภัย = `C-Ps`; หยุดคิดตัดสินใจ/เชื่อมั่นว่าทำได้ = `M-Re`; มั่นคงทางใจคลายกังวล = `M-Au` และอย่าเลือก `C-Ph` หากโจทย์ไม่ได้กล่าวถึงสมรรถนะทางกาย)",
+      caseLensEN: "In COM-B case tables, name both Main (`C/O/M`) and exact Sub-component (`C-Ph, C-Ps, O-Ph, O-So, M-Re, M-Au`) grounded in scenario evidence—and avoid citing `C-Ph` unless physical/motor skill is actually supported by the text.",
+      flowRoleTH: "สังเคราะห์เครื่องมือวิเคราะห์กลไกพฤติกรรมครบ 6 มิติย่อยของ `COM-B` ก่อนเชื่อมสู่ความรอบรู้ด้านสุขภาพระดับบุคคลและองค์กร (`Health Literacy`) ในหมวด 3",
+      flowRoleEN: "Equips learners with full 6-subcomponent COM-B diagnostics before Section 3 examines personal and organizational Health Literacy.",
       crossLinks: [
         {
           target: "HS1:2",
           labelTH: "HS1 · หมวด 2 (พีระมิดผลกระทบทางสุขภาพของ Frieden)",
           labelEN: "HS1 · Sec 2 (Frieden's Health Impact Pyramid)",
-          whyTH: "การปรับค่าตั้งต้น (`Nudge`) และโอกาสเชิงสิ่งแวดล้อมใน `COM-B` สอดคล้องกับชั้นเปลี่ยนบริบททางเลือกของ Frieden",
-          whyEN: "Nudges and COM-B Opportunity redesign match Frieden's high-leverage context-changing tier.",
+          whyTH: "การปลดล็อก `O-Ph` (โครงสร้างตลาดและสภาพแวดล้อม) สอดคล้องกับฐานพีระมิดของ Frieden ที่เปลี่ยนบริบทให้ทางเลือกปลอดภัยทำได้จริง",
+          whyEN: "Unlocking Physical Opportunity (`O-Ph`) mirrors Frieden's context-changing tier.",
         },
         {
           target: "ST1:4",
           labelTH: "ST1 · หมวด 4 (คานงัดเชิงโครงสร้างใต้ภูเขาน้ำแข็ง)",
           labelEN: "ST1 · Sec 4 (Structural Leverage Beneath the Iceberg)",
-          whyTH: "วงกลางและวงนอกของ `BCW` ช่วยยกระดับการแก้ปัญหาจากการสั่งสอนรายบุคคลไปสู่การปรับโครงสร้างและนโยบาย",
-          whyEN: "BCW's outer intervention and policy rings shift clinical thinking from individual blame to structural leverage.",
+          whyTH: "การแก้ที่โครงสร้างตลาด (`CDoH`) และวงนอกของ `BCW` คือการแก้ที่ชั้นโครงสร้างใต้ภูเขาน้ำแข็งแทนการโทษตัวบุคคล",
+          whyEN: "Addressing commercial market structures applies deep Iceberg leverage instead of blaming individuals.",
         },
       ],
       keywords: [
-        { th: "แบบแผนความเชื่อด้านสุขภาพ", en: "Health Belief Model (HBM)" },
-        { th: "ลำดับขั้นของการเปลี่ยนแปลง", en: "Stages of Change (TTM)" },
-        { th: "เศรษฐศาสตร์พฤติกรรมและการสะกิด", en: "Behavioural Economics & Nudge" },
-        { th: "ตัวแบบ COM-B และวงล้อ BCW", en: "COM-B & Behaviour Change Wheel" },
+        { th: "ปัจจัยกำหนดสุขภาพเชิงพาณิชย์", en: "Commercial Determinants of Health (CDoH)" },
+        { th: "ตัวแบบ COM-B ครบ 6 องค์ประกอบย่อย", en: "COM-B (C-Ph · C-Ps · O-Ph · O-So · M-Re · M-Au)" },
+        { th: "ความเชื่อมั่นในศักยภาพตนเอง", en: "Self-Efficacy (M-Re)" },
+        { th: "เศรษฐศาสตร์พฤติกรรมและวงล้อ BCW", en: "Nudge & Behaviour Change Wheel" },
       ],
     },
     "HS4:3": {
@@ -1151,20 +1212,22 @@
       secLabelEN: "Section 3 · Personal & Organizational Health Literacy",
       titleTH: "สมรรถนะ 4 ขั้นใน 3 บริบทของ Sørensen ควบคู่ความรับผิดชอบขององค์กรตามนิยาม CDC 2020",
       titleEN: "Sørensen's 4 Competences × 3 Domains Paired with CDC 2020 Organizational Responsibility",
-      summaryTH: "ความรอบรู้ด้านสุขภาพไม่ใช่ภาระของประชาชนฝ่ายเดียว แต่องค์กรสุขภาพต้องออกแบบข้อมูลและบริการเพื่อเอื้ออย่างเป็นธรรมให้ทุกคนตัดสินใจอย่างรอบด้านได้จริง",
-      summaryEN: "Health literacy is a shared responsibility: personal competences thrive only when organizations equitably enable clear navigation and informed decisions.",
+      summaryTH: "ความรอบรู้ด้านสุขภาพไม่ใช่ภาระของประชาชนฝ่ายเดียว แต่องค์กรและระบบต้องสื่อสารอย่างเข้าใจง่ายและเอื้ออย่างเป็นธรรมให้ทั้งผู้ผลิตและผู้บริโภคตัดสินใจบนฐานข้อมูลที่ถูกต้อง",
+      summaryEN: "Health literacy is a shared responsibility: personal competences thrive only when organizations equitably enable clear communication and informed choices.",
       bullets: [
         {
-          th: "<strong>สมรรถนะ 4 ขั้น × 3 บริบท (Sørensen et al., 2012) + องค์กรรอบรู้ด้านสุขภาพ (CDC, 2020):</strong> ประชาชนเข้าถึง (`access`) เข้าใจ (`understand`) ประเมิน (`appraise`) และนำไปใช้ (`apply`) ข้อมูลทั้งในด้านการรักษา การป้องกันโรค และการสร้างเสริมสุขภาพ ขณะที่องค์กรมีหน้าที่เอื้ออย่างเป็นธรรม (`equitably enable`)",
-          en: "<strong>Dual-Level Health Literacy:</strong> Unites personal competences (access, understand, appraise, apply across 3 domains) with organizational responsibility to equitably enable patients.",
+          th: "<strong>สมรรถนะ 4 ขั้น × 3 บริบท (`Sørensen et al., 2012`) และ 3 ระดับของ `Nutbeam`:</strong> บุคคลเข้าถึง (`access`) เข้าใจ (`understand`) ประเมิน (`appraise`) และนำไปใช้ (`apply`) ข้อมูลสุขภาพทั้งในบริบทการรักษา การป้องกันโรค และการสร้างเสริมสุขภาพ ตั้งแต่ระดับพื้นฐาน ปฏิสัมพันธ์ ไปจนถึงระดับวิจารณญาณ (`critical health literacy`)",
+          en: "<strong>Sørensen's 4 Competences & Nutbeam's 3 Tiers:</strong> Spans accessing, understanding, appraising, and applying health information across care, prevention, and promotion—up to critical health literacy.",
         },
         {
-          th: "<strong>หลักฐานเชิงสหสัมพันธ์ต่อระบบสุขภาพและความเป็นธรรม:</strong> ความรอบรู้ด้านสุขภาพต่ำมีความสัมพันธ์เชิงสังเกตการณ์กับการนอนโรงพยาบาล ห้องฉุกเฉิน อัตราตายในผู้สูงอายุ และค่าใช้จ่ายที่เพิ่มขึ้นราว `3–5%` ของรายจ่ายสุขภาพรวม และทำหน้าที่เป็นตัวแปรส่งผ่านบางส่วนของความเหลื่อมล้ำ",
-          en: "<strong>Correlational Evidence & Equity Role:</strong> Low health literacy associates observationally with higher hospitalization/ED use, ~3–5% added system costs, and socioeconomic health disparities.",
+          th: "<strong>ความรอบรู้ระดับองค์กร (`CDC, 2020`) และหลักฐานเชิงสหสัมพันธ์:</strong> องค์กรมีหน้าที่เอื้ออย่างเป็นธรรม (`equitably enable`) ให้ผู้คนใช้ข้อมูลได้จริง ทั้งนี้ความรอบรู้ต่ำมีความสัมพันธ์เชิงสังเกตการณ์กับการใช้ห้องฉุกเฉิน การนอนโรงพยาบาล และค่าใช้จ่ายระบบที่สูงขึ้นราว `3–5%`",
+          en: "<strong>Organizational Health Literacy & System Evidence:</strong> Organizations must equitably enable navigation and informed action; low health literacy associates observationally with higher ED/inpatient use and ~3–5% added system costs.",
         },
       ],
-      flowRoleTH: "เชื่อมสมรรถนะของประชาชนและหน่วยบริการในหมวด 3 เข้าสู่วาระใหญ่ระดับประชากรและนโยบายสาธารณะ คือ 'การสร้างเสริมสุขภาพ (Health Promotion)' ในหมวด 4",
-      flowRoleEN: "Bridges personal and organizational health literacy to macro-level population empowerment and Healthy Public Policy in Section 4.",
+      caseLensTH: "เชื่อมโยงในกรณีศึกษาได้ทั้งสองฝั่ง: การสื่อสารข้อมูลพิษภัยและวิถีปฏิบัติที่ชัดเจนช่วยยกระดับทักษะและความรอบรู้ด้านสุขภาพของกลุ่มเสี่ยง ขณะที่การสื่อสารสาธารณะให้ผู้บริโภคเข้าใจคุณค่าของผลิตภัณฑ์ปลอดภัยช่วยปรับอุปสงค์ของตลาด",
+      caseLensEN: "Apply health literacy on both sides of a case: clear risk communication builds personal appraisal skills among producers/patients, while public communication reshapes consumer demand.",
+      flowRoleTH: "เชื่อมสมรรถนะการใช้ข้อมูลของประชาชนและองค์กรในหมวด 3 เข้าสู่กรอบปฏิบัติการระดับสังคม คือ 'กลยุทธ์การสร้างเสริมสุขภาพ 5 ด้านตามกฎบัตรออตตาวา' ในหมวด 4",
+      flowRoleEN: "Bridges personal and organizational health literacy to macro-level population empowerment via the Ottawa Charter's 5 Action Areas in Section 4.",
       crossLinks: [
         {
           target: "HS3:2",
@@ -1177,108 +1240,114 @@
           target: "HS5:5",
           labelTH: "HS5 · หมวด 5 (บริการปฐมภูมิที่สื่อสารต่อเนื่องยึดคนเป็นศูนย์กลาง)",
           labelEN: "HS5 · Sec 5 (People-Centered Primary Care)",
-          whyTH: "ความสัมพันธ์ต่อเนื่องกับทีมหมอครอบครัวช่วยเสริมความรอบรู้ด้านสุขภาพและการดูแลตนเองของผู้ป่วย",
+          whyTH: "ความสัมพันธ์ต่อเนื่องกับทีมปฐมภูมิช่วยเสริมความรอบรู้ด้านสุขภาพและการดูแลตนเองของผู้ป่วย",
           whyEN: "Longitudinal primary care relationships strengthen patient health literacy and self-management.",
         },
       ],
       keywords: [
-        { th: "ความรอบรู้ด้านสุขภาพส่วนบุคคล", en: "Personal Health Literacy" },
-        { th: "ความรอบรู้ด้านสุขภาพระดับองค์กร", en: "Organizational Health Literacy" },
+        { th: "ความรอบรู้ด้านสุขภาพส่วนบุคคลและองค์กร", en: "Personal & Organizational Health Literacy" },
         { th: "เข้าถึง · เข้าใจ · ประเมิน · นำไปใช้", en: "Access · Understand · Appraise · Apply" },
+        { th: "ความรอบรู้เชิงวิจารณญาณ", en: "Critical Health Literacy" },
       ],
     },
     "HS4:4": {
-      secLabelTH: "หมวดที่ 4 · การสร้างเสริมสุขภาพ กฎบัตรออตตาวา เซี่ยงไฮ้ และเจนีวา",
-      secLabelEN: "Section 4 · Health Promotion: From Ottawa (1986) to Shanghai (2016) & Geneva (2021)",
-      titleTH: "ขบวนการทางสังคมระดับประชากรที่เสริมพลังผ่าน 5 หลักการ 3 ยุทธศาสตร์ 5 ด้านปฏิบัติการ สู่สังคมสุขภาวะ",
-      titleEN: "Population-Wide Empowerment via Ottawa's 5 Action Areas, Shanghai's 3 Pillars & Geneva's Well-Being Societies",
-      summaryTH: "การสร้างเสริมสุขภาพก้าวข้ามการดูแลเฉพาะผู้ป่วยในคลินิก ไปสู่การเสริมพลังประชาชนทั้งประชากรให้ควบคุมปัจจัยกำหนดสุขภาพผ่านนโยบายสาธารณะ สิ่งแวดล้อม ชุมชน และการปรับระบบบริการ",
-      summaryEN: "Health promotion transcends clinical care to empower whole populations over health determinants through healthy public policy, supportive environments, and reoriented services.",
+      secLabelTH: "หมวดที่ 4 · การสร้างเสริมสุขภาพและกลยุทธ์ 5 ด้านของกฎบัตรออตตาวา",
+      secLabelEN: "Section 4 · Health Promotion: Ottawa's 5 Action Areas, Shanghai & Geneva",
+      titleTH: "จำแนกครบ 5 ด้านปฏิบัติการและ 3 ยุทธศาสตร์ของกฎบัตรออตตาวา (1986) สู่เซี่ยงไฮ้ (2016) และเจนีวา (2021)",
+      titleEN: "Mastering All 5 Action Areas & 3 Strategies of the Ottawa Charter Through Geneva's Well-Being Societies",
+      summaryTH: "การสร้างเสริมสุขภาพคือกระบวนการเสริมพลังให้ผู้คนและชุมชนควบคุมปัจจัยกำหนดสุขภาพได้มากขึ้น ผ่านการขับเคลื่อนประสานกันครบทั้งห้าด้านปฏิบัติการของกฎบัตรออตตาวา",
+      summaryEN: "Health promotion empowers people and communities to increase control over health determinants by orchestrating all five action areas of the Ottawa Charter.",
       bullets: [
         {
-          th: "<strong>ถอดรหัสตราสัญลักษณ์กฎบัตรออตตาวา (1986):</strong> บนฐานปัจจัยพื้นฐาน 9 ประการและหลักการ 5 ข้อ วงกลมในคือ 3 บทบาทหลัก (`Advocate`, `Mediate`, `Enable`) วงแหวนนอกคือนโยบายสาธารณะเพื่อสุขภาพ (เช่น ภาษีเครื่องดื่มน้ำตาลไทยลดยอดซื้อ `-15%`) และ 3 ปีกครอบคลุมสิ่งแวดล้อมเอื้อ ชุมชนเข้มแข็ง ทักษะส่วนบุคคล และการปรับระบบบริการ",
-          en: "<strong>Ottawa Charter Architecture (1986):</strong> Three core strategies (Advocate, Mediate, Enable) drive five action areas anchored by Healthy Public Policy (e.g., Thai SSB tax cutting sales by 15%).",
+          th: "<strong>จำแนกครบ 5 ด้านปฏิบัติการของกฎบัตรออตตาวา (`Ottawa Charter 5 Action Areas`, 1986) ให้แม่นยำ:</strong> <strong>(1) `Build Healthy Public Policy`</strong> (สร้างนโยบายสาธารณะเพื่อสุขภาพ เช่น กฎหมาย ภาษีน้ำตาล หรือมาตรการรัฐ–เอกชนจัดตั้งกลไกรับซื้อในราคาที่เป็นธรรม) · <strong>(2) `Create Supportive Environments`</strong> (สร้างสิ่งแวดล้อมทางกายภาพ เศรษฐกิจ และค่านิยมตลาดที่เอื้อให้ทางเลือกที่ปลอดภัยทำได้ง่ายและอยู่รอดได้จริง) · <strong>(3) `Strengthen Community Actions`</strong> (เสริมความเข้มแข็งของชุมชน เช่น การรวมกลุ่มเครือข่ายแลกเปลี่ยนเรียนรู้ ช่วยเหลือกัน และสร้างอำนาจต่อรอง) · <strong>(4) `Develop Personal Skills`</strong> (พัฒนาทักษะส่วนบุคคลและให้ความรู้เพื่อตัดสินใจดูแลตนเอง) · และ <strong>(5) `Reorient Health Services`</strong> (ปรับบริการสุขภาพจากตั้งรับในโรงพยาบาลสู่การคัดกรองเชิงรุกและทำงานร่วมกับชุมชน/ภาคส่วนอื่น)",
+          en: "<strong>All 5 Ottawa Charter Action Areas:</strong> (1) Build Healthy Public Policy (fiscal/market/regulatory policies); (2) Create Supportive Environments (making healthy, safe choices economically viable and easy); (3) Strengthen Community Actions (collective organization, peer learning, bargaining power); (4) Develop Personal Skills (knowledge & practical skills); and (5) Reorient Health Services (proactive community prevention beyond curative clinics).",
         },
         {
-          th: "<strong>จาก 3 เสาหลักเซี่ยงไฮ้ (2016) สู่กฎบัตรเจนีวาเพื่อสุขภาวะ (2021):</strong> ผสานธรรมาภิบาลที่ดี (`Good Governance`) เมืองสุขภาพดี (`Healthy Cities`) และความรอบรู้ด้านสุขภาพ (`Health Literacy`) มุ่งสู่ `Well-being Societies` ที่เชื่อมสุขภาพ ความเป็นธรรม และความยั่งยืนของระบบนิเวศ",
-          en: "<strong>Shanghai 3 Pillars (2016) to Geneva Charter (2021):</strong> Unites Good Governance, Healthy Cities, and Health Literacy toward equitable, ecologically sustainable Well-being Societies.",
+          th: "<strong>3 บทบาทหลักของบุคลากรสุขภาพ (`Advocate · Mediate · Enable`) สู่เซี่ยงไฮ้ (2016) และเจนีวา (2021):</strong> ชี้นำผลักดันนโยบาย ไกล่เกลี่ยผลประโยชน์ข้ามภาคส่วน และเสริมพลังประชาชน เชื่อมต่อสู่ 3 เสาหลักเซี่ยงไฮ้ (`Good Governance · Healthy Cities · Health Literacy`) และ `Well-being Societies` ตามกฎบัตรเจนีวา",
+          en: "<strong>Advocate · Mediate · Enable to Well-Being Societies:</strong> Health professionals advocate, mediate across sectors, and enable communities—advancing Shanghai's 3 pillars and Geneva's equitable, sustainable Well-being Societies.",
         },
       ],
-      flowRoleTH: "ปิดท้ายบท HS4 ด้วยยุทธศาสตร์การสร้างเสริมสุขภาพระดับประชากร เพื่อส่งต่อสู่ HS5 ว่า 'ระบบสุขภาพปฐมภูมิ (PHC)' จะเป็นกลไกหลักขับเคลื่อนสิ่งนี้ในพื้นที่จริงอย่างไร",
-      flowRoleEN: "Culminates HS4 with population health promotion, setting up HS5 on how Primary Health Care operationalizes multisectoral action and community empowerment.",
+      caseLensTH: "ในการตอบโจทย์ความสอดคล้องกับกฎบัตรออตตาวา ให้ระบุชื่อกลยุทธ์ทั้งภาษาไทย/อังกฤษให้ตรงทั้ง 5 ด้าน แล้วเชื่อมเหตุการณ์ในโจทย์แยกกันอย่างชัดเจน (เช่น นโยบายรัฐ–เอกชนตั้งกลไกราคาเป็นธรรม = `Build Healthy Public Policy`; ระบบตลาดทางเลือกและค่านิยมผู้บริโภคที่ขจัดกำแพงเศรษฐกิจ = `Create Supportive Environments`; การรวมกลุ่มสร้างอำนาจต่อรอง = `Strengthen Community Actions`; ให้ความรู้โทษภัยและทางเลือก = `Develop Personal Skills`; ลงพื้นที่คัดกรองเชิงรุก = `Reorient Health Services`)",
+      caseLensEN: "When mapping interventions to the Ottawa Charter, explicitly name at least 3–5 distinct Action Areas and pair each with its specific mechanism from the case (policy/pricing rules → Healthy Public Policy; alternative market & consumer norms → Supportive Environments; collective peer groups → Community Action; risk/skill education → Personal Skills; proactive field screening → Reorient Health Services).",
+      flowRoleTH: "ปิดท้ายบท HS4 ด้วยยุทธศาสตร์การสร้างเสริมสุขภาพครบ 5 ด้าน เพื่อส่งต่อสู่ HS5 ว่า 'ระบบสุขภาพปฐมภูมิ (PHC)' จะบูรณาการสิ่งนี้เข้ากับบริการด่านหน้าอย่างไร",
+      flowRoleEN: "Culminates HS4 with all 5 Ottawa Action Areas, setting up HS5 on how Primary Health Care operationalizes multisectoral action and community empowerment.",
       crossLinks: [
         {
           target: "HS1:2",
           labelTH: "HS1 · หมวด 2 (ปัจจัยกำหนดสุขภาพทางสังคม SDH)",
           labelEN: "HS1 · Sec 2 (Social Determinants of Health)",
-          whyTH: "นโยบายสาธารณะเพื่อสุขภาพและธรรมาภิบาลที่ดีคือเครื่องมือหลักในการปรับปัจจัยต้นน้ำของ `SDH`",
-          whyEN: "Healthy Public Policy and Good Governance directly reshape structural Social Determinants of Health.",
+          whyTH: "นโยบายสาธารณะเพื่อสุขภาพและสิ่งแวดล้อมที่เอื้อต่อสุขภาพคือเครื่องมือหลักในการแก้ปัจจัยต้นน้ำของ `SDH` และ `CDoH`",
+          whyEN: "Healthy Public Policy and Supportive Environments directly reshape structural and commercial determinants.",
         },
         {
           target: "HS5:4",
           labelTH: "HS5 · หมวด 4 (ปฏิญญาแอสทานาเชื่อมปฐมภูมิ นโยบายข้ามภาคส่วน และชุมชน)",
           labelEN: "HS5 · Sec 4 (Astana Multisectoral PHC)",
-          whyTH: "การปรับระบบบริการสู่การสร้างเสริมสุขภาพ (`Reorienting Health Services`) มีระบบสุขภาพปฐมภูมิเป็นหัวใจหลัก",
-          whyEN: "Reorienting health services toward health promotion is anchored in Primary Health Care.",
+          whyTH: "การปรับระบบบริการสู่การสร้างเสริมสุขภาพ (`Reorient Health Services`) มีระบบสุขภาพปฐมภูมิเป็นกลไกหลักในพื้นที่",
+          whyEN: "Reorienting health services toward health promotion is anchored in frontline Primary Health Care.",
         },
       ],
       keywords: [
-        { th: "กฎบัตรออตตาวา ค.ศ. 1986", en: "Ottawa Charter (1986)" },
+        { th: "กฎบัตรออตตาวา 5 ด้านปฏิบัติการ", en: "Ottawa Charter 5 Action Areas" },
         { th: "ชี้นำผลักดัน · ไกล่เกลี่ย · เสริมพลัง", en: "Advocate · Mediate · Enable" },
-        { th: "สามเสาหลักเซี่ยงไฮ้ ค.ศ. 2016", en: "Shanghai 3 Pillars (2016)" },
-        { th: "กฎบัตรเจนีวาเพื่อสุขภาวะ ค.ศ. 2021", en: "Geneva Charter for Well-being (2021)" },
+        { th: "สามเสาหลักเซี่ยงไฮ้และกฎบัตรเจนีวา", en: "Shanghai 3 Pillars & Geneva Charter" },
       ],
     },
     "HS4:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์พฤติกรรมสุขภาพ การปรับเปลี่ยนพฤติกรรม และการสร้างเสริมสุขภาพ",
-      secLabelEN: "Synthesis · Health Behaviour, Behaviour Change & Health Promotion",
-      titleTH: "ผสานความเข้าใจพฤติกรรมรายบุคคล การจัดสถาปัตยกรรมทางเลือก ความรอบรู้ด้านสุขภาพ และนโยบายสาธารณะ",
-      titleEN: "Integrating Clinical Behaviour Support, Choice Architecture, Health Literacy & Healthy Public Policy",
-      summaryTH: "การจัดการภาระโรคไม่ติดต่อเรื้อรังอย่างยั่งยืนต้องไม่โทษผู้ป่วยฝ่ายเดียว แต่ผสานการรักษาทางการแพทย์เข้ากับการเสริมสมรรถนะ โอกาส ความรอบรู้ด้านสุขภาพ และสิ่งแวดล้อม–นโยบายที่เอื้อต่อสุขภาพ",
-      summaryEN: "Sustainable NCD control replaces victim-blaming with an integrated ecosystem uniting pharmacotherapy, COM-B/Nudge design, dual-level health literacy, and healthy public policy.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS4 & Open Note",
+      secLabelEN: "Synthesis · HS4 Case Discussion & Open-Note Readiness",
+      titleTH: "ร้อยเรียงการนิยามพฤติกรรมเป้าหมาย การวินิจฉัย COM-B 6 มิติย่อย และการขับเคลื่อนกฎบัตรออตตาวา 5 ด้าน",
+      titleEN: "Uniting Target-Behavior Specification, 6-Subcomponent COM-B, and 5 Ottawa Action Areas",
+      summaryTH: "ระบุพฤติกรรมเป้าหมายให้เป็นการกระทำที่ชัดเจน ปลดล็อกอุปสรรคเชิงพาณิชย์และจิตสังคมครบหกมิติย่อยของ COM-B และขับเคลื่อนครบห้ากลยุทธ์ของกฎบัตรออตตาวา คือสูตรสำเร็จของ HS4",
+      summaryEN: "Specifying observable target behaviors, unlocking all 6 COM-B sub-components under CDoH constraints, and applying Ottawa's 5 Action Areas complete the HS4 analytical workflow.",
       bullets: [
         {
-          th: "<strong>บูรณาการครบ 4 มิติของ HS4:</strong> (1) เข้าใจพฤติกรรม 3 ระยะและคัดกรองตามเกณฑ์ความเสี่ยง (2) ออกแบบมาตรการด้วย `HBM`, `Nudge` และ `BCW/COM-B` (3) ยกระดับทั้งความรอบรู้ส่วนบุคคลและองค์กร และ (4) ขับเคลื่อนกฎบัตรออตตาวา–เซี่ยงไฮ้–เจนีวา",
-          en: "<strong>Four-Pillar HS4 Synthesis:</strong> Combine risk-appropriate clinical care, COM-B & Nudge intervention design, personal/organizational health literacy, and Ottawa–Geneva health promotion.",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 3 ประเด็นของกรณีศึกษา HS4:</strong> (1) แยก `Problem Behavior` กับ `Target Behavior` เป็นการกระทำที่สังเกตได้ (ไม่ใช่ค่าผลเลือด) (2) จับคู่มาตรการเข้ากับ `COM-B` ทั้งองค์ประกอบหลักและย่อย (`C-Ph, C-Ps, O-Ph, O-So, M-Re, M-Au`) โดยเห็นรากปัญหา `CDoH` และ (3) เชื่อมโยงมาตรการเข้ากับ `5 Action Areas` ของกฎบัตรออตตาวาพร้อมเหตุผลเชิงกลไก",
+          en: "<strong>Complete HS4 Case Toolkit:</strong> (1) Contrast observable Problem vs. Target Behavior; (2) map interventions precisely across COM-B's 6 sub-components (`C-Ph, C-Ps, O-Ph, O-So, M-Re, M-Au`); and (3) justify alignment with Ottawa Charter's 5 Action Areas.",
         },
       ],
-      flowRoleTH: "สรุปกลไกพฤติกรรมสุขภาพและการสร้างเสริมสุขภาพใน HS4 เพื่อส่งไม้ต่อสู่ HS5: 'ระบบสุขภาพปฐมภูมิ (PHC) จะเชื่อมคลินิก ชุมชน และนโยบายข้ามภาคส่วนเข้าด้วยกันอย่างไร'",
-      flowRoleEN: "Synthesizes HS4 and hands off to HS5: how Primary Health Care unites clinical primary care, public health functions, and empowered communities.",
+      caseLensTH: "ทบทวนเร็ว 3 ขั้นก่อนเข้าห้องอภิปราย HS4: ขั้นที่ 1 'ใครเปลี่ยนจากการทำอะไรไปทำอะไร' → ขั้นที่ 2 'มาตรการไปเสริม C-Ps, O-Ph, O-So, M-Re หรือ M-Au อย่างไรจึงไม่ต้องสู้ลำพังกับตลาดเดิม' → ขั้นที่ 3 'ตรงกับ Build Healthy Public Policy, Create Supportive Environments, Strengthen Community Actions, Develop Personal Skills และ Reorient Health Services อย่างไร'",
+      caseLensEN: "3-step HS4 case drill: (1) Who changes from what action to what action? → (2) How do interventions unlock C-Ps, O-Ph, O-So, M-Re, and M-Au? → (3) How do they operationalize Ottawa's 5 Action Areas?",
+      flowRoleTH: "สรุปกลไกพฤติกรรมสุขภาพและการสร้างเสริมสุขภาพใน HS4 เพื่อส่งไม้ต่อสู่ HS5: 'บริการปฐมภูมิ 5 คุณลักษณะและระบบสุขภาพปฐมภูมิ 3 เสาหลักทำงานร่วมกันอย่างไร'",
+      flowRoleEN: "Synthesizes HS4 and hands off to HS5: distinguishing 5-attribute Primary Care from 3-pillar Astana Primary Health Care.",
       crossLinks: [
         {
           target: "HS5:1",
           labelTH: "ต่อยอดสู่ HS5 · หมวด 1 (ระบบสุขภาพปฐมภูมิ PHC vs. PC)",
           labelEN: "Next: HS5 · Sec 1 (PHC vs. Primary Care)",
-          whyTH: "ระบบสุขภาพปฐมภูมิ (`PHC`) คือเวทีหลักที่เชื่อมการสร้างเสริมสุขภาพ ชุมชน และบริการคลินิกเข้าด้วยกัน",
+          whyTH: "ระบบสุขภาพปฐมภูมิ (`PHC`) คือเวทีหลักที่เชื่อมการสร้างเสริมสุขภาพ ชุมชน นโยบายข้ามภาคส่วน และบริการคลินิกเข้าด้วยกัน",
           whyEN: "Primary Health Care is the frontline platform uniting health promotion, community action, and clinical care.",
         },
       ],
       keywords: [
-        { th: "การไม่กล่าวโทษเหยื่อ", en: "Avoiding Victim-Blaming" },
-        { th: "นิเวศวิทยาเอื้อสุขภาพ", en: "Health-Enabling Ecosystem" },
+        { th: "ไม่สับสนพฤติกรรมกับผลลัพธ์คลินิก", en: "Behavior ≠ Clinical Outcome" },
+        { th: "ปลดล็อก COM-B 6 มิติย่อย", en: "6-Subcomponent COM-B Unlocking" },
+        { th: "กฎบัตรออตตาวาครบ 5 ด้าน", en: "5 Ottawa Action Areas" },
       ],
     },
 
     /* -------------------- HS5: Primary Health Care & Primary Care -------------------- */
     "HS5:1": {
-      secLabelTH: "หมวดที่ 1 · ความหมายและความแตกต่างระหว่าง PHC กับ Primary Care",
+      secLabelTH: "หมวดที่ 1 · ความแตกต่างระหว่าง Primary Health Care (PHC) กับ Primary Care (PC)",
       secLabelEN: "Section 1 · Primary Health Care (PHC) vs. Primary Care (PC)",
-      titleTH: "ระบบสุขภาพปฐมภูมิในฐานะยุทธศาสตร์ของทั้งสังคม เทียบกับบริการปฐมภูมิเชิงคลินิก",
-      titleEN: "Whole-of-Society Primary Health Care vs. Clinical Primary Care",
-      summaryTH: "บริการปฐมภูมิคือคลินิกด่านหน้าที่ดูแลผู้คนอย่างใกล้ชิด ส่วนระบบสุขภาพปฐมภูมิคือยุทธศาสตร์ของทั้งสังคมที่สร้างสุขภาพดีและความเป็นธรรมแก่ทุกคน",
-      summaryEN: "Primary Care is the trusted clinical front door; Primary Health Care is the whole-of-society strategy for equitable health for all.",
+      titleTH: "ระบบสุขภาพปฐมภูมิในฐานะยุทธศาสตร์ของทั้งสังคม เทียบกับบริการปฐมภูมิระดับบุคคลและครอบครัว",
+      titleEN: "Whole-of-Society Primary Health Care vs. Personal/Clinical Primary Care",
+      summaryTH: "บริการปฐมภูมิคือบริการด่านหน้าระดับบุคคลและครอบครัว ส่วนระบบสุขภาพปฐมภูมิคือยุทธศาสตร์ของทั้งสังคมที่หลอมรวมบริการสุขภาพ นโยบายข้ามภาคส่วน และพลังชุมชนเพื่อความเป็นธรรม",
+      summaryEN: "Primary Care is first-contact clinical care for individuals and families, whereas Primary Health Care is the whole-of-society strategy uniting health services, multisectoral action, and empowered communities.",
       bullets: [
         {
-          th: "<strong>แยกแยะขอบเขตให้ชัด:</strong> `Primary Care (PC)` คือการจัดบริการสุขภาพระดับบุคคลและครอบครัวด่านแรก ส่วน `Primary Health Care (PHC)` (Alma-Ata 1978) กว้างกว่าโดยรวมนโยบายข้ามภาคส่วนและการมีส่วนร่วมของชุมชน",
-          en: "<strong>Scope Distinction:</strong> Primary Care delivers first-contact clinical services, whereas PHC encompasses multisectoral policy and community empowerment.",
+          th: "<strong>แยกขอบเขตสองคำนี้ไม่ให้สับสนเด็ดขาด:</strong> `Primary Care (PC)` คือการจัดบริการสุขภาพระดับบุคคลและครอบครัวด่านแรก (`personal care`) ส่วน `Primary Health Care (PHC)` (`Alma-Ata 1978` · `Astana 2018`) เป็นแนวทางของทั้งสังคม (`whole-of-society approach`) ที่มีขอบเขตกว้างกว่าคลินิก",
+          en: "<strong>Crucial Scope Distinction:</strong> Primary Care (`PC`) delivers first-contact personal/family clinical care, whereas Primary Health Care (`PHC`) is a whole-of-society approach spanning beyond the health sector.",
         },
         {
-          th: "<strong>PC เป็นแกนกลางของระบบบริการภายในร่มใหญ่ PHC:</strong> ทั้งสองไม่ใช่สิ่งเดียวกันแต่เกื้อหนุนกันโดยมีเป้าหมายคือสุขภาพดีถ้วนหน้าและความเป็นธรรม",
-          en: "<strong>Nested Partnership:</strong> High-performing Primary Care sits at the service-delivery core of the broader Primary Health Care approach.",
+          th: "<strong>ความสัมพันธ์แบบซ้อนอยู่ข้างใน (`Nested Partnership`):</strong> `Primary Care` ทำหน้าที่เป็นแกนกลางของการจัดบริการสุขภาพภายในเสาที่ 1 ของร่มใหญ่ `Primary Health Care` เพื่อมุ่งสู่สุขภาพดีถ้วนหน้าและลดความเหลื่อมล้ำ",
+          en: "<strong>Nested Partnership:</strong> High-performing Primary Care forms the clinical service-delivery core inside the broader Primary Health Care umbrella.",
         },
       ],
-      flowRoleTH: "วางนิยามแม่บท `PHC` เทียบกับ `PC` ก่อนชี้ให้เห็นความท้าทายจากการเปลี่ยนผ่านทางระบาดวิทยาและการกระจุกตัวของงบในโรงพยาบาลใหญ่ในหมวด 2",
-      flowRoleEN: "Clarifies PHC vs. PC before Section 2 examines how epidemiological shifts and hospital-centrism strain primary-level resources.",
+      caseLensTH: "โครงสร้างโจทย์ Case Discussion ของ HS5 ออกแบบมาทดสอบเส้นแบ่งนี้โดยตรง: ข้อแรกถามระดับ `Primary Care` (คุณลักษณะบริการระดับบุคคล 5 ประการ) ส่วนข้อที่สองถามระดับ `Primary Health Care` (อีก 2 เสาหลักนอกเหนือจากบริการสุขภาพ)",
+      caseLensEN: "HS5's Case Discussion tests this exact boundary: Question 1 evaluates personal-level Primary Care (5 attributes), while Question 2 evaluates the broader non-clinical pillars of Primary Health Care.",
+      flowRoleTH: "วางนิยามแม่บท `PHC` เทียบกับ `PC` ก่อนชี้ให้เห็นความท้าทายจากการเปลี่ยนผ่านภาระโรคและกับดักการยึดโรงพยาบาลเป็นศูนย์กลางในหมวด 2",
+      flowRoleEN: "Clarifies PHC vs. PC before Section 2 examines how aging, multimorbidity, and hospital-centrism strain frontline care.",
       crossLinks: [
         {
           target: "HS2:1",
@@ -1289,28 +1358,30 @@
         },
       ],
       keywords: [
-        { th: "ระบบสุขภาพปฐมภูมิ", en: "Primary Health Care (PHC)" },
-        { th: "บริการปฐมภูมิ", en: "Primary Care (PC)" },
+        { th: "ระบบสุขภาพปฐมภูมิ (ทั้งสังคม)", en: "Primary Health Care (Whole-of-Society)" },
+        { th: "บริการปฐมภูมิ (ระดับบุคคล)", en: "Primary Care (Personal Care)" },
         { th: "คำประกาศอัลมา-อาตา ค.ศ. 1978", en: "Declaration of Alma-Ata (1978)" },
       ],
     },
     "HS5:2": {
       secLabelTH: "หมวดที่ 2 · การเปลี่ยนผ่านภาระโรคและกับดักการยึดโรงพยาบาลเป็นศูนย์กลาง",
       secLabelEN: "Section 2 · Epidemiological Shifts & Hospital-Centrism",
-      titleTH: "จากบริการปฐมภูมิแบบเลือกเฉพาะโรค สู่การดูแลรอบด้านและการแก้ความเหลื่อมล้ำของทรัพยากร",
-      titleEN: "Overcoming Selective Vertical Programs and Hospital-Centric Resource Skew",
-      summaryTH: "เมื่อทรัพยากรไหลไปกระจุกที่ปลายทางโรงพยาบาลใหญ่ ด่านหน้าปฐมภูมิที่ควรป้องกันและคุมโรคเรื้อรังให้คนส่วนใหญ่ย่อมอ่อนแอลง",
-      summaryEN: "When budgets gravitate toward specialist hospitals, the frontline primary care needed to prevent and manage chronic illness is starved.",
+      titleTH: "จากบริการแบบเลือกเฉพาะโรค สู่การดูแลรอบด้านและการทลายวงจรป่วยซ้ำของกลุ่มเปราะบาง",
+      titleEN: "Overcoming Selective Silos, Hospital-Centrism, and Revolving-Door Readmissions",
+      summaryTH: "เมื่อทรัพยากรกระจุกตัวที่โรงพยาบาลใหญ่และตั้งรับรอเฉพาะผู้มีเอกสารสิทธิครบ กลุ่มเปราะบางและผู้ป่วยโรคร่วมย่อมหลุดออกจากระบบและวนกลับมานอนโรงพยาบาลซ้ำไม่รู้จบ",
+      summaryEN: "When resources concentrate in passive hospitals, multimorbid and socially vulnerable patients fall through the cracks into a cycle of avoidable readmissions.",
       bullets: [
         {
-          th: "<strong>ก้าวข้าม Selective PHC:</strong> การจัดบริการเฉพาะบางโรคแบบแยกส่วนไม่เพียงพอต่อผู้สูงอายุและผู้ป่วยโรคเรื้อรังร่วมหลายโรค (`multimorbidity`)",
-          en: "<strong>Beyond Selective Silos:</strong> Narrow disease-specific programs cannot meet the complex needs of aging patients with multimorbidity.",
+          th: "<strong>ก้าวข้าม `Selective PHC` สู่การดูแลรอบด้าน (`Comprehensive`):</strong> สังคมสูงวัย ภาวะโรคร่วมหลายโรค (`multimorbidity`) และความเปราะบางทางจิตสังคม ไม่อาจแก้ด้วยโปรแกรมแยกเฉพาะโรคหรือการจ่ายยาเฉพาะหน้าเพียงอย่างเดียว",
+          en: "<strong>Beyond Selective Silos:</strong> Aging populations, multimorbidity, and psychosocial vulnerability require comprehensive care rather than narrow vertical programs.",
         },
         {
-          th: "<strong>แก้พีระมิดหัวกลับของงบประมาณและกำลังคน (`Hospital-centrism`):</strong> ต้องปรับทิศทางการลงทุนกลับมาเสริมความเข้มแข็งให้หน่วยบริการปฐมภูมิใกล้บ้าน",
-          en: "<strong>Rebalance Hospital-Centrism:</strong> Shifting resources toward community-based primary care improves both equity and allocative efficiency.",
+          th: "<strong>แก้พีระมิดหัวกลับ (`Hospital-centrism`) และวงจรป่วยซ้ำหลังจำหน่าย (`Revolving-door readmission`):</strong> การรักษาในโรงพยาบาลเพียงอย่างเดียวแล้วส่งผู้ป่วยกลับสู่สภาพแวดล้อมที่ไม่ปลอดภัยทำให้ติดเชื้อหรืออาการทรุดซ้ำ จึงต้องลงทุนระบบปฐมภูมิและการพักฟื้นเชื่อมรอยต่อในชุมชน",
+          en: "<strong>Break Hospital-Centrism & Readmission Loops:</strong> Discharging vulnerable patients without community primary care and safe sub-acute recovery fuels costly revolving-door hospitalizations.",
         },
       ],
+      caseLensTH: "ช่วยอ่านบริบทต้นเรื่องของกรณีศึกษาว่าเหตุใดการตั้งรับในโรงพยาบาลจึงล้มเหลวต่อกลุ่มเปราะบาง (เช่น กำแพงเอกสาร/บัตรประชาชน ความกลัวสถานที่ราชการ และการขาดที่พักฟื้นที่ถูกสุขลักษณะหลัง `Hospital discharge` จนเกิดวงจรป่วยซ้ำ)",
+      caseLensEN: "Illuminates why passive hospital care fails marginalized groups facing ID/entitlement barriers, institutional distrust, and unsafe post-discharge environments.",
       flowRoleTH: "ชี้จุดอ่อนของการแยกส่วนและการยึดโรงพยาบาลเป็นศูนย์กลาง เพื่อนำไปสู่ข้อเสนอการปฏิรูป PHC 4 ด้านของ WHO (2008) ในหมวด 3",
       flowRoleEN: "Diagnoses fragmentation and hospital-centrism, motivating WHO's 2008 four-pillar PHC reforms in Section 3.",
       crossLinks: [
@@ -1318,20 +1389,20 @@
           target: "ST1:3",
           labelTH: "ST1 · หมวด 3 (วงจรอุบาทว์ความแออัดโรงพยาบาล)",
           labelEN: "ST1 · Sec 3 (Hospital Crowding Loop)",
-          whyTH: "การยึดโรงพยาบาลเป็นศูนย์กลางทำให้ปฐมภูมิอ่อนแอและยิ่งผลักผู้ป่วยกลับไปแออัดในโรงพยาบาลใหญ่",
-          whyEN: "Underfunding primary care fuels the exact hospital overcrowding feedback loop analyzed in ST1.",
+          whyTH: "การยึดโรงพยาบาลเป็นศูนย์กลางทำให้ด่านหน้าปฐมภูมิอ่อนแอและผลักผู้ป่วยกลับไปแออัดซ้ำในโรงพยาบาล",
+          whyEN: "Underfunding frontline and transitional community care drives recurrent hospital crowding.",
         },
         {
           target: "HS3:4",
           labelTH: "HS3 · หมวด 4 (ประสิทธิภาพการจัดสรร Allocative Efficiency)",
           labelEN: "HS3 · Sec 4 (Allocative Efficiency)",
-          whyTH: "การลงทุนในปฐมภูมิให้ผลตอบแทนทางสุขภาพต่อประชากรคุ้มค่ากว่าการทุ่มงบปลายเหตุเพียงด้านเดียว",
-          whyEN: "Investing in comprehensive primary care strengthens system-wide allocative efficiency.",
+          whyTH: "การลงทุนในปฐมภูมิและบริการพักฟื้นกึ่งเฉียบพลันในชุมชนคุ้มค่ากว่าการปล่อยให้ผู้ป่วยกลับมานอนโรงพยาบาลซ้ำ",
+          whyEN: "Investing in comprehensive primary and transitional care improves system-wide allocative efficiency.",
         },
       ],
       keywords: [
         { th: "การยึดโรงพยาบาลเป็นศูนย์กลาง", en: "Hospital-Centrism" },
-        { th: "ภาวะโรคร่วมหลายโรค", en: "Multimorbidity" },
+        { th: "วงจรการเจ็บป่วยและนอนโรงพยาบาลซ้ำ", en: "Revolving-Door Readmission" },
         { th: "ปฐมภูมิแบบรอบด้านเทียบกับเฉพาะโรค", en: "Comprehensive vs. Selective PHC" },
       ],
     },
@@ -1340,16 +1411,18 @@
       secLabelEN: "Section 3 · World Health Report 2008 Four PHC Reforms",
       titleTH: "หลักประกันถ้วนหน้า บริการยึดคนเป็นศูนย์กลาง นโยบายสาธารณะ และภาวะผู้นำแบบมีส่วนร่วม",
       titleEN: "UHC, People-Centered Service Delivery, Public Policy, and Inclusive Leadership",
-      summaryTH: "ปฐมภูมิที่เข้มแข็งไม่ได้สร้างด้วยการตั้งคลินิกเพิ่มเพียงอย่างเดียว แต่ต้องปฏิรูปพร้อมกันทั้งหลักประกันสุขภาพถ้วนหน้า รูปแบบบริการ นโยบายสาธารณะ และการอภิบาล",
-      summaryEN: "Strong PHC requires more than building clinics—it demands synchronized reforms in universal health coverage, care delivery, public policy, and leadership.",
+      summaryTH: "ปฐมภูมิที่เข้มแข็งต้องปฏิรูปประสานกันทั้งสี่ด้าน คือลดกำแพงสิทธิด้วยหลักประกันถ้วนหน้า จัดบริการยึดคนเป็นศูนย์กลางโดยมีปฐมภูมิเป็นตัวเชื่อม ขับเคลื่อนนโยบายสาธารณะ และนำแบบมีส่วนร่วม",
+      summaryEN: "Strong PHC synchronizes four reforms: universal coverage for equity, people-centered care with primary care as hub, healthy public policies, and inclusive leadership.",
       bullets: [
         {
-          th: "<strong>4 เสาการปฏิรูป WHR 2008:</strong> (1) ปฏิรูปสู่หลักประกันสุขภาพถ้วนหน้าเพื่อความเป็นธรรม (2) ปฏิรูปบริการให้ยึดประชาชนเป็นศูนย์กลางและมีปฐมภูมิเป็นตัวเชื่อม (`hub`) (3) ปฏิรูปนโยบายสาธารณะเพื่อสุขภาพ และ (4) ปฏิรูปภาวะผู้นำสู่การสานเสวนา",
-          en: "<strong>Four Interlocking Reforms (WHR 2008):</strong> Universal health coverage, people-centered service delivery with primary care as hub, healthy public policies, and inclusive leadership.",
+          th: "<strong>4 เสาการปฏิรูป `WHR 2008`:</strong> (1) ปฏิรูปหลักประกันถ้วนหน้า (`UHC`) ลดความเหลื่อมล้ำด้านสิทธิ (2) ปฏิรูปบริการให้ยึดคนเป็นศูนย์กลางและวางปฐมภูมิเป็นศูนย์กลางประสานงาน (`Coordination hub`) (3) ปฏิรูปนโยบายสาธารณะเชื่อมสุขภาพในทุกนโยบาย และ (4) ปฏิรูปภาวะผู้นำสู่การทำงานร่วมกับภาคประชาสังคมและชุมชน",
+          en: "<strong>Four Interlocking Reforms (WHR 2008):</strong> Universal coverage reforms, people-centered delivery with primary care as coordination hub, healthy public policy reforms, and inclusive collaborative leadership.",
         },
       ],
-      flowRoleTH: "วางกรอบการปฏิรูป 4 ด้านของปี 2008 ก่อนต่อยอดสู่กรอบมาตรฐานสากลฉบับปัจจุบันคือ 'ปฏิญญาแอสทานา ค.ศ. 2018' ในหมวด 4",
-      flowRoleEN: "Sets out WHO 2008's four reform pillars, leading directly into the contemporary 2018 Astana Operational Framework in Section 4.",
+      caseLensTH: "ชี้ให้เห็นว่าการพากลุ่มเปราะบางที่ตกหล่นทางทะเบียนราษฎรกลับเข้าสู่สิทธิหลักประกันสุขภาพ ควบคู่กับการตั้งจุดประสานงานกลาง (`Hub`) ร่วมกับมูลนิธิภาคประชาสังคม คือการเดินเครื่องปฏิรูป WHR 2008 ในชีวิตจริง",
+      caseLensEN: "Shows how restoring legal ID/insurance entitlements while building a collaborative NGO–clinician coordination hub operationalizes WHR 2008 reforms.",
+      flowRoleTH: "วางกรอบการปฏิรูป 4 ด้านของปี 2008 ก่อนต่อยอดสู่กรอบมาตรฐานสากลฉบับปัจจุบันคือ '3 องค์ประกอบหลักตามปฏิญญาแอสทานา ค.ศ. 2018' ในหมวด 4",
+      flowRoleEN: "Sets out WHO 2008's four reform pillars, leading directly into the 2018 Astana 3-component framework in Section 4.",
       crossLinks: [
         {
           target: "HS6:1",
@@ -1361,79 +1434,91 @@
       ],
       keywords: [
         { th: "รายงานอนามัยโลก ค.ศ. 2008", en: "World Health Report 2008" },
-        { th: "ปฐมภูมิในฐานะศูนย์กลางเชื่อมประสาน", en: "Primary Care as Coordination Hub" },
+        { th: "ศูนย์กลางเชื่อมประสานการดูแล", en: "Primary Care Coordination Hub" },
         { th: "ภาวะผู้นำแบบมีส่วนร่วม", en: "Inclusive Leadership" },
       ],
     },
     "HS5:4": {
-      secLabelTH: "หมวดที่ 4 · สามองค์ประกอบหลักตามปฏิญญาแอสทานา ค.ศ. 2018",
-      secLabelEN: "Section 4 · Three Components of PHC Under the Declaration of Astana",
-      titleTH: "บริการสุขภาพบูรณาการ นโยบายข้ามภาคส่วน และการเสริมพลังประชาชนและชุมชน",
-      titleEN: "Integrated Health Services, Multisectoral Policy, and Empowered Communities",
-      summaryTH: "ปฏิญญาแอสทานาหลอมรวมสามพลังเข้าด้วยกัน คือบริการปฐมภูมิที่เชื่อมกับสาธารณสุข นโยบายข้ามภาคส่วน และชุมชนที่เป็นเจ้าของการดูแลสุขภาพ",
-      summaryEN: "The Astana Declaration unites three forces: integrated primary care and public health, multisectoral action, and empowered communities.",
+      secLabelTH: "หมวดที่ 4 · สามองค์ประกอบหลักของ PHC ตามปฏิญญาแอสทานา ค.ศ. 2018",
+      secLabelEN: "Section 4 · Three Components of PHC Under the Declaration of Astana (2018)",
+      titleTH: "แยกชัด 3 เสาหลักของ Astana: (1) บริการบูรณาการ PC+EPHFs · (2) นโยบายข้ามภาคส่วน · (3) การเสริมพลังประชาชนและชุมชน",
+      titleEN: "Astana's Three Pillars: Integrated Services (PC+EPHFs), Multisectoral Policy & Action, and Empowered Communities",
+      summaryTH: "ปฏิญญาแอสทานาทำให้เห็นชัดเจนว่าระบบสุขภาพปฐมภูมิไม่ได้มีแค่บริการคลินิกและสาธารณสุข แต่ต้องมีอีกสองเสาหลักคือนโยบายข้ามภาคส่วนและการเสริมพลังผู้คนและชุมชน",
+      summaryEN: "The Astana Declaration defines PHC through three co-equal pillars: integrated primary care and public health functions, multisectoral policy and action, and empowered people and communities.",
       bullets: [
         {
-          th: "<strong>3 องค์ประกอบของ PHC ยุคใหม่ (Astana 2018):</strong> (1) บริการสุขภาพบูรณาการที่ผสานบริการปฐมภูมิเข้ากับหน้าที่สาธารณสุขพื้นฐาน (2) นโยบายและการกระทำข้ามภาคส่วนจัดการปัจจัยต้นน้ำ และ (3) การเสริมพลังบุคคล ครอบครัว และชุมชน",
-          en: "<strong>Three Astana Pillars (2018):</strong> Integrated primary care & essential public health functions, multisectoral policy on determinants, and empowered people and communities.",
+          th: "<strong>เสาหลักที่ 1 — บริการสุขภาพแบบบูรณาการ (`Integrated Health Services`):</strong> ผสานบริการปฐมภูมิระดับบุคคลที่มีคุณภาพ (`Primary Care`) เข้ากับหน้าที่สาธารณสุขที่จำเป็นระดับประชากร (`Essential Public Health Functions: EPHFs`)",
+          en: "<strong>Pillar 1 — Integrated Health Services:</strong> Unites personal Primary Care with population-level Essential Public Health Functions (`EPHFs`).",
+        },
+        {
+          th: "<strong>เสาหลักที่ 2 และ 3 (นอกเหนือจากบริการสุขภาพ):</strong> <strong>(2) `Multisectoral Policy and Action` (การมีนโยบายและมาตรการร่วมกับหลากหลายภาคส่วน)</strong> ทำงานร่วมกับภาคส่วนนอกระบบสาธารณสุข (เช่น ทะเบียนราษฎร/บัตรประชาชน องค์กรภาคประชาสังคม โครงการสร้างอาชีพ/รายได้ และโครงการที่อยู่อาศัย) เพื่อจัดการรากเหง้า `SDH` · และ <strong>(3) `Empowered People and Communities` (การเสริมพลังประชาชนและชุมชน)</strong> ฟื้นฟูความไว้วางใจและพลังใจให้ผู้รับบริการและชุมชนเข้ามามีส่วนร่วมดูแลสุขภาวะและพึ่งพาตนเองได้อย่างยั่งยืน",
+          en: "<strong>Pillars 2 & 3 (Beyond Health Services):</strong> (2) Multisectoral Policy and Action addresses upstream social/economic determinants (legal ID, employment, housing) with non-health partners; (3) Empowered People and Communities builds trust, agency, and self-reliance.",
         },
       ],
-      flowRoleTH: "จากองค์ประกอบที่ 1 ของแอสทานา จึงแตกออกเป็น 2 หมวดถัดไปอย่างเป็นระบบ คือ 'บริการปฐมภูมิระดับบุคคล 4Cs' (หมวด 5) และ 'หน้าที่สาธารณสุขระดับประชากร EPHFs' (หมวด 6)",
-      flowRoleEN: "Unpacks Astana's first pillar directly into Section 5 (individual-level 4Cs Primary Care) and Section 6 (population-level EPHFs).",
+      caseLensTH: "จุดออกสอบตรง ๆ ใน Case Discussion HS5 ข้อที่ 2: เมื่อโจทย์ถามว่า 'นอกเหนือจาก Primary Care และ EPHFs แล้ว โครงการสอดคล้องกับองค์ประกอบหลักอื่นของ PHC อย่างไร' ต้องระบุชื่ออีก 2 เสาหลักของ Astana ให้เป๊ะ คือ `1) Empowered People and Communities` และ `2) Multisectoral Policy and Action` พร้อมยกกิจกรรมรูปธรรม (เช่น การฟื้นพลังใจให้ดูแลตนเองได้ vs การร่วมกับมูลนิธิ/หน่วยงานแก้เรื่องบัตรประชาชน งานสร้างรายได้ และที่อยู่อาศัย)",
+      caseLensEN: "Direct HS5 Case Discussion target: when asked which PHC pillars apply *beyond* Primary Care & EPHFs, explicitly name (1) `Empowered People and Communities` and (2) `Multisectoral Policy and Action`, backing each with concrete social/community interventions.",
+      flowRoleTH: "จากเสาหลักที่ 1 ของแอสทานา จึงแตกออกเป็น 2 หมวดถัดไปอย่างเป็นระบบ คือ 'คุณลักษณะบริการปฐมภูมิระดับบุคคล 5 ประการ' (หมวด 5) และ 'หน้าที่สาธารณสุขระดับประชากร EPHFs' (หมวด 6)",
+      flowRoleEN: "Unpacks Astana's first pillar directly into Section 5 (5-attribute personal Primary Care) and Section 6 (population-level EPHFs).",
       crossLinks: [
         {
           target: "HS4:4",
           labelTH: "HS4 · หมวด 4 (กฎบัตรออตตาวาและการเสริมพลังชุมชน)",
           labelEN: "HS4 · Sec 4 (Ottawa Charter Empowerment)",
-          whyTH: "องค์ประกอบที่ 2 และ 3 ของแอสทานาสอดประสานเป็นเนื้อเดียวกับยุทธศาสตร์การสร้างเสริมสุขภาพใน HS4",
+          whyTH: "เสาหลักที่ 2 และ 3 ของแอสทานาสอดประสานเป็นเนื้อเดียวกับยุทธศาสตร์การสร้างเสริมสุขภาพของกฎบัตรออตตาวา",
           whyEN: "Astana's multisectoral and community-empowerment pillars align directly with HS4's Ottawa Charter.",
         },
       ],
       keywords: [
-        { th: "ปฏิญญาแอสทานา ค.ศ. 2018", en: "Declaration of Astana (2018)" },
-        { th: "บริการสุขภาพแบบบูรณาการ", en: "Integrated Health Services" },
-        { th: "การเสริมพลังประชาชนและชุมชน", en: "Empowered People & Communities" },
+        { th: "ปฏิญญาแอสทานา 3 องค์ประกอบหลัก", en: "Astana 3 Components of PHC (2018)" },
+        { th: "นโยบายและการกระทำข้ามภาคส่วน", en: "Multisectoral Policy and Action" },
+        { th: "การเสริมพลังประชาชนและชุมชน", en: "Empowered People and Communities" },
       ],
     },
     "HS5:5": {
-      secLabelTH: "หมวดที่ 5 · คุณลักษณะหลักของบริการปฐมภูมิที่ดี (Starfield's 4Cs)",
-      secLabelEN: "Section 5 · Core Functions of High-Quality Primary Care (4Cs)",
-      titleTH: "ด่านแรก ครอบคลุมรอบด้าน ต่อเนื่อง และประสานการดูแล บนฐานการยึดคนเป็นศูนย์กลาง",
-      titleEN: "First-Contact, Comprehensive, Continuous, and Coordinated Person-Centered Care",
-      summaryTH: "หัวใจของหมอครอบครัวไม่ใช่แค่การอยู่ใกล้บ้าน แต่คือการเป็นด่านแรกที่รู้จักชีวิตผู้ป่วย ดูแลรอบด้าน ต่อเนื่องยาวนาน และช่วยประสานทุกขั้นตอนการรักษา",
-      summaryEN: "Great primary care is defined not merely by proximity, but by being first-contact, comprehensive, longitudinal, and seamlessly coordinated around the whole person.",
+      secLabelTH: "หมวดที่ 5 · คุณลักษณะหลักครบ 5 ประการของบริการปฐมภูมิที่ดี (4Cs + Person-Centeredness)",
+      secLabelEN: "Section 5 · Five Core Attributes of High-Quality Personal / Primary Care",
+      titleTH: "วิเคราะห์ครบ 5 คุณลักษณะบริการระดับบุคคล: ด่านแรก · รอบด้าน · ต่อเนื่อง · ประสานการดูแล · ยึดคนเป็นศูนย์กลาง",
+      titleEN: "First-Contact, Comprehensive, Continuous, Coordinated, and Person-Centered Care",
+      summaryTH: "บริการปฐมภูมิระดับบุคคลที่มีคุณภาพต้องครบทั้งห้าคุณลักษณะ ตั้งแต่การเข้าถึงด่านแรกโดยไร้กำแพง ไปจนถึงการดูแลต่อเนื่องข้ามรอยต่อหลังออกจากโรงพยาบาลด้วยความเข้าใจศักดิ์ศรีความเป็นมนุษย์",
+      summaryEN: "High-quality personal primary care unites five attributes: barrier-free first contact, whole-person comprehensiveness, 3D continuity across hospital transitions, cross-sector coordination, and non-stigmatizing person-centeredness.",
       bullets: [
         {
-          th: "<strong>ครบทั้ง 4Cs ของ Starfield:</strong> `First-contact` (ด่านแรกเข้าถึงสะดวก) `Comprehensiveness` (ดูแลครบส่งเสริม ป้องกัน รักษา ฟื้นฟู) `Continuity` (ต่อเนื่องทั้งความสัมพันธ์และข้อมูล) และ `Coordination` (ประสานการส่งต่อไป–กลับ)",
-          en: "<strong>Starfield's 4Cs:</strong> First-contact accessibility, Comprehensiveness across care needs, relational/informational Continuity, and active Coordination across levels.",
+          th: "<strong>จำแนกครบทั้ง 5 คุณลักษณะของบริการสุขภาพระดับบุคคล (`Characteristics of Personal / Primary Care`):</strong> <strong>(1) `First-Contact Accessibility` (ด่านแรกเข้าถึงได้จริง)</strong> จัดบริการเชิงรุกในจุดที่กลุ่มเป้าหมายเข้าถึงสะดวกโดยไม่ปฏิเสธแม้ขาดเอกสาร พร้อมช่วยทลายกำแพงบัตรประชาชนและขึ้นทะเบียนสิทธิ · <strong>(2) `Comprehensiveness` (ครอบคลุมรอบด้าน)</strong> ดูแลครบทั้งคัดกรอง/รักษาเบื้องต้น สุขภาพจิตและบาดแผลจิตสังคม การพักฟื้นกึ่งเฉียบพลัน และการเชื่อมสวัสดิการสังคม",
+          en: "<strong>Attributes 1 & 2 (First-Contact & Comprehensiveness):</strong> Proactive, barrier-free first contact (including outreach at community hubs and restoring legal ID/insurance rights) paired with comprehensive physical, psychological, sub-acute, and social care.",
         },
         {
-          th: "<strong>ยึดคนและครอบครัวในบริบทชุมชนเป็นศูนย์กลาง:</strong> ช่วยเพิ่มคุณภาพ ลดการนอนโรงพยาบาลที่หลีกเลี่ยงได้ และสร้างประสิทธิภาพให้ทั้งระบบ",
-          en: "<strong>Person- & Family-Centered Impact:</strong> Strong 4Cs primary care lowers avoidable hospitalizations, improves equity, and contains total system costs.",
+          th: "<strong>ความต่อเนื่อง 3 มิติ (`Continuity`) และการประสานไร้รอยต่อ (`Coordination`):</strong> <strong>(3) `Continuity of Care`</strong> ครอบคลุมทั้งความต่อเนื่องด้านความสัมพันธ์ (`Relational`), แผนการดูแลข้ามระยะโรค (`Management` เช่น บ้านพักพิงทางการแพทย์ชั่วคราว `Medical Respite Care` รับช่วงต่อหลังออกจากโรงพยาบาลเพื่อสกัดวงจรติดเชื้อ/ป่วยซ้ำ), และข้อมูล (`Informational`) · <strong>(4) `Coordination of Care`</strong> ทำหน้าที่เป็นศูนย์กลาง (`Hub`) ประสานทั้งภายในระบบสุขภาพและข้ามภาคส่วน (`Cross-sectoral`) ลดความเสี่ยงช่วงเปลี่ยนผ่านจุดดูแล (`Care transition`)",
+          en: "<strong>Attributes 3 & 4 (Continuity & Coordination):</strong> Continuity spans relational trust, longitudinal management across post-discharge transitions (e.g., Medical Respite Care preventing readmission), and shared information; Coordination acts as the hub linking hospitals with social/housing/employment agencies.",
+        },
+        {
+          th: "<strong>คุณลักษณะที่ 5 — `Person-Centeredness` (การยึดผู้รับบริการ/คนเป็นศูนย์กลาง):</strong> เคารพศักดิ์ศรีความเป็นมนุษย์ เข้าใจความระแวงและบาดแผลทางจิตสังคม สร้างพื้นที่ปลอดภัยในการรับฟังอย่างไม่ตีตรา (เช่น ใช้กิจกรรมบำบัดสร้างความไว้วางใจ) และออกแบบบริการให้สอดคล้องกับบริบทชีวิตจริงของผู้รับบริการ",
+          en: "<strong>Attribute 5 (Person-Centeredness):</strong> Honors human dignity and psychosocial context—building non-judgmental trust (e.g., through music/psychosocial therapy) and co-designing care around people's lived realities.",
         },
       ],
-      flowRoleTH: "เจาะลึกขาที่ 1 ของบริการบูรณาการ (ดูแลระดับบุคคลและครอบครัวด้วย 4Cs) ก่อนเติมขาที่ 2 คือการคุ้มครองระดับประชากร (`EPHFs`) ในหมวด 6",
-      flowRoleEN: "Details the individual/family clinical leg (4Cs) before pairing it with the population public-health leg (EPHFs) in Section 6.",
+      caseLensTH: "ในการตอบตาราง Case Discussion HS5 ข้อที่ 1 ต้องวิเคราะห์ให้ครบทั้ง **5 คุณลักษณะ** (`First-Contact`, `Comprehensiveness`, `Continuity`, `Coordination`, `Person-Centeredness`) โดยชี้ความแตกต่างให้ชัด เช่น บ้านพักพิงพักฟื้น 2–4 สัปดาห์หลังออกจาก รพ. จนส่งต่อที่พักยั่งยืน สะท้อน `Continuity` (สกัดวงจร Readmission) ส่วนการเป็นศูนย์กลางเชื่อม รพ. กับมูลนิธิด้านบัตรประชาชน อาชีพ และที่อยู่อาศัย สะท้อน `Coordination`",
+      caseLensEN: "In HS5 Question 1, analyze all **5 attributes** distinctly—highlighting how post-discharge Medical Respite Care sustains `Continuity` against readmission, whereas acting as a hub linking hospitals with ID, job, and housing partners exemplifies `Coordination`.",
+      flowRoleTH: "เจาะลึกขาที่ 1 ของบริการบูรณาการ (ดูแลระดับบุคคลครบ 5 คุณลักษณะ) ก่อนเติมขาที่ 2 คือการคุ้มครองระดับประชากร (`EPHFs`) ในหมวด 6",
+      flowRoleEN: "Details the 5-attribute personal clinical leg before pairing it with the population public-health leg (`EPHFs`) in Section 6.",
       crossLinks: [
         {
           target: "HS2:5",
-          labelTH: "HS2 · หมวด 5 (ระดับบริการและรูปแบบการดูแล)",
-          labelEN: "HS2 · Sec 5 (Levels & Models of Care)",
-          whyTH: "4Cs คือนิยามเชิงคุณภาพที่ทำให้บริการระดับปฐมภูมิทำหน้าที่เป็นแกนหลักของระบบส่งต่อได้จริง",
-          whyEN: "Starfield's 4Cs define what makes primary-level service delivery work as an integrated hub.",
+          labelTH: "HS2 · หมวด 5 (ระดับบริการและรูปแบบการดูแล 6W)",
+          labelEN: "HS2 · Sec 5 (Levels & 6W Models of Care)",
+          whyTH: "คุณลักษณะทั้ง 5 ประการทำให้นวัตกรรมบริการปฐมภูมิเชื่อมต่อจากหอผู้ป่วยในสู่การฟื้นฟูในชุมชนได้จริง",
+          whyEN: "The 5 attributes operationalize seamless transitions from acute hospital wards back to community living.",
         },
         {
           target: "HS6:4",
           labelTH: "HS6 · หมวด 4 (การจ่ายเหมาจ่ายรายหัว Capitation แก่ด่านหน้า)",
           labelEN: "HS6 · Sec 4 (Capitation for Gatekeepers)",
-          whyTH: "การจ่ายงบเหมาจ่ายรายหัวตามประชากรขึ้นทะเบียนใน HS6 ออกแบบมาเพื่อหนุนหน่วยบริการด่านหน้าตามหลัก 4Cs",
+          whyTH: "การจ่ายงบเหมาจ่ายรายหัวตามประชากรขึ้นทะเบียนใน HS6 ออกแบบมาเพื่อหนุนหน่วยบริการด่านหน้าตามหลักบริการปฐมภูมิ",
           whyEN: "Population-based capitation in HS6 financially supports registered primary care gatekeepers.",
         },
       ],
       keywords: [
-        { th: "ด่านแรก · รอบด้าน · ต่อเนื่อง · ประสานการดูแล", en: "First-Contact · Comprehensive · Continuous · Coordinated (4Cs)" },
-        { th: "การดูแลที่ยึดคนเป็นศูนย์กลาง", en: "Person-Centered Care" },
-        { th: "ทีมหมอครอบครัว", en: "Family Care Team" },
+        { th: "คุณลักษณะบริการปฐมภูมิครบ 5 ประการ", en: "5 Attributes (4Cs + Person-Centeredness)" },
+        { th: "ความต่อเนื่อง 3 มิติและรอยต่อการดูแล", en: "3D Continuity & Care Transitions" },
+        { th: "บ้านพักพิงทางการแพทย์ระยะพักฟื้น", en: "Medical Respite / Sub-Acute Care" },
       ],
     },
     "HS5:6": {
@@ -1441,16 +1526,18 @@
       secLabelEN: "Section 6 · Essential Public Health Functions (EPHFs) in PHC",
       titleTH: "การเฝ้าระวัง คุ้มครอง สร้างเสริม ป้องกัน และเตรียมพร้อมรับภัยสุขภาพระดับประชากร",
       titleEN: "Population Surveillance, Health Protection, Promotion, and Emergency Readiness",
-      summaryTH: "คลินิกปฐมภูมิจะสมบูรณ์ได้เมื่อมองข้ามโต๊ะตรวจออกไปดูแลทั้งชุมชน ด้วยการเฝ้าระวังโรค คุ้มครองภัยสุขภาพ และเตรียมพร้อมรับวิกฤต",
-      summaryEN: "Primary care fulfills its mission when it looks beyond the exam room to protect whole communities through surveillance, prevention, and emergency readiness.",
+      summaryTH: "คลินิกปฐมภูมิจะสมบูรณ์ได้เมื่อผสานการดูแลรายบุคคลเข้ากับงานสาธารณสุขระดับประชากร ทั้งการเฝ้าระวังโรค การคุ้มครองสิ่งแวดล้อม และการรับมือภาวะฉุกเฉิน",
+      summaryEN: "Primary care fulfills Astana's integrated-service pillar when paired with population surveillance, health protection, prevention, and emergency preparedness.",
       bullets: [
         {
-          th: "<strong>ผสานงานคลินิกรายบุคคลเข้ากับสาธารณสุขระดับประชากร (EPHFs):</strong> ครอบคลุมการเฝ้าระวังโรค การคุ้มครองสุขภาพและสิ่งแวดล้อม การสร้างเสริมสุขภาพ การป้องกันโรค และการรับมือภาวะฉุกเฉิน",
-          en: "<strong>Unite Clinical Care with Population EPHFs:</strong> Combines epidemiological surveillance, environmental/occupational protection, health promotion, prevention, and disaster preparedness.",
+          th: "<strong>ผสานงานคลินิกรายบุคคล (`PC`) เข้ากับสาธารณสุขระดับประชากร (`EPHFs`):</strong> ครอบคลุมการเฝ้าระวังทางระบาดวิทยา การคุ้มครองสุขภาพและอนามัยสิ่งแวดล้อม การสร้างเสริมสุขภาพ การป้องกันควบคุมโรค และการเตรียมพร้อมรับภาวะฉุกเฉินในชุมชน",
+          en: "<strong>Unite Personal PC with Population EPHFs:</strong> Combines epidemiological surveillance, environmental/occupational protection, health promotion, disease control, and disaster preparedness.",
         },
       ],
+      caseLensTH: "ช่วยให้เข้าใจว่าเหตุใดเสาหลักที่ 1 ของปฏิญญา Astana จึงเขียนคู่กันว่า `Primary Care and Essential Public Health Functions` — ดังนั้นเมื่อโจทย์ถามหาองค์ประกอบอื่นนอกเหนือจากคู่นี้ จึงต้องตอบเสาหลักที่ 2 (`Multisectoral Policy & Action`) และเสาหลักที่ 3 (`Empowered People & Communities`)",
+      caseLensEN: "Clarifies why Astana groups Primary Care and EPHFs together as Pillar 1—so questions asking for PHC components *beyond* PC & EPHFs point directly to Pillars 2 and 3.",
       flowRoleTH: "เติมเต็มบริการบูรณาการให้ครบทั้งระดับบุคคล (หมวด 5) และระดับประชากร (หมวด 6) ก่อนเชื่อมสู่ระบบหลักประกันและพัฒนาการของไทยในหมวด 7",
-      flowRoleEN: "Completes integrated care by joining population EPHFs with individual 4Cs before examining Thailand's PHC–UHC evolution in Section 7.",
+      flowRoleEN: "Completes integrated care by joining population EPHFs with 5-attribute personal care before examining Thailand's PHC–UHC evolution in Section 7.",
       crossLinks: [
         {
           target: "HS3:6",
@@ -1470,28 +1557,30 @@
       secLabelTH: "หมวดที่ 7 · ปัจจัยหนุนเสริม ความเชื่อมโยงกับ UHC และพัฒนาการระบบปฐมภูมิไทย",
       secLabelEN: "Section 7 · Enablers, UHC Synergy, and Thailand's PHC Evolution",
       titleTH: "จากสาธารณสุขมูลฐานและ อสม. สู่ พ.ร.บ.ระบบสุขภาพปฐมภูมิ พ.ศ. 2562 และการถ่ายโอน รพ.สต.",
-      titleEN: "From Rural Infrastructure and VHVs to the 2019 Primary Health Care Act & Decentralization",
-      summaryTH: "หลักประกันสุขภาพถ้วนหน้าของไทยสำเร็จได้เพราะมีโครงข่ายปฐมภูมิเป็นฐานรองรับ และโจทย์ใหม่ของการกระจายอำนาจคือการรักษาความเชื่อมโยงไม่ให้แยกส่วน",
-      summaryEN: "Thailand's UHC succeeded because decades of district primary care laid its foundation; today's decentralization challenge is keeping care seamlessly connected.",
+      titleEN: "From District Networks and VHVs to the 2019 Primary Health Care Act & Decentralization",
+      summaryTH: "หลักประกันสุขภาพถ้วนหน้าของไทยเกิดผลจริงได้เพราะมีโครงข่ายปฐมภูมิกระจายทั่วประเทศเป็นฐานรองรับ ขณะที่กลุ่มตกหล่นในเมืองและการกระจายอำนาจต้องการนวัตกรรมการประสานงานเชิงรุก",
+      summaryEN: "Thailand's UHC succeeded on the backbone of nationwide district primary care, while urban marginalized groups and decentralization call for proactive coordination.",
       bullets: [
         {
-          th: "<strong>PHC คือรากฐานที่ทำให้ UHC เกิดผลจริงในพื้นที่:</strong> การลงทุนโรงพยาบาลชุมชน สถานีอนามัย/รพ.สต. และ อสม. ยาวนานหลายทศวรรษทำให้สิทธิหลักประกันไม่เป็นเพียงสิทธิบนกระดาษ",
-          en: "<strong>PHC Turns Legal UHC into Real Access:</strong> Thailand's rural district health network and Village Health Volunteers enabled equitable access once UHC removed financial barriers.",
+          th: "<strong>`PHC` คือรากฐานที่เปลี่ยนสิทธิ `UHC` บนกระดาษให้เป็นการเข้าถึงจริง:</strong> การลงทุนโรงพยาบาลชุมชน รพ.สต. และ อสม. ต่อเนื่องหลายทศวรรษ ร่วมกับการช่วยทบทวนสิทธิแก่กลุ่มเปราะบางไร้เอกสาร ทำให้ประชาชนเข้าถึงบริการได้จริง",
+          en: "<strong>PHC Turns Legal UHC into Real Access:</strong> Nationwide district health networks, VHVs, and proactive civil-registration outreach convert statutory coverage into real utilization.",
         },
         {
-          th: "<strong>กฎหมายปฐมภูมิและการถ่ายโอน รพ.สต. สู่ อบจ.:</strong> พ.ร.บ.ระบบสุขภาพปฐมภูมิ พ.ศ. 2562 รับรองสิทธิการมีทีมหมอครอบครัว ขณะที่การถ่ายโอน รพ.สต. ต้องออกแบบการอภิบาลการเงินและระบบส่งต่อร่วมกันไม่ให้เกิดช่องว่าง",
-          en: "<strong>2019 PHC Act & Decentralization:</strong> Guarantees family-care teams by law, while transferring subdistrict health centers to local governments requires tight clinical and financing coordination.",
+          th: "<strong>พ.ร.บ.ระบบสุขภาพปฐมภูมิ พ.ศ. 2562 และการถ่ายโอน รพ.สต. สู่ อบจ.:</strong> กฎหมายรับรองสิทธิการได้รับการดูแลจากทีมหมอครอบครัว ขณะที่การถ่ายโอนสู่ท้องถิ่นต้องวางกลไกประสานข้อมูล การส่งต่อ และการคลังร่วมกับ รพช. ไม่ให้เกิดรอยต่อ",
+          en: "<strong>2019 PHC Act & Decentralization:</strong> Guarantees family-care teams by law, while transferring subdistrict health centers to local governments requires seamless clinical and financing coordination.",
         },
       ],
-      flowRoleTH: "สังเคราะห์พัฒนาการปฐมภูมิไทยและชี้ว่า 'มีหน่วยบริการใกล้บ้านแล้วยังต้องมีกลไกการคลังและหลักประกันสุขภาพมารองรับ' ส่งไม้ต่อเข้าสู่ HS6 โดยตรง",
-      flowRoleEN: "Synthesizes Thailand's PHC platform and bridges directly into HS6: the health insurance and purchasing mechanisms that finance universal access.",
+      caseLensTH: "เชื่อมบทเรียนปฐมภูมิไทยเข้ากับทั้ง HS2 (บทบาท รพ.สต. เป็น Gatekeeper และการถ่ายโอนสู่ อบจ.) และ HS6 (การมีเครือข่ายหน่วยบริการปฐมภูมิกระจายทั่วถึงเป็นปัจจัยหลักที่ยกระดับดัชนีความครอบคลุมบริการ SDG 3.8.1)",
+      caseLensEN: "Connects Thailand's PHC network directly to HS2 (gatekeeping & decentralization) and HS6 (widespread primary care infrastructure driving SDG 3.8.1 service coverage).",
+      flowRoleTH: "สังเคราะห์พัฒนาการปฐมภูมิไทยและชี้ว่า 'มีหน่วยบริการด่านหน้าแล้วยังต้องมีระบบหลักประกันสุขภาพและกลไกจ่ายเงินที่เหมาะสมมารองรับ' ส่งไม้ต่อเข้าสู่ HS6",
+      flowRoleEN: "Synthesizes Thailand's PHC platform and bridges directly into HS6: health insurance theory, UHC monitoring, and provider payment incentives.",
       crossLinks: [
         {
           target: "HS6:1",
-          labelTH: "HS6 · หมวด 1 (หลักประกันสุขภาพคู่โครงสร้างบริการที่ทั่วถึง)",
-          labelEN: "HS6 · Sec 1 (Insurance + Service Infrastructure for UHC)",
-          whyTH: "หมวดที่ 1 ของ HS6 ระบุชัดว่า UHC ต้องอาศัยทั้งหลักประกันสุขภาพและโครงสร้างระบบบริการที่กระจายทั่วถึงควบคู่กัน",
-          whyEN: "Directly mirrors HS6 Section 1's thesis that UHC requires both financial pooling and geographically accessible delivery infrastructure.",
+          labelTH: "HS6 · หมวด 1 (หลักประกันสุขภาพคู่โครงสร้างบริการปฐมภูมิสู่ SDG 3.8)",
+          labelEN: "HS6 · Sec 1 (Insurance + Primary Care Infrastructure for UHC)",
+          whyTH: "ความก้าวหน้าของความครอบคลุมบริการที่จำเป็น (`SDG 3.8.1`) ต้องอาศัยทั้งการขยายหลักประกันสุขภาพและหน่วยบริการปฐมภูมิที่กระจายทั่วถึง",
+          whyEN: "Advancing SDG 3.8.1 essential service coverage requires pairing insurance expansion with accessible primary care networks.",
         },
       ],
       keywords: [
@@ -1502,249 +1591,262 @@
       ],
     },
     "HS5:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์ระบบสุขภาพปฐมภูมิและบริการปฐมภูมิ",
-      secLabelEN: "Synthesis · Primary Health Care & Primary Care",
-      titleTH: "บทสรุปปฐมภูมิในฐานะหัวใจของระบบสุขภาพที่เป็นธรรม คุ้มค่า และยึดประชาชนเป็นศูนย์กลาง",
-      titleEN: "Primary Health Care as the Cornerstone of Equitable, Resilient Health Systems",
-      summaryTH: "ระบบปฐมภูมิที่ผสานคลินิก 4Cs งานสาธารณสุข EPHFs และพลังชุมชนเข้าด้วยกัน คือคานงัดสำคัญที่สุดสู่สุขภาพดีถ้วนหน้า",
-      summaryEN: "Uniting 4Cs clinical primary care, population EPHFs, and community empowerment provides the single strongest lever for Universal Health Coverage.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS5 & Open Note",
+      secLabelEN: "Synthesis · HS5 Case Discussion & Open-Note Readiness",
+      titleTH: "บทสรุปการแยกแยะบริการปฐมภูมิครบ 5 คุณลักษณะ ออกจากระบบสุขภาพปฐมภูมิ 3 เสาหลักของ Astana",
+      titleEN: "Distinguishing 5-Attribute Personal Primary Care from Astana's 3-Pillar Primary Health Care",
+      summaryTH: "แม่นยำทั้งห้าคุณลักษณะของบริการปฐมภูมิระดับบุคคล และแยกอีกสองเสาหลักของระบบสุขภาพปฐมภูมิระดับสังคมได้ชัดเจน คือหัวใจของการวิเคราะห์กรณีศึกษา HS5",
+      summaryEN: "Mastering all five personal Primary Care attributes alongside Astana's non-clinical PHC pillars (Multisectoral Policy and Empowered Communities) unlocks every HS5 case analysis.",
       bullets: [
         {
-          th: "<strong>เชื่อมครบทั้งบริการ นโยบาย และชุมชน:</strong> เมื่อด่านหน้าปฐมภูมิเข้มแข็ง ระบบบริการทั้งหมดจะทำงานได้อย่างมีคุณภาพ เป็นธรรม และประหยัดทรัพยากรปลายน้ำ",
-          en: "<strong>Strong Frontline, Sustainable System:</strong> Robust primary health care elevates quality and equity while relieving costly hospital bottlenecks.",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 2 ประเด็นของกรณีศึกษา HS5:</strong> (1) วิเคราะห์ `Primary Care` ครบ 5 คุณลักษณะ (`First-Contact`, `Comprehensiveness`, `Continuity` ข้ามรอยต่อหลังจำหน่าย รพ., `Coordination` เชื่อมภายในและข้ามภาคส่วน, และ `Person-Centeredness` สร้างความไว้วางใจไม่ตีตรา) และ (2) แยกอีก 2 เสาหลักของ `PHC` ตามปฏิญญา Astana คือ `Empowered People & Communities` และ `Multisectoral Policy & Action`",
+          en: "<strong>Complete HS5 Case Toolkit:</strong> (1) Map concrete outreach, psychosocial, and respite services across all 5 Primary Care attributes; and (2) articulate Astana's remaining 2 PHC pillars (`Empowered People & Communities` and `Multisectoral Policy & Action`).",
         },
       ],
-      flowRoleTH: "สรุปฐานการจัดบริการปฐมภูมิใน HS5 แล้วส่งต่อสู่บทสุดท้าย HS6: 'เราจะออกแบบระบบประกันสุขภาพและการจ่ายเงินอย่างไรให้คนเข้าถึงบริการนี้โดยไม่ล้มละลาย'",
-      flowRoleEN: "Completes the delivery backbone in HS5 and hands off to HS6: financing universal access and aligning provider payment incentives.",
+      caseLensTH: "จำง่ายก่อนเข้าคาบ HS5: ถามเรื่อง `Personal / Primary Care` = ตอบ **5 คุณลักษณะ** (4Cs + Person-Centeredness) · ถามเรื่ององค์ประกอบอื่นของ `Primary Health Care` นอกเหนือจากบริการสุขภาพ = ตอบ **2 เสาหลัก Astana** (การเสริมพลังประชาชน/ชุมชน + นโยบายและการทำงานข้ามภาคส่วนแก้ปัจจัยสังคมเศรษฐกิจ)",
+      caseLensEN: "Quick HS5 memory rule: Personal/Primary Care = **5 attributes** (`First-Contact · Comprehensiveness · Continuity · Coordination · Person-Centeredness`); PHC beyond health services = **2 Astana pillars** (`Empowered People & Communities` + `Multisectoral Policy & Action`).",
+      flowRoleTH: "สรุปฐานการจัดบริการปฐมภูมิใน HS5 แล้วส่งต่อสู่บทสุดท้าย HS6: 'หลักประกันสุขภาพถ้วนหน้า ทฤษฎีประกันเอกชน สิทธิแรงงานนอกระบบ และกลไกจ่ายเงิน FFS · Capitation · P4P'",
+      flowRoleEN: "Completes the PHC backbone in HS5 and hands off to HS6: UHC monitoring, voluntary insurance limits, informal-worker social security, and provider payments.",
       crossLinks: [
         {
           target: "HS6:1",
-          labelTH: "ต่อยอดสู่ HS6 · หมวด 1 (หลักการของการประกันสุขภาพ)",
-          labelEN: "Next: HS6 · Sec 1 (Principles of Health Insurance)",
+          labelTH: "ต่อยอดสู่ HS6 · หมวด 1 (หลักการประกันสุขภาพ ลูกบาศก์ UHC และ SDG 3.8)",
+          labelEN: "Next: HS6 · Sec 1 (Insurance Principles, UHC Cube & SDG 3.8)",
           whyTH: "เติมกลไกการคลังสุขภาพและหลักประกันความเสี่ยงทางการเงินเพื่อปลดล็อกอุปสรรคค่าใช้จ่ายในการเข้าถึงบริการ",
           whyEN: "Adds the health-financing and risk-pooling engine that removes financial barriers to care.",
         },
       ],
       keywords: [
+        { th: "บริการปฐมภูมิ 5 คุณลักษณะ", en: "5 Personal Primary Care Attributes" },
+        { th: "ปฏิญญาแอสทานา 3 เสาหลัก", en: "Astana 3 Pillars of PHC" },
         { th: "ปฐมภูมิเป็นฐานรากของ UHC", en: "PHC Foundation of UHC" },
-        { th: "การบูรณาการคลินิกและสาธารณสุข", en: "Clinical–Public Health Integration" },
       ],
     },
 
     /* -------------------- HS6: Health Insurance, UHC & Provider Payment -------------------- */
     "HS6:1": {
-      secLabelTH: "หมวดที่ 1 · หลักการของการประกันสุขภาพ",
-      secLabelEN: "Section 1 · Principles of Health Insurance",
-      titleTH: "การซื้อความแน่นอน กฎจำนวนมาก หน้าที่คุ้มครองสองมิติ และศักยภาพการเกลี่ยความเสี่ยงและรายได้",
-      titleEN: "Buying Certainty, Law of Large Numbers, Dual Protection, and Redistributive Pooling",
-      summaryTH: "ป่วยเมื่อไรไม่มีใครรู้ล่วงหน้า แต่เมื่อรวมคนกลุ่มใหญ่จ่ายเงินเข้ากองทุนภาคบังคับตามกำลังทรัพย์ ความเสี่ยงของแต่ละคนจึงกลายเป็นหลักประกันที่เป็นธรรมของทุกคน",
-      summaryEN: "Individual illness is unpredictable, yet pooling mandatory prepayments across a large, diverse population turns personal uncertainty into equitable security for all.",
+      secLabelTH: "หมวดที่ 1 · หลักการประกันสุขภาพ สมมติฐานพื้นฐาน 5 ข้อ ลูกบาศก์ UHC และ SDG 3.8",
+      secLabelEN: "Section 1 · Insurance Principles, 5 Basic Assumptions, WHO UHC Cube & SDG 3.8",
+      titleTH: "ทฤษฎีการประกันสุขภาพ 5 สมมติฐาน ลูกบาศก์หลักประกันสุขภาพ 3 แกน (X · Z · Y) และการติดตาม SDG 3.8.1–3.8.2",
+      titleEN: "5 Voluntary Insurance Assumptions, the 3-Axis UHC Cube, and Global Monitoring (SDG 3.8.1 & 3.8.2)",
+      summaryTH: "การประกันสุขภาพเปลี่ยนความไม่แน่นอนรายบุคคลเป็นหลักประกันระดับประชากร แต่การบรรลุ UHC จริงต้องขยายครบสามแกนของลูกบาศก์ UHC พร้อมกระจายหน่วยบริการปฐมภูมิให้ทั่วถึง",
+      summaryEN: "Health insurance pools unpredictable individual risks, yet achieving UHC requires advancing all three axes of the UHC Cube alongside accessible primary care networks.",
       bullets: [
         {
-          th: "<strong>จากความไม่แน่นอนปัจเจกสู่ความคาดการณ์ได้ระดับประชากร:</strong> ผู้ซื้อประกันแลกเบี้ยกับความแน่นอน (`certainty`) และช่องทางเข้าถึงการรักษาราคาแพง (`access motive`) โดยอาศัยกฎจำนวนมาก (`law of large numbers`) คำนวณค่าใช้จ่ายคาดหมายของกลุ่ม",
-          en: "<strong>Predictability Through Pooling:</strong> Insurance satisfies both risk aversion (buying certainty) and the access motive by applying the law of large numbers across a population.",
+          th: "<strong>จากความไม่แน่นอนสู่การรวมความเสี่ยง และสมมติฐานพื้นฐาน 5 ข้อของตลาดสมัครใจ:</strong> ผู้ซื้อแลกเบี้ยกับความแน่นอน (`certainty`) และโอกาสเข้าถึงบริการราคาแพง (`access motive`) ตามกฎจำนวนมาก แต่ตลาดสมัครใจถัวเฉลี่ยความเสี่ยงได้เฉพาะเมื่อ <strong>(1) ผู้รับประกันรู้ค่า `p` และ `E` · (2) โอกาสเกิดเหตุ `p < 1` · (3) ผู้ซื้อไม่รู้ค่า `p` เหนือกว่าผู้รับประกัน (ไม่เกิด `Adverse selection`) · (4) ความเสี่ยงอิสระต่อกัน (`non-covariate`) · และ (5) การป่วยไม่สร้างผลประโยชน์แก่ผู้เอาประกัน</strong>",
+          en: "<strong>Pooling Logic & 5 Voluntary Insurance Assumptions:</strong> Voluntary actuarial pooling requires (1) insurer knows p and E, (2) probability p < 1, (3) insured lacks superior knowledge of p (no adverse selection), (4) independent/non-covariate risks, and (5) illness yields no net gain to the insured.",
         },
         {
-          th: "<strong>ตลาดประกันสมัครใจมีเงื่อนไขจำกัด 4 ข้อ:</strong> ทำงานได้เฉพาะเมื่อโอกาสป่วย < 1 เป็นเหตุสุ่ม ความเสี่ยงอิสระต่อกัน และไม่มี `adverse selection` หรือ `moral hazard` รุนแรงเกินไป",
-          en: "<strong>Strict Limits of Voluntary Insurability:</strong> Voluntary markets require random independent losses (< 1) without excessive information asymmetry (adverse selection) or moral hazard.",
+          th: "<strong>ติดตามความก้าวหน้า UHC ด้วยคู่ตัวชี้วัด `SDG 3.8.1` และ `SDG 3.8.2` คู่บันได `Effective Coverage` (`Campbell et al., 2013`):</strong> `SDG 3.8.1` (`Service Coverage Index`) ดีขึ้นเกือบทุกประเทศเพราะ (1) ความครอบคลุมหลักประกันสุขภาพเพิ่มขึ้น (2) มีหน่วยบริการปฐมภูมิกระจายทั่วถึง และ (3) มีบริการเชิงรุก ลดช่องว่าง `Availability → Accessibility → Acceptability → Utilization → Quality`",
+          en: "<strong>SDG 3.8.1 & Campbell's Effective Coverage Staircase:</strong> Essential service coverage rises when expanding insurance enrollment is paired with geographically distributed primary care and proactive outreach.",
         },
         {
-          th: "<strong>หน้าที่คู่สู่ความเป็นธรรมและ UHC:</strong> (1) อำนวยการเข้าถึงบริการที่จำเป็น และ (2) ปกป้องครัวเรือนจากรายจ่ายหายนะและความยากจนจากค่ารักษา ควบคู่กับโครงสร้างบริการที่กระจายทั่วถึง",
-          en: "<strong>Dual Insurance Function for UHC:</strong> Enables access to needed care and protects households from catastrophic spending and medical impoverishment alongside accessible service infrastructure.",
+          th: "<strong>วิเคราะห์สาเหตุการล้มละลายจากค่ารักษาพยาบาล (`SDG 3.8.2: Catastrophic OOP`) ด้วย 3 แกนของ `WHO UHC Cube`:</strong> เมื่อคนเข้าถึงบริการมากขึ้นแต่ยังพึ่งเงินจ่ายเองหน้างาน รายจ่ายวิบัติจะแย่ลงจาก 3 สาเหตุตรงตาม 3 แกน ได้แก่ <strong>แกน X (`Population`)</strong> ความครอบคลุมประชากรยังขยายได้จำกัด · <strong>แกน Z (`Services`)</strong> ชุดสิทธิประโยชน์ยังมีจำกัดไม่รอบด้าน · และ <strong>แกน Y (`Direct costs`)</strong> ประชาชนยังต้องร่วมจ่าย (`Co-payment / User fees`) หน้างานค่อนข้างสูง",
+          en: "<strong>SDG 3.8.2 & Three Axes of the WHO UHC Cube:</strong> Catastrophic out-of-pocket spending persists or worsens when any cube axis lags—X (limited population coverage), Z (narrow benefit package), or Y (high point-of-care cost-sharing/co-payments).",
         },
         {
-          th: "<strong>ศักยภาพการเกลี่ยขึ้นกับขนาด ความหลากหลาย ความเป็นภาคบังคับ และสูตรเงินสมทบ:</strong> ลำดับเชิงหลักการคือ `อัตราก้าวหน้า > สัดส่วนรายได้ไม่มีเพดาน > มีเพดาน > community rating > risk rating` (และไทยใช้ภาษีทั่วไปใน UCS เพราะแรงงานนอกระบบบังคับเก็บเงินสมทบยาก)",
-          en: "<strong>Redistributive Capacity Design:</strong> Large, diverse, compulsory pools redistribute best; contribution equity ranks Progressive > Uncapped Proportional > Capped Proportional > Community Rating > Individual Risk Rating.",
+          th: "<strong>ศักยภาพการเกลี่ยความเสี่ยงและรายได้:</strong> กองทุนภาคบังคับขนาดใหญ่และหลากหลายเกลี่ยความเสี่ยงได้ดีที่สุด โดยความเป็นธรรมของเงินสมทบเรียงลำดับ `อัตราก้าวหน้า > สัดส่วนรายได้ไม่มีเพดาน > มีเพดาน > community rating > risk rating`",
+          en: "<strong>Redistributive Capacity:</strong> Large, diverse, compulsory pools redistribute best, with contribution equity ranking Progressive > Uncapped Proportional > Capped Proportional > Community Rating > Individual Risk Rating.",
         },
       ],
-      flowRoleTH: "วางรากฐานทฤษฎีการรวมความเสี่ยงและความเป็นธรรมในหมวด 1 ก่อนดูว่าต้องมี 'องค์กรผู้รับประกันทำหน้าที่อะไรบ้าง' เพื่อบริหารกองทุนนี้ในหมวด 2",
-      flowRoleEN: "Establishes the theoretical rationale for prepayment and pooling before Section 2 introduces the third-party insurer needed to run the pool.",
+      caseLensTH: "ใช้หมวดนี้ตอบโจทย์ HS6 เคสที่ 1 ได้ครบทั้งสองข้อ: ข้อ 1.1 อธิบายปัจจัยหนุน `SDG 3.8.1` จากฝั่งหลักประกันสุขภาพ + เครือข่ายบริการปฐมภูมิกระจายทั่วถึง/บริการเชิงรุก · ข้อ 1.2 อธิบายสาเหตุที่หลายประเทศยังมี `SDG 3.8.2` แย่ลงด้วย **3 แกนของ UHC Cube** (แกน X ประชากรครอบคลุมจำกัด · แกน Z ชุดสิทธิประโยชน์ไม่รอบด้าน · แกน Y ร่วมจ่าย Co-payment สูง)",
+      caseLensEN: "Directly unlocks HS6 Case 1: pair insurance expansion + primary-care distribution/outreach to explain SDG 3.8.1 gains, and apply the 3 UHC Cube axes (X population gaps, Z narrow benefits, Y high co-payments) to explain worsening SDG 3.8.2 catastrophic spending.",
+      flowRoleTH: "วางรากฐานทฤษฎีการประกันสุขภาพและ `UHC Cube` ในหมวด 1 ก่อนดูว่าต้องมี 'ผู้รับประกันในฐานะบุคคลที่สาม' ทำหน้าที่บริหารจัดการอย่างไรในหมวด 2",
+      flowRoleEN: "Establishes insurance theory, SDG 3.8 metrics, and the UHC Cube before Section 2 examines the third-party purchaser running the pool.",
       crossLinks: [
         {
           target: "HS3:2",
           labelTH: "HS3 · หมวด 2 (ความเป็นธรรมด้านบริการและการคลัง)",
           labelEN: "HS3 · Sec 2 (Equity in Access & Finance)",
-          whyTH: "หน้าที่ทั้งสองประการและลำดับความก้าวหน้าของเงินสมทบสร้างความเป็นธรรมทั้งด้านการใช้บริการและด้านการคลังโดยตรง",
-          whyEN: "Directly operationalizes HS3's horizontal/vertical equity in care access and progressive financing.",
+          whyTH: "การคุ้มครองทั้ง 3 แกนของ UHC Cube และเงินสมทบอัตราก้าวหน้าสร้างความเป็นธรรมทั้งการเข้าถึงและการคลังโดยตรง",
+          whyEN: "Expanding all 3 UHC Cube axes with progressive financing directly operationalizes Equity.",
         },
         {
           target: "HS5:7",
           labelTH: "HS5 · หมวด 7 (โครงข่ายปฐมภูมิเป็นฐานรองรับ UHC)",
           labelEN: "HS5 · Sec 7 (PHC Platform for UHC)",
-          whyTH: "การมีหลักประกันสุขภาพต้องเดินคู่กับโครงข่ายหน่วยบริการปฐมภูมิที่กระจายทั่วถึงจึงจะบรรลุ UHC ได้จริง",
-          whyEN: "Financial coverage achieves UHC only when paired with geographically distributed primary care.",
+          whyTH: "การมีหลักประกันสุขภาพต้องเดินคู่กับโครงข่ายหน่วยบริการปฐมภูมิที่กระจายทั่วถึงจึงจะยกระดับ SDG 3.8.1 ได้จริง",
+          whyEN: "Insurance coverage improves SDG 3.8.1 only when paired with geographically accessible primary care.",
         },
       ],
       keywords: [
-        { th: "การซื้อความแน่นอนและแรงจูงใจเข้าถึงบริการ", en: "Certainty & Access Motive" },
-        { th: "การจ่ายล่วงหน้าและการรวมกองทุน", en: "Prepayment & Risk Pooling" },
-        { th: "รายจ่ายสุขภาพระดับหายนะ", en: "Catastrophic Health Expenditure" },
-        { th: "การเกลี่ยความเสี่ยงและการเกลี่ยปันรายได้", en: "Risk Cross-Subsidy & Income Redistribution" },
+        { th: "สมมติฐานพื้นฐานประกันสุขภาพ 5 ข้อ", en: "5 Basic Insurance Assumptions (p < 1)" },
+        { th: "ลูกบาศก์หลักประกันสุขภาพ 3 แกน (X · Z · Y)", en: "WHO UHC Cube (X · Z · Y Axes)" },
+        { th: "ดัชนีครอบคลุมบริการและรายจ่ายหายนะ", en: "SDG 3.8.1 & SDG 3.8.2" },
+        { th: "บันไดความครอบคลุมที่มีประสิทธิผล", en: "Effective Coverage Staircase" },
       ],
     },
     "HS6:2": {
-      secLabelTH: "หมวดที่ 2 · องค์ประกอบของการประกันสุขภาพ",
-      secLabelEN: "Section 2 · Components of Health Insurance",
-      titleTH: "บทบาทของผู้รับประกันในฐานะบุคคลที่สาม การบริหารการคลัง และระบบข้อมูลสารสนเทศ",
-      titleEN: "The Third-Party Insurer, Financial Management, and Information Systems",
-      summaryTH: "เมื่อเปลี่ยนจากจ่ายเงินเองเป็นระบบประกัน ผู้รับประกันจะก้าวเข้ามาเป็นบุคคลที่สามที่เชื่อมสิทธิของประชาชนเข้ากับคุณภาพและความสมดุลทางการคลังของหน่วยบริการ",
-      summaryEN: "Moving from out-of-pocket payment to insurance introduces a third-party payer that stewards benefits, fund solvency, provider contracts, and data.",
+      secLabelTH: "หมวดที่ 2 · องค์ประกอบของระบบประกันสุขภาพและการจัดซื้อเชิงยุทธศาสตร์",
+      secLabelEN: "Section 2 · Components of Health Insurance & Strategic Purchasing",
+      titleTH: "บทบาทของผู้รับประกันในฐานะบุคคลที่สาม การจัดซื้อเชิงยุทธศาสตร์ การบริหารการคลัง และระบบข้อมูล",
+      titleEN: "The Third-Party Insurer, Strategic Purchasing, Financial Stewardship, and Information Systems",
+      summaryTH: "เมื่อเปลี่ยนจากจ่ายเงินเองเป็นระบบประกัน ผู้รับประกันจะเข้ามาเป็นบุคคลที่สามที่ออกแบบชุดสิทธิประโยชน์ สัญญาจ่ายเงิน และระบบข้อมูลเพื่อซื้อบริการที่มีคุณภาพและคุ้มค่า",
+      summaryEN: "Moving from out-of-pocket payment to insurance introduces a third-party purchaser that designs benefits, payment incentives, and data systems for strategic purchasing.",
       bullets: [
         {
-          th: "<strong>เปลี่ยนความสัมพันธ์จากสองฝ่ายเป็นสามฝ่าย:</strong> มีผู้รับประกัน (`Insurer`) ทำหน้าที่บริหารชุดสิทธิประโยชน์ให้ผู้มีสิทธิ (`Beneficiaries`) พร้อมทำสัญญาและจ่ายค่าบริการแก่หน่วยบริการ (`Providers`)",
-          en: "<strong>Triangular Health Financing Relationship:</strong> A third-party insurer/purchaser mediates between beneficiaries and healthcare providers.",
+          th: "<strong>เปลี่ยนความสัมพันธ์จากสองฝ่ายเป็นสามฝ่าย (`Triangular Relationship`):</strong> ผู้รับประกัน (`Insurer / Purchaser`) บริหารชุดสิทธิประโยชน์แก่ผู้มีสิทธิ (`Beneficiaries`) พร้อมทำสัญญาและออกแบบกติกาจ่ายเงินแก่หน่วยบริการ (`Providers`)",
+          en: "<strong>Triangular Financing Relationship:</strong> A third-party insurer/purchaser mediates between beneficiaries and contracted healthcare providers.",
         },
         {
-          th: "<strong>หัวใจความสำเร็จคือการบริหารการคลังและระบบข้อมูล:</strong> ต้องคำนวณและระดมทุนให้เพียงพอ กำหนดอัตราและบริหารการเบิกจ่ายอย่างมีประสิทธิภาพ บนฐานระบบข้อมูลสารสนเทศที่ใช้วางแผนและกำกับติดตามได้จริง",
-          en: "<strong>Financial Stewardship & Data Backbone:</strong> Sustainable purchasing depends on sound actuarial budgeting, rate-setting, claims management, and robust health information systems.",
+          th: "<strong>การจัดซื้อเชิงยุทธศาสตร์ (`Strategic Purchasing`) บนฐานการคลังและข้อมูล:</strong> ไม่เพียงจ่ายบิลตามใบเสร็จ แต่ใช้ข้อมูลผลลัพธ์ทางคลินิกและต้นทุนมากำหนดอัตราจ่าย เงื่อนไขคุณภาพ (เช่น `P4P`) และการกำกับติดตามอย่างโปร่งใส",
+          en: "<strong>Strategic Purchasing & Data Backbone:</strong> Uses actuarial budgeting and clinical/claims information to link provider payment with quality and efficiency.",
         },
       ],
-      flowRoleTH: "อธิบายกลไกการทำงานของ 'ผู้รับประกัน' ในหมวด 2 เพื่อเป็นกรอบเปรียบเทียบระบบประกันภาคสมัครใจและภาคบังคับของไทยในหมวด 3",
-      flowRoleEN: "Defines the institutional functions of the third-party payer before comparing how voluntary and compulsory Thai schemes organize this role in Section 3.",
+      caseLensTH: "เชื่อมบทบาทของผู้ซื้อบริการเชิงยุทธศาสตร์ (เช่น สปสช. หรือสำนักงานประกันสังคม) ในการออกแบบทั้งชุดสิทธิประโยชน์สร้างเสริมป้องกันโรค และเกณฑ์จ่ายเงินเพิ่มเติมตามผลลัพธ์ทางคลินิก",
+      caseLensEN: "Explains how public purchasers like NHSO design preventive benefit packages and outcome-based payment add-ons.",
+      flowRoleTH: "เข้าใจกลไก 'ผู้รับประกัน' ในหมวด 2 แล้ว จึงก้าวสู่หมวด 3 เพื่อเปรียบเทียบข้อยกเว้นของตลาดสมัครใจเอกชน กับระบบภาคบังคับและสิทธิแรงงานนอกระบบของไทย",
+      flowRoleEN: "Defines the third-party payer before Section 3 contrasts private market exclusions with Thailand's compulsory schemes and informal-worker coverage.",
       crossLinks: [
         {
           target: "HS2:4",
           labelTH: "HS2 · หมวด 4 (เชื่อมเสาการคลัง ข้อมูล และบริการ)",
           labelEN: "HS2 · Sec 4 (Linking Building Blocks)",
-          whyTH: "ผู้รับประกันเป็นจุดเชื่อมสำคัญระหว่าง Building Block ด้านการคลัง ระบบข้อมูลสารสนเทศ และการจัดบริการสุขภาพ",
-          whyEN: "Illustrates how the financing block relies on health information systems to purchase services effectively.",
+          whyTH: "ผู้รับประกันเชื่อม Building Block ด้านการคลัง ระบบสารสนเทศ และการจัดบริการเข้าด้วยกันผ่านการจัดซื้อเชิงยุทธศาสตร์",
+          whyEN: "Shows how the financing block relies on health information systems to purchase services strategically.",
         },
       ],
       keywords: [
         { th: "ผู้รับประกันในฐานะบุคคลที่สาม", en: "Third-Party Payer / Insurer" },
-        { th: "ผู้มีสิทธิและหน่วยบริการคู่สัญญา", en: "Beneficiaries & Contracted Providers" },
-        { th: "การบริหารจัดการด้านการคลังและข้อมูล", en: "Financial Management & Health Information" },
+        { th: "การจัดซื้อบริการเชิงยุทธศาสตร์", en: "Strategic Purchasing" },
+        { th: "การบริหารการคลังและสารสนเทศ", en: "Financial & Information Management" },
       ],
     },
     "HS6:3": {
-      secLabelTH: "หมวดที่ 3 · ประเภทของการประกันสุขภาพในประเทศไทย",
-      secLabelEN: "Section 3 · Types of Health Insurance in Thailand",
-      titleTH: "ปัญหา Adverse Selection ในประกันสมัครใจ และสถาปัตยกรรมประกันภาคบังคับสามระบบหลักของไทย",
-      titleEN: "Adverse Selection in Voluntary Markets & Thailand's Compulsory Coverage Architecture",
-      summaryTH: "ตลาดสมัครใจคัดกรองคนเสี่ยงออกเพื่อความอยู่รอดของกองทุน แต่ระบบภาคบังคับโอบรับทุกคนเข้าด้วยกันเพื่อแก้ปัญหาการคัดเลือกที่ขัดผลประโยชน์อย่างเบ็ดเสร็จ",
-      summaryEN: "Voluntary insurers screen out high risks to survive, whereas compulsory universal systems include everyone to solve adverse selection completely.",
+      secLabelTH: "หมวดที่ 3 · ประกันสมัครใจ ข้อยกเว้นเอกชน ผลกระทบภายนอก และระบบประกันสังคมไทย (ม.33 · 39 · 40)",
+      secLabelEN: "Section 3 · Private Exclusions, Externalities, Thai 3 Schemes & Social Security Sec 33 · 39 · 40",
+      titleTH: "เหตุผลข้อยกเว้นประกันเอกชน (Adverse Selection, p → 1, Externalities) และสิทธิประกันสังคมไทยสำหรับแรงงานนอกระบบ",
+      titleEN: "Why Private Insurance Excludes High Risks & Preventive Externalities, Plus Thai UCS & SSS Section 40",
+      summaryTH: "ตลาดประกันเอกชนตั้งข้อยกเว้นโรคเสี่ยงสูงและบริการป้องกันที่มีผลกระทบภายนอกเพื่อความอยู่รอด รัฐจึงต้องจัดหลักประกันถ้วนหน้าควบคู่ทางเลือกความมั่นคงทางสังคมแก่แรงงานนอกระบบ",
+      summaryEN: "Private insurers exclude high-probability risks and positive-externality prevention to avoid losses; public systems step in with universal healthcare and voluntary social security for informal workers.",
       bullets: [
         {
-          th: "<strong>Adverse selection คือจุดเปราะบางของประกันสมัครใจ:</strong> คนเสี่ยงสูงอยากซื้อมากกว่าคนแข็งแรง เอกชนจึงใช้ `risk rating`, `underwriting`, ตัดโรคเดิม หรือแบ่งแผน ขณะที่ทางแก้เบ็ดเสร็จคือระบบภาคบังคับถ้วนหน้า",
-          en: "<strong>Adverse Selection & Policy Remedies:</strong> Private insurers counter high-risk self-selection via risk rating, underwriting, and exclusions, whereas mandatory universal pooling eliminates it at the root.",
+          th: "<strong>วิเคราะห์ข้อยกเว้นของประกันสุขภาพเอกชน (`ข้อยกเว้นมาตรฐาน คปภ. 21 ข้อ`) ด้วยทฤษฎีการประกันสุขภาพ:</strong> (1) กรณีโรคที่สัมพันธ์กับพฤติกรรมเสี่ยงสูง (เช่น โรคติดต่อทางเพศสัมพันธ์/HIV): เกิด `Adverse selection` (ผู้ซื้อมีพฤติกรรมเสี่ยงและรู้ความเสี่ยงตนมากกว่าบริษัท) และมีความเสี่ยงเกิดโรคสูงจนค่า <strong>`p เข้าใกล้ 1` (`p → 1`)</strong> ขัดสมมติฐาน `p < 1` จึงถัวเฉลี่ยความเสี่ยงไม่ได้ · (2) กรณีบริการป้องกันเชิงรุก (เช่น `PrEP / PEP` หรือวัคซีน): เป็นบริการที่มี <strong>ผลกระทบภายนอกทางบวก (`Positive externalities`)</strong> ต่อสังคมซึ่งตลาดเอกชนไม่จูงใจจัดสรร และหากเปิดขายจะมีเฉพาะกลุ่มเสี่ยงที่ตั้งใจใช้เข้ามาซื้อทำให้ <strong>`p → 1`</strong> (ในไทย งบ `P&P` ของ สปสช. จึงจัดบริการฟรีแก่คนไทยทุกสิทธิ)",
+          en: "<strong>Why Private Insurance Excludes STI/HIV & PrEP/PEP:</strong> (1) Risky-behavior conditions trigger `Adverse selection` and push probability `p → 1` (violating `p < 1`, making risk-pooling impossible); (2) Proactive prevention (`PrEP/PEP`) generates societal `Positive externalities` (public sector role, covered free under Thai NHSO P&P) and would attract only intended users (`p → 1`).",
         },
         {
-          th: "<strong>จำแนกประกันภาคบังคับในไทยครบ 4 รูปแบบ:</strong> ประกันสังคม (`SHI` ร่วมสมทบ 3 ฝ่าย เฉพาะตัวผู้ประกันตน) ระบบภาษี (`UCS`, `CSMBS`, ท้องถิ่น, ผู้มีปัญหาสถานะและสิทธิ) ประกันเฉพาะกรณี (พ.ร.บ.รถ, กองทุนเงินทดแทน) และประกันสุขภาพแรงงานต่างด้าว",
-          en: "<strong>Four Compulsory Modes in Thailand:</strong> Tripartite Social Health Insurance (SSS), tax-financed schemes (UCS, CSMBS, local govt, stateless), specific-risk mandates (Road Traffic Act, WCS), and Migrant Health Insurance.",
+          th: "<strong>ภาพรวมประกันภาคบังคับและ 3 กองทุนสุขภาพหลักของไทย:</strong> `UCS` (บัตรทอง 46.9 ล้านคน ใช้ภาษีทั่วไป ครอบคลุมแรงงานนอกระบบและคนไทยที่ไม่มีสิทธิอื่น), `SSS` (ประกันสังคม 12.8 ล้านคน สมทบ 3 ฝ่าย), และ `CSMBS` (ข้าราชการ 5.4 ล้านคน ภาษีทั่วไป) ทำงานร่วมกับประกันเฉพาะกรณี (พ.ร.บ.ผู้ประสบภัยจากรถ, กองทุนเงินทดแทนเฉพาะลูกจ้าง ม.33) และประกันแรงงานต่างด้าว",
+          en: "<strong>Thailand's Compulsory Coverage Architecture:</strong> Tax-financed UCS (46.9M, including informal workers), tripartite SSS (12.8M), and tax-financed CSMBS (5.4M), complemented by specific-risk mandates and migrant insurance.",
         },
         {
-          th: "<strong>ภาพรวม 3 กองทุนหลักของไทย (ต.ค. 2567):</strong> `UCS` 46.9 ล้านคน, `SSS` 12.8 ล้านคน และ `CSMBS` 5.4 ล้านคน ทำงานควบคู่กับสิทธิซ้ำซ้อนเฉพาะกรณี โดยมีความต่างสำคัญที่แหล่งเงินและวิธีจ่ายค่าบริการ",
-          en: "<strong>Thailand's Three Main Schemes:</strong> UCS (46.9M), SSS (12.8M), and CSMBS (5.4M) achieve near-universal health coverage while differing in revenue sources and provider payment methods.",
+          th: "<strong>เปรียบเทียบประกันสังคม `มาตรา 33 · 39 · 40` สำหรับแรงงานนอกระบบ:</strong> ลูกจ้างในระบบอยู่ใน `ม.33` (7 กรณี) · ผู้เคยอยู่ ม.33 สมัครต่อ `ม.39` (6 กรณี) · ส่วน <strong>แรงงานนอกระบบ/อาชีพอิสระสมัครภาคสมัครใจ `มาตรา 40`</strong> ได้โดยไม่เสียสิทธิรักษาพยาบาลบัตรทอง (`UCS`) มี 3 ทางเลือกสมทบ: `70 บาท/เดือน` (3 กรณี: เงินทดแทนขาดรายได้เมื่อเจ็บป่วย ทุพพลภาพ เสียชีวิต), `100 บาท/เดือน` (4 กรณี: เพิ่มบำเหน็จชราภาพ), และ <strong>`ไม่น้อยกว่า 300 บาท/เดือน` (ทางเลือกที่ 3 ครบ 5 กรณี: เจ็บป่วย ทุพพลภาพ เสียชีวิต บำเหน็จชราภาพ และสงเคราะห์บุตร)</strong>",
+          en: "<strong>Social Security Section 33 · 39 · 40:</strong> Informal workers retain UCS healthcare and can enroll voluntarily in SSS **Section 40** across 3 tiers: 70 THB/mo (sickness income loss, disability, death), 100 THB/mo (+ old-age lump sum), or **≥300 THB/mo (all 5 benefits: sickness, disability, death, old-age lump sum, and child allowance)**.",
         },
       ],
-      flowRoleTH: "ชี้ให้เห็นในตารางที่ 1 ว่าแต่ละกองทุนของไทยใช้วิธีจ่ายเงินแก่โรงพยาบาลต่างกัน จึงส่งต่อเข้าสู่หมวด 4 เพื่อวิเคราะห์กลไกวิธีจ่ายเงินทั้ง 4 รูปแบบอย่างเป็นระบบ",
-      flowRoleEN: "Table 1 reveals distinct provider payment designs across UCS, SSS, and CSMBS, motivating Section 4's systematic comparison of the four payment methods.",
+      caseLensTH: "ใช้หมวดนี้ตอบโจทย์ HS6 เคสที่ 2 ได้ครบทุกคะแนน: ข้อ 2.1 แยกเหตุผล STI/HIV (`พฤติกรรมเสี่ยง/Adverse selection` + `p เข้าใกล้ 1`) ออกจากเหตุผล PrEP/PEP (`เป็นบริการที่มี Externalities` + `มีเฉพาะกลุ่มเสี่ยงเข้ามาซื้อทำให้ p เข้าใกล้ 1`) · ข้อ 2.2 แรงงานนอกระบบที่ต้องการความมั่นคงครบทั้ง 5 กรณี (รวมบำเหน็จชราภาพและสงเคราะห์บุตร) ต้องสมัคร `ระบบประกันสังคม` แบบ `ภาคสมัครใจ / มาตรา 40` และจ่ายเงินสมทบ `ไม่น้อยกว่า 300 บาท/เดือน`",
+      caseLensEN: "Unlocks HS6 Case 2 completely: for Q2.1, pair risky behavior/Adverse Selection + `p → 1` (STI/HIV) and Positive Externalities + high-risk self-selection `p → 1` (PrEP/PEP); for Q2.2, specify voluntary **Social Security Section 40 at ≥300 THB/month** to cover all 5 social-protection benefits.",
+      flowRoleTH: "เห็นโครงสร้างกองทุนทั้งเอกชนและภาครัฐในหมวด 3 แล้ว จึงส่งต่อเข้าสู่หมวด 4 เพื่อเปรียบเทียบกลไกการจ่ายเงินแก่โรงพยาบาล (`FFS`, `Capitation`, `DRG`, `Global Budget`, `P4P`)",
+      flowRoleEN: "Moves from insurance market structure and Thai schemes in Section 3 to provider payment mechanisms and incentives in Section 4.",
       crossLinks: [
         {
           target: "HS6:1",
-          labelTH: "HS6 · หมวด 1 (เงื่อนไขรับประกันข้อ 2 และขนาดกองทุน)",
-          labelEN: "HS6 · Sec 1 (Information Asymmetry & Pool Size)",
-          whyTH: "ปัญหา `adverse selection` ในหมวด 3 คือผลในโลกจริงเมื่อเงื่อนไขข้อมูลสมมาตรในหมวด 1 ไม่เป็นจริง",
-          whyEN: "Shows the real-world market consequence when Section 1's no-excessive-asymmetry condition fails.",
+          labelTH: "HS6 · หมวด 1 (สมมติฐานพื้นฐาน 5 ข้อของทฤษฎีประกัน)",
+          labelEN: "HS6 · Sec 1 (5 Basic Insurance Assumptions)",
+          whyTH: "ข้อยกเว้นของประกันเอกชนในหมวด 3 คือผลโดยตรงเมื่อสมมติฐาน `p < 1` และข้อมูลสมมาตรในหมวด 1 ไม่เป็นจริง",
+          whyEN: "Private exclusions directly reflect violations of Section 1's `p < 1` and symmetric-information assumptions.",
         },
         {
           target: "HS3:2",
-          labelTH: "HS3 · หมวด 2 (ความเหลื่อมล้ำระหว่างกองทุน)",
-          labelEN: "HS3 · Sec 2 (Cross-Scheme Equity)",
-          whyTH: "การเปรียบเทียบสิทธิ แหล่งเงิน และวิธีจ่ายของ UCS, SSS, CSMBS เป็นโจทย์สำคัญของการวิเคราะห์ความเป็นธรรมในไทย",
-          whyEN: "Comparing UCS, SSS, and CSMBS illuminates ongoing horizontal equity questions in Thailand.",
+          labelTH: "HS3 · หมวด 2 (ความเป็นธรรมของแรงงานนอกระบบและระหว่างกองทุน)",
+          labelEN: "HS3 · Sec 2 (Equity for Informal Workers & Across Schemes)",
+          whyTH: "การมีบัตรทอง (`UCS`) คู่กับประกันสังคม `มาตรา 40` ช่วยลดช่องว่างความคุ้มครองสุขภาพและรายได้ของแรงงานนอกระบบ",
+          whyEN: "Pairing tax-financed UCS with voluntary Section 40 narrows social-protection gaps for informal workers.",
         },
       ],
       keywords: [
-        { th: "การคัดเลือกที่ขัดผลประโยชน์กัน", en: "Adverse Selection" },
-        { th: "การคัดกรองความเสี่ยงและตัดโรคเดิม", en: "Underwriting & Pre-Existing Exclusions" },
+        { th: "การคัดเลือกในทางตรงข้ามและ p เข้าใกล้ 1", en: "Adverse Selection & p → 1" },
+        { th: "ผลกระทบภายนอกทางบวก (PrEP/PEP)", en: "Positive Externalities" },
+        { th: "ประกันสังคม มาตรา 33 · 39 · 40 (300 บาท/เดือน)", en: "SSS Sec 33 · 39 · 40 (70/100/300 THB)" },
         { th: "สามกองทุนหลัก (UCS · SSS · CSMBS)", en: "Thailand's Three Main Schemes" },
-        { th: "การประกันแบบซ้ำซ้อน", en: "Duplicated Coverage" },
       ],
     },
     "HS6:4": {
-      secLabelTH: "หมวดที่ 4 · รูปแบบการจ่ายค่าบริการในระบบประกันสุขภาพ",
-      secLabelEN: "Section 4 · Provider Payment Methods",
-      titleTH: "สมการต้นทุน ปัจจัยผลักดันค่าใช้จ่าย (Cost Drivers) และการโยกความเสี่ยงทางการเงินทั้ง 4 รูปแบบ",
-      titleEN: "Cost Equations, Cost Drivers, and Financial Risk Transfer Across 4 Payment Methods",
-      summaryTH: "วิธีที่กองทุนจ่ายเงินคือสัญญาณกำหนดพฤติกรรมโรงพยาบาล จ่ายตามรายการกองทุนรับความเสี่ยง แต่เหมาจ่ายล่วงหน้าโยกความเสี่ยงให้หน่วยบริการร่วมคุมต้นทุน",
-      summaryEN: "How a fund pays providers shapes how care is delivered: retrospective fee-for-service leaves financial risk with the payer, while prospective payments shift risk to providers.",
+      secLabelTH: "หมวดที่ 4 · กลไกการจ่ายค่าบริการ (FFS · Capitation · DRGs · Global Budget · P4P)",
+      secLabelEN: "Section 4 · Provider Payment Methods, WHR 2000 Matrix & Pay for Performance (P4P)",
+      titleTH: "สมการรายจ่าย พฤติกรรมแพทย์ จุดแข็ง–จุดอ่อนของ FFS เทียบกับ Capitation และบทบาทของ P4P",
+      titleEN: "Expenditure Equations, Provider Behaviors, FFS vs. Capitation Trade-Offs, and P4P Gap-Closing",
+      summaryTH: "ไม่มีวิธีจ่ายเงินเดี่ยววิธีใดสมบูรณ์แบบ จ่ายตามรายการกระตุ้นปริมาณบริการแต่งบบานปลาย ส่วนเหมาจ่ายรายหัวคุมงบและหนุนป้องกันโรคแต่เสี่ยงให้บริการต่ำกว่าเกณฑ์ จึงต้องเสริมด้วย P4P และการจ่ายแบบผสมผสาน",
+      summaryEN: "No single payment method is flawless: FFS boosts responsiveness yet fuels SID and high costs, whereas Capitation contains costs and encourages prevention yet risks under-provision—motivating P4P and blended payment.",
       bullets: [
         {
-          th: "<strong>Fee-for-service (จ่ายย้อนหลังตามรายการ):</strong> ทุกตัวคูณ (`Visits × Quantity × Price × Intensity`) ผลักดันรายจ่าย ความเสี่ยงทางการเงินจึงตกอยู่ที่กองทุนเป็นหลัก",
-          en: "<strong>Fee-for-Service (Retrospective):</strong> Every volume, price, and intensity variable drives spending, leaving financial risk squarely on the insurance fund.",
+          th: "<strong>เปรียบเทียบสมการและพฤติกรรมแพทย์: `Fee-for-Service (FFS)` vs. `Inclusive / Exclusive Capitation`:</strong> ภายใต้ `FFS` (`Expenditure = Visits × Quantity × Price × Intensity`) กองทุนรับความเสี่ยง แพทย์เรียกเก็บได้ทุกรายการจึงมีอิสระตัดสินใจให้บริการเต็มที่และมีแนวโน้มสั่งยาราคาแพง/ตรวจมาก (`Over-provision`) · ส่วนภายใต้ `Capitation` (`Beneficiaries × Capitation rate`; `Inclusive` เหมาทั้ง OPD+IPD ส่วน `Exclusive` แยก IPD ออก) โรงพยาบาลรับความเสี่ยงภายใต้งบคงที่ที่ได้รับมาแล้ว แพทย์จึงระมัดระวังค่าใช้จ่ายและเลี่ยงการรักษาราคาแพง",
+          en: "<strong>FFS vs. Capitation Equations & Provider Behaviors:</strong> Under retrospective FFS, payer-borne risk lets clinicians bill every item freely (tending toward expensive drugs/over-provision); under prospective Capitation (especially Inclusive Capitation covering OPD+IPD), hospital-borne risk under a fixed budget makes clinicians cost-conscious.",
         },
         {
-          th: "<strong>Capitation (เหมาจ่ายรายหัว):</strong> ผูกงบตามจำนวนผู้มีสิทธิขึ้นทะเบียนหน่วยบริการด่านหน้า (`gatekeeper`) โยกความเสี่ยงให้หน่วยบริการบริหารจัดการต้นทุนและเน้นสร้างเสริมป้องกัน",
-          en: "<strong>Capitation (Per Registered Person):</strong> Ties revenue to enrolled population size, shifting financial risk to primary care gatekeepers to manage costs proactively.",
+          th: "<strong>จุดแข็งและจุดอ่อนตามทฤษฎี (`WHO World Health Report 2000 Matrix`):</strong> <strong>`FFS`</strong> มีจุดแข็งคือสร้างแรงจูงใจในการให้บริการและตอบสนองผู้ป่วยสูง แต่มีจุดอ่อน 2 ข้อคือเกิด <strong>อุปสงค์ที่ผู้ให้บริการกระตุ้น (`Supplier-Induced Demand: SID`)</strong> และเกิด <strong>ภาระค่าใช้จ่ายด้านสุขภาพที่สูง</strong> · ส่วน <strong>`Capitation`</strong> มีจุดแข็ง 2 ข้อคือ <strong>ควบคุมค่าใช้จ่ายได้ดี</strong> และ <strong>สร้างแรงจูงใจในการส่งเสริมป้องกันโรค</strong> แต่มีจุดอ่อนคือเสี่ยงเกิด <strong>การให้บริการต่ำกว่าเกณฑ์ (`Under-provision`)</strong> (ขณะที่ `DRGs` จ่ายตาม `RW` เสี่ยง `DRG creep` และ `Global Budget` คุมเพดานงบรวม)",
+          en: "<strong>Theoretical Strengths & Weaknesses (WHR 2000):</strong> FFS excels at service responsiveness (`+`) but suffers from `Supplier-Induced Demand (SID)` and high total expenditure (`-`); Capitation excels at cost containment and preventive care (`+`) but risks `Under-provision` (`-`); DRGs require audit against `DRG creep` under a `Global Budget`.",
         },
         {
-          th: "<strong>Case-based / DRGs และ Global Budget:</strong> `DRGs` จ่ายตามค่าน้ำหนักสัมพัทธ์ความรุนแรงโรคให้โรงพยาบาลคุมต้นทุนต่อรายแต่ต้องระวัง `DRG creep` (ลงรหัสสูงเกินจริง) ส่วน `Global budget` เพดานงบรวมคงที่ทำให้กองทุนไม่เสี่ยงงบบานปลาย",
-          en: "<strong>DRGs & Global Budget:</strong> DRGs incentivize within-case efficiency (requiring audit against DRG creep upcoding), while a global budget caps total fund liability.",
+          th: "<strong>เงื่อนไขของ `Pay for Performance (P4P)` ในการปิดช่องว่างของฐานเดิม และการจ่ายแบบผสมผสาน (`Blended Payment`):</strong> เมื่อเติม `P4P` (จ่ายเพิ่มตามผลลัพธ์ เช่น ลดอัตรา `Acute exacerbation` ที่นอน รพ./เข้า ER): <strong>บนฐาน `FFS`</strong> <em>อาจปิดช่องว่างได้หรือไม่ได้</em> ขึ้นอยู่กับว่า <strong>อัตราจ่าย P4P มากเพียงพอหรือไม่</strong> ที่จะจูงใจให้โรงพยาบาลหันมาทำบริการส่งเสริม ป้องกัน และฟื้นฟู (เทียบกับรายรับ FFS เมื่อผู้ป่วยกำเริบ) · ส่วน <strong>บนฐาน `Inclusive Capitation`</strong> `P4P` <strong>ช่วยปิดช่องว่าง (`Under-provision`) ได้สอดคล้องตรงทิศทาง</strong> เพราะจูงใจให้ส่งเสริม ป้องกัน ฟื้นฟูเพื่อลด `Acute exacerbation` ไปในทิศทางเดียวกับการประหยัดต้นทุน IPD ของโรงพยาบาล (ไทยจึงใช้ `Blended Payment`: `Exclusive Capitation` + `DRGs Global Budget` + `P4P`)",
+          en: "<strong>How P4P Interacts with Base Payment Systems:</strong> Layered onto `FFS`, P4P *may or may not* close the prevention gap—depending on whether the P4P bonus is large enough relative to FFS acute-care revenue; layered onto `Inclusive Capitation`, P4P *effectively closes the under-provision gap* by reinforcing promotion, prevention, and rehabilitation to cut acute exacerbations.",
         },
       ],
-      flowRoleTH: "เข้าใจสมการแรงจูงใจของวิธีจ่ายเงินทั้ง 4 แบบในหมวด 4 แล้ว จึงพร้อมวิเคราะห์ปัญหา `Moral hazard` และการใช้วิธีจ่ายเงินเป็นมาตรการควบคุมทางอ้อมในหมวด 5",
-      flowRoleEN: "Mastering payment incentives in Section 4 directly unlocks Section 5: why third-party payment induces moral hazard and how prospective payment contains it.",
+      caseLensTH: "ใช้หมวดนี้ตอบโจทย์ HS6 เคสที่ 3 ได้ครบทั้ง 3 ข้อย่อย (8 คะแนนเต็ม): (3.1) เทียบพฤติกรรมแพทย์และสาเหตุจากผู้รับความเสี่ยงงบประมาณ (`FFS` เรียกเก็บตามจริง vs `Inclusive Capitation` ตระหนักภาระในงบเหมาจ่ายคงที่) · (3.2) จุดแข็ง–จุดอ่อน (`FFS`: จูงใจบริการสูง vs `SID` + งบสูง; `Capitation`: คุมงบดี + จูงใจส่งเสริมป้องกัน vs `Under-provision`) · (3.3) `P4P` บนฐาน `FFS` อาจมีผลหรือไม่มีผลขึ้นกับอัตราจ่าย P4P ว่ามากพอหรือไม่ ส่วนบนฐาน `Inclusive Capitation` ช่วยปิดช่องว่างได้โดยตรง",
+      caseLensEN: "Directly powers all 3 parts of HS6 Case 3: (3.1) contrast clinician autonomy/expensive prescribing under FFS vs. cost-conscious prescribing under fixed Inclusive Capitation; (3.2) list exact WHR 2000 strengths and weaknesses (SID & high cost vs. cost control, prevention & under-provision); (3.3) contrast conditional P4P impact under FFS (depends on bonus size) vs. synergistic gap-closing under Inclusive Capitation.",
+      flowRoleTH: "เข้าใจสมการแรงจูงใจของ `FFS`, `Capitation`, `DRG`, `Global Budget` และ `P4P` ในหมวด 4 แล้ว จึงพร้อมวิเคราะห์ `Moral hazard` และมาตรการคุมค่าใช้จ่ายที่เป็นธรรมในหมวด 5",
+      flowRoleEN: "Mastering payment incentives and P4P in Section 4 directly unlocks Section 5: managing dual-sided moral hazard equitably.",
       crossLinks: [
         {
           target: "ST1:4",
           labelTH: "ST1 · หมวด 4 (กติกาการจ่ายเงินคือโครงสร้างใต้ภูเขาน้ำแข็ง)",
           labelEN: "ST1 · Sec 4 (Payment Rules as System Structure)",
-          whyTH: "กติกาการจ่ายค่าบริการเป็นชั้น 'โครงสร้างระบบ' ที่กำหนดแนวโน้มพฤติกรรมการให้บริการและ `DRG creep`",
-          whyEN: "Provider payment formulas act as powerful structural incentives beneath clinical utilization patterns.",
+          whyTH: "กติกาการจ่ายค่าบริการเป็นชั้น 'โครงสร้างแรงจูงใจ' ใต้ภูเขาน้ำแข็งที่กำหนดแนวโน้มพฤติกรรมโรงพยาบาล",
+          whyEN: "Provider payment formulas act as structural incentives shaping clinical utilization patterns.",
         },
         {
           target: "HS3:4",
           labelTH: "HS3 · หมวด 4 (ประสิทธิภาพของระบบบริการ)",
           labelEN: "HS3 · Sec 4 (System Efficiency)",
-          whyTH: "การผสมผสาน Capitation และ DRG ภายใต้งบยอดรวมเป็นกลไกสำคัญที่ทำให้ระบบสุขภาพไทยควบคุมต้นทุนได้อย่างมีประสิทธิภาพ",
-          whyEN: "Closed-end capitation and DRG global budgets underpin Thailand's renowned health-system efficiency.",
+          whyTH: "การผสมผสาน Exclusive Capitation, DRGs ภายใต้งบยอดรวม และ P4P เฉพาะโรค ช่วยรักษาสมดุลทั้งประสิทธิภาพและคุณภาพ",
+          whyEN: "Blended capitation, global-budget DRGs, and targeted P4P balance efficiency with clinical quality.",
         },
       ],
       keywords: [
-        { th: "การจ่ายตามรายบริการ · เหมาจ่ายรายหัว", en: "Fee-for-Service · Capitation" },
-        { th: "กลุ่มวินิจฉัยโรคร่วมและน้ำหนักสัมพัทธ์", en: "DRGs & Relative Weight (RW)" },
-        { th: "การลงรหัสโรคสูงเกินจริง", en: "DRG Creep (Upcoding)" },
-        { th: "งบประมาณยอดรวมและการโยกความเสี่ยง", en: "Global Budget & Financial Risk Transfer" },
+        { th: "จ่ายตามรายบริการเทียบกับเหมาจ่ายรายหัว", en: "FFS vs. Inclusive/Exclusive Capitation" },
+        { th: "อุปสงค์ที่ผู้ให้บริการกระตุ้น · บริการต่ำกว่าเกณฑ์", en: "SID vs. Under-Provision" },
+        { th: "การจ่ายตามผลงานและการจ่ายแบบผสมผสาน", en: "Pay for Performance (P4P) & Blended Payment" },
+        { th: "กลุ่มวินิจฉัยโรคร่วมและงบประมาณยอดรวม", en: "DRGs & Global Budget" },
       ],
     },
     "HS6:5": {
       secLabelTH: "หมวดที่ 5 · ปัญหาการขาดจริยธรรม (Moral Hazard) และการควบคุมค่าใช้จ่าย",
-      secLabelEN: "Section 5 · Moral Hazard & Cost Containment",
-      titleTH: "Moral Hazard สองฝั่ง การยกเว้นส่วนร่วมจ่ายให้กลุ่มเปราะบาง และพลังของการควบคุมทางอ้อมฝั่งผู้ให้บริการ",
-      titleEN: "Dual-Sided Moral Hazard, Protecting Vulnerable Groups, and Indirect Supply-Side Control",
-      summaryTH: "เมื่อมีผู้จ่ายแทนย่อมเสี่ยงเกิดการใช้และสั่งบริการเกินจำเป็น การคุมรายจ่ายที่ชาญฉลาดจึงเน้นปรับแรงจูงใจฝั่งผู้ให้บริการโดยไม่ตั้งกำแพงร่วมจ่ายกั้นกลุ่มเปราะบาง",
-      summaryEN: "Third-party payment tempts overuse on both sides; wise cost containment realigns provider payment incentives while shielding vulnerable patients from user fees.",
+      secLabelEN: "Section 5 · Moral Hazard, Supplier-Induced Demand & Cost Containment",
+      titleTH: "Moral Hazard สองฝั่ง ผลกระทบของส่วนร่วมจ่ายต่อแกน Y ของ UHC Cube และการควบคุมทางอ้อมฝั่งผู้ให้บริการ",
+      titleEN: "Dual-Sided Moral Hazard, Protecting Vulnerable Groups on UHC Axis Y, and Supply-Side Control",
+      summaryTH: "เมื่อมีบุคคลที่สามจ่ายแทนย่อมเสี่ยงเกิดการใช้และสั่งบริการเกินจำเป็น การคุมรายจ่ายที่เป็นธรรมจึงเน้นปรับวิธีจ่ายเงินฝั่งผู้ให้บริการโดยไม่ตั้งกำแพงร่วมจ่ายซ้ำเติมกลุ่มเปราะบาง",
+      summaryEN: "Third-party payment tempts overuse on both sides; equitable cost containment reforms supply-side payment incentives while shielding vulnerable groups from user fees.",
       bullets: [
         {
-          th: "<strong>Moral hazard เกิดได้ทั้งสองฝั่ง:</strong> ฝั่งผู้ใช้บริการอาจลดความระมัดระวังหรือใช้บริการเกินจำเป็น ขณะที่ฝั่งผู้ให้บริการมีอิทธิพลต่อค่าใช้จ่ายมากกว่าผ่านการสั่งยาแพง การตรวจวินิจฉัย หรือการนอนโรงพยาบาลเกินจำเป็น (โดยเฉพาะภายใต้ `FFS`)",
-          en: "<strong>Two-Sided Moral Hazard:</strong> Consumers may increase risky habits or discretionary visits, while providers hold far greater sway over costly drugs, tests, and admissions under FFS.",
+          th: "<strong>`Moral hazard` เกิดได้ทั้งสองฝั่ง แต่ฝั่งผู้ให้บริการมีอิทธิพลต่อค่าใช้จ่ายมากกว่า:</strong> ผู้ใช้บริการอาจลดความระมัดระวังหรือมาใช้บริการเกินจำเป็น (`Consumer's moral hazard`) ขณะที่ผู้ให้บริการมีข้อมูลทางการแพทย์เหนือกว่า จึงกำหนดการตรวจ ยาราคาแพง และการรับไว้ในโรงพยาบาลได้มากกว่า (`Provider's moral hazard / SID` โดยเฉพาะภายใต้ `FFS`)",
+          en: "<strong>Two-Sided Moral Hazard & Information Asymmetry:</strong> Consumers may increase discretionary visits, yet providers wield far greater influence over costly diagnostics, drugs, and admissions via `SID` under FFS.",
         },
         {
-          th: "<strong>ระวังผลข้างเคียงของส่วนร่วมจ่าย (`Co-payment`, `Co-insurance`, `Deductible`):</strong> สำหรับคนจน ผู้ป่วยโรคเรื้อรัง ผู้สูงอายุ และผู้พิการ การร่วมจ่ายไม่ต่างจากการจ่ายเงินเองที่กั้นการรักษาที่จำเป็น จึงต้องยกเว้นให้กลุ่มเปราะบางและใช้ `primary care gatekeeper` ช่วยคัดกรอง",
-          en: "<strong>Protect Vulnerable Groups from User Fees:</strong> Cost-sharing deters essential care among the poor, elderly, disabled, and chronically ill—requiring explicit exemptions alongside primary care gatekeeping.",
+          th: "<strong>ระวังผลข้างเคียงของส่วนร่วมจ่าย (`Co-payment`, `Co-insurance`, `Deductible`):</strong> การเก็บส่วนร่วมจ่ายหน้างานสูงเกินไปจะบั่นทอนแกน Y ของ `UHC Cube` ทำให้เกิดรายจ่ายวิบัติ (`SDG 3.8.2`) และสกัดกั้นการรักษาที่จำเป็นในคนจน ผู้ป่วยโรคเรื้อรัง ผู้สูงอายุ และผู้พิการ จึงต้องยกเว้นให้กลุ่มเปราะบางและใช้ `Primary care gatekeeper` แทน",
+          en: "<strong>Cost-Sharing Trade-Offs & Vulnerable Exemptions:</strong> High user fees erode UHC Cube Axis Y—driving catastrophic OOP spending and deterring essential care among poor, elderly, disabled, and chronically ill patients.",
         },
         {
-          th: "<strong>มาตรการทางอ้อมฝั่งผู้ให้บริการเหมาะสมและยั่งยืนกว่ามาตรการทางตรง:</strong> แทนที่จะก้าวล่วงดุลยพินิจแพทย์ทุกเคส การเปลี่ยนวิธีจ่ายเงินจาก `FFS` เป็นแบบล่วงหน้า (`capitation`, `case-based`, `global budget`) ควบคู่กับบัญชียาหลักแห่งชาติช่วยคุมต้นทุนโดยไม่เสียคุณภาพและการเข้าถึง",
-          en: "<strong>Indirect Payment Reform Beats Micromanagement:</strong> Shifting from FFS to prospective payment—supported by essential drug lists and targeted prior authorization—contains costs without intruding on clinical autonomy.",
+          th: "<strong>มาตรการทางอ้อมฝั่งผู้ให้บริการยั่งยืนกว่าการก้าวล่วงรายเคส:</strong> การเปลี่ยนวิธีจ่ายเงินจาก `FFS` เป็นแบบล่วงหน้า (`Capitation`, `DRGs`, `Global budget`) เสริมด้วย `P4P` ด้านคุณภาพและบัญชียาหลักแห่งชาติ ช่วยควบคุมต้นทุนโดยไม่ลดทอนคุณภาพและการเข้าถึง",
+          en: "<strong>Indirect Supply-Side Reform Beats Micromanagement:</strong> Prospective payment paired with targeted P4P and essential medicine lists contains costs sustainably while preserving clinical autonomy and quality.",
         },
       ],
-      flowRoleTH: "ประสานหลักความเป็นธรรม (หมวด 1) และวิธีจ่ายเงิน (หมวด 4) เข้าด้วยกัน เพื่อสรุปหลักการออกแบบระบบประกันสุขภาพที่สมดุลทั้งประสิทธิภาพ คุณภาพ และการเข้าถึง",
-      flowRoleEN: "Synthesizes Equity (Section 1) and Payment Incentives (Section 4) into balanced cost containment that preserves Efficiency, Quality, and Access.",
+      caseLensTH: "เชื่อมหมวด 5 ย้อนกลับไปเสริมทั้งเคสที่ 1 (ส่วนร่วมจ่าย `Co-payment` ที่สูงคือสาเหตุแกน Y ที่ทำให้เกิด `Catastrophic OOP` ใน `SDG 3.8.2`) และเคสที่ 3 (เหตุผลที่ต้องใช้มาตรการจ่ายเงินฝั่งผู้ให้บริการอย่าง `Capitation + P4P` คุมค่าใช้จ่ายควบคู่คุณภาพ)",
+      caseLensEN: "Links Section 5 directly to Case 1 (high co-payments eroding Axis Y and worsening SDG 3.8.2) and Case 3 (using prospective supply-side payment + P4P to balance efficiency and quality).",
+      flowRoleTH: "ประสานหลักความเป็นธรรม (หมวด 1) และวิธีจ่ายเงิน (หมวด 4) เข้าด้วยกัน เพื่อสรุปหลักการออกแบบระบบหลักประกันสุขภาพที่สมดุลทั้งประสิทธิภาพ คุณภาพ และการเข้าถึง",
+      flowRoleEN: "Synthesizes Equity (Section 1) and Payment Incentives (Section 4) into balanced cost containment preserving Efficiency, Quality, and Access.",
       crossLinks: [
         {
           target: "HS1:3",
           labelTH: "HS1 · หมวด 3 (การป้องกันระดับที่สี่ลดบริการเกินจำเป็น)",
           labelEN: "HS1 · Sec 3 (Quaternary Prevention)",
-          whyTH: "การตระหนักรู้ต่อ `provider's moral hazard` และ `supplier-induced demand` สอดคล้องโดยตรงกับจริยธรรมการป้องกันระดับที่สี่",
+          whyTH: "การรู้เท่าทัน `provider's moral hazard` และ `SID` สอดคล้องโดยตรงกับจริยธรรมการป้องกันระดับที่สี่",
           whyEN: "Curbing supplier-induced demand aligns financial stewardship with quaternary prevention ethics.",
         },
         {
           target: "HS3:7",
           labelTH: "HS3 · หมวด 7 (ชั่งน้ำหนัก Efficiency · Quality · Equity)",
           labelEN: "HS3 · Sec 7 (Balancing EQESaRR Trade-Offs)",
-          whyTH: "การยกเว้นส่วนร่วมจ่ายให้กลุ่มเปราะบางและเปลี่ยนวิธีจ่ายเงินผู้ให้บริการคือตัวอย่างต้นแบบของการรักษาสมดุล EQESaRR",
-          whyEN: "Exempting vulnerable patients while reforming provider payment exemplifies balanced EQESaRR policy design.",
+          whyTH: "การยกเว้นส่วนร่วมจ่ายให้กลุ่มเปราะบางและใช้การจ่ายเงินแบบผสมผสานคือต้นแบบของการรักษาสมดุล EQESaRR",
+          whyEN: "Exempting vulnerable patients while blending provider payments exemplifies balanced EQESaRR policy design.",
         },
       ],
       keywords: [
@@ -1755,27 +1857,29 @@
       ],
     },
     "HS6:sum": {
-      secLabelTH: "บทสรุป · สังเคราะห์การประกันสุขภาพ หลักประกันสุขภาพถ้วนหน้า และกลไกการจ่ายเงิน",
-      secLabelEN: "Synthesis · Health Insurance, UHC, and Provider Payment",
-      titleTH: "บทสรุปความเป็นปึกแผ่นทางสังคม (Solidarity) ความเป็นธรรม และความยั่งยืนของระบบหลักประกันสุขภาพ",
-      titleEN: "Achieving Social Solidarity, Equity, and Financial Sustainability Under UHC",
-      summaryTH: "หลักประกันสุขภาพภาคบังคับสร้างความเป็นปึกแผ่นที่คุ้มครองทุกคนจากความยากจนยามเจ็บป่วย และยั่งยืนได้ด้วยการจ่ายเงินผู้ให้บริการที่สมดุลระหว่างประสิทธิภาพ คุณภาพ และการเข้าถึง",
-      summaryEN: "Compulsory universal insurance builds social solidarity against medical impoverishment, sustained by smart provider payments that safeguard efficiency, quality, and access.",
+      secLabelTH: "บทสรุป · เช็กลิสต์สังเคราะห์ก่อนทำ Case Discussion HS6 & Open Note",
+      secLabelEN: "Synthesis · HS6 Case Discussion & Open-Note Readiness",
+      titleTH: "บทสรุปการวิเคราะห์ UHC (SDG 3.8 & UHC Cube) ทฤษฎีประกันและ ม.40 ตลอดจนแรงจูงใจ FFS · Capitation · P4P",
+      titleEN: "Synthesizing SDG 3.8 & UHC Cube, Insurability & SSS Sec 40, and FFS · Capitation · P4P Incentives",
+      summaryTH: "อ่านแนวโน้ม UHC โลกผ่านลูกบาศก์สามแกน อธิบายข้อยกเว้นประกันเอกชนและสิทธิแรงงานนอกระบบได้แม่นยำ และเปรียบเทียบแรงจูงใจของ FFS, Capitation และ P4P ได้ครบถ้วน คือหมุดหมายสุดท้ายของ HS1–HS6",
+      summaryEN: "Analyzing global UHC via the 3-axis UHC Cube, explaining private exclusions and SSS Section 40, and comparing FFS, Capitation, and P4P incentives complete the entire HS1–HS6 curriculum.",
       bullets: [
         {
-          th: "<strong>ร้อยเรียงครบวงจร HS6:</strong> รวมความเสี่ยงระดับประชากร (หมวด 1) → บริหารผ่านผู้รับประกันและข้อมูล (หมวด 2) → ใช้ระบบภาคบังคับแก้ `adverse selection` (หมวด 3) → ออกแบบวิธีจ่ายเงินและมาตรการฝั่งผู้ให้บริการแก้ `moral hazard` โดยไม่กระทบกลุ่มเปราะบาง (หมวด 4–5)",
-          en: "<strong>Complete HS6 Logic Chain:</strong> Population risk pooling (Sec 1) → Third-party purchasing (Sec 2) → Compulsory solidarity overcoming adverse selection (Sec 3) → Prospective supply-side incentives containing moral hazard equitably (Sec 4–5).",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 3 กรณีศึกษาของ HS6:</strong> (1) `SDG 3.8.1` ดีขึ้นจากหลักประกัน + ปฐมภูมิกระจายทั่วถึง/เชิงรุก ส่วน `SDG 3.8.2` วิเคราะห์สาเหตุด้วย 3 แกน `UHC Cube (X · Z · Y)` · (2) ประกันเอกชนยกเว้น STI/HIV เพราะพฤติกรรมเสี่ยง/`Adverse selection` และ `p → 1` ยกเว้น PrEP/PEP เพราะมี `Externalities` และ `p → 1` ขณะที่แรงงานนอกระบบเพิ่มความมั่นคงครบ 5 กรณีผ่าน `ประกันสังคม มาตรา 40 (≥300 บาท/เดือน)` · และ (3) เทียบ `FFS` (`SID`/งบสูง; `P4P` ขึ้นกับขนาดอัตราจ่าย) กับ `Inclusive Capitation` (คุมงบ/เน้นป้องกันแต่เสี่ยง `Under-provision`; `P4P` ช่วยปิดช่องว่างลด `Acute exacerbation` ได้ตรงทิศทาง)",
+          en: "<strong>Complete HS6 Case Toolkit:</strong> (1) Pair SDG 3.8.1 enablers with 3-axis UHC Cube causes of SDG 3.8.2; (2) explain STI/HIV & PrEP/PEP private exclusions (`Adverse selection`, `p → 1`, `Externalities`) plus voluntary SSS Section 40 (`≥300 THB/mo` for 5 benefits); and (3) contrast FFS vs. Inclusive Capitation behaviors, trade-offs, and conditional vs. synergistic P4P effects.",
         },
       ],
-      flowRoleTH: "ปิดฉากเส้นทางการเรียนรู้ทั้งชุด `ST1 → HS1 → HS2 → HS3 → HS4 → HS5 → HS6` อย่างสมบูรณ์ เชื่อมแนวคิดระบบ สุขภาพ ปฐมภูมิ และการคลังสุขภาพเข้าเป็นภาพเดียวกัน",
-      flowRoleEN: "Completes the entire RACM 303 Health Systems arc (ST1 → HS1–HS6), uniting systems thinking, determinants, primary care, and equitable health financing.",
+      caseLensTH: "ทบทวนตัวเลขและเงื่อนไขสำคัญก่อนเข้าห้องอภิปราย HS6: อ่านผลรวมตาราง 3×3 ของ 138 ประเทศให้แม่น · แยกเหตุผล `Adverse selection + p → 1` คู่กับ `Externalities + p → 1` · จำอัตราสมทบ `ม.40 ทางเลือก 300 บาท/เดือน` (5 กรณี โดยไม่เสียสิทธิบัตรทอง) · และชี้เงื่อนไขว่าในระบบ `FFS` อัตราจ่าย `P4P` ต้องสูงพอจึงจะจูงใจเปลี่ยนพฤติกรรมได้",
+      caseLensEN: "Final HS6 checklist: read 3×3 country matrix totals carefully, pair `p → 1` with `Adverse selection` (STI/HIV) and `Externalities` (PrEP/PEP), recall `SSS Section 40 ≥300 THB/mo` (retaining UCS), and highlight why P4P on an FFS base depends critically on bonus magnitude.",
+      flowRoleTH: "ปิดฉากเส้นทางการเรียนรู้ทั้งชุด `ST1 → HS1 → HS2 → HS3 → HS4 → HS5 → HS6` อย่างสมบูรณ์ เชื่อมแนวคิดระบบ สุขภาพ ปฐมภูมิ และการคลังสุขภาพเพื่อพร้อมทั้งอภิปรายกลุ่ม ลงพื้นที่ รพช. และสอบ Open Note",
+      flowRoleEN: "Completes the entire RACM 303 Health Systems arc (`ST1 → HS1–HS6`), uniting systems thinking, determinants, primary care, and equitable health financing for Case Discussions, fieldwork, and the Open-Note exam.",
       crossLinks: [
         {
           target: "ST1:4",
           labelTH: "ย้อนเชื่อมรากฐาน ST1 · หมวด 4 (การคิดเชิงระบบครบวงจร)",
           labelEN: "Full Circle: ST1 · Sec 4 (Systems Thinking Synthesis)",
-          whyTH: "เห็นครบทั้งเหตุการณ์ผู้ป่วย แนวโน้มค่าใช้จ่าย โครงสร้างกองทุน/การจ่ายเงิน และกรอบความคิดความเป็นปึกแผ่นในสังคม (`Solidarity`)",
-          whyEN: "Completes the Iceberg lens from bedside illness events down to financing structures and the mental model of social solidarity.",
+          whyTH: "เห็นครบทั้งเหตุการณ์ผู้ป่วย แนวโน้มรายจ่าย โครงสร้างกองทุน/การจ่ายเงิน และกรอบความคิดความเป็นปึกแผ่นในสังคม (`Solidarity`)",
+          whyEN: "Completes the Iceberg lens from bedside illness events down to financing structures and social solidarity.",
         },
         {
           target: "HS3:7",
@@ -1786,9 +1890,9 @@
         },
       ],
       keywords: [
-        { th: "หลักประกันสุขภาพถ้วนหน้า", en: "Universal Health Coverage (UHC)" },
-        { th: "ความเป็นปึกแผ่นในสังคม", en: "Social Solidarity" },
-        { th: "ดุลยภาพประสิทธิภาพ · คุณภาพ · ความเป็นธรรม", en: "Efficiency · Quality · Equity Balance" },
+        { th: "ลูกบาศก์ UHC และ SDG 3.8.1–3.8.2", en: "UHC Cube & SDG 3.8 Monitoring" },
+        { th: "ประกันสังคม มาตรา 40 (แรงงานนอกระบบ)", en: "SSS Section 40 (Informal Labor)" },
+        { th: "ดุลยภาพ FFS · Capitation · DRG · P4P", en: "Blended Payment & P4P Balance" },
       ],
     },
   };
@@ -1871,8 +1975,13 @@
     return "";
   }
 
-  function matchSubheadingToSectionKey(modCode, h3Text) {
+  function matchSubheadingToSectionKey(modCode, h3Text, h3Id) {
     if (!modCode || !MODULE_META[modCode]) return "";
+    if (modCode === "HS1" && h3Id) {
+      if (h3Id === "hs1c-h-1_2") return "HS1:2";
+      if (h3Id === "hs1c-h-1_4") return "HS1:3";
+      if (h3Id === "hs1c-h-1_1" || h3Id === "hs1c-h-1_3") return "HS1:1";
+    }
     const clean = String(h3Text || "").replace(/\s+/g, " ").trim();
     const m = clean.match(/^(\d+)\.\d+\b/);
     if (m) {
@@ -1907,7 +2016,7 @@
     }
     for (const h of h2s) {
       if (h.tagName === "H3" && secId !== "sum") {
-        const matchedSub = matchSubheadingToSectionKey(modCode, h.textContent || "");
+        const matchedSub = matchSubheadingToSectionKey(modCode, h.textContent || "", h.id || "");
         if (matchedSub === `${modCode}:${secId}` && h.id) return h.id;
       }
     }
@@ -2010,6 +2119,17 @@
     }
   }
 
+  function openCaseDiscussionFromModal(modCode) {
+    if (!/^HS[1-6]$/i.test(modCode || "")) return;
+    const targetHash = `#hs-discussion-${modCode.toUpperCase()}`;
+    closeTakeawayModal();
+    if (window.location.hash === targetHash) {
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    } else {
+      window.location.hash = targetHash;
+    }
+  }
+
   function openTakeawayModal(ktKey, pushHistory) {
     if (!TAKEAWAYS_DB[ktKey]) return;
     if (pushHistory && activeKtKey && activeKtKey !== ktKey) {
@@ -2032,6 +2152,7 @@
 
     const [modCode] = activeKtKey.split(":");
     const modMeta = MODULE_META[modCode];
+    const isHsMod = /^HS[1-6]$/.test(modCode);
     const lang = getLangPref();
     const showTH = lang === "both" || lang === "th";
     const showEN = lang === "both" || lang === "en";
@@ -2069,7 +2190,7 @@
       ? `<button type="button" class="kt-back-crumb" data-kt-pop-history="1">← กลับไป ${escapeHtml(navHistoryStack[navHistoryStack.length - 1].replace(":sum", " · สรุป").replace(":", " · หมวด "))}</button>`
       : "";
 
-    // Bullets HTML — What You Should Know per Table Spec
+    // Bullets HTML — What You Should Know for Case Discussion & Table Spec
     const bulletsHtml = (activeData.bullets || [])
       .map((b, idx) => {
         const thLine = formatCuratedHtml(b.th);
@@ -2085,6 +2206,20 @@
       })
       .join("");
 
+    // Analytical Lens for Case Discussion callout (when present on HS1–HS6 entries)
+    const caseLensHtml =
+      activeData.caseLensTH || activeData.caseLensEN
+        ? `<div class="kt-case-lens-box">
+             <div class="kt-case-lens-kicker">🎯 แนวทางประยุกต์ตอบโจทย์ CASE DISCUSSION · ANALYTICAL LENS FOR CASE DISCUSSION</div>
+             ${showTH && activeData.caseLensTH ? `<p class="kt-case-lens-th">${formatCuratedHtml(activeData.caseLensTH)}</p>` : ""}
+             ${showEN && activeData.caseLensEN ? `<p class="kt-case-lens-en">${formatCuratedHtml(activeData.caseLensEN)}</p>` : ""}
+           </div>`
+        : "";
+
+    const hsdJumpBtnHtml = isHsMod
+      ? `<button type="button" class="kt-study-jump-btn is-hsd" data-kt-open-hsd="${escapeHtml(modCode)}">💬 ฝึกวิเคราะห์ Case Discussion ${escapeHtml(modCode)}${modMeta.caseCountTH ? ` (${escapeHtml(modMeta.caseCountTH)})` : ""} →</button>`
+      : "";
+
     // Within-module 3-step alignment cards (Prev -> Current -> Next)
     const prevCardHtml = prevEntry
       ? `<button type="button" class="kt-flow-node is-neighbor" data-kt-switch="${escapeHtml(prevKey)}">
@@ -2092,7 +2227,7 @@
            <strong class="kt-flow-node-title">${escapeHtml(showTH ? prevEntry.titleTH : prevEntry.titleEN)}</strong>
          </button>`
       : `<div class="kt-flow-node is-origin">
-           <span class="kt-flow-dir">ขอบเขตรวมของบท ${escapeHtml(modCode)} ตาม Table Spec</span>
+           <span class="kt-flow-dir">${escapeHtml(isHsMod ? `ขอบเขตรวมของบท ${modCode} สำหรับ Case Discussion & Table Spec` : `ขอบเขตรวมของบท ${modCode}`)}</span>
            <strong class="kt-flow-node-title">${escapeHtml(showTH ? modMeta.arcTH : modMeta.arcEN)}</strong>
          </div>`;
 
@@ -2103,7 +2238,7 @@
          </button>`
       : `<div class="kt-flow-node is-origin">
            <span class="kt-flow-dir">การนำไปประยุกต์ท้ายบท ${escapeHtml(modCode)}</span>
-           <strong class="kt-flow-node-title">${escapeHtml(showTH ? "เชื่อมสู่แบบฝึกหัด Self-Quiz การจดสรุป A4 Open Note และอภิปรายกรณีศึกษาในชั้นเรียน" : "Connects to Self-Quiz, A4 Open-Note synthesis & Classroom Case Discussion")}</strong>
+           <strong class="kt-flow-node-title">${escapeHtml(showTH ? "พร้อมลงมือวิเคราะห์โจทย์ Case Discussion ประจำคาบ จดสรุป A4 Open Note และทำแบบฝึกหัดทบทวน" : "Ready for Classroom Case Discussion, A4 Open-Note synthesis & Self-Quiz")}</strong>
          </div>`;
 
     // Cross-HS alignment cards
@@ -2148,7 +2283,7 @@
             <div class="kt-head-badges">
               <span class="kt-mod-badge">${escapeHtml(modCode)}</span>
               <span class="kt-sec-label">${escapeHtml(showTH ? activeData.secLabelTH : activeData.secLabelEN)}</span>
-              <span class="kt-carbon-badge" title="กรอบเนื้อหาตาม Table Specification รายวิชา RACM 303">${SPEC_SVG}<span>${escapeHtml(specBadgeText)}</span></span>
+              <span class="kt-carbon-badge" title="กรอบสิ่งที่ควรรู้สำหรับ Case Discussion & Table Specification รายวิชา RACM 303">${SPEC_SVG}<span>${escapeHtml(specBadgeText)}</span></span>
               ${backCrumbHtml}
             </div>
             <div class="kt-head-controls">
@@ -2176,27 +2311,29 @@
               <div class="kt-stepper-pills">${stepperHtml}</div>
             </div>
             <div class="kt-spine-row">
-              <span class="kt-bar-caption">Table Spec ทั้งชุด:</span>
+              <span class="kt-bar-caption">Case &amp; Spec ทั้งชุด:</span>
               <div class="kt-spine-pills">${moduleSpineHtml}</div>
             </div>
           </div>
         </header>
 
         <div class="kt-modal-body">
-          <!-- 1. Core Competency / Learning Objective Statement per Table Spec -->
-          <section class="kt-summary-box" aria-label="ขอบเขตวัตถุประสงค์ตาม Table Spec">
-            <div class="kt-section-kicker">LEARNING OBJECTIVE &amp; TABLE SPEC SCOPE · เป้าหมายความเข้าใจที่ต้องทำได้ในหมวดนี้</div>
+          <!-- 1. Core Competency / Learning Objective Statement -->
+          <section class="kt-summary-box" aria-label="ขอบเขตความเข้าใจเพื่อตอบ Case Discussion และ Table Spec">
+            <div class="kt-section-kicker">${isHsMod ? "CASE DISCUSSION &amp; TABLE SPEC COMPETENCY · เป้าหมายความเข้าใจที่ต้องทำได้ในหมวดนี้" : "LEARNING OBJECTIVE &amp; FOUNDATIONAL SCOPE · เป้าหมายความเข้าใจที่ต้องทำได้ในหมวดนี้"}</div>
             ${showTH ? `<p class="kt-summary-th">${escapeHtml(activeData.summaryTH)}</p>` : ""}
             ${showEN ? `<p class="kt-summary-en">${escapeHtml(activeData.summaryEN)}</p>` : ""}
           </section>
 
-          <!-- 2. What You Should Know Bullets -->
-          <section class="kt-block" aria-label="ประเด็นสำคัญที่ควรรู้ตาม Table Spec">
-            <div class="kt-section-kicker">WHAT YOU SHOULD KNOW · ประเด็นสำคัญที่ควรรู้ แยกแยะ และนำไปใช้ได้จริง</div>
+          <!-- 2. What You Should Know Bullets + Case Discussion Lens -->
+          <section class="kt-block" aria-label="ประเด็นสำคัญที่ควรรู้เพื่อตอบ Case Discussion และ Table Spec">
+            <div class="kt-section-kicker">${isHsMod ? "WHAT YOU SHOULD KNOW FOR CASE DISCUSSION · สิ่งที่ควรรู้ แยกแยะ และนำไปใช้ตอบกรณีศึกษาได้จริง" : "WHAT YOU SHOULD KNOW · ประเด็นสำคัญที่ควรรู้ แยกแยะ และนำไปใช้ได้จริง"}</div>
             <ul class="kt-bullet-list">
               ${bulletsHtml}
             </ul>
+            ${caseLensHtml}
             <div class="kt-study-jump-row">
+              ${hsdJumpBtnHtml}
               <button type="button" class="kt-study-jump-btn is-concise" data-kt-jump-concise="${escapeHtml(activeKtKey)}">⚡ เปิดอ่านส่วนนี้ในฉบับย่อ (${escapeHtml(modCode)} Abridged) →</button>
               <button type="button" class="kt-study-jump-btn is-full" data-kt-jump-full="${escapeHtml(activeKtKey)}">📘 เปิดอ่านขยายความในฉบับเต็ม (${escapeHtml(modCode)} Full) →</button>
               <button type="button" class="kt-study-jump-btn is-quiz" data-kt-open-quiz="${escapeHtml(modCode)}">🧠 ลองทำโจทย์ทบทวนบท ${escapeHtml(modCode)} →</button>
@@ -2210,9 +2347,9 @@
               : ""
           }
 
-          <!-- 3. Curriculum & Table Spec Alignment -->
+          <!-- 3. Curriculum & Case Discussion Alignment -->
           <section class="kt-block kt-flow-section" aria-label="ความเชื่อมโยงตามโครงสร้างหลักสูตร">
-            <div class="kt-section-kicker">${FLOW_SVG}<span>CURRICULUM &amp; TABLE SPEC ALIGNMENT · ความเชื่อมโยงในบทและข้ามบทเรียน</span></div>
+            <div class="kt-section-kicker">${FLOW_SVG}<span>CURRICULUM &amp; CASE DISCUSSION ALIGNMENT · ความเชื่อมโยงในบทและข้ามบทเรียน</span></div>
 
             <div class="kt-within-flow-grid">
               ${prevCardHtml}
@@ -2227,16 +2364,16 @@
             ${
               crossHtml
                 ? `<div class="kt-cross-wrap">
-                     <div class="kt-cross-heading">ประเด็นเชื่อมโยงข้ามบทที่ออกสอบและใช้ร่วมกันในภาคสนาม (ST1 &amp; HS1–HS6)</div>
+                     <div class="kt-cross-heading">ประเด็นเชื่อมโยงข้ามบทที่ใช้ร่วมกันใน Case Discussion, ภาคสนาม และข้อสอบ (ST1 &amp; HS1–HS6)</div>
                      <div class="kt-cross-grid">${crossHtml}</div>
                    </div>`
                 : ""
             }
           </section>
 
-          <!-- 4. Core Terms for Open-Note A4 -->
-          <section class="kt-block kt-keywords-section" aria-label="คำสำคัญสำหรับทบทวนและเตรียมสอบ Open Note">
-            <div class="kt-section-kicker">CORE TERMS FOR OPEN NOTE (A4) · คำสำคัญและกรอบแนวคิดที่ควรแม่นยำ</div>
+          <!-- 4. Core Terms for Case Discussion & Open-Note A4 -->
+          <section class="kt-block kt-keywords-section" aria-label="คำสำคัญสำหรับ Case Discussion และเตรียมสอบ Open Note">
+            <div class="kt-section-kicker">CORE TERMS FOR CASE DISCUSSION &amp; OPEN NOTE (A4) · คำสำคัญและกรอบแนวคิดที่ควรแม่นยำ</div>
             <div class="kt-kw-row">${keywordsHtml}</div>
           </section>
         </div>
@@ -2258,13 +2395,13 @@
     `;
   }
 
-  /* ---------- Prose Enhancement: Inject Section Table Spec Trigger Buttons ---------- */
+  /* ---------- Prose Enhancement: Inject Section Case Discussion & Table Spec Trigger Buttons ---------- */
   function createTriggerBar(ktKey, compactLabel) {
     const entry = TAKEAWAYS_DB[ktKey];
     if (!entry) return null;
     const [modCode] = String(ktKey || "").split(":");
     const modMeta = MODULE_META[modCode] || {};
-    const pillBadge = modMeta.specPillTH || "Table Spec · TH/EN";
+    const pillBadge = modMeta.specPillTH || "Case + Spec · TH/EN";
 
     const bar = document.createElement("div");
     bar.className = "sec-kt-bar hsd-no-print";
@@ -2276,7 +2413,7 @@
     btn.setAttribute("data-kt-open", ktKey);
     btn.innerHTML =
       `${SPEC_SVG}` +
-      `<span class="sec-kt-btn-main">${escapeHtml(compactLabel || "ประเด็นที่ควรรู้ประจำหมวด · ตามกรอบ Table Spec")}</span>` +
+      `<span class="sec-kt-btn-main">${escapeHtml(compactLabel || "ประเด็นที่ควรรู้ประจำหมวด · เตรียมตอบ Case Discussion & Table Spec")}</span>` +
       `<span class="sec-kt-btn-model">${escapeHtml(pillBadge)}</span>`;
 
     bar.appendChild(btn);
@@ -2287,22 +2424,22 @@
     if (!proseContainer || !proseContainer.querySelectorAll) return;
     const modCode = detectModCodeFromContainer(proseContainer, explicitDocId);
     if (!modCode || !MODULE_META[modCode]) return;
+    const isHsMod = /^HS[1-6]$/.test(modCode);
 
-    // 1. Add overview Table Specification Scope bar beneath h2.doc-h1 if present (Scroll reader)
+    // 1. Add overview Case Discussion & Table Specification Scope bar beneath h2.doc-h1 if present (Scroll reader)
     const docH1 = proseContainer.querySelector("h2.doc-h1, .doc-h1");
     if (docH1 && !proseContainer.querySelector(".doc-kt-overview-bar")) {
       const mod = MODULE_META[modCode];
       const firstKey = `${modCode}:1`;
       if (TAKEAWAYS_DB[firstKey]) {
-        const weightNote =
-          mod.specWeight && mod.specWeight !== "รากฐาน"
-            ? `สัดส่วนข้อสอบ ${mod.specWeight} · Open Note A4`
-            : "รากฐานคิดเชิงระบบเชื่อม HS1–HS6";
+        const badgeLabel = isHsMod
+          ? `กรอบสิ่งที่ควรรู้สำหรับ Case Discussion & Table Spec · ${modCode} (${mod.caseCountTH ? `${mod.caseCountTH} · ` : ""}สัดส่วนข้อสอบ ${mod.specWeight} · Open Note A4)`
+          : `กรอบสิ่งที่ควรรู้ตามโครงสร้างรายวิชา · ${modCode} (รากฐานคิดเชิงระบบเชื่อม HS1–HS6)`;
         const ov = document.createElement("div");
         ov.className = "doc-kt-overview-bar hsd-no-print";
         ov.innerHTML = `
           <div class="doc-kt-ov-copy">
-            <span class="doc-kt-ov-badge">${SPEC_SVG}<span>กรอบสิ่งที่ควรรู้ตาม Table Specification · ${escapeHtml(modCode)} (${escapeHtml(weightNote)})</span></span>
+            <span class="doc-kt-ov-badge">${SPEC_SVG}<span>${escapeHtml(badgeLabel)}</span></span>
             <span class="doc-kt-ov-text">${escapeHtml(mod.arcTH)}</span>
           </div>
           <button type="button" class="sec-kt-btn is-overview" data-kt-open="${escapeHtml(firstKey)}">
@@ -2323,7 +2460,7 @@
       }
     }
 
-    // 2. Inject Table Spec "ประเด็นที่ควรรู้" button right after every numbered H2 and Conclusion H2
+    // 2. Inject "ประเด็นที่ควรรู้" button right after every numbered H2 and Conclusion H2
     const h2List = [...proseContainer.querySelectorAll("h2")];
     let injectedAny = false;
     h2List.forEach((h2) => {
@@ -2337,15 +2474,40 @@
       const isSum = ktKey.endsWith(":sum");
       const bar = createTriggerBar(
         ktKey,
-        isSum
-          ? "สรุปสิ่งที่ควรรู้ทั้งบท & ประเด็นเตรียมสอบ Open Note · ตาม Table Spec"
-          : "ประเด็นที่ควรรู้ประจำหมวด · ตามกรอบ Table Spec"
+        isHsMod
+          ? isSum
+            ? "สรุปสิ่งที่ควรรู้ทั้งบท · เช็กลิสต์ก่อนทำ Case Discussion & Open Note A4"
+            : "ประเด็นที่ควรรู้ประจำหมวด · เตรียมตอบ Case Discussion & Table Spec"
+          : isSum
+          ? "สรุปสิ่งที่ควรรู้ทั้งบท · รากฐานคิดเชิงระบบเชื่อม HS1–HS6"
+          : "ประเด็นที่ควรรู้ประจำหมวด · รากฐานการคิดเชิงระบบ"
       );
       if (bar) {
         h2.insertAdjacentElement("afterend", bar);
         injectedAny = true;
       }
     });
+
+    // 2b. Special handling for HS1-CONCISE (compressed 1.1–1.4 under single H2): inject HS1:2 and HS1:3 on 1.2 and 1.4
+    if (modCode === "HS1") {
+      const hs1ConciseMap = { "hs1c-h-1_2": "HS1:2", "hs1c-h-1_4": "HS1:3" };
+      [...proseContainer.querySelectorAll("h3")].forEach((h3) => {
+        const mappedKey = h3.id && hs1ConciseMap[h3.id];
+        if (!mappedKey) return;
+        if (h3.nextElementSibling && h3.nextElementSibling.classList.contains("sec-kt-bar")) {
+          injectedAny = true;
+          return;
+        }
+        const bar = createTriggerBar(
+          mappedKey,
+          "ประเด็นที่ควรรู้ประจำหมวด · เตรียมตอบ Case Discussion & Table Spec"
+        );
+        if (bar) {
+          h3.insertAdjacentElement("afterend", bar);
+          injectedAny = true;
+        }
+      });
+    }
 
     // 3. In 16:9 Slide Deck mode, sub-slides may begin with an H3 (e.g., "1.2 ...", "3.1 ...") without an H2
     if (
@@ -2356,9 +2518,14 @@
     ) {
       const firstH3 = proseContainer.querySelector("h3");
       if (firstH3) {
-        const ktKey = matchSubheadingToSectionKey(modCode, firstH3.textContent || "");
+        const ktKey = matchSubheadingToSectionKey(modCode, firstH3.textContent || "", firstH3.id || "");
         if (ktKey) {
-          const bar = createTriggerBar(ktKey, "ประเด็นที่ควรรู้ของหมวดหลักนี้ · ตามกรอบ Table Spec");
+          const bar = createTriggerBar(
+            ktKey,
+            isHsMod
+              ? "ประเด็นที่ควรรู้ของหมวดหลักนี้ · เตรียมตอบ Case Discussion & Table Spec"
+              : "ประเด็นที่ควรรู้ของหมวดหลักนี้ · รากฐานการคิดเชิงระบบ"
+          );
           if (bar) firstH3.insertAdjacentElement("afterend", bar);
         }
       }
@@ -2442,6 +2609,13 @@
     if (jumpBtn) {
       ev.preventDefault();
       jumpToSectionInPortal(jumpBtn.getAttribute("data-kt-jump-doc"), "");
+      return;
+    }
+
+    const openHsdBtn = target.closest("[data-kt-open-hsd]");
+    if (openHsdBtn) {
+      ev.preventDefault();
+      openCaseDiscussionFromModal(openHsdBtn.getAttribute("data-kt-open-hsd"));
       return;
     }
 

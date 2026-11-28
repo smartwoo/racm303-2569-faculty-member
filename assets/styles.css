@@ -41913,6 +41913,50 @@ html[data-theme="dark"] .hsd-msj-btn.is-fold-toggle {
   background: #fef3c7;
 }
 
+.kt-study-jump-btn.is-hsd {
+  background: #eef2ff;
+  border-color: #818cf8;
+  color: #3730a3;
+}
+
+.kt-study-jump-btn.is-hsd:hover {
+  background: #e0e7ff;
+}
+
+.kt-case-lens-box {
+  margin-top: 11px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #f0fdf4 0%, #eff6ff 100%);
+  border: 1px solid #86efac;
+  border-left: 4px solid #059669;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kt-case-lens-kicker {
+  font-family: var(--font-display);
+  font-size: 11.2px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #065f46;
+}
+
+.kt-case-lens-th {
+  margin: 0;
+  font-size: 13.4px;
+  line-height: 1.52;
+  color: #0f172a;
+}
+
+.kt-case-lens-en {
+  margin: 0;
+  font-size: 12.4px;
+  line-height: 1.45;
+  color: #475569;
+}
+
 .iq-concept-key-stack {
   display: flex;
   flex-direction: column;
@@ -42082,6 +42126,30 @@ html[data-theme="dark"] .kt-study-jump-btn.is-quiz {
   background: rgba(245, 158, 11, 0.16);
   border-color: rgba(251, 191, 36, 0.42);
   color: #fde68a;
+}
+
+html[data-theme="dark"] .kt-study-jump-btn.is-hsd {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(129, 140, 248, 0.48);
+  color: #c7d2fe;
+}
+
+html[data-theme="dark"] .kt-case-lens-box {
+  background: linear-gradient(115deg, rgba(6, 78, 59, 0.34) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(52, 211, 153, 0.38);
+  border-left-color: #10b981;
+}
+
+html[data-theme="dark"] .kt-case-lens-kicker {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .kt-case-lens-th {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .kt-case-lens-en {
+  color: #94a3b8;
 }
 
 html[data-theme="dark"] .iq-concept-core-block {
