@@ -358,8 +358,8 @@
           en: "<strong>Three Independent Dimensions of Malady:</strong> Biomedical Disease (e.g., elevated BMI or asymptomatic hypertension), lived Illness, and social Sickness need not coincide—explaining why people with Disease but no Illness rarely seek passive clinic care.",
         },
         {
-          th: "<strong>ประเมินสุขภาวะ 4 มิติ ตาม พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 และธรรมนูญสุขภาพแห่งชาติ:</strong> ก้าวข้ามการปราศจากโรคและนิยาม 3 มิติของ WHO (1948) สู่ดุลยภาพทั้ง <strong>กาย</strong> (สมรรถนะร่างกายและโรค/ความเสี่ยงชีวภาพ) <strong>จิตใจ</strong> (สมดุลอารมณ์ ความเครียดสะสม การผ่อนคลาย) <strong>สังคม</strong> (สัมพันธภาพในครอบครัว ที่ทำงาน ชุมชน) และ <strong>ปัญญา/จิตวิญญาณ</strong> (สติ รู้เท่าทัน ไตร่ตรองเหตุปัจจัยและลุกขึ้นปรับพฤติกรรมดูแลตนเอง ไม่ได้จำกัดเฉพาะพิธีกรรมทางศาสนา)",
-          en: "<strong>Four Holistic Dimensions (Thai Health Act & Charter):</strong> Assess Physical, Mental, Social, and Spiritual/Intellectual well-being (`ปัญญา`—mindful self-awareness, learning from health feedback, and wise life choices beyond religious rituals).",
+          th: "<strong>ประเมินสุขภาวะ 4 มิติ ตาม พ.ร.บ.สุขภาพแห่งชาติ พ.ศ. 2550 และธรรมนูญสุขภาพแห่งชาติ:</strong> ก้าวข้ามการปราศจากโรคและนิยาม 3 มิติของ WHO (1948) สู่ดุลยภาพทั้ง <strong>สุขภาวะทางกาย</strong> (สมรรถนะร่างกายและโรคหรือความเสี่ยงทางชีวภาพ) <strong>สุขภาวะทางจิต</strong> (สมดุลอารมณ์ ความเครียดสะสม การผ่อนคลาย) <strong>สุขภาวะทางสังคม</strong> (สัมพันธภาพในครอบครัว ที่ทำงาน ชุมชน) และ <strong>สุขภาวะทางปัญญา</strong> (สติ รู้เท่าทันตนเอง ไตร่ตรองเชื่อมโยงเหตุปัจจัยและลุกขึ้นปรับพฤติกรรมดูแลตนเอง ไม่ได้จำกัดเฉพาะพิธีกรรมทางศาสนา)",
+          en: "<strong>Four Holistic Dimensions (Thai Health Act & Charter):</strong> Assess Physical, Mental, Social, and Spiritual/Intellectual well-being (`สุขภาวะทางปัญญา`—mindful self-awareness, learning from health feedback, and wise life choices beyond religious rituals).",
         },
         {
           th: "<strong>แยก 'ภาวะสุขภาพที่เป็นอยู่' ออกจาก 'พฤติกรรม/เหตุการณ์ที่ส่งผลกระทบ' และมองสุขภาพเป็นพลวัต:</strong> เวลาประเมินรายกรณีต้องแยกแยะสถานะสุขภาพของเจ้าตัวในแต่ละมิติ ออกจากพฤติกรรมหรือบริบทแวดล้อมที่ส่งผลทั้งทางบวกและทางลบ พร้อมเชื่อมมุมมองสุขภาพในฐานะความสามารถในการปรับตัวและจัดการตนเองแม้มีโรคเรื้อรัง",
@@ -387,10 +387,10 @@
         },
       ],
       keywords: [
-        { th: "โรค · ความเจ็บป่วย · บทบาทผู้ป่วย", en: "Disease · Illness · Sickness" },
+        { th: "โรค · ความเจ็บป่วย · สถานะผู้ป่วยในสังคม", en: "Disease · Illness · Sickness" },
         { th: "สุขภาวะ 4 มิติ (กาย · จิต · สังคม · ปัญญา)", en: "4-Dimensional Holistic Health" },
-        { th: "ภาวะสุขภาพเทียบกับปัจจัยกระทบ (+/-)", en: "Health Status vs. Affecting Factors" },
-        { th: "ความสามารถในการปรับตัว", en: "Capacity to Adapt" },
+        { th: "การแยกภาวะสุขภาพออกจากปัจจัยที่ส่งผลกระทบ", en: "Health Status vs. Affecting Factors" },
+        { th: "ความสามารถในการปรับตัวและจัดการตนเอง", en: "Capacity to Adapt & Self-Manage" },
       ],
     },
     "HS1:2": {
@@ -402,8 +402,8 @@
       summaryEN: "Health behaviors and outcomes never arise in isolation; they emerge from bidirectional links among individual traits, environments, and health services within an outer ring of structural determinants.",
       bullets: [
         {
-          th: "<strong>สร้างแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดที่เชื่อมลูกศรสองทิศทาง (`↔`):</strong> วางปัญหาสุขภาพหลักตรงกลาง เชื่อมปฏิสัมพันธ์ระหว่าง <strong>(1) ปัจจัยส่วนบุคคล</strong> (พันธุกรรม/อายุ/เพศที่ปรับไม่ได้ vs ความรู้ ทัศนคติ พฤติกรรมกิน–อยู่นิ่ง) <strong>↔ (2) สังคมและสิ่งแวดล้อม</strong> (เวลาครอบครัว ที่พัก โรงเรียน ที่ทำงาน สิ่งแวดล้อมทางอาหาร พื้นที่ออกกำลังกาย บรรทัดฐานคนรอบข้าง) <strong>↔ (3) ระบบบริการสุขภาพ</strong> (บริการเชิงรุก อนามัยโรงเรียน อาชีวเวชศาสตร์ การคัดกรองและนัดติดตาม ควบคู่บทบาทแพทย์ `Clinician · Manager · Health Promoter`) ภายใต้วงล้อมชั้นนอกคือ <strong>(4) ปัจจัยเชิงโครงสร้าง/การเมือง-เศรษฐกิจ-สังคม</strong> (การกระจายอำนาจ ผังเมือง นโยบายองค์กร/โรงเรียน โครงสร้างชั่วโมงทำงาน และการตลาดอาหาร `CDoH`)",
-          en: "<strong>4-Group Systemic DoH Diagram:</strong> Place the central health problem in the middle with bidirectional links (`↔`) among (1) Individual, (2) Social/Physical Environment, and (3) Health Services (spanning Clinician, Manager, and Health Promoter roles), all enclosed within (4) Macro-Structural Determinants.",
+          th: "<strong>สร้างแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวดที่เชื่อมความสัมพันธ์แบบส่งผลถึงกันสองทิศทาง:</strong> วางปัญหาสุขภาพหลักตรงกลาง เชื่อมปฏิสัมพันธ์สองทิศทางระหว่าง <strong>(1) ปัจจัยส่วนบุคคล</strong> (พันธุกรรม/อายุ/เพศที่ปรับไม่ได้ เทียบกับความรู้ ทัศนคติ พฤติกรรมการกินและกิจกรรมทางกาย) กับ <strong>(2) สังคมและสิ่งแวดล้อมใกล้ตัว</strong> (เวลาครอบครัว ที่พัก โรงเรียน ที่ทำงาน สิ่งแวดล้อมทางอาหาร พื้นที่ออกกำลังกาย บรรทัดฐานคนรอบข้าง) และ <strong>(3) ระบบบริการสุขภาพ</strong> (บริการเชิงรุก อนามัยโรงเรียน อาชีวเวชศาสตร์ การคัดกรองและนัดติดตาม ควบคู่บทบาทแพทย์ `Clinician · Manager · Health Promoter`) ภายใต้วงล้อมชั้นนอกคือ <strong>(4) ปัจจัยเชิงโครงสร้างด้านการเมือง เศรษฐกิจ และสังคม</strong> (การกระจายอำนาจ ผังเมือง นโยบายองค์กร/โรงเรียน โครงสร้างชั่วโมงทำงาน และการตลาดอาหาร `CDoH`)",
+          en: "<strong>4-Group Systemic DoH Diagram:</strong> Place the central health problem in the middle with bidirectional links among (1) Individual, (2) Social/Physical Environment, and (3) Health Services (spanning Clinician, Manager, and Health Promoter roles), all enclosed within (4) Macro-Structural Determinants.",
         },
         {
           th: "<strong>แยกปัจจัยต้นน้ำกับปัจจัยตัวกลางตามกรอบ WHO CSDH (`Solar & Irwin`):</strong> <strong>ปัจจัยเชิงโครงสร้างที่มีอิทธิพลต่อความเหลื่อมล้ำด้านสุขภาพ (`Structural determinants`)</strong> คือบริบทเศรษฐกิจ–การเมือง การบังคับใช้กฎหมายควบคุมแหล่งเสี่ยง ระบบการศึกษา โครงสร้างอาชีพแรงงานนอกระบบไร้หลักประกัน และค่านิยมทางสังคม ซึ่งกำหนดการได้รับ <strong>ปัจจัยทางสังคมที่มีผลต่อสุขภาพ (`Intermediary determinants`)</strong> ได้แก่ สภาพการทำงานและที่อยู่อาศัยจริง ช่วงวัยเปราะบาง (เช่น วัยรุ่นตั้งครรภ์ที่ขาดความพร้อม `self-care`) อิทธิพลคู่สมรส/ครอบครัว/เพื่อนร่วมอาชีพ และระบบบริการสุขภาพ",
@@ -498,11 +498,11 @@
       summaryEN: "Assessing 4D well-being, mapping individual-to-structural determinants, and matching all 4 prevention levels to target disease stages anchor every HS1 case analysis.",
       bullets: [
         {
-          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 3 กรณีศึกษาของ HS1:</strong> (1) แยก `Disease–Illness–Sickness` และประเมินสุขภาวะ 4 มิติโดยแยกภาวะสุขภาพออกจากปัจจัยบวก/ลบ (2) เชื่อมแผนภาพวงล้อม DoH 4 หมวด (`↔`) และแยก `Structural` ออกจาก `Intermediary determinants` ตามกรอบ WHO CSDH และ (3) จำแนก `Primary–Quaternary prevention` จากระยะของโรคในกลุ่มเป้าหมายและเป้าหมายของมาตรการ",
-          en: "<strong>Complete HS1 Case Toolkit:</strong> (1) Separate 4D health status from +/- affecting events; (2) map bidirectional DoH rings and CSDH Structural vs. Intermediary determinants; and (3) justify all 4 prevention levels by target group and disease stage.",
+          th: "<strong>เช็กลิสต์พร้อมตอบครบทั้ง 3 กรณีศึกษาของ HS1:</strong> (1) แยก `Disease–Illness–Sickness` และประเมินสุขภาวะ 4 มิติโดยแยกภาวะสุขภาพที่เป็นอยู่ออกจากปัจจัยที่ส่งผลกระทบทั้งทางบวกและทางลบ (2) เชื่อมความสัมพันธ์สองทิศทางในแผนภาพปัจจัยกำหนดสุขภาพ 4 หมวด และแยก `Structural` ออกจาก `Intermediary determinants` ตามกรอบ WHO CSDH และ (3) จำแนก `Primary–Quaternary prevention` จากระยะของโรคในกลุ่มเป้าหมายและเป้าหมายของมาตรการ",
+          en: "<strong>Complete HS1 Case Toolkit:</strong> (1) Separate 4D health status from positive and negative affecting events; (2) map bidirectional DoH rings and CSDH Structural vs. Intermediary determinants; and (3) justify all 4 prevention levels by target group and disease stage.",
         },
       ],
-      caseLensTH: "ก่อนเข้าห้องอภิปราย HS1 ตรวจทาน 3 จุดที่มักพลาดบ่อย: (1) สุขภาพทางปัญญาคือสติรู้เท่าทันและการไตร่ตรองปรับพฤติกรรม (2) กฎหมาย การศึกษา โครงสร้างงานนอกระบบ และผังเมืองเป็น Structural ส่วนครอบครัว เพื่อน และสภาพงานรายวันเป็น Intermediary และ (3) กิจกรรมเดียวกันเปลี่ยนจาก Primary เป็น Tertiary เมื่อทำในผู้ป่วยที่วินิจฉัยโรคแล้ว",
+      caseLensTH: "ก่อนเข้าห้องอภิปราย HS1 ตรวจทาน 3 จุดที่มักพลาดบ่อย: (1) สุขภาวะทางปัญญาคือสติรู้เท่าทันและการไตร่ตรองปรับพฤติกรรมดูแลตนเอง (2) กฎหมาย การศึกษา โครงสร้างงานนอกระบบ และผังเมืองเป็น Structural ส่วนครอบครัว เพื่อน และสภาพงานรายวันเป็น Intermediary และ (3) กิจกรรมเดียวกันเปลี่ยนจาก Primary เป็น Tertiary เมื่อทำในผู้ป่วยที่วินิจฉัยโรคแล้ว",
       caseLensEN: "Pre-discussion check: (1) Spiritual/intellectual health means mindful reflection and informed action; (2) education, labor laws, enforcement, and urban policy are Structural while family/peer norms and daily work conditions are Intermediary; (3) same activity shifts from Primary to Tertiary once disease is diagnosed.",
       flowRoleTH: "สรุปเป้าหมายและรากเหง้าด้านสุขภาพใน HS1 ก่อนก้าวสู่ HS2 เพื่อวิเคราะห์ว่า 'ระบบสุขภาพจัดโครงสร้าง 6 Building Blocks และรูปแบบการดูแล 6W อย่างไร'",
       flowRoleEN: "Concludes HS1's health and determinant foundations and transitions to HS2: organizing 6 Building Blocks and 6W Models of Care.",
@@ -678,7 +678,7 @@
           en: "<strong>CAS Interdependence & Results Chain:</strong> With People at the center, Governance and Financing bottlenecks constrain Workforce, HIS, and Cold-Chain readiness—requiring synchronized solutions tracked across Input → Output → Outcome → Impact.",
         },
       ],
-      caseLensTH: "ในการตอบตารางวิเคราะห์ปัญหาโรงพยาบาลตาม WHO 6 Building Blocks ต้องตรวจสอบความสอดคล้องรวดเดียวทั้ง 3 คอลัมน์ในแต่ละแถว: [ชื่อ Building Block] ↔ [หลักฐานปัญหาจากโจทย์ที่ตรงองค์ประกอบนั้น] ↔ [แนวทางแก้ปัญหาที่ตรงจุดเดียวกัน] เช่น ปัญหาคลังยา/Cold chain คู่กับ Medical Products ส่วนปัญหารอระเบียบส่วนกลาง/ขาดอิสระตัดสินใจ คู่กับ Leadership & Governance",
+      caseLensTH: "ในการตอบตารางวิเคราะห์ปัญหาโรงพยาบาลตามกรอบ WHO 6 Building Blocks ต้องตรวจสอบความสอดคล้องกันทั้ง 3 คอลัมน์ในแต่ละแถว ได้แก่ ชื่อองค์ประกอบหลัก หลักฐานปัญหาจากสถานการณ์ที่ตรงกับองค์ประกอบนั้น และแนวทางแก้ปัญหาที่ตรงจุดเดียวกัน เช่น ปัญหาคลังยาและระบบลูกโซ่ความเย็นคู่กับด้านเวชภัณฑ์และเทคโนโลยี ส่วนปัญหาการรอระเบียบส่วนกลางจนขาดอิสระในการตัดสินใจคู่กับด้านภาวะผู้นำและการอภิบาล",
       caseLensEN: "When completing a 6 Building Blocks matrix, ensure strict 3-column alignment per row—matching each Building Block to its exact scenario evidence and corresponding solution (e.g., cold-chain standards → Medical Products; centralized regulatory bottlenecks/autonomy → Leadership & Governance).",
       flowRoleTH: "จากภาพรวมระดับบริหารทั้ง 6 เสาหลักในหมวด 4 จึงซูมเข้าสู่เสาที่ใกล้ชิดเวชปฏิบัติที่สุดคือ 'การเลือกรูปแบบการดูแลผู้ป่วย (Models of Care)' ในหมวด 5",
       flowRoleEN: "Zooms from macro hospital stewardship across the 6 Building Blocks into clinical Service Delivery design and Models of Care in Section 5.",
