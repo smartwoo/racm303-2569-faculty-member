@@ -409,7 +409,10 @@
     activeInstance = instance;
 
     // 0. Multi-Lecture Switcher Ribbon
-    if (availableCodes.length > 1) {
+    const pendingClipCards = Array.isArray(standaloneData && standaloneData.pendingClips)
+      ? standaloneData.pendingClips
+      : [];
+    if (availableCodes.length > 1 || (standaloneData && standaloneData.alwaysShowSwitcher)) {
       const switcherHeading =
         (opts && opts.switcherLabel) ||
         (standaloneData
@@ -445,6 +448,20 @@
               `;
             })
             .join("")}
+          ${pendingClipCards
+            .map(
+              (pc) => `
+                <div class="ep6-ms-card is-pending-clip" aria-disabled="true" style="border-style:dashed;opacity:0.82;cursor:default;">
+                  <div class="ep6-ms-top">
+                    <span class="ep6-ms-code" style="background:rgba(148,163,184,0.18);color:var(--muted,#64748b);">${esc(pc.code || "HS4")} · ${esc(pc.badge || "รอแขวน VDO")}</span>
+                    <span class="ep6-ms-dur">${esc(pc.rightMeta || "⏳ รอแขวนเพิ่มเติม")}</span>
+                  </div>
+                  <div class="ep6-ms-title">${esc(pc.title || "")}</div>
+                  <div class="ep6-ms-sub">${esc(pc.sub || "")}</div>
+                </div>
+              `
+            )
+            .join("")}
         </div>
       `;
       root.appendChild(switcher);
@@ -458,10 +475,14 @@
     const badgeRightTxt = DATA.meta.examWeight
       ? `สอบ ${DATA.meta.examWeight}`
       : DATA.meta.sessionTag || "STEP 06 · VDO Lecture";
+    const archiveNoticeHtml = DATA.meta.archiveNotice
+      ? `<div class="ep6-archive-notice" style="margin:0 0 10px;padding:8px 12px;border-radius:10px;background:rgba(245,158,11,0.13);border:1px solid rgba(245,158,11,0.34);color:var(--ink,#0f172a);font-size:13.2px;line-height:1.45;"><strong>🕰️ คลิปบรรยายเก่าสำหรับทบทวน (Archive Review Clip):</strong> ${esc(DATA.meta.archiveNotice)}</div>`
+      : "";
     const header = document.createElement("div");
     header.className = "ep6-studio-header";
     header.innerHTML = `
       <div class="ep6-head-main">
+        ${archiveNoticeHtml}
         <div class="ep6-head-eyebrow">
           <span class="ep6-badge-code">${esc(modCode)} · ${esc(badgeRightTxt)}</span>
           <span class="ep6-badge-meta">${TOTAL_SLIDES} Captured Slides · Verbatim → Conceptualized</span>
