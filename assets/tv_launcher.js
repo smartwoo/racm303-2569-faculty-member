@@ -1389,7 +1389,7 @@
               id: "app-books",
               tone: "tone-amber",
               icon: ICONS.quiz,
-              title: t("Self-Quiz (66 ข้อ) & คำศัพท์ 125 คำ", "Self-Quiz (66 Qs) & 125 Flashcards"),
+              title: t("Self-Quiz ตรง Table Spec (42 ข้อ) & คำศัพท์ 125 คำ", "Table-Spec Self-Quiz (42 Qs) & 125 Flashcards"),
               sub: t("ทดสอบความเข้าใจ Active Recall พร้อมตรวจความเข้าใจรายประเด็น บัตรคำศัพท์ และตาราง Rapid Review ครบ ST1 & HS1–HS6", "Active recall Self-Quiz with concept feedback & reading links, 125 flashcards & Rapid Review"),
               badge: t("STEP 03 · ST1 & HS1–6", "STEP 03 · ST1 & HS1–6"),
               action: () => navigateFromTile("app-books", () => {
@@ -3479,10 +3479,10 @@
           {
             id: "hs:practice-all",
             folderPath: ["health-systems"],
-            name: "RACM303_คลัง_Self-Quiz_66ข้อ_และคำศัพท์_125คำ_ST1_HS1-HS6.app",
-            title: "Self-Quiz 66 ข้อ (ตรวจความเข้าใจ & พิกัดอ่านต่อ) · บัตรคำศัพท์ 125 คำ · ตาราง Rapid Review (ST1 & HS1–HS6)",
+            name: "RACM303_คลัง_Self-Quiz_TableSpec_42ข้อ_และคำศัพท์_125คำ_ST1_HS1-HS6.app",
+            title: "Self-Quiz ตรงกรอบ Table Spec 42 ข้อ (ตรวจความเข้าใจ & พิกัดอ่านต่อ) · บัตรคำศัพท์ 125 คำ · ตาราง Rapid Review (ST1 & HS1–HS6)",
             sub: "ทบทวนและทดสอบความเข้าใจครบทุกบทเรียนระบบสุขภาพตั้งแต่ ST1 ถึง HS6",
-            meta: "66 ข้อ · 125 คำศัพท์",
+            meta: "42 ข้อ · 125 คำศัพท์",
             badge: "🧠 เปิด Self-Quiz",
             icoCls: "is-quiz",
             icoTxt: "🧠",

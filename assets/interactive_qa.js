@@ -403,7 +403,10 @@
 
     let bestFullSec = null;
     if (fullSections.length > 0) {
-      if (docId === (fullDoc && fullDoc.id) && enclosingAnchorId) {
+      if (rubric && rubric.fullAnchor) {
+        bestFullSec = fullSections.find((s) => s.anchorId === rubric.fullAnchor) || null;
+      }
+      if (!bestFullSec && docId === (fullDoc && fullDoc.id) && enclosingAnchorId) {
         bestFullSec = fullSections.find((s) => s.anchorId === enclosingAnchorId) || null;
         if (
           bestFullSec &&
@@ -459,7 +462,10 @@
 
     let bestConciseSec = null;
     if (conciseSections.length > 0) {
-      if (docId === (conciseDoc && conciseDoc.id) && enclosingAnchorId) {
+      if (rubric && rubric.conciseAnchor) {
+        bestConciseSec = conciseSections.find((s) => s.anchorId === rubric.conciseAnchor) || null;
+      }
+      if (!bestConciseSec && docId === (conciseDoc && conciseDoc.id) && enclosingAnchorId) {
         bestConciseSec = conciseSections.find((s) => s.anchorId === enclosingAnchorId) || null;
       }
       if (!bestConciseSec) {
@@ -576,6 +582,10 @@
     "near", "miss", "catastrophic", "impoverishment", "opportunity", "cost", "technical",
     "productive", "allocative", "absorptive", "adaptive", "transformative", "alma-ata", "astana",
     "mandatory", "voluntary", "insurance", "coverage", "effective", "need", "use",
+    "p4p", "sdg", "prep", "pep", "cdoh", "ephf", "ephfs", "ppp", "c-ph", "c-ps", "o-ph", "o-so", "m-re", "m-au",
+    "respite", "autonomy", "interoperability", "opioid", "opioids", "exacerbation", "neglect", "self-neglect",
+    "comorbidity", "comorbidities", "silo", "silos", "covariate", "non-covariate", "externality", "externalities",
+    "stabilization", "empowerment", "self-efficacy", "cube", "axes", "axis", "blended", "inclusive", "exclusive",
     "the", "and", "but", "with", "from", "that", "this", "because", "therefore", "however",
     "different", "same", "group", "person", "people", "work", "working", "child", "mother",
     "elderly", "family", "income", "education", "environment", "water", "sanitation", "rural",
@@ -654,6 +664,9 @@
     "well-being", "false positive", "false negative", "overdiagnosis", "shared decision",
     "telemedicine", "barthel", "triage", "palliative", "hospice", "resilience", "governance",
     "accountability", "relevance", "efficiency", "effectiveness", "hta", "gatekeeping",
+    "p4p", "sdg", "prep", "pep", "cdoh", "ephf", "ephfs", "ppp", "c-ph", "c-ps", "o-ph", "o-so", "m-re", "m-au",
+    "มาตรา 40", "มาตรา 33", "มาตรา 39", "ม.40", "ม.33", "ม.39", "300 บาท", "ลูกบาศก์", "แกน x", "แกน y", "แกน z",
+    "ผลกระทบภายนอก", "ลูกโซ่ความเย็น", "cold chain", "respite", "ไร้บ้าน", "เกษตรกร", "สารเคมี", "โรคร่วม",
   ];
 
   // Placeholder / test / give-up exact phrases (pure digits handled separately as numeric_noise gibberish)
@@ -1212,10 +1225,27 @@
 
     // ST1: Systems & Systems Thinking
     ["องค์ประกอบ ขอบเขต และบริบทของระบบ (Elements, Boundary & Contexts)", ["บริบท", "ขอบเขต", "การให้ความหมาย", "เวลาและสถานที่", "ปัจจัยนำเข้า", "context", "boundary", "meaning"]],
-    ["ระบบยุ่งยาก vs ระบบซับซ้อนที่ปรับตัวได้ (Complicated vs CAS)", ["ระบบยุ่งยาก", "ระบบซับซ้อน", "ไม่เป็นเส้นตรง", "จัดการตัวเอง", "ผุดบังเกิด", "ความน่าจะเป็น", "complicated", "complex adaptive", "nonlinear", "emergent"]],
+    ["ระบบยุ่งยาก vs ระบบซับซ้อนที่ปรับตัวได้ (Complicated vs CAS)", ["ระบบยุ่งยาก", "ระบบซับซ้อน", "ไม่เป็นเส้นตรง", "จัดการตัวเอง", "ผุดบังเกิด", "ความน่าจะเป็น", "เงื่อนไขเกื้อหนุน", "complicated", "complex adaptive", "nonlinear", "emergent", "enabling"]],
     ["ความไม่แน่นอนและความเข้าใจที่ตรงกันในคลินิก", ["ความไม่แน่นอน", "ความเข้าใจไม่ตรงกัน", "ความเข้าใจร่วมกัน", "รับฟังความกังวล", "สับสนวุ่นวาย", "chaotic", "uncertainty"]],
-    ["วงจรอุบาทว์และผลลัพธ์ที่ไม่ได้ตั้งใจ (Vicious Cycle & Unintended Consequences)", ["วงจรอุบาทว์", "ผลลัพธ์ที่ไม่ได้ตั้งใจ", "ห้องฉุกเฉิน", "ดึงงบ", "ปฐมภูมิ", "vicious cycle", "unintended"]],
-    ["แบบจำลองภูเขาน้ำแข็ง 4 ระดับ และ Systems vs Systematic Thinking", ["ภูเขาน้ำแข็ง", "เหตุการณ์", "แนวโน้ม", "โครงสร้างระบบ", "กรอบความคิด", "คิดเชิงระบบ", "คิดอย่างเป็นระบบ", "iceberg", "mental model", "systems thinking", "systematic thinking"]],
+    ["วงจรอุบาทว์และผลลัพธ์ที่ไม่ได้ตั้งใจ (Vicious Cycle & Unintended Consequences)", ["วงจรอุบาทว์", "ผลลัพธ์ที่ไม่ได้ตั้งใจ", "ผลลัพธ์ไม่ตั้งใจ", "ห้องฉุกเฉิน", "ดึงงบ", "ปฐมภูมิ", "vicious cycle", "unintended"]],
+    ["แบบจำลองภูเขาน้ำแข็ง 4 ระดับ และ Systems vs Systematic Thinking", ["ภูเขาน้ำแข็ง", "เหตุการณ์", "แนวโน้ม", "โครงสร้างระบบ", "กรอบความคิด", "คิดเชิงระบบ", "คิดอย่างเป็นระบบ", "คิดเป็นขั้นตอน", "iceberg", "mental model", "systems thinking", "systematic thinking"]],
+
+    // Table Spec Competency Precision Concepts (HS1–HS6)
+    ["การแยก 'ภาวะสุขภาพที่เป็นอยู่ (Health Status)' ออกจาก 'ปัจจัยที่ส่งผลกระทบ (+/-)'", ["ภาวะสุขภาพ", "health status", "ปัจจัยที่ส่งผล", "เหตุการณ์ที่ส่งผล", "ทางบวก", "ทางลบ", "แยกออก"]],
+    ["แผนภาพปัจจัยกำหนดสุขภาพ 4 หมวด และบทบาทแพทย์ (Clinician · Manager · Promoter)", ["สี่หมวด", "4 หมวด", "สองทิศทาง", "ปรับเปลี่ยนไม่ได้", "ปรับเปลี่ยนได้", "clinician", "manager", "promoter", "พีระมิด", "frieden"]],
+    ["กฎจำแนกการป้องกันโรคตามกลุ่มเป้าหมายและระยะของโรค (Stage-Specific Prevention)", ["กลุ่มเป้าหมาย", "ระยะของโรค", "ระยะดำเนินโรค", "ค้นหาระยะแรก", "บำบัดรักษาทันที", "early detection", "prompt intervention", "ตรวจหว่าน", "over-testing"]],
+    ["การวินิจฉัยโรงพยาบาลครบ 6 Building Blocks (Gatekeeper · Burnout/Task-shifting · HIS · Cold chain · Autonomy)", ["gatekeeper", "nurse-led", "task-shifting", "interoperability", "กรอกข้อมูลซ้ำ", "ลูกโซ่ความเย็น", "cold chain", "งบลงทุน", "autonomy", "อิสระ", "ระเบียบส่วนกลาง"]],
+    ["ความสอดคล้อง WHAT · WHY · HOW และภาวะละเลยการดูแลตนเองรุนแรง (Severe Self-Neglect)", ["ละเลยการดูแลตนเอง", "self-neglect", "ไม่กินน้ำ", "ไม่ดื่มน้ำ", "สัญญาณชีพปกติ", "stabilization", "guiding principle", "activated patient", "หุ้นส่วน", "partnership", "two-way referral"]],
+    ["โครงสร้างการวิเคราะห์หลัก–ย่อย (Main → Sub → นิยามทฤษฎี → หลักฐาน) & มิติย่อย Accessibility", ["คุณลักษณะหลัก", "คุณลักษณะย่อย", "องค์ประกอบหลัก", "องค์ประกอบย่อย", "คำจำกัดความ", "ใบส่งตัว", "financial accessibility", "administrative accessibility", "geographical accessibility", "equity in quality"]],
+    ["ความยั่งยืนด้านการคลังและกำลังคน (Sustainability) & การชั่งน้ำหนัก Trade-offs", ["ความยั่งยืน", "sustainability", "แลกได้แลกเสีย", "trade-off", "ธรรมนูญ", "โรคร่วม", "comorbidities", "แยกส่วนเฉพาะโรค"]],
+    ["การแยกพฤติกรรมเป้าหมายที่สังเกตได้ (Target Behavior) ออกจากผลลัพธ์ทางคลินิก (Health Outcome)", ["พฤติกรรมเดิม", "พฤติกรรมเป้าหมาย", "problem behavior", "target behavior", "สังเกตเห็นได้", "ไม่ใช่ผลลัพธ์", "ผลลัพธ์ทางคลินิก", "health outcome", "kasl", "sick-role"]],
+    ["ปัจจัยกำหนดสุขภาพเชิงพาณิชย์ (CDoH) และ 6 องค์ประกอบย่อยของ COM-B", ["เชิงพาณิชย์", "cdoh", "ตลาดรับซื้อ", "c-ph", "c-ps", "o-ph", "o-so", "m-re", "m-au", "self-efficacy", "รวมกลุ่ม", "อำนาจต่อรอง", "กลัวขาดทุน"]],
+    ["ยุทธศาสตร์ Advocate · Mediate · Enable สู่ปฏิญญาเซี่ยงไฮ้และกฎบัตรเจนีวา", ["advocate", "mediate", "enable", "ชี้นำ", "ไกล่เกลี่ย", "เสริมพลัง", "เซี่ยงไฮ้", "เจนีวา", "well-being societies"]],
+    ["วงจรป่วยซ้ำ (Revolving-Door Readmission), บ้านพักพิงพักฟื้น (Medical Respite) และ Coordination Hub", ["ป่วยซ้ำ", "นอนโรงพยาบาลซ้ำ", "readmission", "hospital-centrism", "บ้านพักพิง", "พักฟื้น", "respite", "บัตรประชาชน", "ศูนย์กลางเชื่อมประสาน", "coordination hub", "person-centeredness"]],
+    ["ปฏิญญาแอสทานา 3 เสาหลัก (EPHFs · นโยบายข้ามภาคส่วน · การเสริมพลังชุมชน) & การถ่ายโอน รพ.สต.", ["หน้าที่ด้านสาธารณสุขที่จำเป็น", "ephfs", "multisectoral", "empowered people", "เสริมพลังประชาชน", "ทีมหมอครอบครัว", "2562", "ถ่ายโอน", "อบจ."]],
+    ["สมมติฐานประกันสมัครใจ 5 ข้อ (p < 1) · SDG 3.8.1–3.8.2 & ลูกบาศก์ UHC 3 แกน (X · Z · Y)", ["p < 1", "p เข้าใกล้ 1", "p → 1", "non-covariate", "sdg 3.8", "3.8.1", "3.8.2", "uhc cube", "ลูกบาศก์", "แกน x", "แกน y", "แกน z", "ชุดสิทธิประโยชน์"]],
+    ["ข้อยกเว้นประกันเอกชน (Positive Externalities · PrEP/PEP) & ประกันสังคม มาตรา 40 (≥300 บาท/เดือน)", ["ผลกระทบภายนอก", "externalities", "prep", "pep", "มาตรา 40", "ม.40", "300 บาท", "5 กรณี", "บำเหน็จชราภาพ", "สงเคราะห์บุตร", "แรงงานนอกระบบ"]],
+    ["การจ่ายตามผลงาน (P4P) บนฐาน FFS เทียบกับ Inclusive Capitation & การจ่ายแบบผสมผสาน", ["pay for performance", "p4p", "inclusive capitation", "under-provision", "ต่ำกว่าเกณฑ์", "อัตราจ่าย", "มากเพียงพอ", "ปิดช่องว่าง", "blended payment", "จัดซื้อบริการเชิงยุทธศาสตร์", "strategic purchasing"]],
   ];
 
   function extractKeyConceptsFromText(plainText, rawHtml) {
@@ -1398,6 +1428,47 @@
       issues.push(
         "ข้อควรตรวจสอบจากงานวิจัย Bishai และคณะ (146 ประเทศ): ราวครึ่งหนึ่งของการลดการเสียชีวิตมารดาและเด็กมาจาก**การพัฒนาในภาคสุขภาพ** และอีกราวครึ่งหนึ่งมาจากนอกภาคสุขภาพ ระบบบริการสุขภาพจึงมีบทบาทสำคัญมาก แต่มิใช่ปัจจัยเดียว"
       );
+    }
+
+    // 8. Table Spec Trap (HS1): Classifying lifestyle/exercise in ALREADY-DIAGNOSED patients as Primary instead of Tertiary Prevention
+    if (p.includes("โครงการปรับอาหาร") && p.includes("คนละระดับ") && /(?:วินิจฉัย|ความดัน|ไขมัน).{0,28}(?:เป็น|จัดเป็น)\s*(?:primary|ระดับ(?:ที่)?\s*1|ปฐมภูมิ)/.test(u) && !/tertiary|ตติยภูมิ|ระดับ(?:ที่)?\s*3/.test(u)) {
+      issues.push(
+        "ระวังกับดักการจำแนกระดับการป้องกันโรค: โครงการปรับอาหารและออกกำลังกายใน**ผู้ป่วยที่ได้รับการวินิจฉัยโรคแล้ว** มุ่งคุมโรคและลดภาวะแทรกซ้อน จึงจัดเป็น **Tertiary Prevention** (ไม่ใช่ Primary Prevention ซึ่งทำในผู้ที่ยังไม่เกิดโรค)"
+      );
+    }
+
+    // 9. Table Spec Trap (HS2): Putting severe self-neglect with normal vital signs into Ambulatory Care instead of inpatient Acute Care
+    if (p.includes("สัญญาณชีพยังปกติ") && /(?:ควร|จัดเข้า|เลือก)\s*(?:ambulatory|ผู้ป่วยนอก|opd)/.test(u) && !/ห้าม|ไม่ใช่|ไม่ควร|acute care|ผู้ป่วยใน|ipd/.test(u)) {
+      issues.push(
+        "ระวังกับดัก 'สัญญาณชีพปกติ' ใน HS2: ผู้ป่วยที่มีภาวะละเลยการดูแลตนเองอย่างรุนแรง (**Severe self-neglect** เช่น ไม่ดื่มน้ำและไม่กินอาหารหลายวัน) เสี่ยงต่ออันตรายคุกคามชีวิตและเกินขีดความสามารถของบ้าน จึง**ต้องเลือก Acute Care ในหอผู้ป่วยใน (IPD)** ไม่ใช่ Ambulatory Care"
+      );
+    }
+
+    // 10. Table Spec Trap (HS4): Writing a lab/clinical outcome as Target Behavior
+    if (p.includes("พฤติกรรมเป้าหมาย") && /(?:พฤติกรรมเป้าหมาย|target behavior)\s*(?:คือ|ได้แก่)\s*(?:ค่า|ระดับ)?(?:สารพิษ|สารเคมี|น้ำตาล|hba1c|ความดัน).{0,18}ลดลง/.test(u) && !/ไม่ใช่|ห้าม|ผลลัพธ์/.test(u)) {
+      issues.push(
+        "ระวังกับดักอันดับ 1 ของ HS4: ค่าผลเลือดหรือระดับสารเคมีที่ลดลงเป็น **ผลลัพธ์ทางคลินิก (Health outcome)** ไม่ใช่พฤติกรรม — **Target Behavior** ต้องระบุเป็นกริยาการกระทำของกลุ่มเป้าหมายที่สังเกตเห็นได้จริง"
+      );
+    }
+
+    // 11. Table Spec Trap (HS5): Swapping Continuity (Medical Respite post-discharge) with Coordination (cross-sector hub)
+    if (p.includes("medical respite") && /บ้านพักพิง.{0,28}(?:เป็น|ตรงกับ|สะท้อน)\s*(?:coordination|การประสาน)/.test(u) && !/continuity|ความต่อเนื่อง/.test(u)) {
+      issues.push(
+        "ระวังสลับคู่ใน HS5: **บ้านพักพิงทางการแพทย์ระยะพักฟื้นหลังออกจาก รพ. (Medical Respite Care)** มุ่งดูแลต่อเนื่องข้ามรอยต่อเพื่อสกัดการป่วยซ้ำ จึงตรงกับ **Continuity of Care** ส่วนการเป็นตัวกลางเชื่อม รพ. กับหน่วยงานบัตรประชาชน–อาชีพ–ที่อยู่อาศัย จึงตรงกับ **Coordination of Care**"
+      );
+    }
+
+    // 12. Table Spec Trap (HS6): Wrong Social Security section or wrong Section 40 contribution tier for informal workers needing all 5 benefits
+    if (p.includes("แรงงานนอกระบบ") && p.includes("5 กรณี")) {
+      if (/(?:มาตรา|ม\.)\s*(?:33|39)/.test(u) && !/(?:มาตรา|ม\.)\s*40/.test(u)) {
+        issues.push(
+          "ตรวจสอบมาตราประกันสังคมอีกครั้ง: มาตรา 33 สำหรับลูกจ้างในระบบ และมาตรา 39 สำหรับผู้เคยอยู่ ม.33 — สำหรับ**แรงงานนอกระบบ/อาชีพอิสระ** ต้องสมัครภาคสมัครใจตาม **มาตรา 40 (ทางเลือกสมทบไม่น้อยกว่า 300 บาท/เดือน)** โดยไม่เสียสิทธิบัตรทอง"
+        );
+      } else if (/(?:70|100)\s*บาท/.test(u) && !/300/.test(u)) {
+        issues.push(
+          "ตรวจสอบอัตราเงินสมทบมาตรา 40 อีกครั้ง: ทางเลือก 70 บาทคุ้มครอง 3 กรณี และ 100 บาทคุ้มครอง 4 กรณี — หากต้องการครบทั้ง **5 กรณี (รวมบำเหน็จชราภาพและสงเคราะห์บุตร)** ต้องเลือกทางเลือกสมทบ **ไม่น้อยกว่า 300 บาท/เดือน**"
+        );
+      }
     }
 
     return issues;
@@ -2239,6 +2310,11 @@
     const fullExpansion = buildFullSectionConciseExpansion(rubric, ctx);
 
     const linkChips = [];
+    if (rubric.specKey) {
+      linkChips.push(
+        `<button type="button" class="iq-doc-deep-link is-spec" data-kt-open="${escapeHtml(rubric.specKey)}">🎯 เปิดกรอบ Table Spec (${escapeHtml(rubric.specTitle || rubric.specKey)}) →</button>`
+      );
+    }
     if (cSec) {
       linkChips.push(
         buildDocDeepLinkHtml(
@@ -2327,6 +2403,11 @@
       const col2Class = isDangerMiss ? "iq-ai-col is-miss is-critical" : "iq-ai-col is-miss";
 
       const quickTopLinks = [];
+      if (rubric && rubric.specKey) {
+        quickTopLinks.push(
+          `<button type="button" class="iq-doc-deep-link is-spec is-compact" data-kt-open="${escapeHtml(rubric.specKey)}">🎯 Table Spec (${escapeHtml(rubric.specKey.replace(":", " หมวด "))})</button>`
+        );
+      }
       if (teachingCtx.conciseSec) {
         quickTopLinks.push(
           buildDocDeepLinkHtml(
@@ -3053,6 +3134,10 @@
       docId: item.module,
       kind: "question",
       num: item.num,
+      specKey: item.specKey || "",
+      specTitle: item.specTitle || "",
+      fullAnchor: item.fullAnchor || "",
+      conciseAnchor: item.conciseAnchor || "",
       prompt: item.question,
       answerHtml: `<div class="iq-model-prose">${item.answerHtml || ""}</div>`,
     };
@@ -3146,6 +3231,12 @@
 
   /* ---------- Global Deep-Link Click Handler (Jump Straight to ฉบับย่อ or ฉบับเต็ม Heading) ---------- */
   document.addEventListener("click", (ev) => {
+    if (ev.target && ev.target.closest && ev.target.closest("[data-kt-open]")) {
+      if (modalBackdrop && !modalBackdrop.hidden) {
+        modalBackdrop.hidden = true;
+      }
+      return;
+    }
     const link = ev.target && ev.target.closest ? ev.target.closest("[data-racm-doc]") : null;
     if (!link) return;
     ev.preventDefault();

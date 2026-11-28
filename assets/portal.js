@@ -12497,7 +12497,7 @@
       abridgedDesc:
         "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพความเชื่อมโยงและตารางเปรียบเทียบระดับการป้องกันโรคที่มักสับสน สำหรับทบทวนก่อนเข้าคาบและย่อโน้ตสอบ Open Note",
       abridgedBridge: "จับโครงสร้างบทเรียนให้คมชัด แล้วทดสอบจุดที่ยังสับสนในขั้นที่ 3",
-      quizFocus: "การแยกมิติความป่วย ปัจจัยกำหนดสุขภาพ และระดับการป้องกันโรค (Primordial–Quaternary)",
+      quizFocus: "การแยก Disease–Illness–Sickness สุขภาวะ 4 มิติ (แยกภาวะสุขภาพกับปัจจัยกระทบ) แผนภาพ DoH / WHO CSDH และการป้องกันโรค 4 ระดับตามกลุ่มเป้าหมาย",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และอภิปรายกลุ่มย่อยในขั้นที่ 5",
       caseFocus: "ภาวะอ้วนในเด็กและการสร้าง Diagram ปัจจัยกำหนดสุขภาพ (เคส 1) เชื่อมสู่สุขภาวะ 4 มิติและระดับการป้องกันโรคของคนทำงาน (เคส 2)",
       caseBridge: "ถกปัญหาจริงร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
@@ -12511,7 +12511,7 @@
       abridgedDesc:
         "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพโครงสร้างระบบบริการและตารางเปรียบเทียบ Acute vs Chronic/Ambulatory Care ตามกรอบ WHAT–WHY–HOW สำหรับทบทวนและสอบ Open Note",
       abridgedBridge: "เชื่อมความสัมพันธ์ของ 6 Building Blocks ให้เห็นภาพ แล้วทดสอบความเข้าใจในขั้นที่ 3",
-      quizFocus: "ขอบเขตระบบสุขภาพ WHO 6 Building Blocks และเกณฑ์เลือกรูปแบบการดูแล 6W",
+      quizFocus: "เกณฑ์ Primary Intent ผัง 4 หน้าที่สู่ 3 เป้าหมาย การวินิจฉัยโรงพยาบาลครบ 6 Building Blocks และความสอดคล้อง WHAT–WHY–HOW (6W)",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และสวมบทบาทผู้บริหาร รพช. ในขั้นที่ 5",
       caseFocus: "วิกฤตภาระงานแพทย์ใช้ทุน (Intern) ใน รพช. และการเปรียบเทียบ Models of Care ผู้ป่วย 2 ระยะ",
       caseBridge: "คิดเชิงระบบร่วมกับเพื่อนและอาจารย์ในชั้นเรียน และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
@@ -12539,7 +12539,7 @@
       abridgedDesc:
         "ย่อยเนื้อหาจากฉบับเต็มเป็นแผนภาพและตารางเปรียบเทียบทฤษฎีพฤติกรรม Nudge วงล้อ COM-B ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา สำหรับทบทวนก่อนเข้าคาบและเตรียมสอบ Open Note",
       abridgedBridge: "มองเห็นภาพรวมจากพฤติกรรมรายบุคคลสู่นโยบายสาธารณะ แล้วทดสอบความเข้าใจในขั้นที่ 3",
-      quizFocus: "พฤติกรรมสุขภาพ 3 ประเภท, ทฤษฎีพฤติกรรมและ Nudge, วงล้อ COM-B, ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา",
+      quizFocus: "การแยกพฤติกรรมเป้าหมายออกจากผลลัพธ์คลินิก แรงบีบคั้น CDoH ตัวแบบ COM-B ครบ 6 องค์ประกอบย่อย ความรอบรู้ด้านสุขภาพ และกฎบัตรออตตาวา 5 ด้าน",
       quizBridge: "เช็กความแม่นยำก่อนเข้าฟังบรรยายสรุปจากอาจารย์ในขั้นที่ 4 และออกแบบทางออกในขั้นที่ 5",
       caseFocus: "กับดักสารเคมีและทางออกที่ยั่งยืนของเกษตรกรไทยผ่านเลนส์ CDoH, COM-B และ Ottawa Charter",
       caseBridge: "ออกแบบมาตรการสร้างเสริมสุขภาพร่วมกับเพื่อนและอาจารย์ และทบทวนด้วย VDO Lecture ในขั้นที่ 6"
@@ -13978,12 +13978,12 @@
           uid: "course:practice-all",
           icoCls: "is-quiz",
           icoTxt: "🧠",
-          fileName: "RACM303_คลังทบทวนเร็ว_คำศัพท์_111คำ_โจทย์_60ข้อ.app",
-          kicker: "🧠 คลังทบทวนรวม HS1–HS6",
+          fileName: "RACM303_คลัง_Self-Quiz_TableSpec_42ข้อ_คำศัพท์_125คำ.app",
+          kicker: "🧠 คลังทบทวนรวมตรงกรอบ Table Spec",
           headCls: "is-quiz",
-          title: "ตาราง High-Yield Rapid Review · บัตรคำศัพท์ 111 คำ · โจทย์ 60 ข้อ",
-          subDesc: "คลังทบทวนความรู้รวมทุกบทเรียนระบบสุขภาพพร้อมโหมดพลิกบัตรคำศัพท์และร่างคำตอบ Active Recall",
-          chipLabel: "111 คำศัพท์ · 60 ข้อ",
+          title: "Self-Quiz ตรงกรอบ Table Spec 42 ข้อ · บัตรคำศัพท์ 125 คำ · Rapid Review",
+          subDesc: "คลังคำถามประเมินตนเองที่ถามตรงตามสมรรถนะ Table Spec ทุกหมวด พร้อมตรวจความเข้าใจรายประเด็นและพิกัดอ่านต่อ",
+          chipLabel: "42 ข้อ Table Spec · 125 คำศัพท์",
           meta: "HS1–HS6 ครบทุกบท",
           onOpen: () => openPracticeForModule("")
         }
@@ -20995,12 +20995,12 @@
 
     const items = (HS.selfCheck || []).filter((item) => {
       if (mod && item.module !== mod) return false;
-      if (q && !`${item.question} ${item.answerHtml}`.toLocaleLowerCase("th").includes(q)) return false;
+      if (q && !`${item.question} ${item.answerHtml} ${item.specTitle || ""} ${item.specKey || ""}`.toLocaleLowerCase("th").includes(q)) return false;
       return true;
     });
 
     if ($("practiceStatusText")) {
-      $("practiceStatusText").textContent = `คลังคำถามทบทวนตนเอง (Active Recall Q&A) · แสดง ${items.length} ข้อ จากทั้งหมด ${(HS.selfCheck || []).length} ข้อ`;
+      $("practiceStatusText").textContent = `คลังคำถามทบทวนตนเองตรงกรอบ Table Spec Competencies · แสดง ${items.length} ข้อ จากทั้งหมด ${(HS.selfCheck || []).length} ข้อ`;
     }
 
     wrap.replaceChildren();
@@ -21011,7 +21011,16 @@
 
     items.forEach((item) => {
       const card = make("article", null, "qa-card");
-      card.appendChild(make("span", `${item.module} · ข้อที่ ${item.num}`, "badge cat-HS"));
+      const metaRow = make("div", null, "qa-card-meta-row");
+      metaRow.appendChild(make("span", `${item.module} · ข้อที่ ${item.num}`, "badge cat-HS"));
+      if (item.specKey) {
+        const specBtn = make("button", `🎯 Table Spec · ${item.specTitle || item.specKey} ↗`, "qa-spec-pill");
+        specBtn.type = "button";
+        specBtn.setAttribute("data-kt-open", item.specKey);
+        specBtn.title = `คลิกเพื่อเปิดดูเป้าหมายความเข้าใจและแนวทางประยุกต์ตอบโจทย์ Table Spec (${item.specKey})`;
+        metaRow.appendChild(specBtn);
+      }
+      card.appendChild(metaRow);
       card.appendChild(make("h3", item.question, "qa-question"));
 
       if (window.RACMInteractiveQA) {

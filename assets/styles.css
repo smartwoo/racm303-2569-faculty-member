@@ -1566,6 +1566,51 @@ a:hover {
   box-shadow: var(--shadow-xs);
 }
 
+
+/* --- Self-Quiz Table Spec Competency Pill --- */
+.qa-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.qa-spec-pill,
+.iq-doc-deep-link.is-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3.5px 11px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 12.2px;
+  font-weight: 700;
+  line-height: 1.35;
+  border: 1px solid #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #92400e !important;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.12s ease, box-shadow 0.14s ease;
+}
+
+.qa-spec-pill:hover,
+.iq-doc-deep-link.is-spec:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #d97706;
+  color: #78350f !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 7px rgba(217, 119, 6, 0.18);
+}
+
+html[data-theme="dark"] .qa-spec-pill,
+html[data-theme="dark"] .iq-doc-deep-link.is-spec {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(251, 191, 36, 0.45);
+  color: #fde68a !important;
+}
+
 .qa-question {
   font-family: var(--font-display);
   font-size: 16.5px;
