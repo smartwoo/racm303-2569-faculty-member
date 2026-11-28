@@ -13192,52 +13192,101 @@
     );
 
     if (options.showModuleBar !== false) {
-      const strip = make("div", null, "hs-unified-mod-strip");
+      const isStOrBeyondView = isBeyondActive || (!isAllActive && mod.code === "ST1");
+      const strip = make(
+        "div",
+        null,
+        `hs-unified-mod-strip is-segmented-strip${isStOrBeyondView ? " is-beyond-strip" : " is-exam-strip"}`
+      );
       strip.setAttribute("role", "group");
-      strip.setAttribute("aria-label", tr("เลือกบทเรียน HS1–HS6 หรือเวทีคิดเชิงระบบ & เสวนา", "Select HS1–HS6 module or Systems Thinking & Panels"));
-      strip.appendChild(make("span", tr("เลือกบทเรียน:", "Module:"), "hs-unified-mod-label"));
 
-      if (options.allowAllModules) {
-        const allPill = make("button", options.allModulesLabel || "ครบทุกบท (HS1–HS6)", "hs-unified-mod-pill");
-        allPill.type = "button";
-        allPill.setAttribute("aria-pressed", !isBeyondActive && isAllActive ? "true" : "false");
-        allPill.addEventListener("click", () => {
-          if (typeof options.onSelectModule === "function") options.onSelectModule("");
+      const scopeBadge = make(
+        "span",
+        isStOrBeyondView
+          ? tr(
+              "🌟 ไม่ออกสอบข้อเขียน · สำคัญสำหรับการเรียนรู้และนำเสนอ Final Presentation",
+              "🌟 Not on Written Exam · Essential for Learning & Final Presentation"
+            )
+          : tr(
+              "🎯 หมวดเนื้อหาที่ออกสอบข้อเขียน 100% (HS1–HS6 · Open Note A4)",
+              "🎯 100% Written Exam Scope (HS1–HS6 · Open Note A4)"
+            ),
+        `hs-track-scope-badge ${isStOrBeyondView ? "is-beyond" : "is-exam"}`
+      );
+      strip.appendChild(scopeBadge);
+
+      const capsule = make("div", null, "hs-seg-capsule");
+      capsule.setAttribute("role", "tablist");
+
+      if (isStOrBeyondView) {
+        capsule.setAttribute("aria-label", tr("เลือกคาบคิดเชิงระบบ ST1 และเสวนา 6 คาบ", "Select ST1 & 6 Panel Sessions"));
+        const allBeyondBtn = make(
+          "button",
+          tr("รวมทั้ง 6 คาบ", "All 6 Sessions"),
+          `hs-seg-pill${isBeyondActive && !state.sfSelectedId ? " is-active" : ""}`
+        );
+        allBeyondBtn.type = "button";
+        allBeyondBtn.setAttribute("role", "tab");
+        allBeyondBtn.setAttribute("aria-selected", isBeyondActive && !state.sfSelectedId ? "true" : "false");
+        allBeyondBtn.addEventListener("click", () => openSystemsForum(""));
+        capsule.appendChild(allBeyondBtn);
+
+        (HS_BEYOND_SESSIONS || []).forEach((s) => {
+          const isCurSess = isBeyondActive
+            ? state.sfSelectedId === s.id
+            : s.code === "ST1" && mod.code === "ST1";
+          const sBtn = make(
+            "button",
+            `${s.order}. ${s.code}`,
+            `hs-seg-pill${isCurSess ? " is-active" : ""}`
+          );
+          sBtn.type = "button";
+          sBtn.setAttribute("role", "tab");
+          sBtn.setAttribute("aria-selected", isCurSess ? "true" : "false");
+          sBtn.title = `${s.code}: ${s.title}`;
+          sBtn.addEventListener("click", () => openSystemsForum(s.id));
+          capsule.appendChild(sBtn);
         });
-        strip.appendChild(allPill);
+      } else {
+        capsule.setAttribute("aria-label", tr("เลือกบทเรียนออกสอบ HS1–HS6", "Select Exam-Tested HS1–HS6 Module"));
+        if (options.allowAllModules) {
+          const cleanAllLbl = String(options.allModulesLabel || tr("รวมทุกบท (HS1–HS6)", "All Modules (HS1–HS6)"))
+            .replace(/^(?:📚|📁)\s*/, "")
+            .trim();
+          const allPill = make(
+            "button",
+            cleanAllLbl,
+            `hs-seg-pill${isAllActive ? " is-active" : ""}`
+          );
+          allPill.type = "button";
+          allPill.setAttribute("role", "tab");
+          allPill.setAttribute("aria-selected", isAllActive ? "true" : "false");
+          allPill.addEventListener("click", () => {
+            if (typeof options.onSelectModule === "function") options.onSelectModule("");
+          });
+          capsule.appendChild(allPill);
+        }
+
+        (HSD_DATA.modules || []).forEach((m) => {
+          const isModAct = !isAllActive && m.id === mod.code;
+          const pBtn = make("button", m.code, `hs-seg-pill${isModAct ? " is-active" : ""}`);
+          pBtn.type = "button";
+          pBtn.setAttribute("role", "tab");
+          pBtn.setAttribute("aria-selected", isModAct ? "true" : "false");
+          pBtn.title = `${m.code}: ${m.title}`;
+          pBtn.addEventListener("click", () => {
+            state.activeHsModule = m.id;
+            if (typeof options.onSelectModule === "function") {
+              options.onSelectModule(m.id);
+            } else {
+              openHsDiscussion(m.id);
+            }
+          });
+          capsule.appendChild(pBtn);
+        });
       }
 
-      (HSD_DATA.modules || []).forEach((m) => {
-        const pBtn = make("button", m.code, "hs-unified-mod-pill");
-        pBtn.type = "button";
-        pBtn.title = `${m.code}: ${m.title}`;
-        pBtn.setAttribute("aria-pressed", !isBeyondActive && !isAllActive && m.id === mod.code ? "true" : "false");
-        pBtn.addEventListener("click", () => {
-          state.activeHsModule = m.id;
-          if (typeof options.onSelectModule === "function") {
-            options.onSelectModule(m.id);
-          } else {
-            openHsDiscussion(m.id);
-          }
-        });
-        strip.appendChild(pBtn);
-      });
-
-      strip.appendChild(make("span", null, "hs-unified-mod-divider"));
-      const beyondPill = make(
-        "button",
-        tr("🧭 คิดเชิงระบบ (ST1) & เสวนา (6 คาบ)", "🧭 Systems (ST1) & Panels (6)"),
-        "hs-unified-mod-pill is-beyond-pill"
-      );
-      beyondPill.type = "button";
-      beyondPill.title = tr(
-        "คาบปูรากฐาน ST1 (Systems Thinking) และเวทีเสวนา 6 คาบสำคัญนอกกรอบสอบทฤษฎี HS1–HS6",
-        "Foundational ST1 (Systems Thinking) & 6 key taught sessions beyond the HS1–HS6 written exam"
-      );
-      beyondPill.setAttribute("aria-pressed", isBeyondActive || (!isAllActive && mod.code === "ST1") ? "true" : "false");
-      beyondPill.addEventListener("click", () => openSystemsForum(mod.code === "ST1" ? "w1-d1-st" : ""));
-      strip.appendChild(beyondPill);
-
+      strip.appendChild(capsule);
       banner.appendChild(strip);
     }
 

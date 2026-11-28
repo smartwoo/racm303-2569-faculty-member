@@ -1308,6 +1308,104 @@ html[data-theme="dark"] .tv-sibling-pill.is-active {
   color: #0c1424;
 }
 
+/* Health Systems 2-Track Switcher (Exam HS1-HS6 vs Non-Exam ST1 & 6 Panels) */
+.tv-sibling-pills.is-hs-track-pills {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px;
+}
+
+.tv-sibling-pill.is-hs-track-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 16px;
+  white-space: normal;
+  text-align: center;
+}
+
+.tv-sibling-pill.is-hs-track-pill .tv-sib-main {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tv-sibling-pill.is-hs-track-pill .tv-sib-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.4px;
+  font-weight: 700;
+  line-height: 1.35;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-sib-tag.is-exam {
+  background: rgba(11, 70, 166, 0.1);
+  color: #0b46a6;
+  border: 1px solid rgba(11, 70, 166, 0.22);
+}
+
+html[data-role="faculty"] .tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-sib-tag.is-exam {
+  background: rgba(153, 27, 27, 0.1);
+  color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.22);
+}
+
+.tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-sib-tag.is-beyond {
+  background: rgba(15, 118, 110, 0.1);
+  color: #0f766e;
+  border: 1px solid rgba(15, 118, 110, 0.24);
+}
+
+.tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.tv-sibling-pill.is-hs-track-pill.is-active .tv-sib-tag {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+}
+
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-sib-tag.is-exam {
+  background: rgba(96, 165, 250, 0.16);
+  color: #bfdbfe;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-sib-tag.is-beyond {
+  background: rgba(45, 212, 191, 0.15);
+  color: #99f6e4;
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active {
+  background: #2dd4bf;
+  color: #042f2e;
+}
+
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill.is-active .tv-sib-tag {
+  background: rgba(15, 23, 42, 0.12);
+  color: #0c1424;
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+@media (max-width: 780px) {
+  .tv-sibling-pills.is-hs-track-pills {
+    border-radius: 20px;
+    width: 100%;
+  }
+  .tv-sibling-pill.is-hs-track-pill {
+    flex: 1 1 100%;
+    border-radius: 14px;
+    padding: 8px 12px;
+  }
+}
+
 /* ---------- Inner Sub-Page Progressive Disclosure (Decluttering!) ---------- */
 
 /* 1. Calm Section Headers: Hide Long Verbose Paragraph Descriptions */

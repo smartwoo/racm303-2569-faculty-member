@@ -286,11 +286,15 @@
         </div>
 
         <div class="tv-utility-cluster">
-          <button type="button" class="tv-corner-upload-pill ${ROLE === "faculty" ? "is-faculty-upload" : "is-student-materials"}" id="tvCornerUploadBtn" data-tv-focus data-tv-row="0" title="${ROLE === "faculty" ? "มุม Upload Slide & ไฟล์ประกอบการสอน (ซิงค์เว็บ & GitHub)" : "คลังดาวน์โหลด Slide อาจารย์ & เอกสารคำสอน"}">
-            ${ROLE === "faculty" ? ICONS.upload : ICONS.download}
-            <span class="tv-corner-upload-label">${ROLE === "faculty" ? "Upload สื่อสอน" : "คลัง Slide"}</span>
-            <span class="tv-corner-upload-count" id="tvCornerUploadCount">0</span>
-          </button>
+          ${
+            ROLE === "faculty"
+              ? `<button type="button" class="tv-corner-upload-pill is-faculty-upload" id="tvCornerUploadBtn" data-tv-focus data-tv-row="0" title="มุม Upload Slide & ไฟล์ประกอบการสอน (ซิงค์เว็บ & GitHub)">
+                  ${ICONS.upload}
+                  <span class="tv-corner-upload-label">Upload สื่อสอน</span>
+                  <span class="tv-corner-upload-count" id="tvCornerUploadCount">0</span>
+                </button>`
+              : ""
+          }
           <button type="button" class="tv-icon-pill" id="tvSearchBtn" data-tv-focus data-tv-row="0" title="ค้นหาด่วน (⌘K หรือ /)" aria-label="ค้นหา">${ICONS.search}</button>
           <button type="button" class="tv-profile-pill" id="tvProfileBtn" data-tv-focus data-tv-row="0" title="ตั้งค่าชื่อหรือกลุ่มของฉัน">
             <span class="tv-profile-avatar" id="tvProfileAvatar">${ICONS.user}</span>
@@ -2591,22 +2595,70 @@
 
     if (groupKey === "health-systems") {
       const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
-      if (!isLiveJoined) {
-        bar.hidden = true;
-        bar.innerHTML = "";
-        return;
-      }
+      const pracModVal = ($("practiceModuleFilter") && $("practiceModuleFilter").value) || "";
+      const isStOrBeyondActive =
+        activeTab === "systems-forum" ||
+        (activeTab === "textbooks" &&
+          st.textbookSubMode === "doc-reader" &&
+          /^ST1/i.test(String(st.activeHsModule || st.activeDocId || ""))) ||
+        (activeTab === "practice" && /^ST1$/i.test(pracModVal));
 
       bar.hidden = false;
-      bar.classList.add("is-live-only");
+      bar.classList.add("has-centered-pills");
       bar.innerHTML = `
-        <div class="tv-hsd-bar-right">
-          <span class="tv-live-active-pill">
-            <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
-            <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
-          </span>
+        <div class="tv-sibling-pills is-hs-track-pills" role="tablist" aria-label="${esc(
+          t("สลับหมวดออกสอบ HS1–HS6 และคาบคิดเชิงระบบ/เสวนา", "Switch Exam-Tested HS1–HS6 and Non-Exam ST1 & Panels")
+        )}">
+          <button type="button" class="tv-sibling-pill is-hs-track-pill ${!isStOrBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${!isStOrBeyondActive ? "true" : "false"}" data-tv-hs-track="exam" data-tv-focus>
+            <span class="tv-sib-main">${esc(t("บทเรียน HS1–HS6", "HS1–HS6 Modules"))}</span>
+            <span class="tv-sib-tag is-exam">${esc(t("ออกสอบ", "Exam-Tested"))}</span>
+          </button>
+          <button type="button" class="tv-sibling-pill is-hs-track-pill ${isStOrBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${isStOrBeyondActive ? "true" : "false"}" data-tv-hs-track="beyond" data-tv-focus>
+            <span class="tv-sib-main">${esc(t("คิดเชิงระบบ (ST1) & เสวนา (6 คาบ)", "Systems (ST1) & Panels (6)"))}</span>
+            <span class="tv-sib-tag is-beyond">${esc(
+              t("ไม่ออกสอบ · สำคัญต่อการเรียนรู้ & Final Presentation", "Non-Exam · Key for Learning & Final Presentation")
+            )}</span>
+          </button>
         </div>
+        ${
+          isLiveJoined
+            ? `<div class="tv-hsd-bar-right">
+                <span class="tv-live-active-pill">
+                  <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
+                  <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
+                </span>
+              </div>`
+            : ""
+        }
       `;
+
+      bar.querySelectorAll("[data-tv-hs-track]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const track = btn.dataset.tvHsTrack;
+          if (typeof recordNavStateTransition === "function") {
+            recordNavStateTransition();
+          }
+          if (track === "beyond") {
+            if (api && typeof api.openSystemsForum === "function") {
+              api.openSystemsForum("");
+            } else {
+              navigateTvTab("systems-forum");
+            }
+          } else {
+            if (activeTab === "practice" && $("practiceModuleFilter") && $("practiceModuleFilter").value === "ST1") {
+              $("practiceModuleFilter").value = "";
+              if (st) st.activeHsModule = "HS1";
+              if (api && typeof api.switchTab === "function") api.switchTab("practice", true);
+            } else if (api && typeof api.openTextbookDriveFolder === "function") {
+              api.openTextbookDriveFolder("FOLDERS");
+            } else {
+              navigateTvTab("textbooks");
+            }
+          }
+          syncSubpageBar();
+        });
+      });
+
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
         exitLiveBtn.addEventListener("click", () => {
@@ -5807,6 +5859,7 @@
 
     window.addEventListener("racm:subviewchange", () => {
       recordNavStateTransition();
+      syncSubpageBar();
     });
 
     window.addEventListener("racm:profilechange", () => {

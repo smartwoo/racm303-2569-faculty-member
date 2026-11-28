@@ -46992,3 +46992,157 @@ html[data-theme="dark"] .hsd-scen-fig-fs-btn {
     overflow-y: auto;
   }
 }
+
+/* ---------- Segmented Capsule Switcher for HS1–HS6 (Exam) vs ST1 & 6 Panels (Non-Exam) ---------- */
+.hs-unified-mod-strip.is-segmented-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(15, 41, 66, 0.09);
+  text-align: center;
+}
+
+.hsd-module-banner.is-unified-hs-banner:has(.is-beyond-strip) {
+  background: #f0fdfa;
+  border-color: rgba(15, 118, 110, 0.25);
+}
+
+.hs-track-scope-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3.5px 13px;
+  border-radius: 999px;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.hs-track-scope-badge.is-exam {
+  background: rgba(11, 70, 166, 0.1);
+  color: #0b46a6;
+  border: 1px solid rgba(11, 70, 166, 0.22);
+}
+
+body.role-faculty .hs-track-scope-badge.is-exam {
+  background: rgba(153, 27, 27, 0.1);
+  color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.24);
+}
+
+.hs-track-scope-badge.is-beyond {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  border: 1px solid rgba(15, 118, 110, 0.28);
+}
+
+.hs-seg-capsule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 29, 53, 0.11);
+  box-shadow: 0 4px 14px rgba(10, 28, 64, 0.06);
+  max-width: 100%;
+}
+
+.hs-seg-pill {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.hs-seg-pill:hover:not(.is-active) {
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.hs-seg-pill.is-active {
+  background: #0b46a6;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(11, 70, 166, 0.24);
+}
+
+body.role-faculty .hs-seg-pill.is-active {
+  background: #991b1b;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(153, 27, 27, 0.24);
+}
+
+.hs-unified-mod-strip.is-beyond-strip .hs-seg-pill.is-active {
+  background: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.24);
+}
+
+html[data-theme="dark"] .hsd-module-banner.is-unified-hs-banner:has(.is-beyond-strip) {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: rgba(45, 212, 191, 0.25);
+}
+
+html[data-theme="dark"] .hs-track-scope-badge.is-exam {
+  background: rgba(59, 130, 246, 0.18);
+  color: #bfdbfe;
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+html[data-theme="dark"] .hs-track-scope-badge.is-beyond {
+  background: rgba(20, 184, 166, 0.18);
+  color: #99f6e4;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+html[data-theme="dark"] .hs-seg-capsule {
+  background: #111c2e;
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+html[data-theme="dark"] .hs-seg-pill {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .hs-seg-pill:hover:not(.is-active) {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .hs-seg-pill.is-active {
+  background: #ffffff;
+  color: #0c1424;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .hs-unified-mod-strip.is-beyond-strip .hs-seg-pill.is-active {
+  background: #2dd4bf;
+  color: #042f2e;
+}
+
+@media (max-width: 680px) {
+  .hs-seg-capsule {
+    border-radius: 18px;
+    padding: 5px;
+  }
+  .hs-seg-pill {
+    font-size: 12.2px;
+    padding: 5.5px 11px;
+  }
+}
