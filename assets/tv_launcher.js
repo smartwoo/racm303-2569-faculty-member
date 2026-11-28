@@ -3145,11 +3145,11 @@
         files.push({
           id: `hspdf16x9:${m.id}`,
           folderPath: ["health-systems", m.id],
-          name: `05_${m.code}_Blank_Worksheet_16x9_กลางรวม.pdf`,
-          title: `ใบงานเปล่ากลางรวม 16:9 (.PDF) — Case Discussion: ${m.code} (Optimal Font)`,
-          sub: `ไฟล์ .PDF สไลด์ 16:9 ใบงานเปล่ากลางรวมประจำคาบ ${m.code} (${modCases.length} กรณีศึกษา · ${qCount} ข้อคำถาม) อ่านชัดเต็มจอและเขียนบน iPad ได้ทันที`,
+          name: `05_${m.code}_Blank_Worksheet_16x9.pdf`,
+          title: `ใบงานเปล่า 16:9 (.PDF) — Case Discussion: ${m.code} (Optimal Font)`,
+          sub: `ไฟล์ .PDF สไลด์ 16:9 ใบงานเปล่าประจำคาบ ${m.code} (${modCases.length} กรณีศึกษา · ${qCount} ข้อคำถาม) อ่านชัดเต็มจอและเขียนบน iPad ได้ทันที`,
           meta: `16:9 Blank Worksheet · ${m.code}`,
-          badge: `⬇ PDF กลางรวม ${m.code}`,
+          badge: `⬇ PDF ใบงานเปล่า ${m.code}`,
           icoCls: "is-pdf",
           icoTxt: "PDF",
           downloadHref: `exports/pdf/RACM303_2569_${m.code}_Blank_Worksheet_16x9.pdf`,
@@ -3215,32 +3215,6 @@
             ...modKeyPdfItem,
             id: m.code === "HS1" ? `hspdf16x9:ALL` : `hspdf16x9:ROOT-${m.code}-KEY`,
             folderPath: ["health-systems"]
-          });
-        }
-        if (window.RACM_HSD_ROOM_QR && typeof window.RACM_HSD_ROOM_QR.getAllModuleRoomMetas === "function") {
-          window.RACM_HSD_ROOM_QR.getAllModuleRoomMetas(m.code).forEach((rm) => {
-            files.push({
-              id: `hsppt:${m.code}:R${rm.roomId}`,
-              folderPath: ["health-systems", m.id],
-              name: `05_R${rm.roomId}_${m.code}_Room${rm.roomId}_${rm.cleanRoomSlug}_Blank_Worksheet_16x9.pdf`,
-              title: `Case Discussion: ${m.code} — ห้องย่อยที่ ${rm.roomId} (ห้อง ${rm.roomCode}) · QR Check-in & .PDF 16:9`,
-              sub: `เปิดห้อง ${rm.roomCode} · อ.ประจำห้อง: ${rm.instructor} · สแกน QR / ใส่รหัส นศ. 3 ตัวท้าย และดาวน์โหลดใบงานเปล่า .PDF 16:9 ประจำห้อง`,
-              meta: `${rm.pinCode} · ${rm.assignedStudents.length} คน`,
-              badge: `📱 ห้อง ${rm.roomId} (${rm.cleanRoomSlug})`,
-              icoCls: "is-pdf",
-              icoTxt: `R${rm.roomId}`,
-              downloadHref: rm.staticRoomPdfHref,
-              downloadName: rm.roomPdfFileName,
-              onOpen: openFileAction(() => {
-                if (rm.isHs1) {
-                  window.location.href = ROLE === "faculty" ? rm.facultyRoomHref : rm.studentRoomHref;
-                } else if (api && api.openHsDiscussionRoom) {
-                  api.openHsDiscussionRoom(m.code, rm.roomId, null);
-                } else if (api && api.openHsDiscussion) {
-                  api.openHsDiscussion(m.code);
-                }
-              })
-            });
           });
         }
       }

@@ -567,10 +567,10 @@
       : `?page=hs-discussion&module=${modCode}&room=${roomId}&checkin=1#hs-discussion-${modCode}-R${roomId}`;
     const pptxFileName = `RACM303_2569_${modCode}_Room${roomId}_${cleanRoomSlug}.pptx`;
     const staticPptxHref = isHs1 ? `exports/pptx/${pptxFileName}` : "";
-    const roomPdfFileName = `RACM303_2569_${modCode}_Room${roomId}_${cleanRoomSlug}_Blank_Worksheet_16x9.pdf`;
-    const staticRoomPdfHref = `exports/pdf/${roomPdfFileName}`;
     const centralModulePdfFileName = `RACM303_2569_${modCode}_Blank_Worksheet_16x9.pdf`;
     const centralModulePdfHref = `exports/pdf/${centralModulePdfFileName}`;
+    const roomPdfFileName = centralModulePdfFileName;
+    const staticRoomPdfHref = centralModulePdfHref;
     const hs1AnswerKeyPdfFileName = `RACM303_2569_HS1_Answer_Key_16x9.pdf`;
     const hs1AnswerKeyPdfHref = `exports/pdf/${hs1AnswerKeyPdfFileName}`;
     const moduleAnswerKeyPdfFileName = `RACM303_2569_${modCode}_Answer_Key_16x9.pdf`;
@@ -616,6 +616,8 @@
       hs1AnswerKeyPdfHref,
       moduleAnswerKeyPdfFileName,
       moduleAnswerKeyPdfHref,
+      answerKeyPdfFileName: moduleAnswerKeyPdfFileName,
+      answerKeyPdfHref: moduleAnswerKeyPdfHref,
       answerKeyUnlocked,
       unlockAfterLabel,
       unlockShortLabel,
@@ -1580,14 +1582,14 @@
         }</h4>
         <p class="hsd-srp-sub">${
           isFaculty
-            ? `แต่ละห้องมีสไลด์ 16:9 แยกห้อง (Room 1–6), สถานะ Live Lobby เรียลไทม์, QR Code ประจำห้อง และไฟล์ .PDF ใบงานเปล่า 16:9`
+            ? `แต่ละห้องมีสไลด์ 16:9 แยกห้อง (Room 1–6), สถานะ Live Lobby เรียลไทม์, QR Code ประจำห้อง และไฟล์ .PDF ใบงานเปล่า 16:9 ชุดเดียวใช้ร่วมกันทั้งคาบ`
             : `ระบบล้างโปรไฟล์เดิมให้อัตโนมัติทุกครั้งที่เข้า Case Discussion — กรอกรหัสนักศึกษาใหม่ (3 ตัวท้าย หรือ 7 หลัก) แล้วกดปุ่มยืนยันเพื่อไปยังลิงก์ Breakout Room ของคุณทันที`
         }</p>
       `;
 
       const akBtnUnlocked = Boolean(isFaculty || cPdf.answerKeyUnlocked);
       headRight.innerHTML =
-        `<a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่ากลางรวมประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF กลางรวม ${escHtml(modCode)} (16:9 ใบงานเปล่า)</a>` +
+        `<a class="hsd-srp-central-pdf-btn is-mod" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}" title="ดาวน์โหลดไฟล์ PDF ใบงานเปล่าประจำคาบ ${escHtml(modCode)} (16:9 Optimal Font)">⬇ PDF ใบงานเปล่า ${escHtml(modCode)} (16:9)</a>` +
         (akBtnUnlocked
           ? `<a class="hsd-srp-central-pdf-btn is-all" href="${escHtml(cPdf.answerKeyPdfHref)}" download="${escHtml(cPdf.answerKeyPdfFileName)}" title="ดาวน์โหลด ${escHtml(cPdf.answerKeyPdfFileName)} — เฉลยแนวคำตอบมาตรฐาน &amp; Key Takeaways ประจำคาบ ${escHtml(modCode)} (16:9)">⬇ PDF พร้อม Answer Key คาบ ${escHtml(modCode)} (16:9)</a>`
           : `<button type="button" class="hsd-srp-central-pdf-btn is-all is-locked-ak" data-locked-ak-btn="1" title="ไฟล์ ${escHtml(cPdf.answerKeyPdfFileName)} จะเปิดให้ดาวน์โหลดหลังจบคาบเรียน (${escHtml(cPdf.unlockAfterLabel)})" style="opacity:0.78;cursor:not-allowed;background:#f8fafc;border:1.5px dashed #94a3b8;color:#475569;font-family:inherit;">🔒 PDF พร้อม Answer Key คาบ ${escHtml(modCode)} (เปิด ${escHtml(cPdf.unlockShortLabel)})</button>`);
@@ -1660,14 +1662,7 @@
           }
         });
 
-        const roomPdfA = document.createElement("a");
-        roomPdfA.className = "hsd-srp-act-btn is-pdf-btn";
-        roomPdfA.href = lMeta.staticRoomPdfHref;
-        roomPdfA.download = lMeta.roomPdfFileName;
-        roomPdfA.textContent = `⬇ .PDF ห้อง ${stuRoom}`;
-        roomPdfA.title = `ดาวน์โหลดใบงานเปล่า 16:9 (.PDF) ประจำห้อง ${lMeta.roomCode}`;
-
-        ctaWrap.append(goCheckinBtn, openNewWinA, roomPdfA);
+        ctaWrap.append(goCheckinBtn, openNewWinA);
         if (isFaculty) {
           const toggleAllBtn = document.createElement("button");
           toggleAllBtn.type = "button";
@@ -1863,17 +1858,6 @@
           openRoomQrZoomModal(modCode, rId);
         });
 
-        const dlPdfA = document.createElement("a");
-        dlPdfA.className = "hsd-srp-act-btn is-pdf-btn is-full-row-dl";
-        dlPdfA.href = meta.staticRoomPdfHref;
-        dlPdfA.download = meta.roomPdfFileName;
-        dlPdfA.textContent = "⬇ .PDF (ใบงานเปล่า 16:9)";
-        dlPdfA.title = `ดาวน์โหลดไฟล์ ${meta.roomPdfFileName} (16:9 Optimal Font Blank Worksheet) ประจำห้อง ${meta.roomCode}`;
-        if (isLockedOut) {
-          dlPdfA.setAttribute("tabindex", "-1");
-          dlPdfA.setAttribute("aria-disabled", "true");
-        }
-
         acts.append(openRoomBtn, newTabRoomA, qrZoomBtn);
         if (isFaculty) {
           const rstRoomBtn = document.createElement("button");
@@ -1889,7 +1873,6 @@
           });
           acts.appendChild(rstRoomBtn);
         }
-        acts.appendChild(dlPdfA);
         card.appendChild(acts);
         grid.appendChild(card);
       });
@@ -1935,7 +1918,7 @@
           : `🔑 กรอกรหัส 3 ตัวท้ายใหม่ → กดยืนยันเข้าสู่ Breakout Room (${escHtml(modCode)}):`
       }</span>` +
       `<div class="hsd-csl-pdfs">` +
-      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF กลางรวม ${escHtml(modCode)} (16:9)</a>` +
+      `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.modulePdfHref)}" download="${escHtml(cPdf.modulePdfFileName)}">⬇ .PDF ใบงานเปล่า ${escHtml(modCode)} (16:9)</a>` +
       (akChipUnlocked
         ? `<a class="hsd-csl-pdf-chip" href="${escHtml(cPdf.answerKeyPdfHref)}" download="${escHtml(cPdf.answerKeyPdfFileName)}" title="ดาวน์โหลด ${escHtml(cPdf.answerKeyPdfFileName)}">⬇ .PDF พร้อม Answer Key ${escHtml(modCode)}</a>`
         : `<button type="button" class="hsd-csl-pdf-chip" data-locked-csl-ak="1" title="เปิดให้ดาวน์โหลดหลังจบคาบเรียน (${escHtml(cPdf.unlockAfterLabel)})" style="opacity:0.75;cursor:not-allowed;background:#f8fafc;border-style:dashed;color:#64748b;font-family:inherit;">🔒 Answer Key ${escHtml(modCode)} (${escHtml(cPdf.unlockShortLabel)})</button>`) +
