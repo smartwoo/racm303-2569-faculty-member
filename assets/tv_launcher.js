@@ -2568,6 +2568,7 @@
     const bar = $("tvSubpageBar");
     const api = getApi();
     if (!bar || !api) return;
+    bar.classList.remove("has-centered-pills");
     const st = api.getState ? api.getState() : {};
     const activeTab = st.activeTab || "home";
     const groupKey = NAV_GROUP_MAP[activeTab] || "home";
@@ -2684,6 +2685,7 @@
             ];
     }
 
+    bar.classList.toggle("has-centered-pills", siblings.length > 0);
     bar.innerHTML = `
       <div class="tv-subpage-left-group">
         ${renderUniversalNavPairHtml({ tvFocus: true })}
@@ -2694,11 +2696,12 @@
               ${siblings
                 .map(
                   (s) => `
-                <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}">${esc(s.label)}</button>
+                <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}" data-tv-focus>${esc(s.label)}</button>
               `
                 )
                 .join("")}
-            </div>`
+            </div>
+            <div class="tv-subpage-right-spacer" aria-hidden="true"></div>`
           : ""
       }
     `;

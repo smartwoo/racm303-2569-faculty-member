@@ -1223,6 +1223,45 @@ html[data-role="faculty"][data-theme="dark"] .tv-quick-tag {
   padding: 6px 0;
 }
 
+.tv-subpage-bar[hidden] {
+  display: none !important;
+}
+
+.tv-subpage-bar.has-centered-pills:not([hidden]) {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.tv-subpage-bar.has-centered-pills > .tv-subpage-left-group {
+  justify-self: start;
+}
+
+.tv-subpage-bar.has-centered-pills > .tv-sibling-pills {
+  justify-self: center;
+}
+
+.tv-subpage-bar.has-centered-pills > .tv-subpage-right-spacer {
+  justify-self: end;
+  min-width: 0;
+}
+
+@media (max-width: 820px) {
+  .tv-subpage-bar.has-centered-pills:not([hidden]) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tv-subpage-bar.has-centered-pills > .tv-sibling-pills {
+    justify-self: center;
+  }
+
+  .tv-subpage-bar.has-centered-pills > .tv-subpage-right-spacer {
+    display: none;
+  }
+}
+
 .tv-back-home-btn {
   display: inline-flex;
   align-items: center;
