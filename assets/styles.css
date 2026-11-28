@@ -45940,7 +45940,7 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
   white-space: nowrap;
 }
 
-/* Student Read-Only Live Broadcast Countdown Clock (Slide Header & Floating HUD) */
+/* Student Read-Only Live Broadcast Countdown Clock (Orange Slide Master Header Only) */
 .ppt-sm-timer.is-student-live-clock {
   display: inline-flex;
   align-items: center;
@@ -45950,10 +45950,12 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 800;
+  line-height: 1.4;
   color: #ffffff;
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(15, 23, 42, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   white-space: nowrap;
+  flex-shrink: 0;
   user-select: none;
   pointer-events: none;
 }
@@ -45964,7 +45966,7 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
 
 .ppt-sm-timer.is-student-live-clock.is-running {
   background: #0d9488;
-  border-color: rgba(153, 246, 228, 0.75);
+  border-color: rgba(153, 246, 228, 0.8);
   color: #ffffff;
 }
 
@@ -45981,237 +45983,52 @@ html[data-theme="dark"] .ppt-stp-dual-setter .ppt-stp-num-input,
   color: #ffffff;
 }
 
-.stu-live-broadcast-timer-hud {
-  --stu-pip-scale: 1;
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 10025;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: grab;
-  padding: calc(7px * var(--stu-pip-scale, 1)) calc(11px * var(--stu-pip-scale, 1)) calc(8px * var(--stu-pip-scale, 1));
-  border-radius: calc(14px * var(--stu-pip-scale, 1));
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  color: #ffffff;
-  border: 1.5px solid rgba(94, 234, 212, 0.55);
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.42), 0 2px 8px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-  gap: calc(4px * var(--stu-pip-scale, 1));
-  min-width: calc(152px * var(--stu-pip-scale, 1));
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+@media (max-width: 900px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-title {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-timer.is-student-live-clock {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
 }
 
-.stu-live-broadcast-timer-hud:active {
-  cursor: grabbing;
-}
+@media (max-width: 680px) {
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-exit-fs-btn {
+    order: 1;
+  }
 
-.stu-live-broadcast-timer-hud[hidden] {
-  display: none !important;
-}
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-mod {
+    order: 2;
+  }
 
-.stu-live-broadcast-timer-hud .stu-pip-card-view {
-  display: flex;
-  flex-direction: column;
-  gap: calc(4px * var(--stu-pip-scale, 1));
-  width: 100%;
-}
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-timer.is-student-live-clock {
+    order: 3;
+    margin-left: auto;
+    font-size: 12px;
+    padding: 2.5px 9.5px;
+  }
 
-.stu-live-broadcast-timer-hud .stu-pip-mini-pill {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: 12.5px;
-  font-weight: 800;
-  color: #ffffff;
-  white-space: nowrap;
-}
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-title {
+    order: 4;
+  }
 
-.stu-live-broadcast-timer-hud.is-pip-minimized {
-  min-width: 0;
-  padding: 6px 11px;
-  border-radius: 999px;
-  opacity: 0.9;
-  cursor: pointer;
-}
+  .ppt-slide-sheet.is-responsive-slide .ppt-sm-left:has(.ppt-sm-timer.is-student-live-clock:not([hidden])) .ppt-sm-title {
+    flex: 1 1 100% !important;
+  }
 
-.stu-live-broadcast-timer-hud.is-pip-minimized .stu-pip-card-view,
-.stu-live-broadcast-timer-hud.is-pip-minimized .stu-pip-resize-grip {
-  display: none !important;
-}
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-title {
+    order: 2;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+  }
 
-.stu-live-broadcast-timer-hud.is-pip-minimized .stu-pip-mini-pill {
-  display: inline-flex;
-}
-
-.stu-pip-mini-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #94a3b8;
-  flex-shrink: 0;
-}
-
-.stu-live-broadcast-timer-hud.is-running .stu-pip-mini-dot {
-  background: #5eead4;
-  box-shadow: 0 0 8px rgba(94, 234, 212, 0.95);
-}
-
-.stu-live-broadcast-timer-hud.is-warning .stu-pip-mini-dot {
-  background: #fde047;
-}
-
-.stu-live-broadcast-timer-hud.is-urgent .stu-pip-mini-dot,
-.stu-live-broadcast-timer-hud.is-timeup .stu-pip-mini-dot {
-  background: #fecaca;
-}
-
-.stu-pip-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: calc(6px * var(--stu-pip-scale, 1));
-}
-
-.stu-pip-drag-lbl {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-display);
-  font-size: calc(10px * var(--stu-pip-scale, 1));
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.85);
-  white-space: nowrap;
-}
-
-.stu-pip-ctrls {
-  display: inline-flex;
-  align-items: center;
-  gap: calc(3px * var(--stu-pip-scale, 1));
-}
-
-.stu-pip-btn {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: calc(11px * var(--stu-pip-scale, 1));
-  font-weight: 800;
-  line-height: 1;
-  min-width: calc(22px * var(--stu-pip-scale, 1));
-  height: calc(21px * var(--stu-pip-scale, 1));
-  padding: 0 calc(6px * var(--stu-pip-scale, 1));
-  border-radius: calc(6px * var(--stu-pip-scale, 1));
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
-  transition: background 0.12s ease, transform 0.08s ease;
-}
-
-.stu-pip-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.stu-pip-btn:active:not(:disabled) {
-  transform: scale(0.94);
-}
-
-.stu-pip-btn:disabled {
-  opacity: 0.38;
-  cursor: default;
-}
-
-.stu-pip-btn.is-hide-btn {
-  padding: 0 calc(7px * var(--stu-pip-scale, 1));
-  font-size: calc(10.5px * var(--stu-pip-scale, 1));
-}
-
-.stu-live-broadcast-timer-hud .stu-lbth-digits {
-  font-family: var(--font-mono);
-  font-size: calc(23px * var(--stu-pip-scale, 1));
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: 0.02em;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.stu-pip-sub {
-  font-family: var(--font-display);
-  font-size: calc(10.2px * var(--stu-pip-scale, 1));
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.84);
-  text-align: center;
-  white-space: nowrap;
-}
-
-.stu-live-broadcast-timer-hud .stu-lbth-track {
-  width: 100%;
-  height: calc(4px * var(--stu-pip-scale, 1));
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  overflow: hidden;
-  margin-top: 1px;
-}
-
-.stu-live-broadcast-timer-hud .stu-lbth-fill {
-  height: 100%;
-  background: #2dd4bf;
-  transition: width 0.25s linear;
-}
-
-.stu-pip-resize-grip {
-  position: absolute;
-  right: 2px;
-  bottom: 1px;
-  width: calc(16px * var(--stu-pip-scale, 1));
-  height: calc(16px * var(--stu-pip-scale, 1));
-  font-size: calc(10px * var(--stu-pip-scale, 1));
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.55);
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 1px 2px;
-  cursor: nwse-resize;
-  touch-action: none;
-}
-
-.stu-pip-resize-grip:hover {
-  color: #ffffff;
-}
-
-.stu-live-broadcast-timer-hud.is-running {
-  background: rgba(13, 148, 136, 0.94);
-  border-color: #99f6e4;
-}
-
-.stu-live-broadcast-timer-hud.is-warning {
-  background: rgba(217, 119, 6, 0.95);
-  border-color: #fde68a;
-}
-
-.stu-live-broadcast-timer-hud.is-warning .stu-lbth-fill {
-  background: #fef08a;
-}
-
-.stu-live-broadcast-timer-hud.is-urgent,
-.stu-live-broadcast-timer-hud.is-timeup {
-  background: rgba(220, 38, 38, 0.96);
-  border-color: #fecaca;
-}
-
-.stu-live-broadcast-timer-hud.is-urgent .stu-lbth-fill,
-.stu-live-broadcast-timer-hud.is-timeup .stu-lbth-fill {
-  background: #fecaca;
+  .ppt-presentation-overlay.is-kbd-open .ppt-slide-sheet.is-responsive-slide .ppt-sm-left .ppt-sm-timer.is-student-live-clock {
+    order: 3;
+    margin-left: 6px;
+  }
 }
 
 /* ==========================================================================
