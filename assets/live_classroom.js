@@ -10,14 +10,35 @@
   const TOPIC_NS = "racm303/2569/hsd/v2";
   const BC_NAME = "racm303_hsd_live_v2";
   const PRESENCE_STORAGE_KEY = "racm303_live_presence_registry_v2";
-  const LIVE_PRESENCE_TTL_MS = 42 * 1000; // 42s live heartbeat TTL — green turns off when student leaves/disconnects
-  const HEARTBEAT_INTERVAL_MS = 12 * 1000; // 12s active room heartbeat
+  const LIVE_PRESENCE_TTL_MS = 75 * 1000; // 75s fallback TTL — keeps open background tabs online while explicit leave/LWT clears closed tabs in 0–1.2s
+  const HEARTBEAT_INTERVAL_MS = 10 * 1000; // 10s unthrottled Web Worker room heartbeat
   const CHECKED_IN_MAX_AGE_MS = LIVE_PRESENCE_TTL_MS;
   const BROKERS = [
     "wss://mqtt.eclipseprojects.io:443/mqtt",
     "wss://broker.emqx.io:8084/mqtt",
     "wss://broker.hivemq.com:8884/mqtt"
   ];
+
+  // Unthrottled interval via inline Web Worker so open background tabs stay online like Google Docs
+  function startBackgroundSafeInterval(fn, intervalMs) {
+    if (typeof Worker === "function" && typeof Blob === "function" && typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+      try {
+        const blob = new Blob(
+          [`setInterval(function(){postMessage(1);},${Math.max(1000, Number(intervalMs) || 10000)});`],
+          { type: "application/javascript" }
+        );
+        const workerUrl = URL.createObjectURL(blob);
+        const worker = new Worker(workerUrl);
+        worker.onmessage = () => {
+          try {
+            fn();
+          } catch (_) {}
+        };
+        return worker;
+      } catch (_) {}
+    }
+    return setInterval(fn, intervalMs);
+  }
 
   const ROOM_DEFS = [
     { id: 1, name: "ห้องกลุ่ม 1", roomCode: "1C1-02", label: "ห้อง 1 · 1C1-02" },
@@ -188,15 +209,11 @@
     // Teacher-released Conceptualized Key Takeaway slides (room-scoped, hidden initially for students)
     unlockedConceptSummaries: {},
 
-    // Per-room Faculty Check-in Cache Reset Registry: { [roomId]: { resetId, resetAtWallMs, modCode } | null }
-    checkinResetByRoom: { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null },
-    ackResetId: "",
-
     // Responses: Map<questionId, Map<participantId, ResponseRecord>>
     responsesByQuestion: new Map(),
     clearedAtByQuestion: new Map(),
 
-    // Multi-Room Presence Registry: Map<roomId (1..6), Map<participantId, PresenceRecord>>
+    // Multi-Room Presence Registry: Map<roomId (1..6), Map<sessionId, PresenceRecord>>
     presenceByRoom: new Map([
       [1, new Map()],
       [2, new Map()],
@@ -205,73 +222,31 @@
       [5, new Map()],
       [6, new Map()]
     ]),
-    // Active room presence alias: Map<participantId, PresenceRecord>
+    // Active room presence alias: Map<sessionId, PresenceRecord>
     presence: null
   };
 
-  const CHECKIN_RESET_STORAGE_KEY = "racm303_live_checkin_reset_v1";
-  const CHECKIN_RESET_MAX_AGE_MS = 10 * 60 * 60 * 1000; // 10 hours
+  // Legacy check-in reset stubs (no auto/remote cache reset — pure Google Docs tab presence)
+  try {
+    localStorage.removeItem("racm303_live_checkin_reset_v1");
+  } catch (_) {}
 
-  function getActiveRoomResetObj(roomIdOpt) {
-    const r = clampRoom(roomIdOpt || state.roomId);
-    const rec = state.checkinResetByRoom[r];
-    if (!rec || !rec.resetId) return null;
-    if (rec.resetAtWallMs && Date.now() - Number(rec.resetAtWallMs) > CHECKIN_RESET_MAX_AGE_MS) {
-      state.checkinResetByRoom[r] = null;
-      return null;
-    }
-    return rec;
+  function getRoomCheckinResetId() {
+    return "";
   }
 
-  function getRoomCheckinResetId(roomIdOpt) {
-    const rec = getActiveRoomResetObj(roomIdOpt);
-    return rec ? String(rec.resetId) : "";
+  function getRoomCheckinResetAt() {
+    return 0;
   }
 
-  function getRoomCheckinResetAt(roomIdOpt) {
-    const rec = getActiveRoomResetObj(roomIdOpt);
-    return rec ? Number(rec.resetAtWallMs || 0) : 0;
+  function resolvePresenceSessionKey(recOrMsg) {
+    if (!recOrMsg) return "";
+    return String(
+      recOrMsg.sessionId || recOrMsg.senderCli || recOrMsg.participantId || ""
+    )
+      .trim()
+      .slice(0, 64);
   }
-
-  function persistCheckinResetToStorage() {
-    try {
-      const out = {};
-      [1, 2, 3, 4, 5, 6].forEach((rId) => {
-        const rec = getActiveRoomResetObj(rId);
-        if (rec) out[rId] = rec;
-      });
-      localStorage.setItem(CHECKIN_RESET_STORAGE_KEY, JSON.stringify({ updatedMs: Date.now(), rooms: out }));
-    } catch (_) {}
-  }
-
-  function hydrateCheckinResetFromStorage() {
-    let changedRooms = [];
-    try {
-      const raw = safeGetStorage(CHECKIN_RESET_STORAGE_KEY, "");
-      if (!raw) return changedRooms;
-      const parsed = JSON.parse(raw);
-      const roomsObj = (parsed && parsed.rooms) || {};
-      const now = Date.now();
-      [1, 2, 3, 4, 5, 6].forEach((rId) => {
-        const rec = roomsObj[rId];
-        if (!rec || !rec.resetId) return;
-        const ts = Number(rec.resetAtWallMs || 0);
-        if (ts && now - ts > CHECKIN_RESET_MAX_AGE_MS) return;
-        const cur = state.checkinResetByRoom[rId];
-        if (!cur || cur.resetId !== rec.resetId) {
-          state.checkinResetByRoom[rId] = {
-            resetId: String(rec.resetId).slice(0, 48),
-            resetAtWallMs: ts || now,
-            modCode: String(rec.modCode || "HS1").slice(0, 12)
-          };
-          changedRooms.push(rId);
-        }
-      });
-    } catch (_) {}
-    return changedRooms;
-  }
-
-  hydrateCheckinResetFromStorage();
 
   function getRoomPresenceMap(roomIdOpt) {
     const r = clampRoom(roomIdOpt || state.roomId);
@@ -285,42 +260,75 @@
 
   state.presence = getRoomPresenceMap(state.roomId);
 
-  function persistPresenceRegistryToStorage() {
+  function serializePresenceRecordForStorage(rec, rId, now) {
+    const sKey = resolvePresenceSessionKey(rec) || String(rec.participantId || `sid_${rec.studentId}`).slice(0, 64);
+    return {
+      sessionId: sKey,
+      participantId: String(rec.participantId || `sid_${rec.studentId}`).slice(0, 48),
+      role: "student",
+      joined: true,
+      checkedIn: true,
+      loginSynced: Boolean(rec.loginSynced),
+      roomId: rId,
+      teamId: clampTeamOrZero(rec.teamId),
+      studentId: String(rec.studentId).slice(0, 16),
+      shortNo: String(rec.shortNo || String(rec.studentId).slice(-3)).slice(0, 6),
+      fullName: String(rec.fullName || "").slice(0, 80),
+      nickname: String(rec.nickname || "").slice(0, 32),
+      area: String(rec.area || "").slice(0, 40),
+      disc: Number(rec.disc || rId) || rId,
+      photoId: String(rec.photoId || "").slice(0, 40),
+      activeModule: normalizeModuleId(rec.activeModule || state.activeModule || "HS1"),
+      activeQuestionId: String(rec.activeQuestionId || "").slice(0, 32),
+      name: String(rec.name || "").slice(0, 80),
+      senderCli: String(rec.senderCli || sKey).slice(0, 64),
+      joinedWallMs: Number(rec.joinedWallMs || now),
+      lastSeenMs: Number(rec.lastSeenMs || now)
+    };
+  }
+
+  function persistPresenceRegistryToStorage(removedSessionKeyOpt) {
     try {
       const now = Date.now();
+      const removedKey = removedSessionKeyOpt ? String(removedSessionKeyOpt).trim() : "";
+      let prevRooms = {};
+      try {
+        const prevRaw = safeGetStorage(PRESENCE_STORAGE_KEY, "");
+        if (prevRaw) {
+          const prevParsed = JSON.parse(prevRaw);
+          if (prevParsed && prevParsed.rooms) prevRooms = prevParsed.rooms;
+        }
+      } catch (_) {}
+
       const snapshot = {};
       [1, 2, 3, 4, 5, 6].forEach((rId) => {
-        const reqResetId = getRoomCheckinResetId(rId);
-        const arr = [];
-        getRoomPresenceMap(rId).forEach((rec) => {
+        const bySession = new Map();
+        // Preserve fresh entries from sibling tabs in the same browser
+        const prevList = Array.isArray(prevRooms[rId]) ? prevRooms[rId] : [];
+        prevList.forEach((oldRec) => {
+          if (!oldRec || !oldRec.studentId || oldRec.joined === false) return;
+          const sKey = resolvePresenceSessionKey(oldRec);
+          if (!sKey || sKey === clientInstanceId || (removedKey && sKey === removedKey)) return;
+          const refMs = Number(oldRec.lastSeenMs || oldRec.joinedWallMs || 0);
+          if (now - refMs > CHECKED_IN_MAX_AGE_MS) return;
+          bySession.set(sKey, serializePresenceRecordForStorage(oldRec, rId, now));
+        });
+
+        // Overlay current tab's live presence map
+        getRoomPresenceMap(rId).forEach((rec, mapKey) => {
           if (!rec || rec.role !== "student" || !rec.studentId || rec.joined === false) return;
-          if (reqResetId && rec.ackResetId !== reqResetId) return;
+          const sKey = resolvePresenceSessionKey(rec) || String(mapKey);
+          if (!sKey || (removedKey && sKey === removedKey)) return;
+          if (sKey === clientInstanceId && (!state.sessionJoined || state.joinedRoomId !== rId)) return;
           const refMs = Number(rec.lastSeenMs || rec.joinedWallMs || 0);
           if (now - refMs > CHECKED_IN_MAX_AGE_MS) return;
-          arr.push({
-            participantId: String(rec.participantId || `sid_${rec.studentId}`).slice(0, 48),
-            role: "student",
-            joined: true,
-            checkedIn: true,
-            loginSynced: Boolean(rec.loginSynced),
-            roomId: rId,
-            teamId: clampTeamOrZero(rec.teamId),
-            studentId: String(rec.studentId).slice(0, 16),
-            shortNo: String(rec.shortNo || String(rec.studentId).slice(-3)).slice(0, 6),
-            fullName: String(rec.fullName || "").slice(0, 80),
-            nickname: String(rec.nickname || "").slice(0, 32),
-            area: String(rec.area || "").slice(0, 40),
-            disc: Number(rec.disc || rId) || rId,
-            photoId: String(rec.photoId || "").slice(0, 40),
-            activeModule: String(rec.activeModule || "").slice(0, 12),
-            activeQuestionId: String(rec.activeQuestionId || "").slice(0, 32),
-            name: String(rec.name || "").slice(0, 80),
-            senderCli: String(rec.senderCli || "").slice(0, 40),
-            ackResetId: String(rec.ackResetId || "").slice(0, 48),
-            joinedWallMs: Number(rec.joinedWallMs || now),
-            lastSeenMs: Number(rec.lastSeenMs || now)
-          });
+          const existing = bySession.get(sKey);
+          if (!existing || (Number(rec.lastSeenMs) || 0) >= (Number(existing.lastSeenMs) || 0)) {
+            bySession.set(sKey, serializePresenceRecordForStorage(rec, rId, now));
+          }
         });
+
+        const arr = Array.from(bySession.values());
         if (arr.length) snapshot[rId] = arr;
       });
       localStorage.setItem(
@@ -338,49 +346,54 @@
       const parsed = JSON.parse(raw);
       const roomsObj = (parsed && parsed.rooms) || {};
       const now = Date.now();
-      const storagePidsByRoom = { 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set(), 6: new Set() };
+      const storageKeysByRoom = { 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set(), 6: new Set() };
 
       [1, 2, 3, 4, 5, 6].forEach((rId) => {
-        const reqResetId = getRoomCheckinResetId(rId);
         const list = Array.isArray(roomsObj[rId]) ? roomsObj[rId] : [];
         const rMap = getRoomPresenceMap(rId);
         list.forEach((rec) => {
           if (!rec || !rec.studentId || rec.joined === false) return;
-          if (reqResetId && rec.ackResetId !== reqResetId) return;
           const refMs = Number(rec.lastSeenMs || rec.joinedWallMs || 0);
           if (now - refMs > CHECKED_IN_MAX_AGE_MS) return;
-          const pid = String(rec.participantId || `sid_${rec.studentId}`).slice(0, 48);
-          storagePidsByRoom[rId].add(pid);
-          const prev = rMap.get(pid);
+          const sKey = resolvePresenceSessionKey(rec) || String(rec.participantId || `sid_${rec.studentId}`).slice(0, 64);
+          storageKeysByRoom[rId].add(sKey);
+          const prev = rMap.get(sKey);
           if (
             !prev ||
             (Number(rec.lastSeenMs) || 0) > (Number(prev.lastSeenMs) || 0) ||
+            String(rec.activeModule || "") !== String(prev.activeModule || "") ||
             clampTeamOrZero(rec.teamId) !== clampTeamOrZero(prev.teamId)
           ) {
-            rMap.set(pid, Object.assign({}, prev || {}, rec, { roomId: rId, joined: true, fromStorage: true }));
+            rMap.set(
+              sKey,
+              Object.assign({}, prev || {}, rec, {
+                sessionId: sKey,
+                activeModule: normalizeModuleId(rec.activeModule || "HS1"),
+                roomId: rId,
+                joined: true,
+                fromStorage: true
+              })
+            );
             changed = true;
           }
         });
-        // Remove any storage-backed or local student entry that left or expired in another tab
-        rMap.forEach((existing, pid) => {
+        // Remove any storage-backed entry that left or expired in another tab
+        rMap.forEach((existing, sKey) => {
           if (
             existing &&
             existing.role === "student" &&
-            (
-              (reqResetId && existing.ackResetId !== reqResetId) ||
-              (existing.fromStorage &&
-                !storagePidsByRoom[rId].has(pid) &&
-                !(state.sessionJoined && rId === state.joinedRoomId && pid === state.participantId))
-            )
+            existing.fromStorage &&
+            !storageKeysByRoom[rId].has(sKey) &&
+            !(state.sessionJoined && rId === state.joinedRoomId && sKey === clientInstanceId)
           ) {
-            rMap.delete(pid);
+            rMap.delete(sKey);
             changed = true;
           }
         });
       });
     } catch (_) {}
     if (changed && shouldEmit) {
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     }
     return changed;
   }
@@ -735,20 +748,22 @@
     });
   }, 250);
 
-  // Prune offline/disconnected presence entries across all 6 rooms every 5s & send active room heartbeat every 12s
-  setInterval(() => {
+  // Prune offline/disconnected presence entries across all 6 rooms every 5s & send active room heartbeat every 10s (unthrottled in background tabs)
+  startBackgroundSafeInterval(() => {
     const now = Date.now();
     let changed = false;
     [1, 2, 3, 4, 5, 6].forEach((rId) => {
       const rMap = getRoomPresenceMap(rId);
       rMap.forEach((val, key) => {
         if (
-          (state.role === "faculty" && rId === state.roomId && key === state.participantId) ||
-          (state.role !== "faculty" && state.sessionJoined && rId === state.joinedRoomId && key === state.participantId)
+          key === clientInstanceId &&
+          ((state.role === "faculty" && rId === state.roomId) ||
+            (state.role !== "faculty" && state.sessionJoined && rId === state.joinedRoomId))
         ) {
+          val.lastSeenMs = now;
           return;
         }
-        const maxAgeMs = val && val.role === "faculty" ? 65000 : LIVE_PRESENCE_TTL_MS;
+        const maxAgeMs = val && val.role === "faculty" ? 80000 : LIVE_PRESENCE_TTL_MS;
         const refMs = Number((val && val.lastSeenMs) || (val && val.joinedWallMs) || 0);
         if (!refMs || now - refMs > maxAgeMs) {
           rMap.delete(key);
@@ -758,11 +773,11 @@
     });
     if (changed) {
       persistPresenceRegistryToStorage();
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     }
   }, 5000);
 
-  setInterval(() => {
+  startBackgroundSafeInterval(() => {
     if (state.role === "faculty" || state.sessionJoined) {
       publishPresence();
     }
@@ -814,12 +829,11 @@
       } catch (_) {}
     }
 
-    // 2. MQTT over WSS (QoS 1 for timer, checkin_reset & presence so countdown and check-in delivery is broker-acknowledged)
+    // 2. MQTT over WSS (QoS 1 for timer & presence so countdown and online status delivery is broker-acknowledged)
     const fullTopic = roomTopic(subpath, targetRoom);
     const subStr = String(subpath || "");
     const qosLevel =
       subStr.startsWith("timer") ||
-      subStr === "checkin_reset" ||
       subStr.startsWith("concept_unlock") ||
       subStr.startsWith("presence")
         ? 1
@@ -849,138 +863,64 @@
     }
   }
 
-  function clearStudentCheckinCachesForRoomReset(targetRoom, resetId) {
-    const r = clampRoom(targetRoom);
-    ["HS1", "HS2", "HS3", "HS4", "HS5", "HS6"].forEach((m) => {
-      const key = `racm303_hsd_qr_checkin_v1_${m}_R${r}`;
-      [
-        [safeGetSession, safeSetSession],
-        [safeGetStorage, safeSetStorage]
-      ].forEach(([getter, setter]) => {
-        try {
-          const raw = getter(key, "");
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (!parsed || parsed.ackResetId !== resetId) {
-            setter(key, null);
+  const pendingDeadCliTimers = new Map();
+  function scheduleDisconnectedCliCleanup(deadCli) {
+    const cleanCli = String(deadCli || "").trim();
+    if (!cleanCli || cleanCli === clientInstanceId) return;
+    const disconnectDetectedMs = Date.now();
+    if (pendingDeadCliTimers.has(cleanCli)) {
+      clearTimeout(pendingDeadCliTimers.get(cleanCli));
+    }
+    const timer = setTimeout(() => {
+      pendingDeadCliTimers.delete(cleanCli);
+      let removedAny = false;
+      [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        const rMap = getRoomPresenceMap(rId);
+        rMap.forEach((rec, sKey) => {
+          if (
+            rec &&
+            (rec.senderCli === cleanCli || rec.sessionId === cleanCli || sKey === cleanCli) &&
+            (Number(rec.lastSeenMs) || 0) <= disconnectDetectedMs
+          ) {
+            rMap.delete(sKey);
+            removedAny = true;
+            // Wipe dead session's retained MQTT presence topic so late joiners never see a ghost
+            const presTopic = `${TOPIC_NS}/room-${rId}/presence/${sKey}`;
+            state.mqttClients.forEach((c) => {
+              try {
+                if (c && c.connected) c.publish(presTopic, "", { qos: 0, retain: true });
+              } catch (_) {}
+            });
           }
-        } catch (_) {
-          setter(key, null);
-        }
+        });
       });
-    });
-  }
-
-  function doesStoredStudentBelongToRoom(targetRoom) {
-    const r = clampRoom(targetRoom);
-    const lockedPageRoom =
-      typeof window !== "undefined" &&
-      window.RACM_HSD_ROOM_PAGE &&
-      Number(window.RACM_HSD_ROOM_PAGE.roomId);
-    if (lockedPageRoom >= 1 && lockedPageRoom <= 6) {
-      return lockedPageRoom === r;
-    }
-    if (state.disc >= 1 && state.disc <= 6) {
-      return state.disc === r;
-    }
-    const candSid = String(
-      state.studentId ||
-        safeGetSession("racm303_hsd_prefill_sid", "") ||
-        safeGetStorage("racm303_my_sid", "") ||
-        safeGetStorage("racm303_hsd_prefill_sid", "") ||
-        ""
-    ).trim();
-    if (candSid && typeof window !== "undefined" && Array.isArray(window.RACM_STUDENT_ROSTER)) {
-      const stu = window.RACM_STUDENT_ROSTER.find((s) => s && String(s.id) === candSid);
-      if (stu && Number(stu.disc) >= 1 && Number(stu.disc) <= 6) {
-        return Number(stu.disc) === r;
+      if (removedAny) {
+        persistPresenceRegistryToStorage(cleanCli);
+        emit("presence", getPresenceSummary(state.roomId, state.activeModule));
       }
-    }
-    return false;
-  }
-
-  function evictLocalStudentForCheckinReset(pktRoom, modCode, resetId, resetAtWallMs) {
-    if (state.role === "faculty") return;
-    const wasJoined = Boolean(state.sessionJoined);
-    const oldPid = state.participantId;
-    const oldSid = state.studentId;
-    while (burstTimers.length) {
-      clearTimeout(burstTimers.pop());
-    }
-    state.sessionJoined = false;
-    state.joinedRoomId = 0;
-    state.joinedWallMs = 0;
-    state.ackResetId = "";
-    state.teamId = 0;
-    state.studentId = "";
-    state.shortNo = "";
-    state.nickname = "";
-    state.fullName = "";
-    state.area = "";
-    state.disc = 0;
-    state.photoId = "";
-    state.displayName = "";
-    state.participantId = persistentPid;
-    state.responsesByQuestion.clear();
-    state.timersByScope.clear();
-    lastPublishedLocalCellsByQ.clear();
-    pendingCellsByQuestion.clear();
-    pendingDirtyCellsByQ.clear();
-    reloadSubmittedCellsForActiveStudent();
-
-    safeSetSession("racm303_hsd_session_joined_v1", null);
-    safeSetSession("racm303_hsd_room_confirmed", null);
-    safeSetSession("racm303_hsd_prefill_sid", null);
-    safeSetSession("racm303_hsd_step5_pin_sid", null);
-    safeSetSession("racm303_hsd_team_id_v1", null);
-    safeSetStorage("racm303_my_sid", null);
-    safeSetStorage("racm303_login_uid", null);
-    safeSetStorage("racm303_hsd_prefill_sid", null);
-    safeSetStorage("racm303_personal_student", null);
-    safeSetStorage("racm303_live_team_v1", null);
-
-    if (wasJoined && oldPid) {
-      broadcastStudentLeaveFromRoom(oldPid, oldSid, pktRoom, false);
-    }
-    emit("presence", getPresenceSummary());
-    emit("timer", getTimerSnapshot());
-    emit("checkin_reset", {
-      roomId: pktRoom,
-      modCode: modCode || state.activeModule || "HS1",
-      resetId,
-      resetAtWallMs,
-      evicted: true
-    });
+    }, 1200);
+    pendingDeadCliTimers.set(cleanCli, timer);
   }
 
   function handleIncomingPacket(subpath, msg, isRetained) {
     if (!msg || typeof msg !== "object") return;
     if (msg.senderCli === clientInstanceId) return;
-    if (rememberMsgId(msg.msgId)) return;
 
+    // Handle LWT before rememberMsgId so MQTT reconnects never drop future LWT packets
     if (msg.type === "lwt_disconnect") {
       if (isRetained) return;
-      const deadCli = String(msg.senderCli || "").trim();
-      if (!deadCli) return;
-      let removedAny = false;
-      [1, 2, 3, 4, 5, 6].forEach((rId) => {
-        const rMap = getRoomPresenceMap(rId);
-        rMap.forEach((rec, pid) => {
-          if (rec && rec.senderCli === deadCli) {
-            rMap.delete(pid);
-            removedAny = true;
-          }
-        });
-      });
-      if (removedAny) {
-        persistPresenceRegistryToStorage();
-        emit("presence", getPresenceSummary());
-      }
+      scheduleDisconnectedCliCleanup(msg.senderCli);
       return;
     }
 
-    const isMultiRoomPresencePkt =
-      msg.type === "presence" || msg.type === "who_is_here" || msg.type === "checkin_reset";
+    // Legacy check-in reset packets are ignored — online status follows pure Google Docs tab presence
+    if (msg.type === "checkin_reset") {
+      return;
+    }
+
+    if (rememberMsgId(msg.msgId)) return;
+
+    const isMultiRoomPresencePkt = msg.type === "presence" || msg.type === "who_is_here";
     if (!isMultiRoomPresencePkt) {
       if (!msg.roomId || clampRoom(msg.roomId) !== state.roomId) return;
     }
@@ -993,52 +933,6 @@
           if (conn && conn.open) conn.send({ subpath, msg });
         } catch (_) {}
       });
-    }
-
-    if (msg.type === "checkin_reset") {
-      const resetId = String(msg.resetId || "").trim().slice(0, 48);
-      if (!resetId) return;
-      const resetAtWallMs = Number(msg.resetAtWallMs || msg.sentWallMs || Date.now());
-      if (isRetained && Date.now() - resetAtWallMs > CHECKIN_RESET_MAX_AGE_MS) {
-        return;
-      }
-      const modCode = String(msg.modCode || state.activeModule || "HS1").toUpperCase().slice(0, 12);
-      const prevRec = state.checkinResetByRoom[pktRoom];
-      const isNewResetToken = !prevRec || prevRec.resetId !== resetId;
-      if (isNewResetToken) {
-        state.checkinResetByRoom[pktRoom] = { resetId, resetAtWallMs, modCode };
-        persistCheckinResetToStorage();
-      }
-      const rMap = getRoomPresenceMap(pktRoom);
-      let pruned = false;
-      rMap.forEach((rec, pid) => {
-        if (rec && rec.role !== "faculty" && rec.ackResetId !== resetId) {
-          rMap.delete(pid);
-          pruned = true;
-        }
-      });
-      if (pruned) {
-        persistPresenceRegistryToStorage();
-        emit("presence", getPresenceSummary());
-      }
-      if (state.role !== "faculty") {
-        clearStudentCheckinCachesForRoomReset(pktRoom, resetId);
-        const shouldEvictHere =
-          (state.sessionJoined &&
-            clampRoom(state.joinedRoomId || state.roomId) === pktRoom &&
-            state.ackResetId !== resetId) ||
-          (!state.sessionJoined &&
-            state.ackResetId !== resetId &&
-            doesStoredStudentBelongToRoom(pktRoom));
-        if (shouldEvictHere) {
-          evictLocalStudentForCheckinReset(pktRoom, modCode, resetId, resetAtWallMs);
-        } else if (isNewResetToken && clampRoom(state.roomId) === pktRoom) {
-          emit("checkin_reset", { roomId: pktRoom, modCode, resetId, resetAtWallMs, evicted: false });
-        }
-      } else if (isNewResetToken) {
-        emit("checkin_reset", { roomId: pktRoom, modCode, resetId, resetAtWallMs, evicted: false });
-      }
-      return;
     }
 
     if (msg.type === "timer") {
@@ -1209,39 +1103,38 @@
         ? String(msg.senderPid).slice(0, 48)
         : rawPid;
 
-      // Refresh sender student's individual presence ONLY on live (non-retained) packets and ONLY when valid under active room reset
+      // Refresh sender student's individual tab presence on live (non-retained) worksheet packets
       const senderPid = sidClean ? `sid_${sidClean}` : (!pid.startsWith("team_") ? pid : "");
       if (!isRetained && senderPid && sidClean) {
+        const sKey = String(msg.senderCli || senderPid).slice(0, 64);
         const rMap = getRoomPresenceMap(pktRoom);
-        const prevPres = rMap.get(senderPid);
-        const reqRst = getRoomCheckinResetId(pktRoom);
-        const pktAck = String(msg.ackResetId || (prevPres && prevPres.ackResetId) || "").slice(0, 48);
-        if (!reqRst || pktAck === reqRst) {
-          const basePres = prevPres || {};
-          rMap.set(
-            senderPid,
-            Object.assign({}, basePres, {
-              participantId: senderPid,
-              role: "student",
-              joined: true,
-              checkedIn: true,
-              roomId: pktRoom,
-              teamId: clampTeamOrZero(incomingTeamId || basePres.teamId),
-              studentId: sidClean,
-              shortNo: String(msg.shortNo || basePres.shortNo || sidClean.slice(-3)).slice(0, 6),
-              fullName: String(msg.fullName || basePres.fullName || "").slice(0, 80),
-              nickname: String(msg.nickname || basePres.nickname || "").slice(0, 32),
-              area: String(msg.area || basePres.area || "").slice(0, 40),
-              disc: Number(msg.disc || basePres.disc || pktRoom) || pktRoom,
-              name: String(msg.senderName || msg.editorLabel || basePres.name || `รหัส ${sidClean}`).slice(0, 80),
-              activeQuestionId: qid,
-              ackResetId: pktAck,
-              lastSeenMs: Date.now()
-            })
-          );
-          persistPresenceRegistryToStorage();
-          emit("presence", getPresenceSummary());
-        }
+        const prevPres = rMap.get(sKey) || {};
+        const respMod = resolveModuleFromQuestionOrActive(qid, msg.activeModule || prevPres.activeModule);
+        rMap.set(
+          sKey,
+          Object.assign({}, prevPres, {
+            sessionId: sKey,
+            participantId: senderPid,
+            role: "student",
+            joined: true,
+            checkedIn: true,
+            roomId: pktRoom,
+            teamId: clampTeamOrZero(incomingTeamId || prevPres.teamId),
+            studentId: sidClean,
+            shortNo: String(msg.shortNo || prevPres.shortNo || sidClean.slice(-3)).slice(0, 6),
+            fullName: String(msg.fullName || prevPres.fullName || "").slice(0, 80),
+            nickname: String(msg.nickname || prevPres.nickname || "").slice(0, 32),
+            area: String(msg.area || prevPres.area || "").slice(0, 40),
+            disc: Number(msg.disc || prevPres.disc || pktRoom) || pktRoom,
+            name: String(msg.senderName || msg.editorLabel || prevPres.name || `รหัส ${sidClean}`).slice(0, 80),
+            activeModule: respMod,
+            activeQuestionId: qid,
+            senderCli: String(msg.senderCli || sKey).slice(0, 64),
+            lastSeenMs: Date.now()
+          })
+        );
+        persistPresenceRegistryToStorage();
+        emit("presence", getPresenceSummary(state.roomId, state.activeModule));
       }
 
       // Strictly isolate student answer sheets: a student client NEVER absorbs another student's answers
@@ -1401,7 +1294,7 @@
               studentId: state.studentId,
               shortNo: state.shortNo || String(state.studentId).slice(-3),
               fullName: state.fullName || "",
-              ackResetId: state.ackResetId || ""
+              activeModule: normalizeModuleId(state.activeModule)
             }),
             true,
             pktRoom
@@ -1409,20 +1302,6 @@
         });
       }
       if (pktRoom === state.roomId && state.role === "faculty") {
-        const activeRst = getActiveRoomResetObj(pktRoom);
-        if (activeRst && activeRst.resetId) {
-          publishPacket(
-            "checkin_reset",
-            {
-              type: "checkin_reset",
-              resetId: activeRst.resetId,
-              resetAtWallMs: activeRst.resetAtWallMs || Date.now(),
-              modCode: activeRst.modCode || state.activeModule || "HS1"
-            },
-            true,
-            pktRoom
-          );
-        }
         state.timersByScope.forEach((t, key) => {
           const [rStr, mStr] = key.split(":");
           const scopeRoom = clampRoom(rStr);
@@ -1473,46 +1352,49 @@
 
     if (msg.type === "presence") {
       const pid = String(msg.participantId || "").slice(0, 48);
-      if (!pid || pid.startsWith("team_")) return;
+      if (pid.startsWith("team_")) return;
+      const sKey = resolvePresenceSessionKey(msg) || pid;
+      if (!sKey) return;
       const rMap = getRoomPresenceMap(pktRoom);
       if (msg.left || (msg.role !== "faculty" && msg.joined === false)) {
-        let removed = rMap.delete(pid);
-        const leftSid = String(msg.studentId || "").trim();
-        if (leftSid) {
-          [1, 2, 3, 4, 5, 6].forEach((otherR) => {
-            if (getRoomPresenceMap(otherR).delete(`sid_${leftSid}`)) removed = true;
-          });
-        }
+        const senderCliStr = String(msg.senderCli || msg.sessionId || "").trim();
+        let removed = false;
+        [1, 2, 3, 4, 5, 6].forEach((rId) => {
+          const m = getRoomPresenceMap(rId);
+          if (m.delete(sKey)) removed = true;
+          if (senderCliStr) {
+            m.forEach((rec, k) => {
+              if (rec && (rec.senderCli === senderCliStr || rec.sessionId === senderCliStr)) {
+                m.delete(k);
+                removed = true;
+              }
+            });
+          } else if (pid && m.delete(pid)) {
+            removed = true;
+          }
+        });
         if (removed) {
-          persistPresenceRegistryToStorage();
-          emit("presence", getPresenceSummary());
+          persistPresenceRegistryToStorage(sKey);
+          emit("presence", getPresenceSummary(state.roomId, state.activeModule));
         }
         return;
       }
-      const maxRetainedAge = msg.role === "faculty" ? 65000 : LIVE_PRESENCE_TTL_MS;
+      const maxRetainedAge = msg.role === "faculty" ? 80000 : LIVE_PRESENCE_TTL_MS;
       const refWallMs = Number(msg.lastSeenMs || msg.sentWallMs || msg.joinedWallMs || 0);
       if (isRetained && (!refWallMs || Date.now() - refWallMs > maxRetainedAge)) {
         return;
       }
-      const prevPres = rMap.get(pid) || {};
-      if (msg.role !== "faculty") {
-        const reqRst = getRoomCheckinResetId(pktRoom);
-        const incomingAck = String(msg.ackResetId || "").slice(0, 48);
-        if (reqRst && incomingAck !== reqRst) {
-          return;
-        }
-      }
+      const prevPres = rMap.get(sKey) || {};
       const sidStr = String(msg.studentId || prevPres.studentId || "").slice(0, 16);
-      // Remove stale record from other rooms so each student only appears in their active room
-      if (sidStr && msg.role !== "faculty") {
-        [1, 2, 3, 4, 5, 6].forEach((otherR) => {
-          if (otherR !== pktRoom) {
-            getRoomPresenceMap(otherR).delete(`sid_${sidStr}`);
-          }
-        });
-      }
-      rMap.set(pid, {
-        participantId: pid,
+      // Remove stale record for this exact tab session from other rooms so each tab only appears in its active room
+      [1, 2, 3, 4, 5, 6].forEach((otherR) => {
+        if (otherR !== pktRoom) {
+          getRoomPresenceMap(otherR).delete(sKey);
+        }
+      });
+      rMap.set(sKey, {
+        sessionId: sKey,
+        participantId: pid || (sidStr ? `sid_${sidStr}` : sKey),
         role: msg.role === "faculty" ? "faculty" : "student",
         joined: true,
         checkedIn: msg.role === "faculty" ? false : Boolean(msg.checkedIn || sidStr),
@@ -1526,14 +1408,10 @@
         area: String(msg.area || prevPres.area || "").slice(0, 40),
         disc: Number(msg.disc || prevPres.disc || 0) || 0,
         photoId: String(msg.photoId || prevPres.photoId || "").slice(0, 40),
-        activeModule: String(msg.activeModule || prevPres.activeModule || "").slice(0, 12),
+        activeModule: normalizeModuleId(msg.activeModule || prevPres.activeModule || "HS1"),
         activeQuestionId: String(msg.activeQuestionId || prevPres.activeQuestionId || "").slice(0, 32),
         name: String(msg.name || prevPres.name || "ผู้เข้าร่วม").slice(0, 80),
-        senderCli: String(msg.senderCli || prevPres.senderCli || "").slice(0, 40),
-        ackResetId:
-          msg.role === "faculty"
-            ? ""
-            : String(msg.ackResetId || prevPres.ackResetId || "").slice(0, 48),
+        senderCli: String(msg.senderCli || prevPres.senderCli || sKey).slice(0, 64),
         joinedWallMs: Number(msg.joinedWallMs || prevPres.joinedWallMs || msg.sentWallMs || Date.now()),
         lastSeenMs: isRetained && refWallMs ? refWallMs : Date.now()
       });
@@ -1549,7 +1427,7 @@
       ) {
         tryConnectStudentPeerToHost();
       }
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     }
   }
 
@@ -1575,12 +1453,11 @@
   function subscribeCurrentRoomMqtt(client) {
     if (!client || !client.connected) return;
     try {
-      // Subscribe to active room full stream AND all 6 rooms' presence/reset/snapshot/LWT topics
+      // Subscribe to active room full stream AND all 6 rooms' presence/snapshot/LWT topics
       client.subscribe(
         [
           `${TOPIC_NS}/room-${state.roomId}/#`,
           `${TOPIC_NS}/+/presence/#`,
-          `${TOPIC_NS}/+/checkin_reset`,
           `${TOPIC_NS}/+/who_is_here`,
           `${TOPIC_NS}/lwt/+`
         ],
@@ -1590,7 +1467,6 @@
       try {
         client.subscribe(`${TOPIC_NS}/room-${state.roomId}/#`, { qos: 0 });
         client.subscribe(`${TOPIC_NS}/+/presence/#`, { qos: 0 });
-        client.subscribe(`${TOPIC_NS}/+/checkin_reset`, { qos: 0 });
         client.subscribe(`${TOPIC_NS}/lwt/+`, { qos: 0 });
       } catch (_2) {}
     }
@@ -1626,20 +1502,20 @@
 
   function initMqttBrokers() {
     if (!window.mqtt || typeof window.mqtt.connect !== "function") return;
-    const lwtPayload = JSON.stringify({
-      type: "lwt_disconnect",
-      msgId: randomId("lwt"),
-      senderCli: clientInstanceId
-    });
     BROKERS.forEach((url, idx) => {
       try {
         const tag = `mqtt${idx + 1}`;
+        const lwtPayload = JSON.stringify({
+          type: "lwt_disconnect",
+          senderCli: clientInstanceId,
+          brokerTag: tag
+        });
         const client = window.mqtt.connect(url, {
           clientId: `racm303_${state.role}_${Math.random().toString(16).slice(2, 10)}`,
           clean: true,
           connectTimeout: 7000,
-          reconnectPeriod: 4000,
-          keepalive: 22,
+          reconnectPeriod: 3500,
+          keepalive: 60,
           will: {
             topic: `${TOPIC_NS}/lwt/${clientInstanceId}`,
             payload: lwtPayload,
@@ -1661,6 +1537,10 @@
         client.on("close", () => {
           state.connectedTransports.delete(tag);
           updateConnectionBadge();
+          // Immediately refresh presence on remaining open transports so a single broker hiccup never drops a still-open tab
+          if ((state.role === "faculty" || state.sessionJoined) && state.connectedTransports.size > 0) {
+            publishPresence();
+          }
         });
         client.on("error", () => {
           state.connectedTransports.delete(tag);
@@ -1694,12 +1574,12 @@
             const subpath = rest.slice(slashIdx + 1);
             if (!text) {
               if (subpath.startsWith("presence/")) {
-                const gonePid = subpath.slice("presence/".length).trim();
+                const goneKey = subpath.slice("presence/".length).trim();
                 const rMap = getRoomPresenceMap(topicRoom);
-                if (gonePid && rMap.has(gonePid)) {
-                  rMap.delete(gonePid);
-                  persistPresenceRegistryToStorage();
-                  emit("presence", getPresenceSummary());
+                if (goneKey && rMap.has(goneKey)) {
+                  rMap.delete(goneKey);
+                  persistPresenceRegistryToStorage(goneKey);
+                  emit("presence", getPresenceSummary(state.roomId, state.activeModule));
                 }
               }
               return;
@@ -1852,34 +1732,28 @@
                   }
                 });
               });
-              const activeRst = getActiveRoomResetObj(state.roomId);
-              if (activeRst && activeRst.resetId) {
+              getRoomPresenceMap(state.roomId).forEach((pRec, sKey) => {
                 conn.send({
-                  subpath: "checkin_reset",
-                  msg: {
-                    type: "checkin_reset",
-                    msgId: randomId("sync"),
-                    roomId: state.roomId,
-                    resetId: activeRst.resetId,
-                    resetAtWallMs: activeRst.resetAtWallMs || Date.now(),
-                    modCode: activeRst.modCode || state.activeModule || "HS1",
-                    sentWallMs: Date.now()
-                  }
-                });
-              }
-              getRoomPresenceMap(state.roomId).forEach((pRec) => {
-                conn.send({
-                  subpath: `presence/${pRec.participantId}`,
+                  subpath: `presence/${pRec.sessionId || sKey}`,
                   msg: Object.assign({ type: "presence", msgId: randomId("sync"), roomId: state.roomId, sentWallMs: Date.now() }, pRec)
                 });
               });
             } catch (_) {}
           });
           conn.on("data", (data) => {
-            if (data && data.msg) handleIncomingPacket(data.subpath || "", data.msg, false);
+            if (data && data.msg) {
+              if (data.msg.senderCli) conn._remoteCli = String(data.msg.senderCli);
+              handleIncomingPacket(data.subpath || "", data.msg, false);
+            }
           });
-          conn.on("close", () => state.peerConns.delete(conn.peer));
-          conn.on("error", () => state.peerConns.delete(conn.peer));
+          const onPeerStudentClosed = () => {
+            state.peerConns.delete(conn.peer);
+            if (conn._remoteCli) {
+              scheduleDisconnectedCliCleanup(conn._remoteCli);
+            }
+          };
+          conn.on("close", onPeerStudentClosed);
+          conn.on("error", onPeerStudentClosed);
         });
         peer.on("error", (err) => {
           state.connectedTransports.delete("peer");
@@ -1907,7 +1781,7 @@
   }
 
   // Periodic PeerJS reconnect check for students who logged in before teacher opened the room
-  setInterval(() => {
+  startBackgroundSafeInterval(() => {
     if (initialized && state.role === "student" && state.sessionJoined) {
       if (!state.hostConn || !state.hostConn.open) {
         if (!state.peer || state.peer.destroyed) {
@@ -1944,7 +1818,7 @@
     while (burstTimers.length) {
       clearTimeout(burstTimers.pop());
     }
-    [650, 1800, 4200].forEach((delayMs) => {
+    [450, 1500, 3600].forEach((delayMs) => {
       const t = setTimeout(() => {
         if (state.role === "faculty" || state.sessionJoined) {
           publishPresence();
@@ -1954,18 +1828,23 @@
     });
   }
 
+  let lastPublishedPresenceRoom = 0;
+
   function publishPresence() {
-    // Students only broadcast active green presence when identified and actively inside their joined room
+    // Students only broadcast active green presence when identified and actively inside an open Case Discussion tab
     if (state.role !== "faculty" && (!state.sessionJoined || !state.joinedRoomId || !state.studentId)) {
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
       return;
     }
     const pubRoom = state.role === "faculty" ? state.roomId : clampRoom(state.joinedRoomId);
+    const sessionKey = clientInstanceId;
     const myName = getEffectiveDisplayName();
     if (!state.joinedWallMs) state.joinedWallMs = Date.now();
     const myShortNo = state.shortNo || (state.studentId ? String(state.studentId).slice(-3) : "");
+    const effMod = normalizeModuleId(state.activeModule);
     const now = Date.now();
     const myRec = {
+      sessionId: sessionKey,
       participantId: state.participantId,
       role: state.role,
       joined: true,
@@ -1980,63 +1859,89 @@
       area: state.area || "",
       disc: state.disc || pubRoom,
       photoId: state.photoId || "",
-      activeModule: state.activeModule || "",
+      activeModule: effMod,
       activeQuestionId: state.activeQuestionId || "",
       name: myName,
       senderCli: clientInstanceId,
-      ackResetId: state.role === "faculty" ? "" : String(state.ackResetId || "").slice(0, 48),
       joinedWallMs: state.joinedWallMs,
       lastSeenMs: now
     };
-    if (state.role !== "faculty" && state.studentId) {
-      [1, 2, 3, 4, 5, 6].forEach((otherR) => {
-        if (otherR !== pubRoom) {
-          getRoomPresenceMap(otherR).delete(state.participantId);
-        }
+    [1, 2, 3, 4, 5, 6].forEach((otherR) => {
+      if (otherR !== pubRoom) {
+        getRoomPresenceMap(otherR).delete(sessionKey);
+      }
+    });
+    if (lastPublishedPresenceRoom && lastPublishedPresenceRoom !== pubRoom) {
+      const prevTopic = `${TOPIC_NS}/room-${lastPublishedPresenceRoom}/presence/${sessionKey}`;
+      state.mqttClients.forEach((c) => {
+        try {
+          if (c && c.connected) c.publish(prevTopic, "", { qos: 0, retain: true });
+        } catch (_) {}
       });
     }
+    lastPublishedPresenceRoom = pubRoom;
+
     const rMap = getRoomPresenceMap(pubRoom);
-    rMap.set(state.participantId, myRec);
+    rMap.set(sessionKey, myRec);
     if (state.role !== "faculty" && state.studentId) {
       persistPresenceRegistryToStorage();
     }
     publishPacket(
-      `presence/${state.participantId}`,
+      `presence/${sessionKey}`,
       Object.assign({ type: "presence" }, myRec),
       true,
       pubRoom
     );
-    emit("presence", getPresenceSummary());
+    emit("presence", getPresenceSummary(state.roomId, state.activeModule));
   }
 
-  function getPresenceSummary(roomIdOpt) {
+  function resolvePresenceFilterModule(moduleIdOpt) {
+    if (moduleIdOpt === undefined || moduleIdOpt === null || moduleIdOpt === "*" || moduleIdOpt === "ALL") {
+      return "";
+    }
+    const s = String(moduleIdOpt).trim().toUpperCase();
+    return /^HS[1-6]$/.test(s) ? s : "";
+  }
+
+  function getPresenceSummary(roomIdOpt, moduleIdOpt) {
     const targetRoom = clampRoom(roomIdOpt || state.roomId);
+    const filterMod = resolvePresenceFilterModule(moduleIdOpt);
     const rMap = getRoomPresenceMap(targetRoom);
-    let students = 0;
     let teachers = 0;
     const list = [];
-    const joinedStudents = [];
-    const teamCounts = { 1: 0, 2: 0, 3: 0 };
-    const teamMembers = { 1: [], 2: [], 3: [] };
-    const seenSids = new Set();
+    const latestStudentBySid = new Map();
+
     rMap.forEach((p) => {
+      if (!p) return;
       if (p.role === "faculty") {
         teachers += 1;
         list.push(p);
       } else if (p.joined !== false && p.studentId) {
+        if (filterMod && normalizeModuleId(p.activeModule || "HS1") !== filterMod) {
+          return;
+        }
         const sidKey = String(p.studentId);
-        if (seenSids.has(sidKey)) return;
-        seenSids.add(sidKey);
-        students += 1;
-        list.push(p);
-        joinedStudents.push(p);
-        const tid = clampTeamOrZero(p.teamId);
-        if (tid >= 1 && tid <= 3) {
-          teamCounts[tid] += 1;
-          teamMembers[tid].push(p);
+        const prev = latestStudentBySid.get(sidKey);
+        if (!prev || (Number(p.lastSeenMs) || 0) >= (Number(prev.lastSeenMs) || 0)) {
+          latestStudentBySid.set(sidKey, p);
         }
       }
     });
+
+    const joinedStudents = Array.from(latestStudentBySid.values());
+    const students = joinedStudents.length;
+    const teamCounts = { 1: 0, 2: 0, 3: 0 };
+    const teamMembers = { 1: [], 2: [], 3: [] };
+
+    joinedStudents.forEach((p) => {
+      list.push(p);
+      const tid = clampTeamOrZero(p.teamId);
+      if (tid >= 1 && tid <= 3) {
+        teamCounts[tid] += 1;
+        teamMembers[tid].push(p);
+      }
+    });
+
     joinedStudents.sort((a, b) => {
       const ta = clampTeamOrZero(a.teamId) || 9;
       const tb = clampTeamOrZero(b.teamId) || 9;
@@ -2051,6 +1956,7 @@
     });
     return {
       roomId: targetRoom,
+      moduleId: filterMod || "*",
       total: students + teachers,
       students,
       teachers,
@@ -2061,33 +1967,34 @@
     };
   }
 
-  function getAllRoomsPresenceSummary() {
+  function getAllRoomsPresenceSummary(moduleIdOpt) {
     const rooms = {};
     let totalJoinedStudents = 0;
     [1, 2, 3, 4, 5, 6].forEach((rId) => {
-      const sum = getPresenceSummary(rId);
+      const sum = getPresenceSummary(rId, moduleIdOpt);
       rooms[rId] = sum;
       totalJoinedStudents += sum.students;
     });
     return { rooms, totalJoinedStudents };
   }
 
-  function findStudentLivePresence(studentId) {
+  function findStudentLivePresence(studentId, moduleIdOpt) {
     const sid = String(studentId || "").trim();
     if (!sid) return null;
+    const filterMod = resolvePresenceFilterModule(moduleIdOpt);
+    let bestHit = null;
     for (let rId = 1; rId <= 6; rId += 1) {
       const rMap = getRoomPresenceMap(rId);
-      const direct = rMap.get(`sid_${sid}`);
-      if (direct && direct.joined !== false) {
-        return { roomId: rId, record: direct };
-      }
       for (const [, rec] of rMap.entries()) {
-        if (rec && rec.role !== "faculty" && rec.joined !== false && String(rec.studentId || "") === sid) {
-          return { roomId: rId, record: rec };
+        if (!rec || rec.role === "faculty" || rec.joined === false) continue;
+        if (String(rec.studentId || "") !== sid) continue;
+        if (filterMod && normalizeModuleId(rec.activeModule || "HS1") !== filterMod) continue;
+        if (!bestHit || (Number(rec.lastSeenMs) || 0) >= (Number(bestHit.record.lastSeenMs) || 0)) {
+          bestHit = { roomId: rId, record: rec };
         }
       }
     }
-    return null;
+    return bestHit;
   }
 
   function getSmartTeamBalance(excludeStudentIdOpt, totalExpectedOpt, roomIdOpt) {
@@ -2097,9 +2004,14 @@
     const excludePid = excludeSid ? `sid_${excludeSid}` : "";
     const counts = { 1: 0, 2: 0, 3: 0 };
     const otherCounts = { 1: 0, 2: 0, 3: 0 };
+    const seenSids = new Set();
 
     rMap.forEach((p) => {
       if (!p || p.role === "faculty" || p.joined === false) return;
+      if (normalizeModuleId(p.activeModule || "HS1") !== normalizeModuleId(state.activeModule)) return;
+      const sidKey = String(p.studentId || p.participantId || "");
+      if (sidKey && seenSids.has(sidKey)) return;
+      if (sidKey) seenSids.add(sidKey);
       const tid = clampTeamOrZero(p.teamId);
       if (tid < 1 || tid > 3) return;
       counts[tid] += 1;
@@ -2189,8 +2101,6 @@
 
   function setStudentProfile(studentObj, opts) {
     if (!studentObj || !studentObj.id) {
-      const prevPid = state.participantId;
-      const prevSid = state.studentId;
       state.studentId = "";
       state.shortNo = "";
       state.nickname = "";
@@ -2207,25 +2117,18 @@
         pendingDirtyCellsByQ.clear();
         reloadSubmittedCellsForActiveStudent();
       }
-      if (prevPid && prevPid !== persistentPid) {
-        [1, 2, 3, 4, 5, 6].forEach((rId) => {
-          const m = getRoomPresenceMap(rId);
-          m.delete(prevPid);
-          if (prevSid) m.delete(`sid_${prevSid}`);
-        });
-      }
-      emit("presence", getPresenceSummary());
+      [1, 2, 3, 4, 5, 6].forEach((rId) => {
+        getRoomPresenceMap(rId).delete(clientInstanceId);
+      });
+      persistPresenceRegistryToStorage(clientInstanceId);
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
       return;
     }
-    const prevPid = state.participantId;
     const prevSid = state.studentId;
     const nextSid = String(studentObj.id).trim();
     state.studentId = nextSid;
     state.shortNo = nextSid.slice(-3);
     state.participantId = `sid_${nextSid}`;
-    if (prevPid && prevPid !== state.participantId) {
-      [1, 2, 3, 4, 5, 6].forEach((rId) => getRoomPresenceMap(rId).delete(prevPid));
-    }
     const nick = String(studentObj.nickname || studentObj.nick || "").trim();
     state.nickname = nick;
     state.fullName = String(studentObj.fullName || studentObj.name || "").trim();
@@ -2253,7 +2156,7 @@
     if (state.sessionJoined && state.joinedRoomId) {
       publishPresence();
     } else {
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     }
   }
 
@@ -2266,26 +2169,33 @@
       publishPresence();
       schedulePresenceBurst();
     } else {
-      emit("presence", getPresenceSummary());
+      emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     }
     emit("responses", { questionId: "*", teamId: next });
   }
 
   function broadcastStudentLeaveFromRoom(oldPid, oldSid, oldRoom, fromUnload) {
-    if (!oldPid || !oldRoom) return;
+    const targetRoom = clampRoom(oldRoom || state.roomId);
+    const sessionKey = clientInstanceId;
     [1, 2, 3, 4, 5, 6].forEach((rId) => {
       const m = getRoomPresenceMap(rId);
-      m.delete(oldPid);
-      if (oldSid) m.delete(`sid_${oldSid}`);
+      m.delete(sessionKey);
+      m.forEach((rec, k) => {
+        if (rec && (rec.senderCli === sessionKey || rec.sessionId === sessionKey)) {
+          m.delete(k);
+        }
+      });
     });
-    persistPresenceRegistryToStorage();
+    lastPublishedPresenceRoom = 0;
+    persistPresenceRegistryToStorage(sessionKey);
     const leaveMsg = {
       type: "presence",
       msgId: randomId("leave"),
-      roomId: clampRoom(oldRoom),
+      roomId: targetRoom,
+      sessionId: sessionKey,
       senderCli: clientInstanceId,
       sentWallMs: Date.now(),
-      participantId: oldPid,
+      participantId: oldPid || state.participantId,
       studentId: oldSid || "",
       role: "student",
       joined: false,
@@ -2294,49 +2204,66 @@
     rememberMsgId(leaveMsg.msgId);
     if (state.bc) {
       try {
-        state.bc.postMessage({ subpath: `presence/${oldPid}`, msg: leaveMsg, retained: false });
+        state.bc.postMessage({ subpath: `presence/${sessionKey}`, msg: leaveMsg, retained: false });
       } catch (_) {}
     }
-    if (state.hostConn && state.hostConn.open && clampRoom(oldRoom) === state.roomId) {
+    if (state.hostConn && state.hostConn.open && targetRoom === state.roomId) {
       try {
-        state.hostConn.send({ subpath: `presence/${oldPid}`, msg: leaveMsg });
+        state.hostConn.send({ subpath: `presence/${sessionKey}`, msg: leaveMsg });
       } catch (_) {}
     }
-    const topic = `${TOPIC_NS}/room-${clampRoom(oldRoom)}/presence/${oldPid}`;
+    const topic = `${TOPIC_NS}/room-${targetRoom}/presence/${sessionKey}`;
     const raw = JSON.stringify(leaveMsg);
-    const qos = fromUnload ? 0 : 1;
     state.mqttClients.forEach((c) => {
       try {
-        if (c && c.connected) c.publish(topic, raw, { qos, retain: true });
+        if (c && c.connected) {
+          c.publish(topic, raw, { qos: 0, retain: false });
+          c.publish(topic, "", { qos: 0, retain: true });
+          if (oldPid && oldPid !== sessionKey) {
+            c.publish(`${TOPIC_NS}/room-${targetRoom}/presence/${oldPid}`, "", { qos: 0, retain: true });
+          }
+        }
       } catch (_) {}
     });
   }
 
-  function joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt, opts) {
+  function joinSessionWithStudent(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt) {
     startEngine();
     const targetRoom = roomNumOpt
       ? clampRoom(roomNumOpt)
       : studentObj && studentObj.disc >= 1 && studentObj.disc <= 6
       ? clampRoom(studentObj.disc)
       : state.roomId;
+    const nextSid = studentObj && studentObj.id ? String(studentObj.id).trim() : state.studentId;
+    const nextMod = activeModuleOpt ? normalizeModuleId(activeModuleOpt) : normalizeModuleId(state.activeModule);
+    const nextTeam = clampTeamOrZero(teamIdOpt !== undefined ? teamIdOpt : state.teamId);
+
+    const alreadyJoinedSameScope =
+      Boolean(state.sessionJoined) &&
+      state.joinedRoomId === targetRoom &&
+      state.roomId === targetRoom &&
+      state.studentId === nextSid &&
+      normalizeModuleId(state.activeModule) === nextMod &&
+      clampTeamOrZero(state.teamId) === nextTeam &&
+      getRoomPresenceMap(targetRoom).has(clientInstanceId);
+
+    if (alreadyJoinedSameScope) {
+      return;
+    }
+
     if (state.sessionJoined && state.joinedRoomId && state.joinedRoomId !== targetRoom) {
       broadcastStudentLeaveFromRoom(state.participantId, state.studentId, state.joinedRoomId, false);
     }
-    const existingPres = studentObj && studentObj.id ? findStudentLivePresence(studentObj.id) : null;
+    const existingPres = nextSid ? findStudentLivePresence(nextSid, nextMod) : null;
     state.sessionJoined = true;
     state.joinedRoomId = targetRoom;
     state.joinedWallMs =
       (existingPres && existingPres.record && existingPres.record.joinedWallMs) ||
       state.joinedWallMs ||
       Date.now();
-    if (opts && opts.ackResetId !== undefined) {
-      state.ackResetId = String(opts.ackResetId || "").slice(0, 48);
-    } else {
-      state.ackResetId = getRoomCheckinResetId(targetRoom) || "";
-    }
     safeSetSession("racm303_hsd_session_joined_v1", "1");
-    if (activeModuleOpt) state.activeModule = String(activeModuleOpt);
-    state.teamId = clampTeamOrZero(teamIdOpt);
+    state.activeModule = nextMod;
+    state.teamId = nextTeam;
     safeSetSession("racm303_hsd_team_id_v1", state.teamId ? String(state.teamId) : null);
     safeSetStorage("racm303_live_team_v1", state.teamId ? String(state.teamId) : "0");
     if (studentObj && studentObj.id) {
@@ -2359,7 +2286,7 @@
     const isSharedScreen = Boolean((opts && opts.kioskMode) || state.role === "faculty");
     const targetRoom = clampRoom(roomNumOpt || studentObj.disc || state.roomId);
     if (!isSharedScreen) {
-      joinSessionWithStudent(studentObj, targetRoom, activeModuleOpt, clampTeamOrZero(teamIdOpt), opts);
+      joinSessionWithStudent(studentObj, targetRoom, activeModuleOpt, clampTeamOrZero(teamIdOpt));
       return true;
     }
     if (roomNumOpt && targetRoom !== state.roomId) {
@@ -2368,14 +2295,16 @@
     const sidStr = String(studentObj.id).slice(0, 16);
     const shortNo = sidStr.slice(-3);
     const pid = `sid_${sidStr}`;
+    const sKey = `kiosk_${sidStr}`;
     const rMap = getRoomPresenceMap(targetRoom);
-    const prevPres = rMap.get(pid) || {};
+    const prevPres = rMap.get(sKey) || {};
     const teamNum = clampTeamOrZero(teamIdOpt);
     const now = Date.now();
     const nick = String(studentObj.nickname || studentObj.nick || "").trim().slice(0, 32);
     const fullName = String(studentObj.fullName || studentObj.name || "").trim().slice(0, 80);
     const dispLabel = nick ? `รหัส ${sidStr} (${shortNo} · ${nick} ${fullName})` : `รหัส ${sidStr} (${fullName})`;
     const rec = {
+      sessionId: sKey,
       participantId: pid,
       role: "student",
       joined: true,
@@ -2390,25 +2319,17 @@
       area: String(studentObj.area || "").slice(0, 40),
       disc: Number(studentObj.disc) || targetRoom,
       photoId: String(studentObj.photoId || "").slice(0, 40),
-      activeModule: String(activeModuleOpt || state.activeModule || "HS1").slice(0, 12),
+      activeModule: normalizeModuleId(activeModuleOpt || state.activeModule || "HS1"),
       activeQuestionId: String(prevPres.activeQuestionId || "").slice(0, 32),
       name: dispLabel.slice(0, 80),
-      senderCli: clientInstanceId,
-      ackResetId: getRoomCheckinResetId(targetRoom) || "",
+      senderCli: sKey,
       joinedWallMs: prevPres.joinedWallMs || now,
       lastSeenMs: now
     };
-    rMap.set(pid, rec);
+    rMap.set(sKey, rec);
     persistPresenceRegistryToStorage();
-    publishPacket(`presence/${pid}`, Object.assign({ type: "presence" }, rec), true, targetRoom);
-    [700, 2000].forEach((ms) => {
-      setTimeout(() => {
-        if (rMap.get(pid) === rec) {
-          publishPacket(`presence/${pid}`, Object.assign({ type: "presence" }, rec), true, targetRoom);
-        }
-      }, ms);
-    });
-    emit("presence", getPresenceSummary());
+    publishPacket(`presence/${sKey}`, Object.assign({ type: "presence" }, rec), true, targetRoom);
+    emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     return true;
   }
 
@@ -2424,13 +2345,12 @@
     state.sessionJoined = false;
     state.joinedRoomId = 0;
     state.joinedWallMs = 0;
-    state.ackResetId = "";
     state.timersByScope.clear();
     safeSetSession("racm303_hsd_session_joined_v1", null);
-    if (wasJoined && oldPid) {
+    if (wasJoined || getRoomPresenceMap(oldRoom).has(clientInstanceId)) {
       broadcastStudentLeaveFromRoom(oldPid, oldSid, oldRoom, Boolean(opts && opts.fromUnload));
     }
-    emit("presence", getPresenceSummary());
+    emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     if (!opts || !opts.fromUnload) {
       emit("timer", getTimerSnapshot());
     }
@@ -2449,7 +2369,6 @@
     state.sessionJoined = false;
     state.joinedRoomId = 0;
     state.joinedWallMs = 0;
-    state.ackResetId = "";
     state.teamId = 0;
     state.studentId = "";
     state.shortNo = "";
@@ -2470,17 +2389,8 @@
     safeSetSession("racm303_hsd_team_id_v1", null);
     safeSetStorage("racm303_live_room_v1", null);
     safeSetStorage("racm303_live_team_v1", null);
-    if (oldPid) {
-      broadcastStudentLeaveFromRoom(oldPid, effSid, oldRoom, false);
-      if (effSid) {
-        setTimeout(() => {
-          if (!state.sessionJoined || state.studentId !== effSid) {
-            broadcastStudentLeaveFromRoom(`sid_${effSid}`, effSid, oldRoom, false);
-          }
-        }, 1600);
-      }
-    }
-    emit("presence", getPresenceSummary());
+    broadcastStudentLeaveFromRoom(oldPid, effSid, oldRoom, false);
+    emit("presence", getPresenceSummary(state.roomId, state.activeModule));
     emit("timer", getTimerSnapshot());
   }
 
@@ -2488,6 +2398,11 @@
     const nextMod = normalizeModuleId(modId);
     if (state.activeModule === nextMod) return;
     state.activeModule = nextMod;
+    if (initialized && (state.role === "faculty" || (state.sessionJoined && state.joinedRoomId))) {
+      publishPresence();
+    } else {
+      emit("presence", getPresenceSummary(state.roomId, nextMod));
+    }
     emit("timer", getTimerSnapshot());
   }
 
@@ -2505,6 +2420,8 @@
     }
     if (state.role !== "faculty" && state.sessionJoined && state.joinedRoomId) {
       publishPresence();
+    } else if (modChanged) {
+      emit("presence", getPresenceSummary(state.roomId, nextMod));
     }
   }
 
@@ -2558,7 +2475,7 @@
       publishPresence();
       requestRoomSnapshot(next);
     }
-    emit("presence", getPresenceSummary());
+    emit("presence", getPresenceSummary(next, state.activeModule));
     emit("timer", getTimerSnapshot());
     emit("responses", { questionId: "*" });
     emit("concept_unlock", { questionId: "*", unlocked: false, roomChanged: true });
@@ -3028,7 +2945,7 @@
         cellStatuses: cleanCellStatuses,
         cellUpdatedMs: cleanCellUpdatedMs,
         cellEditors: cleanCellEditors,
-        ackResetId: state.ackResetId || "",
+        activeModule: normalizeModuleId(state.activeModule),
         status: overallStatus,
         updatedWallMs: updatedMs
       },
@@ -3294,116 +3211,20 @@
     safeSetStorage("racm303_live_mute_v1", state.soundMuted ? "1" : "0");
   }
 
-  function resetRoomCheckin(roomIdOpt, modCodeOpt) {
-    if (state.role !== "faculty") return null;
-    startEngine();
-    const targetRoom = clampRoom(roomIdOpt || state.roomId);
-    const effMod = String(modCodeOpt || state.activeModule || "HS1").toUpperCase().slice(0, 12);
-    const resetId = randomId("rst");
-    const resetAtWallMs = Date.now();
-
-    state.checkinResetByRoom[targetRoom] = {
-      resetId,
-      resetAtWallMs,
-      modCode: effMod
-    };
-    persistCheckinResetToStorage();
-
-    // Purge all non-faculty presence records in targetRoom & collect all student PIDs for broker retained wipe
-    const rMap = getRoomPresenceMap(targetRoom);
-    const clearedPids = [];
-    const seenPids = new Set();
-    rMap.forEach((rec, pid) => {
-      if (!rec || rec.role === "faculty") return;
-      seenPids.add(pid);
-      clearedPids.push({ pid, studentId: String(rec.studentId || "") });
-      rMap.delete(pid);
-    });
-    if (typeof window !== "undefined" && Array.isArray(window.RACM_STUDENT_ROSTER)) {
-      window.RACM_STUDENT_ROSTER.forEach((stu) => {
-        if (!stu || !stu.id || Number(stu.disc) !== targetRoom) return;
-        const pid = `sid_${String(stu.id).trim()}`;
-        if (!seenPids.has(pid)) {
-          seenPids.add(pid);
-          clearedPids.push({ pid, studentId: String(stu.id).trim() });
-        }
-      });
-    }
-    persistPresenceRegistryToStorage();
-
-    // Wipe retained MQTT presence/<pid> topics for this room & notify same-device tabs
-    clearedPids.forEach(({ pid, studentId }) => {
-      const leaveMsg = {
-        type: "presence",
-        msgId: randomId("rstlv"),
-        roomId: targetRoom,
-        senderCli: clientInstanceId,
-        sentWallMs: resetAtWallMs,
-        participantId: pid,
-        studentId,
-        role: "student",
-        joined: false,
-        left: true,
-        clearedByFaculty: true
-      };
-      rememberMsgId(leaveMsg.msgId);
-      if (state.bc) {
-        try {
-          state.bc.postMessage({ subpath: `presence/${pid}`, msg: leaveMsg, retained: false });
-        } catch (_) {}
-      }
-      const presTopic = `${TOPIC_NS}/room-${targetRoom}/presence/${pid}`;
-      state.mqttClients.forEach((client) => {
-        try {
-          if (client && client.connected) {
-            client.publish(presTopic, "", { qos: 0, retain: true });
-          }
-        } catch (_) {}
-      });
-    });
-
-    const resetPayload = {
-      type: "checkin_reset",
-      resetId,
-      resetAtWallMs,
-      modCode: effMod,
-      roomId: targetRoom
-    };
-    publishPacket("checkin_reset", resetPayload, true, targetRoom);
-    [750, 2000].forEach((delayMs) => {
-      setTimeout(() => {
-        const cur = state.checkinResetByRoom[targetRoom];
-        if (cur && cur.resetId === resetId) {
-          publishPacket(
-            "checkin_reset",
-            Object.assign({}, resetPayload, { msgId: randomId("pkt") }),
-            true,
-            targetRoom
-          );
-        }
-      }, delayMs);
-    });
-
-    emit("presence", getPresenceSummary(targetRoom));
-    emit("checkin_reset", {
-      roomId: targetRoom,
-      modCode: effMod,
-      resetId,
-      resetAtWallMs,
-      clearedCount: rMap.size,
-      localOrigin: true
-    });
-    return { roomId: targetRoom, modCode: effMod, resetId, resetAtWallMs };
+  function resetRoomCheckin() {
+    return null;
   }
 
   let initialized = false;
+  let bfcacheSavedSession = null;
+
   function startEngine() {
     if (initialized) return;
     initialized = true;
     try {
       localStorage.removeItem("racm303_live_anon_v1");
+      localStorage.removeItem("racm303_live_checkin_reset_v1");
     } catch (_) {}
-    hydrateCheckinResetFromStorage();
     hydratePresenceRegistryFromStorage(false);
     hydrateRoomResponsesFromStorage(state.roomId, false);
     initBroadcastChannel();
@@ -3411,27 +3232,6 @@
     initPeerForRoom();
     if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
       window.addEventListener("storage", (ev) => {
-        if (!ev || !ev.key || ev.key === CHECKIN_RESET_STORAGE_KEY) {
-          const changedRstRooms = hydrateCheckinResetFromStorage();
-          hydratePresenceRegistryFromStorage(true);
-          if (state.role !== "faculty" && changedRstRooms.length) {
-            changedRstRooms.forEach((rId) => {
-              const rec = getActiveRoomResetObj(rId);
-              if (!rec) return;
-              clearStudentCheckinCachesForRoomReset(rId, rec.resetId);
-              const shouldEvictHere =
-                (state.sessionJoined &&
-                  clampRoom(state.joinedRoomId || state.roomId) === rId &&
-                  state.ackResetId !== rec.resetId) ||
-                (!state.sessionJoined &&
-                  state.ackResetId !== rec.resetId &&
-                  doesStoredStudentBelongToRoom(rId));
-              if (shouldEvictHere) {
-                evictLocalStudentForCheckinReset(rId, rec.modCode, rec.resetId, rec.resetAtWallMs);
-              }
-            });
-          }
-        }
         if (!ev || !ev.key || ev.key === PRESENCE_STORAGE_KEY) {
           hydratePresenceRegistryFromStorage(true);
         }
@@ -3440,23 +3240,58 @@
         }
       });
       window.addEventListener("online", () => {
-        hydrateCheckinResetFromStorage();
         hydratePresenceRegistryFromStorage(true);
         hydrateRoomResponsesFromStorage(state.roomId, true);
         publishPresence();
-        requestRoomSnapshot();
+        if (state.role === "faculty") {
+          requestAllRoomsSnapshot();
+        } else {
+          requestRoomSnapshot();
+        }
       });
       const onWindowUnload = () => {
-        if (state.role !== "faculty" && state.sessionJoined) {
-          leaveCurrentRoom({ fromUnload: true });
+        if (state.role !== "faculty") {
+          if (state.sessionJoined && state.joinedRoomId && state.studentId) {
+            bfcacheSavedSession = {
+              roomId: state.joinedRoomId,
+              activeModule: normalizeModuleId(state.activeModule)
+            };
+          }
+          if (state.sessionJoined || getRoomPresenceMap(state.joinedRoomId || state.roomId).has(clientInstanceId)) {
+            leaveCurrentRoom({ fromUnload: true });
+          }
+        } else {
+          const facTopic = `${TOPIC_NS}/room-${clampRoom(state.roomId)}/presence/${clientInstanceId}`;
+          state.mqttClients.forEach((c) => {
+            try {
+              if (c && c.connected) c.publish(facTopic, "", { qos: 0, retain: true });
+            } catch (_) {}
+          });
         }
       };
       window.addEventListener("pagehide", onWindowUnload);
       window.addEventListener("beforeunload", onWindowUnload);
+      window.addEventListener("pageshow", (ev) => {
+        if (ev && ev.persisted && state.role !== "faculty" && bfcacheSavedSession && state.studentId) {
+          state.sessionJoined = true;
+          state.joinedRoomId = clampRoom(bfcacheSavedSession.roomId);
+          state.activeModule = normalizeModuleId(bfcacheSavedSession.activeModule);
+          state.joinedWallMs = state.joinedWallMs || Date.now();
+          bfcacheSavedSession = null;
+          hydratePresenceRegistryFromStorage(false);
+          publishPresence();
+          schedulePresenceBurst();
+          requestRoomSnapshot(state.joinedRoomId);
+        }
+      });
+      window.addEventListener("focus", () => {
+        if (state.role === "faculty" || (state.sessionJoined && state.joinedRoomId && state.studentId)) {
+          publishPresence();
+        }
+      });
       if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
         document.addEventListener("visibilitychange", () => {
           if (!document.hidden) {
-            hydrateCheckinResetFromStorage();
             hydratePresenceRegistryFromStorage(true);
             hydrateRoomResponsesFromStorage(state.roomId, true);
             publishPresence();
@@ -3514,7 +3349,6 @@
     getAllRoomsPresenceSummary,
     findStudentLivePresence,
     syncFromStorage: () => {
-      hydrateCheckinResetFromStorage();
       hydratePresenceRegistryFromStorage(true);
       hydrateRoomResponsesFromStorage(state.roomId, true);
     },

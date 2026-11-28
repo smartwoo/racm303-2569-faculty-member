@@ -5645,6 +5645,9 @@
     const curTab = st.activeTab || "home";
 
     if (window.RACM_HSD_ROOM_PAGE) {
+      if (window.RACM_LIVE_CLASSROOM && typeof window.RACM_LIVE_CLASSROOM.leaveCurrentRoom === "function") {
+        window.RACM_LIVE_CLASSROOM.leaveCurrentRoom();
+      }
       if (window.history.length > 1 && document.referrer) {
         window.history.back();
       } else {
@@ -5679,11 +5682,12 @@
         return;
       }
     } else if (curTab === "hs-discussion" && !st.hsdDriveFolderOpen) {
-      if (st.hsdLockedRoomId) {
-        st.hsdLockedRoomId = 0;
-        if (api && api.switchTab) api.switchTab("hs-discussion", true);
-        return;
+      st.hsdLockedRoomId = 0;
+      if (window.RACM_LIVE_CLASSROOM && typeof window.RACM_LIVE_CLASSROOM.leaveCurrentRoom === "function") {
+        window.RACM_LIVE_CLASSROOM.leaveCurrentRoom();
       }
+      if (api && api.switchTab) api.switchTab("hs-discussion", true);
+      return;
     } else if (curTab === "epidemiology" && st.epSection && st.epSection !== "all") {
       if (api && api.setEpidemiologySection) {
         api.setEpidemiologySection("all");
