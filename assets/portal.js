@@ -12617,8 +12617,8 @@
     const makeDl = (docObj) => {
       if (!docObj) return { pdfHref: "", docxHref: "", dlStem: "" };
       return {
-        pdfHref: `exports/pdf/${encodeURIComponent(docObj.id)}.pdf`,
-        docxHref: `exports/docx/${encodeURIComponent(docObj.id)}.docx`,
+        pdfHref: `exports/pdf/${encodeURIComponent(docObj.id)}.pdf?v=20261128ths16`,
+        docxHref: `exports/docx/${encodeURIComponent(docObj.id)}.docx?v=20261128ths16`,
         dlStem: `RACM303_${sanitizeFilenamePart(`${docObj.id}_${docObj.title}`).replace(/\s+/g, "_").slice(0, 72)}`
       };
     };
@@ -13586,8 +13586,8 @@
           headings,
           lecturer,
           shortDate,
-          pdfHref: `exports/pdf/${encodeURIComponent(docObj.id)}.pdf`,
-          docxHref: `exports/docx/${encodeURIComponent(docObj.id)}.docx`,
+          pdfHref: `exports/pdf/${encodeURIComponent(docObj.id)}.pdf?v=20261128ths16`,
+          docxHref: `exports/docx/${encodeURIComponent(docObj.id)}.docx?v=20261128ths16`,
           dlStem: `RACM303_${sanitizeFilenamePart(`${docObj.id}_${docObj.title}`).replace(/\s+/g, "_").slice(0, 72)}`
         });
       });
@@ -16186,11 +16186,11 @@
           docBtnRow.appendChild(gf);
         }
         const pf = make("a", "⬇ PDF (ฉบับเต็ม)", "btn sm pdf-red");
-        pf.href = `exports/pdf/${encodeURIComponent(sessFullDoc.id)}.pdf`;
+        pf.href = `exports/pdf/${encodeURIComponent(sessFullDoc.id)}.pdf?v=20261128ths16`;
         pf.setAttribute("download", `RACM303_${sessFullDoc.id}_Full.pdf`);
         docBtnRow.appendChild(pf);
         const df = make("a", "⬇ Word (ฉบับเต็ม)", "btn sm docx-blue");
-        df.href = `exports/docx/${encodeURIComponent(sessFullDoc.id)}.docx`;
+        df.href = `exports/docx/${encodeURIComponent(sessFullDoc.id)}.docx?v=20261128ths16`;
         df.setAttribute("download", `RACM303_${sessFullDoc.id}_Full.docx`);
         docBtnRow.appendChild(df);
       }
@@ -16207,11 +16207,11 @@
           docBtnRow.appendChild(gc);
         }
         const pc = make("a", "⬇ PDF (ฉบับย่อ)", "btn sm pdf-red");
-        pc.href = `exports/pdf/${encodeURIComponent(sessConciseDoc.id)}.pdf`;
+        pc.href = `exports/pdf/${encodeURIComponent(sessConciseDoc.id)}.pdf?v=20261128ths16`;
         pc.setAttribute("download", `RACM303_${sessConciseDoc.id}_Abridged.pdf`);
         docBtnRow.appendChild(pc);
         const dc = make("a", "⬇ Word (ฉบับย่อ)", "btn sm docx-blue");
-        dc.href = `exports/docx/${encodeURIComponent(sessConciseDoc.id)}.docx`;
+        dc.href = `exports/docx/${encodeURIComponent(sessConciseDoc.id)}.docx?v=20261128ths16`;
         dc.setAttribute("download", `RACM303_${sessConciseDoc.id}_Abridged.docx`);
         docBtnRow.appendChild(dc);
       }
@@ -19527,11 +19527,11 @@
     }
     const dlStem = `RACM303_${sanitizeFilenamePart(`${readerDoc.id}_${readerDoc.title}`).replace(/\s+/g, "_").slice(0, 72)}`;
     if (pdfBtn) {
-      pdfBtn.href = `exports/pdf/${encodeURIComponent(readerDoc.id)}.pdf`;
+      pdfBtn.href = `exports/pdf/${encodeURIComponent(readerDoc.id)}.pdf?v=20261128ths16`;
       pdfBtn.setAttribute("download", `${dlStem}.pdf`);
     }
     if (docxBtn) {
-      docxBtn.href = `exports/docx/${encodeURIComponent(readerDoc.id)}.docx`;
+      docxBtn.href = `exports/docx/${encodeURIComponent(readerDoc.id)}.docx?v=20261128ths16`;
       docxBtn.setAttribute("download", `${dlStem}.docx`);
     }
     if (gdocBtn) {

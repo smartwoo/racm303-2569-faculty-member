@@ -2095,8 +2095,8 @@
               ? `<a class="tv-hosp-chip" href="${esc(epSlideInf.record.driveUrl)}" target="_blank" rel="noopener" style="text-decoration:none">🔗 Google Drive Slide ↗</a>`
               : ""
           }
-          <a class="tv-hosp-chip" href="exports/pdf/${encodeURIComponent(mod.docId || mod.code)}.pdf" download="RACM303_${esc(mod.docId || mod.code)}_Full.pdf" style="text-decoration:none">⬇ PDF ฉบับเต็ม</a>
-          <a class="tv-hosp-chip" href="exports/docx/${encodeURIComponent(mod.docId || mod.code)}.docx" download="RACM303_${esc(mod.docId || mod.code)}_Full.docx" style="text-decoration:none">⬇ Word ฉบับเต็ม</a>
+          <a class="tv-hosp-chip" href="exports/pdf/${encodeURIComponent(mod.docId || mod.code)}.pdf?v=20261128ths16" download="RACM303_${esc(mod.docId || mod.code)}_Full.pdf" style="text-decoration:none">⬇ PDF ฉบับเต็ม</a>
+          <a class="tv-hosp-chip" href="exports/docx/${encodeURIComponent(mod.docId || mod.code)}.docx?v=20261128ths16" download="RACM303_${esc(mod.docId || mod.code)}_Full.docx" style="text-decoration:none">⬇ Word ฉบับเต็ม</a>
           ${
             ROLE === "faculty"
               ? `<button type="button" class="tv-hosp-chip" id="tvEpActQuickUpload" data-tv-modal-focus>📤 ${esc(t(`มุม Upload Slide / ไฟล์สอน (${mod.code})`, `Upload Slides (${mod.code})`))}</button>`
@@ -3011,8 +3011,8 @@
           badge: chip,
           icoCls,
           icoTxt,
-          pdfHref: `exports/pdf/${encodeURIComponent(docId)}.pdf`,
-          docxHref: `exports/docx/${encodeURIComponent(docId)}.docx`,
+          pdfHref: `exports/pdf/${encodeURIComponent(docId)}.pdf?v=20261128ths16`,
+          docxHref: `exports/docx/${encodeURIComponent(docId)}.docx?v=20261128ths16`,
           onOpen: openFileAction(() => {
             if (api && api.openTextbookDoc) api.openTextbookDoc(docId);
           })
@@ -4496,8 +4496,8 @@
             <button type="button" class="tv-hosp-chip" id="stuOpenSpssDeckQuickBtn">💻 เปิด Slide SPSS Workshop (10 สไลด์ · 16:9)</button>
             <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_ST1_Slides.pdf" download="RACM303_2569_ST1_Slides.pdf" style="text-decoration:none">⬇ Slide ST1 (.pdf)</a>
             <a class="tv-hosp-chip" href="exports/pdf/RACM303_2569_SPSS_Workshop_Slides.pdf" download="RACM303_2569_SPSS_Workshop_Slides.pdf" style="text-decoration:none">⬇ Slide SPSS (.pdf)</a>
-            <a class="tv-hosp-chip" href="exports/pdf/ST1.pdf" download="RACM303_ST1_Full.pdf" style="text-decoration:none">⬇ ST1 ฉบับเต็ม (.pdf)</a>
-            <a class="tv-hosp-chip" href="exports/pdf/ST1-CONCISE.pdf" download="RACM303_ST1_Abridged.pdf" style="text-decoration:none">⬇ ST1 ฉบับย่อ (.pdf)</a>
+            <a class="tv-hosp-chip" href="exports/pdf/ST1.pdf?v=20261128ths16" download="RACM303_ST1_Full.pdf" style="text-decoration:none">⬇ ST1 ฉบับเต็ม (.pdf)</a>
+            <a class="tv-hosp-chip" href="exports/pdf/ST1-CONCISE.pdf?v=20261128ths16" download="RACM303_ST1_Abridged.pdf" style="text-decoration:none">⬇ ST1 ฉบับย่อ (.pdf)</a>
             <button type="button" class="tv-hosp-chip" id="stuOpenHsSlidesHubBtn">🖥️ ดูหน้ารวม Slide อาจารย์ (ST1 &amp; HS1–HS6) →</button>
           </div>
           <div class="tv-up-list" id="stuUploadedSlidesList"></div>

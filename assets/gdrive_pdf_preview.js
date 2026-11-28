@@ -589,8 +589,20 @@
     }
   }
 
-  async function openPreview(url, opts) {
-    if (!url) return;
+  const LOCAL_EXPORT_CACHE_VER = "20261128ths16";
+
+  function withExportCacheVer(rawUrl) {
+    const s = String(rawUrl || "");
+    if (!s || /[?&]v=/.test(s)) return s;
+    if (/\/exports\/pdf\/[^?#]+\.pdf$/i.test(s) || /^exports\/pdf\/[^?#]+\.pdf$/i.test(s)) {
+      return `${s}?v=${LOCAL_EXPORT_CACHE_VER}`;
+    }
+    return s;
+  }
+
+  async function openPreview(rawUrl, opts) {
+    if (!rawUrl) return;
+    const url = withExportCacheVer(rawUrl);
     ensureDom();
     const options = opts || {};
     state.prevFocus = document.activeElement;
