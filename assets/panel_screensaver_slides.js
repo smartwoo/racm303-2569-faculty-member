@@ -1390,12 +1390,17 @@
     });
   }
 
-  /* ---------- Live Sync & Real-Time Floor Q&A Engine (BroadcastChannel + Dual MQTT WSS + LocalStorage) ---------- */
+  /* ---------- Live Sync & Real-Time Floor Q&A Engine (BroadcastChannel + Dual MQTT WSS + PeerJS 443 + LocalStorage) ---------- */
   let bc = null;
   let qaBc = null;
   const mqttClients = [];
   const connectedBrokers = new Set();
   const pendingQaPublishes = [];
+  let peerInst = null;
+  let peerHostSlotIdx = 0;
+  let peerReconnectTimer = null;
+  const peerConns = new Map();
+  const pendingPeerPublishes = [];
   const qaBuckets = Object.create(null);
 
   function getDeviceId() {
@@ -1429,10 +1434,14 @@
     try {
       const host = window.location.hostname || "";
       if (host === "localhost" || host === "127.0.0.1") {
-        return `${window.location.origin}${window.location.pathname}#${QA_HASH_SLUG}`;
+        const stuPath = (window.location.pathname || "/").replace(
+          "/racm303-2569-faculty-member/",
+          "/racm303-2569-student/"
+        );
+        return `${window.location.origin}${stuPath}?qa=1#${QA_HASH_SLUG}`;
       }
     } catch (_) {}
-    return `${PROD_STUDENT_BASE}#${QA_HASH_SLUG}`;
+    return `${PROD_STUDENT_BASE}?qa=1#${QA_HASH_SLUG}`;
   }
 
   function ensureQaBucket(deckId) {
@@ -1603,9 +1612,10 @@
       }
     }
 
-    if (!changed) return;
+    if (!changed) return false;
     persistQaBucket(deckId);
     refreshQaComposerFeedOnly();
+    refreshQrModalCountOnly(deckId);
 
     if (state.isOpen && state.deckId === deckId && getCurrentSlide().type === "qa") {
       const nextList = getVisibleQaList(deckId);
@@ -1627,6 +1637,264 @@
           updateStageView();
         }
       }
+    }
+    return true;
+  }
+
+  function buildQaSnapshotPayload(deckId) {
+    const key = deckId || state.deckId || "w1-d1-global";
+    const bucket = ensureQaBucket(key);
+    const likesObj = {};
+    bucket.likes.forEach((set, qId) => {
+      likesObj[qId] = Array.from(set);
+    });
+    return {
+      deckId: key,
+      clearedBeforeTs: bucket.clearedBeforeTs || 0,
+      hiddenIds: Array.from(bucket.hiddenIds),
+      items: Array.from(bucket.items.values()).slice(-150),
+      likes: likesObj
+    };
+  }
+
+  function ingestQaSnapshot(snap) {
+    if (!snap || typeof snap !== "object") return false;
+    const deckId = snap.deckId || "w1-d1-global";
+    const bucket = ensureQaBucket(deckId);
+    let anyChanged = false;
+    const newQuestions = [];
+
+    if (typeof snap.clearedBeforeTs === "number" && snap.clearedBeforeTs > bucket.clearedBeforeTs) {
+      bucket.clearedBeforeTs = snap.clearedBeforeTs;
+      anyChanged = true;
+    }
+    if (Array.isArray(snap.hiddenIds)) {
+      snap.hiddenIds.forEach((id) => {
+        const sId = String(id || "");
+        if (sId && !bucket.hiddenIds.has(sId)) {
+          bucket.hiddenIds.add(sId);
+          anyChanged = true;
+        }
+      });
+    }
+    if (Array.isArray(snap.items)) {
+      snap.items.forEach((it) => {
+        if (!it || !it.id || !it.text) return;
+        const cleanText = String(it.text).trim().slice(0, 420);
+        if (!cleanText) return;
+        const sId = String(it.id);
+        const existing = bucket.items.get(sId);
+        if (!existing || existing.text !== cleanText) {
+          const rec = {
+            id: sId,
+            deckId,
+            text: cleanText,
+            target: String(it.target || QA_TARGET_OPTIONS[0]).trim().slice(0, 60),
+            author: String(it.author || "").trim().slice(0, 60),
+            senderId: String(it.senderId || ""),
+            ts: Number(it.ts) || Date.now()
+          };
+          bucket.items.set(sId, rec);
+          newQuestions.push(rec);
+          anyChanged = true;
+        }
+      });
+    }
+    if (snap.likes && typeof snap.likes === "object") {
+      Object.keys(snap.likes).forEach((qId) => {
+        const arr = snap.likes[qId];
+        if (!Array.isArray(arr)) return;
+        let set = bucket.likes.get(qId);
+        if (!set) {
+          set = new Set();
+          bucket.likes.set(qId, set);
+        }
+        arr.forEach((v) => {
+          const sV = String(v || "");
+          if (sV && !set.has(sV)) {
+            set.add(sV);
+            anyChanged = true;
+          }
+        });
+      });
+    }
+
+    if (anyChanged) {
+      persistQaBucket(deckId);
+      refreshQaComposerFeedOnly();
+      refreshQrModalCountOnly(deckId);
+      if (state.isOpen && state.deckId === deckId && getCurrentSlide().type === "qa") {
+        updateStageView();
+      }
+      if (ROLE === "faculty" && newQuestions.length > 0) {
+        newQuestions.forEach((qObj) => {
+          publishQaMqtt(`${deckId}/q/${qObj.id}`, qObj, true);
+        });
+      }
+    }
+    return anyChanged;
+  }
+
+  function sendPeerPacket(pkt, excludePeerId) {
+    let sentAny = false;
+    peerConns.forEach((conn, pid) => {
+      if (excludePeerId && pid === excludePeerId) return;
+      if (conn && conn.open) {
+        try {
+          conn.send(pkt);
+          sentAny = true;
+        } catch (_) {}
+      }
+    });
+    if (!sentAny && pkt && pkt.type === "qa_pkt") {
+      pendingPeerPublishes.push(pkt);
+      if (pendingPeerPublishes.length > 80) pendingPeerPublishes.shift();
+    }
+  }
+
+  function wirePeerConnection(conn) {
+    if (!conn || !conn.peer) return;
+    const pid = String(conn.peer);
+    const onOpen = () => {
+      peerConns.set(pid, conn);
+      connectedBrokers.add(`peer:${pid}`);
+      refreshQaConnBadge();
+      try {
+        conn.send({
+          type: "qa_snapshot",
+          snap: buildQaSnapshotPayload(state.deckId || "w1-d1-global")
+        });
+        if (ROLE === "faculty" && state.isOpen) {
+          conn.send({
+            type: "host_sync",
+            data: {
+              senderRole: "faculty",
+              deckId: state.deckId,
+              slideIdx: state.slideIdx,
+              stationIdx: state.stationIdx,
+              qaFocusIdx: state.qaFocusIdx,
+              backdropMode: state.backdropMode,
+              ts: Date.now()
+            }
+          });
+        }
+      } catch (_) {}
+      if (pendingPeerPublishes.length > 0) {
+        const batch = pendingPeerPublishes.splice(0, pendingPeerPublishes.length);
+        batch.forEach((item) => {
+          try {
+            conn.send(item);
+          } catch (_) {}
+        });
+      }
+    };
+
+    if (conn.open) onOpen();
+    else conn.on("open", onOpen);
+
+    conn.on("data", (msg) => {
+      if (!msg || typeof msg !== "object") return;
+      if (msg.type === "qa_pkt" && msg.kind && msg.data) {
+        const changed = ingestQaPacket(msg.kind, msg.data);
+        if (ROLE === "faculty" && changed) {
+          sendPeerPacket(msg, pid);
+          const dId = msg.data.deckId || "w1-d1-global";
+          if (msg.kind === "question" && msg.data.id) {
+            publishQaMqtt(`${dId}/q/${msg.data.id}`, msg.data, true);
+          } else if (msg.kind === "like" && msg.data.id && msg.data.voterId) {
+            publishQaMqtt(`${dId}/like/${msg.data.id}/${msg.data.voterId}`, msg.data, true);
+          } else if (msg.kind === "mod" && msg.data.id) {
+            publishQaMqtt(`${dId}/mod/${msg.data.id}`, msg.data, true);
+          }
+        }
+      } else if (msg.type === "qa_snapshot" && msg.snap) {
+        const merged = ingestQaSnapshot(msg.snap);
+        if (ROLE === "faculty" && merged) {
+          sendPeerPacket({ type: "qa_snapshot", snap: buildQaSnapshotPayload(msg.snap.deckId || state.deckId) }, pid);
+        }
+      } else if (msg.type === "host_sync" && msg.data) {
+        handleIncomingSync(msg.data);
+      }
+    });
+
+    const onClose = () => {
+      peerConns.delete(pid);
+      connectedBrokers.delete(`peer:${pid}`);
+      refreshQaConnBadge();
+    };
+    conn.on("close", onClose);
+    conn.on("error", onClose);
+  }
+
+  function connectPeerToHosts() {
+    if (!peerInst || peerInst.destroyed || !peerInst.open) return;
+    PEER_HOST_IDS.forEach((hostId) => {
+      if (peerInst.id === hostId) return;
+      const existing = peerConns.get(hostId);
+      if (existing && existing.open) return;
+      try {
+        const conn = peerInst.connect(hostId, { reliable: true });
+        if (conn) wirePeerConnection(conn);
+      } catch (_) {}
+    });
+  }
+
+  function initPeerBridge() {
+    if (typeof window.Peer !== "function") return;
+    if (peerInst && !peerInst.destroyed) return;
+
+    try {
+      if (ROLE === "faculty") {
+        const desiredId =
+          peerHostSlotIdx < PEER_HOST_IDS.length ? PEER_HOST_IDS[peerHostSlotIdx] : undefined;
+        const p = desiredId ? new window.Peer(desiredId, { debug: 0 }) : new window.Peer(undefined, { debug: 0 });
+        peerInst = p;
+        p.on("open", () => {
+          connectedBrokers.add("peer:signaling");
+          refreshQaConnBadge();
+          connectPeerToHosts();
+        });
+        p.on("connection", (conn) => wirePeerConnection(conn));
+        p.on("disconnected", () => {
+          connectedBrokers.delete("peer:signaling");
+          refreshQaConnBadge();
+          try { p.reconnect(); } catch (_) {}
+        });
+        p.on("error", (err) => {
+          if (err && err.type === "unavailable-id" && peerHostSlotIdx < PEER_HOST_IDS.length) {
+            peerHostSlotIdx += 1;
+            try { p.destroy(); } catch (_) {}
+            peerInst = null;
+            setTimeout(initPeerBridge, 120);
+          }
+        });
+      } else {
+        const p = new window.Peer(undefined, { debug: 0 });
+        peerInst = p;
+        p.on("open", () => {
+          connectedBrokers.add("peer:signaling");
+          refreshQaConnBadge();
+          connectPeerToHosts();
+        });
+        p.on("connection", (conn) => wirePeerConnection(conn));
+        p.on("disconnected", () => {
+          connectedBrokers.delete("peer:signaling");
+          refreshQaConnBadge();
+          try { p.reconnect(); } catch (_) {}
+        });
+        p.on("error", () => {});
+      }
+    } catch (_) {}
+
+    if (!peerReconnectTimer) {
+      peerReconnectTimer = setInterval(() => {
+        if (!state.isOpen && !state.qaComposerOpen) return;
+        if (!peerInst || peerInst.destroyed) {
+          initPeerBridge();
+        } else if (peerInst.open) {
+          connectPeerToHosts();
+        }
+      }, 8000);
     }
   }
 
@@ -1653,6 +1921,7 @@
       try { qaBc.postMessage({ kind: "question", data: qObj }); } catch (_) {}
     }
     publishQaMqtt(`${qObj.deckId}/q/${qObj.id}`, qObj, true);
+    sendPeerPacket({ type: "qa_pkt", kind: "question", data: qObj });
     return qObj;
   }
 
@@ -1674,6 +1943,7 @@
       try { qaBc.postMessage({ kind: "like", data: pkt }); } catch (_) {}
     }
     publishQaMqtt(`${pkt.deckId}/like/${qId}/${myId}`, pkt, true);
+    sendPeerPacket({ type: "qa_pkt", kind: "like", data: pkt });
   }
 
   function hideFloorQuestion(deckId, qId) {
@@ -1690,10 +1960,12 @@
       try { qaBc.postMessage({ kind: "mod", data: pkt }); } catch (_) {}
     }
     publishQaMqtt(`${pkt.deckId}/mod/${qId}`, pkt, true);
+    sendPeerPacket({ type: "qa_pkt", kind: "mod", data: pkt });
   }
 
   function initLiveSync() {
     ensureQaBucket(state.deckId || "w1-d1-global");
+    initPeerBridge();
 
     if (typeof BroadcastChannel !== "undefined" && !bc) {
       try {
@@ -1790,6 +2062,7 @@
         try { cl.publish(MQTT_TOPIC, JSON.stringify(msg)); } catch (_) {}
       }
     });
+    sendPeerPacket({ type: "host_sync", data: msg });
   }
 
   function handleIncomingSync(msg) {
@@ -2876,6 +3149,18 @@
     wrap.innerHTML = renderQaComposerFeedHtml(state.deckId || "w1-d1-global");
   }
 
+  function refreshQrModalCountOnly(deckId) {
+    const pill = document.getElementById("psvQrLiveCountPill");
+    if (!pill) return;
+    const qList = getVisibleQaList(deckId || state.deckId || "w1-d1-global");
+    const cnt = qList.length;
+    pill.classList.toggle("has-questions", cnt > 0);
+    pill.textContent =
+      cnt > 0
+        ? `🟢 รับคำถามสดเข้าคิวแล้ว ${cnt} ข้อ · คลิกเปิด Slide 12 →`
+        : "📡 พร้อมรับคำถามสดขึ้นจอ Slide 12 (0 ข้อ)";
+  }
+
   function ensureQaComposerElement() {
     let el = document.getElementById("panelQaComposerModal");
     if (el) return el;
@@ -2888,6 +3173,10 @@
     document.body.appendChild(el);
 
     el.addEventListener("click", (ev) => {
+      if (!window.RACM_UNIVERSAL_NAV && ev.target.closest("[data-racm-nav]")) {
+        closeQaComposerModal();
+        return;
+      }
       const targetBtn = ev.target.closest("[data-qac-target]");
       if (targetBtn) {
         state.qaSelectedTarget = targetBtn.getAttribute("data-qac-target") || QA_TARGET_OPTIONS[0];
@@ -2964,6 +3253,9 @@
   function openQaComposerModal(deckId, standalone) {
     initLiveSync();
     if (deckId) state.deckId = resolveDeckId(deckId);
+    state.qrLightboxOpen = false;
+    const qrM = document.getElementById("psvQrModal");
+    if (qrM) qrM.hidden = true;
     state.qaComposerOpen = true;
     state.qaComposerStandalone = Boolean(standalone);
     clearIdleTimer();
@@ -3047,12 +3339,19 @@
     if (el) el.hidden = true;
     if (!state.isOpen && !keepBodyLock) {
       document.body.classList.remove("psv-deck-open");
-      const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
-      if (h === QA_HASH_SLUG || h === "panel-global-qa") {
-        try {
-          history.replaceState(null, "", window.location.pathname + window.location.search);
-        } catch (_) {}
-      }
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        let touched = false;
+        if (sp.has("qa")) { sp.delete("qa"); touched = true; }
+        if (sp.has("ask")) { sp.delete("ask"); touched = true; }
+        const h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+        const clearHash = h === QA_HASH_SLUG || h === "panel-global-qa";
+        if (touched || clearHash) {
+          const rest = sp.toString();
+          const nextHash = clearHash ? "" : window.location.hash || "";
+          history.replaceState(null, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${nextHash}`);
+        }
+      } catch (_) {}
     } else if (state.isOpen) {
       resetIdleActivity();
       updateStageView();
@@ -3137,9 +3436,13 @@
           <div style="width:100%;display:flex;justify-content:flex-end"><div class="racm-unav-pair is-compact is-dark-hud"><button type="button" class="racm-unav-btn is-back" data-racm-nav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button><button type="button" class="racm-unav-btn is-home" data-racm-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button></div></div>
           <span class="psv-series-pill"><span class="psv-n-bar"></span>SCAN TO ASK LIVE QUESTIONS</span>
           <div class="psv-qr-big" id="psvQrBigBox"></div>
-          <div style="font-size:15px;font-weight:700;color:#fff" id="psvQrUrlLabel"></div>
+          <a class="psv-qr-url-link" id="psvQrUrlLabel" href="https://smartwoo.github.io/racm303-2569-student/?qa=1#panel-qa" target="_blank" rel="noopener">smartwoo.github.io/racm303-2569-student/#panel-qa ↗</a>
+          <button type="button" class="psv-qr-live-count-pill" id="psvQrLiveCountPill" data-psv-act="jump-qa-slide" title="คลิกเพื่อปิด QR และเปิดดูคำถามสดบน Slide 12">📡 พร้อมรับคำถามสดขึ้นจอ Slide 12 (0 ข้อ)</button>
           <p style="margin:0;font-size:13px;color:#cbd5e1">สแกนด้วยกล้องมือถือหรือไอแพดเพื่อพิมพ์คำถามสดส่งขึ้นจอ Slide 12 แบบเรียลไทม์</p>
-          <button type="button" class="psv-pill-btn is-active" data-psv-act="close-qr-modal">ปิดหน้าต่าง QR (Esc)</button>
+          <div class="psv-qr-modal-actions">
+            <button type="button" class="psv-pill-btn psv-qr-compose-btn" data-psv-act="open-qa-composer-from-qr">✍️ พิมพ์คำถามสดทันที</button>
+            <button type="button" class="psv-pill-btn is-active" data-psv-act="close-qr-modal">ปิดหน้าต่าง QR (Esc)</button>
+          </div>
         </div>
       </div>
 
@@ -3313,8 +3616,15 @@
         const askUrl = getQaScanUrl();
         const qrBox = document.getElementById("psvQrBigBox");
         const qrLbl = document.getElementById("psvQrUrlLabel");
-        if (qrBox) qrBox.innerHTML = buildQrSvg(askUrl);
-        if (qrLbl) qrLbl.textContent = `smartwoo.github.io/racm303-2569-student/#${QA_HASH_SLUG}`;
+        if (qrBox && qrBox.getAttribute("data-qr-url") !== askUrl) {
+          qrBox.innerHTML = buildQrSvg(askUrl);
+          qrBox.setAttribute("data-qr-url", askUrl);
+        }
+        if (qrLbl) {
+          qrLbl.href = askUrl;
+          qrLbl.textContent = `smartwoo.github.io/racm303-2569-student/#${QA_HASH_SLUG} ↗`;
+        }
+        refreshQrModalCountOnly(deck.id);
       }
     }
 
@@ -3577,6 +3887,12 @@
         closePinZoomLightbox();
         return;
       }
+      if (ev.target && ev.target.id === "psvQrModal") {
+        state.qrLightboxOpen = false;
+        resetIdleActivity();
+        updateStageView();
+        return;
+      }
       const qaPill = ev.target.closest("[data-psv-qa-idx]");
       if (qaPill) {
         if (qaPill.blur) qaPill.blur();
@@ -3637,6 +3953,14 @@
         }
       } else if (act === "open-qa-composer") {
         openQaComposerModal(state.deckId, false);
+      } else if (act === "open-qa-composer-from-qr") {
+        state.qrLightboxOpen = false;
+        openQaComposerModal(state.deckId, false);
+      } else if (act === "jump-qa-slide") {
+        state.qrLightboxOpen = false;
+        const deck = getCurrentDeck();
+        const qaSlideIdx = deck.slides.findIndex((s) => s && s.type === "qa");
+        goToSlide(qaSlideIdx >= 0 ? qaSlideIdx : 11, false);
       } else if (act === "hide-current-qa") {
         const qList = getVisibleQaList(state.deckId);
         const curQ = qList[state.qaFocusIdx];
@@ -4052,12 +4376,16 @@
     const slideParam = (params.get("slides") || params.get("panel") || "").toUpperCase();
     const qaParam = (params.get("qa") || params.get("ask") || "").toLowerCase();
 
-    if (h === QA_HASH_SLUG || h === "panel-global-qa" || qaParam === "global" || qaParam === "1") {
-      setTimeout(() => openQaComposerModal("w1-d1-global", true), 60);
+    if (h === QA_HASH_SLUG || h === "panel-global-qa" || qaParam === "global" || qaParam === "1" || qaParam === "true") {
+      openQaComposerModal("w1-d1-global", true);
+      return;
+    }
+    if (qaParam && PANEL_DECKS[resolveDeckId(qaParam)]) {
+      openQaComposerModal(resolveDeckId(qaParam), true);
       return;
     }
     if ((h === "panel-global" || slideParam === "GLOBAL") && PANEL_DECKS["w1-d1-global"]) {
-      setTimeout(() => openDeck("w1-d1-global", 0), 70);
+      openDeck("w1-d1-global", 0);
     }
   }
 
