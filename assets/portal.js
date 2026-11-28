@@ -2193,6 +2193,10 @@
       ) {
         const csStage = sh.querySelector(".ppt-concept-summary-stage");
         if (csStage) fitConceptSummarySlideStage(sh, csStage, true);
+      } else if (sh.classList.contains("is-layout-scenario-figure")) {
+        sh.querySelectorAll(".ppt-sf-side-card").forEach((sc) => {
+          if (typeof sc._runFit === "function") sc._runFit();
+        });
       } else {
         autoFitSingleSheetBoxes(sh, true);
       }
@@ -21873,6 +21877,292 @@
     return caseObj.scenarioBlocks.filter((blk) => blk && blk.type === "image" && blk.src);
   }
 
+  let figEvSvgSeq = 0;
+
+  function buildScenarioFigureCalloutSvgDOM(imgSrc, calloutSpec, opts) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const natW = Number(calloutSpec && calloutSpec.naturalWidth) || 851;
+    const natH = Number(calloutSpec && calloutSpec.naturalHeight) || 793;
+    const useFull = Boolean(opts && opts.useFullHeight);
+    const vbH = useFull ? natH : Number(calloutSpec && calloutSpec.inlineCropHeight) || natH;
+    const visSteps = opts && opts.visSteps ? opts.visSteps : null;
+
+    const HEX_LIST = ["#1d4ed8", "#0d9488", "#d97706", "#7c3aed", "#e11d48", "#059669"];
+    const RGB_LIST = [
+      "29, 78, 216",
+      "13, 148, 136",
+      "217, 119, 6",
+      "124, 58, 237",
+      "225, 29, 72",
+      "5, 150, 105"
+    ];
+
+    figEvSvgSeq += 1;
+    const uid = `hsdFigEv${figEvSvgSeq}`;
+    const clipId = `${uid}Clip`;
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "hsd-fig-callout-svg");
+    svg.setAttribute("viewBox", `0 0 ${natW} ${vbH}`);
+    svg.setAttribute("role", "img");
+
+    const defs = document.createElementNS(svgNS, "defs");
+    const clip = document.createElementNS(svgNS, "clipPath");
+    clip.setAttribute("id", clipId);
+    const clipRect = document.createElementNS(svgNS, "rect");
+    clipRect.setAttribute("x", "0");
+    clipRect.setAttribute("y", "0");
+    clipRect.setAttribute("width", String(natW));
+    clipRect.setAttribute("height", String(vbH));
+    clipRect.setAttribute("rx", "8");
+    clip.appendChild(clipRect);
+    defs.appendChild(clip);
+
+    HEX_LIST.forEach((hex, idx) => {
+      const mk = document.createElementNS(svgNS, "marker");
+      mk.setAttribute("id", `${uid}Arr${idx + 1}`);
+      mk.setAttribute("viewBox", "0 0 10 10");
+      mk.setAttribute("refX", "8.2");
+      mk.setAttribute("refY", "5");
+      mk.setAttribute("markerWidth", "5.2");
+      mk.setAttribute("markerHeight", "5.2");
+      mk.setAttribute("orient", "auto-start-reverse");
+      const p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", "M 0 1 L 9 5 L 0 9 z");
+      p.setAttribute("fill", hex);
+      mk.appendChild(p);
+      defs.appendChild(mk);
+    });
+    svg.appendChild(defs);
+
+    const imgGroup = document.createElementNS(svgNS, "g");
+    imgGroup.setAttribute("clip-path", `url(#${clipId})`);
+    const bgRect = document.createElementNS(svgNS, "rect");
+    bgRect.setAttribute("x", "0");
+    bgRect.setAttribute("y", "0");
+    bgRect.setAttribute("width", String(natW));
+    bgRect.setAttribute("height", String(vbH));
+    bgRect.setAttribute("fill", "#ffffff");
+    imgGroup.appendChild(bgRect);
+
+    const imgNode = document.createElementNS(svgNS, "image");
+    imgNode.setAttribute("href", imgSrc);
+    imgNode.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", imgSrc);
+    imgNode.setAttribute("x", "0");
+    imgNode.setAttribute("y", "0");
+    imgNode.setAttribute("width", String(natW));
+    imgNode.setAttribute("height", String(natH));
+    imgNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    imgGroup.appendChild(imgNode);
+    svg.appendChild(imgGroup);
+
+    const items = Array.isArray(calloutSpec && calloutSpec.items) ? calloutSpec.items : [];
+    items.forEach((it) => {
+      if (!it) return;
+      const step = Number(it.step) || 1;
+      if (visSteps && !visSteps.has(step)) return;
+      const cIdx = ((step - 1) % 6) + 1;
+      const hex = HEX_LIST[cIdx - 1];
+      const rgb = RGB_LIST[cIdx - 1];
+
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("class", `hsd-fig-ev-item${it.anchorForConnector ? " hsd-fig-clue-anchor" : ""}`);
+      g.setAttribute("data-concept-step", String(step));
+      g.setAttribute("data-concept-steps", String(step));
+
+      if (it.type === "rect") {
+        const sw = it.dashed ? 3.0 : 3.6;
+        const halo = document.createElementNS(svgNS, "rect");
+        halo.setAttribute("x", String(it.x));
+        halo.setAttribute("y", String(it.y));
+        halo.setAttribute("width", String(it.w));
+        halo.setAttribute("height", String(it.h));
+        halo.setAttribute("rx", String(it.rx || 10));
+        halo.setAttribute("fill", "none");
+        halo.setAttribute("stroke", "rgba(255,255,255,0.9)");
+        halo.setAttribute("stroke-width", String(sw + 3));
+        g.appendChild(halo);
+
+        const rEl = document.createElementNS(svgNS, "rect");
+        rEl.setAttribute("x", String(it.x));
+        rEl.setAttribute("y", String(it.y));
+        rEl.setAttribute("width", String(it.w));
+        rEl.setAttribute("height", String(it.h));
+        rEl.setAttribute("rx", String(it.rx || 10));
+        rEl.setAttribute("fill", `rgba(${rgb}, ${it.fillAlpha != null ? it.fillAlpha : 0.06})`);
+        rEl.setAttribute("stroke", hex);
+        rEl.setAttribute("stroke-width", String(sw));
+        if (it.dashed) rEl.setAttribute("stroke-dasharray", "8 5");
+        g.appendChild(rEl);
+      } else if (it.type === "circle") {
+        const sw = Number(it.strokeW) || 4.5;
+        if (it.emphasis) {
+          const glow = document.createElementNS(svgNS, "circle");
+          glow.setAttribute("cx", String(it.cx));
+          glow.setAttribute("cy", String(it.cy));
+          glow.setAttribute("r", String(it.r + 5));
+          glow.setAttribute("fill", "none");
+          glow.setAttribute("stroke", hex);
+          glow.setAttribute("stroke-opacity", "0.25");
+          glow.setAttribute("stroke-width", "5");
+          g.appendChild(glow);
+        }
+        const halo = document.createElementNS(svgNS, "circle");
+        halo.setAttribute("cx", String(it.cx));
+        halo.setAttribute("cy", String(it.cy));
+        halo.setAttribute("r", String(it.r));
+        halo.setAttribute("fill", "none");
+        halo.setAttribute("stroke", "rgba(255,255,255,0.94)");
+        halo.setAttribute("stroke-width", String(sw + 3.5));
+        g.appendChild(halo);
+
+        const cEl = document.createElementNS(svgNS, "circle");
+        cEl.setAttribute("cx", String(it.cx));
+        cEl.setAttribute("cy", String(it.cy));
+        cEl.setAttribute("r", String(it.r));
+        cEl.setAttribute("fill", `rgba(${rgb}, ${it.emphasis ? 0.09 : 0.04})`);
+        cEl.setAttribute("stroke", hex);
+        cEl.setAttribute("stroke-width", String(sw));
+        if (it.dashed) cEl.setAttribute("stroke-dasharray", "6 4");
+        g.appendChild(cEl);
+      } else if (it.type === "arrow") {
+        const sw = Number(it.strokeW) || 3.2;
+        const halo = document.createElementNS(svgNS, "path");
+        halo.setAttribute("d", String(it.d));
+        halo.setAttribute("fill", "none");
+        halo.setAttribute("stroke", "rgba(255,255,255,0.92)");
+        halo.setAttribute("stroke-width", String(sw + 3));
+        halo.setAttribute("stroke-linecap", "round");
+        g.appendChild(halo);
+
+        const pEl = document.createElementNS(svgNS, "path");
+        pEl.setAttribute("d", String(it.d));
+        pEl.setAttribute("fill", "none");
+        pEl.setAttribute("stroke", hex);
+        pEl.setAttribute("stroke-width", String(sw));
+        pEl.setAttribute("stroke-linecap", "round");
+        pEl.setAttribute("marker-end", `url(#${uid}Arr${cIdx})`);
+        g.appendChild(pEl);
+      } else if (it.type === "badge") {
+        const bBg = document.createElementNS(svgNS, "rect");
+        bBg.setAttribute("x", String(it.x));
+        bBg.setAttribute("y", String(it.y));
+        bBg.setAttribute("width", String(it.w));
+        bBg.setAttribute("height", String(it.h));
+        bBg.setAttribute("rx", String(it.rx || 12));
+        bBg.setAttribute("fill", "#ffffff");
+        bBg.setAttribute("stroke", hex);
+        bBg.setAttribute("stroke-width", "2.6");
+        g.appendChild(bBg);
+
+        const bTint = document.createElementNS(svgNS, "rect");
+        bTint.setAttribute("x", String(it.x));
+        bTint.setAttribute("y", String(it.y));
+        bTint.setAttribute("width", String(it.w));
+        bTint.setAttribute("height", String(it.h));
+        bTint.setAttribute("rx", String(it.rx || 12));
+        bTint.setAttribute("fill", `rgba(${rgb}, 0.08)`);
+        g.appendChild(bTint);
+
+        const lines = Array.isArray(it.lines) ? it.lines : [];
+        const cx = it.x + it.w / 2;
+        lines.forEach((lnTxt, lIdx) => {
+          const tEl = document.createElementNS(svgNS, "text");
+          tEl.setAttribute("x", String(cx));
+          tEl.setAttribute("text-anchor", "middle");
+          tEl.setAttribute("font-family", "'Anuphan','Sarabun','Plus Jakarta Sans',sans-serif");
+          let ty = it.y + it.h / 2 + 5;
+          let fs = 14.2;
+          let fw = "800";
+          let fillCol = hex;
+          if (lines.length === 2) {
+            ty = lIdx === 0 ? it.y + 18 : it.y + 35;
+            fs = lIdx === 0 ? 12.8 : 12.6;
+            fillCol = lIdx === 0 ? hex : "#0f172a";
+          } else if (lines.length >= 3) {
+            ty = lIdx === 0 ? it.y + 23 : lIdx === 1 ? it.y + 48 : it.y + 71;
+            fs = lIdx === 0 ? 13.0 : lIdx === 1 ? 14.6 : 12.0;
+            fw = lIdx === 2 ? "700" : "800";
+            fillCol = lIdx === 0 ? hex : lIdx === 1 ? "#0f172a" : "#475569";
+          }
+          tEl.setAttribute("y", String(ty));
+          tEl.setAttribute("font-size", String(fs));
+          tEl.setAttribute("font-weight", fw);
+          tEl.setAttribute("fill", fillCol);
+          tEl.textContent = lnTxt;
+          g.appendChild(tEl);
+        });
+      }
+
+      svg.appendChild(g);
+    });
+
+    if (opts && typeof opts.onClickZoom === "function") {
+      svg.addEventListener("click", opts.onClickZoom);
+    }
+    return svg;
+  }
+
+  function applyScenarioFigureCalloutsDOM(scenRoot, qId, opts) {
+    if (!scenRoot || !qId || typeof HSD_KEY === "undefined" || !HSD_KEY || !HSD_KEY.keys) return;
+    const tk = HSD_KEY.keys[qId];
+    const spec = tk && tk.figureCallouts ? tk.figureCallouts : null;
+    if (!spec || !spec.targetSrc) return;
+
+    scenRoot.querySelectorAll(".hsd-scenario-fig").forEach((figEl) => {
+      const existingImg = figEl.querySelector("img");
+      const origSrc = figEl.dataset.origFigSrc || (existingImg && existingImg.getAttribute("src")) || "";
+      if (!origSrc || !origSrc.includes(spec.targetSrc)) return;
+      figEl.dataset.origFigSrc = origSrc;
+      const capEl = figEl.querySelector("figcaption");
+      if (capEl && !figEl.dataset.origFigCap) {
+        figEl.dataset.origFigCap = capEl.textContent || "";
+      }
+      const prevSvg = figEl.querySelector(".hsd-fig-callout-svg");
+      if (prevSvg) prevSvg.remove();
+      if (existingImg) existingImg.remove();
+
+      const svg = buildScenarioFigureCalloutSvgDOM(origSrc, spec, {
+        useFullHeight: Boolean(opts && opts.useFullHeight),
+        visSteps: opts && opts.visSteps ? opts.visSteps : null,
+        onClickZoom: () => openLightbox(origSrc, figEl.dataset.origFigCap || "")
+      });
+      figEl.insertBefore(svg, figEl.firstChild);
+      if (capEl) {
+        capEl.textContent = "🎯 วงกลมชี้เป้าหลักฐานประกอบการตอบคำถามบนแผนภาพ (คลิกภาพเพื่อขยายเต็มจอ)";
+      }
+    });
+  }
+
+  function fitScenarioFigureSideCardDOM(sideCard, viewportEl, fitBodyEl, isStaticExport) {
+    if (!sideCard || !viewportEl || !fitBodyEl) return;
+    const runFit = () => {
+      if (!sideCard.isConnected) return;
+      const availH = viewportEl.clientHeight;
+      const availW = viewportEl.clientWidth;
+      if (availH < 40 || availW < 80) return;
+      let lo = 7.8;
+      let hi = 16.0;
+      for (let iter = 0; iter < 12; iter += 1) {
+        const mid = (lo + hi) / 2;
+        fitBodyEl.style.fontSize = `${mid.toFixed(2)}px`;
+        if (Math.max(fitBodyEl.scrollHeight, fitBodyEl.offsetHeight) <= availH - 4) {
+          lo = mid;
+        } else {
+          hi = mid;
+        }
+      }
+      fitBodyEl.style.fontSize = `${lo.toFixed(2)}px`;
+    };
+    sideCard._runFit = runFit;
+    requestAnimationFrame(runFit);
+    setTimeout(runFit, 120);
+    if (!isStaticExport && typeof ResizeObserver === "function") {
+      const ro = new ResizeObserver(() => requestAnimationFrame(runFit));
+      ro.observe(viewportEl);
+    }
+  }
+
   function jumpToScenarioFigureSlideBySrc(imgSrc) {
     const matchedCases = getFilteredHsDiscussionCases();
     const slides = buildHsSlideDeckItems(matchedCases);
@@ -30427,6 +30717,7 @@
 
       const sfStage = make("div", null, "ppt-scenario-figure-stage is-16x9-canvas");
       const figCard = make("figure", null, "ppt-sf-figure-card");
+      const mediaBox = make("div", null, "ppt-sf-media-box");
       const img = document.createElement("img");
       img.className = "ppt-sf-img";
       img.src = imgBlk.src;
@@ -30447,21 +30738,122 @@
         img.title = "คลิกเพื่อซูมขยายภาพประกอบโจทย์";
         img.addEventListener("click", () => openLightbox(imgBlk.src, imgBlk.caption || imgBlk.alt || ""));
       }
-      figCard.appendChild(img);
+      mediaBox.appendChild(img);
 
       const sideCard = make("aside", null, "ppt-sf-side-card");
       const topInfo = make("div", null, "ppt-sf-top");
-      topInfo.appendChild(make("span", `📊 แผนภาพประกอบโจทย์ · กรณีศึกษาที่ ${cur.caseObj.caseNumber}`, "ppt-sf-kicker"));
+      topInfo.appendChild(
+        make(
+          "span",
+          `📖 เนื้อหาโจทย์ครบถ้วน & แผนภาพประกอบ · กรณีศึกษาที่ ${cur.caseObj.caseNumber}`,
+          "ppt-sf-kicker"
+        )
+      );
       topInfo.appendChild(make("h5", cur.caseObj.subtitle || cur.caseObj.title || "", "ppt-sf-title"));
-      if (imgBlk.caption || imgBlk.alt) {
-        topInfo.appendChild(make("p", imgBlk.caption || imgBlk.alt, "ppt-sf-caption"));
-      }
       sideCard.appendChild(topInfo);
 
+      const scenViewport = make("div", null, "ppt-sf-scen-viewport");
+      const scenFitBody = make("div", null, "ppt-sf-scen-fit-body");
+      const populateUnabridgedScenario = (evQId) => {
+        scenFitBody.replaceChildren();
+        (cur.caseObj.scenarioBlocks || [])
+          .filter((blk) => blk && blk.type !== "image")
+          .forEach((blk) => {
+            scenFitBody.appendChild(renderScenarioBlock(blk));
+          });
+        if (imgBlk.caption || imgBlk.alt) {
+          scenFitBody.appendChild(
+            make("div", `📊 คำอธิบายแผนภาพ: ${imgBlk.caption || imgBlk.alt}`, "ppt-sf-source-note")
+          );
+        }
+        if (evQId && typeof HSD_KEY !== "undefined" && HSD_KEY && HSD_KEY.keys && HSD_KEY.keys[evQId]) {
+          const tkEv = HSD_KEY.keys[evQId];
+          const evClues = [];
+          (tkEv.conceptLinks || []).forEach((lk, idx) => {
+            const step = idx + 1;
+            const colorIdx = (idx % 6) + 1;
+            (lk.clues || []).forEach((rawClue, cIdx) => {
+              const phrase = String(rawClue || "").trim();
+              if (phrase.length >= 2) {
+                evClues.push({ step, colorIdx, phrase, isPrimary: cIdx === 0, linkInfo: lk });
+              }
+            });
+          });
+          evClues.sort((a, b) => b.phrase.length - a.phrase.length);
+          if (evClues.length) {
+            highlightMultiStepScenarioCluesDOM(scenFitBody, evClues, {
+              drawLines: false,
+              justStep: 0,
+              compactTag: true
+            });
+          }
+        }
+        if (typeof sideCard._runFit === "function") sideCard._runFit();
+      };
+      populateUnabridgedScenario("");
+      scenViewport.appendChild(scenFitBody);
+      sideCard.appendChild(scenViewport);
+
       const qList = Array.isArray(cur.caseObj.questions) ? cur.caseObj.questions : [];
+      const evQuestions =
+        !exp && !state.isPptSlideSharePopup
+          ? qList.filter(
+              (qItem) =>
+                canShowAnswerKeyInCurrentMode(qItem, cur.mod && cur.mod.id) &&
+                HSD_KEY.keys[qItem.id] &&
+                HSD_KEY.keys[qItem.id].figureCallouts &&
+                imgBlk.src.includes(HSD_KEY.keys[qItem.id].figureCallouts.targetSrc)
+            )
+          : [];
+
+      if (evQuestions.length > 0) {
+        const evBar = make("div", null, "ppt-sf-ev-bar hsd-no-print");
+        const setEvMode = (targetQId) => {
+          state.hsdScenarioFigEvQId = targetQId || "";
+          evBar.querySelectorAll(".ppt-sf-ev-pill").forEach((b) => {
+            b.classList.toggle("is-active", (b.dataset.evQid || "") === (targetQId || ""));
+          });
+          mediaBox.replaceChildren();
+          if (targetQId && HSD_KEY.keys[targetQId] && HSD_KEY.keys[targetQId].figureCallouts) {
+            mediaBox.appendChild(
+              buildScenarioFigureCalloutSvgDOM(imgBlk.src, HSD_KEY.keys[targetQId].figureCallouts, {
+                useFullHeight: true,
+                onClickZoom: () => openLightbox(imgBlk.src, imgBlk.caption || imgBlk.alt || "")
+              })
+            );
+          } else {
+            mediaBox.appendChild(img);
+          }
+          populateUnabridgedScenario(targetQId || "");
+        };
+
+        const rawBtn = make("button", "👁 ภาพโจทย์ต้นฉบับ", "ppt-sf-ev-pill is-active");
+        rawBtn.type = "button";
+        rawBtn.dataset.evQid = "";
+        rawBtn.addEventListener("click", () => setEvMode(""));
+        evBar.appendChild(rawBtn);
+
+        evQuestions.forEach((qItem) => {
+          const qIdx = Math.max(0, qList.indexOf(qItem));
+          const shortLbl = getShortQuestionNumLabel(qItem, qIdx);
+          const evBtn = make("button", `🎯 วงหลักฐาน ข้อ ${shortLbl}`, "ppt-sf-ev-pill");
+          evBtn.type = "button";
+          evBtn.dataset.evQid = qItem.id;
+          evBtn.title = `คลิกเพื่อวงกลมชี้เป้าหลักฐานบนแผนภาพสำหรับตอบคำถามข้อ ${shortLbl}`;
+          evBtn.addEventListener("click", () => setEvMode(qItem.id));
+          evBar.appendChild(evBtn);
+        });
+
+        figCard.appendChild(evBar);
+        if (state.hsdScenarioFigEvQId && evQuestions.some((q) => q.id === state.hsdScenarioFigEvQId)) {
+          setTimeout(() => setEvMode(state.hsdScenarioFigEvQId), 0);
+        }
+      }
+      figCard.appendChild(mediaBox);
+
+      const bottomBar = make("div", null, "ppt-sf-bottom-bar");
       if (qList.length > 0) {
-        const qWrap = make("div", null, "ppt-sf-qlist");
-        qWrap.appendChild(make("div", "ประเด็นคำถามที่ใช้แผนภาพนี้วิเคราะห์:", "ppt-sf-qlist-head"));
+        const qRow = make("div", null, "ppt-sf-qrow");
         qList.forEach((qItem, qIdx) => {
           const isInteractiveCard = !exp && !state.isPptSlideSharePopup;
           const qCard = make(
@@ -30481,25 +30873,27 @@
             make("span", getClearQuestionHeadingLabel(qItem, qIdx), "ppt-sf-qcard-num"),
             make("span", qItem.title || "", "ppt-sf-qcard-txt")
           );
-          qWrap.appendChild(qCard);
+          qRow.appendChild(qCard);
         });
-        sideCard.appendChild(qWrap);
+        bottomBar.appendChild(qRow);
       }
 
       if (!exp && !state.isPptSlideSharePopup) {
         const actWrap = make("div", null, "ppt-sf-actions hsd-no-print");
-        const zoomBtn = make("button", "🔍 ซูมขยาย", "ppt-sf-btn");
+        const zoomBtn = make("button", "🔍 ซูมขยายภาพ", "ppt-sf-btn");
         zoomBtn.type = "button";
         zoomBtn.addEventListener("click", () => openLightbox(imgBlk.src, imgBlk.caption || imgBlk.alt || ""));
         const nextBtn = make("button", "ไปที่คำถาม →", "ppt-sf-btn is-primary");
         nextBtn.type = "button";
         nextBtn.addEventListener("click", () => stepHsQuestionSlide(1));
         actWrap.append(zoomBtn, nextBtn);
-        sideCard.appendChild(actWrap);
+        bottomBar.appendChild(actWrap);
       }
+      sideCard.appendChild(bottomBar);
 
       sfStage.append(figCard, sideCard);
       sheet.appendChild(sfStage);
+      fitScenarioFigureSideCardDOM(sideCard, scenViewport, scenFitBody, Boolean(exp));
 
       const mFoot = make("div", null, "ppt-slide-master-foot");
       const slidePosIdx = exp && typeof exp.slideNumber === "number" ? exp.slideNumber : state.hsdSlideIdx + 1;
@@ -43581,6 +43975,7 @@
 
     const scenRoot = leftZoomBody.querySelector(".hsd-scenario-box") || leftZoomBody;
     highlightMultiStepScenarioCluesDOM(scenRoot, clueEntries, { drawLines, justStep, compactTag: false });
+    applyScenarioFigureCalloutsDOM(scenRoot, cur.qObj.id, { useFullHeight: false, visSteps });
 
     let activeStep = 0;
     state.hsdFocusedConceptStep = 0;
@@ -43748,7 +44143,7 @@
         const rowEl =
           rowCandidates.find((el) => !el.closest("[hidden]")) || rowCandidates[0] || null;
         if (!rowEl) return;
-        const marks = Array.from(leftZoomBody.querySelectorAll("mark.hsd-clue-hl")).filter((mEl) =>
+        const marks = Array.from(leftZoomBody.querySelectorAll("mark.hsd-clue-hl, .hsd-fig-clue-anchor")).filter((mEl) =>
           markHasConceptStep(mEl, step)
         );
         if (!marks.length) return;
@@ -43934,7 +44329,7 @@
     const applyFocusState = (nextStep) => {
       activeStep = nextStep || 0;
       if (drawLines) state.hsdFocusedConceptStep = activeStep;
-      leftZoomBody.querySelectorAll("mark.hsd-clue-hl").forEach((m) => {
+      leftZoomBody.querySelectorAll("mark.hsd-clue-hl, .hsd-fig-ev-item").forEach((m) => {
         const hasStep = activeStep > 0 && markHasConceptStep(m, activeStep);
         m.classList.toggle("is-focused", hasStep);
         m.classList.toggle("is-dimmed", activeStep > 0 && !hasStep);
@@ -44876,6 +45271,7 @@
 
       const scenRoot = scenContent.querySelector(".hsd-scenario-box") || scenContent;
       highlightMultiStepScenarioCluesDOM(scenRoot, clueEntries, { drawLines: true, justStep: 0, compactTag: true });
+      applyScenarioFigureCalloutsDOM(scenRoot, activeQObj.id, { useFullHeight: true, visSteps: null });
 
       // Populate .hsd-q-concept-hub inside activeQBlock's .hsd-q-head + .hsd-concept-bridge-bar in Answer Key rows
       const rows = (tk.keyTable && tk.keyTable.rows) || [];

@@ -1528,7 +1528,33 @@ window.RACM_HS_DISCUSSION_KEY = {
           "docSec": "1.3",
           "docTitle": "HS6 หัวข้อ 1.3 & 1.4: การขยายความครอบคลุมประชากรและบริการสุขภาพที่จำเป็น"
         }
-      ]
+      ],
+      "figureCallouts": {
+        "targetSrc": "sdg_uhc_2023_fig2.png",
+        "naturalWidth": 851,
+        "naturalHeight": 793,
+        "inlineCropHeight": 598,
+        "items": [
+          { "type": "rect", "step": 1, "x": 98, "y": 46, "w": 492, "h": 78, "rx": 10, "dashed": true, "fillAlpha": 0.05 },
+          { "type": "badge", "step": 1, "x": 596, "y": 62, "w": 246, "h": 40, "rx": 20, "lines": ["💬 #1 แกนนอน = SDG 3.8.1"] },
+          { "type": "rect", "step": 1, "x": 430, "y": 144, "w": 158, "h": 434, "rx": 12, "dashed": true, "fillAlpha": 0.04 },
+          { "type": "rect", "step": 1, "x": 16, "y": 498, "w": 572, "h": 80, "rx": 14, "dashed": false, "fillAlpha": 0.07 },
+          { "type": "circle", "step": 1, "cx": 54, "cy": 539, "r": 31, "dashed": true, "strokeW": 3.4 },
+          { "type": "circle", "step": 1, "cx": 509, "cy": 539, "r": 34, "dashed": false, "strokeW": 5.5, "emphasis": true },
+          { "type": "arrow", "step": 1, "d": "M 672 558 C 626 576, 580 574, 543 553", "strokeW": 3.4 },
+          {
+            "type": "badge",
+            "step": 1,
+            "x": 672,
+            "y": 494,
+            "w": 173,
+            "h": 88,
+            "rx": 12,
+            "anchorForConnector": true,
+            "lines": ["★ หลักฐาน #1 (ข้อ 1.1)", "ดีขึ้น 137 / 138 ประเทศ", "(ไม่เปลี่ยน 1 · แย่ลง 0)"]
+          }
+        ]
+      }
     },
     "q-8-2": {
       "scoreLabel": "เกณฑ์คะแนนตามเฉลยอาจารย์: 3 คะแนน (สถานการณ์โดยรวม 1 คะแนน + ปัจจัยสาเหตุไม่เกิน 2 คะแนน ข้อละ 1 คะแนน)",
@@ -1583,7 +1609,47 @@ window.RACM_HS_DISCUSSION_KEY = {
           "docSec": "1.3",
           "docTitle": "HS6 หัวข้อ 1.3: ลูกบาศก์หลักประกันสุขภาพ 3 มิติ (WHO UHC Cube: X · Y · Z)"
         }
-      ]
+      ],
+      "figureCallouts": {
+        "targetSrc": "sdg_uhc_2023_fig2.png",
+        "naturalWidth": 851,
+        "naturalHeight": 793,
+        "inlineCropHeight": 598,
+        "items": [
+          { "type": "rect", "step": 1, "x": 591, "y": 144, "w": 250, "h": 352, "rx": 12, "dashed": true, "fillAlpha": 0.04 },
+          { "type": "badge", "step": 1, "x": 594, "y": 92, "w": 249, "h": 40, "rx": 20, "lines": ["💬 #1 แกนตั้ง = SDG 3.8.2 (OOP)"] },
+          { "type": "rect", "step": 1, "x": 14, "y": 144, "w": 80, "h": 434, "rx": 14, "dashed": false, "fillAlpha": 0.07 },
+          { "type": "circle", "step": 1, "cx": 54, "cy": 202, "r": 31, "dashed": false, "strokeW": 4.2 },
+          { "type": "circle", "step": 1, "cx": 54, "cy": 321, "r": 30, "dashed": true, "strokeW": 3.2 },
+          { "type": "circle", "step": 1, "cx": 54, "cy": 440, "r": 34, "dashed": false, "strokeW": 5.5, "emphasis": true },
+          { "type": "circle", "step": 1, "cx": 54, "cy": 539, "r": 30, "dashed": true, "strokeW": 3.2 },
+          { "type": "arrow", "step": 1, "d": "M 22 80 C 6 102, 6 124, 18 146", "strokeW": 3.2 },
+          {
+            "type": "badge",
+            "step": 1,
+            "x": 8,
+            "y": 36,
+            "w": 164,
+            "h": 44,
+            "rx": 10,
+            "anchorForConnector": true,
+            "lines": ["★ #1: ดีขึ้น 42 / 138", "แย่ลงถึง 64 · คงเดิม 32"]
+          },
+          { "type": "circle", "step": 2, "cx": 509, "cy": 440, "r": 34, "dashed": false, "strokeW": 5.0, "emphasis": true },
+          { "type": "arrow", "step": 2, "d": "M 672 516 C 625 516, 575 492, 541 460", "strokeW": 3.2 },
+          {
+            "type": "badge",
+            "step": 2,
+            "x": 672,
+            "y": 498,
+            "w": 173,
+            "h": 86,
+            "rx": 12,
+            "anchorForConnector": true,
+            "lines": ["💬 #2 ช่องว่าง UHC Cube", "63 ประเทศ บริการดีขึ้น", "แต่รายจ่ายวิบัติแย่ลง!"]
+          }
+        ]
+      }
     },
     "q-9-1": {
       "scoreLabel": "เกณฑ์คะแนนตามเฉลยอาจารย์: 4 คะแนน (กรณี STI/HIV 2 คะแนน + กรณีบริการป้องกันเชิงรุก PrEP/PEP 2 คะแนน)",
