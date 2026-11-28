@@ -19,8 +19,13 @@
   const MQTT_TOPIC = "racm303/2569/panel_deck_sync/v1";
   const QA_MQTT_NS = "racm303/2569/panel_qa/v1";
   const MQTT_BROKERS = [
-    "wss://mqtt.eclipseprojects.io:443/mqtt",
-    "wss://broker.emqx.io:8084/mqtt"
+    "wss://broker.emqx.io:8084/mqtt",
+    "wss://test.mosquitto.org:8081/mqtt"
+  ];
+  const PEER_HOST_IDS = [
+    "racm303-2569-pqa-host-1",
+    "racm303-2569-pqa-host-2",
+    "racm303-2569-pqa-host-3"
   ];
   const STALE_QA_MS = 14 * 24 * 60 * 60 * 1000;
   const QA_TARGET_OPTIONS = [
@@ -33,7 +38,7 @@
   const AMBIENT_CYCLE_MS = 12000;
   const STATION_CYCLE_MS = 5800;
 
-  /* ---------- Pure-JS ISO/IEC 18004 QR Code SVG Generator (Versions 1..10, ECC-M) ---------- */
+  /* ---------- Pure-JS ISO/IEC 18004 QR Code SVG Generator (Versions 1..10, ECC-M, 8-Mask Optimal) ---------- */
   const QR_ECC_M = [
     null,
     [10, 1, 16, 0, 0],
@@ -88,19 +93,34 @@
     return rem;
   }
 
+  function qrMaskBit(maskId, r, c) {
+    if (maskId === 0) return (r + c) % 2 === 0;
+    if (maskId === 1) return r % 2 === 0;
+    if (maskId === 2) return c % 3 === 0;
+    if (maskId === 3) return (r + c) % 3 === 0;
+    if (maskId === 4) return (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0;
+    if (maskId === 5) return ((r * c) % 2) + ((r * c) % 3) === 0;
+    if (maskId === 6) return (((r * c) % 2) + ((r * c) % 3)) % 2 === 0;
+    return (((r + c) % 2) + ((r * c) % 3)) % 2 === 0;
+  }
+
+  const qrSvgCache = new Map();
   function buildQrSvg(text) {
-    const bytes = Array.from(new TextEncoder().encode(String(text || "")));
-    let ver = 1;
-    while (ver <= 10) {
-      const p = QR_ECC_M[ver];
-      const cap = p[1] * p[2] + p[3] * p[4];
-      const lenBits = ver <= 9 ? 8 : 16;
-      if (Math.ceil((4 + lenBits + bytes.length * 8) / 8) <= cap) break;
-      ver += 1;
+    const key = String(text || "");
+    if (qrSvgCache.has(key)) return qrSvgCache.get(key);
+    const bytes = Array.from(new TextEncoder().encode(key));
+    let ver = 10;
+    for (let v = 1; v <= 10; v += 1) {
+      const [, b1, d1, b2, d2] = QR_ECC_M[v];
+      const totalData = b1 * d1 + b2 * d2;
+      const lenBits = v <= 9 ? 8 : 16;
+      if (4 + lenBits + bytes.length * 8 <= totalData * 8) {
+        ver = v;
+        break;
+      }
     }
-    if (ver > 10) ver = 10;
-    const [ecPerBlock, g1Blocks, g1Data, g2Blocks, g2Data] = QR_ECC_M[ver];
-    const totalData = g1Blocks * g1Data + g2Blocks * g2Data;
+    const [ecCw, b1, d1, b2, d2] = QR_ECC_M[ver];
+    const totalData = b1 * d1 + b2 * d2;
     const bits = [];
     const pushBits = (val, n) => {
       for (let i = n - 1; i >= 0; i -= 1) bits.push((val >>> i) & 1);
@@ -110,6 +130,7 @@
     bytes.forEach((b) => pushBits(b, 8));
     for (let i = 0; i < 4 && bits.length < totalData * 8; i += 1) bits.push(0);
     while (bits.length % 8 !== 0) bits.push(0);
+
     const codewords = [];
     for (let i = 0; i < bits.length; i += 8) {
       let byte = 0;
@@ -121,133 +142,199 @@
       codewords.push(padToggle ? 0xec : 0x11);
       padToggle = !padToggle;
     }
-    const blocks = [];
-    const ecBlocks = [];
+
+    const blocksData = [];
+    const blocksEc = [];
     let offset = 0;
-    for (let b = 0; b < g1Blocks + g2Blocks; b += 1) {
-      const len = b < g1Blocks ? g1Data : g2Data;
+    for (let b = 0; b < b1 + b2; b += 1) {
+      const len = b < b1 ? d1 : d2;
       const slice = codewords.slice(offset, offset + len);
       offset += len;
-      blocks.push(slice);
-      ecBlocks.push(rsRemainder(slice, ecPerBlock));
+      blocksData.push(slice);
+      blocksEc.push(rsRemainder(slice, ecCw));
     }
-    const finalBytes = [];
-    const maxDataLen = Math.max(g1Data, g2Data);
+    const interleaved = [];
+    const maxDataLen = Math.max(d1, d2);
     for (let i = 0; i < maxDataLen; i += 1) {
-      blocks.forEach((bl) => {
-        if (i < bl.length) finalBytes.push(bl[i]);
-      });
+      for (let bi = 0; bi < blocksData.length; bi += 1) {
+        if (i < blocksData[bi].length) interleaved.push(blocksData[bi][i]);
+      }
     }
-    for (let i = 0; i < ecPerBlock; i += 1) {
-      ecBlocks.forEach((ec) => finalBytes.push(ec[i]));
+    for (let i = 0; i < ecCw; i += 1) {
+      for (let bi = 0; bi < blocksEc.length; bi += 1) interleaved.push(blocksEc[bi][i]);
     }
-    const size = ver * 4 + 17;
-    const grid = Array.from({ length: size }, () => new Int8Array(size));
-    const reserved = Array.from({ length: size }, () => new Uint8Array(size));
 
-    const placeFinder = (r0, c0) => {
-      for (let dr = -1; dr <= 7; dr += 1) {
-        for (let dc = -1; dc <= 7; dc += 1) {
-          const r = r0 + dr;
-          const c = c0 + dc;
-          if (r < 0 || r >= size || c < 0 || c >= size) continue;
-          const on =
-            (dr >= 0 && dr <= 6 && (dc === 0 || dc === 6)) ||
-            (dc >= 0 && dc <= 6 && (dr === 0 || dr === 6)) ||
-            (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4);
-          grid[r][c] = on ? 1 : 0;
-          reserved[r][c] = 1;
+    const size = ver * 4 + 17;
+    const modules = Array.from({ length: size }, () => new Array(size).fill(false));
+    const isFunc = Array.from({ length: size }, () => new Array(size).fill(false));
+    const setFunc = (r, c, dark) => {
+      modules[r][c] = dark;
+      isFunc[r][c] = true;
+    };
+
+    const drawFinder = (top, left) => {
+      for (let dy = -1; dy <= 7; dy += 1) {
+        for (let dx = -1; dx <= 7; dx += 1) {
+          const r = top + dy;
+          const c = left + dx;
+          if (r >= 0 && r < size && c >= 0 && c < size) {
+            const inOuter = dy >= 0 && dy <= 6 && dx >= 0 && dx <= 6;
+            const inWhite = dy >= 1 && dy <= 5 && dx >= 1 && dx <= 5;
+            const inCore = dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4;
+            setFunc(r, c, inOuter && (!inWhite || inCore));
+          }
         }
       }
     };
-    placeFinder(0, 0);
-    placeFinder(0, size - 7);
-    placeFinder(size - 7, 0);
+    drawFinder(0, 0);
+    drawFinder(0, size - 7);
+    drawFinder(size - 7, 0);
 
-    const alignPts = QR_ALIGN[ver];
-    for (let i = 0; i < alignPts.length; i += 1) {
-      for (let j = 0; j < alignPts.length; j += 1) {
-        const cr = alignPts[i];
-        const cc = alignPts[j];
-        if (reserved[cr][cc]) continue;
-        for (let dr = -2; dr <= 2; dr += 1) {
-          for (let dc = -2; dc <= 2; dc += 1) {
-            const on = Math.max(Math.abs(dr), Math.abs(dc)) !== 1;
-            grid[cr + dr][cc + dc] = on ? 1 : 0;
-            reserved[cr + dr][cc + dc] = 1;
+    for (let i = 8; i < size - 8; i += 1) {
+      setFunc(6, i, i % 2 === 0);
+      setFunc(i, 6, i % 2 === 0);
+    }
+
+    const apos = QR_ALIGN[ver];
+    for (let ai = 0; ai < apos.length; ai += 1) {
+      for (let aj = 0; aj < apos.length; aj += 1) {
+        const cy = apos[ai];
+        const cx = apos[aj];
+        if ((cy === 6 && cx === 6) || (cy === 6 && cx === size - 7) || (cy === size - 7 && cx === 6)) continue;
+        for (let dy = -2; dy <= 2; dy += 1) {
+          for (let dx = -2; dx <= 2; dx += 1) {
+            setFunc(cy + dy, cx + dx, Math.max(Math.abs(dy), Math.abs(dx)) !== 1);
           }
         }
       }
     }
-    for (let i = 8; i < size - 8; i += 1) {
-      if (!reserved[6][i]) {
-        grid[6][i] = i % 2 === 0 ? 1 : 0;
-        reserved[6][i] = 1;
-      }
-      if (!reserved[i][6]) {
-        grid[i][6] = i % 2 === 0 ? 1 : 0;
-        reserved[i][6] = 1;
-      }
-    }
-    for (let i = 0; i <= 8; i += 1) {
-      if (i < size) {
-        reserved[8][i] = 1;
-        reserved[i][8] = 1;
+
+    for (let i = 0; i < 9; i += 1) {
+      if (i !== 6) {
+        setFunc(8, i, false);
+        setFunc(i, 8, false);
       }
     }
     for (let i = 0; i < 8; i += 1) {
-      reserved[8][size - 1 - i] = 1;
-      reserved[size - 1 - i][8] = 1;
+      setFunc(8, size - 1 - i, false);
+      setFunc(size - 1 - i, 8, false);
     }
-    grid[size - 8][8] = 1;
-    reserved[size - 8][8] = 1;
+    setFunc(size - 8, 8, true);
 
-    const streamBits = [];
-    finalBytes.forEach((b) => {
-      for (let i = 7; i >= 0; i -= 1) streamBits.push((b >>> i) & 1);
-    });
+    if (ver >= 7) {
+      let rem = ver;
+      for (let i = 0; i < 12; i += 1) rem = (rem << 1) ^ ((rem >> 11) & 1 ? 0x1f25 : 0);
+      const vbits = (ver << 12) | rem;
+      for (let i = 0; i < 18; i += 1) {
+        const bit = ((vbits >> i) & 1) === 1;
+        const a = size - 11 + (i % 3);
+        const b = Math.floor(i / 3);
+        setFunc(a, b, bit);
+        setFunc(b, a, bit);
+      }
+    }
+
+    const allBits = [];
+    for (let i = 0; i < interleaved.length; i += 1) {
+      for (let b = 7; b >= 0; b -= 1) allBits.push((interleaved[i] >>> b) & 1);
+    }
     let bitIdx = 0;
     let upward = true;
     for (let col = size - 1; col >= 1; col -= 2) {
       if (col === 6) col -= 1;
       for (let step = 0; step < size; step += 1) {
         const r = upward ? size - 1 - step : step;
-        for (let dx = 0; dx < 2; dx += 1) {
-          const c = col - dx;
-          if (!reserved[r][c]) {
-            const bit = bitIdx < streamBits.length ? streamBits[bitIdx++] : 0;
-            grid[r][c] = (r + c) % 2 === 0 ? bit ^ 1 : bit;
+        for (let dc = 0; dc >= -1; dc -= 1) {
+          const c = col + dc;
+          if (!isFunc[r][c]) {
+            modules[r][c] = bitIdx < allBits.length ? allBits[bitIdx] === 1 : false;
+            bitIdx += 1;
           }
         }
       }
       upward = !upward;
     }
-    let fmt = (0b00 << 3) | 0b000;
-    let rem = fmt << 10;
-    for (let i = 14; i >= 10; i -= 1) {
-      if ((rem >>> i) & 1) rem ^= 0x537 << (i - 10);
+
+    const writeFormat = (mat, msk) => {
+      const data = (0b00 << 3) | msk;
+      let rem = data;
+      for (let i = 0; i < 10; i += 1) rem = (rem << 1) ^ ((rem >> 9) & 1 ? 0x537 : 0);
+      const bits15 = ((data << 10) | rem) ^ 0x5412;
+      for (let i = 0; i < 6; i += 1) mat[i][8] = ((bits15 >> i) & 1) === 1;
+      mat[7][8] = ((bits15 >> 6) & 1) === 1;
+      mat[8][8] = ((bits15 >> 7) & 1) === 1;
+      mat[8][7] = ((bits15 >> 8) & 1) === 1;
+      for (let i = 9; i < 15; i += 1) mat[8][14 - i] = ((bits15 >> i) & 1) === 1;
+      for (let i = 0; i < 8; i += 1) mat[8][size - 1 - i] = ((bits15 >> i) & 1) === 1;
+      for (let i = 8; i < 15; i += 1) mat[size - 15 + i][8] = ((bits15 >> i) & 1) === 1;
+      mat[size - 8][8] = true;
+    };
+
+    const calcPenalty = (mat) => {
+      let score = 0;
+      for (let r = 0; r < size; r += 1) {
+        let run = 1;
+        for (let c = 1; c < size; c += 1) {
+          if (mat[r][c] === mat[r][c - 1]) {
+            run += 1;
+            if (run === 5) score += 3;
+            else if (run > 5) score += 1;
+          } else run = 1;
+        }
+      }
+      for (let c = 0; c < size; c += 1) {
+        let run = 1;
+        for (let r = 1; r < size; r += 1) {
+          if (mat[r][c] === mat[r - 1][c]) {
+            run += 1;
+            if (run === 5) score += 3;
+            else if (run > 5) score += 1;
+          } else run = 1;
+        }
+      }
+      let darkCnt = 0;
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
+          if (mat[r][c]) darkCnt += 1;
+          if (r < size - 1 && c < size - 1) {
+            const v = mat[r][c];
+            if (v === mat[r][c + 1] && v === mat[r + 1][c] && v === mat[r + 1][c + 1]) score += 3;
+          }
+        }
+      }
+      const total = size * size;
+      score += Math.floor(Math.abs(darkCnt * 20 - total * 10) / total) * 10;
+      return score;
+    };
+
+    let bestMat = modules;
+    let bestScore = 1e9;
+    for (let msk = 0; msk < 8; msk += 1) {
+      const cand = modules.map((row) => row.slice());
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
+          if (!isFunc[r][c] && qrMaskBit(msk, r, c)) cand[r][c] = !cand[r][c];
+        }
+      }
+      writeFormat(cand, msk);
+      const sc = calcPenalty(cand);
+      if (sc < bestScore) {
+        bestScore = sc;
+        bestMat = cand;
+      }
     }
-    const fmtBits = ((fmt << 10) | rem) ^ 0x5412;
-    const fmtCoordsA = [
-      [8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8],
-      [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]
-    ];
-    const fmtCoordsB = [
-      [size - 1, 8], [size - 2, 8], [size - 3, 8], [size - 4, 8], [size - 5, 8], [size - 6, 8], [size - 7, 8],
-      [8, size - 8], [8, size - 7], [8, size - 6], [8, size - 5], [8, size - 4], [8, size - 3], [8, size - 2], [8, size - 1]
-    ];
-    for (let i = 0; i < 15; i += 1) {
-      const bit = (fmtBits >>> i) & 1;
-      grid[fmtCoordsA[i][0]][fmtCoordsA[i][1]] = bit;
-      grid[fmtCoordsB[i][0]][fmtCoordsB[i][1]] = bit;
-    }
+
+    const qz = 4;
+    const vb = size + qz * 2;
     let path = "";
     for (let r = 0; r < size; r += 1) {
       for (let c = 0; c < size; c += 1) {
-        if (grid[r][c]) path += `M${c + 1},${r + 1}h1v1h-1z`;
+        if (bestMat[r][c]) path += `M${c + qz},${r + qz}h1v1h-1z`;
       }
     }
-    return `<svg viewBox="0 0 ${size + 2} ${size + 2}" shape-rendering="crispEdges" aria-label="QR Code"><rect width="${size + 2}" height="${size + 2}" fill="#fff"/><path d="${path}" fill="#090d16"/></svg>`;
+    const svg = `<svg viewBox="0 0 ${vb} ${vb}" shape-rendering="crispEdges" role="img" aria-label="QR Code ส่งคำถามสด"><rect width="${vb}" height="${vb}" fill="#ffffff"/><path d="${path}" fill="#090d16"/></svg>`;
+    qrSvgCache.set(key, svg);
+    return svg;
   }
 
   function esc(str) {
