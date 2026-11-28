@@ -744,7 +744,7 @@ window.RACM_HS_DISCUSSION_KEY = {
       "hsBridge": {
         "ref": "HS2 หัวข้อที่ 3.1 และ 4.1 (ความสัมพันธ์ระหว่างหน้าที่ 4 ด้านกับเป้าหมายหลัก 3 ประการตาม WHO, 2000 สู่กรอบ WHO 6 Building Blocks และความเชื่อมโยงเชิงพลวัตตาม de Savigny & Adam, 2009)",
         "insights": [
-          "เชื่อมโยงสไลด์ Essential Framework (WHO, 2000 Fig. 2.1): ชี้ให้ผู้เรียนสังเกตทิศทางลูกศรจาก ‘หน้าที่ 4 ด้าน (Functions)’ สู่ ‘เป้าหมายหลัก 3 ประการ (Objectives: Health · Responsiveness · Fair financial contribution)’ — จะเห็นว่า Stewardship ส่งลูกศรกำกับทุกหน้าที่ และ Financing หนุนทั้ง Creating resources (ซึ่งในปี 2007 ขยายเป็น Workforce, Medical Products และ Information Systems) และ Delivering services",
+          "เชื่อมโยงสไลด์ Essential Framework (WHO, 2000): ชี้ให้ผู้เรียนสังเกตทิศทางลูกศรจาก ‘หน้าที่ 4 ด้าน (Functions)’ สู่ ‘เป้าหมายหลัก 3 ประการ (Objectives: Health · Responsiveness · Fair financial contribution)’ — จะเห็นว่า Stewardship ส่งลูกศรกำกับทุกหน้าที่ และ Financing หนุนทั้ง Creating resources (ซึ่งในปี 2007 ขยายเป็น Workforce, Medical Products และ Information Systems) และ Delivering services",
           "เน้นประเด็นสำคัญใน HS2 ว่า WHO 6 Building Blocks ไม่ใช่ ‘รายการเช็กลิสต์ 6 กล่องแยกขาดจากกัน’ แต่มี Leadership & Governance และ Health Financing เป็นตัวขับเคลื่อนเชิงโครงสร้าง และมี People อยู่ตรงกลาง! ในโจทย์ข้อนี้ คำสรุปของ ผอ.รพช. ชี้ให้เห็นชัดเจนว่าคอขวดของ Governance (ระเบียบส่วนกลาง) ไปล็อก Workforce (ตั้ง Nurse-led clinic ไม่ได้) จนกระทบ Service Delivery (แพทย์ Intern งานล้น 110 ชม./สัปดาห์)"
         ]
       },

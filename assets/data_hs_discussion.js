@@ -1734,9 +1734,9 @@ window.RACM_HS_DISCUSSION_DATA = {
               "studentStageBtnLabel": "🖼 ภาพ Framework",
               "title": "ความสัมพันธ์ระหว่างหน้าที่ 4 ด้าน กับเป้าหมายหลัก 3 ประการของระบบสุขภาพ",
               "enTitle": "Relationship Between Functions and Objectives of a Health System (WHO, 2000)",
-              "sourceNote": "WHO World Health Report (2000, Fig. 2.1)",
-              "imageSrc": "assets/images/hs2_fw_whr2000_functions_objectives.jpg?v=1",
-              "imageAlt": "Fig. 2.1 Relationship between functions and objectives of a health system (Source: WHO, 2000): 4 Functions (Stewardship, Creating resources, Delivering services, Financing) driving 3 Intrinsic Objectives (Responsiveness, Health, Fair financial contribution)",
+              "sourceNote": "WHO World Health Report (2000)",
+              "imageSrc": "assets/images/hs2_fw_whr2000_functions_objectives.jpg?v=2",
+              "imageAlt": "Relationship between functions and objectives of a health system (Source: WHO, 2000): 4 Functions (Stewardship, Creating resources, Delivering services, Financing) driving 3 Intrinsic Objectives (Responsiveness, Health, Fair financial contribution)",
               "caption": "WHO (2000) แยก ‘หน้าที่ที่ระบบกระทำ (4 Functions)’ ออกจาก ‘เป้าหมายหลักปลายทาง (3 Objectives)’ โดยมี Stewardship และ Financing เป็นคานงัดต้นน้ำที่กำกับและหนุน Creating resources ไปสู่ Delivering services",
               "nextBtnLabel": "คำอธิบาย 6 Building Blocks (Slide ถัดไป)"
             },
@@ -1752,9 +1752,9 @@ window.RACM_HS_DISCUSSION_DATA = {
                 "studentStageBtnLabel": "🖼 ภาพ Framework",
                 "title": "ความสัมพันธ์ระหว่างหน้าที่ 4 ด้าน กับเป้าหมายหลัก 3 ประการของระบบสุขภาพ",
                 "enTitle": "Relationship Between Functions and Objectives of a Health System (WHO, 2000)",
-                "sourceNote": "WHO World Health Report (2000, Fig. 2.1)",
-                "imageSrc": "assets/images/hs2_fw_whr2000_functions_objectives.jpg?v=1",
-                "imageAlt": "Fig. 2.1 Relationship between functions and objectives of a health system (Source: WHO, 2000): 4 Functions (Stewardship, Creating resources, Delivering services, Financing) driving 3 Intrinsic Objectives (Responsiveness, Health, Fair financial contribution)",
+                "sourceNote": "WHO World Health Report (2000)",
+                "imageSrc": "assets/images/hs2_fw_whr2000_functions_objectives.jpg?v=2",
+                "imageAlt": "Relationship between functions and objectives of a health system (Source: WHO, 2000): 4 Functions (Stewardship, Creating resources, Delivering services, Financing) driving 3 Intrinsic Objectives (Responsiveness, Health, Fair financial contribution)",
                 "caption": "WHO (2000) แยก ‘หน้าที่ที่ระบบกระทำ (4 Functions)’ ออกจาก ‘เป้าหมายหลักปลายทาง (3 Objectives)’ โดยมี Stewardship และ Financing เป็นคานงัดต้นน้ำที่กำกับและหนุน Creating resources ไปสู่ Delivering services",
                 "nextBtnLabel": "คำอธิบาย 6 Building Blocks (Slide ถัดไป)"
               }
