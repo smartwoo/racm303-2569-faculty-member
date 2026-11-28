@@ -2777,12 +2777,8 @@
 
     const gateNavRow = document.createElement("div");
     gateNavRow.className = "hsd-no-print";
-    gateNavRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;";
+    gateNavRow.style.cssText = "display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px;";
     gateNavRow.innerHTML = `
-      <div class="racm-unav-pair" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
-        <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span class="racm-unav-lbl">ย้อนกลับ</span></button>
-        <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
-      </div>
       <span style="font-size:12.5px;color:var(--muted, #64748b);font-weight:600">📍 ยืนยันตัวตนเข้าห้องกลุ่มย่อย ${escHtml(modCode)} (ห้องที่ ${roomId})</span>
     `;
     container.appendChild(gateNavRow);

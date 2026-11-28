@@ -450,14 +450,7 @@
       root.appendChild(switcher);
     }
 
-    const unavBackSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`;
-    const unavHomeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-    const studioUnavHtml = `
-      <div class="racm-unav-pair is-compact" role="navigation" aria-label="ปุ่มย้อนกลับและหน้าหลักใหญ่">
-        <button type="button" class="racm-unav-btn is-back" data-racm-nav="back" title="ย้อนกลับ 1 หน้าก่อนหน้านี้">${unavBackSvg}<span class="racm-unav-lbl">ย้อนกลับ</span></button>
-        <button type="button" class="racm-unav-btn is-home" data-racm-nav="home" title="กลับหน้าหลักใหญ่พอร์ทัล RACM 303">${unavHomeSvg}<span class="racm-unav-lbl">หน้าหลักใหญ่</span></button>
-      </div>
-    `;
+    const studioUnavHtml = "";
 
     // 1. Header Banner
     const pdfFilename = ((DATA.meta.pdfDownloadPath || "").split("?")[0]).split("/").pop() || `${modCode}_Slides.pdf`;

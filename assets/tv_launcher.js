@@ -2560,7 +2560,7 @@
     const bar = $("tvSubpageBar");
     const api = getApi();
     if (!bar || !api) return;
-    bar.classList.remove("has-centered-pills");
+    bar.classList.remove("has-centered-pills", "is-live-only");
     const st = api.getState ? api.getState() : {};
     const activeTab = st.activeTab || "home";
     const groupKey = NAV_GROUP_MAP[activeTab] || "home";
@@ -2587,25 +2587,23 @@
       return;
     }
 
-    bar.hidden = false;
-
     if (groupKey === "health-systems") {
       const isLiveJoined = Boolean(ROLE === "student" && st.hsdSessionJoined && st.myStudent);
+      if (!isLiveJoined) {
+        bar.hidden = true;
+        bar.innerHTML = "";
+        return;
+      }
 
+      bar.hidden = false;
+      bar.classList.add("is-live-only");
       bar.innerHTML = `
-        <div class="tv-subpage-left-group">
-          ${renderUniversalNavPairHtml({ tvFocus: true })}
+        <div class="tv-hsd-bar-right">
+          <span class="tv-live-active-pill">
+            <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
+            <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
+          </span>
         </div>
-        ${
-          isLiveJoined
-            ? `<div class="tv-hsd-bar-right">
-                 <span class="tv-live-active-pill">
-                   <span>🟢 ${esc(t(`กลุ่ม ${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`, `G${st.myStudent.disc} · ${st.myStudent.nickname || st.myStudent.id}`))}</span>
-                   <button type="button" class="tv-live-exit-btn" id="tvHsdExitLiveBtn">${esc(t("ออกกลุ่ม", "Leave"))}</button>
-                 </span>
-               </div>`
-            : ""
-        }
       `;
       const exitLiveBtn = $("tvHsdExitLiveBtn");
       if (exitLiveBtn) {
@@ -2632,10 +2630,9 @@
         { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
         { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
       ];
+      bar.hidden = false;
+      bar.classList.add("has-centered-pills");
       bar.innerHTML = `
-        <div class="tv-subpage-left-group">
-          ${renderUniversalNavPairHtml({ tvFocus: true })}
-        </div>
         <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
           ${epPills
             .map(
@@ -2677,25 +2674,24 @@
             ];
     }
 
-    bar.classList.toggle("has-centered-pills", siblings.length > 0);
+    if (!siblings.length) {
+      bar.hidden = true;
+      bar.innerHTML = "";
+      return;
+    }
+
+    bar.hidden = false;
+    bar.classList.add("has-centered-pills");
     bar.innerHTML = `
-      <div class="tv-subpage-left-group">
-        ${renderUniversalNavPairHtml({ tvFocus: true })}
+      <div class="tv-sibling-pills" role="tablist">
+        ${siblings
+          .map(
+            (s) => `
+          <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}" data-tv-focus>${esc(s.label)}</button>
+        `
+          )
+          .join("")}
       </div>
-      ${
-        siblings.length
-          ? `<div class="tv-sibling-pills" role="tablist">
-              ${siblings
-                .map(
-                  (s) => `
-                <button type="button" class="tv-sibling-pill ${s.id === activeTab ? "is-active" : ""}" data-tv-sib="${s.id}" data-tv-focus>${esc(s.label)}</button>
-              `
-                )
-                .join("")}
-            </div>
-            <div class="tv-subpage-right-spacer" aria-hidden="true"></div>`
-          : ""
-      }
     `;
 
     bar.querySelectorAll("[data-tv-sib]").forEach((btn) => {
@@ -3804,7 +3800,6 @@
     modeBanner.className = "portal-drive-mode-banner";
     modeBanner.innerHTML = `
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0">
-        ${renderUniversalNavPairHtml()}
         <div class="portal-drive-mode-copy">
           <strong>📁 ${esc(t("มุมมอง Google Drive (File Explorer) — รายวิชา RACM 303 ปีการศึกษา 2569", "Google Drive File Explorer View — RACM 303 (2569)"))}</strong>
           <span>${esc(t("เปิดดูทุกโฟลเดอร์ของทั้งรายวิชาแบบ File Explorer จริง (ตารางเรียน · ระบบสุขภาพ HS1–HS6 · ระบาดวิทยา · ภาคสนาม · คู่มือ · ส่งงาน) และสลับกลับโหมดเรียนได้ตลอดเวลา", "Browse every course folder like a real Google Drive File Explorer, or switch back to Study View anytime."))}</span>

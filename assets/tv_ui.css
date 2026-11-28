@@ -1212,11 +1212,11 @@ html[data-role="faculty"][data-theme="dark"] .tv-quick-tag {
   color: var(--tv-ink-muted);
 }
 
-/* ---------- Inner Sub-Page Navigation Bar (← หน้าหลัก + Sibling Switcher) ---------- */
+/* ---------- Inner Sub-Page Navigation Bar (Sibling Switcher) ---------- */
 .tv-subpage-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 16px;
@@ -1228,38 +1228,14 @@ html[data-role="faculty"][data-theme="dark"] .tv-quick-tag {
 }
 
 .tv-subpage-bar.has-centered-pills:not([hidden]) {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 12px;
 }
 
-.tv-subpage-bar.has-centered-pills > .tv-subpage-left-group {
-  justify-self: start;
-}
-
-.tv-subpage-bar.has-centered-pills > .tv-sibling-pills {
-  justify-self: center;
-}
-
-.tv-subpage-bar.has-centered-pills > .tv-subpage-right-spacer {
-  justify-self: end;
-  min-width: 0;
-}
-
-@media (max-width: 820px) {
-  .tv-subpage-bar.has-centered-pills:not([hidden]) {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .tv-subpage-bar.has-centered-pills > .tv-sibling-pills {
-    justify-self: center;
-  }
-
-  .tv-subpage-bar.has-centered-pills > .tv-subpage-right-spacer {
-    display: none;
-  }
+.tv-subpage-bar.is-live-only:not([hidden]) {
+  justify-content: flex-end;
 }
 
 .tv-back-home-btn {
