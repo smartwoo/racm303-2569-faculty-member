@@ -1885,7 +1885,10 @@
     root.querySelectorAll(".ep6-module-switcher [data-switch-ep-mod]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const nextCode = btn.getAttribute("data-switch-ep-mod");
-        if (nextCode) switchActiveModule(nextCode);
+        if (nextCode) {
+          switchActiveModule(nextCode);
+          window.dispatchEvent(new CustomEvent("racm:epstudiomodchange", { detail: { moduleCode: nextCode } }));
+        }
       });
     });
 

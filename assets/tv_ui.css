@@ -1361,7 +1361,8 @@ html[data-role="faculty"] .tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-
   border: 1px solid rgba(15, 118, 110, 0.24);
 }
 
-.tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active {
+.tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active,
+.tv-sibling-pill.is-hs-track-pill[data-tv-ep-track="beyond"].is-active {
   background: #0f766e;
   color: #ffffff;
 }
@@ -1384,7 +1385,8 @@ html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill:not(.is-active) .tv-si
   border-color: rgba(45, 212, 191, 0.3);
 }
 
-html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active {
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill[data-tv-hs-track="beyond"].is-active,
+html[data-theme="dark"] .tv-sibling-pill.is-hs-track-pill[data-tv-ep-track="beyond"].is-active {
   background: #2dd4bf;
   color: #042f2e;
 }

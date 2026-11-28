@@ -46964,8 +46964,10 @@
   function normalizeEpSection(sec) {
     const s = String(sec || "").trim().toLowerCase();
     if (s === "morbidity-mortality") return "ep6";
+    if (s === "zoom-spss") return "spss";
     const valid = [
       "all",
+      "exam-all",
       "racm303-epi",
       "ep1",
       "ep2",
@@ -46976,13 +46978,15 @@
       "ep7",
       "ep8",
       "ep9",
+      "sessions",
+      "exam-spec",
+      "exam-field",
+      "beyond-all",
       "rage-review",
       "rage201",
       "rage301",
       "spss",
-      "sessions",
-      "zoom-spss",
-      "exam-field"
+      "form-4a"
     ];
     return valid.includes(s) ? s : "all";
   }
@@ -47010,6 +47014,18 @@
         openFacultySlideStudioForSession("w1-d3-ep123");
       });
     }
+    window.addEventListener("racm:epstudiomodchange", (ev) => {
+      const code = ev && ev.detail && ev.detail.moduleCode ? String(ev.detail.moduleCode).toLowerCase() : "";
+      if (!code || state.activeTab !== "epidemiology") return;
+      if (["ep1", "ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(state.epSection)) {
+        state.epSection = code;
+        document.querySelectorAll("#epidemiologyMount .hs-seg-pill[data-ep-seg]").forEach((p) => {
+          const act = p.getAttribute("data-ep-seg") === code;
+          p.classList.toggle("is-active", act);
+          p.setAttribute("aria-selected", act ? "true" : "false");
+        });
+      }
+    });
   }
 
   function renderEpidemiologyView() {
@@ -47020,92 +47036,127 @@
     }
     mount.replaceChildren();
 
-    const curSec = state.epSection || "all";
+    const curSec = normalizeEpSection(state.epSection || "all");
     const isEpLectureCode = ["ep1", "ep2", "ep3", "ep4", "ep5", "ep6", "ep7", "ep8", "ep9"].includes(curSec);
-    const isRacmEpiTab = curSec === "racm303-epi" || isEpLectureCode;
     const isRageReviewTab = ["rage-review", "rage201", "rage301"].includes(curSec);
     const isSpssTab = curSec === "spss";
-    const isSessionsTab = curSec === "sessions" || curSec === "zoom-spss";
-    const isExamFieldTab = curSec === "exam-field";
+    const isForm4aTab = curSec === "form-4a";
+    const isBeyondAll = curSec === "beyond-all";
+    const isBeyondTrack = isBeyondAll || isRageReviewTab || isSpssTab || isForm4aTab;
+
+    const isSessionsTab = curSec === "sessions";
+    const isExamSpecTab = curSec === "exam-spec" || curSec === "exam-field";
+    const isExamAll = !isBeyondTrack && !isEpLectureCode && !isSessionsTab && !isExamSpecTab;
 
     const wrap = make("div", null, "ep-hub-wrap");
 
-    // 1. KPI Summary Strip (Aligned with the 3 core tracks + Exam/Fieldwork)
-    const kpiGrid = make("div", null, "ep-kpi-grid");
-    const kpis = [
-      {
-        badge: "🎯 RACM 303 EPI · EP1–EP9",
-        title: tr("RACM 303 EPI ที่ออกสอบ (9 คาบ VDO)", "RACM 303 EPI Exam Lectures (EP1–EP9)"),
-        meta: tr("ครบ EP1–EP9 รวม 256 สไลด์ · คำพูดอาจารย์ → Conceptualized · สอบ อ. 8 ธ.ค. 69", "9 Interactive Video Lectures · 256 Slides · Exam 8 Dec 2026"),
-        sec: "racm303-epi"
-      },
-      {
-        badge: tr("📘 ทบทวน RAGE 201 & 301 · ไม่ออกสอบ", "📘 RAGE 201 & 301 Review · Non-Exam"),
-        title: tr("ความรู้พื้นฐานสำหรับการทำ Health Survey", "Foundations for Community Health Survey"),
-        meta: tr("RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Stats, Statistical & Clinical Sig.)", "RAGE 201 Overview/Descriptive & RAGE 301 Medical Statistics"),
-        sec: "rage-review"
-      },
-      {
-        badge: tr("💻 Statistical Software · อ. 8 ธ.ค. 69", "💻 Statistical Software · Tue 8 Dec 26"),
-        title: tr("โปรแกรมวิเคราะห์ข้อมูลสถิติ SPSS", "Statistical Software (SPSS) Workshop"),
-        meta: tr("13.30–15.00 น. ห้อง 2C2-03 & Zoom · วิเคราะห์ข้อมูลสำรวจสุขภาพชุมชน", "13:30–15:00 · Room 2C2-03 & Zoom · Health Survey Data Analysis"),
-        sec: "spss"
-      },
-      {
-        badge: tr("🏥 สอบ 8 ธ.ค. & ฟอร์ม 4A 30 ธ.ค. 69", "🏥 Blueprint & Form 4A · 30 Dec 26"),
-        title: tr("สัดส่วนข้อสอบ 100% & นำเสนอภาคสนาม", "Exam Blueprint (100%) & Form 4A"),
-        meta: tr("ตารางสัดส่วนข้อสอบระบาดฯ & เกณฑ์นำเสนอทั้ง 9 โรงพยาบาล ห้อง 2C2-03", "EP Exam Blueprint & Fieldwork Oral Presentation (9 Hospitals)"),
-        sec: "exam-field"
-      }
-    ];
-    kpis.forEach((k) => {
-      const card = make("button", null, "ep-kpi-card");
-      card.type = "button";
-      card.innerHTML = `
-        <span class="ep-kpi-badge">${escapeHtml(k.badge)}</span>
-        <strong class="ep-kpi-title">${escapeHtml(k.title)}</strong>
-        <span class="ep-kpi-meta">${escapeHtml(k.meta)}</span>
-      `;
-      card.addEventListener("click", () => setEpidemiologySection(k.sec));
-      kpiGrid.appendChild(card);
-    });
-    wrap.appendChild(kpiGrid);
+    // 1. Centered Floating Scope Badge + Segmented Sub-Capsule (matching Health Systems)
+    const banner = make("div", null, "hsd-module-banner is-unified-hs-banner is-strip-only hsd-no-print");
+    const strip = make(
+      "div",
+      null,
+      `hs-unified-mod-strip is-segmented-strip${isBeyondTrack ? " is-beyond-strip" : " is-exam-strip"}`
+    );
+    strip.setAttribute("role", "group");
 
-    // 2. Clean Track Filter Bar (No cramped individual EP pills)
-    const filterBar = make("div", null, "ep-filter-bar");
-    filterBar.setAttribute("role", "tablist");
-    const filterItems = [
-      { id: "all", active: curSec === "all", label: tr("ภาพรวมทั้งหมด", "All Overview") },
-      { id: "racm303-epi", active: isRacmEpiTab, label: tr("🎯 RACM 303 EPI ที่ออกสอบ (EP1–EP9)", "🎯 RACM 303 EPI Exam (EP1–EP9)") },
-      { id: "rage-review", active: isRageReviewTab, label: tr("📘 ทบทวน RAGE 201 & 301 (พื้นฐาน Health Survey)", "📘 RAGE 201 & 301 Review (Health Survey Prep)") },
-      { id: "spss", active: isSpssTab, label: tr("💻 Statistical Software (SPSS)", "💻 Statistical Software (SPSS)") },
-      { id: "sessions", active: isSessionsTab, label: tr("📚 ตารางสอน & Zoom", "📚 Schedule & Zoom") },
-      { id: "exam-field", active: isExamFieldTab, label: tr("📋 สัดส่วนข้อสอบ & ภาคสนาม (4A)", "📋 Exam Blueprint & Form 4A") }
-    ];
-    filterItems.forEach((f) => {
-      const btn = make("button", f.label, `ep-filter-pill ${f.active ? "is-active" : ""}`);
+    const scopeBadge = make(
+      "span",
+      isBeyondTrack
+        ? tr(
+            "🌟 ไม่ออกสอบข้อเขียน · สำคัญต่อการสำรวจสุขภาพชุมชน (Health Survey) & นำเสนอ Final Presentation (ฟอร์ม 4A)",
+            "🌟 Not on Written Exam · Key for Community Health Survey & Final Presentation (Form 4A)"
+          )
+        : tr(
+            "🎯 หมวดเนื้อหาที่ออกสอบข้อเขียนระบาดวิทยา 100% (EP1–EP9 · สอบ อ. 8 ธ.ค. 2569 เวลา 08.30–12.00 น.)",
+            "🎯 100% Epidemiology Written Exam Scope (EP1–EP9 · Tue 8 Dec 2026, 08:30–12:00)"
+          ),
+      `hs-track-scope-badge ${isBeyondTrack ? "is-beyond" : "is-exam"}`
+    );
+    strip.appendChild(scopeBadge);
+
+    const capsule = make("div", null, "hs-seg-capsule");
+    capsule.setAttribute("role", "tablist");
+
+    const segItems = isBeyondTrack
+      ? [
+          { id: "beyond-all", active: isBeyondAll, label: tr("รวมทั้ง 3 หมวด", "All 3 Modules") },
+          { id: "rage-review", active: isRageReviewTab, label: tr("1. ทบทวน RAGE 201 & 301", "1. RAGE 201 & 301 Review") },
+          { id: "spss", active: isSpssTab, label: tr("2. SPSS Workshop (อ. 8 ธ.ค.)", "2. SPSS Workshop") },
+          { id: "form-4a", active: isForm4aTab, label: tr("3. Health Survey & ฟอร์ม 4A", "3. Health Survey & Form 4A") }
+        ]
+      : [
+          { id: "all", active: isExamAll, label: tr("รวมทุกบท (EP1–EP9)", "All Modules (EP1–EP9)") },
+          { id: "ep1", active: curSec === "ep1", label: "EP1" },
+          { id: "ep2", active: curSec === "ep2", label: "EP2" },
+          { id: "ep3", active: curSec === "ep3", label: "EP3" },
+          { id: "ep4", active: curSec === "ep4", label: "EP4" },
+          { id: "ep5", active: curSec === "ep5", label: "EP5" },
+          { id: "ep6", active: curSec === "ep6", label: "EP6" },
+          { id: "ep7", active: curSec === "ep7", label: "EP7" },
+          { id: "ep8", active: curSec === "ep8", label: "EP8" },
+          { id: "ep9", active: curSec === "ep9", label: "EP9" },
+          { id: "sessions", active: isSessionsTab, label: tr("ตารางสอน & Zoom", "Schedule & Zoom") },
+          { id: "exam-spec", active: isExamSpecTab, label: tr("สัดส่วนข้อสอบ 100%", "Exam Blueprint 100%") }
+        ];
+
+    segItems.forEach((it) => {
+      const btn = make("button", it.label, `hs-seg-pill${it.active ? " is-active" : ""}`);
       btn.type = "button";
       btn.setAttribute("role", "tab");
-      btn.setAttribute("aria-selected", f.active ? "true" : "false");
-      btn.addEventListener("click", () => setEpidemiologySection(f.id));
-      filterBar.appendChild(btn);
+      btn.setAttribute("data-ep-seg", it.id);
+      btn.setAttribute("aria-selected", it.active ? "true" : "false");
+      btn.addEventListener("click", () => setEpidemiologySection(it.id));
+      capsule.appendChild(btn);
     });
-    wrap.appendChild(filterBar);
+
+    strip.appendChild(capsule);
+    banner.appendChild(strip);
+    wrap.appendChild(banner);
+
+    // 2. Non-Exam Track Framing Banner (when viewing all 3 practical modules together)
+    if (isBeyondAll) {
+      const whyBanner = make("div", null, "sf-why-banner");
+      whyBanner.innerHTML =
+        `<div class="sf-why-head">` +
+        `<div class="sf-why-kicker">🧭 BEYOND THE WRITTEN EXAM · ทบทวนพื้นฐานสถิติ · ปฏิบัติการ SPSS · สำรวจสุขภาพชุมชน &amp; นำเสนอฟอร์ม 4A</div>` +
+        `<h3 class="sf-why-title">${escapeHtml(
+          tr(
+            "ทำไมทั้ง 3 หมวดนี้จึงสำคัญต่อการสำรวจสุขภาพชุมชน & นำเสนอ Final Presentation (ฟอร์ม 4A)?",
+            "Why These 3 Modules Are Essential for Community Health Survey & Final Presentation (Form 4A)"
+          )
+        )}</h3>` +
+        `<p class="sf-why-sub">${escapeHtml(
+          tr(
+            "ข้อสอบข้อเขียนระบาดวิทยา (อ. 8 ธ.ค. ช่วงเช้า) ออกเฉพาะ EP1–EP9 (100%) แต่ทั้ง 3 หมวดนี้คือชุดเครื่องมือปฏิบัติจริงสำหรับการวางแผนสำรวจชุมชน วิเคราะห์ข้อมูลด้วย SPSS และนำเสนอผลระบาดวิทยาภาคสนามทั้ง 9 โรงพยาบาล (พ. 30 ธ.ค. · ฟอร์ม 4A)",
+            "The Epidemiology written exam (Tue 8 Dec morning) tests EP1–EP9 (100%), while these 3 practical modules power your 9-hospital Community Health Survey, SPSS analysis, and Form 4A Final Presentation."
+          )
+        )}</p>` +
+        `</div>` +
+        `<div class="sf-why-pillars">` +
+        `<div class="sf-why-pillar"><span class="sf-pillar-ico">📘</span><div><strong>1. ทบทวน RAGE 201 &amp; RAGE 301</strong><span>ปูพื้นฐานการกำหนดประชากรเป้าหมาย ชนิดตัวแปร สถิติเชิงพรรณนา 95% CI และการแยกแยะ Statistical vs. Clinical Significance</span></div></div>` +
+        `<div class="sf-why-pillar"><span class="sf-pillar-ico">💻</span><div><strong>2. ปฏิบัติการ SPSS Workshop (อ. 8 ธ.ค. บ่าย)</strong><span>ติดตั้ง IBM SPSS v31 ม.มหิดล สร้าง Codebook, ทำ Data Cleaning/Recode และรันสถิติวิเคราะห์ผลสำรวจสุขภาพชุมชนจริง</span></div></div>` +
+        `<div class="sf-why-pillar"><span class="sf-pillar-ico">🏥</span><div><strong>3. นำเสนอ Final Presentation (ฟอร์ม 4A · พ. 30 ธ.ค.)</strong><span>สังเคราะห์และนำเสนอรายงานการสำรวจสุขภาพชุมชนของทั้ง 9 โรงพยาบาลภาคสนาม ตามแนวทางคู่มือบทที่ 17 และเกณฑ์ฟอร์ม 4A</span></div></div>` +
+        `</div>`;
+      wrap.appendChild(whyBanner);
+    }
 
     const allSessions = SCHED.sessions || [];
     const epSessions = allSessions.filter(
       (s) => s.category === "EP" || s.id === "w3-d2-ep-exam" || s.id === "w6-d3-pres-ep"
     );
+    const examEpSessions = epSessions.filter(
+      (s) => s.id !== "w3-d2-spss" && s.id !== "w6-d3-pres-ep"
+    );
 
-    // 3A. RACM 303 EPI Interactive Studio (EP1–EP9)
+    // 3A. Exam Track: RACM 303 EPI Interactive Studio (EP1–EP9)
     let ep6StudioHost = null;
-    if (curSec === "all" || isRacmEpiTab) {
+    if (!isBeyondTrack && (isExamAll || isEpLectureCode)) {
       ep6StudioHost = make("div", null, "ep6-studio-mount-slot");
       wrap.appendChild(ep6StudioHost);
     }
 
-    // 3B. Foundation Review Section: RAGE 201 (Overview, Descriptive) & RAGE 301 (Medical Statistics, Statistical & Clinical Significance)
-    if (curSec === "all" || isRageReviewTab) {
+    // 3B. Non-Exam Track: Foundation Review Section — RAGE 201 & RAGE 301
+    if (isBeyondTrack && (isBeyondAll || isRageReviewTab)) {
       const rageScope = curSec === "rage201" ? "rage201" : curSec === "rage301" ? "rage301" : "both";
       const revSection = make("section", null, "ep-section-block");
       revSection.innerHTML = `
@@ -47210,8 +47261,8 @@
       wrap.appendChild(revSection);
     }
 
-    // 3C. Dedicated Statistical Software (SPSS) Section
-    if (curSec === "all" || isSpssTab) {
+    // 3C. Non-Exam Track: Dedicated Statistical Software (SPSS) Section
+    if (isBeyondTrack && (isBeyondAll || isSpssTab)) {
       const spssSection = make("section", null, "ep-section-block");
       const zoomRoomsAll = (SCHED.courseMeta && SCHED.courseMeta.zoomRooms) || [];
       const spssZoom = zoomRoomsAll.find((zr) => String(zr.id || "").replace(/\s+/g, "") === "95270544175");
@@ -47329,29 +47380,29 @@
       wrap.appendChild(spssSection);
     }
 
-    // 4. Zoom Rooms (shown in 'all' or 'sessions' / 'zoom-spss')
-    if (curSec === "all" || isSessionsTab) {
+    // 4. Exam Track: Zoom Rooms (Days 1–3 for EP1–EP9 & Exercises)
+    if (!isBeyondTrack && (isExamAll || isSessionsTab)) {
       const zoomSection = make("section", null, "ep-section-block");
       zoomSection.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">🎥 ${escapeHtml(tr("ห้องเรียนออนไลน์ Zoom ระบาดวิทยา (ครบทั้ง 3 วัน) & ปฏิบัติการ SPSS", "Epidemiology Zoom Classrooms (3 Days) & SPSS Workshop"))}</h3>
+            <h3 class="ep-sec-title">🎥 ${escapeHtml(tr("ห้องเรียนออนไลน์ Zoom ระบาดวิทยา (ครบทั้ง 3 วัน · EP1–EP9 & แบบฝึกหัด)", "Epidemiology Zoom Classrooms (3 Days · EP1–EP9 & Exercises)"))}</h3>
             <p class="ep-sec-sub">${escapeHtml(tr("คลิกเข้าห้องเรียน Zoom ได้ทันที หรือคัดลอก Meeting ID / Passcode สำหรับคณาจารย์และนักศึกษา", "Join Zoom directly or copy Meeting ID & Passcode"))}</p>
           </div>
         </div>
       `;
 
       const zoomGrid = make("div", null, "ep-zoom-grid");
-      const zoomRooms = (SCHED.courseMeta && SCHED.courseMeta.zoomRooms) || [];
-      const spssSession = epSessions.find((s) => s.id === "w3-d2-spss");
+      const zoomRooms = ((SCHED.courseMeta && SCHED.courseMeta.zoomRooms) || []).filter(
+        (zr) => String(zr.id || "").replace(/\s+/g, "") !== "95270544175"
+      );
       zoomRooms.forEach((zr, idx) => {
-        const isSpssZoom = String(zr.id || "").replace(/\s+/g, "") === "95270544175";
-        const zCard = make("div", null, `ep-zoom-card${isSpssZoom ? " is-spss" : ""}`);
-        const dayTag = zr.dayTag || (idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : idx === 2 ? "Day 3 · พฤ. 3 ธ.ค. 69" : "SPSS · อ. 8 ธ.ค. 69");
+        const zCard = make("div", null, "ep-zoom-card");
+        const dayTag = zr.dayTag || (idx === 0 ? "Day 1 · ศ. 27 พ.ย. 69" : idx === 1 ? "Day 2 · พ. 2 ธ.ค. 69" : "Day 3 · พฤ. 3 ธ.ค. 69");
         const zoomTime = zr.timeLabel || (idx === 0 ? "08.30 – 11.00 น." : "08.30 – 16.30 น.");
         zCard.innerHTML = `
           <div class="ep-zoom-top">
-            <span class="ep-zoom-tag${isSpssZoom ? " is-spss-tag" : ""}">ZOOM · ${escapeHtml(dayTag)}</span>
+            <span class="ep-zoom-tag">ZOOM · ${escapeHtml(dayTag)}</span>
             <span class="ep-zoom-time">${escapeHtml(zoomTime)}</span>
           </div>
           <div class="ep-zoom-label">${escapeHtml(zr.label || "")}</div>
@@ -47376,18 +47427,6 @@
             });
           });
         }
-        if (isSpssZoom && spssSession) {
-          const actWrap = zCard.querySelector(".ep-zoom-actions");
-          if (actWrap && typeof appendSessionMaterialButtons === "function") {
-            appendSessionMaterialButtons(actWrap, spssSession, false);
-          }
-          if (actWrap) {
-            const detailBtn = make("button", tr("รายละเอียดคาบ", "Session Details"), "btn sm");
-            detailBtn.type = "button";
-            detailBtn.addEventListener("click", () => openEventModal(spssSession));
-            actWrap.appendChild(detailBtn);
-          }
-        }
         zoomGrid.appendChild(zCard);
       });
 
@@ -47395,20 +47434,20 @@
       wrap.appendChild(zoomSection);
     }
 
-    // 5. Day-by-Day Epidemiology Sessions (shown in 'all' or 'sessions')
-    if (curSec === "all" || isSessionsTab) {
+    // 5. Exam Track: Day-by-Day Epidemiology Sessions (EP1–EP9, Exercises & Written Exam)
+    if (!isBeyondTrack && (isExamAll || isSessionsTab)) {
       const sessSection = make("section", null, "ep-section-block");
       sessSection.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">📚 ${escapeHtml(tr("ตารางคาบสอน & อัปโหลด Slide ระบาดวิทยา (EP1–EP9 · Exercise 2–7)", "Epidemiology Lectures, Exercises & Assessments"))}</h3>
+            <h3 class="ep-sec-title">📚 ${escapeHtml(tr("ตารางคาบสอน & อัปโหลด Slide ระบาดวิทยา (EP1–EP9 · แบบฝึกหัด & สอบข้อเขียน)", "Epidemiology Lectures, Exercises & Written Exam"))}</h3>
             <p class="ep-sec-sub">${escapeHtml(tr("คลิกปุ่ม “อัปโหลด Slide” ในแต่ละคาบเพื่อแนบไฟล์ .pdf / .pptx หรือลิงก์สื่อการสอนให้นักศึกษาเปิดดูได้ทันที", "Attach .pdf / .pptx or Drive links per session for instant student access"))}</p>
           </div>
         </div>
       `;
 
       const byDate = new Map();
-      epSessions.forEach((s) => {
+      examEpSessions.forEach((s) => {
         const key = s.dateISO || "other";
         if (!byDate.has(key)) byDate.set(key, { dateTH: s.dateTH || s.dateISO, items: [] });
         byDate.get(key).items.push(s);
@@ -47473,17 +47512,15 @@
       wrap.appendChild(sessSection);
     }
 
-    // 6. Exam Blueprint (Table Specification) & Fieldwork Oral Presentation Form 4A (shown in 'all' or 'exam-field')
-    if (curSec === "all" || isExamFieldTab) {
-      const specGrid = make("div", null, "ep-spec-split");
-
+    // 6A. Exam Track: Exam Blueprint (Table Specification — EP1–EP9 = 100%)
+    if (!isBeyondTrack && (isExamAll || isExamSpecTab)) {
       const specCard = make("section", null, "ep-panel-card");
       const epSpecRows = (SCHED.tableSpec && SCHED.tableSpec.ep) || [];
       specCard.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">🎯 ${escapeHtml(tr("โครงสร้างและสัดส่วนข้อสอบระบาดวิทยา RACM 303 (EP1–EP9)", "RACM 303 Epidemiology Exam Blueprint (EP1–EP9)"))}</h3>
-            <p class="ep-sec-sub">${escapeHtml(tr("สอบวันอังคารที่ 8 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-02 และ 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Exam: Tue 8 Dec 2026, 08:30–12:00 at Rooms 2C2-02 & 2C2-03"))}</p>
+            <h3 class="ep-sec-title">🎯 ${escapeHtml(tr("โครงสร้างและสัดส่วนข้อสอบระบาดวิทยา RACM 303 (EP1–EP9 · รวม 100%)", "RACM 303 Epidemiology Exam Blueprint (EP1–EP9 · 100%)"))}</h3>
+            <p class="ep-sec-sub">${escapeHtml(tr("สอบข้อเขียนวันอังคารที่ 8 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-02 และ 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Written Exam: Tue 8 Dec 2026, 08:30–12:00 at Rooms 2C2-02 & 2C2-03"))}</p>
           </div>
         </div>
         <div class="ep-spec-table-wrap">
@@ -47527,15 +47564,18 @@
       specCard.querySelectorAll("[data-ep-open-mod]").forEach((b) => {
         b.addEventListener("click", () => setEpidemiologySection(b.dataset.epOpenMod || "ep1"));
       });
-      specGrid.appendChild(specCard);
+      wrap.appendChild(specCard);
+    }
 
+    // 6B. Non-Exam Track: Fieldwork Health Survey & Oral Presentation Form 4A
+    if (isBeyondTrack && (isBeyondAll || isForm4aTab)) {
       const ch17 = (MANUAL.chapters || []).find((c) => c.id === "man-ch-17");
       const fieldCard = make("section", null, "ep-panel-card");
       fieldCard.innerHTML = `
         <div class="ep-sec-head">
           <div>
-            <h3 class="ep-sec-title">🏥 ${escapeHtml(tr("การนำเสนอระบาดวิทยาภาคสนาม & เกณฑ์ประเมินฟอร์ม 4A", "Fieldwork Epidemiology Oral Presentation & Form 4A"))}</h3>
-            <p class="ep-sec-sub">${escapeHtml(tr("วันพุธที่ 30 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-03 ชั้น 2 อาคารพรีคลินิก", "Wed 30 Dec 2026, 08:30–12:00 at Room 2C2-03"))}</p>
+            <h3 class="ep-sec-title">🏥 ${escapeHtml(tr("การสำรวจสุขภาพชุมชน & นำเสนอ Final Presentation ระบาดวิทยาภาคสนาม (ฟอร์ม 4A)", "Community Health Survey & Fieldwork Epidemiology Final Presentation (Form 4A)"))}</h3>
+            <p class="ep-sec-sub">${escapeHtml(tr("วันพุธที่ 30 ธันวาคม 2569 เวลา 08.30 – 12.00 น. ณ ห้อง 2C2-03 ชั้น 2 อาคารพรีคลินิก (ครบทั้ง 9 โรงพยาบาลภาคสนาม)", "Wed 30 Dec 2026, 08:30–12:00 at Room 2C2-03 (All 9 Fieldwork Hospitals)"))}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="button" class="btn sm" id="epOpenManualCh17Btn">${escapeHtml(tr("บทที่ 17 แนวทางนำเสนอ →", "Ch.17 Guide →"))}</button>
@@ -47560,8 +47600,7 @@
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       }
-      specGrid.appendChild(fieldCard);
-      wrap.appendChild(specGrid);
+      wrap.appendChild(fieldCard);
     }
 
     mount.appendChild(wrap);

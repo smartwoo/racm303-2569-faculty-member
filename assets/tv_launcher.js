@@ -2674,38 +2674,56 @@
       return;
     }
 
-    // Epidemiology section filter bar (#panel-epidemiology)
+    // Epidemiology 2-Track Switcher (#panel-epidemiology: Exam EP1–EP9 vs Non-Exam RAGE/SPSS/Form 4A)
     if (groupKey === "epidemiology") {
       const curEpSec = st.epSection === "morbidity-mortality" ? "ep6" : (st.epSection || "all");
-      const epPills = [
-        { id: "all", label: t("ภาพรวมทั้งหมด", "All Sections") },
-        { id: "ep4", label: t("🎬 EP4: Study Designs & Impact", "🎬 EP4: Study Designs & Impact") },
-        { id: "ep5", label: t("🎬 EP5: Surveillance & Outbreak", "🎬 EP5: Surveillance & Outbreak") },
-        { id: "ep6", label: t("🎬 EP6: Morbidity & Mortality", "🎬 EP6: Morbidity & Mortality") },
-        { id: "ep7", label: t("🎬 EP7: Health Survey", "🎬 EP7: Health Survey") },
-        { id: "ep8", label: t("🎬 EP8: Experimental Study", "🎬 EP8: Experimental Study") },
-        { id: "ep9", label: t("🎬 EP9: EBM", "🎬 EP9: EBM") },
-        { id: "sessions", label: t("คาบเรียน EP1–EP9 & Ex 1–6", "EP1–EP9 & Ex 1–6") },
-        { id: "zoom-spss", label: t("ห้องเรียน Zoom & SPSS", "Zoom & SPSS") },
-        { id: "exam-field", label: t("สัดส่วนสอบ & นำเสนอ (4A)", "Exam Spec & Form 4A") }
-      ];
+      const isEpBeyondActive = [
+        "beyond-all",
+        "rage-review",
+        "rage201",
+        "rage301",
+        "spss",
+        "zoom-spss",
+        "form-4a"
+      ].includes(curEpSec);
+
       bar.hidden = false;
       bar.classList.add("has-centered-pills");
       bar.innerHTML = `
-        <div class="tv-sibling-pills" role="tablist" aria-label="หมวดย่อยระบาดวิทยา">
-          ${epPills
-            .map(
-              (p) => `
-            <button type="button" class="tv-sibling-pill ${p.id === curEpSec ? "is-active" : ""}" data-tv-ep-sec="${p.id}">${esc(p.label)}</button>
-          `
-            )
-            .join("")}
+        <div class="tv-sibling-pills is-hs-track-pills" role="tablist" aria-label="${esc(
+          t(
+            "สลับหมวดระบาดวิทยาที่ออกสอบ (EP1–EP9) และหมวดไม่ออกสอบ (RAGE 201/301 · SPSS Workshop & Health Survey)",
+            "Switch Exam-Tested Epidemiology (EP1–EP9) and Non-Exam Practical Modules (RAGE · SPSS · Form 4A)"
+          )
+        )}">
+          <button type="button" class="tv-sibling-pill is-hs-track-pill ${!isEpBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${!isEpBeyondActive ? "true" : "false"}" data-tv-ep-track="exam" data-tv-focus>
+            <span class="tv-sib-main">${esc(t("บทเรียนหลัก EP1–EP9 & แบบฝึกหัด", "Core Lectures EP1–EP9 & Exercises"))}</span>
+            <span class="tv-sib-tag is-exam">${esc(t("ออกสอบ", "Exam-Tested"))}</span>
+          </button>
+          <button type="button" class="tv-sibling-pill is-hs-track-pill ${isEpBeyondActive ? "is-active" : ""}" role="tab" aria-selected="${isEpBeyondActive ? "true" : "false"}" data-tv-ep-track="beyond" data-tv-focus>
+            <span class="tv-sib-main">${esc(
+              t(
+                "ทบทวน RAGE 201/301 · SPSS Workshop & Health Survey",
+                "RAGE 201/301 Review · SPSS Workshop & Health Survey"
+              )
+            )}</span>
+            <span class="tv-sib-tag is-beyond">${esc(
+              t(
+                "ไม่ออกสอบ · สำคัญต่อการสำรวจชุมชน & Final Presentation",
+                "Non-Exam · Key for Health Survey & Final Presentation"
+              )
+            )}</span>
+          </button>
         </div>
       `;
-      bar.querySelectorAll("[data-tv-ep-sec]").forEach((btn) => {
+      bar.querySelectorAll("[data-tv-ep-track]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          if (api && api.setEpidemiologySection) {
-            api.setEpidemiologySection(btn.dataset.tvEpSec);
+          const track = btn.dataset.tvEpTrack;
+          if (typeof recordNavStateTransition === "function") {
+            recordNavStateTransition();
+          }
+          if (api && typeof api.setEpidemiologySection === "function") {
+            api.setEpidemiologySection(track === "beyond" ? "beyond-all" : "all");
           }
           syncSubpageBar();
         });
