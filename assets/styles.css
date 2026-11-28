@@ -25297,6 +25297,12 @@ html[data-theme="dark"] .gd-pending-pill {
 }
 
 /* Reader Top Return-to-Drive & Sibling File Switcher Bar */
+.tb-drive-reader-bar[hidden],
+#textbookDriveReaderBar[hidden],
+#textbookDriveReaderBar:empty {
+  display: none !important;
+}
+
 .tb-drive-reader-bar {
   display: flex;
   align-items: center;

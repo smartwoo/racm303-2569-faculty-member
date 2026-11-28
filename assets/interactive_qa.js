@@ -1432,16 +1432,16 @@
     }
 
     // 8. Table Spec Trap (HS1): Classifying lifestyle/exercise in ALREADY-DIAGNOSED patients as Primary instead of Tertiary Prevention
-    if (/โครงการปรับ(?:เปลี่ยน)?อาหาร/.test(p) && p.includes("คนละระดับ") && /(?:วินิจฉัย|ความดัน|ไขมัน).{0,28}(?:เป็น|จัดเป็น)\s*(?:primary|ระดับ(?:ที่)?\s*1|ปฐมภูมิ)/.test(u) && !/tertiary|ตติยภูมิ|ระดับ(?:ที่)?\s*3/.test(u)) {
+    if (/(?:โครงการ)?การ?ปรับ(?:เปลี่ยน)?อาหาร/.test(p) && p.includes("คนละระดับ") && /(?:วินิจฉัย|เบาหวาน|ความดัน|ไขมัน).{0,28}(?:เป็น|จัดเป็น)\s*(?:primary|ระดับ(?:ที่)?\s*1|ปฐมภูมิ)/.test(u) && !/tertiary|ตติยภูมิ|ระดับ(?:ที่)?\s*3/.test(u)) {
       issues.push(
         "ระวังกับดักการจำแนกระดับการป้องกันโรค: โครงการปรับอาหารและออกกำลังกายใน**ผู้ป่วยที่ได้รับการวินิจฉัยโรคแล้ว** มุ่งคุมโรคและลดภาวะแทรกซ้อน จึงจัดเป็น **Tertiary Prevention** (ไม่ใช่ Primary Prevention ซึ่งทำในผู้ที่ยังไม่เกิดโรค)"
       );
     }
 
-    // 9. Table Spec Trap (HS2): Putting severe self-neglect with normal vital signs into Ambulatory Care instead of inpatient Acute Care
-    if (p.includes("สัญญาณชีพยังปกติ") && /(?:ควร|จัดเข้า|เลือก)\s*(?:ambulatory|ผู้ป่วยนอก|opd)/.test(u) && !/ห้าม|ไม่ใช่|ไม่ควร|acute care|ผู้ป่วยใน|ipd/.test(u)) {
+    // 9. Table Spec Trap (HS2): Putting severe self-neglect with normal/stable vital signs into Ambulatory Care instead of inpatient Acute Care
+    if ((p.includes("สัญญาณชีพคงที่") || p.includes("สัญญาณชีพยังปกติ")) && /(?:ควร|จัดเข้า|เลือก)\s*(?:ambulatory|ผู้ป่วยนอก|opd)/.test(u) && !/ห้าม|ไม่ใช่|ไม่ควร|acute care|ผู้ป่วยใน|ipd/.test(u)) {
       issues.push(
-        "ระวังกับดัก 'สัญญาณชีพปกติ' ใน HS2: ผู้ป่วยที่มีภาวะละเลยการดูแลตนเองอย่างรุนแรง (**Severe self-neglect** เช่น ไม่ดื่มน้ำและไม่กินอาหารหลายวัน) เสี่ยงต่ออันตรายคุกคามชีวิตและเกินขีดความสามารถของบ้าน จึง**ต้องเลือก Acute Care ในหอผู้ป่วยใน (IPD)** ไม่ใช่ Ambulatory Care"
+        "ระวังกับดัก 'สัญญาณชีพคงที่/ปกติ' ใน HS2: ผู้ป่วยที่มีภาวะละเลยการดูแลตนเองอย่างรุนแรง (**Severe self-neglect** เช่น ไม่ดื่มน้ำและไม่รับประทานอาหารติดต่อกันหลายวัน) เสี่ยงต่ออันตรายคุกคามชีวิตและเกินขีดความสามารถของบ้าน จึง**ต้องเลือก Acute Care ในหอผู้ป่วยใน (IPD)** ไม่ใช่ Ambulatory Care"
       );
     }
 

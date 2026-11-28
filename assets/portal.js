@@ -13182,7 +13182,7 @@
     const options = opts || {};
     const isAllActive = Boolean(options.isAllActive);
     const mod = getHsModuleMeta(modCode || state.activeHsModule || "HS1");
-    const effectiveFormat = activeFormat === "wb" ? "practice" : activeFormat;
+    const effectiveFormat = activeFormat === "wb" && !mod.wbDocId ? "practice" : activeFormat;
     const isBeyondActive = effectiveFormat === "systems-forum";
 
     const banner = make(
@@ -13502,6 +13502,20 @@
         { slidePending: !isVdoUploaded, slideUploaded: isVdoUploaded }
       )
     );
+
+    // Supplementary Worksheet / Workbook (for modules with wbDocId, e.g. HS1-WB, HS2-WB)
+    if (!showAllTag && mod.wbDocId) {
+      tabsRow.appendChild(
+        makeTabBtn(
+          `📝 Worksheet · Workbook (${mod.code})`,
+          "wb",
+          true,
+          () => {
+            openTextbookDoc(mod.wbDocId);
+          }
+        )
+      );
+    }
 
     banner.appendChild(tabsRow);
     return banner;
@@ -19220,16 +19234,23 @@
     const isSlidesFoldersRoot = subMode === "lecture-slides" && (state.lsDriveScope || "folders") === "folders";
     const isVdoFoldersRoot = subMode === "vdo-lecture" && (state.vdoDriveScope || "folders") === "folders";
     const isFoldersRoot = isDocsFoldersRoot || isSlidesFoldersRoot || isVdoFoldersRoot;
+    let readerDoc = current;
+    if (subMode === "doc-reader" && parseHsDocInfo(readerDoc.id).modCode !== baseMod) {
+      const resolvedId = resolveDocIdForModuleAndFormat(baseMod, state.preferredHsFormat || "full");
+      readerDoc = docs.find((d) => d.id === resolvedId) || current;
+      state.activeDocId = readerDoc.id;
+    }
+    const activeDocParsed = parseHsDocInfo(readerDoc.id);
     const bannerActiveFmt =
       subMode === "lecture-slides"
         ? "lecture-slides"
         : subMode === "vdo-lecture"
         ? "vdo-lecture"
         : subMode === "doc-reader"
-        ? parsed.format === "concise"
+        ? activeDocParsed.format === "concise"
           ? "concise"
-          : parsed.format === "wb"
-          ? "practice"
+          : activeDocParsed.format === "wb"
+          ? "wb"
           : "full"
         : "docs";
 
@@ -19320,15 +19341,9 @@
       return;
     }
 
-    // Mode: "doc-reader" — Ensure current doc matches baseMod
-    let readerDoc = current;
-    if (parseHsDocInfo(readerDoc.id).modCode !== baseMod) {
-      const resolvedId = resolveDocIdForModuleAndFormat(baseMod, state.preferredHsFormat || "full");
-      readerDoc = docs.find((d) => d.id === resolvedId) || current;
-      state.activeDocId = readerDoc.id;
-    }
+    // Mode: "doc-reader" — Current doc already synced to baseMod above
     notifySubviewChange();
-    const readerParsed = parseHsDocInfo(readerDoc.id);
+    const readerParsed = activeDocParsed;
     const modMeta = getHsModuleMeta(baseMod);
     const flow = getHsLogicalFlowModel(baseMod);
 
@@ -19338,106 +19353,10 @@
     }
     if (readerWrap) readerWrap.hidden = false;
 
-    // Populate Top 6-Step Flow Switcher Bar inside Reader
+    // Hide redundant reader route strip (Worksheet/Workbook moved to top unified HS banner)
     if (readerBar) {
       readerBar.replaceChildren();
-      const backGroup = make("div", null, "tb-drive-file-pills");
-      const backAllBtn = make(
-        "button",
-        isStReader
-          ? "🧭 ← คิดเชิงระบบ & เสวนา (6 คาบ)"
-          : isDriveUi
-          ? "📂 โฟลเดอร์ HS1–HS6"
-          : "📚 รวมทุกบท HS1–HS6",
-        "btn sm"
-      );
-      backAllBtn.type = "button";
-      backAllBtn.addEventListener("click", () =>
-        isStReader ? openSystemsForum("") : openTextbookDriveFolder("FOLDERS")
-      );
-      const backDriveBtn = make(
-        "button",
-        isDriveUi ? `📁 ← โฟลเดอร์ ${baseMod}` : `🧭 ← ภาพรวม 6 ขั้น (${baseMod})`,
-        "btn sm"
-      );
-      backDriveBtn.type = "button";
-      backDriveBtn.addEventListener("click", () => openTextbookDriveFolder(baseMod));
-      backGroup.append(backAllBtn, backDriveBtn);
-      readerBar.appendChild(backGroup);
-
-      const fileSwitchGroup = make("div", null, "tb-drive-file-pills");
-      fileSwitchGroup.appendChild(make("span", `เส้นทาง ${baseMod}:`, "tb-drive-file-label"));
-      const flowBarItems = [
-        {
-          label: "① ฉบับเต็ม (Full)",
-          active: readerDoc.id === modMeta.docId,
-          available: Boolean(modMeta.docId),
-          onClick: () => openTextbookDoc(modMeta.docId)
-        },
-        {
-          label: "② ฉบับย่อ (Abridged)",
-          active: readerDoc.id === modMeta.conciseDocId,
-          available: Boolean(modMeta.conciseDocId),
-          onClick: () => openTextbookDoc(modMeta.conciseDocId)
-        },
-        {
-          label: `③ Self-Quiz (${flow.qaCount} ข้อ)`,
-          active: false,
-          available: true,
-          onClick: () => openSelfQuizForModule(baseMod, "qa")
-        },
-        {
-          label:
-            flow.slideInfo && flow.slideInfo.uploaded
-              ? `④ Slide อาจารย์ (✓ ${flow.slideInfo.extBadge})`
-              : "④ Slide อาจารย์ (รอ Upload)",
-          extraCls:
-            flow.slideInfo && flow.slideInfo.uploaded ? " is-slide-tab-uploaded" : " is-slide-tab-pending",
-          active: false,
-          available: true,
-          onClick: () => openHsLectureSlides(baseMod)
-        },
-        isStReader
-          ? {
-              label: "⑤ กรอบคาบเรียน (ST1)",
-              active: false,
-              available: true,
-              onClick: () => openSystemsForum("w1-d1-st")
-            }
-          : {
-              label: ROLE === "faculty" ? "⑤ Case Discussion & เฉลย" : "⑤ Case Discussion",
-              active: false,
-              available: true,
-              onClick: () => openHsDiscussion(baseMod)
-            },
-        {
-          label:
-            flow.vdoInfo && flow.vdoInfo.uploaded
-              ? `⑥ VDO Lecture (✓ ${flow.vdoInfo.extBadge})`
-              : "⑥ VDO Lecture (รอแขวน VDO)",
-          extraCls:
-            flow.vdoInfo && flow.vdoInfo.uploaded ? " is-slide-tab-uploaded" : " is-slide-tab-pending",
-          active: false,
-          available: true,
-          onClick: () => openHsVdoLecture(baseMod)
-        }
-      ];
-      if (modMeta.wbDocId) {
-        flowBarItems.push({
-          label: "📝 Workbook เสริม",
-          active: readerDoc.id === modMeta.wbDocId,
-          available: true,
-          onClick: () => openTextbookDoc(modMeta.wbDocId)
-        });
-      }
-      flowBarItems.forEach((fItem) => {
-        if (!fItem.available) return;
-        const fBtn = make("button", fItem.label, `btn sm${fItem.active ? " teal" : ""}${fItem.extraCls || ""}`);
-        fBtn.type = "button";
-        fBtn.addEventListener("click", fItem.onClick);
-        fileSwitchGroup.appendChild(fBtn);
-      });
-      readerBar.appendChild(fileSwitchGroup);
+      readerBar.hidden = true;
     }
 
     // Populate Left Sidebar (Coherent 6-Step Logical Flow)
@@ -19526,7 +19445,7 @@
     ];
     if (modMeta.wbDocId) {
       sidebarSteps.push({
-        label: `📝 ${baseMod} · แบบฝึกหัดเสริม (Workbook)`,
+        label: `📝 ${baseMod} · Worksheet · Workbook เสริม`,
         active: readerDoc.id === modMeta.wbDocId,
         available: true,
         onClick: () => openTextbookDoc(modMeta.wbDocId)
@@ -19556,7 +19475,7 @@
         ? "STEP 01 · เอกสารคำสอนฉบับเต็ม (Full)"
         : readerParsed.format === "concise"
         ? "STEP 02 · เอกสารคำสอนฉบับย่อ (Abridged)"
-        : "เสริม STEP 03 · แบบฝึกหัดและเฉลย (Workbook)";
+        : "📝 Worksheet · แบบฝึกหัดและเฉลย (Workbook)";
 
     if (metaTitle) {
       metaTitle.textContent = `${stepPrefix} · ${readerDoc.badge} — ${readerDoc.sessionInfo || readerDoc.subtitle || ""}`;
