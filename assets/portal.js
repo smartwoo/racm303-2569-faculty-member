@@ -2257,6 +2257,9 @@
 
   window.addEventListener("hashchange", () => {
     const rawHash = (window.location.hash || "").replace(/^#/, "");
+    if (/^panel-(?:qa|global(?:-qa)?|dhs|6bb|policy)$/i.test(rawHash)) {
+      return;
+    }
     const nextTab = normalizeTabId(rawHash);
     if (nextTab !== state.activeTab || /^hs-discussion/i.test(rawHash)) {
       switchTab(rawHash || "home", false);

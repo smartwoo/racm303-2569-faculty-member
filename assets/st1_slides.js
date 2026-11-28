@@ -329,8 +329,9 @@
       for (let i = 0; i <= 5; i += 1) mat[8][i] = fmtBits[14 - i];
       mat[8][7] = fmtBits[8]; mat[8][8] = fmtBits[7]; mat[7][8] = fmtBits[6];
       for (let i = 9; i < 15; i += 1) mat[14 - i][8] = fmtBits[14 - i];
-      for (let i = 0; i < 8; i += 1) mat[size - 1 - i][8] = fmtBits[14 - i];
-      for (let i = 8; i < 15; i += 1) mat[8][size - 15 + i] = fmtBits[14 - i];
+      for (let i = 0; i < 7; i += 1) mat[size - 1 - i][8] = fmtBits[14 - i];
+      for (let i = 7; i < 15; i += 1) mat[8][size - 15 + i] = fmtBits[14 - i];
+      mat[size - 8][8] = 1;
       const margin = 2, vb = size + margin * 2;
       let d = "";
       for (let r = 0; r < size; r += 1) {
