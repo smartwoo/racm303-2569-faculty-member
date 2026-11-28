@@ -47138,6 +47138,39 @@
               </div>
             </div>
 
+            <!-- Synthesized A4 Case Discussion & Key Answer Booklet (HS1–HS6) -->
+            <div class="fac-printout-sec">
+              <div class="fac-printout-sec-head">
+                <div>
+                  <h4>📘 รูปเล่มกรณีศึกษาและแนวคำตอบมาตรฐาน Discussion ระบบสุขภาพ HS1–HS6 (ฉบับสังเคราะห์รูปเล่ม A4 · โจทย์สีดำ vs เฉลยสีแดง)</h4>
+                  <p>สังเคราะห์ครบทั้ง 6 หัวข้อ (12 กรณีศึกษา · 119.5 คะแนนอ้างอิง) จัดหน้าด้วยหัวข้อฟอนต์ร่วมสมัย (Anuphan) ควบคู่เนื้อหา THSarabunPSK 16 pt จัดแนวแบบ Thai Distributed พร้อมภาพประกอบโจทย์ ตารางฝึกวิเคราะห์กึ่งโครงร่าง เฉลยตัวอักษรสีแดงตัวเอนขีดเส้นใต้ แผนภาพ Essential Frameworks 25 ภาพ และเกณฑ์การให้คะแนน</p>
+                </div>
+              </div>
+              <div class="fac-six-items-list">
+                <div class="fac-six-item-row">
+                  <div class="fsir-main">
+                    <span class="fsir-num">HS</span>
+                    <div class="fsir-copy">
+                      <div class="fsir-title-row">
+                        <strong>รูปเล่มกรณีศึกษาและเฉลยละเอียด หมวดระบบสุขภาพ HS1–HS6 (Synthesis A4 Booklet · ปีการศึกษา 2569)</strong>
+                        <span class="fsir-meta-pill">รูปเล่ม A4 แนวตั้ง · มี Bookmarks สารบัญ · โจทย์สีดำ + เฉลยสีแดง</span>
+                      </div>
+                      <p>ฉบับรูปเล่มเสริม (Companion Edition) คู่กับคู่มือผู้นำอภิปรายฉบับเดิม รวบรวมเนื้อหาโจทย์ ภาพประกอบ ตารางเติมคำ แผนภาพทฤษฎีประกอบการเฉลย เกณฑ์คะแนนย่อย และเรียงความวิเคราะห์ต้นแบบในเล่มเดียว</p>
+                      <div class="fsir-chips">
+                        <a class="fsir-chip is-hl" href="exports/pdf/RACM303_2569_HS_Discussion_Key_Booklet_A4.pdf" target="_blank" rel="noopener">📕 เปิดดูรูปเล่ม A4 (PDF) ↗</a>
+                        <a class="fsir-chip" href="exports/pdf/RACM303_2569_HS_Discussion_Teacher_Key.pdf" target="_blank" rel="noopener">คู่มือนำอภิปรายฉบับเดิม (Teacher Key PDF) ↗</a>
+                        <a class="fsir-chip" href="exports/docx/RACM303_2569_HS_Discussion_Worksheet.docx" download="ใบงานเปล่า_นศพ_Discussion_HS1-HS6_2569.docx">⬇ ใบงานเปล่า นศพ. (.docx)</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fsir-actions">
+                    <a class="btn sm pdf-red" href="exports/pdf/RACM303_2569_HS_Discussion_Key_Booklet_A4.pdf" download="รูปเล่มกรณีศึกษาและเฉลย_Discussion_HS1-HS6_A4_2569.pdf">${pdfIco}Export as PDF</a>
+                    <a class="btn sm docx-blue" href="exports/docx/RACM303_2569_HS_Discussion_Key_Booklet_A4.docx" download="รูปเล่มกรณีศึกษาและเฉลย_Discussion_HS1-HS6_A4_2569.docx">${docxIco}Export as .docx</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- 6 Individual Items -->
             <div class="fac-printout-sec">
               <div class="fac-printout-sec-head">

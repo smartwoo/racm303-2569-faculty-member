@@ -47146,3 +47146,48 @@ html[data-theme="dark"] .hs-unified-mod-strip.is-beyond-strip .hs-seg-pill.is-ac
     padding: 5.5px 11px;
   }
 }
+
+
+/* ==========================================================================
+   SYNTHESIZED A4 CASE DISCUSSION & KEY ANSWER BOOKLET READER (#faculty-docs)
+   ========================================================================== */
+.classic-a4-booklet-reader { color: #0f172a; line-height: 1.62; }
+.classic-a4-booklet-reader .booklet-reader-banner { background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); border: 1px solid #fecaca; border-left: 4px solid #b91c1c; border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
+.classic-a4-booklet-reader .booklet-reader-banner p { margin: 0 0 10px 0; font-size: 0.96em; line-height: 1.55; }
+.classic-a4-booklet-reader .booklet-reader-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.classic-a4-booklet-reader section.page-start { padding-top: 18px; margin-top: 24px; border-top: 1px dashed var(--line); }
+.classic-a4-booklet-reader section.page-start:first-of-type { border-top: 0; margin-top: 6px; padding-top: 0; }
+.classic-a4-booklet-reader .topic-heading { font-family: 'Anuphan', var(--font-display), sans-serif; font-size: 1.24em; font-weight: 700; line-height: 1.38; margin: 0 0 14px 0; padding: 0 0 8px 0; border-bottom: 2px solid #0f172a; display: flex; align-items: baseline; gap: 10px; color: #0f172a; }
+.classic-a4-booklet-reader .topic-code-pill { display: inline-block; background: #0f172a; color: #ffffff; font-size: 0.72em; font-weight: 700; padding: 2px 9px; border-radius: 5px; letter-spacing: 0.03em; flex-shrink: 0; }
+.classic-a4-booklet-reader .scenario-heading { font-family: 'Anuphan', var(--font-display), sans-serif; font-size: 1.12em; font-weight: 700; line-height: 1.42; margin: 0 0 12px 0; color: #000000; }
+.classic-a4-booklet-reader .scen-para { margin: 0 0 10px 0; text-indent: 2.2em; text-align: justify; text-justify: inter-character; }
+.classic-a4-booklet-reader .closing-line, .classic-a4-booklet-reader .q-section-head { font-family: 'Anuphan', var(--font-display), sans-serif; font-weight: 700; margin: 14px 0 10px 0; }
+.classic-a4-booklet-reader .q-item { margin-bottom: 16px; }
+.classic-a4-booklet-reader .q-prompt { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.classic-a4-booklet-reader .q-num { font-weight: 700; min-width: 1.5em; }
+.classic-a4-booklet-reader .q-text { flex: 1; text-align: justify; text-justify: inter-character; }
+.classic-a4-booklet-reader table.exam-table { width: 100%; border-collapse: collapse; margin: 10px 0 16px 0; font-size: 0.95em; line-height: 1.48; }
+.classic-a4-booklet-reader table.exam-table th, .classic-a4-booklet-reader table.exam-table td { border: 1px solid #1e293b; padding: 8px 10px; vertical-align: top; text-align: left; background: #ffffff; color: #0f172a; }
+.classic-a4-booklet-reader table.exam-table thead th { font-family: 'Anuphan', var(--font-display), sans-serif; font-weight: 600; background: #f8fafc; }
+.classic-a4-booklet-reader .diagram-box { margin: 10px 0 14px 0; background: #ffffff; border-radius: 10px; padding: 6px; }
+.classic-a4-booklet-reader .scen-figure, .classic-a4-booklet-reader .fw-figure { margin: 12px auto 16px auto; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; text-align: center; }
+.classic-a4-booklet-reader .scen-figure img, .classic-a4-booklet-reader .fw-figure img { max-width: 100%; max-height: 420px; width: auto; height: auto; display: block; margin: 0 auto; cursor: zoom-in; }
+.classic-a4-booklet-reader .scen-figure figcaption, .classic-a4-booklet-reader .fw-figure figcaption { margin-top: 8px; font-size: 0.9em; line-height: 1.45; color: #334155; text-align: justify; text-justify: inter-character; }
+.classic-a4-booklet-reader .ans-main-head { font-family: 'Anuphan', var(--font-display), sans-serif; font-size: 1.15em; font-weight: 700; color: #991b1b; border-bottom: 2px solid #b91c1c; padding-bottom: 4px; margin: 0 0 12px 0; }
+.classic-a4-booklet-reader em.ans-fill, .classic-a4-booklet-reader em.ans-fill u { color: #b91c1c; text-decoration: underline; text-decoration-color: #b91c1c; text-underline-offset: 2px; }
+.classic-a4-booklet-reader em.pts-tag, .classic-a4-booklet-reader .ans-sublists, .classic-a4-booklet-reader .ans-subhead, .classic-a4-booklet-reader ul.ans-roman-list li, .classic-a4-booklet-reader .ans-prose { color: #b91c1c; }
+.classic-a4-booklet-reader .ans-sublists { margin: 8px 0 12px 22px; }
+.classic-a4-booklet-reader ul.ans-roman-list { list-style: none; padding-left: 18px; margin: 4px 0 10px 0; }
+.classic-a4-booklet-reader ul.ans-roman-list li { margin-bottom: 6px; text-align: justify; text-justify: inter-character; }
+.classic-a4-booklet-reader .ans-q-title { font-family: 'Anuphan', var(--font-display), sans-serif; font-size: 1.04em; color: #0f172a; margin: 8px 0 6px 0; }
+.classic-a4-booklet-reader .rubric-box { margin: 0 0 12px 14px; }
+.classic-a4-booklet-reader .rubric-head, .classic-a4-booklet-reader ul.rubric-list li, .classic-a4-booklet-reader .prose-subhead { color: #991b1b; }
+.classic-a4-booklet-reader ul.rubric-list li, .classic-a4-booklet-reader .ans-prose { text-align: justify; text-justify: inter-character; }
+.classic-a4-booklet-reader .ans-prose { text-indent: 2.2em; margin: 0 0 10px 0; }
+html[data-theme="dark"] .classic-a4-booklet-reader { color: #f1f5f9; }
+html[data-theme="dark"] .classic-a4-booklet-reader .booklet-reader-banner { background: rgba(127, 29, 29, 0.22); border-color: rgba(248, 113, 113, 0.35); }
+html[data-theme="dark"] .classic-a4-booklet-reader .topic-heading, html[data-theme="dark"] .classic-a4-booklet-reader .scenario-heading, html[data-theme="dark"] .classic-a4-booklet-reader .ans-q-title { color: #f8fafc; border-bottom-color: #475569; }
+html[data-theme="dark"] .classic-a4-booklet-reader table.exam-table th, html[data-theme="dark"] .classic-a4-booklet-reader table.exam-table td { background: #0f172a; border-color: #475569; color: #f1f5f9; }
+html[data-theme="dark"] .classic-a4-booklet-reader table.exam-table thead th { background: #1e293b; }
+html[data-theme="dark"] .classic-a4-booklet-reader em.ans-fill, html[data-theme="dark"] .classic-a4-booklet-reader em.ans-fill u, html[data-theme="dark"] .classic-a4-booklet-reader em.pts-tag, html[data-theme="dark"] .classic-a4-booklet-reader .ans-sublists, html[data-theme="dark"] .classic-a4-booklet-reader .ans-subhead, html[data-theme="dark"] .classic-a4-booklet-reader ul.ans-roman-list li, html[data-theme="dark"] .classic-a4-booklet-reader .ans-prose { color: #fca5a5; text-decoration-color: #fca5a5; }
+html[data-theme="dark"] .classic-a4-booklet-reader .ans-main-head, html[data-theme="dark"] .classic-a4-booklet-reader .rubric-head, html[data-theme="dark"] .classic-a4-booklet-reader ul.rubric-list li, html[data-theme="dark"] .classic-a4-booklet-reader .prose-subhead { color: #fda4af; }
