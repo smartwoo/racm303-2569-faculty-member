@@ -401,6 +401,7 @@
   hydratePresenceRegistryFromStorage(false);
 
   const RETAINED_STALE_MS = 90 * 60 * 1000;
+  const RESPONSE_RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
   const ROOM_RESP_STORAGE_PREFIX = "racm303_live_room_resps_v2_r";
 
   function persistRoomResponsesToStorage(roomIdOpt) {
@@ -416,7 +417,7 @@
           if (!rec || !rec.participantId || !rec.cells) return;
           if (String(rec.participantId).startsWith("team_")) return;
           const uMs = Number(rec.updatedWallMs || 0);
-          if (uMs && now - uMs > RETAINED_STALE_MS) return;
+          if (uMs && now - uMs > RESPONSE_RETENTION_MS) return;
           if (!Object.keys(rec.cells).length) return;
           arr.push(rec);
         });
@@ -424,7 +425,7 @@
       });
       const clearedObj = {};
       state.clearedAtByQuestion.forEach((ts, qid) => {
-        if (ts && now - ts <= RETAINED_STALE_MS) clearedObj[qid] = ts;
+        if (ts && now - ts <= RESPONSE_RETENTION_MS) clearedObj[qid] = ts;
       });
       // Merge with existing room storage if current tab is a student (so Student B doesn't overwrite Student A's stored answer for Faculty)
       let mergedQuestions = questionsObj;
@@ -442,7 +443,7 @@
               (Array.isArray(prevQs[qid]) ? prevQs[qid] : []).forEach((oldRec) => {
                 if (!oldRec || !oldRec.participantId || String(oldRec.participantId).startsWith("team_")) return;
                 const uMs = Number(oldRec.updatedWallMs || 0);
-                if (uMs && now - uMs > RETAINED_STALE_MS) return;
+                if (uMs && now - uMs > RESPONSE_RETENTION_MS) return;
                 const cTs = Number(clearedObj[qid] || (prevParsed.clearedAt && prevParsed.clearedAt[qid]) || 0);
                 if (cTs && uMs <= cTs) return;
                 if (oldRec.participantId === myPid) return; // replaced by current tab's latest state for myPid
@@ -503,7 +504,7 @@
             if (!myOwnPid || rec.participantId !== myOwnPid) return;
           }
           const uMs = Number(rec.updatedWallMs || 0);
-          if (!uMs || now - uMs > RETAINED_STALE_MS || uMs <= cTs) return;
+          if (!uMs || now - uMs > RESPONSE_RETENTION_MS || uMs <= cTs) return;
           if (!state.responsesByQuestion.has(qid)) {
             state.responsesByQuestion.set(qid, new Map());
           }
@@ -523,7 +524,7 @@
   }
 
   const ROOM_CONCEPT_UNLOCK_PREFIX = "racm303_live_concept_unlock_r";
-  const CONCEPT_UNLOCK_STORAGE_TTL_MS = 18 * 60 * 60 * 1000;
+  const CONCEPT_UNLOCK_STORAGE_TTL_MS = RESPONSE_RETENTION_MS;
 
   function persistRoomConceptUnlocksToStorage(roomIdOpt) {
     try {
@@ -918,7 +919,10 @@
       return;
     }
 
-    if (rememberMsgId(msg.msgId)) return;
+    if (msg.type === "resp" && state.role !== "faculty" && !state.studentId) {
+      return;
+    }
+    if (!(isRetained && msg.type === "resp") && rememberMsgId(msg.msgId)) return;
 
     const isMultiRoomPresencePkt = msg.type === "presence" || msg.type === "who_is_here";
     if (!isMultiRoomPresencePkt) {
@@ -1042,7 +1046,7 @@
     }
 
     if (msg.type === "concept_unlock") {
-      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RETAINED_STALE_MS) {
+      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RESPONSE_RETENTION_MS) {
         return;
       }
       const qid = String(msg.questionId || "").slice(0, 32);
@@ -1103,9 +1107,9 @@
         ? String(msg.senderPid).slice(0, 48)
         : rawPid;
 
-      // Refresh sender student's individual tab presence on live (non-retained) worksheet packets
+      // Refresh sender student's individual tab presence on live (non-retained, non-leaving) worksheet packets
       const senderPid = sidClean ? `sid_${sidClean}` : (!pid.startsWith("team_") ? pid : "");
-      if (!isRetained && senderPid && sidClean) {
+      if (!isRetained && !msg.suppressPresenceRefresh && senderPid && sidClean) {
         const sKey = String(msg.senderCli || senderPid).slice(0, 64);
         const rMap = getRoomPresenceMap(pktRoom);
         const prevPres = rMap.get(sKey) || {};
@@ -1147,7 +1151,7 @@
       const updatedMs = Number(msg.updatedWallMs) || Number(msg.sentWallMs) || Date.now();
       const clearedAt = state.clearedAtByQuestion.get(qid) || 0;
       if (updatedMs <= clearedAt) return;
-      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RETAINED_STALE_MS) {
+      if (isRetained && msg.sentWallMs && Date.now() - Number(msg.sentWallMs) > RESPONSE_RETENTION_MS) {
         return;
       }
 
@@ -2274,10 +2278,28 @@
     } else {
       hydrateRoomResponsesFromStorage(targetRoom, false);
     }
+    resubscribeOwnStudentResponsesMqtt(targetRoom, state.studentId);
     publishPresence();
     schedulePresenceBurst();
     requestRoomSnapshot(targetRoom);
     emit("responses", { questionId: "*", teamId: state.teamId });
+  }
+
+  function resubscribeOwnStudentResponsesMqtt(roomNum, sidStr) {
+    const cleanSid = String(sidStr || "").trim();
+    if (!cleanSid || state.role === "faculty") return;
+    const topic = `${TOPIC_NS}/room-${clampRoom(roomNum)}/resp/+/sid_${cleanSid}`;
+    state.mqttClients.forEach((c) => {
+      try {
+        if (c && c.connected) {
+          c.unsubscribe(topic, () => {
+            try {
+              if (c.connected) c.subscribe(topic, { qos: 0 });
+            } catch (_) {}
+          });
+        }
+      } catch (_) {}
+    });
   }
 
   function checkinStudentToRoom(studentObj, roomNumOpt, activeModuleOpt, teamIdOpt, opts) {
@@ -2335,6 +2357,7 @@
 
   function leaveCurrentRoom(opts) {
     if (state.role === "faculty") return false;
+    flushAllPendingLiveTyping(true);
     const oldPid = state.participantId;
     const oldSid = state.studentId;
     const oldRoom = state.joinedRoomId || state.roomId;
@@ -2823,7 +2846,7 @@
   const lastPublishedLocalCellsByQ = new Map();
   const pendingDirtyCellsByQ = new Map();
 
-  function publishStudentQuestionCells(questionId, cellsObj, forceSubmitAll, dirtyKeysOpt) {
+  function publishStudentQuestionCells(questionId, cellsObj, forceSubmitAll, dirtyKeysOpt, opts) {
     if (!questionId || !cellsObj) return;
     const sidClean = String(state.studentId || "").trim();
     const activeTeamId = state.role === "student" ? clampTeamOrZero(state.teamId) : 0;
@@ -2946,6 +2969,7 @@
         cellUpdatedMs: cleanCellUpdatedMs,
         cellEditors: cleanCellEditors,
         activeModule: normalizeModuleId(state.activeModule),
+        suppressPresenceRefresh: Boolean(opts && opts.suppressPresenceRefresh),
         status: overallStatus,
         updatedWallMs: updatedMs
       },
@@ -3018,6 +3042,31 @@
     pendingCellsByQuestion.delete(questionId);
     pendingDirtyCellsByQ.delete(questionId);
     if (latest) publishStudentQuestionCells(questionId, latest, false, dirtyArr);
+  }
+
+  function flushAllPendingLiveTyping(leavingRoom) {
+    const qids = new Set([
+      ...Array.from(debounceTimers.keys()),
+      ...Array.from(pendingCellsByQuestion.keys())
+    ]);
+    qids.forEach((qid) => {
+      const prevT = debounceTimers.get(qid);
+      if (prevT) {
+        clearTimeout(prevT);
+        debounceTimers.delete(qid);
+      }
+      const latest = pendingCellsByQuestion.get(qid);
+      const dirtyArr = pendingDirtyCellsByQ.has(qid)
+        ? Array.from(pendingDirtyCellsByQ.get(qid))
+        : undefined;
+      pendingCellsByQuestion.delete(qid);
+      pendingDirtyCellsByQ.delete(qid);
+      if (latest) {
+        publishStudentQuestionCells(qid, latest, false, dirtyArr, {
+          suppressPresenceRefresh: Boolean(leavingRoom)
+        });
+      }
+    });
   }
 
   function submitSingleCell(questionId, inputId, cellsObj) {
@@ -3365,6 +3414,7 @@
     getUnlockedConceptSummaries,
     queueLiveTyping,
     flushLiveTyping,
+    flushAllPendingLiveTyping,
     submitSingleCell,
     submitQuestionFinal,
     getCellSubmissionState,

@@ -22518,6 +22518,15 @@
       LIVE.setActiveModule(cleanMod);
     }
     if ($("hsdModuleSelect")) $("hsdModuleSelect").value = cleanMod;
+    if (state.activeTab !== "hs-discussion" && !window.RACM_HSD_ROOM_PAGE) {
+      const rSfx = state.hsdLockedRoomId ? `-R${state.hsdLockedRoomId}` : "";
+      switchTab(`hs-discussion-${cleanMod}${rSfx}`, false);
+      if (!state.isPptSlideSharePopup) {
+        history.replaceState(null, "", `#hs-discussion-${cleanMod}${rSfx}`);
+      }
+      broadcastPptPresentationState();
+      return;
+    }
     if (!state.isPptSlideSharePopup && !window.RACM_HSD_ROOM_PAGE) {
       const rSfx = state.hsdLockedRoomId ? `-R${state.hsdLockedRoomId}` : "";
       history.replaceState(null, "", `#hs-discussion-${cleanMod}${rSfx}`);
