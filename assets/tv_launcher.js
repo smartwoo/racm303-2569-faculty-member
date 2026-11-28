@@ -1331,9 +1331,9 @@
               id: "app-guides",
               tone: "tone-amber",
               icon: ICONS.book,
-              title: t("คู่มือผู้สอน · Key & ต้นฉบับ", "Facilitator Guides & Key"),
-              sub: t("แนวทางนำอภิปราย เฉลย Teacher Key โจทย์ Self-Quiz 66 ข้อ และต้นฉบับ ST1 & HS1–HS6", "Facilitator guides, Teacher Key, 66 Self-Quiz items & ST1 + HS1–HS6 originals"),
-              badge: "ST1 · HS1 – HS6",
+              title: t("เฉลยรวม Discussion & ต้นฉบับ", "Discussion Key & Originals"),
+              sub: t("เฉลยรวม Discussion HS1–HS6 (12 กรณีศึกษา) โครงสร้างหลักสูตร และลิงก์เอกสารต้นฉบับ", "Discussion Teacher Key (12 cases), curriculum structure & original links"),
+              badge: "HS1 – HS6 · Key",
               action: () => navigateFromTile("app-guides", () => navigateTvTab("faculty-docs"))
             },
             {
@@ -3239,25 +3239,6 @@
         })
       });
 
-      // Step 07: Faculty Guide (Faculty Portal only)
-      if (ROLE === "faculty") {
-        files.push({
-          id: `hsfac:${m.id}`,
-          folderPath: ["health-systems", m.id],
-          name: `07_${m.code}_คู่มือผู้สอนและเฉลย_(Teacher_Key).gdoc`,
-          title: `คู่มือผู้สอนและแนวทางนำอภิปรายประจำคาบ ${m.code}`,
-          sub: "เฉพาะคณาจารย์ — แผนการสอน แนวคำตอบ และจุดเน้นสำคัญประจำคาบ",
-          meta: "Faculty Member Only",
-          badge: "📕 คู่มือผู้สอน",
-          icoCls: "is-faculty",
-          icoTxt: "📕",
-          onOpen: openFileAction(() => {
-            if (m.code === "ST1" && api && api.openFacultyDoc) api.openFacultyDoc("st1-tg");
-            else if (api && api.switchTab) api.switchTab("faculty-docs");
-          })
-        });
-      }
-
       return files;
     };
 
@@ -3662,9 +3643,9 @@
       manuals: {
         id: "manuals",
         code: "05_คู่มือรายวิชาและเอกสารอ้างอิง",
-        title: ROLE === "faculty" ? "คู่มือรายวิชา 2569 (17 บท) · คู่มือผู้สอน & เฉลย Teacher Answer Key" : "คู่มือการจัดการเรียนการสอน RACM 303 ปีการศึกษา 2569 (17 บท)",
-        meta: ROLE === "faculty" ? "คู่มือวิชา 17 บท + คู่มือผู้สอน" : "คู่มือรายวิชา 17 บท",
-        tags: ["📘 คู่มือ 17 บท", "⬇ PDF / Word", ...(ROLE === "faculty" ? ["📕 คู่มือผู้สอน"] : [])],
+        title: ROLE === "faculty" ? "คู่มือรายวิชา 2569 (17 บท) · เฉลยรวม Discussion Teacher Answer Key" : "คู่มือการจัดการเรียนการสอน RACM 303 ปีการศึกษา 2569 (17 บท)",
+        meta: ROLE === "faculty" ? "คู่มือวิชา 17 บท + เฉลยรวม Discussion" : "คู่มือรายวิชา 17 บท",
+        tags: ["📘 คู่มือ 17 บท", "⬇ PDF / Word", ...(ROLE === "faculty" ? ["📕 เฉลย Discussion รวม"] : [])],
         files: [
           {
             id: "man:orient-slides",
@@ -3743,11 +3724,11 @@
                 {
                   id: "man:faculty",
                   folderPath: ["manuals"],
-                  name: "RACM303_คู่มือผู้สอน_แนวทางนำอภิปราย_และเฉลยรวม_HS1-HS6.gdoc",
-                  title: "คู่มือผู้สอนและต้นฉบับ Teacher Answer Key (เฉพาะคณาจารย์)",
-                  sub: "แผนนำอภิปรายกลุ่มย่อย เฉลยครบ 11 กรณีศึกษา และเอกสารอ้างอิงสำหรับคณาจารย์",
+                  name: "RACM303_เฉลยรวม_Discussion_Teacher_Key_HS1-HS6.gdoc",
+                  title: "เฉลยและคู่มือนำอภิปราย Discussion ระบบสุขภาพ HS1–HS6 (เฉพาะคณาจารย์)",
+                  sub: "แผนนำอภิปรายกลุ่มย่อย เฉลยครบ 12 กรณีศึกษา และเอกสารอ้างอิงสำหรับคณาจารย์",
                   meta: "Faculty Member Portal",
-                  badge: "📕 เปิดคู่มือผู้สอน",
+                  badge: "📕 เปิดเฉลยรวม",
                   icoCls: "is-faculty",
                   icoTxt: "📕",
                   onOpen: openFileAction(() => navigateTvTab("faculty-docs"))

@@ -88,7 +88,7 @@
             </button>
             <button class="nav-group-btn" type="button" data-nav-cat="knowledge" aria-expanded="false">
               <span class="ngb-top"><span class="ngb-ico">🏥</span><span class="ngb-title">ระบบสุขภาพ</span><span class="ngb-pill">HS1–6 + ST1 &amp; เสวนา</span></span>
-              <span class="ngb-sub">บทเรียน HS1–6 · คิดเชิงระบบ (ST1) &amp; เสวนา (6 คาบ) · Discussion · คู่มือผู้สอน</span>
+              <span class="ngb-sub">บทเรียน HS1–6 · คิดเชิงระบบ (ST1) &amp; เสวนา (6 คาบ) · Discussion &amp; เฉลยรวม</span>
             </button>
             <button class="nav-group-btn" type="button" data-nav-cat="epidemiology" aria-expanded="false">
               <span class="ngb-top"><span class="ngb-ico">📊</span><span class="ngb-title">ระบาดวิทยา</span><span class="ngb-pill">EP1–EP9</span></span>
@@ -118,7 +118,7 @@
               <button class="nav-tab" id="fTabTextbooks" role="tab" data-tab="textbooks" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>บทเรียนระบบสุขภาพ <span class="tab-count">HS1–HS6</span></button>
               <button class="nav-tab" id="fTabSystemsForum" role="tab" data-tab="systems-forum" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คิดเชิงระบบ &amp; เสวนา <span class="tab-count">ST1 + 5 เวที</span></button>
               <button class="nav-tab" id="fTabPractice" role="tab" data-tab="practice" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คำศัพท์และโจทย์ฝึกหัด <span class="tab-count">66 ข้อ</span></button>
-              <button class="nav-tab" id="fTabFacultyDocs" role="tab" data-tab="faculty-docs" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>คู่มือผู้สอนและต้นฉบับ</button>
+              <button class="nav-tab" id="fTabFacultyDocs" role="tab" data-tab="faculty-docs" data-nav-cat="knowledge" aria-selected="false" type="button" hidden>เฉลยรวมและต้นฉบับ</button>
               <button class="nav-tab" id="fTabEpidemiology" role="tab" data-tab="epidemiology" data-nav-cat="epidemiology" aria-selected="false" type="button" hidden>ระบาดวิทยา <span class="tab-count">EP1–EP9</span></button>
               <button class="nav-tab" id="fTabManual" role="tab" data-tab="manual" data-nav-cat="manual" aria-selected="false" type="button" hidden>คู่มือรายวิชา 2569 <span class="tab-count">17 บท</span></button>
               <button class="nav-tab" id="fTabSubmissions" role="tab" data-tab="submissions" data-nav-cat="admin" aria-selected="false" type="button" hidden>ระบบรับงานและ E-learning</button>
@@ -632,8 +632,8 @@
 
       <div class="section-header">
         <div>
-          <h2>คู่มือผู้สอน (Teacher Guides) · บันทึกการปรับปรุง &amp; สารบัญลิงก์ต้นฉบับ</h2>
-          <p>แนวทางการนำอภิปรายกลุ่มย่อย เฉลยเชิงลึกสำหรับคณาจารย์ แผนการศึกษาหลักสูตร และลิงก์ Google Drive / ข้อสอบปี 2569</p>
+          <h2>เฉลยรวม Discussion ระบบสุขภาพ (HS1–HS6) · โครงสร้างหลักสูตร &amp; สารบัญลิงก์ต้นฉบับ</h2>
+          <p>แนวทางการนำอภิปรายกลุ่มย่อย เฉลยเชิงลึกครบ 12 กรณีศึกษา แผนการศึกษาหลักสูตร และลิงก์ Google Drive / ข้อสอบปี 2569</p>
         </div>
         <div class="header-actions" id="facultyDocsExportActions">
           <a class="btn pdf-red" id="exportFacultyDocPdfBtn" href="exports/pdf/hs-disc-teacher-key.pdf" download="RACM303_hs-disc-teacher-key.pdf" title="ส่งออกคู่มือผู้สอนฉบับนี้เป็นไฟล์ PDF"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9.5 15.5 2.5 2.5 2.5-2.5"/></svg>Export as PDF</a>
@@ -648,7 +648,7 @@
       </p>
 
       <div class="subnav" role="group" aria-label="หมวดเอกสารสำหรับคณาจารย์">
-        <button class="subnav-btn" id="facSubGuidesBtn" data-fac-sub="guides" aria-pressed="true" type="button">เฉลย Discussion HS1–HS6 &amp; คู่มือผู้สอน (8 ฉบับ)</button>
+        <button class="subnav-btn" id="facSubGuidesBtn" data-fac-sub="guides" aria-pressed="true" type="button">เฉลยรวม Discussion HS1–HS6 &amp; แผนการศึกษาชุดวิชา (2 ฉบับ)</button>
         <button class="subnav-btn" id="facSubPrintBinderBtn" data-fac-sub="print-binder" aria-pressed="false" type="button">📄 เอกสารสำหรับอาจารย์ (PDF &amp; .docx · 6 หมวด &amp; 9 แฟ้มพื้นที่)</button>
         <button class="subnav-btn" id="facSubLinksBtn" data-fac-sub="links" aria-pressed="false" type="button">สารบัญลิงก์ Google Drive / Docs / ข้อสอบปี 2569</button>
       </div>
@@ -876,7 +876,7 @@
   <script src="assets/data_hs_docs.js?v=20261124prem9"></script>
   <script src="assets/data_hs_discussion.js?v=20261128hs2fw2"></script>
   <script src="assets/data_hs_discussion_key.js?v=20261128hs2fw2"></script>
-  <script src="assets/data_faculty.js?v=20261126dohbi3"></script>
+  <script src="assets/data_faculty.js?v=20261128notg1"></script>
   <script src="assets/data_ep1_intro.js?v=20261124ep1v1"></script>
   <script src="assets/data_ep2_diagnostic.js?v=20261124ep23v1"></script>
   <script src="assets/data_ep3_errors.js?v=20261124ep23v1"></script>
@@ -903,8 +903,8 @@
   <script src="assets/st1_slides.js?v=20261126unav2"></script>
   <script src="assets/spss_slides.js?v=20261126unav2"></script>
   <script src="assets/panel_screensaver_slides.js?v=20261126unav2"></script>
-  <script src="assets/portal.js?v=20261128gdoc2"></script>
-  <script src="assets/tv_launcher.js?v=20261128gdoc2"></script>
+  <script src="assets/portal.js?v=20261128notg1"></script>
+  <script src="assets/tv_launcher.js?v=20261128notg1"></script>
   <script src="assets/gdrive_pdf_preview.js?v=20261126unav2"></script>
 </body>
 </html>
