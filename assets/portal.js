@@ -11318,6 +11318,11 @@
     if (window.RACMInteractiveQA) {
       window.RACMInteractiveQA.enhanceContainer(rootEl);
     }
+
+    enhanceRapidReviewTablesInRoot(rootEl, {
+      sourceType: "in-doc",
+      sourceDocId: (rootEl.dataset && rootEl.dataset.docId) || state.activeDocId || ""
+    });
   }
 
   function extractSlidesFromProse(proseContainer) {
@@ -19672,7 +19677,7 @@
         const q = (($("practiceSearchInput") && $("practiceSearchInput").value) || "").trim().toLocaleLowerCase("th");
         let html = "";
         if (state.practiceSub === "rapid" && $("practiceRapidWrap")) {
-          html = $("practiceRapidWrap").innerHTML;
+          html = buildCleanRapidReviewExportHtml($("practiceRapidWrap"));
         } else if (state.practiceSub === "flashcards") {
           const cards = (HS.glossary || []).filter(
             (g) => (!mod || g.module === mod) && (!q || `${g.termTH} ${g.termEN} ${g.definition}`.toLocaleLowerCase("th").includes(q))

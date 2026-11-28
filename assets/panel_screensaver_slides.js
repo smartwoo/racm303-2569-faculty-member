@@ -14,9 +14,7 @@
 
   const PROD_STUDENT_BASE = "https://smartwoo.github.io/racm303-2569-student/";
   const QA_HASH_SLUG = "panel-qa";
-  const SYNC_BC_NAME = "racm303_panel_deck_sync_v1";
   const QA_BC_NAME = "racm303_panel_live_qa_v1";
-  const MQTT_TOPIC = "racm303/2569/panel_deck_sync/v1";
   const QA_MQTT_NS = "racm303/2569/panel_qa/v1";
   const MQTT_BROKERS = [
     "wss://broker.emqx.io:8084/mqtt",
@@ -1343,7 +1341,6 @@
     modDrawerOpen: false,
     stuDrawerOpen: false,
     fontScale: parseFloat(localStorage.getItem("racm303_psv_font_scale") || "1") || 1,
-    followHost: ROLE === "student",
     activeBgSlot: 0,
     currentBgUrl: "",
     currentDicutUrl: "",
@@ -1390,8 +1387,7 @@
     });
   }
 
-  /* ---------- Live Sync & Real-Time Floor Q&A Engine (BroadcastChannel + Dual MQTT WSS + PeerJS 443 + LocalStorage) ---------- */
-  let bc = null;
+  /* ---------- Real-Time Floor Q&A Engine ONLY (Slides Never Sync Across Viewers) ---------- */
   let qaBc = null;
   const mqttClients = [];
   const connectedBrokers = new Set();
@@ -1764,20 +1760,6 @@
           type: "qa_snapshot",
           snap: buildQaSnapshotPayload(state.deckId || "w1-d1-global")
         });
-        if (ROLE === "faculty" && state.isOpen) {
-          conn.send({
-            type: "host_sync",
-            data: {
-              senderRole: "faculty",
-              deckId: state.deckId,
-              slideIdx: state.slideIdx,
-              stationIdx: state.stationIdx,
-              qaFocusIdx: state.qaFocusIdx,
-              backdropMode: state.backdropMode,
-              ts: Date.now()
-            }
-          });
-        }
       } catch (_) {}
       if (pendingPeerPublishes.length > 0) {
         const batch = pendingPeerPublishes.splice(0, pendingPeerPublishes.length);
@@ -1812,8 +1794,6 @@
         if (ROLE === "faculty" && merged) {
           sendPeerPacket({ type: "qa_snapshot", snap: buildQaSnapshotPayload(msg.snap.deckId || state.deckId) }, pid);
         }
-      } else if (msg.type === "host_sync" && msg.data) {
-        handleIncomingSync(msg.data);
       }
     });
 
@@ -1967,12 +1947,6 @@
     ensureQaBucket(state.deckId || "w1-d1-global");
     initPeerBridge();
 
-    if (typeof BroadcastChannel !== "undefined" && !bc) {
-      try {
-        bc = new BroadcastChannel(SYNC_BC_NAME);
-        bc.onmessage = (ev) => handleIncomingSync(ev.data);
-      } catch (_) {}
-    }
     if (typeof BroadcastChannel !== "undefined" && !qaBc) {
       try {
         qaBc = new BroadcastChannel(QA_BC_NAME);
@@ -1997,7 +1971,6 @@
           client.on("connect", () => {
             connectedBrokers.add(tag);
             try {
-              client.subscribe(MQTT_TOPIC, { qos: 0 });
               client.subscribe(`${QA_MQTT_NS}/#`, { qos: 0 });
             } catch (_) {}
             if (pendingQaPublishes.length > 0) {
@@ -2022,10 +1995,6 @@
             try {
               const rawStr = payload ? payload.toString() : "";
               if (!rawStr) return;
-              if (topic === MQTT_TOPIC) {
-                handleIncomingSync(JSON.parse(rawStr));
-                return;
-              }
               if (topic.startsWith(`${QA_MQTT_NS}/`)) {
                 const sub = topic.slice(QA_MQTT_NS.length + 1);
                 const parts = sub.split("/");
@@ -2041,60 +2010,6 @@
         } catch (_) {}
       });
     }
-  }
-
-  function broadcastHostState() {
-    if (ROLE !== "faculty" || !state.isOpen) return;
-    const msg = {
-      senderRole: "faculty",
-      deckId: state.deckId,
-      slideIdx: state.slideIdx,
-      stationIdx: state.stationIdx,
-      qaFocusIdx: state.qaFocusIdx,
-      backdropMode: state.backdropMode,
-      ts: Date.now()
-    };
-    if (bc) {
-      try { bc.postMessage(msg); } catch (_) {}
-    }
-    mqttClients.forEach((cl) => {
-      if (cl && cl.connected) {
-        try { cl.publish(MQTT_TOPIC, JSON.stringify(msg)); } catch (_) {}
-      }
-    });
-    sendPeerPacket({ type: "host_sync", data: msg });
-  }
-
-  function handleIncomingSync(msg) {
-    if (!msg || msg.senderRole !== "faculty") return;
-    if (!state.isOpen || ROLE === "faculty" || !state.followHost) return;
-    let changed = false;
-    if (msg.deckId && PANEL_DECKS[msg.deckId] && msg.deckId !== state.deckId) {
-      state.deckId = msg.deckId;
-      state.stationIdx = 0;
-      state.qaFocusIdx = 0;
-      changed = true;
-    }
-    const deck = getCurrentDeck();
-    if (typeof msg.slideIdx === "number" && msg.slideIdx >= 0 && msg.slideIdx < deck.slides.length && msg.slideIdx !== state.slideIdx) {
-      state.slideIdx = msg.slideIdx;
-      state.stationIdx = 0;
-      state.qaFocusIdx = 0;
-      changed = true;
-    }
-    if (typeof msg.stationIdx === "number" && msg.stationIdx >= 0 && msg.stationIdx !== state.stationIdx) {
-      state.stationIdx = msg.stationIdx;
-      changed = true;
-    }
-    if (typeof msg.qaFocusIdx === "number" && msg.qaFocusIdx >= 0 && msg.qaFocusIdx !== state.qaFocusIdx) {
-      state.qaFocusIdx = msg.qaFocusIdx;
-      changed = true;
-    }
-    if (msg.backdropMode && msg.backdropMode !== state.backdropMode) {
-      state.backdropMode = msg.backdropMode;
-      changed = true;
-    }
-    if (changed) updateStageView();
   }
 
   function getCurrentDeck() {
@@ -3486,7 +3401,6 @@
         `
         : `
           <button type="button" class="psv-pill-btn${state.stuDrawerOpen ? " is-active" : ""}" data-psv-act="toggle-stu-drawer" title="เปิดสมุดจดคำถามและบันทึกสะท้อนคิดส่วนตัว (กด N)">📝 โน้ตของฉัน</button>
-          <button type="button" class="psv-pill-btn${state.followHost ? " is-ambient-on" : ""}" data-psv-act="toggle-follow" title="ซิงก์หน้าสไลด์ตามจอห้องเรียนอัตโนมัติ">📡 ${state.followHost ? "ซิงก์สด: เปิด" : "ซิงก์สด: ปิด"}</button>
         `;
 
     controls.innerHTML = `
@@ -3631,7 +3545,6 @@
     fitCurrentSlideBody();
     scheduleFitSlideBody();
     scheduleNextAmbientTick();
-    broadcastHostState();
   }
 
   function wireStudentInputs(deck) {
@@ -4006,9 +3919,6 @@
         }
       } else if (act === "toggle-timer" && ROLE === "faculty") {
         toggleSessionTimer();
-      } else if (act === "toggle-follow") {
-        state.followHost = !state.followHost;
-        syncHudButtonsOnly();
       } else if (act === "open-qr-modal") {
         state.qrLightboxOpen = true;
         clearIdleTimer();
