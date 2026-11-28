@@ -13305,52 +13305,28 @@
       banner.appendChild(strip);
     }
 
-    const infoWrap = make("div", null, "hsd-banner-info");
-    if (isAllActive || isBeyondActive) {
-      infoWrap.append(
-        make(
-          "h3",
-          options.allHeading ||
-            (isBeyondActive
-              ? tr(
-                  "เวทีคิดเชิงระบบ & เสวนาผู้เชี่ยวชาญ (Beyond HS1–HS6 · 6 คาบสอนสำคัญ)",
-                  "Systems Thinking & Expert Panels (Beyond HS1–HS6 · 6 Key Sessions)"
-                )
-              : "HS1–HS6: เส้นทางการเรียนรู้ระบบสุขภาพ 6 ขั้นตอน")
-        ),
-        make(
-          "p",
-          options.allDesc ||
-            (isBeyondActive
-              ? tr(
-                  "6 คาบสอนสำคัญนอกกรอบสอบทฤษฎี HS1–HS6 (17.5 ชม. · เช็คชื่อ Onsite ห้อง 2C2-03) — ปูกรอบคิด Systems Thinking เชื่อมผู้ป่วยข้างเตียงสู่ระบบสุขภาพจริง ภาคสนาม 9 พื้นที่ ฟอร์ม 3A และ SRN 1–2",
-                  "6 high-impact taught sessions beyond the HS1–HS6 written exam (17.5 hrs · Onsite Room 2C2-03) — anchoring Systems Thinking, Fieldwork, Form 3A & SRN 1–2."
-                )
-              : `เลือกบทเรียน HS1–HS6 ด้านบนเพื่อเดินตามลำดับ ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 อยู่ในเวทีคิดเชิงระบบ & เสวนา)`)
-        )
-      );
-    } else {
-      const subParts = [];
-      if (mod.scheduleDate) subParts.push(mod.scheduleDate);
-      if (mod.lectureTime) subParts.push(`บรรยาย ${mod.lectureTime}`);
-      if (mod.discTime) {
-        subParts.push(
-          `อภิปรายกลุ่มย่อย ${mod.discTime}${mod.examWeight ? ` (น้ำหนัก ${mod.examWeight})` : ""}`
-        );
-      }
-      const prefixStr = subParts.join(" · ");
-      const fullDesc =
-        prefixStr && mod.summaryFocus
-          ? `${prefixStr} — ${mod.summaryFocus}`
-          : prefixStr || mod.summaryFocus || "";
-      infoWrap.append(make("h3", `${mod.code}: ${mod.title}`), make("p", fullDesc));
-    }
-    banner.appendChild(infoWrap);
-
     const isDriveUi = state.hsUiMode === "drive";
     if (isAllActive || isBeyondActive || (effectiveFormat === "docs" && !isDriveUi)) {
+      banner.classList.add("is-strip-only");
       return banner;
     }
+
+    const infoWrap = make("div", null, "hsd-banner-info");
+    const subParts = [];
+    if (mod.scheduleDate) subParts.push(mod.scheduleDate);
+    if (mod.lectureTime) subParts.push(`บรรยาย ${mod.lectureTime}`);
+    if (mod.discTime) {
+      subParts.push(
+        `อภิปรายกลุ่มย่อย ${mod.discTime}${mod.examWeight ? ` (น้ำหนัก ${mod.examWeight})` : ""}`
+      );
+    }
+    const prefixStr = subParts.join(" · ");
+    const fullDesc =
+      prefixStr && mod.summaryFocus
+        ? `${prefixStr} — ${mod.summaryFocus}`
+        : prefixStr || mod.summaryFocus || "";
+    infoWrap.append(make("h3", `${mod.code}: ${mod.title}`), make("p", fullDesc));
+    banner.appendChild(infoWrap);
 
     const tabsRow = make("div", null, "hs-unified-format-tabs header-actions hsd-no-print");
     tabsRow.setAttribute("role", "tablist");
@@ -17434,12 +17410,7 @@
       const head = make("div", null, "tv-shelf-head");
       const headLeft = make("div");
       headLeft.append(
-        make("h3", "Core Domains: เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title"),
-        make(
-          "span",
-          "เรียงตาม Logical Flow 6 ขั้นตอน: ① ฉบับเต็ม (Full) → ② ฉบับย่อ (Abridged) → ③ Self-Quiz → ④ Slide อาจารย์ → ⑤ Case Discussion in Class → ⑥ VDO Lecture (ส่วนคาบ ST1 และเวทีบูรณาการอยู่ในแท็บ Workshop & Panel Discussion · Cross-Cutting & Linking Domains)",
-          "tv-shelf-sub"
-        )
+        make("h3", "Core Domains: เส้นทางการเรียนรู้ระบบสุขภาพครบทั้ง 6 บท (HS1 – HS6)", "tv-shelf-title")
       );
       head.appendChild(headLeft);
       shelf.appendChild(head);

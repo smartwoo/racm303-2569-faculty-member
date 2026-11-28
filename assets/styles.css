@@ -47196,3 +47196,17 @@ html[data-theme="dark"] .classic-a4-booklet-reader .ans-main-head, html[data-the
 .classic-a4-booklet-reader .ans-scoring-note { margin: 0 0 10px 26px; color: #991b1b; font-size: 0.94em; line-height: 1.5; text-align: justify; text-justify: inter-character; }
 html[data-theme="dark"] .classic-a4-booklet-reader .q-scoring-note { background: rgba(30, 41, 59, 0.7); border-left-color: #94a3b8; color: #e2e8f0; }
 html[data-theme="dark"] .classic-a4-booklet-reader .ans-scoring-note { color: #fda4af; }
+
+.hsd-module-banner.is-unified-hs-banner.is-strip-only,
+html[data-theme="dark"] .hsd-module-banner.is-unified-hs-banner.is-strip-only {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 2px 0 6px;
+  margin-bottom: 10px;
+}
+
+.hsd-module-banner.is-unified-hs-banner.is-strip-only .hs-unified-mod-strip.is-segmented-strip {
+  padding-bottom: 0;
+  border-bottom: none;
+}
